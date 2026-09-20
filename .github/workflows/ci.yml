@@ -28,9 +28,16 @@ jobs:
           repository: mindderivative/tre
           path: tre
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      # No explicit Rust-toolchain-install action needed -- matches
+      # `tre`'s own real ci.yml precedent: `ubuntu-latest` runners ship
+      # a working stable rustup toolchain already (confirmed by this
+      # workflow's own first real run, `actions-rs/toolchain@v1`'s
+      # `stable` install succeeding trivially). Deliberately not using
+      # `actions-rs/toolchain@v1` here -- confirmed unmaintained (forced
+      # onto an old Node.js runtime by GitHub's own deprecation notice
+      # on this workflow's first real run) and unnecessary.
+      - name: Confirm a real Rust toolchain is present
+        run: rustc --version && cargo --version
 
       - uses: actions/setup-python@v5
         with:
