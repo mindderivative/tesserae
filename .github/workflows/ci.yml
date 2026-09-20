@@ -71,3 +71,7 @@ jobs:
       - name: Run the multi-screen example
         working-directory: tesserae
         run: python examples/multi_screen/app.py
+
+      - name: Run the todo-list example
+        working-directory: tesserae
+        run: python examples/todo_list/app.py

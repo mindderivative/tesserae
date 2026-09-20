@@ -13,22 +13,31 @@ tesserae.App            -- registry of named (View, ViewModel) pairs +
   |                          one live tre.Window; App.show(name) switches
   |                          which pair that Window currently renders
   |
-tesserae.{Signal,View,ViewModel}   -- thin re-exports of tre's own real,
-  |                                     already-working MVVM primitives
+tesserae.instantiate    -- embeds a Component with its own ViewModel
+  |                          into a View/Component, enforcing the same
+  |                          naming convention as App.load (below)
+  |
+tesserae.{Signal,View,ViewModel,Component}   -- thin re-exports of tre's
+  |                                               own real, already-
+  |                                               working MVVM primitives
   |
 tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         the declarative YAML+binding layer
-                                        (engine-spec), and the live-window
+                                        (engine-spec), the live-window
                                         wiring (Window.from_view/show_view,
-                                        tre's own M42)
+                                        tre's own M42), and real
+                                        multi-instance component embedding
+                                        (View.instantiate/Component,
+                                        tre's own M43)
 ```
 
 Tesserae does not duplicate `tre`'s own real capability in slower,
-less-tested Python -- `Signal`/`View`/`ViewModel` are `tre`'s own classes,
-imported unmodified. Tesserae's own real, additive value is `App`: the
-real "one entry point, named-screen registry, switch without
+less-tested Python -- `Signal`/`View`/`ViewModel`/`Component` are `tre`'s
+own classes, imported unmodified. Tesserae's own real, additive value is
+`App` (the real "one entry point, named-screen registry, switch without
 re-bootstrapping" layer neither `tre` nor pyCopper's own `App`/`Engine`
-split provide in this exact shape.
+split provide in this exact shape) and `instantiate` (the same real
+enforced-naming discipline, applied to embedded components).
 
 ## `*_View.yaml` / `*_ViewModel.py`
 
@@ -36,10 +45,12 @@ Mirrors pyCopper's own real, validated convention (see its
 `ARCHITECTURE.md`/`LESSONS_LEARNED.md`): a `ViewModel` is scoped
 one-per-view-file, so a self-contained, independently-loadable pair is
 what lets `app.py` register several and switch which one is currently
-shown without re-bootstrapping each one from scratch. Not (yet) enforced
-by a runtime check the way pyCopper's own does -- a real, additive
-follow-up if it turns out to matter in practice, not manufactured ahead
-of a real need.
+shown without re-bootstrapping each one from scratch. **Enforced at
+runtime** (`tesserae.naming.check_naming_convention`, checked via
+`inspect.getfile` against the `ViewModel` class's own defining file),
+by both `App.load` (top-level screens) and `instantiate` (embedded
+components) -- a mismatched pair raises `ValueError` immediately rather
+than failing later when a handler name doesn't resolve.
 
 ## `App`
 
@@ -68,17 +79,43 @@ level path for a `ViewModel` that needs a live `app` reference at
 construction time (to call `app.show(...)` from its own handler --
 `examples/multi_screen/`'s own real reason for using it instead).
 
+## Components
+
+```python
+component, viewmodel = instantiate(view, "Card_View.yaml", CardViewModel, container)
+```
+
+`instantiate(parent, path, viewmodel_cls, into, *args, **kwargs)`
+(`tesserae.component`) checks the naming convention, then calls
+`parent.instantiate(str(path), into)` (real `tre` M43 capability --
+`parent` is a `View` or another `Component`, so components nest for
+free) and constructs `viewmodel_cls(component, *args, **kwargs)`.
+Extra `*args`/`**kwargs` are the real, common case a bare `App.load`
+call doesn't need: a component's own `ViewModel` often needs data (an
+item's own text) or a callback (to notify its parent when it removes
+itself via `component.remove()`) -- see `examples/todo_list/`'s own
+`TodoViewModel.add_item`/`TodoItemViewModel.remove_self`.
+
+Multiple simultaneous instances of the same component are fully
+independent -- each `instantiate()` call gets its own `Component`, its
+own `ViewModel`, and (confirmed by `tre`'s own M43 investigation) its
+own real `NodeId`s, even for widget ids repeated identically across
+instances.
+
 ## What's real today
 
 - `App.register`/`load`/`show`/`run`, exercised end to end by
   `examples/counter/` (single screen, `load`) and
   `examples/multi_screen/` (two screens switching via `App.show()`
   from inside a real dispatched handler, `register`).
-- Everything `tre.View`/`tre.Signal`/`tre.ViewModel` already provide:
-  `{{ }}` binding expressions (a strict, non-`eval` whitelist), real
-  `on_click`/`on_hover_enter`/`on_hover_exit`/`on_change` handler wiring,
-  two-way binding for `checked`/`thumb_position`/`text`, hot-reload via
-  `View.poll_reload()`.
+- `instantiate`/`Component.remove()`, exercised end to end by
+  `examples/todo_list/` -- a real dynamic list, each item its own
+  component, added and removed via real dispatched clicks.
+- Everything `tre.View`/`tre.Signal`/`tre.ViewModel`/`tre.Component`
+  already provide: `{{ }}` binding expressions (a strict, non-`eval`
+  whitelist), real `on_click`/`on_hover_enter`/`on_hover_exit`/
+  `on_change` handler wiring, two-way binding for `checked`/
+  `thumb_position`/`text`, hot-reload via `View.poll_reload()`.
 
 ## Explicitly deferred
 

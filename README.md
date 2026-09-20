@@ -10,12 +10,14 @@ GLFW/wgpu-py stack instead): app authors write **YAML views**, not Python
 widget-class trees, paired with a Python `ViewModel` per view -- a plain
 `Signal`-driven MVVM layer, not a whole-tree reconcile.
 
-**Status: pre-alpha, first two vertical slices.** `App`/`Signal`/`View`/
-`ViewModel` exist and are exercised end to end by `examples/counter/`
-(a single screen) and `examples/multi_screen/` (two screens, switched
-via `App.show()` from inside a real dispatched handler), but the widget
-catalog, wider live-bindable properties, and richer reactivity are all
-real, deliberately deferred follow-ups -- see below.
+**Status: pre-alpha, three vertical slices.** `App`/`Signal`/`View`/
+`ViewModel`/`Component` exist and are exercised end to end by
+`examples/counter/` (a single screen), `examples/multi_screen/` (two
+screens, switched via `App.show()` from inside a real dispatched
+handler), and `examples/todo_list/` (a real dynamic list of
+independently-`ViewModel`'d, addable/removable components), but the
+widget catalog, wider live-bindable properties, and richer reactivity
+are all real, deliberately deferred follow-ups -- see below.
 
 ## Install (development)
 
@@ -33,6 +35,7 @@ pip install -e ".[dev]"
 ```bash
 python examples/counter/app.py
 python examples/multi_screen/app.py
+python examples/todo_list/app.py
 ```
 
 `counter/`: a real `Signal`-bound counter -- a `Counter_View.yaml` +
@@ -45,6 +48,36 @@ own `*_View.yaml`/`*_ViewModel.py` pair, switched via `App.show(name)`
 from inside each screen's own real dispatched `on_click` handler --
 proving a switch works even when triggered *reentrantly*, from the
 handler `App.show` itself is dispatching into.
+
+`todo_list/`: a real dynamic list -- each to-do item is its own
+independent `Component` + `ViewModel` (`TodoItem_View.yaml`/
+`TodoItem_ViewModel.py`), instantiated via `tesserae.instantiate` from
+inside the top-level screen's own "Add" button handler, and torn down
+via `Component.remove()` from its own "Remove" button handler. Proves
+the full real multi-instance lifecycle: add, toggle a two-way-bound
+checkbox, remove, add again, all through real dispatched clicks and one
+live window.
+
+## Components
+
+`tesserae.instantiate(parent, path, viewmodel_cls, into, *args,
+**kwargs)` embeds another view's own YAML as a real, independent
+`Component` with its own `ViewModel` -- the enforced-naming counterpart
+to `tre.View.instantiate`/`Component.instantiate`. `parent` is a `View`
+or another `Component` (they nest); `into` is the `Node` to embed under
+(e.g. `view.node("item_list")`); extra positional/keyword args are
+forwarded to `viewmodel_cls(component, *args, **kwargs)` -- the real,
+common case for a component that needs its own data or a callback to
+notify its parent when it removes itself (see `examples/todo_list/`).
+
+```python
+component, viewmodel = instantiate(view, "Card_View.yaml", CardViewModel, container)
+```
+
+Call this once per instance for multiple simultaneous instances (a list
+where each row is its own independent component) -- each call is fully
+independent, even reusing the same `path` repeatedly. `component.remove()`
+tears the instance down for real, unsubscribing its own `Signal`s first.
 
 ## Naming convention
 

@@ -6,13 +6,19 @@ Real, current surface (v1): `App`, the real single entry point owning a
 named `View`/`ViewModel` registry and one live `Window`, letting
 `App.show(name)` switch which pair is currently rendered without
 re-bootstrapping either -- powered directly by `tre.Window.show_view`
-(TRE M42 Phase 2). `Signal`/`View`/`ViewModel` are `tre`'s own real,
-already-working MVVM primitives, re-exported here unmodified rather than
-duplicated -- Tesserae's own real, additive value starts at `App`.
+(TRE M42 Phase 2). `Component`/`instantiate` are the real, multi-instance
+embedded-component layer (TRE M43) -- a component gets its own,
+independent `ViewModel`, and `instantiate` enforces the identical
+`*_View.yaml`/`*_ViewModel.py` naming convention `App.load` already does
+for top-level screens. `Signal`/`View`/`ViewModel`/`Component` are `tre`'s
+own real, already-working primitives, re-exported here unmodified rather
+than duplicated -- Tesserae's own real, additive value is `App`/
+`instantiate`.
 """
 
-from tre import Signal, View, ViewModel
+from tre import Component, Signal, View, ViewModel
 
 from tesserae.app import App
+from tesserae.component import instantiate
 
-__all__ = ["App", "Signal", "View", "ViewModel"]
+__all__ = ["App", "Component", "Signal", "View", "ViewModel", "instantiate"]

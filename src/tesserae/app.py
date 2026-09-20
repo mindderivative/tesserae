@@ -18,7 +18,6 @@ life of the `App`.
 
 from __future__ import annotations
 
-import inspect
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -26,8 +25,7 @@ from typing import Any
 from tre import App as _TreApp
 from tre import View, Window
 
-_VIEW_SUFFIX = "_View.yaml"
-_VIEWMODEL_SUFFIX = "_ViewModel.py"
+from tesserae.naming import check_naming_convention
 
 
 @dataclass
@@ -94,30 +92,11 @@ class App:
         `ViewModel` itself to read a `Signal` back, still can.
         """
         view_path = Path(view_path)
-        if not view_path.name.endswith(_VIEW_SUFFIX):
-            raise ValueError(
-                f"{view_path.name!r} does not follow the required *{_VIEW_SUFFIX} naming "
-                "convention"
-            )
-        view_prefix = view_path.name[: -len(_VIEW_SUFFIX)]
-
-        viewmodel_file = Path(inspect.getfile(viewmodel_cls))
-        if not viewmodel_file.name.endswith(_VIEWMODEL_SUFFIX):
-            raise ValueError(
-                f"{viewmodel_cls.__name__} (defined in {viewmodel_file.name!r}) does not "
-                f"follow the required *{_VIEWMODEL_SUFFIX} naming convention"
-            )
-        viewmodel_prefix = viewmodel_file.name[: -len(_VIEWMODEL_SUFFIX)]
-
-        if view_prefix != viewmodel_prefix:
-            raise ValueError(
-                f"{view_path.name!r} and {viewmodel_file.name!r} must share the same "
-                f"prefix (got {view_prefix!r} vs {viewmodel_prefix!r})"
-            )
+        prefix = check_naming_convention(view_path, viewmodel_cls)
 
         view = View(str(view_path))
         viewmodel = viewmodel_cls(view)
-        self.register(name or view_prefix, view, viewmodel)
+        self.register(name or prefix, view, viewmodel)
         return view, viewmodel
 
     def show(self, name: str) -> Window:
