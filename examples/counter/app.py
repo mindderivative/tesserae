@@ -13,18 +13,19 @@ the view/viewModel").
 
 from pathlib import Path
 
-from tesserae import App, View
+from tesserae import App
 
 from Counter_ViewModel import CounterViewModel
 
 directory = Path(__file__).parent
 
-view = View(str(directory / "Counter_View.yaml"))
-viewmodel = CounterViewModel(view)
-
 app = App(width=240, height=120, title="Tesserae Counter")
-app.register("counter", view, viewmodel)
-window = app.show("counter")
+# App.load enforces the *_View.yaml/*_ViewModel.py naming convention at
+# runtime (previously documentation-only) and registers under the
+# inferred prefix, "Counter" -- both files here already follow it, so
+# this succeeds; a mismatched pair would raise ValueError immediately.
+view, viewmodel = app.load(directory / "Counter_View.yaml", CounterViewModel)
+window = app.show("Counter")
 
 label = view.node("label")
 button = view.node("button")
@@ -41,7 +42,7 @@ for _ in range(3):
 
 print(f"after 3 clicks: label={label.get_text()!r}")
 assert label.get_text() == "Count: 3"
-assert app.current == "counter"
+assert app.current == "Counter"
 
 app.run(max_frames=20)
 print("examples/counter/app.py: exited cleanly after a real 20-frame render loop")

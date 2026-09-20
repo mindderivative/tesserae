@@ -18,11 +18,16 @@ life of the `App`.
 
 from __future__ import annotations
 
+import inspect
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from tre import App as _TreApp
-from tre import Window
+from tre import View, Window
+
+_VIEW_SUFFIX = "_View.yaml"
+_VIEWMODEL_SUFFIX = "_ViewModel.py"
 
 
 @dataclass
@@ -58,6 +63,62 @@ class App:
         if name in self._registered:
             raise ValueError(f"a view named {name!r} is already registered")
         self._registered[name] = _Registered(view, viewmodel)
+
+    def load(
+        self, view_path: str | Path, viewmodel_cls: type, name: str | None = None
+    ) -> tuple[Any, Any]:
+        """Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it
+        -- the real, enforced-at-runtime counterpart to `README.md`'s own
+        documented naming convention (previously convention-only, not
+        checked). Mirrors pyCopper's own real, validated design (see
+        `ARCHITECTURE.md`): a `ViewModel` is scoped one-per-view-file, so
+        catching a mismatched pair immediately, at load time, is worth
+        more than a cryptic failure much later when a handler name
+        doesn't resolve.
+
+        `tre.View` doesn't expose its own source path back to Python
+        (confirmed by reading `view.rs` before writing this -- `path` is
+        a private Rust field), so this takes `view_path` directly rather
+        than trying to recover it from an already-constructed `View` --
+        the caller already has it (it's what they'd otherwise pass to
+        `View(...)` themselves).
+
+        `name` defaults to the shared prefix (e.g. `"Counter"` for
+        `Counter_View.yaml`/`Counter_ViewModel.py`) -- only needed
+        explicitly if two different pairs would otherwise collide on it.
+
+        Returns the constructed `(view, viewmodel)` pair -- most real
+        `app.py` scripts won't need it (everything from here on happens
+        through `show()`/registered handlers), but a caller that wants a
+        `Node` handle to dispatch a synthetic click/test against, or the
+        `ViewModel` itself to read a `Signal` back, still can.
+        """
+        view_path = Path(view_path)
+        if not view_path.name.endswith(_VIEW_SUFFIX):
+            raise ValueError(
+                f"{view_path.name!r} does not follow the required *{_VIEW_SUFFIX} naming "
+                "convention"
+            )
+        view_prefix = view_path.name[: -len(_VIEW_SUFFIX)]
+
+        viewmodel_file = Path(inspect.getfile(viewmodel_cls))
+        if not viewmodel_file.name.endswith(_VIEWMODEL_SUFFIX):
+            raise ValueError(
+                f"{viewmodel_cls.__name__} (defined in {viewmodel_file.name!r}) does not "
+                f"follow the required *{_VIEWMODEL_SUFFIX} naming convention"
+            )
+        viewmodel_prefix = viewmodel_file.name[: -len(_VIEWMODEL_SUFFIX)]
+
+        if view_prefix != viewmodel_prefix:
+            raise ValueError(
+                f"{view_path.name!r} and {viewmodel_file.name!r} must share the same "
+                f"prefix (got {view_prefix!r} vs {viewmodel_prefix!r})"
+            )
+
+        view = View(str(view_path))
+        viewmodel = viewmodel_cls(view)
+        self.register(name or view_prefix, view, viewmodel)
+        return view, viewmodel
 
     def show(self, name: str) -> Window:
         """Shows the view registered under `name`. The very first call

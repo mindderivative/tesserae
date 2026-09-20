@@ -67,3 +67,7 @@ jobs:
       - name: Run the counter example
         working-directory: tesserae
         run: python examples/counter/app.py
+
+      - name: Run the multi-screen example
+        working-directory: tesserae
+        run: python examples/multi_screen/app.py

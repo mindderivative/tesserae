@@ -1,11 +1,16 @@
 """Real, repeatable coverage for `tesserae.App` -- registration,
-name-collision handling, and `show()`'s own real "first call opens,
-later calls switch" behavior, mirroring `tre`'s own established pytest
-conventions (`tmp_path` for a throwaway view file, no `App.run()` in
-these tests -- `tre`'s own `test_tracing.py` documents the real reason a
-second real render-loop call in the same process is best avoided; the
-one live end-to-end proof lives in `examples/counter/app.py`).
+name-collision handling, `show()`'s own real "first call opens, later
+calls switch" behavior, and `load()`'s own real `*_View.yaml`/
+`*_ViewModel.py` naming-convention enforcement -- mirroring `tre`'s own
+established pytest conventions (`tmp_path` for a throwaway view file, no
+`App.run()` in these tests -- `tre`'s own `test_tracing.py` documents
+the real reason a second real render-loop call in the same process is
+best avoided; the one live end-to-end proof lives in
+`examples/counter/app.py`/`examples/multi_screen/app.py`).
 """
+
+import importlib.util
+import sys
 
 import pytest
 
@@ -16,6 +21,29 @@ def write_view(tmp_path, yaml, name="view.yaml"):
     path = tmp_path / name
     path.write_text(yaml)
     return str(path)
+
+
+def load_viewmodel_class(tmp_path, filename, class_name):
+    """Writes a real, importable `*ViewModel.py`-shaped module to disk
+    and imports it for real -- `App.load()`'s own naming check reads a
+    class's *actual* defining file via `inspect.getfile`, so a class
+    merely defined inline in this test module (whose own filename is
+    `test_app.py`, not `*_ViewModel.py`) can't stand in for the real
+    thing the way `SimpleVM` below does for the non-`load()` tests.
+    """
+    path = tmp_path / filename
+    path.write_text(
+        f"from tesserae import Signal, ViewModel\n\n\n"
+        f"class {class_name}(ViewModel):\n"
+        f"    def __init__(self, view):\n"
+        f"        self.value = Signal(0)\n"
+        f"        super().__init__(view)\n"
+    )
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return getattr(module, class_name)
 
 
 SIMPLE_VIEW = """
@@ -93,3 +121,53 @@ def test_run_before_show_raises_a_clear_runtime_error():
     app = App()
     with pytest.raises(RuntimeError):
         app.run()
+
+
+def test_load_registers_a_valid_pair_under_the_inferred_prefix(tmp_path):
+    view_path = write_view(tmp_path, SIMPLE_VIEW, name="Counter_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Counter_ViewModel.py", "CounterViewModel")
+
+    app = App()
+    app.load(view_path, vm_cls)
+    window = app.show("Counter")
+
+    assert window is not None
+    assert app.current == "Counter"
+
+
+def test_load_accepts_an_explicit_name_override(tmp_path):
+    view_path = write_view(tmp_path, SIMPLE_VIEW, name="Counter_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Counter_ViewModel.py", "CounterViewModel")
+
+    app = App()
+    app.load(view_path, vm_cls, name="main_counter")
+    window = app.show("main_counter")
+
+    assert window is not None
+
+
+def test_load_rejects_a_view_file_missing_the_required_suffix(tmp_path):
+    view_path = write_view(tmp_path, SIMPLE_VIEW, name="Counter.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Counter_ViewModel.py", "CounterViewModel")
+
+    app = App()
+    with pytest.raises(ValueError, match="_View.yaml"):
+        app.load(view_path, vm_cls)
+
+
+def test_load_rejects_a_viewmodel_file_missing_the_required_suffix(tmp_path):
+    view_path = write_view(tmp_path, SIMPLE_VIEW, name="Counter_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "counter_vm.py", "CounterViewModel")
+
+    app = App()
+    with pytest.raises(ValueError, match="_ViewModel.py"):
+        app.load(view_path, vm_cls)
+
+
+def test_load_rejects_mismatched_view_and_viewmodel_prefixes(tmp_path):
+    view_path = write_view(tmp_path, SIMPLE_VIEW, name="Counter_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Settings_ViewModel.py", "SettingsViewModel")
+
+    app = App()
+    with pytest.raises(ValueError, match="prefix"):
+        app.load(view_path, vm_cls)

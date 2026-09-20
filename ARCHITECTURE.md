@@ -45,10 +45,10 @@ of a real need.
 
 ```python
 app = App(width=240, height=120, title="My App")
-app.register("counter", view, viewmodel)
-app.show("counter")   # opens the real Window (tre.Window.from_view)
+view, viewmodel = app.load("Counter_View.yaml", CounterViewModel)  # or register() directly
+app.show("Counter")   # opens the real Window (tre.Window.from_view)
 ...
-app.show("settings")  # switches the same live Window (tre.Window.show_view)
+app.show("Settings")  # switches the same live Window (tre.Window.show_view)
 app.run(max_frames=...)
 ```
 
@@ -58,10 +58,22 @@ from_view`; every call after that switches the same live window via
 (M42, both phases). Neither call re-parses YAML or re-attaches a
 `ViewModel`.
 
+`App.load` is the enforced-naming-convention path (`*_View.yaml`/
+`*_ViewModel.py`, checked via `inspect.getfile` against the
+`ViewModel` class's own defining file -- `tre.View` has no `path`
+getter of its own, confirmed by reading `view.rs` before designing
+this, so `load` takes the path directly rather than trying to recover
+it from an already-constructed `View`); `App.register` is the lower-
+level path for a `ViewModel` that needs a live `app` reference at
+construction time (to call `app.show(...)` from its own handler --
+`examples/multi_screen/`'s own real reason for using it instead).
+
 ## What's real today
 
-- `App.register`/`show`/`run`, exercised end to end by
-  `examples/counter/`.
+- `App.register`/`load`/`show`/`run`, exercised end to end by
+  `examples/counter/` (single screen, `load`) and
+  `examples/multi_screen/` (two screens switching via `App.show()`
+  from inside a real dispatched handler, `register`).
 - Everything `tre.View`/`tre.Signal`/`tre.ViewModel` already provide:
   `{{ }}` binding expressions (a strict, non-`eval` whitelist), real
   `on_click`/`on_hover_enter`/`on_hover_exit`/`on_change` handler wiring,
