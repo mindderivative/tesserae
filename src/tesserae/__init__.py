@@ -12,16 +12,32 @@ independent `ViewModel`, and `instantiate` enforces the identical
 `*_View.yaml`/`*_ViewModel.py` naming convention `App.load` already does
 for top-level screens. `Repeater` is the declarative-*feeling* layer on
 top of that: one list `Signal` as the single source of truth, automatic
-keyed add/remove diffing. `Signal`/`View`/`ViewModel`/`Component` are
-`tre`'s own real, already-working primitives, re-exported here unmodified
-rather than duplicated -- Tesserae's own real, additive value is `App`/
-`instantiate`/`Repeater`.
+keyed add/remove diffing. `Computed`/`Effect`/`batch`/`untrack` (TRE M45)
+are the richer-reactivity layer built on `Signal`'s own dependency-
+recording primitive -- derived/cached values, side-effect-only reactions,
+and collapsing several related writes into one notification pass.
+`Signal`/`View`/`ViewModel`/`Component`/`Computed`/`Effect`/`batch`/
+`untrack` are `tre`'s own real, already-working primitives, re-exported
+here unmodified rather than duplicated -- Tesserae's own real, additive
+value is `App`/`instantiate`/`Repeater`.
 """
 
-from tre import Component, Signal, View, ViewModel
+from tre import Component, Computed, Effect, Signal, View, ViewModel, batch, untrack
 
 from tesserae.app import App
 from tesserae.component import instantiate
 from tesserae.repeater import Repeater
 
-__all__ = ["App", "Component", "Repeater", "Signal", "View", "ViewModel", "instantiate"]
+__all__ = [
+    "App",
+    "Component",
+    "Computed",
+    "Effect",
+    "Repeater",
+    "Signal",
+    "View",
+    "ViewModel",
+    "batch",
+    "instantiate",
+    "untrack",
+]

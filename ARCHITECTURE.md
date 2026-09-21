@@ -21,9 +21,11 @@ tesserae.Repeater       -- one list Signal as the single source of
   |                          truth; keeps one Component+ViewModel alive
   |                          per item present, via instantiate (above)
   |
-tesserae.{Signal,View,ViewModel,Component}   -- thin re-exports of tre's
+tesserae.{Signal,View,ViewModel,Component,
+  |        Computed,Effect,batch,untrack}       -- thin re-exports of tre's
   |                                               own real, already-
-  |                                               working MVVM primitives
+  |                                               working MVVM + reactivity
+  |                                               primitives (tre's M45)
   |
 tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         the declarative YAML+binding layer
@@ -150,11 +152,17 @@ before tearing down" ordering.
   whitelist), real `on_click`/`on_hover_enter`/`on_hover_exit`/
   `on_change` handler wiring, two-way binding for `checked`/
   `thumb_position`/`text`, hot-reload via `View.poll_reload()`.
+- `tre.Computed`/`Effect`/`batch`/`untrack` (M45), re-exported
+  unmodified -- derived/cached values, side-effect-only reactions, and
+  collapsing related writes into one notification pass, all duck-typed
+  against `Signal`'s own subscribe shape so a `{{ }}` binding can depend
+  on a `Computed` with no special handling. See `README.md`'s own
+  Reactivity section.
 
 ## Explicitly deferred
 
-See `README.md`'s own "Explicitly deferred" section -- richer
-reactivity, a wider bindable-property/widget surface, app-level
-state/routing beyond `App.show`, PyPI publishing. `Repeater`'s own real,
-stated scope boundaries (no reordering, no per-item data re-application)
-are named directly above, not repeated here.
+See `README.md`'s own "Explicitly deferred" section -- a wider widget
+catalog, app-level state/routing beyond `App.show`, PyPI publishing.
+`Repeater`'s own real, stated scope boundaries (no reordering, no
+per-item data re-application) are named directly above, not repeated
+here.

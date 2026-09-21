@@ -16,9 +16,9 @@ widget-class trees, paired with a Python `ViewModel` per view -- a plain
 screens, switched via `App.show()` from inside a real dispatched
 handler), and `examples/todo_list/` (a real dynamic list, one list
 `Signal` as the single source of truth, `Repeater` keeping components in
-sync automatically), but the widget catalog, wider live-bindable
-properties, and richer reactivity are all real, deliberately deferred
-follow-ups -- see below.
+sync automatically). `Computed`/`Effect`/`batch`/`untrack` (TRE M45) are
+also real and re-exported -- see Reactivity below. The widget catalog is
+still a real, deliberately deferred follow-up -- see below.
 
 ## Install (development)
 
@@ -114,6 +114,29 @@ for the same real reason `tre`'s own `Reconciler` doesn't: `engine_core
 every remaining instance down and unsubscribes, mirroring `Component
 .remove()`'s own real teardown ordering.
 
+## Reactivity
+
+`tre`'s own richer reactivity layer (TRE M45), re-exported unmodified:
+
+```python
+from tesserae import Computed, Effect, batch
+
+total = Computed(lambda: price.get() * quantity.get())  # derived, cached
+Effect(lambda: print(f"total is now {total.get()}"))     # side effect only
+
+def apply_discount():
+    price.update(lambda p: p * 0.9)
+    quantity.set(quantity.get() + 1)
+
+batch(apply_discount)  # total recomputes once, not twice
+```
+
+`Computed`/`Effect` duck-type against `Signal`'s own subscribe shape, so
+a `{{ }}` binding can point straight at a `Computed.get()` value with no
+special handling. See `tre`'s own `examples/reactivity.py` for a full,
+live-window proof of `Computed`-of-`Computed` chains, `Effect`, and
+`batch()` composing together.
+
 ## Naming convention
 
 Every real view is a `*_View.yaml` + `*_ViewModel.py` pair (mirroring
@@ -155,10 +178,6 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 Named for the record, not designed in detail yet -- each is real, future
 work once this foundation is proven further:
 
-- Richer reactivity (`Computed`, general-purpose `Effect`, `batch()`/
-  `untrack()`) beyond `tre.Signal`'s own dependency-recording primitive.
-- Widening which properties are live-bindable beyond `opacity`/
-  `corner_radius`/`checked`/`text` (`tre`'s own current real set).
 - A broad widget/component catalog beyond what `tre`'s own `add_*`
   factories and `engine-spec`'s YAML builder already expose.
 - App-level state stores shared across screens, routing beyond a plain
