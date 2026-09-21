@@ -11,13 +11,14 @@ widget-class trees, paired with a Python `ViewModel` per view -- a plain
 `Signal`-driven MVVM layer, not a whole-tree reconcile.
 
 **Status: pre-alpha, three vertical slices.** `App`/`Signal`/`View`/
-`ViewModel`/`Component` exist and are exercised end to end by
+`ViewModel`/`Component`/`Repeater` exist and are exercised end to end by
 `examples/counter/` (a single screen), `examples/multi_screen/` (two
 screens, switched via `App.show()` from inside a real dispatched
-handler), and `examples/todo_list/` (a real dynamic list of
-independently-`ViewModel`'d, addable/removable components), but the
-widget catalog, wider live-bindable properties, and richer reactivity
-are all real, deliberately deferred follow-ups -- see below.
+handler), and `examples/todo_list/` (a real dynamic list, one list
+`Signal` as the single source of truth, `Repeater` keeping components in
+sync automatically), but the widget catalog, wider live-bindable
+properties, and richer reactivity are all real, deliberately deferred
+follow-ups -- see below.
 
 ## Install (development)
 
@@ -49,14 +50,16 @@ from inside each screen's own real dispatched `on_click` handler --
 proving a switch works even when triggered *reentrantly*, from the
 handler `App.show` itself is dispatching into.
 
-`todo_list/`: a real dynamic list -- each to-do item is its own
-independent `Component` + `ViewModel` (`TodoItem_View.yaml`/
-`TodoItem_ViewModel.py`), instantiated via `tesserae.instantiate` from
-inside the top-level screen's own "Add" button handler, and torn down
-via `Component.remove()` from its own "Remove" button handler. Proves
-the full real multi-instance lifecycle: add, toggle a two-way-bound
-checkbox, remove, add again, all through real dispatched clicks and one
-live window.
+`todo_list/`: a real dynamic list, driven by `tesserae.Repeater` -- one
+list `Signal` of stable item ids (`TodoViewModel.items`) is the single
+source of truth; adding a "to-do" appends an id, removing one drops it
+-- the `Repeater` keeps exactly one independent `TodoItem` `Component` +
+`ViewModel` (`TodoItem_View.yaml`/`TodoItem_ViewModel.py`) alive per id,
+instantiating/removing automatically. Proves the full real multi-
+instance lifecycle: add, toggle a two-way-bound checkbox, remove
+(mutating the shared `items` `Signal` from *inside* the item's own
+dispatched handler), add again, all through real dispatched clicks and
+one live window.
 
 ## Components
 
@@ -78,6 +81,38 @@ Call this once per instance for multiple simultaneous instances (a list
 where each row is its own independent component) -- each call is fully
 independent, even reusing the same `path` repeatedly. `component.remove()`
 tears the instance down for real, unsubscribing its own `Signal`s first.
+
+## Repeater
+
+`Repeater` automates the add/remove bookkeeping `instantiate`/
+`Component.remove()` otherwise need by hand: point it at a list `Signal`
+and it keeps exactly one `Component` + `ViewModel` alive per item
+currently present, diffed by a real key.
+
+```python
+from tesserae import Repeater, Signal
+
+items = Signal([])  # the single source of truth
+repeater = Repeater(view, items, "Card_View.yaml", CardViewModel, container)
+
+items.update(lambda lst: [*lst, new_id])              # adds one
+items.update(lambda lst: [i for i in lst if i != id])  # removes one
+```
+
+`key` (default: the item itself) and `args` (default: `lambda item:
+(item,)`, forwarded to `viewmodel_cls(component, *args)`) are both
+overridable for items that are dicts/dataclasses rather than bare ids
+-- see `examples/todo_list/`'s own `Todo_ViewModel.py`.
+
+**Real, deliberate scope boundary:** `Repeater` only ever adds or
+removes instances to match the *set* of keys present -- it never
+reorders an already-present key's own position, and never re-applies a
+changed item's own data to an existing instance (that's the item's own
+`ViewModel`'s job, via its own `Signal`s). Reordering isn't supported
+for the same real reason `tre`'s own `Reconciler` doesn't: `engine_core
+::Tree` has no child-reorder primitive today. `Repeater.remove()` tears
+every remaining instance down and unsubscribes, mirroring `Component
+.remove()`'s own real teardown ordering.
 
 ## Naming convention
 

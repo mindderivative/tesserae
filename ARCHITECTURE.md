@@ -17,6 +17,10 @@ tesserae.instantiate    -- embeds a Component with its own ViewModel
   |                          into a View/Component, enforcing the same
   |                          naming convention as App.load (below)
   |
+tesserae.Repeater       -- one list Signal as the single source of
+  |                          truth; keeps one Component+ViewModel alive
+  |                          per item present, via instantiate (above)
+  |
 tesserae.{Signal,View,ViewModel,Component}   -- thin re-exports of tre's
   |                                               own real, already-
   |                                               working MVVM primitives
@@ -36,8 +40,12 @@ less-tested Python -- `Signal`/`View`/`ViewModel`/`Component` are `tre`'s
 own classes, imported unmodified. Tesserae's own real, additive value is
 `App` (the real "one entry point, named-screen registry, switch without
 re-bootstrapping" layer neither `tre` nor pyCopper's own `App`/`Engine`
-split provide in this exact shape) and `instantiate` (the same real
-enforced-naming discipline, applied to embedded components).
+split provide in this exact shape), `instantiate` (the same real
+enforced-naming discipline, applied to embedded components), and
+`Repeater` (automatic keyed add/remove diffing over `instantiate`, built
+entirely in Python on top of it -- no new `engine-spec`/`engine-core`
+work needed; see its own module doc comment for why a YAML-level
+`for_each:` keyword was considered and set aside).
 
 ## `*_View.yaml` / `*_ViewModel.py`
 
@@ -92,9 +100,9 @@ component, viewmodel = instantiate(view, "Card_View.yaml", CardViewModel, contai
 free) and constructs `viewmodel_cls(component, *args, **kwargs)`.
 Extra `*args`/`**kwargs` are the real, common case a bare `App.load`
 call doesn't need: a component's own `ViewModel` often needs data (an
-item's own text) or a callback (to notify its parent when it removes
-itself via `component.remove()`) -- see `examples/todo_list/`'s own
-`TodoViewModel.add_item`/`TodoItemViewModel.remove_self`.
+item's own id) or a reference to shared state (`examples/todo_list/`'s
+own `TodoItemViewModel` takes the shared `items` `Signal`, so its own
+`remove_self` can mutate the single source of truth directly).
 
 Multiple simultaneous instances of the same component are fully
 independent -- each `instantiate()` call gets its own `Component`, its
@@ -102,15 +110,41 @@ own `ViewModel`, and (confirmed by `tre`'s own M43 investigation) its
 own real `NodeId`s, even for widget ids repeated identically across
 instances.
 
+## Repeater
+
+```python
+items = Signal([])
+repeater = Repeater(view, items, "Card_View.yaml", CardViewModel, container)
+items.update(lambda lst: [*lst, new_id])   # adds; a removed id drops it
+```
+
+`Repeater.__init__` checks the naming convention once, subscribes to
+`items_signal` (via its own real `_subscribe`, the same mechanism
+`View._attach`'s bindings already use), and does an initial sync. On
+every change, it diffs the new list's own keys (`key(item)`, default
+identity) against the previously-rendered set: new keys call
+`instantiate` (above); keys no longer present call `component.remove()`.
+
+**Real, deliberate scope boundary:** no reordering (an already-present
+key keeps its prior position in the shared `Tree` -- `engine_core::Tree`
+has no child-reorder primitive today, confirmed by reading its source;
+`tre`'s own `Reconciler` carries the identical real limitation), and no
+re-application of a changed item's own *data* to an already-alive
+instance (that's the item's own `ViewModel`'s job, via its own
+`Signal`s -- see `examples/todo_list/`'s own `TodoItemViewModel`).
+`Repeater.remove()` tears every remaining instance down and
+unsubscribes, mirroring `Component.remove()`'s own real "unsubscribe
+before tearing down" ordering.
+
 ## What's real today
 
 - `App.register`/`load`/`show`/`run`, exercised end to end by
   `examples/counter/` (single screen, `load`) and
   `examples/multi_screen/` (two screens switching via `App.show()`
   from inside a real dispatched handler, `register`).
-- `instantiate`/`Component.remove()`, exercised end to end by
-  `examples/todo_list/` -- a real dynamic list, each item its own
-  component, added and removed via real dispatched clicks.
+- `instantiate`/`Component.remove()`/`Repeater`, exercised end to end
+  by `examples/todo_list/` -- a real dynamic list driven by one list
+  `Signal`, `Repeater` adding/removing components automatically.
 - Everything `tre.View`/`tre.Signal`/`tre.ViewModel`/`tre.Component`
   already provide: `{{ }}` binding expressions (a strict, non-`eval`
   whitelist), real `on_click`/`on_hover_enter`/`on_hover_exit`/
@@ -121,4 +155,6 @@ instances.
 
 See `README.md`'s own "Explicitly deferred" section -- richer
 reactivity, a wider bindable-property/widget surface, app-level
-state/routing beyond `App.show`, PyPI publishing.
+state/routing beyond `App.show`, PyPI publishing. `Repeater`'s own real,
+stated scope boundaries (no reordering, no per-item data re-application)
+are named directly above, not repeated here.

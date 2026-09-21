@@ -10,15 +10,18 @@ re-bootstrapping either -- powered directly by `tre.Window.show_view`
 embedded-component layer (TRE M43) -- a component gets its own,
 independent `ViewModel`, and `instantiate` enforces the identical
 `*_View.yaml`/`*_ViewModel.py` naming convention `App.load` already does
-for top-level screens. `Signal`/`View`/`ViewModel`/`Component` are `tre`'s
-own real, already-working primitives, re-exported here unmodified rather
-than duplicated -- Tesserae's own real, additive value is `App`/
-`instantiate`.
+for top-level screens. `Repeater` is the declarative-*feeling* layer on
+top of that: one list `Signal` as the single source of truth, automatic
+keyed add/remove diffing. `Signal`/`View`/`ViewModel`/`Component` are
+`tre`'s own real, already-working primitives, re-exported here unmodified
+rather than duplicated -- Tesserae's own real, additive value is `App`/
+`instantiate`/`Repeater`.
 """
 
 from tre import Component, Signal, View, ViewModel
 
 from tesserae.app import App
 from tesserae.component import instantiate
+from tesserae.repeater import Repeater
 
-__all__ = ["App", "Component", "Signal", "View", "ViewModel", "instantiate"]
+__all__ = ["App", "Component", "Repeater", "Signal", "View", "ViewModel", "instantiate"]

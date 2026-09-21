@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""Tesserae's own real third vertical slice: a dynamic to-do list,
-showcasing TRE M43's real multi-instance, independent-`ViewModel`
-component embedding through Tesserae's own real conventions --
-`tesserae.instantiate` (the `*_View.yaml`/`*_ViewModel.py`-enforced
-counterpart to `Component.instantiate`), used from inside a real
-dispatched `on_click` handler (`TodoViewModel.add_item`).
+"""Tesserae's own real fourth vertical slice: a dynamic to-do list
+driven by `tesserae.Repeater` -- one list `Signal` (`TodoViewModel
+.items`) is the single source of truth, and the `Repeater` keeps
+exactly one real, independent `TodoItem` `Component` + `ViewModel`
+alive per item id currently present, adding/removing them
+automatically. Adding is `items.update(lambda lst: [*lst, new_id])`
+(`TodoViewModel.add_item`); removing is the *same* pattern from the
+item's own side (`TodoItemViewModel.remove_self`) -- neither one ever
+calls `Component.remove()`/`tesserae.instantiate` directly anymore.
 
-Each to-do item is its own real, independent `Component` + `ViewModel`
-(`TodoItem_View.yaml`/`TodoItem_ViewModel.py`) -- adding one, toggling
-its checkbox, and removing it are all real, dispatched interactions
-through the same live window, proving the whole real stack end to end:
-`App.load` -> `Todo_ViewModel` -> `tesserae.instantiate` -> a real,
-embedded `Component` with its own `Signal`-bound state.
+Toggling a checkbox and the whole real render loop prove the same real
+stack this repo's earlier, pre-`Repeater` version already did --
+`Repeater` is a real, additive convenience over `tesserae.instantiate`/
+`Component.remove()` (TRE M43), not a replacement for them.
 """
 
 from pathlib import Path
@@ -28,12 +29,18 @@ window = app.show("Todo")
 
 add_button = view.node("add_button")
 
-# Three real, dispatched clicks on "Add" -- each instantiating a fresh,
-# independent TodoItem component with its own ViewModel.
+
+def item_texts():
+    return [item_vm.text.get() for _key, _component, item_vm in vm.repeater]
+
+
+# Three real, dispatched clicks on "Add" -- each appending a new id to
+# `vm.items`, which the Repeater turns into a fresh, independent
+# TodoItem component + ViewModel automatically.
 for _ in range(3):
     window.click(add_button)
-assert len(vm.items) == 3
-assert [item_vm.text.get() for _, item_vm in vm.items] == ["Item 1", "Item 2", "Item 3"]
+assert len(vm.repeater) == 3
+assert item_texts() == ["Item 1", "Item 2", "Item 3"]
 
 # Toggle the first item's checkbox -- a real two-way binding write-back.
 # `Node.set_checked` (not `window.click`) is the real, Python-reachable
@@ -41,20 +48,25 @@ assert [item_vm.text.get() for _, item_vm in vm.items] == ["Item 1", "Item 2", "
 # documents this precedent: a real click routes through the same real
 # method, but a synthetic `click()` dispatch alone doesn't include a
 # Checkbox's own toggle behavior).
-first_component, first_vm = vm.items[0]
+first_component, first_vm = vm.repeater[1]
 first_component.node("check").set_checked(True)
 assert first_vm.done.get() is True
 
-# Remove the second item via its own dispatched "remove" click.
-window.click(vm.items[1][0].node("remove_button"))
-assert len(vm.items) == 2
-assert [item_vm.text.get() for _, item_vm in vm.items] == ["Item 1", "Item 3"]
+# Remove the second item via its own dispatched "remove" click --
+# TodoItemViewModel.remove_self mutates the shared `items` Signal;
+# the Repeater notices id 2 is gone and tears its Component down.
+window.click(vm.repeater[2][0].node("remove_button"))
+assert len(vm.repeater) == 2
+assert item_texts() == ["Item 1", "Item 3"]
 
 # The list stays healthy after a real removal -- one more "Add" works.
 window.click(add_button)
-assert len(vm.items) == 3
+assert len(vm.repeater) == 3
 
-print(f"final items: {[(item_vm.text.get(), item_vm.done.get()) for _, item_vm in vm.items]!r}")
+print(
+    f"final items: "
+    f"{[(item_vm.text.get(), item_vm.done.get()) for _k, _c, item_vm in vm.repeater]!r}"
+)
 
 app.run(max_frames=20)
 print("todo_list/app.py: exited cleanly after a real 20-frame render loop")

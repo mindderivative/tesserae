@@ -1,14 +1,14 @@
 """Pairs with `Todo_View.yaml` -- the real, top-level screen `App.load`
-registers. Owns the real dynamic list: each "Add" click instantiates a
-new, independent `TodoItem` component (TRE M43) with its own
-`TodoItemViewModel`, via `tesserae.instantiate` (the enforced-naming
-counterpart to `Component.instantiate` this repo's own `README.md`
-documents).
+registers. Owns the real dynamic list via `tesserae.Repeater`: `items`
+is the single source of truth (a plain list of stable item ids) -- the
+`Repeater` keeps exactly one `TodoItem` component + `TodoItemViewModel`
+alive per id currently present, added/removed automatically whenever
+`items` changes, with zero manual bookkeeping here.
 """
 
 from pathlib import Path
 
-from tesserae import ViewModel, instantiate
+from tesserae import Repeater, Signal, ViewModel
 
 from TodoItem_ViewModel import TodoItemViewModel
 
@@ -17,25 +17,19 @@ _ITEM_PATH = Path(__file__).parent / "TodoItem_View.yaml"
 
 class TodoViewModel(ViewModel):
     def __init__(self, view):
-        self.items = []  # list of (Component, TodoItemViewModel), display order
         self._counter = 0
-        self._container = view.node("item_list")
+        self.items = Signal([])  # the single source of truth: stable item ids
+        container = view.node("item_list")
+        self.repeater = Repeater(
+            view,
+            self.items,
+            _ITEM_PATH,
+            TodoItemViewModel,
+            container,
+            args=lambda item_id: (item_id, self.items),
+        )
         super().__init__(view)
 
     def add_item(self):
         self._counter += 1
-        component, item_vm = instantiate(
-            self._view,
-            _ITEM_PATH,
-            TodoItemViewModel,
-            self._container,
-            f"Item {self._counter}",
-            self._discard_item,
-        )
-        self.items.append((component, item_vm))
-
-    def _discard_item(self, item_vm):
-        for index, (_component, existing_vm) in enumerate(self.items):
-            if existing_vm is item_vm:
-                del self.items[index]
-                return
+        self.items.update(lambda lst: [*lst, self._counter])
