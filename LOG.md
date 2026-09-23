@@ -1,34 +1,37 @@
-# LOG — M10: Widget Catalog, Part 2c — Cards, Lists, Chips & Structural Rows
+# LOG — M11: Widget Catalog, Part 2d — Navigation & Shell Composition
 
-- Continuing the widget catalog: `card`/`list_`/`list_item`/`chip`/
-  `badge`/`divider`/`link`/`accordion_header`/`tree_node`, same
-  thin-delegate pattern M8/M9 established.
+- Continuing the widget catalog: `tabs`/`navigation_rail`/
+  `navigation_drawer`/`toolbar`/`top_app_bar`/`status_bar`, same
+  thin-delegate pattern M8-M10 established.
 
 ## What shipped
 
-1. `src/tesserae/widgets/structural.py` — all 9, verified directly
-   against `crates/engine-py/src/window_factory.rs`'s real signatures,
-   including the two-element return tuples `add_accordion_header`/
-   `add_tree_node` produce (`(header, chevron)`, `(node, chevron |
-   None)`).
-2. `src/tesserae/widgets/__init__.py` extended to re-export all 9.
-3. Confirms M9's own correction: none of these 9 expose a raw color
-   kwarg beyond the already-clear `border_color` (`add_list`/`add_link`
-   take no color at all).
-4. `tests/test_widgets_structural.py` — 12 new pytest tests. Caught one
-   broken draft mid-write (a nonsensical placeholder assertion left in
-   from an interrupted edit) before it was ever run — the Fact-Forcing
-   Gate's re-statement requirement on file creation gave a natural
-   pause point to notice and fix it before writing the real content.
-- Verification: `pytest tests/` 49 passed (37 prior + 12 new), 0
+1. `src/tesserae/widgets/navigation.py` — all 6, verified directly
+   against `crates/engine-py/src/window_factory.rs`'s real signatures.
+2. `src/tesserae/widgets/__init__.py` extended to re-export all 6.
+3. Real, concrete first application of M8's naming-translation
+   decision: `add_toolbar`'s own `color: Option<&str>` param isn't an
+   RGBA color at all — confirmed directly at
+   `window_factory.rs:6727-6734`, it accepts exactly two named strings
+   (`"standard"`/`"vibrant"`), a container-tone selector. Calling it
+   `color` is its own real source of confusion — every other `color`/
+   `background` kwarg across the whole catalog takes an RGBA tuple, so
+   a caller would reasonably expect one here too. Tesserae's own
+   `toolbar(tone=...)` renames it, translating internally when it
+   delegates.
+4. `tests/test_widgets_navigation.py` — 7 new pytest tests, including
+   a dedicated check that `toolbar(tone="vibrant")` reaches the
+   identical resolution as the native `add_toolbar(color="vibrant")`
+   call — proving the translation is real, not just cosmetic.
+- Verification: `pytest tests/` 56 passed (49 prior + 7 new), 0
   regressions.
 
 ## Status
 
-**M10 is complete.** Cards/Lists/Chips/Structural Rows is real, tested,
-and committed (`e76ee8a`); push deferred pending explicit user
+**M11 is complete.** Navigation & Shell Composition is real, tested,
+and committed (`66d2137`); push deferred pending explicit user
 confirmation.
 
-Next: the remaining 3 widget categories in the original Part 2 scope
-(Navigation & Shell, Overlays, Search) plus Date & Time and Media &
-Graphics. Then Part 3 (YAML component macro-expansion).
+Next: the remaining 2 widget categories in the original Part 2 scope
+(Overlays, Search) plus Date & Time and Media & Graphics. Then Part 3
+(YAML component macro-expansion).
