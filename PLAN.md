@@ -1,37 +1,34 @@
-# PLAN — M12: Widget Catalog, Part 2e — Overlays
+# PLAN — M13: Widget Catalog, Part 2f — Search & Progress/Status
 
-*(Replaces the prior M11 plan in this file — M11 is complete, committed.)*
+*(Replaces the prior M12 plan in this file — M12 is complete, committed.)*
 
 ## Goal
 
-Continue the widget catalog: `dialog`/`snackbar`/`side_sheet`/`menu`/
-`menu_item`/`tooltip` — `tre`'s own "Overlays" category — same
-thin-delegate pattern M8-M11 established.
+Close out the original Part 2 scope's category list from `tre`'s own
+docs: `search_bar`/`search_view` (Search) and `circular_progress`/
+`linear_progress`/`loading_indicator` (Progress & Status).
 
 ## Status
 
-**Complete.** `src/tesserae/widgets/overlays.py` — all 6, verified
-directly against `window_factory.rs` (including `add_snackbar`'s
-`(container, action|None, close|None)` return shape).
-`src/tesserae/widgets/__init__.py` extended.
+**Complete.** `src/tesserae/widgets/search.py` — `search_bar`/
+`search_view`, verified directly against `window_factory.rs`
+(including `add_search_bar`'s real 4-tuple return).
+`src/tesserae/widgets/progress.py` — `circular_progress`/
+`linear_progress`/`loading_indicator`.
 
-Real scope decision: deliberately does not wrap `Window.open_*`/
-`close_*` (e.g. `open_dialog`/`close_dialog`) — those are already
-plain, minimal `Window` methods with no naming ambiguity or
-construction-time logic to delegate around, so a wrapper would only
-add indirection, not clarity. None of these 6 expose an ambiguous
-color kwarg, so M8's naming translation wasn't needed here.
+Second real, concrete application of M8's naming translation, found
+auditing this category: `add_loading_indicator`'s `color=` is a
+genuine RGBA tint for the spinner's own glyph (no background of its
+own) — the same "glyph/tint, not a fill" concept M8 named `foreground`.
+`loading_indicator(foreground=...)` translates internally.
 
-7 new pytest tests (`test_widgets_overlays.py`): parity on
-`corner_radius`, `add_snackbar`'s real `None`-shape for an omitted
-`action_label`/`closable` reproduced through the delegate, and
-`build_menu`'s real `ValueError` on an empty item list reproduced
-through `menu(...)`. Full suite: 63 passed (56 prior + 7 new), 0
-regressions. `BUILD_TRACKER.md` updated, tracker artifact regenerated
-(12 milestones/23 phases/48 items/4 known gaps/1 fixed gap) and
-republished. Committed locally (`416ab3a`); push deferred pending
-explicit user confirmation.
+7 new pytest tests across `test_widgets_search.py`/
+`test_widgets_progress.py`. Full suite: 70 passed (63 prior + 7 new),
+0 regressions. `BUILD_TRACKER.md` updated, tracker artifact
+regenerated (13 milestones/25 phases/54 items/4 known gaps/1 fixed
+gap) and republished. Committed locally (`0023c4a`); push deferred
+pending explicit user confirmation.
 
-Next: the remaining widget category in the original Part 2 scope
-(Search) plus Date & Time and Media & Graphics. Then Part 3 (YAML
-component macro-expansion).
+Next: Date & Time and Media & Graphics — the last 2 widget categories
+from the original 38-widget scope. Then Part 3 (YAML component
+macro-expansion) — the real "ease of use to a GUI designer" deliverable.
