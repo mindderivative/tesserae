@@ -14,11 +14,11 @@ from tesserae import View, instantiate
 PARENT_VIEW = """
 id: root
 kind: Container
-style: {flex_direction: Column, width: 300, height: 200, gap: 8, padding: 8}
+style: {flex_direction: Vertical, width: 300, height: 200, gap: 8, padding: 8}
 children:
   - id: item_list
     kind: Container
-    style: {flex_direction: Column, gap: 4, width: 280, height: 180}
+    style: {flex_direction: Vertical, gap: 4, width: 280, height: 180}
 """
 
 ITEM_VIEW = """
