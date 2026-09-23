@@ -22,13 +22,14 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M10 — Widget Catalog, Cards/Lists/Chips/Structural Rows (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M11 — Widget Catalog, Navigation & Shell (thin delegates + 1 naming translation) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M12 — Widget Catalog, Overlays (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M13 — Widget Catalog, Search & Progress/Status (thin delegates + 1 naming translation) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M12 — `tesserae.widgets` Overlays category (`dialog`/`snackbar`/`side_sheet`/`menu`/`menu_item`/`tooltip`). Deliberately does not wrap `Window.open_*`/`close_*` (e.g. `open_dialog`/`close_dialog`) — those are already plain, minimal methods with no naming ambiguity or construction-time logic to delegate around, so a wrapper would add indirection with no real value. None of these 6 expose an ambiguous color kwarg, so no naming translation applied here.
+**Just closed:** M13 — `tesserae.widgets` Search (`search_bar`/`search_view`) and Progress & Status (`circular_progress`/`linear_progress`/`loading_indicator`) categories, completing the original Part 2 scope's category list from `tre`'s own docs. A second real, concrete application of M8's naming translation, found while auditing this category: `add_loading_indicator`'s `color: Option<(u8,u8,u8,u8)>` is a genuine RGBA tint for the spinner's own glyph (it has no background of its own, falling back to the theme's primary when omitted) — the same "glyph/tint, not a fill" concept M8 named `foreground`. `loading_indicator(foreground=...)` translates internally to `add_loading_indicator(color=...)`.
 
-**Up next:** the remaining widget category in the original Part 2 scope (Search) plus Date & Time and Media & Graphics. The Text/Icon primitives (`add_text`/`add_icon`) remain where M8's `background`-as-glyph-color translation actually applies, if/when they get their own `tesserae.widgets` wrapper — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable.
+**Up next:** Date & Time and Media & Graphics — the last 2 widget categories from the original 38-widget scope. The Text/Icon primitives (`add_text`/`add_icon`) remain where M8's `background`-as-glyph-color translation actually applies, if/when they get their own `tesserae.widgets` wrapper — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable.
 
 **Known gaps:**
-- The remaining 3 widget categories are still real, deferred work — being scoped now (see "Up next").
+- The remaining 2 widget categories are still real, deferred work — being scoped now (see "Up next").
 - Part 3 (YAML component macro-expansion) not started.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
@@ -207,3 +208,21 @@ Real, concrete first application of M8's naming-translation decision: `add_toolb
 ### Phase 2 — Verification ✅
 - Step 1: `tests/test_widgets_overlays.py` — 7 real pytest tests: parity on `corner_radius`, `add_snackbar`'s real `None`-shape for an omitted `action_label`/`closable` reproduced through the delegate, and `build_menu`'s real `ValueError` on an empty item list reproduced through `menu(...)` — ✅
 - Step 2: full suite — 63 passed (56 prior + 7 new), 0 regressions — ✅
+
+---
+
+## Milestone 13 — Widget Catalog, Part 2f: Search & Progress/Status
+
+**Status: ✅ Complete (2026-09-23).** `search_bar`/`search_view` (Search) and `circular_progress`/`linear_progress`/`loading_indicator` (Progress & Status) — the last 2 categories from the original Part 2 scope's category list in `tre`'s own docs (`circular_progress`/`linear_progress`/`loading_indicator` are real `NodeKind` primitives, wrapped for the same uniform-surface reason M9 wrapped `checkbox`/`slider`/etc.).
+
+Second real, concrete naming translation: `add_loading_indicator`'s `color: Option<(u8,u8,u8,u8)>` is a genuine RGBA tint for the spinner's own glyph (no background of its own; falls back to the theme's primary when omitted) — verified directly against `window_factory.rs`, the same "glyph/tint, not a fill" concept M8 named `foreground`. Tesserae's own `loading_indicator(foreground=...)` translates internally to `add_loading_indicator(color=...)`.
+
+### Phase 1 — Thin Delegating Wrappers ✅
+- Step 1: `src/tesserae/widgets/search.py` — `search_bar`/`search_view`, verified directly against `window_factory.rs` (including `add_search_bar`'s real 4-tuple return) — ✅
+- Step 2: `src/tesserae/widgets/progress.py` — `circular_progress`/`linear_progress`/`loading_indicator`, with the `foreground=`→`color=` translation on the third — ✅
+- Step 3: `src/tesserae/widgets/__init__.py` extended to re-export all 5 — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_widgets_search.py` — 3 real pytest tests, including proving the returned `TextField` node from `search_bar(...)` is genuinely wireable via `set_on_change` — ✅
+- Step 2: `tests/test_widgets_progress.py` — 4 real pytest tests: parity on `.get("value")` for both progress bars, and a real check that the translated `loading_indicator(foreground=...)` call reaches `tre` without raising, matching the native `color=` call (no gettable color property exists to assert stronger parity — the same real limitation every other color kwarg in this catalog has) — ✅
+- Step 3: full suite — 70 passed (63 prior + 7 new), 0 regressions — ✅

@@ -48,6 +48,8 @@ from tesserae.widgets.overlays import (
     snackbar,
     tooltip,
 )
+from tesserae.widgets.search import search_bar, search_view
+from tesserae.widgets.progress import circular_progress, linear_progress, loading_indicator
 
 __all__ = [
     "accordion_header",
@@ -57,19 +59,24 @@ __all__ = [
     "card",
     "checkbox",
     "chip",
+    "circular_progress",
     "dialog",
     "divider",
     "extended_fab",
     "fab",
     "icon_button",
+    "linear_progress",
     "link",
     "list_",
     "list_item",
+    "loading_indicator",
     "menu",
     "menu_item",
     "navigation_drawer",
     "navigation_rail",
     "radio_button",
+    "search_bar",
+    "search_view",
     "side_sheet",
     "slider",
     "snackbar",
