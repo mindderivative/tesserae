@@ -40,6 +40,14 @@ from tesserae.widgets.navigation import (
     toolbar,
     top_app_bar,
 )
+from tesserae.widgets.overlays import (
+    dialog,
+    menu,
+    menu_item,
+    side_sheet,
+    snackbar,
+    tooltip,
+)
 
 __all__ = [
     "accordion_header",
@@ -49,6 +57,7 @@ __all__ = [
     "card",
     "checkbox",
     "chip",
+    "dialog",
     "divider",
     "extended_fab",
     "fab",
@@ -56,16 +65,21 @@ __all__ = [
     "link",
     "list_",
     "list_item",
+    "menu",
+    "menu_item",
     "navigation_drawer",
     "navigation_rail",
     "radio_button",
+    "side_sheet",
     "slider",
+    "snackbar",
     "spin_box",
     "split_button",
     "status_bar",
     "switch",
     "tabs",
     "toolbar",
+    "tooltip",
     "top_app_bar",
     "tree_node",
 ]
