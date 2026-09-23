@@ -1,34 +1,47 @@
-# PLAN — M13: Widget Catalog, Part 2f — Search & Progress/Status
+# PLAN — M14: Widget Catalog, Part 2g — Media/Graphics & Date/Time (Part 2 complete)
 
-*(Replaces the prior M12 plan in this file — M12 is complete, committed.)*
+*(Replaces the prior M13 plan in this file — M13 is complete, committed.)*
 
 ## Goal
 
-Close out the original Part 2 scope's category list from `tre`'s own
-docs: `search_bar`/`search_view` (Search) and `circular_progress`/
-`linear_progress`/`loading_indicator` (Progress & Status).
+Close out the widget catalog entirely: `image`/`video`/`icon`/
+`graph_node`/`node_graph` (Media & Graphics) and `date_picker_day`/
+`time_picker_dial`/`period_selector` (Date & Time Pickers) — the last
+2 categories in `tre`'s own `docs/guide/components.md`.
 
 ## Status
 
-**Complete.** `src/tesserae/widgets/search.py` — `search_bar`/
-`search_view`, verified directly against `window_factory.rs`
-(including `add_search_bar`'s real 4-tuple return).
-`src/tesserae/widgets/progress.py` — `circular_progress`/
-`linear_progress`/`loading_indicator`.
+**Complete. Part 2 of the approved plan is now fully done.**
+`src/tesserae/widgets/media.py` — all 5, with `icon`'s real naming
+translation applied (`add_icon`'s `color=` is the glyph's own paint,
+no background at all — same reasoning `image`/`video` already have for
+taking no color param). `src/tesserae/widgets/date_time.py` — all 3
+(named to avoid shadowing the stdlib `datetime` module).
 
-Second real, concrete application of M8's naming translation, found
-auditing this category: `add_loading_indicator`'s `color=` is a
-genuine RGBA tint for the spinner's own glyph (no background of its
-own) — the same "glyph/tint, not a fill" concept M8 named `foreground`.
-`loading_indicator(foreground=...)` translates internally.
+Real, deliberate scope note: no dedicated `tesserae.widgets.text`
+wrapper for the bare `add_text` primitive was built — every widget
+that displays text does so through its own already-clear param
+(`label`/`headline`/`content`), never a raw passthrough to `add_text`'s
+own ambiguous `background=`.
 
-7 new pytest tests across `test_widgets_search.py`/
-`test_widgets_progress.py`. Full suite: 70 passed (63 prior + 7 new),
-0 regressions. `BUILD_TRACKER.md` updated, tracker artifact
-regenerated (13 milestones/25 phases/54 items/4 known gaps/1 fixed
-gap) and republished. Committed locally (`0023c4a`); push deferred
-pending explicit user confirmation.
+11 new pytest tests (`test_widgets_media.py`/`test_widgets_date_time.py`),
+including real file-loading parity via a new checked-in 1×1 PNG
+fixture (`tests/fixtures/pixel.png`, hand-built with `zlib`, no
+external dependency), and 3 real error-path checks (`add_image`'s
+`OSError`, `add_icon`'s `ValueError`, `add_period_selector`'s
+`ValueError`) reproduced through the delegates. Full suite: 81 passed
+(70 prior + 11 new), 0 regressions. `BUILD_TRACKER.md` updated,
+tracker artifact regenerated (14 milestones/27 phases/61 items/5 known
+gaps/1 fixed gap) and republished. Committed locally (`97cfb59`); push
+deferred pending explicit user confirmation.
 
-Next: Date & Time and Media & Graphics — the last 2 widget categories
-from the original 38-widget scope. Then Part 3 (YAML component
-macro-expansion) — the real "ease of use to a GUI designer" deliverable.
+**Summary of the naming-consistency work across the whole catalog:** 3
+real, concrete translations applied where `tre`'s own vocabulary was
+genuinely ambiguous — `add_toolbar`'s `color`→`tone` (M11, a named
+variant selector, not a color), `add_loading_indicator`'s
+`color`→`foreground` (M13, a glyph tint), `add_icon`'s
+`color`→`foreground` (M14, a glyph paint). Everywhere else, `tre`'s own
+names were already clear and kept as-is.
+
+Next: Part 3 — the YAML component macro-expansion layer, the real
+"ease of use to a GUI designer" deliverable.

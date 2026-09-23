@@ -1,30 +1,43 @@
-# LOG — M13: Widget Catalog, Part 2f — Search & Progress/Status
+# LOG — M14: Widget Catalog, Part 2g — Media/Graphics & Date/Time (Part 2 complete)
 
-- Closing out the original Part 2 scope's category list: Search and
-  Progress & Status.
+- Closing out the widget catalog: Media & Graphics and Date & Time
+  Pickers, the last 2 categories.
 
 ## What shipped
 
-1. `src/tesserae/widgets/search.py` — `search_bar`/`search_view`,
-   verified directly against `window_factory.rs`.
-2. `src/tesserae/widgets/progress.py` — `circular_progress`/
-   `linear_progress`/`loading_indicator`. Second real application of
-   M8's naming translation: `add_loading_indicator`'s `color=` is a
-   genuine RGBA tint for the spinner's own glyph, no background of its
-   own — translated to `foreground=` in Tesserae's own API.
-3. `src/tesserae/widgets/__init__.py` extended to re-export all 5.
-4. `tests/test_widgets_search.py` (3 tests) / `test_widgets_progress.py`
-   (4 tests) — proving `search_bar`'s returned `TextField` is genuinely
-   wireable via `set_on_change`, progress `value` parity, and the
-   `foreground=`→`color=` translation reaching `tre` without raising.
-- Verification: `pytest tests/` 70 passed (63 prior + 7 new), 0
+1. `src/tesserae/widgets/media.py` — `image`/`video`/`icon`/
+   `graph_node`/`node_graph`. `icon` gets the real naming translation
+   M8/M9's finding always pointed to: `add_icon`'s `color=` is the
+   glyph's own paint, no background at all — translated to
+   `foreground=`.
+2. `src/tesserae/widgets/date_time.py` — `date_picker_day`/
+   `time_picker_dial`/`period_selector` (named to avoid shadowing the
+   stdlib `datetime` module).
+3. `src/tesserae/widgets/__init__.py` extended to re-export all 8.
+4. `tests/fixtures/pixel.png` — a real, minimal valid 1×1 PNG,
+   hand-built via `zlib`/`struct` (no PIL dependency in this venv),
+   checked in for `image(...)`'s own real file-loading test coverage.
+5. `tests/test_widgets_media.py` (6 tests) / `test_widgets_date_time.py`
+   (5 tests) — including 3 real error-path checks (`add_image`'s
+   `OSError` on a missing file, `add_icon`'s `ValueError` on an unknown
+   name, `add_period_selector`'s `ValueError` on an invalid value) all
+   reproduced through the delegates, not just happy-path parity.
+- Verification: `pytest tests/` 81 passed (70 prior + 11 new), 0
   regressions.
 
 ## Status
 
-**M13 is complete.** Search and Progress & Status are real, tested,
-and committed (`0023c4a`); push deferred pending explicit user
-confirmation.
+**M14 is complete. Part 2 of the approved plan is now fully done** --
+every widget-catalog category from `tre`'s own docs has a real, tested
+`tesserae.widgets` counterpart. Committed locally (`97cfb59`); push
+deferred pending explicit user confirmation.
 
-Next: Date & Time and Media & Graphics — the last 2 widget categories.
-Then Part 3 (YAML component macro-expansion).
+Summary across the whole catalog: 3 real naming translations applied
+where `tre`'s own vocabulary was genuinely ambiguous (`add_toolbar`
+color->tone, `add_loading_indicator` color->foreground, `add_icon`
+color->foreground) -- everywhere else `tre`'s own names were already
+clear.
+
+Next: Part 3 -- the YAML component macro-expansion layer. This is the
+real "ease of use to a GUI designer" deliverable per the user's own
+direct correction earlier in this milestone sequence.
