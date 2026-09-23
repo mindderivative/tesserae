@@ -14,12 +14,24 @@ from tesserae.widgets.buttons import (
     icon_button,
     split_button,
 )
+from tesserae.widgets.selection import (
+    checkbox,
+    radio_button,
+    slider,
+    spin_box,
+    switch,
+)
 
 __all__ = [
     "button",
     "button_group",
+    "checkbox",
     "extended_fab",
     "fab",
     "icon_button",
+    "radio_button",
+    "slider",
+    "spin_box",
     "split_button",
+    "switch",
 ]

@@ -18,13 +18,14 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M6 — Sync with `tre` v0.3.0's `flex_direction` Rename | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M7 — Bootstrap Documentation Infrastructure (this file, MkDocs, `PLAN.md`/`LOG.md`) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M8 — Widget Catalog, Buttons & Actions (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M9 — Widget Catalog, Selection & Input (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M8 — `tesserae.widgets` Buttons & Actions category (`button`/`icon_button`/`fab`/`extended_fab`/`split_button`/`button_group`), delegating directly to `tre`'s own native factories (see `buttons.py`'s module docstring for why: full fidelity, including `split_button`/`button_group`'s hover/press animations, which a from-scratch Python port could never reach). Button-family params were already clear (`label`/`icon`/`variant`/`border_color`), so no translation needed here — but auditing them surfaced a real, unrelated naming inconsistency worth recording for the widgets still to come: `tre`'s own `style.background`/`add_text(background=...)` doubles as *glyph color* on a `Text` node (not an actual background fill), and `add_icon`/`add_badge` separately name glyph color `color=` — two different names for the same underlying "foreground color" concept, confirmed directly in `engine-spec/src/build.rs:547-564`. Tesserae's own API will translate to clear, consistent names (`background` only ever means a real background fill; `foreground` names glyph/text color) at the point a widget actually exposes that param — starting with the Text/Icon-family widgets next.
+**Just closed:** M9 — `tesserae.widgets` Selection & Input category (`checkbox`/`slider`/`radio_button`/`switch`/`spin_box`). Real finding: `checkbox`/`slider`/`radio_button`/`switch` are actual `NodeKind` primitives in `tre` (not compositions) — already fully usable from Python via `Window.add_checkbox`/etc. with zero blockers. Wrapped anyway, for a uniform `tesserae.widgets` surface a GUI designer can rely on regardless of what's primitive vs. composed underneath `tre` — the same "accessed as if created by tesserae" goal M8's own course correction established. None of these 5 expose an ambiguous color kwarg (`background` already means "this widget's own fill" everywhere it appears), so no naming translation applied here either.
 
-**Up next:** the remaining widget categories (Selection & Input, Cards/Lists/Chips/Structural Rows, Navigation & Shell, Overlays, Search, Date & Time, Media & Graphs), each a thin delegate to `tre`'s own native factory with the same naming-consistency pass applied. Then Part 3 — the YAML component macro-expansion layer — which is the real "ease of use to a GUI designer" deliverable per the user's own direct correction: a designer writing `kind: Button` in a `*_View.yaml` should never need to know it's a Rect+Text composition under the hood.
+**Up next:** the remaining widget categories (Cards/Lists/Chips/Structural Rows, Navigation & Shell, Overlays, Search, Date & Time, Media & Graphs). Correction to M8's own note: checked directly before assuming — `add_card`/`add_chip`/`add_badge`/`add_list_item` (the composition-only factories) expose no raw text/glyph color kwarg at all, only the already-clear `border_color`/`variant`; the `background`-as-glyph-color ambiguity lives specifically on the *primitive* `add_text(background=...)`/`add_icon(color=...)` factories, not on any composition-only widget category. If those two primitives get their own `tesserae.widgets` wrappers (for the same uniform-surface reason M9 wrapped `checkbox`/`slider`/`switch`/`radio_button`), that's where the naming translation actually lands — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable per the user's own direct correction: a designer writing `kind: Button` in a `*_View.yaml` should never need to know it's a Rect+Text composition under the hood.
 
 **Known gaps:**
-- The remaining 32 widget categories are still real, deferred work — being scoped now (see "Up next").
+- The remaining 6 widget categories are still real, deferred work — being scoped now (see "Up next").
 - Part 3 (YAML component macro-expansion) not started.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
@@ -142,4 +143,20 @@ Same message also surfaced a second, real, cross-cutting finding: if the imperat
 - Step 2: `src/tesserae/widgets/__init__.py` — re-exports all 6 as `tesserae.widgets.*` — ✅
 
 ### Phase 2 — Verification ✅
-- Step 1: `tests/test_widgets_buttons.py` — 7 real pytest tests, each constructing the same widget two ways (via `tesserae.widgets` and via the native `window.add_*` call with identical args) and asserting `Node.get("corner_radius")`/`.get("background")`/`.get("elevation")` match exactly, proving the delegate is a true pass-through — ✅
+- Step 1: `tests/test_widgets_buttons.py` — 9 real pytest tests, each constructing the same widget two ways (via `tesserae.widgets` and via the native `window.add_*` call with identical args) and asserting `Node.get("corner_radius")`/`.get("elevation")`/`.get("border_width")` match exactly (`Node.get()` has no `"background"` property at all — confirmed directly from `node.rs`, colors are deliberately excluded), plus real kwarg-forwarding checks (`variant=`, `size=`) proving the delegate doesn't silently drop an argument — ✅
+
+---
+
+## Milestone 9 — Widget Catalog, Part 2b: Selection & Input
+
+**Status: ✅ Complete (2026-09-23).** `checkbox`/`slider`/`radio_button`/`switch`/`spin_box`. Real finding before writing these: `checkbox`/`slider`/`radio_button`/`switch` are actual `NodeKind` primitives in `tre` (not compositions) — confirmed against the approved plan's own list of the 21 real primitive kinds — already fully usable from Python with zero blockers. Wrapped anyway, matching M8's "accessed as if created by tesserae" goal: a GUI designer using `tesserae.widgets` shouldn't need to know or care which underlying widgets are primitives vs. compositions in `tre`. `spin_box` is a real composition (a text field flanked by minus/plus icon buttons).
+
+None of these 5 expose an ambiguous color kwarg — `background` already means "this widget's own fill" everywhere it appears (`checkbox`/`slider` take it directly; `radio_button`/`switch` are auto-themed with no color override at all) — so no naming translation was needed. Auditing composition-only Card/Chip/Badge/ListItem factories while investigating where the translation *should* land turned up a correction to M8's own note (see Top Metrics "Up next" above): none of those four expose a raw color kwarg either, only `add_text`/`add_icon`'s own primitive signatures do.
+
+### Phase 1 — Thin Delegating Wrappers ✅
+- Step 1: `src/tesserae/widgets/selection.py` — `checkbox`/`slider`/`radio_button`/`switch`/`spin_box`, same parameter names/order/defaults as `tre`'s own factories (verified directly against `window_factory.rs`) — ✅
+- Step 2: `src/tesserae/widgets/__init__.py` extended to re-export all 5 — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_widgets_selection.py` — 6 real pytest tests, parity asserted on each widget's own real gettable state (`get_checked()`/`.get("thumb_position")`/`.get("select_progress")`/`.get("toggle_progress")`/`.get("corner_radius")`) — ✅
+- Step 2: full suite — 37 passed (31 prior + 6 new), 0 regressions — ✅
