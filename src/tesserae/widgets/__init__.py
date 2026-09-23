@@ -32,6 +32,14 @@ from tesserae.widgets.structural import (
     list_item,
     tree_node,
 )
+from tesserae.widgets.navigation import (
+    navigation_drawer,
+    navigation_rail,
+    status_bar,
+    tabs,
+    toolbar,
+    top_app_bar,
+)
 
 __all__ = [
     "accordion_header",
@@ -48,10 +56,16 @@ __all__ = [
     "link",
     "list_",
     "list_item",
+    "navigation_drawer",
+    "navigation_rail",
     "radio_button",
     "slider",
     "spin_box",
     "split_button",
+    "status_bar",
     "switch",
+    "tabs",
+    "toolbar",
+    "top_app_bar",
     "tree_node",
 ]

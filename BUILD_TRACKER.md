@@ -20,13 +20,14 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M8 — Widget Catalog, Buttons & Actions (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M9 — Widget Catalog, Selection & Input (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M10 — Widget Catalog, Cards/Lists/Chips/Structural Rows (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M11 — Widget Catalog, Navigation & Shell (thin delegates + 1 naming translation) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M10 — `tesserae.widgets` Cards, Lists, Chips & Structural Rows category (`card`/`list_`/`list_item`/`chip`/`badge`/`divider`/`link`/`accordion_header`/`tree_node`), confirming M9's own correction: none of these 9 expose an ambiguous color kwarg (only the already-clear `border_color`, or none at all for `add_list`/`add_link`), so no naming translation applied here either.
+**Just closed:** M11 — `tesserae.widgets` Navigation & Shell Composition category (`tabs`/`navigation_rail`/`navigation_drawer`/`toolbar`/`top_app_bar`/`status_bar`), plus the first real application of M8's naming-translation decision: `add_toolbar`'s own `color=` kwarg isn't an RGBA color at all — it's a named container-tone selector (`"standard"`/`"vibrant"`, confirmed at `window_factory.rs:6727-6734`). Tesserae's `toolbar(tone=...)` translates to it internally, since calling a two-value named selector `color` is its own kind of confusing (a caller would reasonably expect an RGBA tuple, matching every other `color`/`background` kwarg in the catalog).
 
-**Up next:** the remaining 3 widget categories (Navigation & Shell, Overlays, Search) plus Date & Time and Media & Graphics. The Text/Icon primitives (`add_text`/`add_icon`) remain where M8's naming translation actually applies, if/when they get their own `tesserae.widgets` wrapper — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable per the user's own direct correction: a designer writing `kind: Button` in a `*_View.yaml` should never need to know it's a Rect+Text composition under the hood.
+**Up next:** the remaining 2 widget categories in the original Part 2 scope (Overlays, Search) plus Date & Time and Media & Graphics. The Text/Icon primitives (`add_text`/`add_icon`) remain where M8's `background`-as-glyph-color translation actually applies, if/when they get their own `tesserae.widgets` wrapper — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable.
 
 **Known gaps:**
-- The remaining 5 widget categories are still real, deferred work — being scoped now (see "Up next").
+- The remaining 4 widget categories are still real, deferred work — being scoped now (see "Up next").
 - Part 3 (YAML component macro-expansion) not started.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
@@ -175,3 +176,19 @@ None of these 5 expose an ambiguous color kwarg — `background` already means "
 ### Phase 2 — Verification ✅
 - Step 1: `tests/test_widgets_structural.py` — 12 real pytest tests: parity on `elevation`/`corner_radius`/`border_width`, a real kwarg-forwarding check (`card`'s `elevated` vs. `outlined` variant resolves to different elevation *and* border width), `add_list`'s real `ValueError` on an empty item list reproduced through the delegate, and `add_tree_node`'s `leaf=True` correctly producing `chevron=None` — ✅
 - Step 2: full suite — 49 passed (37 prior + 12 new), 0 regressions — ✅
+
+---
+
+## Milestone 11 — Widget Catalog, Part 2d: Navigation & Shell Composition
+
+**Status: ✅ Complete (2026-09-23).** `tabs`/`navigation_rail`/`navigation_drawer`/`toolbar`/`top_app_bar`/`status_bar` — the 6 real factories in `tre`'s own "Navigation & Shell Composition" category.
+
+Real, concrete first application of M8's naming-translation decision: `add_toolbar`'s own `color: Option<&str>` param isn't an RGBA color at all — verified directly at `window_factory.rs:6727-6734`, it accepts exactly two named strings (`"standard"`/`"vibrant"`), a container-tone selector, not a literal paint value. Calling it `color` is its own real source of confusion (every other `color`/`background` kwarg across the whole catalog takes an RGBA tuple) — Tesserae's own `toolbar(...)` renames it `tone=`, translating internally when it delegates to `window.add_toolbar(color=tone, ...)`.
+
+### Phase 1 — Thin Delegating Wrappers ✅
+- Step 1: `src/tesserae/widgets/navigation.py` — all 6, verified directly against `window_factory.rs` (including `add_tabs`/`add_navigation_rail`'s list-of-`Node` returns and `add_navigation_drawer`/`add_top_app_bar`'s tuple returns) — ✅
+- Step 2: `src/tesserae/widgets/__init__.py` extended to re-export all 6 — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_widgets_navigation.py` — 7 real pytest tests: parity on `corner_radius`, a dedicated check that `toolbar(tone="vibrant")` reaches the identical resolution as the native `add_toolbar(color="vibrant")` call (proving the translation is real, not just cosmetic), and a real kwarg-forwarding check (`variant="docked"` vs. `"floating"` resolves to different corner radius *and* elevation) — ✅
+- Step 2: full suite — 56 passed (49 prior + 7 new), 0 regressions — ✅
