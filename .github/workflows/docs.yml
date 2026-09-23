@@ -1,0 +1,58 @@
+# Builds docs/ (MkDocs) and deploys it to GitHub Pages. Mirrors tre's
+# own real docs.yml -- see that repo's own workflow for the full real
+# reasoning behind this exact shape (separate from ci.yml's own gate,
+# scoped via `paths:` so an unrelated source commit doesn't redeploy
+# the same site, `mkdocs build --strict` catches broken internal
+# links). Unlike tre, this repo's docs never import tesserae/tre
+# itself -- pure prose + links -- so no Rust toolchain or editable
+# install is needed here at all, just the two doc-build packages.
+#
+# Real, stated manual step (not something this workflow can do for
+# itself): GitHub Pages needs "Build and deployment: GitHub Actions"
+# enabled once in this repo's own Settings > Pages before the first
+# real run of the `deploy` job below will succeed -- confirmed via
+# `gh api repos/mindderivative/tesserae/pages` returning 404 (not yet
+# enabled) at the time this workflow was added.
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install mkdocs mkdocs-material
+      - run: mkdocs build --strict
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

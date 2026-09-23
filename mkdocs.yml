@@ -1,0 +1,63 @@
+site_name: Tesserae
+site_description: >-
+  A declarative Python GUI framework, powered by the Tesserae Render
+  Engine (tre) -- write desktop apps in YAML views + Python ViewModels,
+  without touching Rust.
+site_url: https://mindderivative.github.io/tesserae/
+repo_url: https://github.com/mindderivative/tesserae
+repo_name: mindderivative/tesserae
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      accent: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+    - search.suggest
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - tables
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+
+nav:
+  - Overview: index.md
+  - Installation: installation.md
+  - Getting Started: getting-started.md
+  - Guide:
+      - Apps & Screens: guide/apps-and-screens.md
+      - Components & Embedding: guide/components.md
+      - Repeater (Lists): guide/repeater.md
+      - Reactivity: guide/reactivity.md
+      - Naming Convention: guide/naming-convention.md
+  - API Reference:
+      - Overview: api/index.md
+      - App: api/app.md
+      - instantiate: api/instantiate.md
+      - Repeater: api/repeater.md
+  - Architecture: architecture.md
