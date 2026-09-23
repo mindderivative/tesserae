@@ -16,18 +16,21 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M4 — `Repeater`: Automatic Keyed List Diffing | `██████████` 100% | ✅ Complete (2026-09-21) |
 | M5 — Reactivity Re-exports: `Computed`/`Effect`/`batch`/`untrack` | `██████████` 100% | ✅ Complete (2026-09-21) |
 | M6 — Sync with `tre` v0.3.0's `flex_direction` Rename | `██████████` 100% | ✅ Complete (2026-09-23) |
-| M7 — Bootstrap Documentation Infrastructure (this file, MkDocs, `PLAN.md`/`LOG.md`) | `🚧🚧🚧🚧🚧🚧🚧🚧🚧🚧` in progress | 🚧 In progress (2026-09-23) |
+| M7 — Bootstrap Documentation Infrastructure (this file, MkDocs, `PLAN.md`/`LOG.md`) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M8 — Widget Catalog, Buttons & Actions (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M6 — `tre` v0.3.0 renamed the declarative `style.flex_direction` values (`Row`/`Column` → `Horizontal`/`Vertical` — "row"/"column" collided with spreadsheet/datasheet vocabulary). Tesserae's own `.venv` was still on `tre` 0.2.0 and every example/test YAML used the old values; updated to current `tre` and fixed all 7 affected files. 22/22 tests and all 3 real examples pass again.
+**Just closed:** M8 — `tesserae.widgets` Buttons & Actions category (`button`/`icon_button`/`fab`/`extended_fab`/`split_button`/`button_group`), delegating directly to `tre`'s own native factories (see `buttons.py`'s module docstring for why: full fidelity, including `split_button`/`button_group`'s hover/press animations, which a from-scratch Python port could never reach). Button-family params were already clear (`label`/`icon`/`variant`/`border_color`), so no translation needed here — but auditing them surfaced a real, unrelated naming inconsistency worth recording for the widgets still to come: `tre`'s own `style.background`/`add_text(background=...)` doubles as *glyph color* on a `Text` node (not an actual background fill), and `add_icon`/`add_badge` separately name glyph color `color=` — two different names for the same underlying "foreground color" concept, confirmed directly in `engine-spec/src/build.rs:547-564`. Tesserae's own API will translate to clear, consistent names (`background` only ever means a real background fill; `foreground` names glyph/text color) at the point a widget actually exposes that param — starting with the Text/Icon-family widgets next.
 
-**Up next:** M7 (this milestone) — bootstrapping the same real documentation infrastructure `tre` already has (this file, a real MkDocs site, `PLAN.md`/`LOG.md`), per the user's own explicit direction that Tesserae-scoped work is tracked in the Tesserae repo, not folded into `tre`'s own tracker. After that: the real widget/component catalog (composing MD3 components in Python from `tre`'s own primitives) and a YAML-level component macro-expansion mechanism, both named directly in `README.md`'s "Explicitly deferred" section and now being scoped as real milestones.
+**Up next:** the remaining widget categories (Selection & Input, Cards/Lists/Chips/Structural Rows, Navigation & Shell, Overlays, Search, Date & Time, Media & Graphs), each a thin delegate to `tre`'s own native factory with the same naming-consistency pass applied. Then Part 3 — the YAML component macro-expansion layer — which is the real "ease of use to a GUI designer" deliverable per the user's own direct correction: a designer writing `kind: Button` in a `*_View.yaml` should never need to know it's a Rect+Text composition under the hood.
 
 **Known gaps:**
-- The widget/component catalog beyond what `tre`'s own `add_*` factories expose is still real, deferred work — being scoped now (see "Up next").
+- The remaining 32 widget categories are still real, deferred work — being scoped now (see "Up next").
+- Part 3 (YAML component macro-expansion) not started.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
 
-**Fixed gaps:** none yet — this is the first real tracker entry.
+**Fixed gaps:**
+- M7's own tracker entry wasn't flipped to ✅ before its commit (`686214a`) landed — Phase 2/3 checkboxes and the Top Metrics row both still read `⬜`/`🚧` despite the real MkDocs site, `docs.yml`, and `PLAN.md`/`LOG.md` all existing on disk. Caught and corrected while starting M8; all three deliverables verified present before flipping the status.
 
 ---
 
@@ -113,15 +116,30 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 
 ## Milestone 7 — Bootstrap Documentation Infrastructure
 
-**Status: 🚧 In progress (2026-09-23).** User-directed, as part of shifting real development focus to Tesserae: "Tesserae as a new project and git/github repo should have its own documentation to include build tracker and MkDocs, along with everything else. If it is Tesserae scoped it goes in the Tesserae project." Mirrors `tre`'s own real, established documentation shape rather than a lighter-weight substitute — this file, a real MkDocs site, and `PLAN.md`/`LOG.md`, so the real widget-catalog/macro-expansion work about to start (Milestones 8+) has a real place to be tracked from the beginning.
+**Status: ✅ Complete (2026-09-23).** User-directed, as part of shifting real development focus to Tesserae: "Tesserae as a new project and git/github repo should have its own documentation to include build tracker and MkDocs, along with everything else. If it is Tesserae scoped it goes in the Tesserae project." Mirrors `tre`'s own real, established documentation shape rather than a lighter-weight substitute — this file, a real MkDocs site, and `PLAN.md`/`LOG.md`, so the real widget-catalog/macro-expansion work (Milestones 8+) has a real place to be tracked from the beginning.
 
 ### Phase 1 — `BUILD_TRACKER.md` ✅
 - Step 1: this file, seeded with Milestones 1-6 as real, honest, after-the-fact history reconstructed from the 6 real commits already shipped — ✅
 - Step 2: `tools/generate_tracker_artifact.py` copied verbatim from `tre` (the script's own header states it's project-agnostic, meant to be copied into any repo with a `BUILD_TRACKER.md` at its root) — ✅
 
-### Phase 2 — MkDocs Site ⬜
-- Step 1: `docs/`/`mkdocs.yml`, the same real structure `tre/docs/` established (Overview/Installation/Getting Started/Guide/API Reference/Architecture), scoped to what Tesserae itself provides — ⬜
-- Step 2: a `docs.yml` GitHub Actions workflow mirroring `tre/.github/workflows/docs.yml` — ⬜
+### Phase 2 — MkDocs Site ✅
+- Step 1: `docs/`/`mkdocs.yml`, the same real structure `tre/docs/` established (Overview/Installation/Getting Started/Guide/API Reference/Architecture), scoped to what Tesserae itself provides — ✅
+- Step 2: a `docs.yml` GitHub Actions workflow mirroring `tre/.github/workflows/docs.yml` — ✅
 
-### Phase 3 — `PLAN.md`/`LOG.md` ⬜
-- Step 1: adopted in this repo too, overwritten per phase, matching `tre`'s own already-corrected convention (no per-step archiving; `BUILD_TRACKER.md` is the durable record) — ⬜
+### Phase 3 — `PLAN.md`/`LOG.md` ✅
+- Step 1: adopted in this repo too, overwritten per phase, matching `tre`'s own already-corrected convention (no per-step archiving; `BUILD_TRACKER.md` is the durable record) — ✅
+
+---
+
+## Milestone 8 — Widget Catalog, Part 2a: Buttons & Actions
+
+**Status: ✅ Complete (2026-09-23).** Real, direct user correction mid-milestone reshaped this and every widget category still to come: the original plan called for from-scratch Python reimplementations of all 38 composition-only widgets' MD3 color/shape/elevation resolution. Before writing the first one, a real, load-bearing realization: `window.add_button()` and its 37 siblings already work perfectly from Python *today* — a from-scratch port would duplicate real, working Rust logic for zero fidelity gain, and for `add_button_group`/`add_split_button` specifically, could *never* reach parity at all (their hover/press shape-tightening and reflow animations live entirely in `PaintProperties` fields with no public Python setter). Presented to the user via `AskUserQuestion`; user's own reply reframed the goal directly: "It's not about accessing the widgets it's about ease of use to a GUI designer" — meaning the real deliverable is Part 3 (declarative `kind: Button` usable in a `*_View.yaml`, impossible today), and `tesserae.widgets` should be thin, faithful delegates to `tre`'s own native factories, not parallel reimplementations.
+
+Same message also surfaced a second, real, cross-cutting finding: if the imperative and declarative surfaces expose confusing or inconsistent naming, "ease of use to a GUI designer" isn't served just by delegating — the *names* matter too. Confirmed concretely: `engine-spec`'s declarative `style.background` doubles as a `Text` node's own glyph color (`build.rs:547-564` — not an actual background fill), and `add_icon`/`add_badge` separately call the same underlying concept `color=`. Decision: Tesserae's own API translates to clear, consistent names at each point a widget exposes a color kwarg — `background` only ever means a real background fill, `foreground` names glyph/text color — rather than inheriting `tre`'s organically-evolved internal vocabulary wholesale. Applied starting with the next widget category (Text/Icon-family), since none of this milestone's 6 button-family widgets expose a raw background/color kwarg to begin with.
+
+### Phase 1 — Thin Delegating Wrappers ✅
+- Step 1: `src/tesserae/widgets/buttons.py` — `button`/`icon_button`/`fab`/`extended_fab`/`split_button`/`button_group`, each `window` as first positional arg (matching `tesserae.component.instantiate`'s own convention), same parameter names/order/defaults as `tre`'s own `add_*` factories (verified directly against `crates/engine-py/src/window_factory.rs`'s real `#[pyo3(signature = ...)]` declarations, not assumed), delegating with zero added logic — ✅
+- Step 2: `src/tesserae/widgets/__init__.py` — re-exports all 6 as `tesserae.widgets.*` — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_widgets_buttons.py` — 7 real pytest tests, each constructing the same widget two ways (via `tesserae.widgets` and via the native `window.add_*` call with identical args) and asserting `Node.get("corner_radius")`/`.get("background")`/`.get("elevation")` match exactly, proving the delegate is a true pass-through — ✅
