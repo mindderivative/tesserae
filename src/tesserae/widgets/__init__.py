@@ -50,6 +50,8 @@ from tesserae.widgets.overlays import (
 )
 from tesserae.widgets.search import search_bar, search_view
 from tesserae.widgets.progress import circular_progress, linear_progress, loading_indicator
+from tesserae.widgets.media import graph_node, icon, image, node_graph, video
+from tesserae.widgets.date_time import date_picker_day, period_selector, time_picker_dial
 
 __all__ = [
     "accordion_header",
@@ -60,11 +62,15 @@ __all__ = [
     "checkbox",
     "chip",
     "circular_progress",
+    "date_picker_day",
     "dialog",
     "divider",
     "extended_fab",
     "fab",
+    "graph_node",
+    "icon",
     "icon_button",
+    "image",
     "linear_progress",
     "link",
     "list_",
@@ -74,6 +80,8 @@ __all__ = [
     "menu_item",
     "navigation_drawer",
     "navigation_rail",
+    "node_graph",
+    "period_selector",
     "radio_button",
     "search_bar",
     "search_view",
@@ -85,8 +93,10 @@ __all__ = [
     "status_bar",
     "switch",
     "tabs",
+    "time_picker_dial",
     "toolbar",
     "tooltip",
     "top_app_bar",
     "tree_node",
+    "video",
 ]

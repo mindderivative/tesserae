@@ -23,13 +23,15 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M11 — Widget Catalog, Navigation & Shell (thin delegates + 1 naming translation) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M12 — Widget Catalog, Overlays (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M13 — Widget Catalog, Search & Progress/Status (thin delegates + 1 naming translation) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M14 — Widget Catalog, Media/Graphics & Date/Time (thin delegates + `icon`'s naming translation) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M13 — `tesserae.widgets` Search (`search_bar`/`search_view`) and Progress & Status (`circular_progress`/`linear_progress`/`loading_indicator`) categories, completing the original Part 2 scope's category list from `tre`'s own docs. A second real, concrete application of M8's naming translation, found while auditing this category: `add_loading_indicator`'s `color: Option<(u8,u8,u8,u8)>` is a genuine RGBA tint for the spinner's own glyph (it has no background of its own, falling back to the theme's primary when omitted) — the same "glyph/tint, not a fill" concept M8 named `foreground`. `loading_indicator(foreground=...)` translates internally to `add_loading_indicator(color=...)`.
+**Just closed:** M14 — `tesserae.widgets` Media & Graphics (`image`/`video`/`icon`/`graph_node`/`node_graph`) and Date & Time Pickers (`date_picker_day`/`time_picker_dial`/`period_selector`), **completing the entire widget catalog** — every category in `tre`'s own `docs/guide/components.md` now has a `tesserae.widgets` counterpart. `icon` is the real place M8's naming-consistency finding always pointed to: `add_icon`'s own `color=` is the glyph's own paint (no background at all, matching `image`/`video`'s "no meaningful behind-it color" reasoning) — `icon(foreground=...)` translates internally. Part 2 of the approved plan is now real and done: `add_text`'s own `background`-as-glyph-color ambiguity was the one case explicitly left unresolved (no dedicated `text` primitive wrapper was built — every widget that displays text does so through its own already-clear param, e.g. `label`/`headline`/`content`, never a raw `add_text` passthrough).
 
-**Up next:** Date & Time and Media & Graphics — the last 2 widget categories from the original 38-widget scope. The Text/Icon primitives (`add_text`/`add_icon`) remain where M8's `background`-as-glyph-color translation actually applies, if/when they get their own `tesserae.widgets` wrapper — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable.
+**Up next:** Part 3 — the YAML component macro-expansion layer, modeled on pyCopper's real `source:`/`with:`/`params:` precedent. This is the actual "ease of use to a GUI designer" deliverable the user's own message pointed to: a designer writing `kind: Button` directly in a `*_View.yaml` should never need to know it's a Rect+Text composition underneath.
 
 **Known gaps:**
-- The remaining 2 widget categories are still real, deferred work — being scoped now (see "Up next").
+- Part 3 (YAML component macro-expansion) not started — the real next deliverable.
+- No dedicated `tesserae.widgets.text` wrapper for the raw `add_text` primitive — every widget needing text uses its own clear param instead; revisit only if a real caller needs the bare primitive.
 - Part 3 (YAML component macro-expansion) not started.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
@@ -226,3 +228,26 @@ Second real, concrete naming translation: `add_loading_indicator`'s `color: Opti
 - Step 1: `tests/test_widgets_search.py` — 3 real pytest tests, including proving the returned `TextField` node from `search_bar(...)` is genuinely wireable via `set_on_change` — ✅
 - Step 2: `tests/test_widgets_progress.py` — 4 real pytest tests: parity on `.get("value")` for both progress bars, and a real check that the translated `loading_indicator(foreground=...)` call reaches `tre` without raising, matching the native `color=` call (no gettable color property exists to assert stronger parity — the same real limitation every other color kwarg in this catalog has) — ✅
 - Step 3: full suite — 70 passed (63 prior + 7 new), 0 regressions — ✅
+
+---
+
+## Milestone 14 — Widget Catalog, Part 2g: Media/Graphics & Date/Time — Part 2 Complete
+
+**Status: ✅ Complete (2026-09-23).** `image`/`video`/`icon`/`graph_node`/`node_graph` (Media & Graphics) and `date_picker_day`/`time_picker_dial`/`period_selector` (Date & Time Pickers) — the last 2 categories, completing the full widget catalog (14 real widget-catalog milestones, every category in `tre`'s own `docs/guide/components.md` now covered).
+
+The real, final application of M8's naming-consistency finding: `add_icon`'s own `color: (u8,u8,u8,u8)` is the glyph's own paint — an icon has no background at all (confirmed directly in `window_factory.rs`, matching the docs' own "No `background` param, same reasoning as `Image`" note). `icon(foreground=...)` translates internally to `add_icon(name, color, size, ...)`. `image`/`video` take no color param at all — their content *is* their own pixels. `graph_node`/`node_graph`/the 3 Date & Time widgets only take the already-clear `border_color`.
+
+Real, deliberate scope note: no dedicated `tesserae.widgets.text` wrapper for the bare `add_text` primitive was built — every widget in the catalog that displays text does so through its own already-clear, purpose-named param (`label`, `headline`, `content`, `text`), never a raw passthrough to `add_text`'s own ambiguous `background=` (glyph color). If a real caller needs the bare primitive later, that's the one remaining place the `background`→`foreground` translation would land.
+
+### Phase 1 — Thin Delegating Wrappers ✅
+- Step 1: `src/tesserae/widgets/media.py` — all 5, `icon`'s naming translation applied — ✅
+- Step 2: `src/tesserae/widgets/date_time.py` — all 3 (named to avoid shadowing the stdlib `datetime` module) — ✅
+- Step 3: `src/tesserae/widgets/__init__.py` extended to re-export all 8 — ✅
+- Step 4: `tests/fixtures/pixel.png` — a real, minimal valid 1×1 PNG (hand-built via `zlib`, no external dependency) checked in for `image(...)`'s own real file-loading test coverage — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_widgets_media.py` — 6 real pytest tests: real file-loading parity via the checked-in PNG fixture, `add_image`'s real `OSError` on a missing path reproduced through the delegate, the `foreground=`→`color=` translation, and `add_icon`'s real `ValueError` on an unknown icon name reproduced through the delegate — ✅
+- Step 2: `tests/test_widgets_date_time.py` — 5 real pytest tests, including `add_period_selector`'s real `ValueError` on an invalid `selected` value reproduced through the delegate — ✅
+- Step 3: full suite — 81 passed (70 prior + 11 new), 0 regressions — ✅
+
+**Part 2 of the approved plan is now complete.** All widget-catalog categories are real, tested, faithful delegates to `tre`'s own native factories, with 3 real, concrete naming translations applied where `tre`'s own vocabulary was genuinely ambiguous (`add_toolbar`'s `color`→`tone`, `add_loading_indicator`'s `color`→`foreground`, `add_icon`'s `color`→`foreground`).
