@@ -21,17 +21,37 @@ from tesserae.widgets.selection import (
     spin_box,
     switch,
 )
+from tesserae.widgets.structural import (
+    accordion_header,
+    badge,
+    card,
+    chip,
+    divider,
+    link,
+    list_,
+    list_item,
+    tree_node,
+)
 
 __all__ = [
+    "accordion_header",
+    "badge",
     "button",
     "button_group",
+    "card",
     "checkbox",
+    "chip",
+    "divider",
     "extended_fab",
     "fab",
     "icon_button",
+    "link",
+    "list_",
+    "list_item",
     "radio_button",
     "slider",
     "spin_box",
     "split_button",
     "switch",
+    "tree_node",
 ]

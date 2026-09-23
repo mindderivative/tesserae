@@ -19,13 +19,14 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M7 — Bootstrap Documentation Infrastructure (this file, MkDocs, `PLAN.md`/`LOG.md`) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M8 — Widget Catalog, Buttons & Actions (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M9 — Widget Catalog, Selection & Input (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M10 — Widget Catalog, Cards/Lists/Chips/Structural Rows (thin delegates) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M9 — `tesserae.widgets` Selection & Input category (`checkbox`/`slider`/`radio_button`/`switch`/`spin_box`). Real finding: `checkbox`/`slider`/`radio_button`/`switch` are actual `NodeKind` primitives in `tre` (not compositions) — already fully usable from Python via `Window.add_checkbox`/etc. with zero blockers. Wrapped anyway, for a uniform `tesserae.widgets` surface a GUI designer can rely on regardless of what's primitive vs. composed underneath `tre` — the same "accessed as if created by tesserae" goal M8's own course correction established. None of these 5 expose an ambiguous color kwarg (`background` already means "this widget's own fill" everywhere it appears), so no naming translation applied here either.
+**Just closed:** M10 — `tesserae.widgets` Cards, Lists, Chips & Structural Rows category (`card`/`list_`/`list_item`/`chip`/`badge`/`divider`/`link`/`accordion_header`/`tree_node`), confirming M9's own correction: none of these 9 expose an ambiguous color kwarg (only the already-clear `border_color`, or none at all for `add_list`/`add_link`), so no naming translation applied here either.
 
-**Up next:** the remaining widget categories (Cards/Lists/Chips/Structural Rows, Navigation & Shell, Overlays, Search, Date & Time, Media & Graphs). Correction to M8's own note: checked directly before assuming — `add_card`/`add_chip`/`add_badge`/`add_list_item` (the composition-only factories) expose no raw text/glyph color kwarg at all, only the already-clear `border_color`/`variant`; the `background`-as-glyph-color ambiguity lives specifically on the *primitive* `add_text(background=...)`/`add_icon(color=...)` factories, not on any composition-only widget category. If those two primitives get their own `tesserae.widgets` wrappers (for the same uniform-surface reason M9 wrapped `checkbox`/`slider`/`switch`/`radio_button`), that's where the naming translation actually lands — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable per the user's own direct correction: a designer writing `kind: Button` in a `*_View.yaml` should never need to know it's a Rect+Text composition under the hood.
+**Up next:** the remaining 3 widget categories (Navigation & Shell, Overlays, Search) plus Date & Time and Media & Graphics. The Text/Icon primitives (`add_text`/`add_icon`) remain where M8's naming translation actually applies, if/when they get their own `tesserae.widgets` wrapper — not yet decided which milestone that is. Then Part 3 — the YAML component macro-expansion layer — the real "ease of use to a GUI designer" deliverable per the user's own direct correction: a designer writing `kind: Button` in a `*_View.yaml` should never need to know it's a Rect+Text composition under the hood.
 
 **Known gaps:**
-- The remaining 6 widget categories are still real, deferred work — being scoped now (see "Up next").
+- The remaining 5 widget categories are still real, deferred work — being scoped now (see "Up next").
 - Part 3 (YAML component macro-expansion) not started.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
@@ -160,3 +161,17 @@ None of these 5 expose an ambiguous color kwarg — `background` already means "
 ### Phase 2 — Verification ✅
 - Step 1: `tests/test_widgets_selection.py` — 6 real pytest tests, parity asserted on each widget's own real gettable state (`get_checked()`/`.get("thumb_position")`/`.get("select_progress")`/`.get("toggle_progress")`/`.get("corner_radius")`) — ✅
 - Step 2: full suite — 37 passed (31 prior + 6 new), 0 regressions — ✅
+
+---
+
+## Milestone 10 — Widget Catalog, Part 2c: Cards, Lists, Chips & Structural Rows
+
+**Status: ✅ Complete (2026-09-23).** `card`/`list_`/`list_item`/`chip`/`badge`/`divider`/`link`/`accordion_header`/`tree_node` — the 9 real factories in `tre`'s own "Cards, Lists, Chips & Structural Rows" category. Confirms M9's own correction directly: checked every one of these 9 signatures against `window_factory.rs` before writing the wrappers, and none expose a raw color kwarg beyond the already-clear `border_color` (`add_list`/`add_link` take no color at all) — the `background`-as-glyph-color naming issue really is confined to the primitive `add_text`/`add_icon` factories, not this category.
+
+### Phase 1 — Thin Delegating Wrappers ✅
+- Step 1: `src/tesserae/widgets/structural.py` — all 9, same parameter names/order/defaults as `tre`'s own factories (verified directly against `window_factory.rs`, including the two-element return tuples `add_accordion_header`/`add_tree_node` produce) — ✅
+- Step 2: `src/tesserae/widgets/__init__.py` extended to re-export all 9 (`list_`/`badge` etc. named to avoid shadowing Python builtins) — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_widgets_structural.py` — 12 real pytest tests: parity on `elevation`/`corner_radius`/`border_width`, a real kwarg-forwarding check (`card`'s `elevated` vs. `outlined` variant resolves to different elevation *and* border width), `add_list`'s real `ValueError` on an empty item list reproduced through the delegate, and `add_tree_node`'s `leaf=True` correctly producing `chevron=None` — ✅
+- Step 2: full suite — 49 passed (37 prior + 12 new), 0 regressions — ✅
