@@ -1,40 +1,41 @@
-# PLAN — M22: Part 3, Phase 8 — Navigation & Shell Component Fragments (Fixed-Shape Members)
+# PLAN — M23: Part 3, Phase 9 — Overlays Component Fragments
 
-*(Replaces the prior M21 plan in this file — M21 is complete, committed.)*
+*(Replaces the prior M22 plan in this file — M22 is complete, committed.)*
 
 ## Goal
 
-The real, fixed-shape widgets in Navigation & Shell: `toolbar` (both
-variants), `top_app_bar`, `status_bar`. `tabs`/`navigation_rail`/
-`navigation_drawer` stay out of scope — variable-length lists.
+`Dialog`, `Snackbar`, `SideSheetModal`/`SideSheetStandard`, `MenuItem`,
+`Tooltip` — every fixed-shape widget in Overlays. `menu` stays out of
+scope (dynamic list).
 
 ## Status
 
 **Complete, both phases.**
 
-`ToolbarDocked`/`ToolbarFloating`, `TopAppBar`, `StatusBar` — all 4
-shipped, content-free where real MD3 anatomy is (an app populates via
-nested `component:`/`Node.add_child`).
+6 new fragments shipped, all cross-checked against `tesserae.widgets`.
+Real, useful pattern confirmed twice more: `Dialog`/`SideSheetModal`
+both return the full-window scrim imperatively — `scrim_width`/
+`scrim_height` are required params on both.
 
-Real correction caught before it shipped wrong: an initial `StatusBar`
-draft guessed its real color role/typography without checking the
-source first — caught by reading `add_status_bar`'s own body directly,
-fixed to the real values (`on_surface_variant`/`label_small`) before
-any test ran against it.
+Real, significant finding, not previously encountered: `add_side_sheet`
+applies a per-corner `corner_radii_override`, and its own base `paint.
+corner_radius` is a literal `0.0` — the real visual rounding lives
+entirely in the override, which `Node.get("corner_radius")` never
+reads back. A `corner_radius` cross-check isn't meaningful for
+`side_sheet` specifically, confirmed by direct testing. Both fragments
+use a uniform `corner_radius: large` instead.
 
-`Toolbar`'s real 3-axis design (variant/orientation/tone) handled by
-making `tone` a plain `background` role-name param (not a separate
-fragment axis) and shipping horizontal-only (a docked toolbar has no
-vertical variant in real MD3 anatomy at all, so that's not even a real
-gap for `ToolbarDocked`). `TopAppBar` reuses the `flex_grow: 1`
-title-fills-remaining-space pattern already established.
+Real bug caught in a test, not a fragment: `side_sheet(modal=True)`
+returns the outer scrim, not the inner panel — an initial test
+compared the wrong two nodes' `elevation`, fixed by comparing what
+each side actually returns. A second, unrelated float-precision
+artifact needed `pytest.approx`.
 
-4 new pytest tests (`test_fragments_navigation.py`), all cross-checked
-against `tesserae.widgets`. Full suite: 123 passed (119 prior + 4 new),
-0 regressions. `BUILD_TRACKER.md` updated, tracker artifact
-regenerated (22 milestones/45 phases/111 items/9 known gaps/3 fixed
-gaps) and republished. Committed locally (`a0385aa`); push deferred
-pending explicit user confirmation.
+5 new pytest tests (`test_fragments_overlays.py`). Full suite: 128
+passed (123 prior + 5 new), 0 regressions. `BUILD_TRACKER.md` updated,
+tracker artifact regenerated (23 milestones/47 phases/118 items/9
+known gaps/3 fixed gaps) and republished. Committed locally
+(`3e2b841`); push deferred pending explicit user confirmation.
 
-44 fragments total so far. Next: Overlays (`dialog`/`snackbar`/
-`side_sheet`/`menu_item`/`tooltip` — all fixed-shape, buildable).
+50 fragments total so far. Next: Search, Progress & Status, Media &
+Graphics, Date & Time — the last 4 categories.
