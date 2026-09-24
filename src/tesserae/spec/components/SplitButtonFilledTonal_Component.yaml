@@ -1,0 +1,35 @@
+# `add_split_button(variant="filled_tonal")`'s declarative counterpart
+# -- see `SplitButtonFilled_Component.yaml` for the shared real design
+# and stated scope boundary. Colors match `resolve_button_colors`'s
+# "filled_tonal" exactly.
+params: [label, width, height, corner_radius]
+id: root
+kind: Container
+style:
+  flex_direction: Horizontal
+  gap: 2
+children:
+  - id: leading
+    kind: Rect
+    style:
+      width: "{{ width }}"
+      height: "{{ height }}"
+      background: secondary_container
+      corner_radius: "{{ corner_radius }}"
+    children:
+      - id: label
+        kind: Text
+        text: {content: "{{ label }}", role: label_large}
+        style: {background: on_secondary_container}
+  - id: trailing
+    kind: Rect
+    style:
+      width: "{{ height }}"
+      height: "{{ height }}"
+      background: secondary_container
+      corner_radius: "{{ corner_radius }}"
+    children:
+      - id: chevron
+        kind: Icon
+        icon: {name: expand_more}
+        style: {width: 22, height: 22, background: on_secondary_container}

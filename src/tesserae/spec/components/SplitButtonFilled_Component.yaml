@@ -1,0 +1,54 @@
+# `add_split_button(variant="filled")`'s declarative counterpart --
+# leading = a real `ButtonFilled`-shaped Rect+Text, trailing = a square
+# chevron Icon button, laid out horizontally with the same real
+# `SPLIT_BUTTON_GAP=2.0` `add_split_button` itself uses. Colors match
+# `resolve_button_colors`'s "filled" exactly (the same function
+# `add_button` uses -- confirmed directly, `add_split_button` calls it
+# with the identical variant string). `corner_radius` is a required
+# param, same real reason `ButtonFilled_Component.yaml` states.
+#
+# Real, deliberate scope boundary, not silently dropped: the real
+# hover/press inner-corner "tightening" shape-morph animation
+# (`PaintProperties.interactive_shape`/`corner_radii_override`) has no
+# public Python API at all -- confirmed directly in `window_factory.rs`
+# -- so this fragment is REST-STATE ONLY, matching this project's own
+# already-established scope cut for `tesserae.widgets.split_button`
+# (a thin delegate, which *does* get the animation for free by calling
+# the real Rust factory -- this declarative fragment cannot).
+#
+# The outer `Container` has no explicit `width`/`height` -- confirmed
+# live that both are genuinely optional and the container shrinks to
+# fit its two real children, avoiding any need for arithmetic
+# (`{{ }}` substitution has none) to compute `leading_width + gap +
+# height` for a total.
+params: [label, width, height, corner_radius]
+id: root
+kind: Container
+style:
+  flex_direction: Horizontal
+  gap: 2
+children:
+  - id: leading
+    kind: Rect
+    style:
+      width: "{{ width }}"
+      height: "{{ height }}"
+      background: primary
+      corner_radius: "{{ corner_radius }}"
+    children:
+      - id: label
+        kind: Text
+        text: {content: "{{ label }}", role: label_large}
+        style: {background: on_primary}
+  - id: trailing
+    kind: Rect
+    style:
+      width: "{{ height }}"
+      height: "{{ height }}"
+      background: primary
+      corner_radius: "{{ corner_radius }}"
+    children:
+      - id: chevron
+        kind: Icon
+        icon: {name: expand_more}
+        style: {width: 22, height: 22, background: on_primary}
