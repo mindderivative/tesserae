@@ -1,0 +1,22 @@
+# `add_checkbox`'s declarative counterpart -- `checked`/`background` map
+# directly onto `WidgetSpec`'s own top-level `checked`/`style.background`
+# fields (not a sibling block -- confirmed directly against `build.rs`'s
+# real `NodeKindSpec::Checkbox` arm: `CheckboxState::new(spec.checked)`).
+# No `corner_radius` param -- `add_checkbox` itself hardcodes `0.0` with
+# no theming/param at all (`window_factory.rs`), confirmed directly.
+#
+# Real, honest gap, not fixed here: `add_checkbox`'s own imperative
+# construction additionally sets `checkbox_state.mark_tint =
+# theme.on_surface()` when a theme is set -- a real, separate internal
+# field with no declarative equivalent at all (`build.rs`'s own
+# `NodeKindSpec::Checkbox` arm never touches it). A declarative
+# checkbox's checkmark always paints with `CheckboxState`'s own
+# un-themed default tint, regardless of `theme_seed`/`custom_theme`.
+params: [background, width, height, checked]
+id: root
+kind: Checkbox
+checked: "{{ checked }}"
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: "{{ background }}"

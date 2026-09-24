@@ -29,15 +29,16 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M17 — Part 3 Phase 3: Button Component Fragments (all 5 MD3 variants) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M18 — Part 3 Phase 4: `icon_button`/`fab`/`extended_fab` Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M19 — Part 3 Phase 5: `split_button` Fragments — Buttons & Actions Complete | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M20 — Part 3 Phase 6: Selection & Input Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M19 — all 5 `split_button` variants, completing the Buttons & Actions category (22 fragments total). Rest-state only (the real hover/press shape-tightening animation has no public Python API, named directly in each fragment). Real, useful finding confirmed live: a declarative `Container` with no explicit `width`/`height` genuinely auto-sizes to its children, avoiding the need for `{{ }}` arithmetic to compute a total width. Real bug caught in a test, not the engine: id-namespacing is flat (one prefix level from the call site, regardless of nesting depth) — fixed a wrong test assumption after confirming the real behavior by inspecting the expanded YAML directly.
+**Just closed:** M20 — `Checkbox`/`Slider`/`SpinBox`. `radio_button`/`switch` stay real, deliberately deferred — no declarative `NodeKindSpec` variant exists for either. `Checkbox`/`Slider` need no `corner_radius` param at all (both hardcode `0.0` imperatively); a real, honest gap named directly: neither's real `mark_tint`/`text_tint` theming has a declarative equivalent. `SpinBox` composes 3 independently-positioned imperative nodes into one real `Container`+flexbox tree (the right declarative translation, not a compromise) and found a second real token match: `corner_radius: small` == `CHIP_CORNER_RADIUS` exactly.
 
-**Previously:** M15/M16/M17/M18 — the macro-expansion engine, its wiring, and the `button`/`icon_button`/`fab`/`extended_fab` families. See their own entries below.
+**Previously:** M15-M19 — the macro-expansion engine, its wiring, and the full Buttons & Actions category (22 fragments). See their own entries below.
 
-**Up next:** Selection & Input — `checkbox`/`slider` (real declarative primitives already, no `kind: Icon` needed) and `spin_box` (a composition, now buildable). `radio_button`/`switch` stay blocked — no declarative `NodeKindSpec` variant exists for either yet (real, deliberately deferred, matching `tre`'s own M74 scope boundary).
+**Up next:** Cards/Lists/Chips/Structural Rows — `card` (3 variants), `chip` (4 variants), `list_item`, `badge` (2 structural shapes: dot/pill), `divider`, `link`, `accordion_header`, `tree_node`.
 
 **Known gaps:**
-- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (22 fragments shipped so far, all of Buttons & Actions) — real, deferred, mechanical follow-up work.
+- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (25 fragments shipped so far: Buttons & Actions + Selection & Input) — real, deferred, mechanical follow-up work.
 - `extended_fab`'s icon-less structural shape has no fragment yet (real, deliberately deferred — see M18).
 - Several real widgets are fundamentally dynamic/list-shaped (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`) and can't be expressed as a fixed-parameter `*_Component.yaml` fragment at all with this macro layer's current design (no loop/repeat construct) — a real, deliberate, structural limitation, not a per-widget oversight.
 - `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
@@ -380,3 +381,24 @@ Real, useful finding confirmed live before relying on it: a declarative `Contain
 - Step 2: full suite — 106 passed (104 prior + 2 new), 0 regressions — ✅
 
 **Buttons & Actions category complete: 22 fragments** (`button` ×5, `icon_button` ×4, `fab` ×4, `extended_fab` ×4, `split_button` ×5) — every fixed-shape widget in the category now has a real, tested declarative fragment. Only `button_group` (dynamic list) remains out of scope, a real, structural limitation.
+
+---
+
+## Milestone 20 — Part 3, Phase 6: Selection & Input Component Fragments
+
+**Status: ✅ Complete (2026-09-23).** `Checkbox`/`Slider`/`SpinBox` — the real, fixed-shape widgets in this category. `radio_button`/`switch` stay real, deliberately deferred: `engine-spec` has no declarative `NodeKindSpec` variant for either (the same real scope boundary `tre`'s own M74 named directly — `RadioButton`/`Switch` are real, valid `engine_core::NodeKind` values with zero declarative equivalent).
+
+`Checkbox`/`Slider` map `checked`/`value` directly onto `WidgetSpec`'s own top-level fields (not a sibling block — confirmed directly against `build.rs`), and neither takes a `corner_radius` param — `add_checkbox`/`add_slider` both hardcode `0.0` imperatively, with no theming or param at all. Real, honest gap named directly in `Checkbox_Component.yaml`'s own header, not fixed here: `add_checkbox`'s own imperative construction additionally sets `mark_tint = theme.on_surface()` when a theme is set — a separate internal `CheckboxState` field the declarative build path never touches at all, so a declarative checkbox's checkmark always paints with its un-themed default tint.
+
+`SpinBox`: a real, deliberate structural translation, not a compromise. `add_spin_box` itself builds 3 independent sibling nodes positioned via absolute x/y arithmetic (`field_x = base_x + SPIN_BOX_BUTTON_SIZE + SPIN_BOX_GAP`) — `{{ }}` has no arithmetic, so the fragment composes the identical visual result via a `Container` + `flex_direction: Horizontal`, the same real flexbox idiom every other fragment already uses. `add_spin_box` itself takes only `value` (no size/color params exist imperatively at all), so every other value is a literal/token — including a second real token match found: `corner_radius: small` for the field (confirmed `CHIP_CORNER_RADIUS=8.0` == `engine_md3::shape::SHAPE_SMALL` exactly, the same real key `add_spin_box` itself uses). Same real `text_tint` gap as `Checkbox` named directly: `TextFieldState.text_tint` has no declarative equivalent either.
+
+### Phase 1 — Fragments ✅
+- Step 1: `Checkbox_Component.yaml` — `params: [background, width, height, checked]`, real `mark_tint` gap named — ✅
+- Step 2: `Slider_Component.yaml` — `params: [background, width, height, value]` — ✅
+- Step 3: `SpinBox_Component.yaml` — `params: [value]` only, real `text_tint` gap named — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_fragments_selection.py` (new file) — 4 real pytest tests: `Checkbox`/`Slider` construct and read back correctly (`get_checked()`/`.get("thumb_position")`), `checked` confirmed as a real required param (not silently defaulted), `SpinBox` cross-checked against `tesserae.widgets.spin_box(...)`'s own real output — ✅
+- Step 2: full suite — 110 passed (106 prior + 4 new), 0 regressions — ✅
+
+**3 new fragments this milestone; 25 total so far.**

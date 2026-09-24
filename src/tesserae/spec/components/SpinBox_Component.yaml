@@ -1,0 +1,53 @@
+# `add_spin_box`'s declarative counterpart. Real, deliberate design
+# choice, not a compromise: `add_spin_box` itself builds 3 independent
+# sibling nodes positioned via absolute x/y arithmetic
+# (`field_x = base_x + SPIN_BOX_BUTTON_SIZE + SPIN_BOX_GAP`) -- `{{ }}`
+# substitution has no arithmetic, so this fragment composes the
+# identical real visual result (minus/field/plus, `SPIN_BOX_GAP=4.0`
+# apart) via a `Container` + `flex_direction: Horizontal` instead, the
+# same real flexbox idiom every other fragment in this catalog already
+# uses.
+#
+# `add_spin_box` itself takes only `value` -- no size/color params
+# exist on the real imperative factory at all -- so every other value
+# here is a literal/token, matching `SPIN_BOX_BUTTON_SIZE=40.0` (=
+# `SEARCH_ICON_BUTTON_SIZE`), the icon-button pill fallback
+# `SPIN_BOX_BUTTON_SIZE/2.0=20.0`, `SPIN_BOX_FIELD_WIDTH=64.0`/
+# `_HEIGHT=40.0`, and `corner_radius: small` for the field (confirmed
+# `CHIP_CORNER_RADIUS=8.0` == `engine_md3::shape::SHAPE_SMALL` exactly
+# -- the same real key `add_spin_box` itself uses, keyed `"spin_box"`).
+#
+# Real, honest gap, not fixed here: `add_spin_box`'s own imperative
+# construction additionally sets `TextFieldState.text_tint =
+# theme.on_surface()` -- confirmed directly, `build.rs`'s own
+# declarative `NodeKindSpec::TextField` arm never sets `text_tint` at
+# all (the same real limitation `Checkbox_Component.yaml`'s own
+# `mark_tint` gap already names). A declarative spin box's own field
+# text always paints with its un-themed default tint.
+params: [value]
+id: root
+kind: Container
+style:
+  flex_direction: Horizontal
+  gap: 4
+children:
+  - id: decrement
+    kind: Rect
+    style: {width: 40, height: 40, background: transparent, corner_radius: 20}
+    children:
+      - id: decrement_icon
+        kind: Icon
+        icon: {name: remove}
+        style: {width: 24, height: 24, background: on_surface_variant}
+  - id: field
+    kind: TextField
+    text: {content: "{{ value }}", font_family: Roboto, font_weight: 400, font_size: 14}
+    style: {width: 64, height: 40, background: surface_container_highest, corner_radius: small}
+  - id: increment
+    kind: Rect
+    style: {width: 40, height: 40, background: transparent, corner_radius: 20}
+    children:
+      - id: increment_icon
+        kind: Icon
+        icon: {name: add}
+        style: {width: 24, height: 24, background: on_surface_variant}
