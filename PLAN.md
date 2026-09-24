@@ -1,43 +1,41 @@
-# PLAN — M18: Part 3, Phase 4 — `icon_button`/`fab`/`extended_fab` Component Fragments
+# PLAN — M19: Part 3, Phase 5 — `split_button` Component Fragments (Buttons & Actions Complete)
 
-*(Replaces the prior M17 plan in this file — M17 is complete, committed.
-Continues item 1, now unblocked by `tre`'s new declarative `kind:
-Icon`.)*
+*(Replaces the prior M18 plan in this file — M18 is complete, committed.)*
 
 ## Goal
 
-The first 3 widget families that actually need an icon glyph:
-`icon_button` (4 variants), `fab` (4 variants), `extended_fab` (4
-variants).
+The last fixed-shape widget in Buttons & Actions: `split_button`, all
+5 real MD3 variants.
 
 ## Status
 
 **Complete, both phases.**
 
-`icon_button` reuses `resolve_button_colors` directly (confirmed:
-`"standard"` maps to `"text"`'s own colors). `fab`/`extended_fab` use
-`resolve_fab_colors`; a real, useful finding — both get fixed MD3
-elevation/shape tokens baked directly into the fragment (`elevation:
-level_3`, and `corner_radius: large` for Extended FAB specifically),
-confirmed equal to the real unthemed constants (`ELEVATION_LEVEL_3 ==
-3.0`, `SHAPE_LARGE == 16.0 == EXTENDED_FAB_CORNER_RADIUS`) — no param
-needed for those two, unlike plain FAB's own size-dependent
-`corner_radius`.
+`SplitButtonElevated`/`Filled`/`FilledTonal`/`Outlined`/`Text` — an
+auto-sized `Container` (`flex_direction: Horizontal`, `gap: 2`)
+wrapping a `ButtonFilled`-shaped leading Rect+Text and a square
+trailing Rect+chevron Icon, both sharing the identical real `resolve_
+button_colors` output per variant. Rest-state only, matching `tesserae.
+widgets.split_button`'s own already-stated scope cut (the hover/press
+shape-tightening animation has no public Python API).
 
-Real, deliberate scope boundary: only `extended_fab`'s leading-icon
-shape shipped — the icon-less shape is a genuine structural difference
-(different padding, no `Icon` child) `{{ }}` can't conditionally
-express, deferred as a named gap.
+Real, useful finding confirmed live: a declarative `Container` with no
+explicit `width`/`height` genuinely auto-sizes to its children —
+avoids needing `{{ }}` arithmetic for a total width.
 
-`tests/test_fragments_buttons.py` (new file) — 3 real pytest tests,
-each looping over its family's 4 variants and cross-checking against
-`tesserae.widgets`'s own imperative output (12 real variant checks) —
-all MATCH. Full suite: 104 passed (101 prior + 3 new), 0 regressions.
-`BUILD_TRACKER.md` updated, tracker artifact regenerated (18
-milestones/37 phases/89 items/9 known gaps/3 fixed gaps) and
-republished. Committed locally (`8c6500e`); push deferred pending
-explicit user confirmation.
+2 new pytest tests (`test_fragments_split_button.py`). Real bug caught
+in the test itself, not the engine, while writing it: id-namespacing
+is flat (one prefix level from the call site, regardless of nesting
+depth) — confirmed by direct inspection of the expanded YAML before
+fixing the test's wrong assumption. Full suite: 106 passed (104 prior
++ 2 new), 0 regressions. `BUILD_TRACKER.md` updated, tracker artifact
+regenerated (19 milestones/39 phases/92 items/9 known gaps/3 fixed
+gaps) and republished. Committed locally (`b9542b5`); push deferred
+pending explicit user confirmation.
 
-17 fragments total so far. Next: `split_button` (a fixed 2-button+
-chevron shape, not a dynamic list), then onward through the remaining
-categories.
+**Buttons & Actions category complete: 22 fragments.** `button_group`
+(dynamic list) stays real, deliberately out of scope.
+
+Next: Selection & Input — `checkbox`/`slider` (real declarative
+primitives already) and `spin_box` (buildable now). `radio_button`/
+`switch` stay blocked — no declarative `NodeKindSpec` variant exists.
