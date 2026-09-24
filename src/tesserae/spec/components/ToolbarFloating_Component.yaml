@@ -1,0 +1,28 @@
+# `add_toolbar(variant="floating", orientation="horizontal")`'s
+# declarative counterpart -- see `ToolbarDocked_Component.yaml` for the
+# shared real design. `elevation: level_3` is a real, fixed MD3 token
+# (confirmed `FAB_REST_ELEVATION_LEVEL == ELEVATION_LEVEL_3`, the same
+# real value `Fab*_Component.yaml`'s own fragments already use).
+# `corner_radius` is a required param -- a floating toolbar's own real
+# unthemed fallback is `height / 2.0` (a pill shape), the same real
+# arithmetic gap `ButtonFilled_Component.yaml`'s own `corner_radius`
+# param already documents.
+#
+# Real, deliberate scope boundary: only the horizontal orientation
+# ships -- a real, separate `ToolbarFloatingVertical` fragment (swapped
+# `flex_direction`/gap axis) is deferred, not silently dropped.
+params: [background, width, corner_radius]
+id: root
+kind: Container
+style:
+  flex_direction: Horizontal
+  width: "{{ width }}"
+  height: 64
+  background: "{{ background }}"
+  corner_radius: "{{ corner_radius }}"
+  elevation: level_3
+  align_items: Center
+  justify_content: Center
+  padding: 16
+  gap: 32
+children: []

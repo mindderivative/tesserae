@@ -1,0 +1,33 @@
+# `add_toolbar(variant="docked")`'s declarative counterpart -- a
+# content-free, horizontal flexbox bar (an app populates it via nested
+# `component:` usage/`Node.add_child`, matching `Card_Component.yaml`'s
+# own real "content-free" precedent). `corner_radius`/`elevation` are
+# both fixed `0` -- a docked toolbar has no pill shape or elevation in
+# real MD3 anatomy, confirmed directly (`default_corner_radius`/
+# `default_elevation` are both `0.0` when `!is_floating`).
+#
+# Real, deliberate scope boundary: only the horizontal orientation
+# ships -- `add_toolbar` itself rejects a vertical docked toolbar
+# outright ("a docked toolbar is always horizontal... MD3's own real
+# anatomy has no vertical docked variant"), so this isn't a real gap,
+# just this fragment matching that same real constraint.
+#
+# `background` takes a real MD3 color-role name directly (`surface_
+# container` for "standard" tone, `primary_container` for "vibrant" --
+# `tre`'s own `add_toolbar(color=...)` naming, which `tesserae.widgets.
+# toolbar` already translates to `tone=` for the same real reason) --
+# a caller picks the tone by which role name they pass, avoiding two
+# separate tone fragments for what's really just one field's value.
+params: [background, width]
+id: root
+kind: Container
+style:
+  flex_direction: Horizontal
+  width: "{{ width }}"
+  height: 64
+  background: "{{ background }}"
+  align_items: Center
+  justify_content: Center
+  padding: 16
+  gap: 32
+children: []

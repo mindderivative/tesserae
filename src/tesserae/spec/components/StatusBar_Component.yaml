@@ -1,0 +1,21 @@
+# `add_status_bar(text=..., width=...)`'s declarative counterpart.
+# Colors are fixed, not variant-driven, confirmed directly against
+# `add_status_bar`'s own real construction: container=surface_
+# container, text=on_surface_variant (not `on_surface` -- verified by
+# direct read, not assumed), typography role=label_small (not
+# `body_medium`). `height: 24`/`padding: 8` match `STATUS_BAR_HEIGHT`/
+# `STATUS_BAR_PADDING` exactly.
+params: [text, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 24
+  background: surface_container
+  align_items: Center
+  padding: {left: 8, right: 8, top: 0, bottom: 0}
+children:
+  - id: text
+    kind: Text
+    text: {content: "{{ text }}", role: label_small}
+    style: {background: on_surface_variant}

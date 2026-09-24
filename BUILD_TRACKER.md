@@ -31,15 +31,16 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M19 — Part 3 Phase 5: `split_button` Fragments — Buttons & Actions Complete | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M20 — Part 3 Phase 6: Selection & Input Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M21 — Part 3 Phase 7: Cards/Lists/Chips/Structural Rows Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M22 — Part 3 Phase 8: Navigation & Shell Component Fragments (Fixed-Shape Members) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M21 — 15 new fragments: `Card` (3 variants), `Chip` (5 real named variants — `input`/`suggestion` are real distinct MD3 names even though they share unselected `filter`'s own colors), `ListItem`, `Badge` (2 structural shapes: dot/pill), `Divider`, `AccordionHeader`, `TreeNode` (2 structural shapes: leaf/branch). `link` stays out of scope — `NodeKind::Link` has no declarative equivalent, confirmed directly, the same real gap already named for `radio_button`/`switch`. Two more real token matches found (`corner_radius: medium` for `Card`, `small` for `Chip`/`BadgeLabeled`). `TreeNode`'s real `depth * TREE_NODE_INDENT_WIDTH` arithmetic handled by requiring the already-computed `left_padding` as a param instead, matching `Button`'s own established `corner_radius` precedent.
+**Just closed:** M22 — `ToolbarDocked`/`ToolbarFloating`, `TopAppBar`, `StatusBar` — every fixed-shape widget in Navigation & Shell (`tabs`/`navigation_rail`/`navigation_drawer` stay out of scope as dynamic lists). Real correction caught before it shipped wrong: an initial `StatusBar` draft guessed its real color role/typography without checking the source first — caught and fixed to the real values (`on_surface_variant`/`label_small`) before any test ran. `Toolbar`'s real 3-axis design (variant/orientation/tone) handled by making `tone` a plain `background` role-name param and shipping horizontal-only (a docked toolbar has no vertical variant in real MD3 at all, so that half isn't even a real gap).
 
-**Previously:** M15-M20 — the macro-expansion engine, its wiring, Buttons & Actions (22 fragments), and Selection & Input (3 fragments). See their own entries below.
+**Previously:** M15-M21 — the macro-expansion engine, its wiring, Buttons & Actions (22), Selection & Input (3), and Cards/Lists/Chips/Structural Rows (15). See their own entries below.
 
-**Up next:** Navigation & Shell (mostly blocked as dynamic-list — `tabs`/`navigation_rail`/`navigation_drawer` all take a variable-length list of entries), Overlays (`dialog`/`snackbar`/`side_sheet`/`menu_item`/`tooltip` — all fixed-shape, buildable), Search, Progress & Status, Media & Graphics, Date & Time.
+**Up next:** Overlays (`dialog`/`snackbar`/`side_sheet`/`menu_item`/`tooltip` — all fixed-shape, buildable), Search, Progress & Status, Media & Graphics, Date & Time.
 
 **Known gaps:**
-- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (40 fragments shipped so far) — real, deferred, mechanical follow-up work.
+- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (44 fragments shipped so far) — real, deferred, mechanical follow-up work.
 - `extended_fab`'s icon-less structural shape has no fragment yet (real, deliberately deferred — see M18).
 - Several real widgets are fundamentally dynamic/list-shaped (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`) and can't be expressed as a fixed-parameter `*_Component.yaml` fragment at all with this macro layer's current design (no loop/repeat construct) — a real, deliberate, structural limitation, not a per-widget oversight.
 - `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
@@ -430,3 +431,24 @@ Real, deliberate scope boundaries, all named directly rather than silently dropp
 - Step 2: full suite — 119 passed (110 prior + 9 new), 0 regressions — ✅
 
 **15 new fragments this milestone; 40 total so far.**
+
+---
+
+## Milestone 22 — Part 3, Phase 8: Navigation & Shell Component Fragments (Fixed-Shape Members)
+
+**Status: ✅ Complete (2026-09-23).** `ToolbarDocked`/`ToolbarFloating`, `TopAppBar`, `StatusBar` — the real, fixed-shape widgets in this category, all content-free (an app populates them via nested `component:`/`Node.add_child`). `tabs`/`navigation_rail`/`navigation_drawer` stay real, deliberately out of scope — each takes a genuinely variable-length list of entries, the same real structural limit already named for `button_group`/`list_`/`menu`.
+
+Real correction caught before it shipped wrong: an initial `StatusBar_Component.yaml` draft guessed `text=on_surface`/typography `body_medium` without checking the real source first — caught by reading `add_status_bar`'s own body directly before relying on the guess, and fixed to the real values (`on_surface_variant`, `label_small`) before any test ran against it.
+
+`Toolbar`'s own real design carries 3 independent axes (variant, orientation, tone) — real, deliberate scope narrowing: `tone` becomes a plain `background` param (a real MD3 role name the caller passes directly, since it's just one field's value, not a multi-field variant like `button`'s own); only the horizontal orientation ships (a docked toolbar has no vertical variant in real MD3 anatomy at all — `add_toolbar` itself rejects the combination — so this isn't a real gap for `ToolbarDocked`; `ToolbarFloatingVertical` is a real, separate, deferred fragment for `ToolbarFloating` specifically). `elevation: level_3` reused from the FAB fragments' own real token match. `TopAppBar` reuses the `flex_grow: 1` title-fills-remaining-space pattern `AccordionHeader_Component.yaml` already established, avoiding `add_top_app_bar`'s own width-subtraction arithmetic entirely.
+
+### Phase 1 — Fragments ✅
+- Step 1: `ToolbarDocked`/`ToolbarFloating` — content-free, horizontal-only, `background` as a real MD3 role-name param — ✅
+- Step 2: `TopAppBar` — the common no-leading/no-trailing-icons case, `flex_grow: 1` on the title — ✅
+- Step 3: `StatusBar` — real correction applied before shipping (see above) — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_fragments_navigation.py` (new file) — 4 real pytest tests, all cross-checked against `tesserae.widgets`'s own imperative output (`corner_radius`/`elevation`) — ✅
+- Step 2: full suite — 123 passed (119 prior + 4 new), 0 regressions — ✅
+
+**4 new fragments this milestone; 44 total so far.**

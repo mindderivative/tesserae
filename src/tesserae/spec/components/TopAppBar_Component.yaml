@@ -1,0 +1,32 @@
+# `add_top_app_bar(title=..., width=...)`'s declarative counterpart --
+# the common, no-leading-icon/no-trailing-icons case (real, deliberate
+# scope boundary: `trailing_icons` is a genuinely variable-length list
+# imperatively -- the same real structural limit already named for
+# `tabs`/`navigation_rail`/etc. -- and `leading_icon` is independently
+# optional too, changing real structure; deferred, not silently
+# dropped). Colors are fixed, not variant-driven: container=surface,
+# title=on_surface (real MD3 top app bar anatomy has no color variant
+# at all, confirmed directly). `corner_radius: 0` is fixed too -- "the
+# bar itself stays un-themed -- always square in real MD3 anatomy," a
+# deliberate design choice `window_factory.rs`'s own comment states
+# directly.
+#
+# Real, useful finding, same pattern `AccordionHeader_Component.yaml`
+# already used: `flex_grow: 1` on the title avoids needing an explicit
+# computed width. `margin: {left: 16}` on the title matches `TOP_APP_
+# BAR_HEADLINE_START_PADDING` exactly (applied only when there's no
+# leading icon, which this fragment's own scope never has).
+params: [title, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 64
+  background: surface
+  align_items: Center
+  padding: {left: 4, right: 4, top: 0, bottom: 0}
+children:
+  - id: title
+    kind: Text
+    text: {content: "{{ title }}", role: title_large}
+    style: {background: on_surface, flex_grow: 1, margin: {left: 16, right: 0, top: 0, bottom: 0}}
