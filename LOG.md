@@ -1,34 +1,44 @@
-# LOG — M20: Part 3, Phase 6 — Selection & Input Component Fragments
+# LOG — M21: Part 3, Phase 7 — Cards, Lists, Chips & Structural Rows Component Fragments
 
-- Selection & Input category: `Checkbox`/`Slider`/`SpinBox`. `radio_
-  button`/`switch` stay out of scope — no declarative `NodeKindSpec`
-  variant exists for either.
+- `Card` (3 variants), `Chip` (multiple variants), `ListItem`, `Badge`
+  (2 structural shapes), `Divider`, `AccordionHeader`, `TreeNode` (2
+  structural shapes). `link` stays out of scope.
 
 ## What shipped
 
-1. `Checkbox_Component.yaml`/`Slider_Component.yaml` — `checked`/
-   `value` map directly onto `WidgetSpec`'s own top-level fields (not
-   a sibling block, confirmed against `build.rs`), no `corner_radius`
-   param (both `add_checkbox`/`add_slider` hardcode `0.0`
-   imperatively). Real, honest gap named directly, not fixed here:
-   `mark_tint`/`text_tint` theming has no declarative equivalent at
-   all.
-2. `SpinBox_Component.yaml` — a real, deliberate structural
-   translation: `add_spin_box` builds 3 independent sibling nodes via
-   absolute x/y arithmetic; the fragment composes the identical result
-   via a `Container` + `flex_direction: Horizontal`. Second real token
-   match found: `corner_radius: small == CHIP_CORNER_RADIUS ==
-   SHAPE_SMALL` exactly.
-3. `tests/test_fragments_selection.py` (new file) — 4 real pytest
-   tests.
-- Verification: `pytest tests/` 110 passed (106 prior + 4 new), 0
+1. `CardElevated`/`CardFilled`/`CardOutlined` — content-free Rects,
+   `corner_radius: medium` (a real, confirmed token match).
+2. `ChipAssist`/`ChipFilter`/`ChipFilterSelected`/`ChipInput`/
+   `ChipSuggestion` — real finding: 5 named states, not 4 (`input`/
+   `suggestion` share unselected `filter`'s own colors but are real,
+   distinct MD3 names kept as their own fragments); `ChipFilterSelected`
+   is a real, distinct structural shape (automatic checkmark Icon, not
+   a color swap).
+3. `ListItem` — the common single-line, no-icon case.
+4. `BadgeDot`/`BadgeLabeled` — the two real structural shapes, fixed
+   `error`/`on_error` colors.
+5. `Divider` — takes `width`/`height` directly, avoiding 2 fragments
+   for what isn't a real MD3 variant.
+6. `AccordionHeader` — real, useful finding: `flex_grow: 1` on the
+   headline avoids `add_accordion_header`'s own width-subtraction
+   arithmetic entirely.
+7. `TreeNodeLeaf`/`TreeNodeBranch` — the two real structural shapes.
+   Real `depth * TREE_NODE_INDENT_WIDTH` arithmetic handled by
+   requiring the already-computed `left_padding` as a param.
+8. `link` confirmed blocked — `NodeKind::Link` has no declarative
+   equivalent, the same real gap already named for `radio_button`/
+   `switch`.
+9. `tests/test_fragments_structural.py` (new file) — 9 real pytest
+   tests, including a direct proof `TreeNodeLeaf` has no `chevron`
+   node at all.
+- Verification: `pytest tests/` 119 passed (110 prior + 9 new), 0
   regressions.
 
 ## Status
 
-**M20 is complete. 25 fragments total so far.** Committed locally
-(`1aa1549`); push deferred pending explicit user confirmation.
+**M21 is complete. 40 fragments total so far.** Committed locally
+(`353b071`); push deferred pending explicit user confirmation.
 
-Next: Cards/Lists/Chips/Structural Rows — `card` (3 variants), `chip`
-(4 variants), `list_item`, `badge` (2 structural shapes), `divider`,
-`link`, `accordion_header`, `tree_node`.
+Next: Navigation & Shell (mostly blocked as dynamic-list), Overlays
+(fixed-shape, buildable), Search, Progress & Status, Media & Graphics,
+Date & Time.
