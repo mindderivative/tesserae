@@ -1,15 +1,14 @@
 """Real coverage for the Selection & Input component fragments
-(`Checkbox`/`Slider`/`SpinBox`). `radio_button`/`switch` have no
-fragment yet -- `engine-spec` has no declarative `NodeKindSpec` variant
-for either (a real, deliberately deferred gap, matching `tre`'s own
-M74 scope boundary -- see `BUILD_TRACKER.md`).
+(`Checkbox`/`Slider`/`SpinBox`/`RadioButton`/`Switch`). The latter two
+were blocked until `tre`'s own M84 added declarative `NodeKindSpec`
+support for both (this repo's own M27) -- see `BUILD_TRACKER.md`.
 """
 
 import pytest
 from tre import View, Window
 
 from tesserae.spec import ComponentError, expand_components
-from tesserae.widgets import spin_box
+from tesserae.widgets import radio_button, spin_box, switch
 
 THEME_SEED = (0x67, 0x50, 0xA4, 0xFF)
 
@@ -85,3 +84,86 @@ children:
     assert decrement.get("corner_radius") == imp_minus.get("corner_radius")
     assert field.get("corner_radius") == imp_field.get("corner_radius")
     assert increment.get("corner_radius") == imp_plus.get("corner_radius")
+
+
+def test_radio_button_matches_the_imperative_catalog():
+    # Real, honest scope note: `Node.get()` only exposes a small
+    # numeric whitelist (`engine-py::node.rs`, confirmed directly) --
+    # no color/tint field is readable from Python at all, for either
+    # the declarative or imperative path, so this compares real
+    # observable state (`get_selected()`) rather than tint colors,
+    # which `engine-spec`'s own Rust unit tests already cover directly.
+    yaml_text = """
+id: root
+kind: Container
+style: {width: 200, height: 100}
+children:
+  - id: opt
+    component: RadioButton
+    with: {size: 20, selected: true}
+"""
+    expanded = expand_components(yaml_text)
+    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    declarative = view.node("opt")
+
+    window = Window(width=200, height=100)
+    window.set_theme(THEME_SEED)
+    imperative = radio_button(window, size=20, selected=True)
+
+    assert declarative.get_selected() == imperative.get_selected() is True
+
+
+def test_radio_button_selected_is_a_required_param_not_silently_defaulted():
+    yaml_text = """
+id: root
+kind: Container
+children:
+  - id: opt
+    component: RadioButton
+    with: {size: 20}
+"""
+    with pytest.raises(ComponentError, match=r"missing parameter"):
+        expand_components(yaml_text)
+
+
+def test_switch_matches_the_imperative_catalog():
+    # `is_on:`, not the bare `on:` YAML would parse as a boolean literal
+    # itself (PyYAML's default YAML 1.1 loader) -- see `Switch_
+    # Component.yaml`'s own doc comment for the real bug this avoids.
+    yaml_text = """
+id: root
+kind: Container
+style: {width: 200, height: 100}
+children:
+  - id: toggle
+    component: Switch
+    with: {width: 52, height: 32, is_on: false}
+"""
+    expanded = expand_components(yaml_text)
+    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    declarative = view.node("toggle")
+
+    window = Window(width=200, height=100)
+    window.set_theme(THEME_SEED)
+    imperative = switch(window, width=52, height=32, on=False)
+
+    assert declarative.get_on() == imperative.get_on() is False
+
+
+def test_switch_with_no_theme_still_builds_falling_back_to_the_real_md3_baseline():
+    # `tre`'s own engine-spec unit tests already prove the real
+    # fallback color; this proves the declarative path builds cleanly
+    # with no theme at all, matching `add_switch`'s own identical
+    # no-theme contract.
+    yaml_text = """
+id: root
+kind: Container
+children:
+  - id: toggle
+    component: Switch
+    with: {width: 52, height: 32, is_on: true}
+"""
+    expanded = expand_components(yaml_text)
+    view = View("T.yaml", source=expanded)
+    node = view.node("toggle")
+    assert node.get_on() is True

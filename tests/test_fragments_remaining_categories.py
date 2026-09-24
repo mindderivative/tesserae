@@ -2,11 +2,11 @@
 `SearchBar`/`SearchView` (Search), `Image` (Media & Graphics -- the
 only buildable one; `video`/`node_graph`/`graph_node` all confirmed
 blocked, no declarative kind), `DatePickerDay` (4 real states)/
-`PeriodSelectorAM`/`PeriodSelectorPM` (Date & Time). Progress & Status
-has zero fragments -- `CircularProgress`/`LinearProgress`/
-`LoadingIndicator` all confirmed blocked, no declarative `NodeKindSpec`
-equivalent for any of the 3 (verified directly, matching `tre`'s own
-M74 scope note).
+`PeriodSelectorAM`/`PeriodSelectorPM`/`TimePickerDial` (Date & Time --
+the latter was blocked until `tre`'s own M84 added declarative
+`NodeKindSpec` support, this repo's own M27; see `test_fragments_
+progress.py` for the sibling `CircularProgress`/`LinearProgress`/
+`LoadingIndicator` fragments the same milestone unblocked).
 """
 
 from pathlib import Path
@@ -14,8 +14,8 @@ from pathlib import Path
 import pytest
 from tre import View, Window
 
-from tesserae.spec import expand_components
-from tesserae.widgets import date_picker_day, period_selector, search_bar, search_view
+from tesserae.spec import ComponentError, expand_components
+from tesserae.widgets import date_picker_day, period_selector, search_bar, search_view, time_picker_dial
 
 FIXTURES_VIEW_PATH = str(Path(__file__).parent / "View.yaml")
 
@@ -159,3 +159,35 @@ children:
 
         assert am.get("corner_radius") == imperative_am.get("corner_radius"), component_name
         assert pm.get("corner_radius") == imperative_pm.get("corner_radius"), component_name
+
+
+def test_time_picker_dial_matches_the_imperative_catalog():
+    yaml_text = """
+id: root
+kind: Container
+style: {width: 300, height: 300}
+children:
+  - id: dial
+    component: TimePickerDial
+    with: {size: 256, hour: 13, minute: 45}
+"""
+    expanded = expand_components(yaml_text)
+    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    declarative = view.node("dial")
+
+    imperative = time_picker_dial(_themed_window(300, 300), hour=13, minute=45, size=256)
+
+    assert declarative.get_time_picker_dial_time() == imperative.get_time_picker_dial_time() == (13, 45)
+
+
+def test_time_picker_dial_hour_and_minute_are_required_params():
+    yaml_text = """
+id: root
+kind: Container
+children:
+  - id: dial
+    component: TimePickerDial
+    with: {size: 256, hour: 0}
+"""
+    with pytest.raises(ComponentError, match=r"missing parameter"):
+        expand_components(yaml_text)

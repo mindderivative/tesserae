@@ -1,17 +1,16 @@
 """Real coverage for the Cards, Lists, Chips & Structural Rows
 component fragments: `Card` (3 variants), `Chip` (5 variants),
 `ListItem`, `Badge` (2 structural shapes), `Divider`,
-`AccordionHeader`, `TreeNode` (2 structural shapes). `link` has no
-fragment -- `NodeKind::Link` has no declarative `NodeKindSpec`
-equivalent (confirmed directly, matching `tre`'s own M74 scope
-boundary), the same real gap already named for `radio_button`/`switch`.
+`AccordionHeader`, `TreeNode` (2 structural shapes), `Link` (was
+blocked until `tre`'s own M84 added declarative `NodeKindSpec` support
+for it, this repo's own M27 -- see `BUILD_TRACKER.md`).
 """
 
 import pytest
 from tre import View, Window
 
-from tesserae.spec import expand_components
-from tesserae.widgets import accordion_header, badge, card, chip, divider, list_item, tree_node
+from tesserae.spec import ComponentError, expand_components
+from tesserae.widgets import accordion_header, badge, card, chip, divider, link, list_item, tree_node
 
 THEME_SEED = (0x67, 0x50, 0xA4, 0xFF)
 
@@ -190,3 +189,37 @@ children:
     view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
     assert view.node("branch") is not None
     assert view.node("branch.chevron") is not None
+
+
+def test_link_matches_the_imperative_catalog():
+    yaml_text = """
+id: root
+kind: Container
+style: {width: 200, height: 100}
+children:
+  - id: docs
+    component: Link
+    with: {text: "Docs", width: 60, height: 20}
+"""
+    expanded = expand_components(yaml_text)
+    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    declarative = view.node("docs")
+
+    window = Window(width=200, height=100)
+    window.set_theme(THEME_SEED)
+    imperative = link(window, "Docs", width=60)
+
+    assert declarative.get_text() == imperative.get_text() == "Docs"
+
+
+def test_link_text_is_a_required_param_not_silently_defaulted():
+    yaml_text = """
+id: root
+kind: Container
+children:
+  - id: docs
+    component: Link
+    with: {width: 60, height: 20}
+"""
+    with pytest.raises(ComponentError, match=r"missing parameter"):
+        expand_components(yaml_text)

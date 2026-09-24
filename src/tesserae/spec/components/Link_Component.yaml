@@ -1,0 +1,28 @@
+# `add_link`'s declarative counterpart -- `text`/`width`/`height` map
+# onto `WidgetSpec`'s own `text.content`/`style.width`/`style.height`.
+# Hardcodes `text.role: body_large` and `style.background: primary`,
+# matching `add_link`'s own real, exact typography/color contract with
+# zero override params (`window_factory.rs`'s own `add_link` body
+# confirmed directly) -- a faithful port, not a reinterpretation, the
+# same real goal every fragment in this catalog shares. `tre`'s own
+# declarative `kind: Link` (M84) can actually accept a `text.role`/
+# `style.background` override for a custom, hand-written fragment that
+# genuinely needs one (a real, deliberate widening over `add_link`'s own
+# imperative contract, documented in `tre`'s own `build.rs`) -- this
+# provided fragment just doesn't expose that as a param, staying a
+# faithful match to the native widget.
+#
+# `height` has no imperative equivalent to match against -- `add_link`
+# computes it internally from the theme's own resolved font size
+# (`font_size + 4.0`); a static fragment has no such auto-sizing
+# mechanism, so it's a real, required param here instead.
+params: [text, width, height]
+id: root
+kind: Link
+text:
+  content: "{{ text }}"
+  role: body_large
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: primary

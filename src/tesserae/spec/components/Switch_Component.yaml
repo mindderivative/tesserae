@@ -1,0 +1,20 @@
+# `add_switch`'s declarative counterpart -- `is_on` maps onto
+# `WidgetSpec`'s own top-level `checked` field (`tre`'s `build.rs`, M84:
+# `SwitchState::new(spec.checked)`). Named `is_on`, not the bare `on` a
+# first draft used -- real, caught bug: PyYAML's default loader treats
+# an unquoted `on`/`off` as a YAML 1.1 boolean literal (confirmed
+# directly: `yaml.safe_load('on: false')` -> `{True: False}`), silently
+# coercing both a `params:` entry and a `with:` key named `on` into
+# `True` instead of the string `"on"` -- `_substitute`'s own string-key
+# lookup then never matches, leaving the literal placeholder text
+# `"{{ on }}"` in the expanded output for `tre` to reject. No
+# `background` param -- all 5 internal tint fields are real-theme-
+# resolved at declarative build time, the identical "no color param"
+# contract `add_switch` itself already has.
+params: [width, height, is_on]
+id: root
+kind: Switch
+checked: "{{ is_on }}"
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
