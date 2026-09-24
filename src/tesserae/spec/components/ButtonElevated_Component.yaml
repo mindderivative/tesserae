@@ -1,0 +1,24 @@
+# `add_button(variant="elevated")`'s declarative counterpart -- see
+# `ButtonFilled_Component.yaml` for the full real design/limitations
+# this whole variant family shares. Colors match `resolve_button_colors`
+# exactly: container=surface_container_low, label=primary, elevation=
+# level_1 (MD3's real named token, confirmed to equal the same 1.0
+# `add_button`'s own unthemed fallback uses -- `engine_md3::shape::
+# ELEVATION_LEVEL_1`).
+params: [label, width, height, corner_radius]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: surface_container_low
+  corner_radius: "{{ corner_radius }}"
+  elevation: level_1
+children:
+  - id: label
+    kind: Text
+    text:
+      content: "{{ label }}"
+      role: label_large
+    style:
+      background: primary

@@ -1,0 +1,20 @@
+# `add_button(variant="text")`'s declarative counterpart -- see
+# `ButtonFilled_Component.yaml` for the full real design/limitations.
+# Colors match `resolve_button_colors` exactly: container=transparent,
+# label=primary, no border/elevation.
+params: [label, width, height, corner_radius]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: transparent
+  corner_radius: "{{ corner_radius }}"
+children:
+  - id: label
+    kind: Text
+    text:
+      content: "{{ label }}"
+      role: label_large
+    style:
+      background: primary

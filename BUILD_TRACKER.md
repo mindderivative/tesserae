@@ -26,18 +26,20 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M14 — Widget Catalog, Media/Graphics & Date/Time (thin delegates + `icon`'s naming translation) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M15 — Part 3 Phase 1: Component Macro-Expansion Engine | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M16 — Part 3 Phase 2: Wire `App.load()`/`instantiate()` to Macro-Expansion | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M17 — Part 3 Phase 3: Button Component Fragments (all 5 MD3 variants) | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M16 — `App.load()` and `tesserae.instantiate()` both now apply `component:` macro-expansion by default (built on `tre`'s own new M73, `instantiate(..., source=...)`, which closed the one real blocker M15 had named). A real, honest limitation surfaced by this milestone's own tests, not fixed here: `App` has no theme API at all, so an MD3-token-using `component:` fragment can't actually render through `App.load()` without one yet.
+**Just closed:** M17 — all 5 real `button` MD3 variants shipped as separate fragments (`ButtonElevated`/`ButtonFilled`/`ButtonFilledTonal`/`ButtonOutlined`/`ButtonText`), per the user's own confirmed "one fragment per variant" decision. A major blocking finding surfaced immediately after: `engine-spec` supported only 7 of `tre`'s real 21 primitive kinds declaratively — no `kind: Icon` at all — blocking ~2/3 of the remaining catalog. Resolved by adding declarative `kind: Icon` to `tre` itself first (`tre`'s own new M74), not by narrowing scope. All 5 variants cross-checked against `tesserae.widgets.button(...)`'s own real output — exact matches.
 
-**Previously:** M15 — the real start of Part 3: `component: Name` / `with: {...}` in a `*_View.yaml` now expands to a real `*_Component.yaml` fragment's own `WidgetSpec` subtree before `tre` ever parses the file, modeled on pyCopper's real `source:`/`with:`/`params:` precedent (`pyCopper/src/pycopper/spec/include.py`, read directly). Real findings that reshaped the design: `tre` already has a working, unparameterized `include:` splice (`engine-spec/src/include.rs`) that this pass deliberately leaves untouched; `tre`'s declarative layer resolves MD3 color roles/shape tokens for real (verified with a live `theme_seed` call) so fragments need no Python-side color math; the declarative cascade never consults a theme's per-component `components:` override (only the imperative catalog does) — a real, named gap, not silently promised as covered. A real, load-bearing bug found while testing (not assumed): PyYAML's `safe_dump` quotes numeric-looking strings, which would have broken every numeric param — fixed by preserving a param's real type on a whole-value placeholder match. One real fragment shipped (`Button_Component.yaml`, "filled" variant, faithful to `resolve_button_colors`), proven identical to `tesserae.widgets.button(...)`'s own `corner_radius` via a real cross-check test.
+**Previously:** M15/M16 — the macro-expansion engine and its wiring into `App.load()`/`tesserae.instantiate()`. See their own entries below.
 
-**Up next:** the other 37 component fragments (a separate, mostly-mechanical milestone). Real, additive follow-up decision to make: give `App`/`App.load()` its own theme API (`theme_seed`/`custom_theme`/`dark`) — currently `App` has none at all, a real, pre-existing gap that surfaced directly while testing this milestone's own `component: Button` wiring (an MD3-token-using fragment can't actually render through `App.load()` today without one).
+**Up next:** the remaining widget-family fragments, applying the same per-variant convention, now unblocked by `kind: Icon` — `icon_button` (4 variants), `fab`/`extended_fab` (4 variants each), and onward through the rest of the catalog.
 
 **Known gaps:**
-- 37 of 38 widget categories have no declarative `*_Component.yaml` fragment yet (only `Button`) — real, deferred, mechanical follow-up work.
-- `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, not introduced by this milestone, but newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
+- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (only the 5 button variants) — real, deferred, mechanical follow-up work, now unblocked by `tre`'s new declarative `kind: Icon`.
+- `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
 - The declarative cascade doesn't consult a theme's per-component `components:` override (imperative-only) — an app wanting that level of per-component customization uses `tesserae.widgets` instead of a declarative fragment.
 - No dedicated `tesserae.widgets.text` wrapper for the raw `add_text` primitive — every widget needing text uses its own clear param instead; revisit only if a real caller needs the bare primitive.
+- Some real MD3 primitives (`radio_button`/`switch`/progress indicators/`link`/etc.) still have no declarative `NodeKindSpec` equivalent in `tre` at all — real, deliberately deferred at `tre`'s own M74, add only if a real fragment needs one.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
 
@@ -308,3 +310,29 @@ Real, honest limitation surfaced while testing, not fixed here: `App`/`App.load(
 - Step 4: all 3 real examples (`counter`/`multi_screen`/`todo_list`) re-run end to end -- genuinely warranted this time (unlike the additive widget-catalog milestones), since this change touches the core construction path every example goes through, not an independent new module; all exited cleanly with correct real output (`Count: 3` after 3 clicks, final screen `Settings`, final todo items list) — ✅
 
 **Real, honest limitation, named directly (not fixed here):** `App`/`App.load()` still has no theme API of its own -- a `component:` fragment using an MD3 color role can't render through `App.load()` without one. A real, additive follow-up candidate once a real app needs it.
+
+---
+
+## Milestone 17 — Part 3, Phase 3: Button Component Fragments (All 5 MD3 Variants)
+
+**Status: ✅ Complete (2026-09-23).** User-directed ordering complete ("Start 3, then move to 2 and then 1" — items 3 and 2 both landed; this is item 1). Real scoping question resolved via `AskUserQuestion` before writing anything: since `{{ }}` substitution has no conditional branching, a widget with multiple real MD3 variants (button has 5: elevated/filled/filled_tonal/outlined/text) needs one fragment per variant, not one fragment with a `variant` param — user confirmed full fidelity, one fragment per variant, for all widgets going forward.
+
+**Real, major blocking finding surfaced immediately after that decision, before continuing:** `engine-spec`'s `NodeKindSpec` supports only 7 of `engine-core`'s real 21 primitive kinds — no `kind: Icon` existed at all, confirmed directly (`unknown variant "Icon"`). This blocked roughly two-thirds of the remaining widget catalog (anything with an icon glyph: `icon_button`/`fab`/`chip`/`list_item`/`menu_item`/etc.) from being expressible as a fragment. Resolved via a second `AskUserQuestion`: added declarative `kind: Icon` to `tre` itself first (`tre`'s own new M74, committed on its `0.3.1` branch) rather than scoping fragment work down — see `tre`'s own `BUILD_TRACKER.md` for that work. Reinstalled into `tesserae/.venv` before resuming here.
+
+This milestone itself ships the one widget that needed neither: all 5 real `button` variants, faithful to `resolve_button_colors` (`window_factory.rs`) exactly.
+
+### Phase 1 — Rename for the Per-Variant Convention ✅
+- Step 1: `Button_Component.yaml` renamed to `ButtonFilled_Component.yaml` — the new naming convention is `<Widget><Variant>_Component.yaml`, referenced as `component: <Widget><Variant>` — ✅
+- Step 2: real, necessary fix caught before it went unnoticed: every existing consumer of the old `component: Button` name (`tests/test_spec_expand.py`, `tests/test_spec_load.py`, `tests/test_app.py`, `tests/test_component.py`) updated to `component: ButtonFilled` — caught immediately by re-running the full suite after the `tre` reinstall, not silently left stale — ✅
+
+### Phase 2 — The Other 4 Variants ✅
+- Step 1: `ButtonElevated_Component.yaml` — container=`surface_container_low`, label=`primary`, `elevation: level_1` (MD3's real named token, confirmed to equal the identical `1.0` `add_button`'s own unthemed fallback uses — `engine_md3::shape::ELEVATION_LEVEL_1`) — ✅
+- Step 2: `ButtonFilledTonal_Component.yaml` — container=`secondary_container`, label=`on_secondary_container` — ✅
+- Step 3: `ButtonOutlined_Component.yaml` — container=`transparent` (confirmed as a real, valid CSS color keyword `peniko::color::parse_color` accepts, verified with a live test before relying on it), label=`primary`, `border_color: outline`, `border_width: 1.0` — ✅
+- Step 4: `ButtonText_Component.yaml` — container=`transparent`, label=`primary`, no border/elevation — ✅
+
+### Phase 3 — Verification ✅
+- Step 1: all 5 variants cross-checked in one pass against `tesserae.widgets.button(...)`'s own real output, comparing `corner_radius`/`elevation`/`border_width` for every variant — all 5 MATCH exactly — ✅
+- Step 2: full suite re-run after the rename fix — 101 passed, 0 regressions — ✅
+
+**Real naming convention now established for the rest of item 1:** `<Widget><Variant>_Component.yaml` / `component: <Widget><Variant>` for every widget with more than one real MD3 variant; a single `<Widget>_Component.yaml` / `component: <Widget>` for widgets with exactly one real shape.

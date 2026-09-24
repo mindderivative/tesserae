@@ -28,7 +28,7 @@ def _button_view_yaml(with_values: dict | None = None) -> str:
             "kind": "Container",
             "style": {"width": 300, "height": 200},
             "children": [
-                {"id": "save_button", "component": "Button", "with": with_values or BUTTON_WITH}
+                {"id": "save_button", "component": "ButtonFilled", "with": with_values or BUTTON_WITH}
             ],
         }
     )
@@ -90,7 +90,7 @@ def test_component_without_call_site_id_raises():
         {
             "id": "root",
             "kind": "Container",
-            "children": [{"component": "Button", "with": BUTTON_WITH}],
+            "children": [{"component": "ButtonFilled", "with": BUTTON_WITH}],
         }
     )
     with pytest.raises(ComponentError, match="needs its own `id:`"):
@@ -103,8 +103,8 @@ def test_two_uses_of_same_component_get_distinct_namespaced_ids():
             "id": "root",
             "kind": "Container",
             "children": [
-                {"id": "btn1", "component": "Button", "with": BUTTON_WITH},
-                {"id": "btn2", "component": "Button", "with": {**BUTTON_WITH, "label": "Cancel"}},
+                {"id": "btn1", "component": "ButtonFilled", "with": BUTTON_WITH},
+                {"id": "btn2", "component": "ButtonFilled", "with": {**BUTTON_WITH, "label": "Cancel"}},
             ],
         }
     )
@@ -124,7 +124,7 @@ def test_binding_forwarded_as_param_value_survives_untouched():
             "children": [
                 {
                     "id": "b",
-                    "component": "Button",
+                    "component": "ButtonFilled",
                     "with": {**BUTTON_WITH, "label": "{{ headline.get() }}"},
                 }
             ],
@@ -163,7 +163,7 @@ def test_extra_keys_at_call_site_are_rejected():
             "id": "root",
             "kind": "Container",
             "children": [
-                {"id": "b", "component": "Button", "with": BUTTON_WITH, "style": {"width": 999}}
+                {"id": "b", "component": "ButtonFilled", "with": BUTTON_WITH, "style": {"width": 999}}
             ],
         }
     )

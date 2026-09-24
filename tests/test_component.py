@@ -139,7 +139,7 @@ kind: Container
 style: {width: 260, height: 40}
 children:
   - id: action_button
-    component: Button
+    component: ButtonFilled
     with: {label: Go, width: 100, height: 32, corner_radius: 16}
 """
 

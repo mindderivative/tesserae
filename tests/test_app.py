@@ -193,7 +193,7 @@ kind: Container
 style: {width: 300, height: 200}
 children:
   - id: save_button
-    component: Button
+    component: ButtonFilled
     with: {label: Save, width: 120, height: 40, corner_radius: 20}
 """
 

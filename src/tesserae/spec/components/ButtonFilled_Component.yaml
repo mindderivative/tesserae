@@ -4,14 +4,16 @@
 # "filled" variant colors (`resolve_button_colors`, `window_factory.rs`):
 # container = primary, label = on_primary.
 #
+# One fragment per real MD3 variant (`ButtonElevated`/`ButtonFilled`/
+# `ButtonFilledTonal`/`ButtonOutlined`/`ButtonText`) -- `{{ }}`
+# substitution has no conditional branching, so a `variant` param
+# can't pick between them the way `add_button(variant=...)` does.
+#
 # Real, honest limitation, not silently glossed over: `{{ }}` parameter
-# substitution is purely textual (no arithmetic), so a true MD3 pill
-# shape (corner_radius = height / 2, `add_button`'s own real unthemed
-# fallback) can't be *derived* from `height` here -- `corner_radius` is
-# its own required param instead. Only the "filled" variant is modeled;
-# a different variant needs its own fragment (no conditional branching
-# in this templating layer) -- a real, deferred scope boundary, not a
-# silently narrower reimplementation of `add_button`.
+# substitution is also purely textual (no arithmetic), so a true MD3
+# pill shape (corner_radius = height / 2, `add_button`'s own real
+# unthemed fallback) can't be *derived* from `height` here --
+# `corner_radius` is its own required param instead.
 params: [label, width, height, corner_radius]
 id: root
 kind: Rect
