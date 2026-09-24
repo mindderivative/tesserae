@@ -5,7 +5,8 @@ fragment end to end (parsed by `yaml.safe_load`, constructed as a real
 docstring: missing/unknown params, a missing call-site `id:`, an unknown
 component name, a cycle, id-namespacing across two uses of the same
 component, and a `{{ }}` binding forwarded as a param value surviving
-untouched.
+untouched. `repeat:` (M28) gets its own real coverage further down,
+using the already-shipped `ListItem_Component.yaml` fragment.
 """
 
 from pathlib import Path
@@ -17,6 +18,7 @@ from tre import View, Window
 from tesserae.spec import ComponentError, expand_components
 from tesserae.spec.expand import MAX_DEPTH
 from tesserae.widgets import button as imperative_button
+from tesserae.widgets import list_item as imperative_list_item
 
 BUTTON_WITH = {"label": "Save", "width": 120, "height": 40, "corner_radius": 20}
 
@@ -167,7 +169,7 @@ def test_extra_keys_at_call_site_are_rejected():
             ],
         }
     )
-    with pytest.raises(ComponentError, match=r"takes only `id:` and `with:`"):
+    with pytest.raises(ComponentError, match=r"takes only `id:`, `with:`, and `repeat:`"):
         expand_components(yaml_text)
 
 
@@ -179,3 +181,159 @@ def test_no_component_usage_is_a_true_no_op():
 
 def test_max_depth_is_a_real_positive_bound():
     assert MAX_DEPTH > 0
+
+
+# M28: `repeat:` real coverage, using the already-shipped `ListItem`
+# fragment (`params: [headline, width]`).
+
+THEME_SEED = (0x67, 0x50, 0xA4, 0xFF)
+
+
+def _repeat_view_yaml(items: list[dict], *, extra_with: dict | None = None) -> str:
+    node = {"id": "settings", "component": "ListItem", "repeat": items}
+    if extra_with is not None:
+        node["with"] = extra_with
+    return yaml.safe_dump(
+        {
+            "id": "root",
+            "kind": "Container",
+            "style": {"width": 400, "height": 300, "flex_direction": "Vertical"},
+            "children": [node],
+        }
+    )
+
+
+def test_repeat_expands_to_one_real_node_per_item():
+    yaml_text = _repeat_view_yaml(
+        [{"headline": "Notifications"}, {"headline": "Privacy"}, {"headline": "About"}],
+        extra_with={"width": 360},
+    )
+    expanded = yaml.safe_load(expand_components(yaml_text))
+    children = expanded["children"]
+    assert len(children) == 3
+    assert [c["id"] for c in children] == ["settings.0", "settings.1", "settings.2"]
+    assert [c["children"][0]["text"]["content"] for c in children] == [
+        "Notifications",
+        "Privacy",
+        "About",
+    ]
+
+
+def test_repeat_matches_the_imperative_catalog():
+    yaml_text = _repeat_view_yaml([{"headline": "Alice"}, {"headline": "Bob"}], extra_with={"width": 360})
+    expanded = expand_components(yaml_text)
+    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    alice = view.node("settings.0.headline")
+    bob = view.node("settings.1.headline")
+    assert alice.get_text() == "Alice"
+    assert bob.get_text() == "Bob"
+
+    # `list_item()`'s own real return value is the row's outer
+    # container, not its internal headline child -- no public API
+    # reaches that child from Python, so this can only prove the
+    # imperative call builds too, not do a direct text comparison.
+    window = Window(width=400, height=300)
+    window.set_theme(THEME_SEED)
+    imperative_alice = imperative_list_item(window, "Alice", width=360)
+    assert isinstance(imperative_alice, type(view.node("root")))
+
+
+def test_repeat_produces_real_namespaced_ids_with_no_collisions():
+    yaml_text = _repeat_view_yaml([{"headline": f"Item {i}"} for i in range(5)], extra_with={"width": 360})
+    expanded = yaml.safe_load(expand_components(yaml_text))
+    ids = [c["id"] for c in expanded["children"]]
+    assert ids == [f"settings.{i}" for i in range(5)]
+    assert len(set(ids)) == len(ids), "every repeated instance must get a real, unique id"
+
+
+def test_repeat_must_be_a_list():
+    yaml_text = _repeat_view_yaml({"headline": "not a list"}, extra_with={"width": 360})  # type: ignore[arg-type]
+    with pytest.raises(ComponentError, match=r"`repeat:` must be a list of mappings"):
+        expand_components(yaml_text)
+
+
+def test_repeat_entry_must_be_a_mapping():
+    yaml_text = _repeat_view_yaml(["not a mapping"], extra_with={"width": 360})  # type: ignore[list-item]
+    with pytest.raises(ComponentError, match=r"`repeat:` entry 0 must be a mapping"):
+        expand_components(yaml_text)
+
+
+def test_repeat_key_colliding_with_with_is_rejected():
+    # `width` given both as a shared `with:` value and inside a
+    # `repeat:` entry -- real, deliberate ambiguity, rejected rather
+    # than silently letting one win.
+    yaml_text = _repeat_view_yaml(
+        [{"headline": "Notifications", "width": 200}], extra_with={"width": 360}
+    )
+    with pytest.raises(ComponentError, match=r"repeats key\(s\) \['width'\]"):
+        expand_components(yaml_text)
+
+
+def test_repeat_still_validates_missing_params_per_item():
+    # `width` is a declared param, supplied via neither `with:` nor
+    # this one `repeat:` entry -- must fail exactly like an ordinary,
+    # non-repeated missing-parameter case.
+    yaml_text = _repeat_view_yaml([{"headline": "Notifications"}])
+    with pytest.raises(ComponentError, match=r"missing parameter\(s\) \['width'\] for 'settings.0'"):
+        expand_components(yaml_text)
+
+
+def test_repeat_at_the_document_root_is_rejected():
+    # `repeat:` only makes sense inside a `children:` list -- the root
+    # of a view is a single node, there's nowhere for a 2nd/3rd
+    # instance to go.
+    yaml_text = yaml.safe_dump(
+        {"id": "settings", "component": "ListItem", "repeat": [{"headline": "A"}, {"headline": "B"}], "with": {"width": 360}}
+    )
+    with pytest.raises(ComponentError, match=r"needs exactly one"):
+        expand_components(yaml_text)
+
+
+def test_repeat_with_zero_items_produces_zero_nodes():
+    yaml_text = _repeat_view_yaml([], extra_with={"width": 360})
+    expanded = yaml.safe_load(expand_components(yaml_text))
+    assert expanded["children"] == []
+
+
+def test_nested_repeat_namespaces_correctly_under_the_outer_call(tmp_path: Path):
+    # A component that itself contains a `repeat:`, sourced from a
+    # param supplied by the OUTER call site -- proves `{{ items }}`
+    # substitution (already real, general-purpose) correctly resolves
+    # a `repeat:` value before `_walk` ever reaches the nested
+    # `component:` node, and that the outer call site's own id still
+    # prefixes every inner repeated instance, exactly once, matching
+    # ordinary nested-component namespacing.
+    from tesserae.spec import expand as expand_module
+
+    real_components_dir = Path(expand_module.__file__).parent / "components"
+    (tmp_path / "Section_Component.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "params": ["items"],
+                "id": "root",
+                "kind": "Container",
+                "children": [
+                    {"id": "rows", "component": "ListItem", "repeat": "{{ items }}", "with": {"width": 360}}
+                ],
+            }
+        )
+    )
+    yaml_text = yaml.safe_dump(
+        {
+            "id": "root",
+            "kind": "Container",
+            "children": [
+                {
+                    "id": "section",
+                    "component": "Section",
+                    "with": {"items": [{"headline": "One"}, {"headline": "Two"}]},
+                }
+            ],
+        }
+    )
+    expanded = yaml.safe_load(
+        expand_components(yaml_text, component_dirs=[tmp_path, real_components_dir])
+    )
+    section = expanded["children"][0]
+    row_ids = [c["id"] for c in section["children"]]
+    assert row_ids == ["section.rows.0", "section.rows.1"]

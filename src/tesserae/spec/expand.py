@@ -13,6 +13,24 @@ a real, working, parameterization-free splice mechanism for that
 (`engine-spec/src/include.rs`); this module only adds the missing
 capability, parameterized reuse.
 
+M28: `repeat:` lets one `component:` entry expand to N sibling
+instances from a literal, static list of per-item overrides -- real,
+deliberately narrow scope, confirmed against `tre`'s own imperative
+`add_list` first: it takes pre-built `Node`s and does pure layout
+composition (`window_factory.rs`, no `NodeKind::List` primitive at
+all), meaning "a list" is *already* expressible today as a plain
+`kind: Container` with N `ListItem` children -- the real, missing
+capability isn't a primitive, it's repeating a fragment call without
+hand-duplicating N near-identical `component:` blocks. Deliberately
+NOT reactive -- `repeat:`'s own items are known at macro-expansion
+time, before `tre` ever sees the file (matching this whole module's
+own "before `tre` ever sees the file" framing), so an app wanting
+runtime-changing content (items added/removed, live reordering) still
+uses the existing imperative `tesserae.Repeater`, not this. Checked
+`pyCopper` directly (M26/M28's own scoping) -- no repeat/loop construct
+exists there at all, confirming this is genuinely new design territory,
+not a port.
+
 Real, load-bearing design point: `{{ param }}` substitution preserves
 the supplied value's own real Python type (int/float/bool/str) when a
 string is *exactly* one placeholder with nothing else around it --
@@ -44,6 +62,7 @@ _WITH_KEY = "with"
 _PARAMS_KEY = "params"
 _ID_KEY = "id"
 _CHILDREN_KEY = "children"
+_REPEAT_KEY = "repeat"
 
 #: A guard against pathological/adversarial nesting, not a real depth
 #: any legitimate component tree needs. `tre`'s own `include:` uses 8
@@ -134,9 +153,10 @@ def _expand_component(
     node: dict[str, Any],
     component_dirs: list[Path],
     chain: tuple[str, ...],
-) -> dict[str, Any]:
+) -> list[dict[str, Any]]:
     """Replace one `{component: Name, with: {...}}` node with the
-    fragment it names, fully expanded and namespaced."""
+    fragment(s) it names, fully expanded and namespaced -- one element
+    normally, or one per real `repeat:` entry (M28)."""
     if len(chain) >= MAX_DEPTH:
         raise ComponentError(f"{_chain_text(chain)}: components nested more than {MAX_DEPTH} deep")
 
@@ -154,58 +174,111 @@ def _expand_component(
         )
 
     path = _find_component_file(name, component_dirs)
-    fragment = _load_fragment(path)
-    declared = fragment.pop(_PARAMS_KEY, []) or []
+    fragment_template = _load_fragment(path)
+    declared = fragment_template.pop(_PARAMS_KEY, []) or []
     if not isinstance(declared, list):
         raise ComponentError(f"{path}: `params:` must be a list of names")
 
-    supplied = node.get(_WITH_KEY) or {}
-    if not isinstance(supplied, dict):
+    with_supplied = node.get(_WITH_KEY) or {}
+    if not isinstance(with_supplied, dict):
         raise ComponentError(f"{_chain_text((*chain, name))}: `with:` must be a mapping")
 
-    missing = [p for p in declared if p not in supplied]
-    if missing:
-        raise ComponentError(
-            f"{_chain_text((*chain, name))}: missing parameter(s) {missing}; "
-            f"{name} declares {declared}"
-        )
-    unknown = [k for k in supplied if k not in declared]
-    if unknown:
-        raise ComponentError(
-            f"{_chain_text((*chain, name))}: unknown parameter(s) {unknown}; "
-            f"{name} declares {declared or '[]'}"
-        )
-
-    fragment = _substitute(fragment, supplied)
-
-    # Resolve any `component:` usage inside the fragment itself before
-    # namespacing -- a nested fragment's own ids get namespaced by the
-    # OUTER call site's id too, once, not twice.
-    fragment = _walk(fragment, component_dirs, (*chain, name))
-
-    local_id = fragment.get(_ID_KEY)
-    fragment = _namespace_ids(fragment, call_id)
-    if isinstance(local_id, str):
-        # The fragment's own root gets the call site's id directly, not
-        # a further "call_id.call_id"-prefixed one.
-        fragment[_ID_KEY] = call_id
-
-    extra = set(node) - {_COMPONENT_KEY, _WITH_KEY, _ID_KEY}
+    extra = set(node) - {_COMPONENT_KEY, _WITH_KEY, _ID_KEY, _REPEAT_KEY}
     if extra:
         raise ComponentError(
-            f"{_chain_text((*chain, name))}: a `component:` node takes only `id:` and "
-            f"`with:`; got {sorted(extra)}. Pass configuration as parameters."
+            f"{_chain_text((*chain, name))}: a `component:` node takes only `id:`, `with:`, "
+            f"and `repeat:`; got {sorted(extra)}. Pass configuration as parameters."
         )
-    return fragment
+
+    # M28: `repeat:` -- one iteration per entry, each a mapping of
+    # per-item values merged on top of the shared `with:` values. A
+    # real key given in both is rejected rather than silently letting
+    # one win, matching this module's own "fail loudly on ambiguity"
+    # convention every other real check here already follows.
+    repeat_items = node.get(_REPEAT_KEY)
+    if repeat_items is None:
+        iterations = [(call_id, dict(with_supplied))]
+    else:
+        if not isinstance(repeat_items, list):
+            raise ComponentError(
+                f"{_chain_text((*chain, name))}: `repeat:` must be a list of mappings, "
+                f"got {type(repeat_items).__name__}"
+            )
+        iterations = []
+        for index, item in enumerate(repeat_items):
+            if not isinstance(item, dict):
+                raise ComponentError(
+                    f"{_chain_text((*chain, name))}: `repeat:` entry {index} must be a "
+                    f"mapping, got {type(item).__name__}"
+                )
+            overlap = set(item) & set(with_supplied)
+            if overlap:
+                raise ComponentError(
+                    f"{_chain_text((*chain, name))}: `repeat:` entry {index} repeats "
+                    f"key(s) {sorted(overlap)} already given in `with:` -- a value "
+                    "that varies per item belongs in `repeat:`, a shared one in `with:`, "
+                    "not both"
+                )
+            iterations.append((f"{call_id}.{index}", {**with_supplied, **item}))
+
+    results = []
+    for local_call_id, supplied in iterations:
+        missing = [p for p in declared if p not in supplied]
+        if missing:
+            raise ComponentError(
+                f"{_chain_text((*chain, name))}: missing parameter(s) {missing} for "
+                f"{local_call_id!r}; {name} declares {declared}"
+            )
+        unknown = [k for k in supplied if k not in declared]
+        if unknown:
+            raise ComponentError(
+                f"{_chain_text((*chain, name))}: unknown parameter(s) {unknown} for "
+                f"{local_call_id!r}; {name} declares {declared or '[]'}"
+            )
+
+        fragment = _substitute(fragment_template, supplied)
+
+        # Resolve any `component:` usage inside the fragment itself
+        # before namespacing -- a nested fragment's own ids get
+        # namespaced by the OUTER call site's id too, once, not twice.
+        fragment = _walk(fragment, component_dirs, (*chain, name))
+
+        local_id = fragment.get(_ID_KEY)
+        fragment = _namespace_ids(fragment, local_call_id)
+        if isinstance(local_id, str):
+            # The fragment's own root gets the call site's id directly,
+            # not a further "local_call_id.local_call_id"-prefixed one.
+            fragment[_ID_KEY] = local_call_id
+        results.append(fragment)
+
+    return results
+
+
+def _expand_list_item(item: Any, component_dirs: list[Path], chain: tuple[str, ...]) -> list[Any]:
+    """One `children:` entry expands to 0+ real nodes -- 1 for an
+    ordinary node (component or not), N for a real `repeat:` (M28)."""
+    if isinstance(item, dict) and _COMPONENT_KEY in item:
+        return _expand_component(dict(item), component_dirs, chain)
+    return [_walk(item, component_dirs, chain)]
 
 
 def _walk(node: Any, component_dirs: list[Path], chain: tuple[str, ...]) -> Any:
     if isinstance(node, list):
-        return [_walk(v, component_dirs, chain) for v in node]
+        out: list[Any] = []
+        for item in node:
+            out.extend(_expand_list_item(item, component_dirs, chain))
+        return out
     if not isinstance(node, dict):
         return node
     if _COMPONENT_KEY in node:
-        return _expand_component(dict(node), component_dirs, chain)
+        results = _expand_component(dict(node), component_dirs, chain)
+        if len(results) != 1:
+            raise ComponentError(
+                f"{_chain_text(chain)}: `repeat:` produced {len(results)} nodes, but this "
+                "position needs exactly one -- `repeat:` is only valid on a `component:` "
+                "entry inside a `children:` list"
+            )
+        return results[0]
     return {
         k: (_walk(v, component_dirs, chain) if k == _CHILDREN_KEY else v) for k, v in node.items()
     }
