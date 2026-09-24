@@ -1,0 +1,35 @@
+# Real, confirmed requirement: `day` must be passed as a quoted
+# string (`with: {day: "15"}`), not a bare number -- `TextSpec.content`
+# is typed `String` in Rust, and a whole-value `{{ }}` substitution
+# preserves the supplied Python type verbatim; an unquoted integer
+# fails with a real, clear deserialize error ("invalid type: integer,
+# expected a string"), confirmed directly by testing, not assumed.
+# The same real "text content is always a string" contract `add_spin_
+# box(value: &str)` already establishes imperatively.
+#
+# `add_date_picker_day(selected=true)`'s declarative counterpart -- one
+# of 4 real, distinct visual states (`selected`/`today`/
+# `outside_month`/default), checked in priority order in `add_date_
+# picker_day` itself -- shipped as separate fragments, the same
+# per-variant convention this whole catalog already uses. `DATE_CELL_
+# SIZE=48.0` is a fixed constant (not caller-controlled), so `corner_
+# radius: 24` (`DATE_CELL_SIZE/2.0`, a real pill shape) is a literal
+# here, not a required param -- unlike every other pill-shaped
+# fragment in this catalog, size genuinely never varies for this
+# widget. Colors match `add_date_picker_day`'s own "selected" branch
+# exactly: fill=primary, label=on_primary, no border.
+params: [day]
+id: root
+kind: Container
+style:
+  width: 48
+  height: 48
+  background: primary
+  corner_radius: 24
+  justify_content: Center
+  align_items: Center
+children:
+  - id: label
+    kind: Text
+    text: {content: "{{ day }}", role: body_large}
+    style: {background: on_primary}

@@ -33,21 +33,23 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M21 — Part 3 Phase 7: Cards/Lists/Chips/Structural Rows Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M22 — Part 3 Phase 8: Navigation & Shell Component Fragments (Fixed-Shape Members) | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M23 — Part 3 Phase 9: Overlays Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M24 — Part 3 Phase 10: Search, Progress & Status, Media & Graphics, Date & Time Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M23 — `Dialog`, `Snackbar`, `SideSheetModal`/`SideSheetStandard`, `MenuItem`, `Tooltip` — every fixed-shape widget in Overlays. Real, significant finding: `add_side_sheet`'s own base `paint.corner_radius` is a literal `0.0` — its real visual rounding comes entirely from a per-corner `corner_radii_override` `Node.get()` never reads back, so a `corner_radius` cross-check isn't meaningful for this widget specifically, unlike everywhere else in the catalog; confirmed by direct testing, not assumed. Real test bug caught (not a fragment bug): `side_sheet(modal=True)` returns the outer scrim, not the inner panel — an initial test compared the wrong two nodes' `elevation`, fixed by comparing what each side actually returns.
+**Just closed:** M24 — `SearchBar`/`SearchView` (Search), `Image` (the one buildable Media & Graphics widget), `DatePickerDay` (all 4 real states)/`PeriodSelectorAM`/`PeriodSelectorPM` (Date & Time) — 9 new fragments. **Progress & Status ships zero fragments**, confirmed by direct failing-test verification, not assumed: `CircularProgress`/`LinearProgress`/`LoadingIndicator` are all real `NodeKind` variants with no declarative `NodeKindSpec` equivalent, matching `tre`'s own M74 scope note exactly. `video`/`node_graph`/`graph_node` (Media & Graphics) and `TimePickerDial` (Date & Time) are likewise confirmed blocked for the same reason. Two real findings from this milestone: (1) `TextSpec.content` is Rust `String`-typed, so `DatePickerDay*`'s `day` param must be passed as a quoted string (`day: "15"`) — a bare `day: 15` fails deserialization with `invalid type: integer, expected a string`, since whole-value `{{ }}` substitution preserves the caller's real Python type verbatim; documented in all 4 fragments' own header comments. (2) `ContentFitSpec`'s declarative values are PascalCase (`Cover`/`Contain`/`Fill`), not the lowercase strings `image()`'s own imperative `fit=` kwarg accepts — documented in `Image_Component.yaml`'s own header. With this milestone, every category in the original widget-catalog scope has been explored to its real, natural completion point: the remaining gaps (dynamic-list widgets, primitives with no declarative `NodeKindSpec`) are structural, not mechanical follow-up.
 
-**Previously:** M15-M22 — the macro-expansion engine, its wiring, and 5 full/partial widget categories (44 fragments). See their own entries below.
+**Previously:** M15-M23 — the macro-expansion engine, its wiring, and 6 full/partial widget categories (50 fragments). See their own entries below.
 
-**Up next:** Search, Progress & Status, Media & Graphics, Date & Time — the last 4 categories.
+**Up next:** No further widget-catalog categories remain unexplored. Any additional fragment work now depends on new `tre`-side declarative primitives (`radio_button`/`switch`/progress indicators/`link`/`video`/`node_graph`/`time_picker_dial`) or a macro-layer loop/repeat construct (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`) — neither requested yet. Item 1 of the standing 3-item follow-up list ("Start 3, then move to 2 and then 1") is at its real, natural completion point.
 
 **Known gaps:**
-- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (50 fragments shipped so far) — real, deferred, mechanical follow-up work.
+- 59 of ~68 real MD3 widgets now have a declarative `*_Component.yaml` fragment; the remaining 9 are either dynamic-list-shaped or block on a `tre`-side primitive that doesn't exist yet (see below) — not mechanical follow-up, a real structural boundary.
+- Progress & Status (`circular_progress`/`linear_progress`/`loading_indicator`) has zero fragments — no declarative `NodeKindSpec` equivalent exists for any of the 3 (confirmed directly, M24).
+- `video`/`node_graph`/`graph_node`/`time_picker_dial`/`radio_button`/`switch`/`link` all confirmed blocked the same way — real `NodeKind` primitives with no declarative `NodeKindSpec` equivalent (M23/M24).
 - `extended_fab`'s icon-less structural shape has no fragment yet (real, deliberately deferred — see M18).
 - Several real widgets are fundamentally dynamic/list-shaped (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`) and can't be expressed as a fixed-parameter `*_Component.yaml` fragment at all with this macro layer's current design (no loop/repeat construct) — a real, deliberate, structural limitation, not a per-widget oversight.
 - `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
 - The declarative cascade doesn't consult a theme's per-component `components:` override (imperative-only) — an app wanting that level of per-component customization uses `tesserae.widgets` instead of a declarative fragment.
 - No dedicated `tesserae.widgets.text` wrapper for the raw `add_text` primitive — every widget needing text uses its own clear param instead; revisit only if a real caller needs the bare primitive.
-- Some real MD3 primitives (`radio_button`/`switch`/progress indicators/`link`/etc.) still have no declarative `NodeKindSpec` equivalent in `tre` at all — real, deliberately deferred at `tre`'s own M74, add only if a real fragment needs one.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI (`tre` itself isn't fully published either yet — both depend on a local editable checkout for now).
 
@@ -478,3 +480,31 @@ Real bug caught in the test itself, not the fragment, while verifying `side_shee
 - Step 2: full suite — 128 passed (123 prior + 5 new), 0 regressions — ✅
 
 **6 new fragments this milestone; 50 total so far.**
+
+---
+
+## Milestone 24 — Part 3, Phase 10: Search, Progress & Status, Media & Graphics, Date & Time Component Fragments
+
+**Status: ✅ Complete (2026-09-23).** The last 4 widget categories, bundled into one milestone (matching how M14 already bundled Search & Progress/Status together imperatively). 9 new fragments: `SearchBar`, `SearchView`, `Image`, `DatePickerDaySelected`, `DatePickerDayToday`, `DatePickerDayOutsideMonth`, `DatePickerDay`, `PeriodSelectorAM`, `PeriodSelectorPM`.
+
+**Progress & Status ships zero fragments — a real, confirmed-blocked category, not an oversight.** `CircularProgress`/`LinearProgress`/`LoadingIndicator` are all real `engine_core::NodeKind` variants; none has a declarative `NodeKindSpec` equivalent, confirmed directly via failing `unknown variant` YAML parse errors, matching `tre`'s own M74 scope note exactly (M74 added `Icon` but deliberately left progress indicators out). `video`/`node_graph`/`graph_node` (Media & Graphics) and `TimePickerDial` (Date & Time) are the same real, confirmed-blocked story — `Image`/`icon` (already directly usable via `kind: Icon`, no wrapper fragment needed) are the only two Media & Graphics primitives with a declarative path at all.
+
+**Real finding 1 — `TextSpec.content` string-typing:** it's Rust `String`-typed; `DatePickerDay*`'s whole-value `{{ }}` substitution preserves the caller's real Python type verbatim, so a bare `day: 15` fails deserialization with `invalid type: integer, expected a string`. Callers must pass `day: "15"` — documented directly in all 4 `DatePickerDay*` fragments' own header comments. The same class of bug was caught and fixed in this milestone's own test suite: `test_date_picker_day_requires_a_quoted_string_day` originally wrapped `pytest.raises` around `expand_components(...)` (which never raises — it's pure string substitution, no schema validation); fixed to wrap `View(source=expand_components(...))` instead, since the real deserialize error only surfaces once `tre.View` parses the expanded text.
+
+**Real finding 2 — declarative enum values are PascalCase:** `ContentFitSpec`'s real values are `Cover`/`Contain`/`Fill`, not the lowercase strings `image()`'s own imperative `fit=` kwarg accepts (`"cover"`/`"contain"`/`"fill"`) — found and documented directly in `Image_Component.yaml`'s own header after a live test. `src:` also resolves relative to the *calling view's own directory*, not the working directory — confirmed by pointing a test's `path=` at `tests/` itself (where the real `fixtures/pixel.png` already lives) rather than a throwaway temp directory.
+
+With this milestone, every category in the original ~9-category widget-catalog scope has been explored to its real, natural completion point. The remaining unbuilt widgets are a real structural boundary, not mechanical follow-up: dynamic-list widgets (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`, no macro-layer loop construct) and primitives with no declarative `NodeKindSpec` (`radio_button`/`switch`/`link`/progress indicators/`video`/`node_graph`/`graph_node`/`time_picker_dial`). Neither gap has further scope without new `tre`-side work or a macro-layer loop construct, neither of which has been requested.
+
+### Phase 1 — Fragments ✅
+- Step 1: `SearchBar` — `params: [placeholder, width, corner_radius]` (pill shape, no matching MD3 token); `elevation: level_3`; `flex_grow: 1` for the `TextField` — ✅
+- Step 2: `SearchView` — content-free full-screen overlay shape; `corner_radius: extra_large`/`elevation: level_3` — ✅
+- Step 3: `Image` — uses `kind: Image` directly; real PascalCase-`fit`-value and relative-`src`-resolution findings documented in its own header — ✅
+- Step 4: `DatePickerDaySelected`/`DatePickerDayToday`/`DatePickerDayOutsideMonth`/`DatePickerDay` — the 4 real distinct visual states; `corner_radius: 24` literal (fixed `DATE_CELL_SIZE=48`, no param needed); the quoted-string-`day` requirement documented in all 4 headers — ✅
+- Step 5: `PeriodSelectorAM`/`PeriodSelectorPM` — 2 stacked options (`flex_direction: Vertical`), `corner_radius: small` — ✅
+- Step 6: Progress & Status confirmed zero-fragment via direct failing-test verification of all 3 primitives — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_fragments_remaining_categories.py` (new file) — 6 real pytest tests covering all 9 new fragments plus the quoted-string-`day` requirement; real test bugs caught and fixed during authoring (the `pytest.raises`-wraps-the-wrong-call bug above, and the image fixture path needing to resolve against a real `tests/`-rooted `path=` rather than a throwaway `tmp_path`) — ✅
+- Step 2: full suite — 134 passed (128 prior + 6 new), 0 regressions — ✅
+
+**9 new fragments this milestone; 59 total so far — the widget-catalog fragment-authoring pass (item 1 of the standing 3-item follow-up list) is at its real, natural completion point.**

@@ -1,0 +1,24 @@
+# `add_image(path=..., width=..., height=..., fit=...)`'s declarative
+# counterpart, using `tre`'s own real `kind: Image` primitive directly
+# (`ImageSpec { src, fit }`, `engine-spec/src/spec.rs`) -- no
+# composition needed. Real, useful note for anyone using this fragment:
+# `src` resolves relative to the *calling* `*_View.yaml`'s own
+# directory (the same base directory `include:`/every other `image.
+# src:` already resolves against), not this fragment file's own
+# directory -- the natural, correct behavior for an app referencing its
+# own image assets. No `background` param -- an image has no
+# meaningful "behind it" fill, the identical real reasoning `docs/
+# guide/components.md` already states for `add_image` itself.
+#
+# Real, confirmed naming difference: `fit` here takes `ContentFitSpec`'s
+# own real PascalCase enum values (`Cover`/`Contain`/`Fill`), verified
+# directly -- not `add_image`'s own lowercase `"cover"`/`"contain"`/
+# `"fill"` strings. A caller migrating imperative usage to this
+# fragment needs to capitalize the value.
+params: [src, width, height, fit]
+id: root
+kind: Image
+image: {src: "{{ src }}", fit: "{{ fit }}"}
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"

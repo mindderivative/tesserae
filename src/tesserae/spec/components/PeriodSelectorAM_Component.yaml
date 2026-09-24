@@ -1,0 +1,43 @@
+# `add_period_selector(selected="AM")`'s declarative counterpart -- a
+# real, always-paired 2-option stack (AM above PM), only the selected
+# half's color changes -- shipped as 2 fragments (`PeriodSelectorAM`/
+# `PeriodSelectorPM`), the same per-real-state convention this whole
+# catalog already uses (`{{ }}` has no conditionals to pick between
+# them within one fragment). Colors match `add_period_selector` exactly:
+# selected=tertiary_container/on_tertiary_container, unselected=
+# transparent/on_surface. `corner_radius: small` matches `CHIP_CORNER_
+# RADIUS=8.0 == SHAPE_SMALL`, the same real fallback `add_period_
+# selector` itself uses (its own `"period_selector"` theme key, not
+# `"chip"`, confirmed directly).
+id: root
+kind: Container
+style: {flex_direction: Vertical, width: 52, height: 72}
+children:
+  - id: am
+    kind: Container
+    style:
+      width: 52
+      height: 36
+      background: tertiary_container
+      corner_radius: small
+      justify_content: Center
+      align_items: Center
+    children:
+      - id: am_label
+        kind: Text
+        text: {content: AM, role: label_large}
+        style: {background: on_tertiary_container}
+  - id: pm
+    kind: Container
+    style:
+      width: 52
+      height: 36
+      background: transparent
+      corner_radius: small
+      justify_content: Center
+      align_items: Center
+    children:
+      - id: pm_label
+        kind: Text
+        text: {content: PM, role: label_large}
+        style: {background: on_surface}

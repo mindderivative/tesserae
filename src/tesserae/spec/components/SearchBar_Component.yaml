@@ -1,0 +1,31 @@
+# `add_search_bar(placeholder=..., width=...)`'s declarative
+# counterpart -- the common, no-leading-icon/no-trailing-icons case
+# (real, deliberate scope boundary, same reasoning `ExtendedFabSurface_
+# Component.yaml` states: both are independently optional
+# imperatively, `trailing_icons` genuinely variable-length; deferred,
+# not silently dropped). `corner_radius` is a required param --
+# `SEARCH_BAR_CORNER_RADIUS = SEARCH_BAR_HEIGHT / 2.0` (a real pill
+# shape), the same real arithmetic gap `ButtonFilled_Component.yaml`'s
+# own `corner_radius` param already documents. `elevation: level_3` is
+# a real, fixed MD3 token. Colors match `add_search_bar` exactly:
+# container=surface_container_high, input text=on_surface. The
+# `TextField` reuses `flex_grow: 1` -- the identical real pattern
+# `add_search_bar` itself already uses internally for the field
+# (`field_id`'s own `Style { flex_grow: 1.0, ... }`), not invented
+# here.
+params: [placeholder, width, corner_radius]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 56
+  background: surface_container_high
+  corner_radius: "{{ corner_radius }}"
+  elevation: level_3
+  align_items: Center
+  padding: {left: 4, right: 4, top: 0, bottom: 0}
+children:
+  - id: field
+    kind: TextField
+    text: {content: "{{ placeholder }}", font_family: Roboto, font_weight: 400, font_size: 16}
+    style: {background: transparent, flex_grow: 1}

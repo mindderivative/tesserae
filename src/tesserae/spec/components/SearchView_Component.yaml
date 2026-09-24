@@ -1,0 +1,17 @@
+# `add_search_view`'s declarative counterpart -- a content-free Rect
+# (an app populates it via `Node.add_child`/nested `component:` usage,
+# matching `Card_Component.yaml`'s own real "content-free" precedent).
+# `corner_radius: extra_large`/`elevation: level_3` are real, fixed MD3
+# values (confirmed `search_view` reuses the identical `DIALOG_CORNER_
+# RADIUS`/`SEARCH_VIEW_ELEVATION=3.0` values -- a real coincidence of
+# shared tokens, not a coupled theme key, confirmed directly against
+# `window_factory.rs`'s own comment).
+params: [width, height]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: surface_container_high
+  corner_radius: extra_large
+  elevation: level_3

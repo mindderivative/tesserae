@@ -1,0 +1,31 @@
+# Real, confirmed requirement: `day` must be passed as a quoted
+# string (`with: {day: "15"}`), not a bare number -- `TextSpec.content`
+# is typed `String` in Rust, and a whole-value `{{ }}` substitution
+# preserves the supplied Python type verbatim; an unquoted integer
+# fails with a real, clear deserialize error ("invalid type: integer,
+# expected a string"), confirmed directly by testing, not assumed.
+# The same real "text content is always a string" contract `add_spin_
+# box(value: &str)` already establishes imperatively.
+#
+# `add_date_picker_day(today=true, selected=false)`'s declarative
+# counterpart -- see `DatePickerDaySelected_Component.yaml` for the
+# shared real design. Colors match the "today" branch exactly:
+# fill=transparent, border_color=primary, border_width=1.0
+# (`DATE_TODAY_OUTLINE_WIDTH`), label=primary.
+params: [day]
+id: root
+kind: Container
+style:
+  width: 48
+  height: 48
+  background: transparent
+  corner_radius: 24
+  border_color: primary
+  border_width: 1.0
+  justify_content: Center
+  align_items: Center
+children:
+  - id: label
+    kind: Text
+    text: {content: "{{ day }}", role: body_large}
+    style: {background: primary}

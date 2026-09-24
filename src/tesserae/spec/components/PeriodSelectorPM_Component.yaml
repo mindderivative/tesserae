@@ -1,0 +1,34 @@
+# `add_period_selector(selected="PM")`'s declarative counterpart -- see
+# `PeriodSelectorAM_Component.yaml` for the shared real design.
+id: root
+kind: Container
+style: {flex_direction: Vertical, width: 52, height: 72}
+children:
+  - id: am
+    kind: Container
+    style:
+      width: 52
+      height: 36
+      background: transparent
+      corner_radius: small
+      justify_content: Center
+      align_items: Center
+    children:
+      - id: am_label
+        kind: Text
+        text: {content: AM, role: label_large}
+        style: {background: on_surface}
+  - id: pm
+    kind: Container
+    style:
+      width: 52
+      height: 36
+      background: tertiary_container
+      corner_radius: small
+      justify_content: Center
+      align_items: Center
+    children:
+      - id: pm_label
+        kind: Text
+        text: {content: PM, role: label_large}
+        style: {background: on_tertiary_container}
