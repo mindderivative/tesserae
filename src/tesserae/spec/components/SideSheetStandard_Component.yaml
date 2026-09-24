@@ -1,0 +1,17 @@
+# `add_side_sheet(modal=false)`'s declarative counterpart -- the real,
+# structurally distinct non-modal shape (a plain panel, no scrim
+# wrapper). Colors match exactly: background=surface, no elevation
+# (`SIDE_SHEET_STANDARD_ELEVATION=0.0`). Same real per-corner `corner_
+# radii_override` gap as `SideSheetModal_Component.yaml` -- see its own
+# header for the full real finding (the imperative factory's own base
+# `corner_radius` is a literal `0.0`, not meaningfully comparable; this
+# fragment uses uniform `corner_radius: large` as the closer real
+# visual approximation).
+params: [width, height]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: surface
+  corner_radius: large

@@ -1,0 +1,48 @@
+# `add_dialog`'s declarative counterpart -- a real, useful finding: the
+# returned node is the full-window `scrim`, not the panel (confirmed
+# directly, `self.wrap_node(scrim)`) -- `add_dialog` sizes it via the
+# live `Window`'s own `self.width.get()`/`height.get()`, which has no
+# declarative equivalent at all, so `scrim_width`/`scrim_height` are
+# required params here (the caller passes the real window size).
+# `corner_radius: extra_large`/`elevation: level_3`/`opacity: 0.32` are
+# all real, fixed MD3 tokens/values (confirmed `DIALOG_CORNER_
+# RADIUS=28.0 == SHAPE_EXTRA_LARGE`, `DIALOG_ELEVATION=3.0 ==
+# ELEVATION_LEVEL_3`, `DIALOG_SCRIM_OPACITY=0.32` verbatim). Colors
+# match `add_dialog` exactly: scrim=scrim, panel=surface_container_high,
+# headline=on_surface, body=on_surface_variant. Real, useful finding:
+# omitting `width` on `headline`/`body` lets them stretch to the
+# panel's own cross-axis width automatically (taffy's real default
+# `align_items: Stretch`), avoiding `add_dialog`'s own `content_width
+# = width - 2*padding` arithmetic entirely; `flex_grow: 1` on `body`
+# similarly avoids its own `body_height` subtraction.
+params: [headline, text, width, height, scrim_width, scrim_height]
+id: root
+kind: Container
+style:
+  width: "{{ scrim_width }}"
+  height: "{{ scrim_height }}"
+  background: scrim
+  opacity: 0.32
+  justify_content: Center
+  align_items: Center
+children:
+  - id: panel
+    kind: Container
+    style:
+      flex_direction: Vertical
+      width: "{{ width }}"
+      height: "{{ height }}"
+      background: surface_container_high
+      corner_radius: extra_large
+      elevation: level_3
+      padding: 24
+      gap: 16
+    children:
+      - id: headline
+        kind: Text
+        text: {content: "{{ headline }}", role: headline_small}
+        style: {background: on_surface}
+      - id: body
+        kind: Text
+        text: {content: "{{ text }}", role: body_medium}
+        style: {background: on_surface_variant, flex_grow: 1}

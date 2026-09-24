@@ -32,15 +32,16 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M20 — Part 3 Phase 6: Selection & Input Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M21 — Part 3 Phase 7: Cards/Lists/Chips/Structural Rows Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M22 — Part 3 Phase 8: Navigation & Shell Component Fragments (Fixed-Shape Members) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M23 — Part 3 Phase 9: Overlays Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M22 — `ToolbarDocked`/`ToolbarFloating`, `TopAppBar`, `StatusBar` — every fixed-shape widget in Navigation & Shell (`tabs`/`navigation_rail`/`navigation_drawer` stay out of scope as dynamic lists). Real correction caught before it shipped wrong: an initial `StatusBar` draft guessed its real color role/typography without checking the source first — caught and fixed to the real values (`on_surface_variant`/`label_small`) before any test ran. `Toolbar`'s real 3-axis design (variant/orientation/tone) handled by making `tone` a plain `background` role-name param and shipping horizontal-only (a docked toolbar has no vertical variant in real MD3 at all, so that half isn't even a real gap).
+**Just closed:** M23 — `Dialog`, `Snackbar`, `SideSheetModal`/`SideSheetStandard`, `MenuItem`, `Tooltip` — every fixed-shape widget in Overlays. Real, significant finding: `add_side_sheet`'s own base `paint.corner_radius` is a literal `0.0` — its real visual rounding comes entirely from a per-corner `corner_radii_override` `Node.get()` never reads back, so a `corner_radius` cross-check isn't meaningful for this widget specifically, unlike everywhere else in the catalog; confirmed by direct testing, not assumed. Real test bug caught (not a fragment bug): `side_sheet(modal=True)` returns the outer scrim, not the inner panel — an initial test compared the wrong two nodes' `elevation`, fixed by comparing what each side actually returns.
 
-**Previously:** M15-M21 — the macro-expansion engine, its wiring, Buttons & Actions (22), Selection & Input (3), and Cards/Lists/Chips/Structural Rows (15). See their own entries below.
+**Previously:** M15-M22 — the macro-expansion engine, its wiring, and 5 full/partial widget categories (44 fragments). See their own entries below.
 
-**Up next:** Overlays (`dialog`/`snackbar`/`side_sheet`/`menu_item`/`tooltip` — all fixed-shape, buildable), Search, Progress & Status, Media & Graphics, Date & Time.
+**Up next:** Search, Progress & Status, Media & Graphics, Date & Time — the last 4 categories.
 
 **Known gaps:**
-- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (44 fragments shipped so far) — real, deferred, mechanical follow-up work.
+- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (50 fragments shipped so far) — real, deferred, mechanical follow-up work.
 - `extended_fab`'s icon-less structural shape has no fragment yet (real, deliberately deferred — see M18).
 - Several real widgets are fundamentally dynamic/list-shaped (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`) and can't be expressed as a fixed-parameter `*_Component.yaml` fragment at all with this macro layer's current design (no loop/repeat construct) — a real, deliberate, structural limitation, not a per-widget oversight.
 - `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
@@ -452,3 +453,28 @@ Real correction caught before it shipped wrong: an initial `StatusBar_Component.
 - Step 2: full suite — 123 passed (119 prior + 4 new), 0 regressions — ✅
 
 **4 new fragments this milestone; 44 total so far.**
+
+---
+
+## Milestone 23 — Part 3, Phase 9: Overlays Component Fragments
+
+**Status: ✅ Complete (2026-09-23).** `Dialog`, `Snackbar`, `SideSheetModal`/`SideSheetStandard`, `MenuItem`, `Tooltip` — 6 new fragments, every fixed-shape widget in Overlays. `menu` (`build_menu`'s own variable-length list of `MenuItem`s) stays out of scope — the same real structural limit already named for `tabs`/etc.
+
+Real, useful pattern confirmed twice more: `Dialog`/`SideSheetModal` both return the full-window *scrim* imperatively (`self.wrap_node(scrim)`), which has no declarative "auto = window size" equivalent — `scrim_width`/`scrim_height` are required params on both, the same real gap `add_top_app_bar`'s own `self.width.get()` default already established. `flex_grow: 1` (the now-familiar pattern) avoids `Dialog`'s/`Snackbar`'s own text-width-subtraction arithmetic.
+
+**Real, significant finding, not previously encountered:** `add_side_sheet` applies a per-corner `corner_radii_override` (only the sheet's inner edge is rounded) — `StyleSpec.corner_radius` has no per-corner concept at all declaratively. More importantly: **the imperative factory's own base `paint.corner_radius` field is a literal `0.0`** — the real visual rounding lives entirely in the override, which `Node.get("corner_radius")` never reads back. This means a `corner_radius` cross-check against the imperative call is *not meaningful* for `side_sheet` specifically, unlike every other fragment in this catalog — confirmed by direct testing, not assumed. Both fragments use a uniform `corner_radius: large` as the closer real visual approximation instead of matching the imperative's own misleading `0.0` readback (which would mean rendering a fully square panel).
+
+Real bug caught in the test itself, not the fragment, while verifying `side_sheet`: `side_sheet(modal=True)` returns the outer scrim (confirmed live), not the inner panel — an initial test compared the scrim's own `elevation` (always `0.0`) against the declarative *panel*'s real `elevation: level_1`, a real apples-to-oranges mismatch. Fixed by comparing each side's own actually-returned node. A second, unrelated f32-vs-f64 float precision artifact (`0.3199999928474426` vs `0.32`) needed `pytest.approx`, the same real, harmless artifact `Dialog`'s own opacity already produced without needing a fix (that test never asserted opacity directly).
+
+### Phase 1 — Fragments ✅
+- Step 1: `Dialog` — real finding: returns the scrim, not the panel; `scrim_width`/`scrim_height` required params; `corner_radius: extra_large`/`elevation: level_3`/`opacity: 0.32` all real, fixed, confirmed values — ✅
+- Step 2: `Snackbar` — the common no-action/non-closable case; `corner_radius: extra_small`/`elevation: level_3` — ✅
+- Step 3: `SideSheetModal`/`SideSheetStandard` — the two real structural shapes (scrim-wrapped vs. plain panel); the real `corner_radii_override`/base-`0.0` finding named directly in both fragments' own header comments — ✅
+- Step 4: `MenuItem` — the common no-icon/no-submenu-chevron case — ✅
+- Step 5: `Tooltip` — `corner_radius: extra_small`, the same real token `Snackbar` already uses — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_fragments_overlays.py` (new file) — 5 real pytest tests, including the real test-bug fix described above and a `pytest.approx` fix for a harmless float-precision artifact — ✅
+- Step 2: full suite — 128 passed (123 prior + 5 new), 0 regressions — ✅
+
+**6 new fragments this milestone; 50 total so far.**

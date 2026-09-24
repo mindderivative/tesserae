@@ -1,0 +1,42 @@
+# `add_side_sheet(modal=true)`'s declarative counterpart -- the real,
+# structurally distinct modal shape (a full-window scrim, right-
+# justified, wrapping the panel -- confirmed directly, the returned
+# node in the modal branch is `scrim`, not `panel`). `scrim_width`/
+# `scrim_height` are required params, same real reason `Dialog_
+# Component.yaml` states (`self.width.get()`/`height.get()` has no
+# declarative equivalent). `elevation: level_1` matches `SIDE_SHEET_
+# MODAL_ELEVATION=1.0` exactly, confirmed by direct readback.
+#
+# Real, honest gap, not fixed here, and a real, subtle finding worth
+# stating precisely: `add_side_sheet` applies a per-corner `corner_
+# radii_override` (only the sheet's own inner edge is rounded,
+# `[corner_radius, 0.0, 0.0, corner_radius]`) -- `StyleSpec.corner_
+# radius` has no per-corner concept declaratively at all. **The
+# imperative factory's own base `paint.corner_radius` is a literal
+# `0.0`** (the real visual rounding comes entirely from the override,
+# which `Node.get("corner_radius")` never reads back) -- so a
+# corner_radius cross-check against the imperative call is not
+# meaningful here, unlike every other fragment in this catalog. This
+# fragment uses a uniform `corner_radius: large`
+# (`SIDE_SHEET_CORNER_RADIUS=16.0 == SHAPE_LARGE`) as the closer real
+# visual approximation (some rounding, matching the sheet's own real
+# intent) rather than matching the imperative's own literal `0.0`
+# (which would render as a fully square panel, visually wrong).
+params: [width, height, scrim_width, scrim_height]
+id: root
+kind: Container
+style:
+  width: "{{ scrim_width }}"
+  height: "{{ scrim_height }}"
+  background: scrim
+  opacity: 0.32
+  justify_content: FlexEnd
+children:
+  - id: panel
+    kind: Rect
+    style:
+      width: "{{ width }}"
+      height: "{{ height }}"
+      background: surface_container_low
+      corner_radius: large
+      elevation: level_1

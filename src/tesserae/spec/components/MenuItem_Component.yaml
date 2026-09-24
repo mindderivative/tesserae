@@ -1,0 +1,20 @@
+# `add_menu_item(label=..., width=...)`'s declarative counterpart --
+# the common, no-icon/no-submenu-chevron case (real, deliberate scope
+# boundary, same reasoning `ListItem_Component.yaml` states: `icon`/
+# `submenu` are each independently optional imperatively, changing
+# real structure; deferred, not silently dropped). Colors match
+# `add_menu_item` exactly: label=on_surface, transparent container, no
+# corner radius (real MD3 menu item anatomy has none).
+params: [label, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 56
+  align_items: Center
+  padding: 16
+children:
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", role: label_large}
+    style: {background: on_surface}

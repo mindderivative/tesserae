@@ -1,0 +1,25 @@
+# `add_snackbar(text=..., width=...)`'s declarative counterpart -- the
+# common, no-action/non-closable case (real, deliberate scope boundary:
+# `action_label`/`closable` are each independently optional
+# imperatively, changing real structure; deferred, same reasoning
+# `ExtendedFabSurface_Component.yaml` states). Colors match `add_
+# snackbar` exactly: container=inverse_surface, text=
+# inverse_on_surface. `corner_radius: extra_small`/`elevation: level_3`
+# are real, fixed MD3 tokens (confirmed `SNACKBAR_CORNER_RADIUS=4.0 ==
+# SHAPE_EXTRA_SMALL`, `SNACKBAR_ELEVATION=3.0 == ELEVATION_LEVEL_3`).
+params: [text, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 48
+  background: inverse_surface
+  corner_radius: extra_small
+  elevation: level_3
+  align_items: Center
+  padding: {left: 16, right: 16, top: 0, bottom: 0}
+children:
+  - id: text
+    kind: Text
+    text: {content: "{{ text }}", role: body_medium}
+    style: {background: inverse_on_surface, flex_grow: 1}
