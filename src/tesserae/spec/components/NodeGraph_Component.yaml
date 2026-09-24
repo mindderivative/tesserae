@@ -1,0 +1,33 @@
+# `add_node_graph`'s declarative counterpart -- a themed viewport
+# surface for `add_graph_node`-composed nodes. `background:
+# surface_container_low` is the real MD3 role `add_node_graph` resolves
+# via its own theme lookup; corner_radius/elevation are both real,
+# fixed `0.0` (add_node_graph's own `PaintProperties::new(container_
+# color, 0.0, 0.0, 1.0)` call -- a flat, square-cornered, fully opaque
+# panel, not variant-dependent).
+#
+# The common no-border case only -- `add_node_graph` also takes
+# optional `border_color`/`border_width` (both `None` by default,
+# drawing no border at all); same "ship the common case, name the
+# rest" pattern this catalog already uses (see
+# ExtendedFabSurface_Component.yaml).
+#
+# Real, permanent structural boundary, not deferred here: `add_graph_
+# node` (the nodes this viewport is meant to hold) needs a live
+# `graph` node reference as its own attachment parent -- something no
+# `{{ }}`-substitution macro can express, since a fragment always
+# expands into a subtree at its own call site, never re-parents into
+# an unrelated, already-existing node elsewhere in the tree.
+# `graph_node` has no fragment and structurally cannot get one with
+# this macro layer's design -- nodes are meant to be added to a
+# NodeGraph programmatically (typically by a layout algorithm or user
+# action), the same "runtime-constructed, not statically declarable"
+# character `tabs`/`menu`/etc. already have, just via a different real
+# mechanism.
+params: [width, height]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: surface_container_low
