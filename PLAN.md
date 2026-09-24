@@ -1,17 +1,17 @@
-# PLAN — M25: Scoping the Next Boundary + `NodeGraph` Component Fragment
+# PLAN — M26: Detailed Scoping: `tre`-Side Primitive Additions & Macro-Layer Loop Construct
 
-*(Replaces the prior M24 plan in this file — M24 is complete, committed.)*
+*(Replaces the prior M25 plan in this file — M25 is complete, committed.)*
 
 ## Goal
 
-Scope the two real boundaries M24 named (dynamic-list widgets needing a macro-layer loop construct; primitives with no declarative `NodeKindSpec`) into something concrete enough to plan real work from — not implement either yet.
+Scope both of M25's remaining fronts as separate, buildable-later milestones — full technical design, not just a one-line summary. No implementation this milestone.
 
 ## Status
 
 **Complete.**
 
-Scoping surfaced a real correction to M24's own work: direct source investigation found `add_video`/`add_node_graph`/`add_graph_node` were wrongly lumped into "confirmed blocked, no declarative kind" — true for none of them in that form. `add_node_graph` is a plain themed `Rect` (zero new primitives needed — shipped today as `NodeGraph_Component.yaml`). `add_video` is a `NodeKind::Image` with a synthetic placeholder — `kind: Image` is already declarative but `ImageSpec.src` is required, so a faithful port needs one small `tre`-side change; filed [`tre` issue #2](https://github.com/mindderivative/tre/issues/2) rather than ship a non-faithful approximation (offered to the user directly, declined). `graph_node` needs a live node reference as its own attachment parent — reclassified from "no primitive" into the same dynamic/runtime-constructed bucket as `tabs`/`menu`/etc., for a different real reason.
+Front A (tentatively M27, `tre`-side `NodeKindSpec` additions for `radio_button`/`switch`/`link`/`circular_progress`/`linear_progress`/`loading_indicator`/`time_picker_dial`): sized every real constructor against `WidgetSpec`'s existing fields. Found and corrected an incomplete part of M25's own summary — 5 of the 7 primitives hardcode `PaintProperties.background` to `TRANSPARENT` and carry their entire real visual in internal per-kind tint fields that `Checkbox`/`Slider`'s own existing declarative precedent never had to theme-resolve. Scoped a small reusable role-resolve-with-fallback helper to close this, not a new subsystem. Found `loading_indicator` needs an extra required `paint.shape` seeding step (avoids a real, confirmed first-tick flash bug) and that `time_picker_dial`'s real new fields are `hour: u8`/`minute: u8`, not the `mode` field M25 guessed.
 
-`NodeGraph_Component.yaml` shipped: themed `Rect`, `background: surface_container_low`, common no-border case. 1 new pytest test. Full suite: 135 passed (134 prior + 1 new), 0 regressions. `BUILD_TRACKER.md` updated (25 milestones/51 phases/132 items/11 known gaps/3 fixed gaps), tracker artifact regenerated and republished. Committed locally (`8d87a3c`); push deferred pending explicit user confirmation.
+Front B (tentatively M28, macro-layer loop/repeat construct): checked `pyCopper` directly (this macro layer's own stated precedent) — found no repeat/loop construct there at all, confirming genuinely new design territory. Found the 6 dynamic-list widgets aren't uniform: `add_list` takes pre-built `Node`s (pure composition, the loop construct's cleanest fit — repeating the already-shipped `ListItem` fragment); `add_tabs`/`add_button_group`/`add_navigation_rail`/`add_navigation_drawer`/`add_menu` take raw `Vec<String>` and construct real state-dependent active/inactive coloring internally in Rust, which a static `{{ }}`-substitution template can't branch on. A loop construct alone gives full fidelity for `list_` but only a static snapshot for the other 5 without a second, separate new capability (conditional per-item styling).
 
-Two real fronts sized for a future milestone, neither started: (1) `tre`-side `NodeKindSpec` additions for `radio_button`/`switch`/`link`/`circular_progress`/`linear_progress`/`loading_indicator`/`time_picker_dial` (7 widgets, mirrors the proven M74 `Icon` precedent, mostly reuses existing `WidgetSpec` fields); (2) a macro-layer loop/repeat construct for the 6 dynamic-list widgets (real, novel design surface — `expand.py`'s `_substitute` only handles scalar params today — with a permanent load-time-only limitation regardless of syntax chosen). 60 fragments total.
+`BUILD_TRACKER.md` updated (26 milestones/53 phases/138 items/11 known gaps/3 fixed gaps), tracker artifact regenerated and republished. Committed locally (`80deaa2`); push deferred pending explicit user confirmation. No fragments shipped this milestone — 60 total, unchanged. Neither front built — user has not yet chosen which to pursue.

@@ -1,43 +1,40 @@
-# LOG — M25: Scoping the Next Boundary + `NodeGraph` Component Fragment
+# LOG — M26: Detailed Scoping: `tre`-Side Primitive Additions & Macro-Layer Loop Construct
 
-- User asked to scope the two real boundaries M24 named. Investigation
-  surfaced a real correction to M24's own categorization, not just a
-  plan.
+- User asked to scope both of M25's remaining fronts as separate
+  milestones. No code changed — pure investigation and design.
 
 ## What shipped
 
-1. Real correction: `add_node_graph` is a plain themed `NodeKind::Rect`
-   (`background: surface_container_low`, `corner_radius`/`elevation`
-   both literal `0.0`) — zero new `tre` primitives needed. Shipped as
-   `NodeGraph_Component.yaml` today.
-2. Real correction: `add_video` builds `NodeKind::Image` with a
-   synthetic transparent placeholder — `kind: Image` is already
-   declarative, but `ImageSpec.src` is a required file path with no
-   blank-placeholder concept, so a faithful port isn't possible today.
-   User declined a non-faithful poster-image approximation; filed
-   [`tre` issue #2](https://github.com/mindderivative/tre/issues/2)
-   requesting `ImageSpec.src` become optional, scoped precisely to the
-   placeholder shape (not a declarative video-source concept).
-3. Real reclassification: `graph_node` needs a live `graph` node
-   reference as its own attachment parent — not a missing
-   `NodeKindSpec` at all. Moved into the same "runtime-constructed"
-   bucket as `tabs`/`navigation_rail`/`navigation_drawer`/
-   `button_group`/`list_`/`menu`.
-4. `tests/test_fragments_media_graph.py` (new file) — 1 real pytest
-   test for `NodeGraph`.
-5. Sized (not built) the two real remaining fronts: `tre`-side
-   `NodeKindSpec` additions for 7 primitives (mirrors the proven M74
-   `Icon` precedent); a macro-layer loop/repeat construct for the 6
-   dynamic-list widgets (real novel design surface, permanent
-   load-time-only limitation regardless of syntax).
-- Verification: `pytest tests/` 135 passed (134 prior + 1 new), 0
-  regressions.
+1. Front A (tentatively M27) fully sized: all 7 primitives'
+   (`RadioButton`/`Switch`/`Link`/`CircularProgress`/`LinearProgress`/
+   `LoadingIndicator`/`TimePickerDial`) real constructors checked
+   against `WidgetSpec`'s existing fields. Real correction to M25's
+   own summary: 5 of 7 hardcode `PaintProperties.background` to
+   `TRANSPARENT` and carry their real visual entirely in internal
+   per-kind tint fields `Checkbox`/`Slider` never needed to
+   theme-resolve — without closing this, declarative versions would
+   render flat black regardless of theme, a real functional defect.
+   Scoped a small reusable helper to fix it, not a new subsystem.
+   Found `loading_indicator`'s real required `paint.shape`-seeding
+   step (avoids a confirmed first-tick flash bug) and corrected
+   `time_picker_dial`'s real new fields (`hour: u8`/`minute: u8`, not
+   the `mode` field M25 guessed).
+2. Front B (tentatively M28) fully sized: checked `pyCopper` directly
+   for a repeat/loop precedent — found none. Found the 6 dynamic-list
+   widgets aren't uniform: `add_list` takes pre-built `Node`s (pure
+   composition — the loop construct's cleanest target, repeating the
+   already-shipped `ListItem` fragment); the other 5 take raw
+   `Vec<String>` and construct real state-dependent coloring
+   internally in Rust, which a static template can't branch on. Full
+   fidelity for `list_`; only a static snapshot for the other 5
+   without a second, separate new capability.
+- No new fragments, no new tests this milestone — pure scoping.
 
 ## Status
 
-**M25 is complete. 60 fragments total.** Committed locally (`8d87a3c`);
-push deferred pending explicit user confirmation.
+**M26 is complete. 60 fragments total, unchanged.** Committed locally
+(`80deaa2`); push deferred pending explicit user confirmation.
 
-Both remaining fronts are scoped, not started. Next step is the
-user's: pick a front (`tre`-side primitives, or the macro-layer loop
-construct), or continue scoping something else.
+Both fronts (M27, M28) are now scoped in enough detail to start
+implementation. Next step is the user's: pick one, both, or continue
+scoping something else.
