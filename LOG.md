@@ -1,38 +1,34 @@
-# LOG — M19: Part 3, Phase 5 — `split_button` Component Fragments (Buttons & Actions Complete)
+# LOG — M20: Part 3, Phase 6 — Selection & Input Component Fragments
 
-- The last fixed-shape widget in Buttons & Actions: `split_button`,
-  all 5 real MD3 variants.
+- Selection & Input category: `Checkbox`/`Slider`/`SpinBox`. `radio_
+  button`/`switch` stay out of scope — no declarative `NodeKindSpec`
+  variant exists for either.
 
 ## What shipped
 
-1. `SplitButtonElevated`/`Filled`/`FilledTonal`/`Outlined`/`Text` — an
-   auto-sized `Container` wrapping a `ButtonFilled`-shaped leading
-   Rect+Text and a square trailing Rect+chevron Icon, both sharing the
-   identical real `resolve_button_colors` output per variant.
-2. Real, deliberate scope boundary, restated from `tesserae.widgets.
-   split_button`'s own docstring: rest-state only, no public Python
-   API for the real hover/press shape-tightening animation.
-3. Real, useful finding confirmed live before relying on it: a
-   declarative `Container` with no explicit `width`/`height` genuinely
-   auto-sizes to its children (standard flexbox behavior) — avoids
-   needing `{{ }}` arithmetic to compute a total width.
-4. `tests/test_fragments_split_button.py` (new file) — 2 real pytest
-   tests. Real bug caught in the test itself, not the engine: id-
-   namespacing is flat (every id prefixed once by the call-site's own
-   id, regardless of nesting depth) — matching pyCopper's own real
-   `_namespace_names` precedent — confirmed by direct inspection of
-   the expanded YAML before fixing the test's wrong assumption.
-- Verification: `pytest tests/` 106 passed (104 prior + 2 new), 0
+1. `Checkbox_Component.yaml`/`Slider_Component.yaml` — `checked`/
+   `value` map directly onto `WidgetSpec`'s own top-level fields (not
+   a sibling block, confirmed against `build.rs`), no `corner_radius`
+   param (both `add_checkbox`/`add_slider` hardcode `0.0`
+   imperatively). Real, honest gap named directly, not fixed here:
+   `mark_tint`/`text_tint` theming has no declarative equivalent at
+   all.
+2. `SpinBox_Component.yaml` — a real, deliberate structural
+   translation: `add_spin_box` builds 3 independent sibling nodes via
+   absolute x/y arithmetic; the fragment composes the identical result
+   via a `Container` + `flex_direction: Horizontal`. Second real token
+   match found: `corner_radius: small == CHIP_CORNER_RADIUS ==
+   SHAPE_SMALL` exactly.
+3. `tests/test_fragments_selection.py` (new file) — 4 real pytest
+   tests.
+- Verification: `pytest tests/` 110 passed (106 prior + 4 new), 0
   regressions.
 
 ## Status
 
-**M19 is complete. Buttons & Actions category complete: 22
-fragments.** `button_group` (dynamic list) stays real, deliberately
-out of scope. Committed locally (`b9542b5`); push deferred pending
-explicit user confirmation.
+**M20 is complete. 25 fragments total so far.** Committed locally
+(`1aa1549`); push deferred pending explicit user confirmation.
 
-Next: Selection & Input — `checkbox`/`slider` (real declarative
-primitives already) and `spin_box` (buildable now). `radio_button`/
-`switch` stay blocked — no declarative `NodeKindSpec` variant exists
-for either.
+Next: Cards/Lists/Chips/Structural Rows — `card` (3 variants), `chip`
+(4 variants), `list_item`, `badge` (2 structural shapes), `divider`,
+`link`, `accordion_header`, `tree_node`.
