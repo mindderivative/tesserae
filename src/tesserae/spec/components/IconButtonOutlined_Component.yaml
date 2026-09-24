@@ -1,0 +1,19 @@
+# `add_icon_button(variant="outlined")`'s declarative counterpart --
+# see `IconButtonFilled_Component.yaml` for the shared real design.
+# Colors match `resolve_button_colors`'s "outlined" exactly: container=
+# transparent, icon glyph=primary, border_color=outline, width=1.0.
+params: [icon, size, corner_radius]
+id: root
+kind: Rect
+style:
+  width: "{{ size }}"
+  height: "{{ size }}"
+  background: transparent
+  corner_radius: "{{ corner_radius }}"
+  border_color: outline
+  border_width: 1.0
+children:
+  - id: icon
+    kind: Icon
+    icon: {name: "{{ icon }}"}
+    style: {width: 24, height: 24, background: primary}

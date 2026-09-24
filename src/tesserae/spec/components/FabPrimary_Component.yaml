@@ -1,0 +1,18 @@
+# `add_fab(variant="primary")`'s declarative counterpart -- see
+# `FabSurface_Component.yaml` for the shared real design. Colors match
+# `resolve_fab_colors`'s "primary" exactly: container=primary_container,
+# icon glyph=on_primary_container.
+params: [icon, size, corner_radius]
+id: root
+kind: Rect
+style:
+  width: "{{ size }}"
+  height: "{{ size }}"
+  background: primary_container
+  corner_radius: "{{ corner_radius }}"
+  elevation: level_3
+children:
+  - id: icon
+    kind: Icon
+    icon: {name: "{{ icon }}"}
+    style: {width: 24, height: 24, background: on_primary_container}

@@ -1,0 +1,34 @@
+# `add_extended_fab(variant="surface", icon=<given>)`'s declarative
+# counterpart -- the leading-icon shape only (real, deliberate scope
+# boundary: `icon` is optional imperatively, changing both the leading
+# padding AND whether an Icon child exists at all -- a genuine
+# structural difference `{{ }}` substitution can't conditionally
+# express; the icon-less shape is a real, separate, deferred fragment,
+# not silently dropped). `corner_radius: large` and `elevation: level_3`
+# are real, fixed MD3 tokens here (unlike plain FAB, Extended FAB has
+# no size variants at all in real MD3, confirmed directly against
+# `EXTENDED_FAB_CORNER_RADIUS=16.0` == `engine_md3::shape::SHAPE_LARGE`
+# and `FAB_REST_ELEVATION_LEVEL=3.0` == `ELEVATION_LEVEL_3`). Colors
+# match `resolve_fab_colors`'s "surface" exactly.
+params: [label, icon, width]
+id: root
+kind: Container
+style:
+  flex_direction: Horizontal
+  width: "{{ width }}"
+  height: 56
+  background: surface_container_high
+  corner_radius: large
+  elevation: level_3
+  align_items: Center
+  padding: {left: 16, right: 20, top: 0, bottom: 0}
+  gap: 8
+children:
+  - id: icon
+    kind: Icon
+    icon: {name: "{{ icon }}"}
+    style: {width: 24, height: 24, background: primary}
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", role: label_large}
+    style: {background: primary}

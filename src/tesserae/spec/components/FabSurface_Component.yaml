@@ -1,0 +1,25 @@
+# `add_fab(variant="surface")`'s declarative counterpart. Colors match
+# `resolve_fab_colors`'s "surface" exactly: container=
+# surface_container_high, icon glyph=primary. `elevation: level_3` is a
+# real, fixed MD3 token (confirmed equal to FAB's own real unthemed
+# `FAB_REST_ELEVATION_LEVEL=3.0`, looked up with no variant -- same
+# across all 4 real FAB color variants). `size`/`corner_radius` are
+# required params, the same real reason `ButtonFilled_Component.yaml`
+# states (no arithmetic in `{{ }}` substitution) -- FAB's own 3 real
+# sizes each pair a fixed container size with its own real shape token
+# (small=40dp/corner_medium, default=56dp/corner_large,
+# large=96dp/corner_extra_large), so a caller picks the matching pair.
+params: [icon, size, corner_radius]
+id: root
+kind: Rect
+style:
+  width: "{{ size }}"
+  height: "{{ size }}"
+  background: surface_container_high
+  corner_radius: "{{ corner_radius }}"
+  elevation: level_3
+children:
+  - id: icon
+    kind: Icon
+    icon: {name: "{{ icon }}"}
+    style: {width: 24, height: 24, background: primary}

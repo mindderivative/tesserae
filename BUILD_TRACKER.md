@@ -27,15 +27,18 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M15 — Part 3 Phase 1: Component Macro-Expansion Engine | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M16 — Part 3 Phase 2: Wire `App.load()`/`instantiate()` to Macro-Expansion | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M17 — Part 3 Phase 3: Button Component Fragments (all 5 MD3 variants) | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M18 — Part 3 Phase 4: `icon_button`/`fab`/`extended_fab` Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M17 — all 5 real `button` MD3 variants shipped as separate fragments (`ButtonElevated`/`ButtonFilled`/`ButtonFilledTonal`/`ButtonOutlined`/`ButtonText`), per the user's own confirmed "one fragment per variant" decision. A major blocking finding surfaced immediately after: `engine-spec` supported only 7 of `tre`'s real 21 primitive kinds declaratively — no `kind: Icon` at all — blocking ~2/3 of the remaining catalog. Resolved by adding declarative `kind: Icon` to `tre` itself first (`tre`'s own new M74), not by narrowing scope. All 5 variants cross-checked against `tesserae.widgets.button(...)`'s own real output — exact matches.
+**Just closed:** M18 — 12 new fragments across 3 widget families, the first to actually need `kind: Icon`. `icon_button` (4) reuses `resolve_button_colors` directly (confirmed: `"standard"` maps to `"text"`'s own colors, matching the imperative factory's own real translation). `fab`/`extended_fab` (4 each) use `resolve_fab_colors`; a real, useful finding — both get fixed MD3 elevation/shape tokens (`level_3`, and `large` for Extended FAB specifically) baked directly into the fragment, confirmed equal to the real unthemed constants, no param needed for those two. Real, deliberate scope boundary: only `extended_fab`'s leading-icon shape shipped — the icon-less shape is a genuine structural difference (different padding, no `Icon` child) `{{ }}` can't conditionally express, deferred as a named gap. All 12 new fragments cross-checked against `tesserae.widgets`'s own imperative output — exact matches. 17 fragments total so far.
 
-**Previously:** M15/M16 — the macro-expansion engine and its wiring into `App.load()`/`tesserae.instantiate()`. See their own entries below.
+**Previously:** M15/M16/M17 — the macro-expansion engine, its wiring into `App.load()`/`tesserae.instantiate()`, and all 5 `button` variants. See their own entries below.
 
-**Up next:** the remaining widget-family fragments, applying the same per-variant convention, now unblocked by `kind: Icon` — `icon_button` (4 variants), `fab`/`extended_fab` (4 variants each), and onward through the rest of the catalog.
+**Up next:** `split_button` (a fixed 2-button+chevron shape, not a dynamic list — buildable), then onward through the remaining categories (Selection & Input, Cards/Lists/Chips, Navigation & Shell, Overlays, Search, Progress & Status, Media & Graphics, Date & Time).
 
 **Known gaps:**
-- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (only the 5 button variants) — real, deferred, mechanical follow-up work, now unblocked by `tre`'s new declarative `kind: Icon`.
+- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (17 fragments shipped so far, across Buttons & Actions) — real, deferred, mechanical follow-up work.
+- `extended_fab`'s icon-less structural shape has no fragment yet (real, deliberately deferred — see M18).
+- Several real widgets are fundamentally dynamic/list-shaped (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`) and can't be expressed as a fixed-parameter `*_Component.yaml` fragment at all with this macro layer's current design (no loop/repeat construct) — a real, deliberate, structural limitation, not a per-widget oversight.
 - `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
 - The declarative cascade doesn't consult a theme's per-component `components:` override (imperative-only) — an app wanting that level of per-component customization uses `tesserae.widgets` instead of a declarative fragment.
 - No dedicated `tesserae.widgets.text` wrapper for the raw `add_text` primitive — every widget needing text uses its own clear param instead; revisit only if a real caller needs the bare primitive.
@@ -336,3 +339,24 @@ This milestone itself ships the one widget that needed neither: all 5 real `butt
 - Step 2: full suite re-run after the rename fix — 101 passed, 0 regressions — ✅
 
 **Real naming convention now established for the rest of item 1:** `<Widget><Variant>_Component.yaml` / `component: <Widget><Variant>` for every widget with more than one real MD3 variant; a single `<Widget>_Component.yaml` / `component: <Widget>` for widgets with exactly one real shape.
+
+---
+
+## Milestone 18 — Part 3, Phase 4: `icon_button`/`fab`/`extended_fab` Component Fragments
+
+**Status: ✅ Complete (2026-09-23).** Continues item 1, now unblocked by `kind: Icon` (`tre`'s own M74) -- the first 3 widget families that actually need an icon glyph.
+
+`icon_button` (4 variants: filled/filled_tonal/outlined/standard) reuses `resolve_button_colors` directly, confirmed by direct read of `add_icon_button` -- `"standard"` maps to `"text"`'s own colors, the same real translation the imperative factory itself performs. `fab` (4 variants: surface/primary/secondary/tertiary) uses its own `resolve_fab_colors`; a real, useful finding: `elevation: level_3` is expressible as a genuine fixed MD3 token here (confirmed `ELEVATION_LEVEL_3 == 3.0`, the identical value `FAB_REST_ELEVATION_LEVEL` already uses, looked up with no variant at all -- the same across all 4 colors), so no elevation param is needed, unlike `corner_radius` (still a required param -- FAB's 3 real sizes each pair a fixed container size with their own real shape token, a caller picks the matching pair). `extended_fab` (4 variants, same `resolve_fab_colors`) has a real, fixed `corner_radius: large` token too (confirmed `SHAPE_LARGE == 16.0 == EXTENDED_FAB_CORNER_RADIUS` exactly, unlike plain FAB -- Extended FAB has no size variants in real MD3 at all).
+
+**Real, deliberate scope boundary, named directly:** `extended_fab`'s own `icon` param is optional imperatively (changes both the leading padding *and* whether an `Icon` child exists at all) -- a genuine structural difference `{{ }}` substitution can't conditionally express. Only the leading-icon shape shipped this milestone (the more common real case); the icon-less shape is a real, separate, deferred fragment, not silently dropped.
+
+### Phase 1 — Fragments ✅
+- Step 1: `IconButtonFilled`/`IconButtonFilledTonal`/`IconButtonOutlined`/`IconButtonStandard` — a square `Rect` + centered `Icon`, `size`/`corner_radius` required params — ✅
+- Step 2: `FabSurface`/`FabPrimary`/`FabSecondary`/`FabTertiary` — same real shape, `elevation: level_3` baked in as a real fixed token — ✅
+- Step 3: `ExtendedFabSurface`/`ExtendedFabPrimary`/`ExtendedFabSecondary`/`ExtendedFabTertiary` — a `Container` (`flex_direction: Horizontal`) with a leading `Icon` + `Text` label, `corner_radius: large`/`elevation: level_3` both baked in as real fixed tokens (Extended FAB has no size variants), only `label`/`icon`/`width` as params — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_fragments_buttons.py` (new file) — 3 real pytest tests, each looping over its own family's 4 variants and cross-checking `corner_radius`/`elevation`/`border_width` against `tesserae.widgets`'s own imperative output (12 real variant checks total) — all MATCH — ✅
+- Step 2: full suite — 104 passed (101 prior + 3 new), 0 regressions — ✅
+
+**12 new fragments this milestone; 17 total so far (Buttons & Actions: `button` ×5, `icon_button` ×4, `fab` ×4, `extended_fab` ×4).**

@@ -1,0 +1,19 @@
+# `add_icon_button(variant="standard")`'s declarative counterpart --
+# see `IconButtonFilled_Component.yaml` for the shared real design.
+# `standard` resolves to `resolve_button_colors`'s own "text" colors
+# (confirmed directly: `add_icon_button`'s own real "standard" -> "text"
+# translation, `window_factory.rs`): container=transparent, icon
+# glyph=primary.
+params: [icon, size, corner_radius]
+id: root
+kind: Rect
+style:
+  width: "{{ size }}"
+  height: "{{ size }}"
+  background: transparent
+  corner_radius: "{{ corner_radius }}"
+children:
+  - id: icon
+    kind: Icon
+    icon: {name: "{{ icon }}"}
+    style: {width: 24, height: 24, background: primary}

@@ -1,0 +1,26 @@
+# `add_extended_fab(variant="primary", icon=<given>)`'s declarative
+# counterpart -- see `ExtendedFabSurface_Component.yaml` for the shared
+# real design/scope boundary. Colors match `resolve_fab_colors`'s
+# "primary" exactly.
+params: [label, icon, width]
+id: root
+kind: Container
+style:
+  flex_direction: Horizontal
+  width: "{{ width }}"
+  height: 56
+  background: primary_container
+  corner_radius: large
+  elevation: level_3
+  align_items: Center
+  padding: {left: 16, right: 20, top: 0, bottom: 0}
+  gap: 8
+children:
+  - id: icon
+    kind: Icon
+    icon: {name: "{{ icon }}"}
+    style: {width: 24, height: 24, background: on_primary_container}
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", role: label_large}
+    style: {background: on_primary_container}
