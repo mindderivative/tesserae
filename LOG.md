@@ -1,41 +1,40 @@
-# LOG — M17: Part 3, Phase 3 — Button Component Fragments (All 5 MD3 Variants)
+# LOG — M18: Part 3, Phase 4 — `icon_button`/`fab`/`extended_fab` Component Fragments
 
-- User-directed ordering complete: "Start 3, then move to 2 and then
-  1" — items 3 and 2 both landed. This starts item 1: the remaining
-  37 component fragments.
+- Continues item 1, now unblocked by `tre`'s new declarative `kind:
+  Icon` — the first 3 widget families that actually need an icon
+  glyph.
 
 ## What shipped
 
-1. Real scoping question resolved via `AskUserQuestion` before writing
-   anything: one fragment per real MD3 variant, not one fragment with
-   an unbranchable `variant` param (`{{ }}` substitution has no
-   conditional logic). User confirmed full fidelity for all widgets
-   going forward.
-2. Real, major blocking finding surfaced immediately after: `engine-
-   spec` supports only 7 of `tre`'s real 21 primitive kinds
-   declaratively — no `kind: Icon` at all, confirmed directly. Blocks
-   ~2/3 of the remaining catalog. Resolved via a second
-   `AskUserQuestion`: added declarative `kind: Icon` to `tre` itself
-   first (its own new M74) rather than narrowing scope — see `tre`'s
-   own `LOG.md` for that work.
-3. `Button_Component.yaml` renamed to `ButtonFilled_Component.yaml` --
-   the new convention: `<Widget><Variant>_Component.yaml`.
-4. Real fix caught before it went unnoticed: every existing consumer
-   of the old `component: Button` name (4 test files) updated to
-   `component: ButtonFilled`, caught by re-running the full suite
-   immediately after reinstalling the new `tre` build.
-5. 4 new fragments (`ButtonElevated`/`ButtonFilledTonal`/
-   `ButtonOutlined`/`ButtonText`), all faithful to `resolve_button_
-   colors` exactly. `ButtonElevated` uses `elevation: level_1` -- MD3's
-   real named token, confirmed equal to the identical `1.0`
-   `add_button`'s own unthemed fallback uses.
-6. All 5 variants cross-checked in one pass against `tesserae.widgets.
-   button(...)`'s own real output -- all 5 MATCH exactly.
-- Verification: `pytest tests/` 101 passed, 0 regressions.
+1. `IconButtonFilled`/`IconButtonFilledTonal`/`IconButtonOutlined`/
+   `IconButtonStandard` — reuses `resolve_button_colors` directly
+   (confirmed: `"standard"` maps to `"text"`'s own colors, the same
+   real translation the imperative factory itself performs).
+2. `FabSurface`/`FabPrimary`/`FabSecondary`/`FabTertiary` — real,
+   useful finding: `elevation: level_3` is a genuine fixed MD3 token
+   here (confirmed `ELEVATION_LEVEL_3 == 3.0`, same across all 4
+   colors) — no elevation param needed, unlike `corner_radius` (still
+   required — FAB's 3 real sizes each pair a fixed container size with
+   their own shape token).
+3. `ExtendedFabSurface`/`ExtendedFabPrimary`/`ExtendedFabSecondary`/
+   `ExtendedFabTertiary` — real, fixed `corner_radius: large` token too
+   (confirmed `SHAPE_LARGE == 16.0 == EXTENDED_FAB_CORNER_RADIUS`
+   exactly — Extended FAB has no size variants in real MD3 at all).
+   Real, deliberate scope boundary: only the leading-icon shape
+   shipped — `icon` is optional imperatively, changing both the
+   leading padding and whether an `Icon` child exists at all, a
+   genuine structural difference `{{ }}` can't conditionally express.
+4. `tests/test_fragments_buttons.py` (new file) — 3 real pytest tests,
+   each looping over its family's 4 variants, cross-checking against
+   `tesserae.widgets`'s own imperative output (12 real variant checks)
+   — all MATCH.
+- Verification: `pytest tests/` 104 passed (101 prior + 3 new), 0
+  regressions.
 
 ## Status
 
-**M17 is complete.** Committed locally (`1d91f1e`); push deferred
-pending explicit user confirmation.
+**M18 is complete.** 17 fragments total so far. Committed locally
+(`8c6500e`); push deferred pending explicit user confirmation.
 
-Next: `icon_button` (4 variants), now unblocked by `kind: Icon`.
+Next: `split_button` (a fixed 2-button+chevron shape, not a dynamic
+list), then onward through the remaining categories.
