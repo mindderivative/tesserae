@@ -1,48 +1,41 @@
-# LOG — M16: Part 3, Phase 2 — Wire `App.load()`/`instantiate()` to Macro-Expansion
+# LOG — M17: Part 3, Phase 3 — Button Component Fragments (All 5 MD3 Variants)
 
-- User-directed ordering: "Start 3, then move to 2 and then 1". Item 3
-  (`tre`'s own `instantiate(..., source=...)` widening, its M73)
-  landed first, on `tre`'s `0.3.1` branch. This milestone is item 2.
+- User-directed ordering complete: "Start 3, then move to 2 and then
+  1" — items 3 and 2 both landed. This starts item 1: the remaining
+  37 component fragments.
 
 ## What shipped
 
-1. Reinstalled `tre` (`0.3.1` branch, with M73) into `tesserae/.venv`
-   via `maturin develop --release`, confirmed live with a direct
-   interactive check before writing any Tesserae-side code.
-2. `src/tesserae/app.py` — `App.load()` now constructs via `tesserae.
-   spec.load_view(view_path)` instead of `tre.View(str(view_path))`
-   directly. Real, deliberate scope limit stated in its own docstring:
-   no `theme_seed`/`custom_theme`/`stylesheet`/`dark` forwarding yet.
-3. `src/tesserae/component.py` — `instantiate()` now reads `path`'s
-   real content, calls `expand_components()`, and hands off via
-   `parent.instantiate(str(path), into, source=expanded)` — reachable
-   for nested components too, since `Component.instantiate` (not just
-   `View.instantiate`) got the identical `tre`-side widening.
-4. Real, honest limitation surfaced while testing, not fixed here:
-   `App` has no theme API of its own at all — an MD3-token-using
-   `component:` fragment can't actually render through `App.load()`
-   without one yet. Proven via a real distinguishing test: before this
-   wiring, a `component:`-using view fails with `tre`'s own schema
-   error (`component` isn't a real `WidgetSpec` field,
-   `deny_unknown_fields`); after, it fails later, at MD3 color
-   resolution — proving `component:`/`with:` were genuinely replaced
-   before `tre` ever parsed the file, even though the fragment still
-   can't fully render without a theme.
-5. `tests/test_app.py` (+2) / `test_component.py` (+2) — each pair
-   proving the no-op regression case and the genuine-expansion case.
-- Verification: `pytest tests/` 101 passed (97 prior + 4 new), 0
-  regressions. All 3 real examples (`counter`/`multi_screen`/
-  `todo_list`) re-run end to end — genuinely warranted this time (this
-  change touches the core construction path every example goes
-  through, unlike the additive widget-catalog milestones) — all exited
-  cleanly with correct real output (`Count: 3` after 3 clicks, final
-  screen `Settings`, final todo items list unchanged from before).
+1. Real scoping question resolved via `AskUserQuestion` before writing
+   anything: one fragment per real MD3 variant, not one fragment with
+   an unbranchable `variant` param (`{{ }}` substitution has no
+   conditional logic). User confirmed full fidelity for all widgets
+   going forward.
+2. Real, major blocking finding surfaced immediately after: `engine-
+   spec` supports only 7 of `tre`'s real 21 primitive kinds
+   declaratively — no `kind: Icon` at all, confirmed directly. Blocks
+   ~2/3 of the remaining catalog. Resolved via a second
+   `AskUserQuestion`: added declarative `kind: Icon` to `tre` itself
+   first (its own new M74) rather than narrowing scope — see `tre`'s
+   own `LOG.md` for that work.
+3. `Button_Component.yaml` renamed to `ButtonFilled_Component.yaml` --
+   the new convention: `<Widget><Variant>_Component.yaml`.
+4. Real fix caught before it went unnoticed: every existing consumer
+   of the old `component: Button` name (4 test files) updated to
+   `component: ButtonFilled`, caught by re-running the full suite
+   immediately after reinstalling the new `tre` build.
+5. 4 new fragments (`ButtonElevated`/`ButtonFilledTonal`/
+   `ButtonOutlined`/`ButtonText`), all faithful to `resolve_button_
+   colors` exactly. `ButtonElevated` uses `elevation: level_1` -- MD3's
+   real named token, confirmed equal to the identical `1.0`
+   `add_button`'s own unthemed fallback uses.
+6. All 5 variants cross-checked in one pass against `tesserae.widgets.
+   button(...)`'s own real output -- all 5 MATCH exactly.
+- Verification: `pytest tests/` 101 passed, 0 regressions.
 
 ## Status
 
-**M16 is complete, all 3 phases.** `component:` macro-expansion is now
-the default for both real construction paths. Committed locally
-(`13b58c5`); push deferred pending explicit user confirmation.
+**M17 is complete.** Committed locally (`1d91f1e`); push deferred
+pending explicit user confirmation.
 
-Next: item 1 of the user's own ordering — the other 37 component
-fragments.
+Next: `icon_button` (4 variants), now unblocked by `kind: Icon`.
