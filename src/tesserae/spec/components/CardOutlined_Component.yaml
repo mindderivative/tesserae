@@ -1,0 +1,14 @@
+# `add_card(variant="outlined")`'s declarative counterpart -- see
+# `CardElevated_Component.yaml` for the shared real design. Colors
+# match `resolve_card_colors`'s "outlined" exactly: container=surface,
+# border_color=outline_variant, border_width=1.0.
+params: [width, height]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: surface
+  corner_radius: medium
+  border_color: outline_variant
+  border_width: 1.0

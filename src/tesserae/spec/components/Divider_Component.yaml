@@ -1,0 +1,14 @@
+# `add_divider`'s declarative counterpart. Real, deliberate design
+# choice: `add_divider(length, vertical)` computes `width`/`height`
+# from `length`+`vertical` internally -- this fragment instead takes
+# `width`/`height` directly (the caller picks the orientation by which
+# dimension is thin), avoiding two separate `DividerHorizontal`/
+# `DividerVertical` fragments for what isn't a real MD3 "variant", just
+# an axis choice -- the identical real reasoning `tesserae.widgets.
+# divider`'s own imperative wrapper design already settled on. Color is
+# fixed, not variant/param-driven: `outline_variant` (no theming choice
+# exists here in real MD3 divider anatomy).
+params: [width, height]
+id: root
+kind: Rect
+style: {width: "{{ width }}", height: "{{ height }}", background: outline_variant}

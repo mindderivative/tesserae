@@ -30,15 +30,16 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M18 — Part 3 Phase 4: `icon_button`/`fab`/`extended_fab` Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M19 — Part 3 Phase 5: `split_button` Fragments — Buttons & Actions Complete | `██████████` 100% | ✅ Complete (2026-09-23) |
 | M20 — Part 3 Phase 6: Selection & Input Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
+| M21 — Part 3 Phase 7: Cards/Lists/Chips/Structural Rows Component Fragments | `██████████` 100% | ✅ Complete (2026-09-23) |
 
-**Just closed:** M20 — `Checkbox`/`Slider`/`SpinBox`. `radio_button`/`switch` stay real, deliberately deferred — no declarative `NodeKindSpec` variant exists for either. `Checkbox`/`Slider` need no `corner_radius` param at all (both hardcode `0.0` imperatively); a real, honest gap named directly: neither's real `mark_tint`/`text_tint` theming has a declarative equivalent. `SpinBox` composes 3 independently-positioned imperative nodes into one real `Container`+flexbox tree (the right declarative translation, not a compromise) and found a second real token match: `corner_radius: small` == `CHIP_CORNER_RADIUS` exactly.
+**Just closed:** M21 — 15 new fragments: `Card` (3 variants), `Chip` (5 real named variants — `input`/`suggestion` are real distinct MD3 names even though they share unselected `filter`'s own colors), `ListItem`, `Badge` (2 structural shapes: dot/pill), `Divider`, `AccordionHeader`, `TreeNode` (2 structural shapes: leaf/branch). `link` stays out of scope — `NodeKind::Link` has no declarative equivalent, confirmed directly, the same real gap already named for `radio_button`/`switch`. Two more real token matches found (`corner_radius: medium` for `Card`, `small` for `Chip`/`BadgeLabeled`). `TreeNode`'s real `depth * TREE_NODE_INDENT_WIDTH` arithmetic handled by requiring the already-computed `left_padding` as a param instead, matching `Button`'s own established `corner_radius` precedent.
 
-**Previously:** M15-M19 — the macro-expansion engine, its wiring, and the full Buttons & Actions category (22 fragments). See their own entries below.
+**Previously:** M15-M20 — the macro-expansion engine, its wiring, Buttons & Actions (22 fragments), and Selection & Input (3 fragments). See their own entries below.
 
-**Up next:** Cards/Lists/Chips/Structural Rows — `card` (3 variants), `chip` (4 variants), `list_item`, `badge` (2 structural shapes: dot/pill), `divider`, `link`, `accordion_header`, `tree_node`.
+**Up next:** Navigation & Shell (mostly blocked as dynamic-list — `tabs`/`navigation_rail`/`navigation_drawer` all take a variable-length list of entries), Overlays (`dialog`/`snackbar`/`side_sheet`/`menu_item`/`tooltip` — all fixed-shape, buildable), Search, Progress & Status, Media & Graphics, Date & Time.
 
 **Known gaps:**
-- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (25 fragments shipped so far: Buttons & Actions + Selection & Input) — real, deferred, mechanical follow-up work.
+- Most of the widget catalog still has no declarative `*_Component.yaml` fragment yet (40 fragments shipped so far) — real, deferred, mechanical follow-up work.
 - `extended_fab`'s icon-less structural shape has no fragment yet (real, deliberately deferred — see M18).
 - Several real widgets are fundamentally dynamic/list-shaped (`tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`list_`/`menu`) and can't be expressed as a fixed-parameter `*_Component.yaml` fragment at all with this macro layer's current design (no loop/repeat construct) — a real, deliberate, structural limitation, not a per-widget oversight.
 - `App`/`App.load()` has no theme-related API at all (`theme_seed`/`custom_theme`/`dark`/`stylesheet`) — a real, pre-existing gap, newly relevant now that `component:` fragments can reference MD3 color roles/shape tokens through `App.load()`.
@@ -402,3 +403,30 @@ Real, useful finding confirmed live before relying on it: a declarative `Contain
 - Step 2: full suite — 110 passed (106 prior + 4 new), 0 regressions — ✅
 
 **3 new fragments this milestone; 25 total so far.**
+
+---
+
+## Milestone 21 — Part 3, Phase 7: Cards, Lists, Chips & Structural Rows Component Fragments
+
+**Status: ✅ Complete (2026-09-23).** `Card` (3 variants), `Chip` (5 real named variants), `ListItem`, `Badge` (2 structural shapes), `Divider`, `AccordionHeader`, `TreeNode` (2 structural shapes) — 15 new fragments. `link` stays out of scope: `NodeKind::Link` has no declarative `NodeKindSpec` equivalent at all, confirmed directly (`unknown variant "Link"`) — the same real gap already named for `radio_button`/`switch` at `tre`'s own M74.
+
+Real token finds: `corner_radius: medium` for `Card` (`CARD_CORNER_RADIUS=12.0 == SHAPE_MEDIUM`, not variant-dependent in real MD3 card anatomy) and `corner_radius: small` for `Chip`/`BadgeLabeled` (`8.0 == SHAPE_SMALL`), both confirmed before relying on them.
+
+`Chip`'s real variant space is genuinely 5 named states, not 4: `assist`/`filter`(unselected)/`filter`(selected)/`input`/`suggestion` — `input`/`suggestion` resolve to identical colors as unselected `filter`, but are real, distinct MD3 names kept as their own fragments on purpose. `ChipFilterSelected` is a real, distinct *structural* shape (an automatic checkmark Icon, not a param-driven color swap) confirmed directly in `window_factory.rs`'s own `show_checkmark` logic.
+
+Real, deliberate scope boundaries, all named directly rather than silently dropped: `Chip`/`ListItem`/`ExtendedFab`-style optional leading/trailing icons and supporting text ship only the common no-icon case (multiple independent optional pieces changing real structure, `{{ }}` has no conditionals); `AccordionHeader`/`TreeNodeBranch` ship the collapsed rest state only (the real `expanded=true` chevron flip is a runtime `paint.transform` animation, not a structural difference). `TreeNode`'s real `depth * TREE_NODE_INDENT_WIDTH` indent arithmetic (`{{ }}` has none) is handled by requiring the already-computed `left_padding` as a param instead of `depth` — the same real "require the final computed value" precedent `ButtonFilled`'s own `corner_radius` param already established.
+
+### Phase 1 — Fragments ✅
+- Step 1: `CardElevated`/`CardFilled`/`CardOutlined` — content-free Rects, `corner_radius: medium` — ✅
+- Step 2: `ChipAssist`/`ChipFilter`/`ChipFilterSelected`/`ChipInput`/`ChipSuggestion` — `corner_radius: small`; `ChipFilterSelected` includes a real fixed checkmark Icon — ✅
+- Step 3: `ListItem` — single-line, no-icon case — ✅
+- Step 4: `BadgeDot`/`BadgeLabeled` — the two real structural shapes, fixed `error`/`on_error` colors (no theming choice in real MD3 badge anatomy) — ✅
+- Step 5: `Divider` — takes `width`/`height` directly rather than `length`/`vertical` (avoids 2 fragments for what isn't a real MD3 variant, matching `tesserae.widgets.divider`'s own imperative design) — ✅
+- Step 6: `AccordionHeader` — real, useful finding: `flex_grow: 1` on the headline avoids `add_accordion_header`'s own `headline_width = width - 2*padding - icon_size - gap` arithmetic entirely — ✅
+- Step 7: `TreeNodeLeaf`/`TreeNodeBranch` — the two real structural shapes (chevron present/absent) — ✅
+
+### Phase 2 — Verification ✅
+- Step 1: `tests/test_fragments_structural.py` (new file) — 9 real pytest tests covering all 15 fragments: `Card`/`Chip` cross-checked against `tesserae.widgets`'s own imperative output across every real variant/case; `Badge`/`Divider` cross-checked too; `ListItem`/`AccordionHeader`/`TreeNodeLeaf`/`TreeNodeBranch` structurally verified (including a real, direct proof that `TreeNodeLeaf` genuinely has no `chevron` node at all, not just an empty one) — ✅
+- Step 2: full suite — 119 passed (110 prior + 9 new), 0 regressions — ✅
+
+**15 new fragments this milestone; 40 total so far.**

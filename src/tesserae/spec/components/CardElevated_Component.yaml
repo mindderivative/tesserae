@@ -1,0 +1,18 @@
+# `add_card(variant="elevated")`'s declarative counterpart -- a
+# content-free Rect (real MD3 anatomy: an app populates it via
+# `Node.add_child`/nested `component:` usage, matching `add_card`'s own
+# real "content-free" design). `corner_radius: medium` is a real, fixed
+# MD3 token here (confirmed `CARD_CORNER_RADIUS=12.0` ==
+# `engine_md3::shape::SHAPE_MEDIUM` exactly -- corner radius is not
+# variant-dependent in real MD3 card anatomy, confirmed directly in
+# `window_factory.rs`'s own comment). Colors match `resolve_card_colors`
+# exactly: container=surface_container_low, `elevation: level_1`.
+params: [width, height]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+  background: surface_container_low
+  corner_radius: medium
+  elevation: level_1

@@ -1,0 +1,21 @@
+# `add_badge(label=..., width=...)`'s declarative counterpart -- the
+# real, structurally distinct "labeled" pill shape (a Rect + centered
+# Text). `corner_radius: small` is a real, fixed MD3 token here
+# (confirmed `BADGE_LABELED_HEIGHT/2=8.0` == `SHAPE_SMALL` exactly).
+# Colors are fixed: `error`/`on_error`, the same real "no theming
+# choice" reasoning `BadgeDot_Component.yaml` states.
+params: [label, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 16
+  background: error
+  corner_radius: small
+  justify_content: Center
+  align_items: Center
+children:
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", role: label_small}
+    style: {background: on_error}

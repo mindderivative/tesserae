@@ -1,0 +1,30 @@
+# `add_accordion_header(expanded=false)`'s declarative counterpart --
+# the real, collapsed rest state only (real, deliberate scope
+# boundary: `expanded=true` applies a real `paint.transform` scale-flip
+# to the chevron, an app-driven runtime animation state, not a
+# structural difference -- out of scope for a fragment's own static
+# initial pose, the same real reasoning `SplitButtonFilled_Component
+# .yaml`'s own animation scope-cut states). Colors match `add_
+# accordion_header` exactly: headline=on_surface, chevron=
+# on_surface_variant. Real, useful finding: `flex_grow: 1` on the
+# headline lets it fill the real remaining space after the chevron,
+# avoiding the `headline_width = width - 2*padding - icon_size - gap`
+# arithmetic `add_accordion_header` itself computes (`{{ }}` has none).
+params: [title, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 56
+  align_items: Center
+  padding: 16
+  gap: 12
+children:
+  - id: title
+    kind: Text
+    text: {content: "{{ title }}", role: label_large}
+    style: {background: on_surface, flex_grow: 1}
+  - id: chevron
+    kind: Icon
+    icon: {name: expand_more}
+    style: {width: 24, height: 24, background: on_surface_variant}

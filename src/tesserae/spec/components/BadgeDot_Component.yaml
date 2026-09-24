@@ -1,0 +1,12 @@
+# `add_badge()` (no `label`)'s declarative counterpart -- the real,
+# structurally distinct "dot" shape (a plain, content-free square,
+# `BADGE_DOT_SIZE=6.0`, `corner_radius=BADGE_DOT_SIZE/2=3.0` -- a
+# literal, no matching MD3 token exists for this one specific size,
+# unlike `BadgeLabeled_Component.yaml`'s own `small` token match).
+# Colors are fixed, not variant/param-driven: `error`/`on_error` (no
+# theming choice exists here at all in real MD3 badge anatomy).
+# No params -- `add_badge()`'s own dot shape takes none either (size
+# and color are both fixed).
+id: root
+kind: Rect
+style: {width: 6, height: 6, background: error, corner_radius: 3}

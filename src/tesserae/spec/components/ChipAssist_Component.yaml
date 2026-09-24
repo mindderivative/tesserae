@@ -1,0 +1,28 @@
+# `add_chip(variant="assist")`'s declarative counterpart -- the common,
+# no-leading-icon/non-removable case (real, deliberate scope boundary,
+# same reasoning `ExtendedFabSurface_Component.yaml` states: `icon`/
+# `removable` are optional imperatively, changing real structure --
+# padding, gap, extra children -- that `{{ }}` can't conditionally
+# express; deferred, not silently dropped). Colors match `resolve_chip_
+# colors`'s "assist" exactly: container=transparent, border_color=
+# outline, label=on_surface (not `on_surface_variant` -- assist is the
+# one real chip variant that differs here, confirmed directly).
+# `corner_radius: small` is a real, fixed MD3 token (`CHIP_CORNER_
+# RADIUS=8.0` == `SHAPE_SMALL`); height=32 and padding/gap match
+# `CHIP_HEIGHT`/`CHIP_LEADING_PADDING_NO_ICON`/`CHIP_TRAILING_PADDING_
+# NO_ICON` exactly (real MD3 Chip anatomy constants).
+params: [label, width]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: 32
+  background: transparent
+  corner_radius: small
+  border_color: outline
+  border_width: 1.0
+children:
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", role: label_large}
+    style: {background: on_surface}

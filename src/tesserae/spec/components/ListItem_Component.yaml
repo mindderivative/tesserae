@@ -1,0 +1,26 @@
+# `add_list_item(headline=..., width=...)`'s declarative counterpart --
+# the common, no-leading/trailing-icon, no-supporting-text case (real,
+# deliberate scope boundary, same reasoning `ExtendedFabSurface_
+# Component.yaml` states: all 3 are optional imperatively, each
+# changing real structure -- extra children, a taller two-line height
+# -- that `{{ }}` can't conditionally express; deferred, not silently
+# dropped). No MD3 "variant" concept exists for list items at all, so
+# this is the one real fragment. `height: 56` matches the real
+# `MENU_ITEM_HEIGHT` (single-line); `padding: 16` matches `MENU_ITEM_
+# LEADING_SPACE` on both sides. Headline color matches `add_list_item`'s
+# own real `theme.on_surface()` -- `background: on_surface`, no
+# `on_surface_variant` (that's reserved for the icon/supporting-text
+# colors this fragment doesn't use).
+params: [headline, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  height: 56
+  align_items: Center
+  padding: 16
+children:
+  - id: headline
+    kind: Text
+    text: {content: "{{ headline }}", role: label_large}
+    style: {background: on_surface}

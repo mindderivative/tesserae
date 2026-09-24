@@ -1,0 +1,22 @@
+# `add_chip(variant="filter", selected=false)`'s declarative
+# counterpart -- see `ChipAssist_Component.yaml` for the shared real
+# design/scope boundary. Colors match `resolve_chip_colors`'s "filter"
+# (unselected) exactly: container=transparent, border_color=outline,
+# label=on_surface_variant. See `ChipFilterSelected_Component.yaml` for
+# the real, distinct selected state (a genuinely different structure --
+# an automatic checkmark, not a param-driven color swap).
+params: [label, width]
+id: root
+kind: Rect
+style:
+  width: "{{ width }}"
+  height: 32
+  background: transparent
+  corner_radius: small
+  border_color: outline
+  border_width: 1.0
+children:
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", role: label_large}
+    style: {background: on_surface_variant}
