@@ -1,40 +1,40 @@
-# PLAN — M21: Part 3, Phase 7 — Cards, Lists, Chips & Structural Rows Component Fragments
+# PLAN — M22: Part 3, Phase 8 — Navigation & Shell Component Fragments (Fixed-Shape Members)
 
-*(Replaces the prior M20 plan in this file — M20 is complete, committed.)*
+*(Replaces the prior M21 plan in this file — M21 is complete, committed.)*
 
 ## Goal
 
-`Card` (3 variants), `Chip` (multiple variants), `ListItem`, `Badge`
-(2 structural shapes), `Divider`, `AccordionHeader`, `TreeNode` (2
-structural shapes). `link` stays out of scope.
+The real, fixed-shape widgets in Navigation & Shell: `toolbar` (both
+variants), `top_app_bar`, `status_bar`. `tabs`/`navigation_rail`/
+`navigation_drawer` stay out of scope — variable-length lists.
 
 ## Status
 
 **Complete, both phases.**
 
-15 new fragments, all cross-checked against `tesserae.widgets`'s own
-imperative output. Real findings: `Chip`'s real variant space is 5
-named states, not 4 (`input`/`suggestion` are real, distinct MD3 names
-even though they resolve to identical colors as unselected `filter`);
-`ChipFilterSelected` is a real, distinct structural shape (automatic
-checkmark Icon); two more real token matches (`corner_radius: medium`
-for `Card`, `small` for `Chip`/`BadgeLabeled`); `TreeNode`'s real
-`depth * TREE_NODE_INDENT_WIDTH` arithmetic handled by requiring the
-already-computed `left_padding` as a param.
+`ToolbarDocked`/`ToolbarFloating`, `TopAppBar`, `StatusBar` — all 4
+shipped, content-free where real MD3 anatomy is (an app populates via
+nested `component:`/`Node.add_child`).
 
-`link` confirmed blocked — `NodeKind::Link` has no declarative
-equivalent, the same real gap already named for `radio_button`/
-`switch`.
+Real correction caught before it shipped wrong: an initial `StatusBar`
+draft guessed its real color role/typography without checking the
+source first — caught by reading `add_status_bar`'s own body directly,
+fixed to the real values (`on_surface_variant`/`label_small`) before
+any test ran against it.
 
-9 new pytest tests (`test_fragments_structural.py`), including a real
-direct proof `TreeNodeLeaf` has no `chevron` node at all, not just an
-empty one. Full suite: 119 passed (110 prior + 9 new), 0 regressions.
-`BUILD_TRACKER.md` updated, tracker artifact regenerated (21
-milestones/43 phases/106 items/9 known gaps/3 fixed gaps) and
-republished. Committed locally (`353b071`); push deferred pending
-explicit user confirmation.
+`Toolbar`'s real 3-axis design (variant/orientation/tone) handled by
+making `tone` a plain `background` role-name param (not a separate
+fragment axis) and shipping horizontal-only (a docked toolbar has no
+vertical variant in real MD3 anatomy at all, so that's not even a real
+gap for `ToolbarDocked`). `TopAppBar` reuses the `flex_grow: 1`
+title-fills-remaining-space pattern already established.
 
-40 fragments total so far. Next: Navigation & Shell (mostly blocked as
-dynamic-list), Overlays (`dialog`/`snackbar`/`side_sheet`/`menu_item`/
-`tooltip` — all fixed-shape, buildable), Search, Progress & Status,
-Media & Graphics, Date & Time.
+4 new pytest tests (`test_fragments_navigation.py`), all cross-checked
+against `tesserae.widgets`. Full suite: 123 passed (119 prior + 4 new),
+0 regressions. `BUILD_TRACKER.md` updated, tracker artifact
+regenerated (22 milestones/45 phases/111 items/9 known gaps/3 fixed
+gaps) and republished. Committed locally (`a0385aa`); push deferred
+pending explicit user confirmation.
+
+44 fragments total so far. Next: Overlays (`dialog`/`snackbar`/
+`side_sheet`/`menu_item`/`tooltip` — all fixed-shape, buildable).
