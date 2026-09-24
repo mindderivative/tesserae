@@ -23,9 +23,10 @@ from pathlib import Path
 from typing import Any
 
 from tre import App as _TreApp
-from tre import View, Window
+from tre import Window
 
 from tesserae.naming import check_naming_convention
+from tesserae.spec import load_view
 
 
 @dataclass
@@ -85,6 +86,16 @@ class App:
         `Counter_View.yaml`/`Counter_ViewModel.py`) -- only needed
         explicitly if two different pairs would otherwise collide on it.
 
+        Constructed via `tesserae.spec.load_view` (not `tre.View`
+        directly) -- transparent `component: Name`/`with: {...}` macro
+        expansion for any screen that uses it, a true no-op for one that
+        doesn't (`load_view`'s own real design). Real, current scope
+        limit: no `theme_seed`/`custom_theme`/`stylesheet`/`dark`
+        forwarding here yet -- `App.load()` never accepted any of those
+        before this change either, so this is a real, additive widening
+        for `component:` support, not a narrowing of anything that
+        already worked.
+
         Returns the constructed `(view, viewmodel)` pair -- most real
         `app.py` scripts won't need it (everything from here on happens
         through `show()`/registered handlers), but a caller that wants a
@@ -94,7 +105,7 @@ class App:
         view_path = Path(view_path)
         prefix = check_naming_convention(view_path, viewmodel_cls)
 
-        view = View(str(view_path))
+        view = load_view(view_path)
         viewmodel = viewmodel_cls(view)
         self.register(name or prefix, view, viewmodel)
         return view, viewmodel

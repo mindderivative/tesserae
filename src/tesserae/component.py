@@ -9,6 +9,12 @@ call already works; this adds the same real `*_View.yaml`/
 screens, so a mismatched component pair fails immediately at
 instantiation time instead of much later when a handler name doesn't
 resolve.
+
+Also applies `component:` macro-expansion (`tesserae.spec`) before
+handing off to `parent.instantiate`, using the real `source=` override
+`tre`'s own M73 gave `View.instantiate`/`Component.instantiate` --
+previously only reachable for a top-level `View` (via `App.load`'s own
+`load_view`), never for an embedded component.
 """
 
 from __future__ import annotations
@@ -17,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from tesserae.naming import check_naming_convention
+from tesserae.spec import expand_components
 
 
 def instantiate(
@@ -28,9 +35,18 @@ def instantiate(
 
     `parent` is whatever already has a real `instantiate(path, into)` of
     its own -- a `View` or another `Component` (they nest, so a
-    component can itself hold further nested components this same way).
+    component can itself hold further nested components this same way,
+    and `component:` usage inside a nested component's own YAML expands
+    the identical way).
+
+    `path`'s real content is expanded for `component:` usage before
+    handoff -- a true no-op for a `*_Component.yaml` with none (`expand_
+    components`'s own real design, matching `load_view`'s).
     """
     check_naming_convention(path, viewmodel_cls)
-    component = parent.instantiate(str(path), into)
+    path = Path(path)
+    raw_text = path.read_text(encoding="utf-8")
+    expanded = expand_components(raw_text)
+    component = parent.instantiate(str(path), into, source=expanded)
     viewmodel = viewmodel_cls(component, *args, **kwargs)
     return component, viewmodel

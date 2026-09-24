@@ -113,3 +113,57 @@ def test_multiple_instances_are_independent_and_removable(tmp_path):
     # raising after the neighbor is gone.
     component_a.remove()
     view.click(component_b.node("root"))
+
+
+def test_instantiate_with_no_component_usage_still_works_unchanged(tmp_path):
+    """Real regression proof: `instantiate()` now expands `path`'s
+    content and hands it off via `source=` (`tre`'s own M73 widening)
+    instead of letting `parent.instantiate` read the file itself -- a
+    `*_Component.yaml` with zero `component:` usage must still embed
+    exactly as it always did (`expand_components`'s own real "true
+    no-op" design)."""
+    parent_path = write(tmp_path, PARENT_VIEW, "Parent_View.yaml")
+    item_path = write(tmp_path, ITEM_VIEW, "Item_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Item_ViewModel.py", "ItemViewModel")
+
+    view = View(parent_path)
+    container = view.node("item_list")
+    component, vm = instantiate(view, item_path, vm_cls, container)
+
+    assert component.node("root") is not None
+
+
+NESTED_COMPONENT_USING_ITEM_VIEW = """
+id: root
+kind: Container
+style: {width: 260, height: 40}
+children:
+  - id: action_button
+    component: Button
+    with: {label: Go, width: 100, height: 32, corner_radius: 16}
+"""
+
+
+def test_instantiate_genuinely_expands_component_usage(tmp_path):
+    """Real, distinguishing proof `tesserae.instantiate()` (an embedded
+    component, not a top-level `View`) genuinely applies `component:`
+    macro-expansion -- the real gap `tre`'s own M73 closed
+    (`Component.instantiate`/`View.instantiate` had no `source=`
+    override at all before it). Before M73 + this wiring, a
+    `component:`-using `*_Component.yaml` would fail with `tre`'s own
+    schema error (`component` is not a real `WidgetSpec` field). After,
+    it fails later, at MD3 color resolution (no `theme_seed` given --
+    `View` itself supports one, but this test constructs a plain,
+    unthemed `View` on purpose to isolate this one real, distinguishing
+    proof) -- confirming `component:`/`with:` were genuinely replaced
+    before `tre` ever parsed this component's own YAML.
+    """
+    parent_path = write(tmp_path, PARENT_VIEW, "Parent_View.yaml")
+    item_path = write(tmp_path, NESTED_COMPONENT_USING_ITEM_VIEW, "Item_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Item_ViewModel.py", "ItemViewModel")
+
+    view = View(parent_path)
+    container = view.node("item_list")
+
+    with pytest.raises(ValueError, match="unknown color identifier"):
+        instantiate(view, item_path, vm_cls, container)

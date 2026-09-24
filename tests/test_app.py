@@ -171,3 +171,50 @@ def test_load_rejects_mismatched_view_and_viewmodel_prefixes(tmp_path):
     app = App()
     with pytest.raises(ValueError, match="prefix"):
         app.load(view_path, vm_cls)
+
+
+def test_load_with_no_component_usage_still_works_unchanged(tmp_path):
+    """Real regression proof: `App.load()` now constructs via `tesserae.
+    spec.load_view` instead of `tre.View` directly -- a view with zero
+    `component:` usage must still load exactly as it always did
+    (`load_view`'s own real "true no-op" design)."""
+    view_path = write_view(tmp_path, SIMPLE_VIEW, name="Counter_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Counter_ViewModel.py", "CounterViewModel")
+
+    app = App()
+    view, vm = app.load(view_path, vm_cls)
+
+    assert view.node("root") is not None
+
+
+COMPONENT_USING_VIEW = """
+id: root
+kind: Container
+style: {width: 300, height: 200}
+children:
+  - id: save_button
+    component: Button
+    with: {label: Save, width: 120, height: 40, corner_radius: 20}
+"""
+
+
+def test_load_genuinely_expands_component_usage(tmp_path):
+    """Real, distinguishing proof that `App.load()` now applies
+    `component:` macro-expansion, not just that it doesn't crash on a
+    plain view: before this change, a `component:`-using view would
+    fail with `tre`'s own schema error (`component` is not a real
+    `WidgetSpec` field, `#[serde(deny_unknown_fields)]`) -- confirming
+    `tre` saw the raw, unexpanded YAML. After this change, the same
+    view instead fails later, at MD3 color resolution (`Button_
+    Component.yaml`'s own `background: primary`, with no `theme_seed`
+    given -- `App` has no theme-related API of its own yet, a real,
+    separate, pre-existing gap unrelated to this change) -- proving
+    `component:`/`with:` were genuinely replaced with real `WidgetSpec`
+    content before `tre` ever parsed it.
+    """
+    view_path = write_view(tmp_path, COMPONENT_USING_VIEW, name="Save_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Save_ViewModel.py", "SaveViewModel")
+
+    app = App()
+    with pytest.raises(ValueError, match="unknown color identifier"):
+        app.load(view_path, vm_cls)
