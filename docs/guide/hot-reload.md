@@ -100,7 +100,7 @@ runs once per reload, even though the value didn't change. The same
 thing happens when a view is first attached and on a view-file reload.
 Write `on_change` handlers so that running one again with the same value
 is harmless: set a `Signal` to the node's current value, don't toggle
-it or append to a list.
+it or append to a list. This is [`tre` issue #12](https://github.com/mindderivative/tre/issues/12).
 
 ## Limits
 
