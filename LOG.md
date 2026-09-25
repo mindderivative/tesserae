@@ -82,3 +82,16 @@ logged (not raised through `tre`), examples on `logger`. `loguru` 0.7.3
 installed. `tesserae/log.py` with `configure_logging`; logging in
 `watch.py` and `app.py`; the `logs` fixture; four tests rewritten, seven
 added; docs. 426 passed. Recorded as M44.
+
+## M34 Phase 2 — spikes; M34 complete
+
+User: "push it and run the two spikes". Pushed `d5e7dfc`. The app quit
+mid-run; resumed.
+
+1. `cascade_cost.py`: Tesserae 20.7 / 2.8 / 0.7 ms against `tre`
+   11.0 / 3.1 / 0.5 ms (build / theme switch / bound update), with
+   matching results. The profile puts half the build in the rule scan.
+2. `checkbox_on_primitives.py`: 6/12 at first. A simulated press and
+   release already counts as a click, so the extra click toggled back;
+   Tab needed a second focusable node. Then 12/12.
+3. Spikes kept in `tools/spikes/` with a README.

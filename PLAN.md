@@ -43,4 +43,6 @@ User-directed: "scope tre's building-block program". `tre`'s approved plan (its 
 
 Colour spike done: `materialyoucolor` with `spec_version="2021"` and tone 10 for the four light `on_*_container` roles matches `tre` exactly (784/784), so P2 is accepted. Message sent to `tre`; it agreed and is building the migration guide and the `TRE_FORBID_REMOVED=1` gate shim (its M97 Phase 2).
 
-**Up next:** the cascade/binding cost spike and the checkbox-on-primitives spike.
+Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 ms against `tre`'s 11.0 ms, with theme switches and bound updates on par; a full MD3 checkbox on primitives passes 12/12 checks. **M34 complete.**
+
+**Up next:** M35 (reactivity), waiting on the user's go-ahead.

@@ -183,5 +183,21 @@ On `tre` 0.3.4, this machine, 2,000 boxes each holding a text node:
 | build | 9.5 ms | 10.9 ms |
 | re-colour every node | 0.8 ms | 2.3 ms (`set_theme`) |
 
-Not yet measured: Tesserae's own cascade and binding evaluation in Python
-on the same tree (M34 Phase 2).
+With Tesserae's own cascade, role colours and bindings prototyped in
+Python (`tools/spikes/cascade_cost.py`), on 2,000 boxes and 2,000 texts
+with a 4-rule stylesheet and 500 texts bound to one `Signal`:
+
+| | Tesserae prototype | `tre`'s `View` |
+|---|---|---|
+| build, including cascade and bindings | 20.7 ms | 11.0 ms |
+| theme switch | 2.8 ms | 3.1 ms |
+| one `Signal.set` reaching 500 nodes | 0.7 ms | 0.5 ms |
+
+Half the prototype's build is its naive cascade, which scans every rule
+for every node; the real one (M37) indexes rules by kind, class and id.
+
+A full MD3 checkbox built from the building blocks alone
+(`tools/spikes/checkbox_on_primitives.py`, ~70 lines) passes 12
+headless checks: state layers, ripple, keyboard-only focus ring, the
+check mark drawn in with `trim_end`, accessibility role, label and state,
+and Space/Enter activation.
