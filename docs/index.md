@@ -43,8 +43,9 @@ end to end by three real vertical-slice examples. See
 - **Themes, stylesheets and custom fonts** -- loaded from files, with a
   warning when a font would silently fall back. See
   [Themes & Fonts](guide/themes-and-fonts.md).
-- **A full reactivity layer** -- `Signal`, plus `tre`'s own richer
-  `Computed`/`Effect`/`batch`/`untrack`, re-exported unmodified.
+- **A full reactivity layer** -- `Signal`, `Computed`, `Effect`,
+  `batch`, `untrack` and `ViewModel`, Tesserae's own since M35. See
+  [Reactivity](guide/reactivity.md).
 - **An enforced naming convention** -- every real view is a
   `*_View.yaml` + `*_ViewModel.py` pair, checked at load time, not
   discovered as a cryptic failure later.

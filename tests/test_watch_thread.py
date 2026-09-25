@@ -108,7 +108,7 @@ def test_a_broken_edit_is_logged_and_the_watcher_carries_on(started, logs):
         "unknown component 'NoSuchThing'",
     )
     assert message.startswith(f"hot reload of {view_path} failed: ")
-    assert any("traceback" in m for m in logs.messages("DEBUG"))
+    logs.wait_for("DEBUG", "traceback")  # logged just after the ERROR, on the watcher thread
     assert handle.queued.empty()  # nothing for the loop to run
     assert watcher.running
     assert view.node("label").get_text() == "Hello"

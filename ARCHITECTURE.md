@@ -36,11 +36,14 @@ tesserae.widgets        -- one Python function per MD3 widget, thin
   |                          delegates to tre's Window.add_* factories
   |                          (image() decodes in Tesserae first)
   |
-tesserae.{Signal,View,ViewModel,Component,
-  |        Computed,Effect,batch,untrack}       -- thin re-exports of tre's
-  |                                               own real, already-
-  |                                               working MVVM + reactivity
-  |                                               primitives (tre's M45)
+tesserae.{Signal,ViewModel,Computed,
+  |        Effect,batch,untrack}                -- tesserae.reactive: Tesserae's
+  |                                               own reactivity (M35, taken
+  |                                               over from tre); feeds tre's
+  |                                               binding tracking until M36
+  |
+tesserae.{View,Component}                    -- re-exports of tre's, until
+  |                                               Tesserae builds views (M37)
   |
 tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         the declarative YAML+binding layer
@@ -52,10 +55,15 @@ tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         tre's own M43)
 ```
 
-Tesserae does not duplicate `tre`'s own real capability in slower,
-less-tested Python -- `Signal`/`View`/`ViewModel`/`Component` are `tre`'s
-own classes, imported unmodified. The one deliberate division of labour
-the other way is files (next section): Tesserae owns all of them. Tesserae's own real, additive value is
+`tre` is moving everything a framework can build out of the engine (its
+M93–M103); Tesserae takes it over in M34–M43
+(`docs/design/building-blocks.md`). Reactivity is Tesserae's since M35
+(`tesserae/reactive.py`, taken over from `tre`'s pure-Python module with
+the same behaviour). Until M36, `tre` still evaluates `{{ }}` bindings on
+its native recording stack, so a Tesserae read with no Tesserae frame
+open is passed on to `tre._core._record_read`; a Tesserae frame shadows
+`tre`'s. `View`/`Component` are still `tre`'s. Files are Tesserae's too
+(next section). Tesserae's own real, additive value is
 `App` (the real "one entry point, named-screen registry, switch without
 re-bootstrapping" layer neither `tre` nor pyCopper's own `App`/`Engine`
 split provide in this exact shape), `instantiate` (the same real
@@ -207,8 +215,8 @@ before tearing down" ordering.
 - `instantiate`/`Component.remove()`/`Repeater`, exercised end to end
   by `examples/todo_list/` -- a real dynamic list driven by one list
   `Signal`, `Repeater` adding/removing components automatically.
-- Everything `tre.View`/`tre.Signal`/`tre.ViewModel`/`tre.Component`
-  already provide: `{{ }}` binding expressions (a strict, non-`eval`
+- Everything `tre.View`/`tre.Component` provide, with Tesserae's own
+  `Signal`/`ViewModel` (M35): `{{ }}` binding expressions (a strict, non-`eval`
   whitelist), real `on_click`/`on_hover_enter`/`on_hover_exit`/
   `on_change` handler wiring, two-way binding for `checked` (Checkbox),
   `selected` (Switch/RadioButton), `value` (Slider) and `text` -- the
@@ -216,8 +224,8 @@ before tearing down" ordering.
 - Hot reload, owned by Tesserae (`tre`'s `View.poll_reload()` has no
   file to watch, since `tre` reads none): `app.run(hot_reload=True)`,
   or `tesserae.spec.ViewWatcher` directly.
-- `tre.Computed`/`Effect`/`batch`/`untrack` (M45), re-exported
-  unmodified -- derived/cached values, side-effect-only reactions, and
+- `Computed`/`Effect`/`batch`/`untrack`, Tesserae's own since M35
+  (taken over from `tre`'s M45, same behaviour) -- derived/cached values, side-effect-only reactions, and
   collapsing related writes into one notification pass, all duck-typed
   against `Signal`'s own subscribe shape so a `{{ }}` binding can depend
   on a `Computed` with no special handling. See `README.md`'s own

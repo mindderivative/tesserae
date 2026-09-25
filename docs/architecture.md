@@ -38,11 +38,14 @@ tesserae.Repeater       -- one list Signal as the single source of
   |                          truth; keeps one Component+ViewModel alive
   |                          per item present, via instantiate (above)
   |
-tesserae.{Signal,View,ViewModel,Component,
-  |        Computed,Effect,batch,untrack}       -- thin re-exports of tre's
-  |                                               own real, already-
-  |                                               working MVVM + reactivity
-  |                                               primitives
+tesserae.{Signal,ViewModel,Computed,
+  |        Effect,batch,untrack}                -- tesserae.reactive: Tesserae's
+  |                                               own reactivity (M35, taken
+  |                                               over from tre); feeds tre's
+  |                                               binding tracking until M36
+  |
+tesserae.{View,Component}                    -- re-exports of tre's, until
+  |                                               Tesserae builds views (M37)
   |
 tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         the declarative YAML+binding layer
@@ -57,9 +60,10 @@ watches every file; `tre` receives only data (`View(spec=...)`,
 `add_image_from_bytes` pixels, `register_font` bytes). Tesserae never
 gives `tre` a file path (M29).
 
-Tesserae does not duplicate `tre`'s own real capability in slower,
-less-tested Python -- `Signal`/`View`/`ViewModel`/`Component` are
-`tre`'s own classes, imported unmodified. Tesserae's own real,
+`tre` is moving everything a framework can build out of the engine (its
+M93–M103), and Tesserae is taking it over (M34–M43, see
+[the design page](design/building-blocks.md)). Reactivity is Tesserae's
+since M35; `View`/`Component` are still `tre`'s. Tesserae's own real,
 additive value is `App`, `instantiate`, `Repeater`, the declarative
 `component:`/`with:`/`repeat:` macro layer, the `tesserae.widgets`
 imperative catalog, and all file handling -- images, themes, fonts and

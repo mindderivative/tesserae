@@ -45,4 +45,6 @@ Colour spike done: `materialyoucolor` with `spec_version="2021"` and tone 10 for
 
 Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 ms against `tre`'s 11.0 ms, with theme switches and bound updates on par; a full MD3 checkbox on primitives passes 12/12 checks. **M34 complete.**
 
-**Up next:** M35 (reactivity), waiting on the user's go-ahead.
+**M35 complete (2026-09-25):** `tesserae.reactive`, the parity suite (both implementations), and the recording bridge to `tre`'s bindings until M36; 455 passed.
+
+**Up next:** M36 (bindings and handlers), waiting on the user's go-ahead.

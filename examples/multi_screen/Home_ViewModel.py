@@ -1,5 +1,5 @@
 """Pairs with `Home_View.yaml`. Takes `app` alongside `view` (widening
-`tre.ViewModel`'s own real `__init__(self, view)` contract) so its
+`tesserae.ViewModel`'s `__init__(self, view)` contract) so its
 `on_click` handler can call `app.show(...)` -- the real, decisive proof
 this example exists for: switching screens *from inside a real
 dispatched handler*, the same reentrant scenario `tre`'s own M42 Phase 2

@@ -16,8 +16,8 @@ widget-class trees, paired with a Python `ViewModel` per view -- a plain
 screens, switched via `App.show()` from inside a real dispatched
 handler), and `examples/todo_list/` (a real dynamic list, one list
 `Signal` as the single source of truth, `Repeater` keeping components in
-sync automatically). `Computed`/`Effect`/`batch`/`untrack` (TRE M45) are
-also real and re-exported -- see Reactivity below. The MD3 widget catalog
+sync automatically). `Signal`/`Computed`/`Effect`/`batch`/`untrack`/
+`ViewModel` are Tesserae's own (M35) -- see Reactivity below. The MD3 widget catalog
 is real too: 67 declarative `component:` fragments for `*_View.yaml`
 files, plus `tesserae.widgets` for building widgets from Python. See the
 [documentation](https://mindderivative.github.io/tesserae/) for both.
@@ -143,7 +143,8 @@ every remaining instance down and unsubscribes, mirroring `Component
 
 ## Reactivity
 
-`tre`'s own richer reactivity layer (TRE M45), re-exported unmodified:
+Tesserae's reactivity (`tesserae.reactive`, taken over from `tre` in
+M35 with the same behaviour):
 
 ```python
 from tesserae import Computed, Effect, batch

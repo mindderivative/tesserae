@@ -95,3 +95,23 @@ mid-run; resumed.
    release already counts as a click, so the extra click toggled back;
    Tab needed a second focusable node. Then 12/12.
 3. Spikes kept in `tools/spikes/` with a README.
+
+## M35 — reactivity in Tesserae
+
+User: "push it and start M35". Pushed `7e508a7`.
+
+1. Read `tre`'s reactivity at v0.3.4 (Computed, Effect, ViewModel, the
+   `_core` recording imports). `tre` is MIT, same author.
+2. `src/tesserae/reactive.py`: the same code with a Python recording
+   stack, plus the bridge: with no Tesserae frame open, reads go to
+   `tre._core._record_read`, so `tre`'s `View._attach` bindings still
+   track them.
+3. `tests/test_reactive.py`: 13 tests × 2 implementations, plus a names
+   test and bridge tests. The shadowing mutant wasn't caught at first;
+   the real case is `untrack` inside a method a binding calls. Writing it
+   found that `tre`'s grammar needs `info.described()`, not
+   `described()`. 5/5 mutants caught.
+4. The full suite once failed intermittently in an M44 test: a race
+   between the watcher thread's ERROR and DEBUG log lines. Fixed by
+   waiting for the DEBUG line. 455 passed.
+5. Docs updated everywhere reactivity was called "tre's, re-exported".

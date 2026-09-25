@@ -14,9 +14,12 @@ Tesserae's own real, additive public surface:
 | `tesserae.configure_logging(level="INFO", *, sink=sys.stderr, format=DEFAULT_FORMAT, capture_warnings=True) -> int` | Sends log messages at `level` and above to `sink` in Tesserae's format, replacing loguru's default stderr handler; shows Python warnings through loguru too. Returns the handler id. See [Logging](../guide/logging.md). |
 | `tesserae.register_font(path) -> list[str]` | Reads a font file and registers it with `tre`; returns its family names. See [Themes & Fonts](../guide/themes-and-fonts.md). |
 
-`tre`'s own real, already-working primitives, re-exported unmodified
-rather than duplicated -- see [`tre`'s own Python API reference](https://mindderivative.github.io/tre/api/python/index/)
-for these:
+Reactivity (`Signal`, `ViewModel`, `Computed`, `Effect`, `batch`,
+`untrack`) is Tesserae's own (`tesserae.reactive`, M35); see
+[Reactivity](../guide/reactivity.md). `View` and `Component` are still
+`tre`'s, re-exported until Tesserae builds views itself (M37); see
+[`tre`'s Python API reference](https://mindderivative.github.io/tre/api/python/index/)
+for those:
 
 | | |
 | --- | --- |
