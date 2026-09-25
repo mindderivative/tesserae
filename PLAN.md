@@ -29,8 +29,8 @@ User-directed: "scope the tre 0.3.4 migration". Move Tesserae from `tre` v0.3.3 
 
 ## Status
 
-**In progress — all done locally; CI check waits on a push (2026-09-25).** Decisions: the user took all three recommendations. Phase 2: `.venv` on 0.3.4; scrims `"#00000052"` (reads back `(0, 0, 0, 82)`, the same as `tre`'s); labels `"#FFFFFF"`; `tests/test_paint_0_3_4.py` scans every view, fragment and docs snippet (fails 8 times on the old files). 418 passed.
+**Complete (2026-09-25).** CI green on `v0.3.4` (run 36178911095: 417 passed, 2 skipped for no display). Decisions: the user took all three recommendations. Phase 2: `.venv` on 0.3.4; scrims `"#00000052"` (reads back `(0, 0, 0, 82)`, the same as `tre`'s); labels `"#FFFFFF"`; `tests/test_paint_0_3_4.py` scans every view, fragment and docs snippet (fails 8 times on the old files). 418 passed.
 
 Phase 3: `tests/test_thread_gc.py` (fails on 0.3.3 with tre#10's panic, passes on 0.3.4); CI's `tre` ref → `v0.3.4`; `installation.md`/`README.md` → v0.3.4; a "Transparency" section in the themes guide; the two 0.3.4 gaps moved to fixed. 419 passed.
 
-**Up next:** push M33 and confirm CI is green on `v0.3.4`; that closes M33.
+**Up next:** nothing started. Candidates: `tre`'s building-block program (M97's gate), hot reload for `App.register()`ed screens, conditional per-item styling.

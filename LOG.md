@@ -57,3 +57,10 @@ User: "start Phase 3".
 3. `installation.md`, `README.md` → v0.3.4 (release assets checked:
    CPython 3.9–3.15 wheels). Transparency section in the themes guide.
 4. 419 passed; `mkdocs build --strict` clean. Gaps moved to fixed.
+
+## CI
+
+User: "push it and check the CI run". Pushed `e8b23c3..73b31da`. CI run
+36178911095 green: `tre` at `29800f3`, built `tre-0.3.4`, 417 passed and
+2 skipped (the two live tests; no display), no unraisable warnings. Docs
+deploy green. M33 complete.
