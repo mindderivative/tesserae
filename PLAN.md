@@ -8,10 +8,10 @@ User-directed: "Push, cleanup, and then start M31". With `run(hot_reload=True)`,
 
 ## Status
 
-**In progress — Phase 1 of 3 done (2026-09-25).**
+**In progress — Phase 2 of 3 done (2026-09-25).**
 
 1. **Theme files** — ✅ `FileWatcher` watches `App(default_theme=, custom_theme=)`; an edit queues `App.set_theme_specs()`, which re-themes every view `build_view()`/`load()` made plus the window. Found and fixed an M30 bug on the way: the window was never themed (building a `View` doesn't set the window's theme), so `App.show()` now calls `Window.set_theme`, resolving seed and colors the way a `View` does. 234 → 245 tests.
-2. **Stylesheet files** — watch the app's default stylesheet and each screen's own `load(stylesheet=)` file; re-apply with `View.set_stylesheet`. Settle the two M91 consequences: an `on_change` handler fires once per live update when bindings are re-applied, and an embedded `tesserae.instantiate` component isn't re-themed (`tre`'s `Component` has no `set_theme`).
+2. **Stylesheet files** — ✅ the default (`App.set_stylesheet_spec()`) and each screen's own file are watched; a failed re-style is undone on the screens already changed. The M91 consequences are documented, not worked around: `on_change` fires once per reload on bound nodes (pinned by a test), and embedded components never get the host's theme or stylesheet (a `tre` limitation, found reading `View.instantiate`). 245 → 254 tests.
 3. **Tests, docs, tracker** — a subprocess live test (M29 Phase 6's pattern); final MkDocs pass; tracker and artifact.
 
-**Up next:** Phase 2, waiting on the user's go-ahead.
+**Up next:** Phase 3, waiting on the user's go-ahead.

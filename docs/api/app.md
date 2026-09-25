@@ -40,6 +40,17 @@ If `tre` rejects the theme, it raises, and the app keeps its old theme.
 Call it on the event-loop thread; `run(hot_reload=True)` calls it when a
 theme file changes.
 
+## `set_stylesheet_spec`
+
+**`set_stylesheet_spec(stylesheet_spec) -> None`**
+
+Replaces the app's default stylesheet in place. Every screen using the
+default is re-styled, and screens built later use the new one. Screens
+given their own `stylesheet=` aren't touched. `None` means no
+stylesheet. If `tre` rejects it, it raises, and every screen keeps its
+old stylesheet. Call it on the event-loop thread;
+`run(hot_reload=True)` calls it when the default stylesheet file changes.
+
 ## `build_view`
 
 **`build_view(view_path, *, stylesheet=None, stylesheet_spec=None) -> View`**
@@ -96,7 +107,9 @@ changes on disk. See [Hot Reload](../guide/hot-reload.md). Screens given
 to `register()` directly aren't watched, since Tesserae doesn't know
 their file. The theme files given to `App(...)` are watched too, and an
 edit re-themes the running app (see
-[Hot Reload](../guide/hot-reload.md#theme-files)).
+[Hot Reload](../guide/hot-reload.md#theme-and-stylesheet-files)). So are
+stylesheet files: the default from `App(stylesheet=)`, and each screen's
+own `load(stylesheet=)` file.
 
 ## `thread_handle`
 

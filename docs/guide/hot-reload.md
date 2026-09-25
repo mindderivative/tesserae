@@ -68,7 +68,7 @@ Then either:
 `watcher.files` lists every file being watched. It's recomputed on every
 reload, so a newly added include, fragment or image is picked up.
 
-## Theme files
+## Theme and stylesheet files
 
 `App.run(hot_reload=True)` also watches the theme files given to
 `App(default_theme=..., custom_theme=...)`. When you save one, Tesserae
@@ -78,10 +78,37 @@ by `app.load()` or `app.build_view()`, and the window, through
 `*_spec=` dict has no file, so it isn't watched. A broken edit is logged
 like a failed view reload, and the app keeps its previous theme.
 
+Stylesheet files are watched the same way:
+
+- **The default stylesheet** from `App(stylesheet=...)`: saving it
+  re-styles every screen that uses the default, through
+  `app.set_stylesheet_spec(...)`. Screens loaded with their own
+  stylesheet are left alone.
+- **A screen's own stylesheet** from `app.load(..., stylesheet=...)`:
+  saving it re-styles only the screens loaded with that file.
+
+A stylesheet `tre` rejects is reported naming the file, and every
+screen keeps its old stylesheet.
+
+### Handlers fire when bindings are re-applied
+
+After a theme or stylesheet change, `tre` re-applies every binding so
+bound nodes keep their live values. It does this by setting each bound
+value again, so a declared `on_change` handler on a bound node (a
+`Checkbox` with `checked:` bound, a `TextField` with `text:` bound)
+runs once per reload, even though the value didn't change. The same
+thing happens when a view is first attached and on a view-file reload.
+Write `on_change` handlers so that running one again with the same value
+is harmless: set a `Signal` to the node's current value, don't toggle
+it or append to a list.
+
 ## Limits
 
-- **Stylesheet files aren't watched yet** (M31 Phase 2). After editing
-  one, call `view.set_stylesheet(stylesheet_spec=load_stylesheet(...))`.
+- **Embedded components don't get the app's theme or stylesheet.** A
+  component added with [`tesserae.instantiate`](components.md) is built
+  by `tre` without the host view's theme and stylesheet `styles:`, so it
+  isn't styled by them when created or when either is reloaded. Style
+  it with its own inline `style:`.
 - **Don't use `tre`'s own `View.poll_reload()`.** Tesserae gives `tre`
   the finished view as data, never a file, so `tre` has nothing to
   watch.

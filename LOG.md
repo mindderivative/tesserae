@@ -33,3 +33,25 @@ Slip: while probing, a `git checkout v0.3.3` ran in `tre`'s main
 checkout by mistake; restored to `main` at once (`68c3883`), with the
 `tre` session's uncommitted `CLAUDE.md` edit intact. Source reads use
 `git show v0.3.3:...` from then on.
+
+## Phase 2 — stylesheet files
+
+User: "Push and start". Pushed `dae8402`.
+
+1. Probed both M91 consequences on 0.3.3 first. `on_change`: a bound
+   Checkbox and TextField each fired once after `set_stylesheet`,
+   `set_theme` and `reconcile`, and at first attach, with the value
+   unchanged. Embedded component: a `tesserae.instantiate` card had
+   `corner_radius` 0 and `elevation` 0 under the host's stylesheet and
+   theme, even at creation. `View.instantiate` (at the tag) hands
+   `instantiate_component` only the shared window `ThemeState`.
+2. Both documented rather than worked around (Tesserae has no hook for
+   either); both in known gaps as possible `tre` issues.
+3. `_Built` records per built view whether it has its own stylesheet
+   and from which file. `App.set_stylesheet_spec()` (public),
+   `_set_own_stylesheet`, a `FileWatcher` per stylesheet file, and
+   `_naming` so a `tre` rejection names the file. `_apply_all` undoes
+   screens already changed if one fails, for themes too.
+4. 9 tests in `tests/test_stylesheet_reload.py`; four code paths
+   removed in turn, each caught. 254 passed. Docs updated;
+   `mkdocs build --strict` clean.

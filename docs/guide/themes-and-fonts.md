@@ -81,7 +81,9 @@ In an `App`, `app.set_theme_specs(default_theme_spec, custom_theme_spec)`
 re-themes every screen the app built, and the window, in one call. Both
 dicts are the complete new selection (`None` for none), and the seed and
 `dark` stay as given to `App(...)`. With `run(hot_reload=True)`, saving
-a theme file does this for you ([Hot Reload](hot-reload.md#theme-files)).
+a theme file does this for you ([Hot Reload](hot-reload.md#theme-and-stylesheet-files)).
+`app.set_stylesheet_spec(stylesheet_spec)` does the same for the app's
+default stylesheet, re-styling every screen that uses it.
 
 For a single view or window, `load_theme` and `load_stylesheet` read a
 file into the dict `tre` takes, for `View.set_theme` and
@@ -135,7 +137,7 @@ warnings.filterwarnings("error", category=FontFallbackWarning)
 
 ## Not yet covered
 
-- **Hot reload doesn't watch stylesheet files yet.** Theme files are
-  watched ([Hot Reload](hot-reload.md#theme-files)). Stylesheet files are
-  next (M31 Phase 2); until then, re-apply one with
-  `view.set_stylesheet(stylesheet_spec=load_stylesheet(...))`.
+- **Embedded components don't get the theme or stylesheet.** A
+  component added with [`tesserae.instantiate`](components.md) isn't
+  styled by the host view's theme or stylesheet `styles:`
+  ([Hot Reload](hot-reload.md#limits)).

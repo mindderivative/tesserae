@@ -122,7 +122,10 @@ widgets, interaction tints), and building a `View` never sets the
 window's, so `App.show()` calls `Window.set_theme` with the app's theme,
 resolved the way a `View` resolves it. `App.set_theme_specs()` re-themes
 every built screen and the window; `run(hot_reload=True)` calls it when a
-theme file changes (a `FileWatcher` thread). A stylesheet is per-`View`:
+theme file changes (a `FileWatcher` thread). Stylesheet files are
+watched too: `App.set_stylesheet_spec()` re-applies the default to every
+screen using it, and a screen's own file re-styles the screens built with
+it (`View.set_stylesheet`, `tre` M91). A stylesheet is per-`View`:
 `App(stylesheet=)` is the default and `App.load(..., stylesheet=)`
 replaces it for one screen. `App.build_view()` gives a `register()`ed
 screen the same theme and stylesheet.

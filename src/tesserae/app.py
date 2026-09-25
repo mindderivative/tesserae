@@ -44,6 +44,47 @@ class _Registered:
     path: Path | None = None
 
 
+@dataclass
+class _Built:
+    """A view `App.build_view()` made -- one a theme or stylesheet reload
+    reaches (M31)."""
+
+    view: Any
+    #: `True` if it was given its own stylesheet (file or dict) instead
+    #: of the app's default.
+    own_stylesheet: bool = False
+    #: That own stylesheet's file, resolved, if it came from one.
+    stylesheet_file: Path | None = None
+
+
+def _apply_all(views: list[Any], apply: Any, undo: Any) -> None:
+    """`apply(view)` for each view; if one raises, `undo(view)` the ones
+    already done, then re-raise -- so a rejected theme or stylesheet
+    leaves every screen as it was."""
+    done: list[Any] = []
+    try:
+        for view in views:
+            apply(view)
+            done.append(view)
+    except Exception:
+        for view in done:
+            undo(view)
+        raise
+
+
+def _naming(path: Path, fn: Any) -> Any:
+    """Wraps `fn(arg)` so a `ValueError` from `tre` names the file the
+    change came from, as a failed view reload does."""
+
+    def apply(arg: Any) -> None:
+        try:
+            fn(arg)
+        except ValueError as exc:
+            raise ValueError(f"{path}: {exc}") from exc
+
+    return apply
+
+
 def _file_or_spec(owner: str, file_arg: str, file: Any, spec: Any, loader: Any) -> Any:
     """One `*=` file path / `*_spec=` dict pair -> the dict (or `None`).
     The file is read here, by Tesserae; `tre` only ever gets the dict."""
@@ -104,9 +145,13 @@ class App:
         self._custom_theme_spec = _file_or_spec("App", "custom_theme", custom_theme, custom_theme_spec, load_theme)
         #: The theme files, for `run(hot_reload=True)` to watch (M31).
         self._theme_files = {"default": default_theme, "custom": custom_theme}
-        #: Every view `build_view()` made -- the ones a theme reload re-themes.
-        self._built: list[Any] = []
+        #: Every view `build_view()` made -- the ones a reload reaches.
+        self._built: list[_Built] = []
         self._stylesheet_spec = _file_or_spec("App", "stylesheet", stylesheet, stylesheet_spec, load_stylesheet)
+        #: The default stylesheet's file, for `run(hot_reload=True)`.
+        self._stylesheet_file = stylesheet
+        #: Each screen's own stylesheet file -> the dict `tre` last accepted.
+        self._own_sheets: dict[Path, Any] = {}
         self._registered: dict[str, _Registered] = {}
         self._window: Window | None = None
         self._current: str | None = None
@@ -179,16 +224,49 @@ class App:
         live (`tre` M91). Runs `tre` code, so call it on the event-loop
         thread -- `run(hot_reload=True)` does, for theme-file edits.
         """
+        old_theme = self._view_theme()
         previous = (self._default_theme_spec, self._custom_theme_spec)
         self._default_theme_spec, self._custom_theme_spec = default_theme_spec, custom_theme_spec
         try:
-            theme = self._view_theme()
-            for view in self._built:
-                view.set_theme(**theme)
+            new_theme = self._view_theme()
+            _apply_all(
+                [b.view for b in self._built],
+                lambda view: view.set_theme(**new_theme),
+                lambda view: view.set_theme(**old_theme),
+            )
             self._set_window_theme()
         except Exception:
             self._default_theme_spec, self._custom_theme_spec = previous
             raise
+
+    def set_stylesheet_spec(self, stylesheet_spec: dict[str, Any] | None) -> None:
+        """Replaces the app's default stylesheet in place (M31 Phase 2):
+        every view `build_view()`/`load()` made with the default -- not
+        one given its own `stylesheet=` -- is re-styled, and views built
+        later use it too. `None` means no stylesheet. Bound values stay
+        live (`tre` M91). If `tre` rejects it, it raises and every screen
+        keeps its old stylesheet. Call it on the event-loop thread;
+        `run(hot_reload=True)` does, when the default stylesheet file
+        changes.
+        """
+        previous = self._stylesheet_spec
+        _apply_all(
+            [b.view for b in self._built if not b.own_stylesheet],
+            lambda view: view.set_stylesheet(stylesheet_spec=stylesheet_spec),
+            lambda view: view.set_stylesheet(stylesheet_spec=previous),
+        )
+        self._stylesheet_spec = stylesheet_spec
+
+    def _set_own_stylesheet(self, path: Path, stylesheet_spec: dict[str, Any]) -> None:
+        """A screen's own stylesheet file changed: re-style the views
+        built with it."""
+        previous = self._own_sheets.get(path)
+        _apply_all(
+            [b.view for b in self._built if b.stylesheet_file == path],
+            lambda view: view.set_stylesheet(stylesheet_spec=stylesheet_spec),
+            lambda view: view.set_stylesheet(stylesheet_spec=previous),
+        )
+        self._own_sheets[path] = stylesheet_spec
 
     def build_view(
         self,
@@ -204,14 +282,18 @@ class App:
         view. `load()` builds its views through this too.
         """
         sheet = _file_or_spec("App.build_view", "stylesheet", stylesheet, stylesheet_spec, load_stylesheet)
+        built = _Built(None, own_stylesheet=sheet is not None)
+        if stylesheet is not None:
+            built.stylesheet_file = Path(stylesheet).resolve()
+            self._own_sheets[built.stylesheet_file] = sheet
         if sheet is None:
             sheet = self._stylesheet_spec
         kwargs = self._view_theme()
         if sheet is not None:
             kwargs["stylesheet_spec"] = sheet
-        view = load_view(view_path, **kwargs)
-        self._built.append(view)
-        return view
+        built.view = load_view(view_path, **kwargs)
+        self._built.append(built)
+        return built.view
 
     def register(self, name: str, view: Any, viewmodel: Any) -> None:
         """Registers `view` (already loaded) and its already-`_attach`ed
@@ -325,6 +407,25 @@ class App:
         for registered in self._registered.values():
             if registered.path is not None:
                 watchers.append(ViewWatcher(registered.view, registered.path))
+        if self._stylesheet_file is not None:
+            path = Path(self._stylesheet_file).resolve()
+            watchers.append(
+                FileWatcher(
+                    [path],
+                    lambda path=path: load_stylesheet(path),
+                    _naming(path, self.set_stylesheet_spec),
+                    name="stylesheet",
+                )
+            )
+        for path in self._own_sheets:
+            watchers.append(
+                FileWatcher(
+                    [path],
+                    lambda path=path: load_stylesheet(path),
+                    _naming(path, lambda spec, path=path: self._set_own_stylesheet(path, spec)),
+                    name=f"stylesheet:{path.name}",
+                )
+            )
         theme_files = [f for f in self._theme_files.values() if f is not None]
         if theme_files:
             watchers.append(
@@ -359,7 +460,10 @@ class App:
         M31: the theme files given to `App(default_theme=, custom_theme=)`
         are watched too. An edit re-reads them on the watcher thread and
         re-themes every screen `build_view()`/`load()` made, and the
-        window, with `set_theme_specs`.
+        window, with `set_theme_specs`. So are stylesheet files: the
+        default from `App(stylesheet=)` (re-applied, with
+        `set_stylesheet_spec`, to every screen using it) and each screen's
+        own `stylesheet=` file (re-applied to the screens built with it).
         """
         if self._window is None:
             raise RuntimeError("App.run() called before show() -- nothing to display yet")
