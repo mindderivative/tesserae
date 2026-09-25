@@ -127,6 +127,23 @@ reconciled, never per frame.
   detaches the previous one with `remove()`, which keeps it alive with
   its state (`tre` R5). This replaces `Window.from_view`/`show_view`.
 
+### Tokens (M37 Phase 1)
+
+`tesserae.tokens` holds the MD3 values the builder resolves, checked
+against `tre` 0.3.4 by `tests/test_tokens.py`:
+
+- **colour roles**, all 49 from a seed, light and dark, with `colors:`
+  overrides and `tre`'s seed precedence;
+- the **shape** scale and **elevation** levels;
+- **elevation as `shadows`**, `tre`'s key and ambient pair. 0.3.4 nodes
+  have no `elevation`, and level 1 is exactly the pair `tre`'s docs give;
+- the 15 **type** roles;
+- **colour strings**: hex, CSS names, `transparent`, and CSS Color 4
+  `rgb()`/`hsl()` with alpha.
+
+`tre` also accepts CSS's wide-gamut functions (`color()`, `oklch()`, …),
+and Tesserae doesn't yet: it raises a clear error instead.
+
 ### Theme (M38)
 
 `tre` keeps no theme (D7), so Tesserae owns all of it:

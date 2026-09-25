@@ -162,3 +162,20 @@ User: "push it and scope M37". Pushed `cbdf82c`.
 3. Coupling counts: 15/39 test files use `tre.View`; 135 `.node()`
    lookups; 28 `get_text()`.
 4. Six phases and decisions Q1–Q4 written into the tracker.
+
+## M37 Phase 1 — tokens
+
+User: "push it and go with your recommendations for M37". Pushed
+`42d0b70`.
+
+1. Read `engine-md3`'s shape and type scales, and `engine-render`'s
+   key/ambient shadow geometry.
+2. `materialyoucolor` 3.0.4 installed in `.venv` and added as a
+   dependency.
+3. `tokens.py`. Pillow's colour parser missed CSS Color 4 syntax, and a
+   probe of 20 strings against `tre` showed it; added `rgb()`/`hsl()`
+   parsing. A rounding slip (50% gave 127, not 128) was caught the same
+   way. Wide-gamut functions raise, and are listed as a known gap.
+4. 74 tests. The type scale is compared at f32. A mutant that seemed to
+   survive (`spec_version`) had only changed the docstring; mutating
+   the call itself gives 18 failures.

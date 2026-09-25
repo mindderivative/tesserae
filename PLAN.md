@@ -51,4 +51,6 @@ Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 
 
 **M37 scoped in detail (2026-09-25):** six phases (tokens, compiler and cascade, tree parity, View/reconciler/bindings, components and screens, tests and docs) and four decisions, Q1–Q4, in `BUILD_TRACKER.md`.
 
-**Up next:** the user's decisions on M37's Q1–Q4.
+**M37:** decisions Q1–Q4 as recommended. Phase 1 done: `tesserae.tokens` matches `tre` on 74 checks (roles, shapes, elevation shadows, type scale, colour strings); 698 passed.
+
+**Up next:** M37 Phase 2 (spec compiler and cascade).
