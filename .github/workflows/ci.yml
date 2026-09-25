@@ -23,15 +23,17 @@ jobs:
         with:
           path: tesserae
 
-      # Pinned to `tre`'s `0.3.2` release-prep branch, not its default
-      # `main` (v0.3.1): Tesserae's M27 fragments need `tre`'s M84
-      # declarative kinds, which live only on `0.3.2` so far. Unpinned,
-      # CI tested a different `tre` than local development and failed
-      # 9 of 157 tests. Switch this to the `v0.3.2` tag once it ships.
+      # Pinned to an exact commit on `tre`'s `0.3.2` release-prep branch
+      # (d6c30ef, M86 Phase 3), not the branch name: later work on
+      # `0.3.2` can't break Tesserae's CI. It carries M84's declarative
+      # kinds (M27's fragments) and M86's `*_spec=`/`register_font`
+      # (M29 Phase 4). Unpinned, CI tested `tre`'s `main` (v0.3.1) and
+      # failed 9 of 157 tests. Switch to `main` or the `v0.3.2` tag once
+      # v0.3.2 is released.
       - uses: actions/checkout@v4
         with:
           repository: mindderivative/tre
-          ref: "0.3.2"
+          ref: d6c30efefb482097205c5184c0fc76c6811b7d32
           path: tre
 
       # No explicit Rust-toolchain-install action needed -- matches
