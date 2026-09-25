@@ -3,7 +3,7 @@
 *(Replaces M30's log — M30 is complete, committed and pushed.)*
 
 - User: "scope the 0.3.3 migration as M32", then "go with your
-  recommendations for M32", then "push it and start Phase 2", then "accept both drops, send the questions, and start Phase 3".
+  recommendations for M32", then "push it and start Phase 2", then "accept both drops, send the questions, and start Phase 3", then "start Phase 4".
 
 ## Phase 1 — decisions
 
@@ -39,3 +39,11 @@ becomes `selected`; `.venv` pinned to the `tre` v0.3.3 release.
 3. Docs: widget-catalog renames table; ARCHITECTURE binding names.
 
 **233 passed, 0 failed** on `tre` 0.3.3 (81 before M32); examples clean.
+
+## Phase 4 — verify
+
+1. 234 passed locally on `tre` 0.3.3; examples clean.
+2. CI pin `v0.3.2` -> `v0.3.3`; Phases 2-4 pushed (`7f39410..2a932e6`).
+   CI green: 233 passed, 1 skipped (no display), `tre` at `bc5e9b6`.
+3. New regression test: a reload editing a bound node keeps its live
+   value. Shows the placeholder on v0.3.2, `'live'` on v0.3.3 (M91).
