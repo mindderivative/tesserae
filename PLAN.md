@@ -1,36 +1,44 @@
-# PLAN — M33: Migrate to `tre` 0.3.4
+# PLAN — `tre`'s Building-Block Program (M34–M43)
 
-*(Replaces the M31 plan in this file — M31 is complete, committed and pushed.)*
+*(Replaces the M33 plan in this file — M33 is complete, committed and pushed.)*
 
 ## Goal
 
-User-directed: "scope the tre 0.3.4 migration". Move Tesserae from `tre` v0.3.3 to the released v0.3.4 (tag on `29800f3`). 0.3.4 adds `tre`'s building-block API (M93–M96) and keeps the old API. This milestone is only the move; adopting the building blocks is the separate program `tre`'s M97 gate waits on.
-
-## Sizing (a real 0.3.4 build, Tesserae unmodified)
-
-- **1 of 255 tests fails**, no warnings, all 3 examples run clean.
-- **Breaks, both predicted by the known gaps:**
-  1. A color's alpha now renders: six Text glyphs colored `"#FFFFFF00"` (4 example views, 2 docs snippets) go from white to invisible. It's visual, so no test catches it.
-  2. `opacity` is group opacity: `Dialog`/`SideSheetModal` fragments put `opacity: 0.32` on a scrim that contains the panel, so the panel fades to 32% too. This is the one failing test, because `tre`'s own scrims moved the 32% into the color's alpha.
-- **Fixes that land:** `tre` issue #10 (background-thread GC panic); the M32 repro is clean on 0.3.4.
-- **Checked and unaffected:** `Node.remove()` detach semantics (Tesserae only calls `Component.remove()`, which still frees), `animate()` argument order, `blur` → `unfocus`, the wheel sign fix.
-
-## Decisions (Phase 1) — recommendations
-
-1. **Scrim:** `background: "#00000052"` and no `opacity`. It matches `tre`'s own scrim, since MD3's scrim role is always black. The cost: a custom theme's `scrim` override won't reach these two fragments. Alternatives: make the scrim a sibling of the panel, or ask `tre` for a role-with-alpha color syntax.
-2. **Labels:** `"#FFFFFF"`, which keeps today's look.
-3. **`.venv`:** pin to the v0.3.4 release wheel (already built from the tag).
-
-## Phases
-
-1. **Decisions** — the three above.
-2. **Migrate** — pin `.venv`; fix the two fragments and six labels; tests that fail on the old YAML (no translucent glyph colors; overlay scrim and panel opacity 1.0).
-3. **Verify, docs, tracker** — suite and examples on 0.3.4; a tre#10 regression test; CI pinned to `v0.3.4`; `installation.md`; gaps moved to fixed.
+User-directed: "scope tre's building-block program". `tre`'s approved plan (its M93–M103, D1–D11) moves the declarative layer, reactivity, the MD3 catalog and MD3 theming out of `tre` and into Tesserae. `tre` 0.3.4 has the building blocks with the old API still present. `tre` removes the old API (M98–M99, released as 0.3.5) only after its M97 gate confirms Tesserae no longer uses it. This program is Tesserae's side of that gate. Full write-up: `BUILD_TRACKER.md`, "Program — `tre`'s Building-Block Migration".
 
 ## Status
 
-**Complete (2026-09-25).** CI green on `v0.3.4` (run 36178911095: 417 passed, 2 skipped for no display). Decisions: the user took all three recommendations. Phase 2: `.venv` on 0.3.4; scrims `"#00000052"` (reads back `(0, 0, 0, 82)`, the same as `tre`'s); labels `"#FFFFFF"`; `tests/test_paint_0_3_4.py` scans every view, fragment and docs snippet (fails 8 times on the old files). 418 passed.
+**Scoped, not approved (2026-09-25).** Waiting on the user's approval and decisions P1–P8.
 
-Phase 3: `tests/test_thread_gc.py` (fails on 0.3.3 with tre#10's panic, passes on 0.3.4); CI's `tre` ref → `v0.3.4`; `installation.md`/`README.md` → v0.3.4; a "Transparency" section in the themes guide; the two 0.3.4 gaps moved to fixed. 419 passed.
+## Evidence
 
-**Up next:** nothing started. Candidates: `tre`'s building-block program (M97's gate), hot reload for `App.register()`ed screens, conditional per-item styling.
+- **Inventory of `src/`:** nearly all of Tesserae's ~2,950 lines sit on `tre` APIs that M98–M99 delete: reactivity, `View`/`Component`/`reconcile`/bindings, the cascade and themes, ~50 MD3 factories, 12 MD3 kinds, the ripple and state layer, and the `Rect`/`Container`/`Icon` kinds in 67 fragments.
+- **Spike:** 2,000 boxes plus texts built from Python via `create`/`set` took 9.5 ms, against 10.9 ms through `tre`'s `View`. Re-coloring 4,000 nodes took 0.8 ms, against 2.3 ms for `set_theme`. Engine calls aren't the bottleneck; Tesserae's own cascade and binding cost is still to measure (M34).
+
+## Milestones
+
+| | Milestone | Replaces |
+|---|---|---|
+| M34 | Design and spikes (approval gate) | — |
+| M35 | Reactivity | `Signal`, `Computed`, `Effect`, `ViewModel`, `batch`, `untrack` |
+| M36 | Bindings and handlers | `binding.rs`, `View._attach` |
+| M37 | Declarative engine on primitives | `View`, `reconcile`, `Component`, cascade, `from_view`/`show_view` |
+| M38 | MD3 theme | `set_theme`, `Theme`, `engine-md3` color science and tokens |
+| M39 | Interaction and accessibility | state layer, ripple, focus rings, per-kind roles |
+| M40 | Widgets I: stateful controls | the 12 MD3 kinds |
+| M41 | Widgets II: composed catalog and overlays | ~40 composition factories, `open_*` overlays, icon set |
+| M42 | Widgets III: inputs, date/time, media, graphs, docking | text fields, pickers, video, node graph, `build_shell` |
+| M43 | Migration gate | `tre` M97 Phase 2 Step 2: suite green with removed names stubbed |
+
+## Decisions (M34) — recommendations
+
+1. **P1 YAML format:** keep Tesserae's schema unchanged for app authors, translated to primitives inside Tesserae.
+2. **P2 Color science:** a maintained Python port of `material-color-utilities`, accepted only if it matches `tre`'s schemes on reference seeds.
+3. **P3 Reactivity:** reproduce `tre`'s semantics exactly, with one test suite run against both.
+4. **P4 Bindings:** port `binding.rs`'s safe grammar exactly, and check both evaluators agree on every expression in the repo.
+5. **P5 Order:** incremental, bottom-up, suite green after each step.
+6. **P6 Public API:** keep every public name. One break, written down: stateful `tesserae.widgets` factories return a small widget object (`.node` plus state) instead of a bare `tre.Node`.
+7. **P7 Scope:** rebuild the whole catalog, staged by category; the node graph, docking and app shell last.
+8. **P8 Names:** build on `tre` 0.3.4's new API only (`create`, `set`, `on`, `show_layer`, `fill`).
+
+**Up next:** the user's approval and decisions; then M34 Phase 1.

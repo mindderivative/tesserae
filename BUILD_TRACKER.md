@@ -43,6 +43,16 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M31 — Hot Reload for Theme and Stylesheet Files | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M32 — Migrate to `tre` 0.3.3 | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M33 — Migrate to `tre` 0.3.4 | `██████████` 100% | ✅ Complete (2026-09-25) |
+| M34 — Building-Block Program: Design and Spikes | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M35 — Reactivity in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M36 — Bindings and Handlers in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M37 — Declarative Engine on `tre` Primitives | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M38 — MD3 Theme in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
+| M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped, not approved (2026-09-25) |
 
 **Just closed:** M33 (2026-09-25) — Tesserae migrated to `tre` 0.3.4: `.venv` and CI both pin the v0.3.4 release; the scrim fragments and six labels fixed for its paint model (color alpha renders, `opacity` is group opacity), guarded by a scan of every view, fragment and docs snippet; `tre` issue #10's fix lands, with a regression test. 419 passed locally; CI green on v0.3.4 (417 passed, 2 skipped for no display). Phase 3 (same day): the tre#10 test, CI pin, install docs, a transparency section. Phase 2 (same day) — Tesserae runs on `tre` 0.3.4: `.venv` pinned to the release; the two scrim fragments take their 32% from their color (`"#00000052"`, matching `tre`'s own scrim exactly) so group opacity doesn't fade their panels; the six invisible `"#FFFFFF00"` labels are `"#FFFFFF"`; a scan of every view, fragment and docs snippet guards both. 418 passed. Before that, M31 (2026-09-25) — hot reload for theme and stylesheet files, complete. `run(hot_reload=True)` now watches the app's theme files, its default stylesheet and each screen's own stylesheet, and re-styles the running app in place with bound values kept (`App.set_theme_specs()` and `App.set_stylesheet_spec()` are public). It also fixed an M30 bug (the window was never themed) and filed [`tre` issue #12](https://github.com/mindderivative/tre/issues/12) (`on_change` firing on every reload). Phase 3 added a live `App.run()` test and the final docs. 234 → 255 tests. Phase 2 (same day) — stylesheet files hot-reload: the default from `App(stylesheet=)` through the new `App.set_stylesheet_spec()`, and each screen's own file for the screens built with it; a failed re-style puts back the screens already changed. The two M91 consequences were probed and documented: `on_change` fires once per reload on bound nodes, and embedded components never get the host's theme or stylesheet (a `tre` limitation). 245 → 254 tests. Before that, M31 Phase 1 (same day) — theme files hot-reload: `run(hot_reload=True)` watches `App(default_theme=, custom_theme=)` and re-themes every screen and the window through the new `App.set_theme_specs()`. Along the way it found an M30 bug: the window was never themed, because building a `View` doesn't set the window's theme. Imperative widgets and interaction tints ran unthemed until now; `App.show()` now themes the window, matching the view's seed and colors. 234 → 245 tests. Before that, M32 (2026-09-25) — Tesserae migrated to `tre` 0.3.3: `.venv` and CI both pinned to the v0.3.3 release; `tre`'s migration script run and reviewed (a bug in it caught — Rect `background`s rewritten inside `.py` strings); dict specs, docs and `Switch`'s `selected` done by hand; `tesserae.widgets` follows `tre` 0.3.3's names; a regression test proves bound values now survive hot reload (`tre` M91). 81 failing → 0; CI green (233 passed, 1 skipped for no display). Unblocks M31. Phase 3 (same day): `tesserae.widgets` follows `tre` 0.3.3's names; 233 passed, 0 failed on 0.3.3. Phase 2 (same day): `.venv` pinned to the v0.3.3 wheel, `tre`'s migration script run and reviewed (one bug in it caught). Before that, M30 (2026-09-25) — theme arguments on `App`: an app-wide theme on `App(...)` (`theme_seed`/`dark`/`default_theme`/`custom_theme`, plus `*_spec=` forms), a default stylesheet on `App(...)` that `App.load(..., stylesheet=)` overrides per screen, and `App.build_view()` for `register()`ed screens. Theme is app-wide because in `tre` a theme belongs to the window (M30 believed the window took the first screen's theme; M31 Phase 1 found it doesn't, and fixed it). Theme-file hot reload was split out into M31. 221 → 233 tests, verified against `tre` v0.3.2 built from source (this repo's `.venv` currently loads `tre`'s unreleased 0.3.3).
 
@@ -58,7 +68,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** Nothing currently started. Candidates: **`tre`'s building-block program**: `tre` 0.3.4 is released (2026-09-25, tag on `29800f3`: the additive building blocks, M93–M96, with the old API still present), and its M97 gate waits on Tesserae taking over `tre`'s declarative layer, reactivity, MD3 components and theming — a large Tesserae-side program, not yet scoped (known gaps list what 0.3.4 will break). Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
+**Up next:** the **building-block program (M34–M43)** is scoped and waiting on the user's approval and decisions P1–P8 (see Milestone 34). Other candidates: **`tre`'s building-block program**: `tre` 0.3.4 is released (2026-09-25, tag on `29800f3`: the additive building blocks, M93–M96, with the old API still present), and its M97 gate waits on Tesserae taking over `tre`'s declarative layer, reactivity, MD3 components and theming — a large Tesserae-side program, not yet scoped (known gaps list what 0.3.4 will break). Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -883,3 +893,165 @@ User-directed follow-up to Phase 3, after `tre` M87 closed [`tre` issue #6](http
 - Step 1: `tests/test_thread_gc.py`: a background-thread `gc.collect()` frees a `View` held only by a reference cycle, and must raise nothing. Checked it's real: on a fresh 0.3.3 venv (built from the saved v0.3.3 wheel) it fails with `tre` issue #10's `PanicException`; on 0.3.4 it passes. Full suite on the pinned 0.3.4: **419 passed**, with unraisable warnings as errors; all 3 examples clean — ✅
 - Step 2: CI's `tre` checkout moved from `v0.3.3` to `v0.3.4` (`ci.yml`, comment updated), and M33's three commits pushed together (`e8b23c3..73b31da`), since CI on 0.3.3 would fail the updated overlay tests. CI run 36178911095: `tre` checked out at `29800f3` (v0.3.4) and built as `tre-0.3.4`, **417 passed, 2 skipped** (the two live `App.run()` tests; the runner has no display), no unraisable warnings or `unsendable` panics anywhere in the log. Docs deploy 36178911147 green — ✅
 - Step 3: docs: `installation.md` and `README.md` → v0.3.4 (the release has wheels for CPython 3.9–3.15 on Linux, macOS arm64 and Windows); `guide/themes-and-fonts.md` gained "Transparency: color alpha and `opacity`" (alpha renders; opacity fades a subtree; the scrim fragments and what a theme's `scrim` override can't reach); the two snippets were fixed in Phase 2; `mkdocs build --strict` clean. Known gaps: the 0.3.4 gap and the GC gap moved to "Fixed gaps", the PyPI gap updated to v0.3.4. Tracker, artifact, `PLAN.md`/`LOG.md` — ✅
+
+---
+
+## Program — `tre`'s Building-Block Migration (M34–M43)
+
+User-directed: "scope tre's building-block program". `tre`'s approved plan (its M93–M103, decisions D1–D11) turns `tre` into an engine of building blocks — a node tree, layout, paint, text, animation, input, accessibility, layers, the event loop — and **moves the declarative layer, reactivity, the MD3 component catalog and MD3 theming into Tesserae**. `tre` 0.3.4 (M33) ships the building blocks with the old API still present. `tre`'s M97 is a gate: its removals (M98 the declarative layer, M99 MD3 components, kinds and theming; released as 0.3.5 per D11) start only once Tesserae no longer calls anything they delete. M97 Phase 2 Step 2 checks that by running Tesserae's suite with those names stubbed out. This program is the Tesserae side of that gate.
+
+**What Tesserae uses today that `tre` removes** (inventoried from `src/`, 2026-09-25):
+
+| Tesserae today | `tre` source, removed in | Replacement in this program |
+|---|---|---|
+| `Signal`, `Computed`, `Effect`, `ViewModel`, `batch`, `untrack` (re-exported unmodified) | M98 (D5) | M35 |
+| `{{ }}` bindings, `handlers:`, `two_way:` (resolved by `View._attach`, `binding.rs`) | M98 | M36 |
+| `View(spec=)`, `reconcile(spec=)`, `instantiate`, `Component`, `set_stylesheet`; the style cascade (default theme < custom theme < stylesheet < inline); `Window.from_view`/`show_view` | M98 | M37 |
+| `theme_seed`/`dark`/`*_theme_spec`, `View.set_theme`, `Window.set_theme`, `Window.theme`; MD3 color science (`engine-md3`, Rust `material_colors`), shape/elevation/typography tokens, motion curves | M99 (D7) | M38 |
+| The interaction state layer and ripple, `enable_interaction`; accessibility roles assigned per built-in kind | M99 (D8) | M39 |
+| MD3 widget kinds in fragments and `tesserae.widgets`: `Checkbox`, `RadioButton`, `Switch`, `Slider`, 3 progress kinds, `LoadingIndicator`, `TimePickerDial`, `Carousel`, `Splitter`, `Link` | M99 | M40 |
+| ~50 MD3 composition factories wrapped by `tesserae.widgets` (`add_button` … `add_status_bar`), `open_dialog`/`open_menu`/`open_side_sheet`/`open_navigation_drawer`; the curated icon set | M99 | M41 |
+| `add_text_field`/search, date and time pickers, `add_node_graph`/`add_graph_node`, `add_video`, `build_shell`, docking presentation | M99 (D2, D6, D10) | M42 |
+| Node kinds `Rect`/`Container` (→ `box`, D3), `Icon` (→ `path`, D4), `TextField` (→ `text_input`); `add_image(path)` (D6; Tesserae already decodes) | M98–M100 | M37, M41 |
+
+Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the list above. The 67 fragments use `Rect` ×44, `Text` ×43, `Container` ×42, `Icon` ×23, plus the 12 MD3 kinds. This is the largest program in Tesserae's history. It's a rebuild of what `tre` does for Tesserae today, not a migration of names.
+
+**Measured, not assumed (2026-09-25, `tre` 0.3.4, this machine):** building 2,000 boxes each holding a text node from Python with `window.create`/`set`/`add_child` took 9.5 ms, against 10.9 ms for the same tree through `tre`'s own `View(spec=)`. Re-coloring all 4,000 nodes with `set(fill=...)` took 0.8 ms, against 2.3 ms for `View.set_theme`. So the engine calls themselves are not a bottleneck, and D7's fallback (named color variables in `tre`) isn't needed on this evidence. Tesserae's own cascade and binding evaluation in Python are not measured yet; that's an M34 spike.
+
+**Ordering.** Bottom-up, one subsystem at a time, with the suite green after each step, on `tre` 0.3.4 where old and new APIs coexist. Reactivity (M35) and bindings (M36) come before the declarative engine (M37), which comes before theming (M38). The widgets (M40–M42) need both the engine and the theme. M43 is the gate check and hand-off. Each milestone after M34 gets its own detailed scoping against the source when it starts, as M32 and M33 did.
+
+---
+
+## Milestone 34 — Building-Block Program: Design and Spikes
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** The program's approval gate, the counterpart of `tre`'s M93. Nothing is rebuilt until the design and decisions are agreed.
+
+**Decisions for the user, each with a recommendation:**
+- P1 **The YAML view format.** Recommended: **keep Tesserae's current schema unchanged for app authors** (`kind: Rect`/`Container`/`Text`/`Icon`, `style: {background, foreground, ...}`, `bindings:`, `handlers:`, `component:`/`with:`/`repeat:`, `include:`) and translate it to `tre`'s primitives inside Tesserae. Every existing view keeps working. The alternative, adopting `tre`'s new names (`box`, `fill`) in YAML, breaks every app's views for no user benefit.
+- P2 **MD3 color science** (HCT, tonal palettes, dynamic schemes from a seed). Recommended: **depend on a maintained Python port of Google's `material-color-utilities`** (such as `materialyoucolor`), accepted only if an M34 spike shows its schemes match `tre`'s own `DynamicTheme` on a set of reference seeds, light and dark. Alternatives: port `tre`'s handed-over code to Python (D says it hands over its color science, scales and icon data), or keep a small Rust extension in Tesserae.
+- P3 **Reactivity semantics.** Recommended: **reproduce `tre`'s behavior exactly**: same-value writes don't notify, `Computed` is lazy and glitch-free, `batch`/`untrack` as today. Proven by one behavioral test suite run against both `tre`'s classes and Tesserae's while 0.3.4 still has `tre`'s.
+- P4 **Binding expressions.** Recommended: **port `binding.rs`'s safe, non-`eval` whitelist grammar exactly**, so every existing `{{ }}` expression means the same thing. While 0.3.4 has both, check the two evaluators agree on every expression in the repo.
+- P5 **Migration order.** Recommended: **incremental, bottom-up, suite green after every step** (the ordering above). The alternative, a parallel rewrite switched over at the end, delays all feedback to the end.
+- P6 **Public API.** Recommended: Tesserae **keeps every public name it exports today** (`Signal`, `ViewModel`, `App`, `instantiate`, `Repeater`, `load_view`, `tesserae.widgets.*`), now backed by its own code. One known break: a `tesserae.widgets` factory returns a `tre.Node` today. A stateful control (a checkbox's `checked`, a slider's `value`) needs Tesserae-side state once `tre` stops holding it. Recommended: return a small Tesserae widget object with `.node` and its state, and write down the break.
+- P7 **Catalog scope.** Recommended: **rebuild the whole catalog**, all ~50 factories and 67 fragments, staged by category (M40–M42), with the node graph, docking presentation and app shell last. The alternative is to trim rarely-used widgets and name them as dropped.
+- P8 **Which `tre` names to build on.** Recommended: **`tre` 0.3.4's new API only** (`window.create`, `set`/`get`/`animate`, `on`, `show_layer`, `fill`/`stroke_color`), which are the target names, so `tre` 0.3.5 is mostly deletions for Tesserae. Anything R1-renamed in 0.3.5 gets a short follow-up.
+
+### Phase 1 — Design ⬜
+- Step 1: a Tesserae target-architecture page (`docs/design/`): the reactive core, the binding evaluator, the spec compiler and reconciler, the cascade, the theme engine, the widget model, how `App` shows screens (`root.add_child`/`remove`), and how hot reload fits — ⬜
+- Step 2: decisions P1–P8 settled with the user — ⬜
+- Step 3: ask `tre` for M97 Phase 2 Step 1's per-feature migration guide, and agree the gate check (which names are stubbed, run how) — ⬜
+
+### Phase 2 — Spikes ⬜
+- Step 1: cost of Tesserae's own cascade and binding evaluation in Python on a 2,000-node view (build, one theme switch, one bound update) against `tre`'s `View` — ⬜
+- Step 2: color-scheme parity between the chosen color-science option (P2) and `tre`'s `DynamicTheme` on reference seeds, light and dark, every role — ⬜
+- Step 3: one control end to end on primitives (a checkbox: box and check `path`, animated `trim_end`, ripple, focus ring, `role="checkbox"`), to check the building blocks suffice before the catalog is planned in detail — ⬜
+
+---
+
+## Milestone 35 — Reactivity in Tesserae
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** `tre` D5: `Signal`, `Computed`, `Effect`, `ViewModel`, `batch`, `untrack` move to Tesserae.
+
+### Phase 1 — Core ⬜
+- Step 1: `tesserae.reactive`: `Signal`, `Computed`, `Effect`, `batch`, `untrack`, with `tre`'s semantics (P3) — ⬜
+- Step 2: one behavioral suite run against both implementations while `tre` 0.3.4 still has its own — ⬜
+
+### Phase 2 — Switch Over ⬜
+- Step 1: `tesserae.Signal` etc. become Tesserae's; `ViewModel` base; everything still green on `tre`'s bindings via a thin adapter until M36 — ⬜
+
+---
+
+## Milestone 36 — Bindings and Handlers in Tesserae
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** `binding.rs`'s evaluator moves to Tesserae (`tre` M98).
+
+### Phase 1 — Evaluator ⬜
+- Step 1: port the safe `{{ }}` grammar (P4); every expression in the repo, docs and tests evaluated by both evaluators, with matching results — ⬜
+
+### Phase 2 — Wiring ⬜
+- Step 1: one-way bindings, `two_way:`, and `handlers:` wired through `node.on(...)` and `set`, including `on_change` semantics (skip unchanged values; see `tre` issue #12) — ⬜
+
+---
+
+## Milestone 37 — Declarative Engine on `tre` Primitives
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** Replaces `View`, `reconcile`, `instantiate`/`Component`, the style cascade and `Window.from_view`/`show_view`.
+
+### Phase 1 — Build ⬜
+- Step 1: a spec compiler from Tesserae's YAML schema (P1) to `window.create`/`set`/`add_child`: `Rect`/`Container` → `box`, `Text` → `text`, `Icon` → `path`, `TextField` → `text_input`, `Image` → `image`; layout and paint properties mapped — ⬜
+- Step 2: the cascade (default theme < custom theme < stylesheet < inline), including layout rules — ⬜
+
+### Phase 2 — Reconcile ⬜
+- Step 1: a keyed reconciler (`insert_child`, `remove`/`destroy`) that keeps unchanged nodes, focus and running animations; hot reload moves onto it — ⬜
+- Step 2: `tesserae.instantiate` and `Repeater` on it, and embedded components now get the host's theme and stylesheet (the M31 gap) — ⬜
+
+### Phase 3 — Screens ⬜
+- Step 1: `App.show` via `root.add_child`/`remove`, keeping screens alive; `App` no longer uses `View`/`Window.from_view`/`show_view` — ⬜
+
+---
+
+## Milestone 38 — MD3 Theme in Tesserae
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** `tre` D7: `tre` keeps no theme concept.
+
+### Phase 1 — Tokens ⬜
+- Step 1: color schemes from a seed, light and dark, with `colors:` overrides (P2); roles; shape, elevation (MD3 key and ambient `shadows`), typography scale and motion curves — ⬜
+- Step 2: theme files (`seed`, `colors`, `styles`, `components`, `typography`) read as today — ⬜
+
+### Phase 2 — Live ⬜
+- Step 1: re-theme by re-`set`ting colors (0.8 ms per 4,000 nodes measured); OS light/dark through the window's `color_scheme` event; M31's hot reload on top — ⬜
+
+---
+
+## Milestone 39 — Interaction: State Layer, Ripple, Focus, Accessibility
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** `tre` D8 and R12: `tre` draws no ripple, state layer, scrim or focus ring.
+
+### Phase 1 — Primitives ⬜
+- Step 1: hover and press state layers, the ripple (clipped box plus a circle `path` animated by `scale` and `opacity`), focus rings from bubbling `focus`/`unfocus`, `tab_index` — ⬜
+- Step 2: accessibility: every Tesserae widget sets its own `role`, state and actions (`a11y_action`) — ⬜
+
+---
+
+## Milestone 40 — Widgets I: Stateful Controls
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** The 12 MD3 widget kinds `tre` M99 deletes, rebuilt from primitives.
+
+### Phase 1 — Controls ⬜
+- Step 1: `Checkbox`, `RadioButton`, `Switch`, `Slider` (pointer capture, arrow keys, `a11y_action`), `Link`, `SpinBox` — ⬜
+- Step 2: linear and circular progress (`trim_start`/`trim_end`), `LoadingIndicator` (path morphing), `TimePickerDial`, `Carousel`, `Splitter` — ⬜
+- Step 3: their fragments and `tesserae.widgets` factories on the new controls, with the widget-object return value (P6) — ⬜
+
+---
+
+## Milestone 41 — Widgets II: Composed Catalog and Overlays
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** The MD3 composition factories `tre` M99 deletes.
+
+### Phase 1 — Composed Widgets ⬜
+- Step 1: buttons (all variants, FABs, split and grouped), cards, chips, badges, dividers, lists and list items, accordion and tree nodes, tabs, navigation rail and drawer, toolbars, top app bar, status bar — ⬜
+- Step 2: the icon set as `path` data, handed over by `tre` (M99 Phase 1 Step 3) — ⬜
+
+### Phase 2 — Overlays ⬜
+- Step 1: dialogs, menus, snackbars, tooltips, side sheets, navigation drawers and context menus on `show_layer` (modal, focus trap, dismissal, anchoring), with scrims as Tesserae boxes — ⬜
+
+---
+
+## Milestone 42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** The rest of the catalog.
+
+### Phase 1 — The Rest ⬜
+- Step 1: text fields and search on `text_input`; date picker days, time input, period selector — ⬜
+- Step 2: video on `image` plus `set(rgba=...)`; the node graph on `canvas`; pagination and popovers — ⬜
+- Step 3: docking presentation (tab strips, handles, drop highlights) on `tre`'s bare-bones docking (D10), and the app shell `build_shell` provided — ⬜
+
+---
+
+## Milestone 43 — Migration Gate: Off `tre`'s Removed API
+
+**Status: ⬜ Proposed — scoped, not approved (2026-09-25).** Tesserae's side of `tre` M97 Phase 2 Step 2.
+
+### Phase 1 — Prove It ⬜
+- Step 1: run Tesserae's full suite and examples with every name `tre` M98–M99 removes stubbed to raise, per the check agreed in M34; fix whatever it finds — ⬜
+- Step 2: report the result to `tre` so M98 can start; docs rewritten for Tesserae-owned reactivity, bindings, theming and widgets; tracker, `PLAN.md`/`LOG.md` — ⬜
