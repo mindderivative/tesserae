@@ -4,7 +4,7 @@
   file handling, `tre` gets specs and bytes. Recorded as M29 in
   `BUILD_TRACKER.md` after verifying every line reference and every
   `tre` API name against both codebases (`65e9d5a`).
-- User: "pin CI to 0.3.2 and start Phase 1", then "push it and use Pillow for Phase 2", then "push it and use a poll loop for Phase 3", then "Create an issue on tre's github about the hot reload hook" ([tre#6](https://github.com/mindderivative/tre/issues/6)), then "push it and start Phase 4".
+- User: "pin CI to 0.3.2 and start Phase 1", then "push it and use Pillow for Phase 2", then "push it and use a poll loop for Phase 3", then "Create an issue on tre's github about the hot reload hook" ([tre#6](https://github.com/mindderivative/tre/issues/6)), then "push it and start Phase 4", then "push it and use watchfiles for the watcher".
 
 ## What shipped
 
@@ -68,19 +68,29 @@
      Arabic, Hack Nerd Font Mono.
    - Mutation-checked: passing theme paths through to `tre` again
      fails the "only dicts" test.
-7. CI pin refined to the exact commit `d6c30ef` (relayed from the
+7. Phase 3b, hot reload inside `App.run()` (`watchfiles` + `tre` M87):
+   - `ViewWatcher.start(handle)`/`stop()`: background thread, file
+     events via `watchfiles`, rebuild off the UI thread, only
+     `reconcile`/`push_frame` queued with `call_soon`. Failures are
+     queued as raising callables, logged by `tre`.
+   - `App.run(hot_reload=True)` and a new `App.thread_handle()`.
+   - Live test in a subprocess; skips with no display (GitHub CI).
+     Mutation-checked: `hot_reload=False` never sees the change.
+   - CI pin moved to `0066203` (`tre` M87), relayed and verified.
+8. CI pin refined to the exact commit `d6c30ef` (relayed from the
    `tre` session, user-directed there).
-8. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
+9. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
    section, `expand_components_to_spec`, file-named errors);
    `guide/component-fragments.md` loading section updated.
 
 ## Status
 
-**Phases 1–4 of 5 done.** `pytest tests/` 214 passed (up from 157:
-+15 Phase 1, +16 Phase 2, +8 Phase 3, +18 Phase 4; 0 regressions);
+**Phases 1–4 (and 3b) of 5 done.** `pytest tests/` 221 passed (up
+from 157: +15 Phase 1, +16 Phase 2, +8 Phase 3, +7 Phase 3b, +18
+Phase 4; 0 regressions);
 all 3 examples ran clean; `mkdocs build --strict` clean (new
 `guide/hot-reload.md`, `guide/themes-and-fonts.md`). CI green after
-the pin and after Phase 2 (188 passed on `7108c9e`). Phase 4 committed
-locally, not pushed.
+the pin and after each push since (214 passed on `07d0c53`). Phase 3b
+committed locally, not pushed.
 
 Only Phase 5 (final docs pass) remains.

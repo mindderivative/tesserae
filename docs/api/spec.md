@@ -73,8 +73,16 @@ ComponentError: widget 'logo': image.src: 'assets/logo.png': cannot read ...
 **`ViewWatcher(view, path, *, component_dirs=None)`**
 
 Hot reload for a view built with `load_view`. Pass the same `path` and
-`component_dirs`.
+`component_dirs`. `App.run(hot_reload=True)` creates and starts one for
+every screen registered with `App.load()`.
 
+- **`start(handle)` / `stop()`** -- watch for file-change events
+  (`watchfiles`) on a background thread. `handle` is
+  `App.thread_handle()`; each reload is rebuilt on the watcher thread
+  and applied on the event-loop thread via `handle.call_soon`. A failed
+  reload is queued as a callable that raises, so it's logged like an
+  event handler's exception and the watcher carries on. `running` says
+  whether the thread is active.
 - **`poll() -> bool`** -- if any file the view was built from changed
   since the last poll, rebuilds it and updates the live view in place
   via `tre`'s `view.reconcile(spec=...)`, then returns `True`.
@@ -84,9 +92,10 @@ Hot reload for a view built with `load_view`. Pass the same `path` and
   each image. Recomputed on every reload, so a newly added include,
   fragment or image is picked up.
 
-A reload that fails raises (`ComponentError`, or `ValueError` naming
-the view file) and leaves the view unchanged; polling again returns
-`False` until the next edit. See [Hot Reload](../guide/hot-reload.md).
+With `poll()`, a reload that fails raises (`ComponentError`, or
+`ValueError` naming the view file) and leaves the view unchanged;
+polling again returns `False` until the next edit. `poll()` can't be
+used while `start()`'s thread is running. See [Hot Reload](../guide/hot-reload.md).
 
 ## `load_theme` / `load_stylesheet`
 

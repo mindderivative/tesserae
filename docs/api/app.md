@@ -43,9 +43,33 @@ call.
 
 ## `run`
 
-**`run(max_frames=None) -> None`**
+**`run(max_frames=None, *, hot_reload=False) -> None`**
 
 The one blocking call -- opens the real window `show()` already built
 and runs `tre`'s own real render loop. `max_frames` caps it (headless/
 CI-safe); omit it for a real, interactive run. Raises `RuntimeError`
 if called before `show()`.
+
+`hot_reload=True` reloads every screen registered with `load()` while
+the app runs, whenever its view file -- or anything it was built from --
+changes on disk. See [Hot Reload](../guide/hot-reload.md). Screens given
+to `register()` directly aren't watched, since Tesserae doesn't know
+their file.
+
+## `thread_handle`
+
+**`thread_handle() -> tre.LoopHandle`**
+
+The one object that may be used from another thread. Views, windows and
+the app itself may only be used from the thread that created them; a
+background thread calls `handle.call_soon(fn)` instead, and `fn` (no
+arguments) runs on the event-loop thread at the next frame, waking the
+loop if it's idle. Callables run in the order they were queued, and one
+queued before `run()` runs on the first frame.
+
+```python
+handle = app.thread_handle()
+
+def on_download_done(result):          # called on a worker thread
+    handle.call_soon(lambda: viewmodel.status.set(result))
+```

@@ -44,9 +44,10 @@ cd ../tesserae
 pip install -e ".[dev]"
 ```
 
-This also installs Tesserae's own two dependencies from PyPI: PyYAML,
-for reading view files, and Pillow, for decoding images -- Tesserae
-reads and decodes every file itself and hands `tre` only the data.
+This also installs Tesserae's own dependencies from PyPI: PyYAML, for
+reading view files; Pillow, for decoding images; and watchfiles, for
+hot reload. Tesserae reads, decodes and watches every file itself and
+hands `tre` only the data.
 
 ## Verify it worked
 

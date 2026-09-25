@@ -26,13 +26,17 @@ from tre import App as _TreApp
 from tre import Window
 
 from tesserae.naming import check_naming_convention
-from tesserae.spec import load_view
+from tesserae.spec import ViewWatcher, load_view
 
 
 @dataclass
 class _Registered:
     view: Any
     viewmodel: Any
+    #: The `*_View.yaml` it was loaded from -- set by `load()`, so
+    #: `run(hot_reload=True)` knows what to watch. `None` for a pair
+    #: given to `register()` directly.
+    path: Path | None = None
 
 
 class App:
@@ -51,6 +55,7 @@ class App:
         self._registered: dict[str, _Registered] = {}
         self._window: Window | None = None
         self._current: str | None = None
+        self._tre_app: _TreApp | None = None
 
     def register(self, name: str, view: Any, viewmodel: Any) -> None:
         """Registers `view` (already loaded, e.g. `View("Foo_View.yaml")`)
@@ -108,6 +113,7 @@ class App:
         view = load_view(view_path)
         viewmodel = viewmodel_cls(view)
         self.register(name or prefix, view, viewmodel)
+        self._registered[name or prefix].path = view_path
         return view, viewmodel
 
     def show(self, name: str) -> Window:
@@ -136,15 +142,55 @@ class App:
         """
         return self._current
 
-    def run(self, max_frames: int | None = None) -> None:
+    def thread_handle(self) -> Any:
+        """`tre`'s thread-safe `LoopHandle` for this app (tre M87): the one
+        object that may cross threads. `handle.call_soon(fn)` runs `fn`
+        (no arguments) on the event-loop thread at the next frame, waking
+        an idle loop -- the way for a background thread to touch a view,
+        since views may only be used from the thread that created them.
+        Usable before `run()`; a callable queued then runs on the first
+        frame.
+        """
+        if self._tre_app is None:
+            self._tre_app = _TreApp()
+        return self._tre_app.thread_handle()
+
+    def run(self, max_frames: int | None = None, *, hot_reload: bool = False) -> None:
         """The one blocking call -- opens the real `Window` `show()` has
         already built and runs `tre`'s own real render loop. `max_frames`
         is the identical headless-CI-safe convention `tre`'s own examples
         already use (TRE v1 finding #261) -- omit it for a real,
         interactive run that exits only when the window closes.
+
+        `hot_reload=True` (M29) watches every screen registered through
+        `load()` -- its view file and everything it was built from -- and
+        reloads it in place while the app runs. Each screen gets a
+        `ViewWatcher` on a background thread (`watchfiles`), which hands
+        its reloads to the event loop through `tre`'s thread-safe
+        `App.thread_handle()` (tre M87). A failed reload is logged by
+        `tre` like a handler's exception; the app keeps running. Screens
+        given to `register()` directly have no known file and aren't
+        watched.
         """
         if self._window is None:
             raise RuntimeError("App.run() called before show() -- nothing to display yet")
-        tre_app = _TreApp()
+        if self._tre_app is None:
+            self._tre_app = _TreApp()
+        tre_app = self._tre_app
         tre_app.add_window(self._window)
-        tre_app.run(max_frames=max_frames)
+        watchers: list[ViewWatcher] = []
+        try:
+            if hot_reload:
+                handle = tre_app.thread_handle()
+                for registered in self._registered.values():
+                    if registered.path is not None:
+                        watcher = ViewWatcher(registered.view, registered.path)
+                        watcher.start(handle)
+                        watchers.append(watcher)
+            tre_app.run(max_frames=max_frames)
+        finally:
+            for watcher in watchers:
+                watcher.stop()
+            # A later run() starts from a fresh tre App, as before
+            # thread_handle() existed; a handle from this run is spent.
+            self._tre_app = None
