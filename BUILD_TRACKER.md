@@ -86,7 +86,6 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 - No dedicated `tesserae.widgets.text` wrapper for the raw `add_text` primitive — every widget needing text uses its own clear param instead; revisit only if a real caller needs the bare primitive.
 - No routing beyond a plain named `App.show(name)` (no history/back-stack, no URL-style deep links); no app-level state store shared across screens; no `tesserae new` CLI scaffolding tool. All real, named, un-scoped future candidates — see `README.md`'s own "Explicitly deferred" section.
 - Not published to PyPI. `tre` v0.3.4 is a published GitHub Release with 24 attached assets (`github.com/mindderivative/tre/releases/tag/v0.3.4`, 2026-09-25; wheels for CPython 3.9–3.15 on Linux, macOS arm64 and Windows), and both Tesserae's CI and its local `.venv` pin it (M33), but neither `tre` nor Tesserae is on PyPI yet.
-
 - Tesserae's colour parsing (`tesserae.tokens.parse_color`) doesn't accept CSS's wide-gamut colour functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser does; it raises a clear error instead. Nothing in the repo uses them. Found in M37 Phase 1.
 
 **Fixed gaps:**
