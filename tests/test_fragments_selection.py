@@ -127,9 +127,9 @@ children:
 
 
 def test_switch_matches_the_imperative_catalog():
-    # `is_on:`, not the bare `on:` YAML would parse as a boolean literal
-    # itself (PyYAML's default YAML 1.1 loader) -- see `Switch_
-    # Component.yaml`'s own doc comment for the real bug this avoids.
+    # `selected:` (M32; `is_on:` before that), never the bare `on:` YAML
+    # would parse as a boolean literal (PyYAML's default YAML 1.1 loader)
+    # -- see `Switch_Component.yaml`'s own doc comment for the real bug.
     yaml_text = """
 id: root
 kind: Container
@@ -137,7 +137,7 @@ style: {width: 200, height: 100}
 children:
   - id: toggle
     component: Switch
-    with: {width: 52, height: 32, is_on: false}
+    with: {width: 52, height: 32, selected: false}
 """
     expanded = expand_components(yaml_text)
     view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
@@ -161,7 +161,7 @@ kind: Container
 children:
   - id: toggle
     component: Switch
-    with: {width: 52, height: 32, is_on: true}
+    with: {width: 52, height: 32, selected: true}
 """
     expanded = expand_components(yaml_text)
     view = View("T.yaml", source=expanded)

@@ -197,7 +197,7 @@ def _repeat_view_yaml(items: list[dict], *, extra_with: dict | None = None) -> s
         {
             "id": "root",
             "kind": "Container",
-            "style": {"width": 400, "height": 300, "flex_direction": "Vertical"},
+            "style": {"width": 400, "height": 300, "flex_direction": "vertical"},
             "children": [node],
         }
     )

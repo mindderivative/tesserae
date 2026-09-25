@@ -184,7 +184,7 @@ def test_an_unquoted_date_still_loads_as_its_string(tmp_path: Path):
     # it back into "2026-09-24"; the dict path must do the same.
     view_path = _write(
         tmp_path / "Date_View.yaml",
-        "id: root\nkind: Text\nstyle: {width: 100, height: 20, background: \"#000000\"}\n"
+        "id: root\nkind: Text\nstyle: {width: 100, height: 20, foreground: \"#000000\"}\n"
         "text: {content: 2026-09-24, font_family: Roboto, font_size: 16}\n",
     )
     view = load_view(view_path)

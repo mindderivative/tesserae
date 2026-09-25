@@ -13,11 +13,9 @@
 # meaningful "behind it" fill, the identical real reasoning `docs/
 # guide/components.md` already states for `add_image` itself.
 #
-# Real, confirmed naming difference: `fit` here takes `ContentFitSpec`'s
-# own real PascalCase enum values (`Cover`/`Contain`/`Fill`), verified
-# directly -- not `add_image`'s own lowercase `"cover"`/`"contain"`/
-# `"fill"` strings. A caller migrating imperative usage to this
-# fragment needs to capitalize the value.
+# `fit` takes lowercase `cover`/`contain`/`fill` -- the same values as
+# `add_image`'s `fit=` since `tre` 0.3.3 lowercased declarative enums
+# (M90). Before M32 this fragment needed PascalCase (`Cover`).
 params: [src, width, height, fit]
 id: root
 kind: Image

@@ -64,7 +64,7 @@ def test_decode_image_corrupt_file_raises_oserror(tmp_path: Path):
 # -- extract_images ----------------------------------------------------
 
 
-def _image_node(node_id="img", src="rb.png", fit="Cover"):
+def _image_node(node_id="img", src="rb.png", fit="cover"):
     return {"id": node_id, "kind": "Image", "image": {"src": src, "fit": fit}}
 
 
@@ -74,14 +74,14 @@ def test_extract_images_strips_src_keeps_fit_and_decodes(tmp_path: Path):
 
     stripped, frames = extract_images(spec, tmp_path)
 
-    assert stripped["children"][0]["image"] == {"fit": "Cover"}
+    assert stripped["children"][0]["image"] == {"fit": "cover"}
     assert frames == [("img", RED_BLUE, 2, 1)]
     assert spec["children"][0]["image"]["src"] == "rb.png"  # input not modified
 
 
 def test_extract_images_finds_nested_images_and_leaves_others_alone(tmp_path: Path):
     _png(tmp_path / "rb.png")
-    blank = {"id": "blank", "kind": "Image", "image": {"fit": "Fill"}}
+    blank = {"id": "blank", "kind": "Image", "image": {"fit": "fill"}}
     spec = {
         "id": "root",
         "kind": "Container",
@@ -175,7 +175,7 @@ def test_load_view_decodes_images_and_no_src_reaches_tre(tmp_path: Path, monkeyp
     view = load_view(view_path)
 
     assert view.node("img") is not None
-    assert seen[0]["children"][0]["image"] == {"fit": "Cover"}
+    assert seen[0]["children"][0]["image"] == {"fit": "cover"}
 
 
 def test_load_view_decodes_a_hand_written_image_too(tmp_path: Path):
@@ -227,4 +227,4 @@ def test_instantiate_gives_tre_no_path_and_no_src(tmp_path: Path):
     assert component.node("img") is not None
     path, spec = calls[0]
     assert path == ""
-    assert spec["children"][0]["image"] == {"fit": "Cover"}
+    assert spec["children"][0]["image"] == {"fit": "cover"}
