@@ -3,7 +3,7 @@
 *(Replaces M30's log — M30 is complete, committed and pushed.)*
 
 - User: "scope the 0.3.3 migration as M32", then "go with your
-  recommendations for M32", then "push it and start Phase 2".
+  recommendations for M32", then "push it and start Phase 2", then "accept both drops, send the questions, and start Phase 3".
 
 ## Phase 1 — decisions
 
@@ -25,3 +25,17 @@ becomes `selected`; `.venv` pinned to the `tre` v0.3.3 release.
    fence fixed, installation/README rewritten for v0.3.3.
 
 81 -> 13 failures on `tre` 0.3.3; the 13 left are Python-API renames.
+
+## Phase 3 — Python API migration
+
+1. `tesserae.widgets` renamed to `tre` 0.3.3's names, checked against
+   the wheel's own signatures: `switch(selected=)`,
+   `divider(orientation=)`, `link(content)`, `dialog(supporting_text)`,
+   `toolbar(vibrant=)`; `icon`/`loading_indicator` pass `foreground=`
+   through (translations removed).
+2. Tests follow (`"value"`, `get_selected`, same-name parity tests).
+   `test_themes`' real-font test silently skipped under the pinned
+   wheel (no `.ttf` shipped); now also honors `TRE_SOURCE_DIR`.
+3. Docs: widget-catalog renames table; ARCHITECTURE binding names.
+
+**233 passed, 0 failed** on `tre` 0.3.3 (81 before M32); examples clean.
