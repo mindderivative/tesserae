@@ -45,7 +45,9 @@ except ValueError as exc:  # ComponentError is a ValueError too
 - **Not yet available inside `App.run()`.** `App.run()` hands control to
   `tre`'s event loop, and `tre` doesn't yet offer a way to run code
   periodically from inside it, so there's nowhere to call `poll()`
-  from. For now, hot reload works in a loop your app controls.
+  from. For now, hot reload works in a loop your app controls
+  ([`tre` issue #6](https://github.com/mindderivative/tre/issues/6)
+  tracks adding that hook).
 - **Don't use `tre`'s own `View.poll_reload()`.** Tesserae gives `tre`
   the finished view as data, never a file, so `tre` has nothing to
   watch.
