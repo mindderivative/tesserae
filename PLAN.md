@@ -1,21 +1,21 @@
-# PLAN — M30: Theme Arguments on `App` and `App.load()`
+# PLAN — M32: Migrate to `tre` 0.3.3
 
-*(Replaces the M29 plan in this file — M29 is complete, committed and pushed.)*
+*(Replaces the M30 plan in this file — M30 is complete, committed and pushed. `LOG.md` still holds M30's record until M32 work starts.)*
 
 ## Goal
 
-User-directed: "scope adding theme args to App.load()". Give `App` a theme API, closing the known gap that it had none.
+User-directed: "scope the 0.3.3 migration as M32". Move Tesserae from `tre` v0.3.2 to the released v0.3.3 (M90's renames, M91's fix for issue #8 and `View.set_stylesheet`, M92). Unblocks M31.
 
 ## Status
 
-**Complete (2026-09-25).**
+**Scoped, not started — waiting on user decisions (Phase 1).**
 
-- **Phase 1 — decisions (user):** an app-wide theme on `App(...)`; a stylesheet per screen on `load()`, with an app-wide default on `App(...)`; theme-file hot reload deferred until `tre` issue #8 is fixed — split out into M31.
-- **Phase 2 — implementation:** `App(..., theme_seed=, dark=, default_theme=, custom_theme=, stylesheet=)` plus `*_spec=` forms, files read once by Tesserae; `App.load(..., stylesheet=)`; new `App.build_view()` for `register()`ed screens (the `multi_screen` example uses it). MkDocs updated.
-- **Phase 3 — tests, docs, tracker:** 12 new tests, mutation-checked; verified against `tre` v0.3.2 built from source in a scratch venv, since this repo's `.venv` loads `tre`'s unreleased 0.3.3; a docs inaccuracy about when stylesheet files are read fixed.
+Sized against the real v0.3.3 release (built from its tag into a scratch venv): 81 of 233 tests and all 3 examples fail unmodified. `tre`'s migration script would change 58 of 72 YAML files and 8 `.py` files with embedded YAML; Python dict specs, Python calls and the docs' Markdown are manual.
 
-Why app-wide: in `tre`, `Window.from_view` shares the first screen's theme with the window and `Window.show_view` never switches it, so per-screen themes would leave `tesserae.widgets` and interaction tints on the first screen's theme.
+Plan (full detail in `BUILD_TRACKER.md` Milestone 32):
 
-`pytest tests/` 233 passed against v0.3.2.
-
-**Up next:** nothing scoped. M31 waits on Tesserae's move to `tre` 0.3.3 (where issue #8 is fixed); that migration is the natural next milestone once 0.3.3 is released.
+1. **Decide** — recommended: follow `tre` 0.3.3's names in `tesserae.widgets` (`switch(selected=)`, `divider(orientation=)`, `link(content=)`, `dialog(supporting_text=)`, `toolbar(vibrant=)`); rename `Switch`'s `is_on` fragment param to `selected`; pin `.venv` to the `tre` v0.3.3 release instead of `tre`'s source tree.
+2. **YAML migration** — run `tre`'s script, review and commit it separately, then hand-migrate dict specs.
+3. **Python API migration** — `tesserae.widgets`, the rest of `src/`, the tests.
+4. **Verify** — 0 failures on v0.3.3, examples clean, CI pinned to `v0.3.3`, M91's fix confirmed through Tesserae's hot reload.
+5. **Docs and tracker** — every snippet in `docs/` updated, a note on the cascade change, gaps closed.
