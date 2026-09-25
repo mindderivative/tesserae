@@ -26,7 +26,7 @@ from tre import App as _TreApp
 from tre import Window
 
 from tesserae.naming import check_naming_convention
-from tesserae.spec import ViewWatcher, load_view
+from tesserae.spec import ViewWatcher, load_stylesheet, load_theme, load_view
 
 
 @dataclass
@@ -39,6 +39,14 @@ class _Registered:
     path: Path | None = None
 
 
+def _file_or_spec(owner: str, file_arg: str, file: Any, spec: Any, loader: Any) -> Any:
+    """One `*=` file path / `*_spec=` dict pair -> the dict (or `None`).
+    The file is read here, by Tesserae; `tre` only ever gets the dict."""
+    if file is not None and spec is not None:
+        raise ValueError(f"{owner}: pass {file_arg}= or {file_arg}_spec=, not both")
+    return loader(file) if file is not None else spec
+
+
 class App:
     """`width`/`height`/`title` describe the one real `Window` this
     `App` opens the first time `show()` is called -- every registered
@@ -46,30 +54,101 @@ class App:
     is, not its own independent size (matching `Window.show_view`'s own
     real, stated scope: only the *currently* active view's `width`/
     `height` are kept in sync with the window).
+
+    M30: the theme is app-wide -- `theme_seed=`, `dark=`,
+    `default_theme=`/`custom_theme=` (file paths) or their `*_spec=`
+    dict forms apply to every screen `load()` builds. That matches `tre`,
+    where a theme belongs to the window: `Window.from_view` shares the
+    first screen's theme with the window and `Window.show_view` never
+    switches it, so per-screen themes would leave imperative
+    `tesserae.widgets` and interaction tints on the first screen's theme
+    after a `show()`. `stylesheet=`/`stylesheet_spec=` here is the
+    default stylesheet for every screen; `load(stylesheet=...)` replaces
+    it for one screen (a stylesheet is genuinely per-`View` in `tre`).
+
+    Theme and stylesheet files are read once, here, by Tesserae (so a
+    `FontFallbackWarning` fires once, not once per screen); `tre` only
+    ever gets the dicts.
     """
 
-    def __init__(self, width: int = 480, height: int = 320, title: str = "Tesserae App") -> None:
+    def __init__(
+        self,
+        width: int = 480,
+        height: int = 320,
+        title: str = "Tesserae App",
+        *,
+        theme_seed: tuple[int, int, int, int] | None = None,
+        dark: bool = False,
+        default_theme: str | Path | None = None,
+        default_theme_spec: dict[str, Any] | None = None,
+        custom_theme: str | Path | None = None,
+        custom_theme_spec: dict[str, Any] | None = None,
+        stylesheet: str | Path | None = None,
+        stylesheet_spec: dict[str, Any] | None = None,
+    ) -> None:
         self._width = width
         self._height = height
         self._title = title
+        self._theme: dict[str, Any] = {"dark": dark}
+        if theme_seed is not None:
+            self._theme["theme_seed"] = theme_seed
+        default = _file_or_spec("App", "default_theme", default_theme, default_theme_spec, load_theme)
+        custom = _file_or_spec("App", "custom_theme", custom_theme, custom_theme_spec, load_theme)
+        if default is not None:
+            self._theme["default_theme_spec"] = default
+        if custom is not None:
+            self._theme["custom_theme_spec"] = custom
+        self._stylesheet_spec = _file_or_spec("App", "stylesheet", stylesheet, stylesheet_spec, load_stylesheet)
         self._registered: dict[str, _Registered] = {}
         self._window: Window | None = None
         self._current: str | None = None
         self._tre_app: _TreApp | None = None
 
+    def build_view(
+        self,
+        view_path: str | Path,
+        *,
+        stylesheet: str | Path | None = None,
+        stylesheet_spec: dict[str, Any] | None = None,
+    ) -> Any:
+        """Builds a view with this app's theme and stylesheet, without
+        registering it -- for a screen given to `register()`, e.g. one
+        whose `ViewModel` needs the `app` itself. `stylesheet=`/
+        `stylesheet_spec=` replace the app's default stylesheet for this
+        view. `load()` builds its views through this too.
+        """
+        sheet = _file_or_spec("App.build_view", "stylesheet", stylesheet, stylesheet_spec, load_stylesheet)
+        if sheet is None:
+            sheet = self._stylesheet_spec
+        kwargs = dict(self._theme)
+        if sheet is not None:
+            kwargs["stylesheet_spec"] = sheet
+        return load_view(view_path, **kwargs)
+
     def register(self, name: str, view: Any, viewmodel: Any) -> None:
-        """Registers `view` (already loaded, e.g. `tesserae.spec.load_view("Foo_View.yaml")`)
-        and its already-`_attach`ed `viewmodel` (e.g. `FooViewModel(view)`)
-        under `name`, for a later `show(name)` to display. Raises if
-        `name` is already registered -- a real, load-bearing collision a
-        caller should know about immediately, not silently overwrite.
+        """Registers `view` (already loaded) and its already-`_attach`ed
+        `viewmodel` (e.g. `FooViewModel(view)`) under `name`, for a later
+        `show(name)` to display. Raises if `name` is already registered
+        -- a real, load-bearing collision a caller should know about
+        immediately, not silently overwrite.
+
+        The caller builds `view`, so the caller themes it: build it with
+        `app.build_view("Foo_View.yaml")` to give it this app's theme and
+        stylesheet (M30). A view built any other way keeps whatever theme
+        it was built with.
         """
         if name in self._registered:
             raise ValueError(f"a view named {name!r} is already registered")
         self._registered[name] = _Registered(view, viewmodel)
 
     def load(
-        self, view_path: str | Path, viewmodel_cls: type, name: str | None = None
+        self,
+        view_path: str | Path,
+        viewmodel_cls: type,
+        name: str | None = None,
+        *,
+        stylesheet: str | Path | None = None,
+        stylesheet_spec: dict[str, Any] | None = None,
     ) -> tuple[Any, Any]:
         """Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it
         -- the real, enforced-at-runtime counterpart to `README.md`'s own
@@ -91,15 +170,10 @@ class App:
         `Counter_View.yaml`/`Counter_ViewModel.py`) -- only needed
         explicitly if two different pairs would otherwise collide on it.
 
-        Constructed via `tesserae.spec.load_view` (not `tre.View`
-        directly) -- transparent `component: Name`/`with: {...}` macro
-        expansion for any screen that uses it, a true no-op for one that
-        doesn't (`load_view`'s own real design). Real, current scope
-        limit: no `theme_seed`/`custom_theme`/`stylesheet`/`dark`
-        forwarding here yet -- `App.load()` never accepted any of those
-        before this change either, so this is a real, additive widening
-        for `component:` support, not a narrowing of anything that
-        already worked.
+        Built with `build_view` -- `tesserae.spec.load_view` under the
+        hood, so `include:`/`component:`/images are handled by Tesserae --
+        using the app's theme and its default stylesheet, or this
+        screen's own `stylesheet=`/`stylesheet_spec=` if given (M30).
 
         Returns the constructed `(view, viewmodel)` pair -- most real
         `app.py` scripts won't need it (everything from here on happens
@@ -110,7 +184,7 @@ class App:
         view_path = Path(view_path)
         prefix = check_naming_convention(view_path, viewmodel_cls)
 
-        view = load_view(view_path)
+        view = self.build_view(view_path, stylesheet=stylesheet, stylesheet_spec=stylesheet_spec)
         viewmodel = viewmodel_cls(view)
         self.register(name or prefix, view, viewmodel)
         self._registered[name or prefix].path = view_path

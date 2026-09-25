@@ -2,7 +2,10 @@
 
 ## `App`
 
-**`App(width=480, height=320, title="Tesserae App")`**
+**`App(width=480, height=320, title="Tesserae App", *, theme_seed=None, dark=False, default_theme=None, custom_theme=None, stylesheet=None)`**
+
+(Each of `default_theme=`, `custom_theme=` and `stylesheet=` also has a
+`*_spec=` twin that takes a dict instead of a file path.)
 
 `width`/`height`/`title` describe the one real window this `App`
 opens the first time `show()` is called -- every registered view is
@@ -11,21 +14,45 @@ own independent size (matching `Window.show_view`'s own real, stated
 scope: only the *currently* active view's own `width`/`height` are
 kept in sync with the window).
 
+The theme arguments set **one theme for the whole app**, used by every
+screen `load()` builds. `stylesheet=` is the **default stylesheet** for
+every screen; `load(stylesheet=...)` replaces it for one screen. Files
+are read once, when the `App` is created, and `tre` is given only the
+parsed data. Passing a file and its `*_spec=` twin together raises
+`ValueError`. See [Themes & Fonts](../guide/themes-and-fonts.md).
+
+The theme is app-wide rather than per screen because in `tre` a theme
+belongs to the window: the window takes the first screen's theme and
+keeps it when you switch screens, so widgets created with
+`tesserae.widgets` and hover/press tints would otherwise disagree with
+the screen's own widgets.
+
+## `build_view`
+
+**`build_view(view_path, *, stylesheet=None, stylesheet_spec=None) -> View`**
+
+Builds a view with the app's theme and stylesheet without registering
+it -- for a screen you pass to `register()` yourself. `stylesheet=`
+replaces the app's default for this view.
+
 ## `register`
 
 **`register(name, view, viewmodel) -> None`**
 
 Registers an already-loaded `view` and its already-`_attach`ed
 `viewmodel` under `name`, for a later `show(name)` to display. Raises
-`ValueError` if `name` is already registered.
+`ValueError` if `name` is already registered. Build the view with
+[`build_view`](#build_view) to give it the app's theme and stylesheet.
 
 ## `load`
 
-**`load(view_path, viewmodel_cls, name=None) -> (view, viewmodel)`**
+**`load(view_path, viewmodel_cls, name=None, *, stylesheet=None, stylesheet_spec=None) -> (view, viewmodel)`**
 
 Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it -- see
 [Naming Convention](../guide/naming-convention.md). `name` defaults to
-the shared prefix. Returns the constructed `(view, viewmodel)` pair.
+the shared prefix. The screen uses the app's theme, and its own
+`stylesheet=` if given, otherwise the app's default. Returns the
+constructed `(view, viewmodel)` pair.
 
 ## `show`
 

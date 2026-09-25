@@ -4,7 +4,35 @@ Give Tesserae file paths for themes, stylesheets and fonts. Tesserae
 reads and parses them itself and hands `tre` only the data, the same as
 it does for views and images.
 
-## Themes and stylesheets on a view
+## Themes and stylesheets for an app
+
+Give the `App` one theme for every screen, plus a default stylesheet;
+a screen can bring its own stylesheet instead:
+
+```python
+from tesserae import App
+
+app = App(
+    theme_seed=(0x67, 0x50, 0xA4, 0xFF),
+    custom_theme="themes/Brand.yaml",   # one theme, every screen
+    stylesheet="styles/Default.yaml",   # every screen's default
+)
+app.load("Home_View.yaml", HomeViewModel)
+app.load("Settings_View.yaml", SettingsViewModel, stylesheet="styles/Settings.yaml")
+```
+
+The theme is app-wide because in `tre` a theme belongs to the window:
+the window takes the first screen's theme and keeps it when you switch
+screens. A stylesheet belongs to a single view, so it can differ per
+screen. For a screen you pass to `App.register()`, build its view with
+`app.build_view("Foo_View.yaml")` so it gets the same theme and
+stylesheet.
+
+Theme and stylesheet files are read once, when the `App` is created.
+
+## Themes and stylesheets on a single view
+
+Outside an `App`, `load_view` takes the same arguments:
 
 ```python
 from tesserae.spec import load_view
@@ -86,9 +114,11 @@ warnings.filterwarnings("error", category=FontFallbackWarning)
 
 ## Not yet covered
 
-- **`App.load()` doesn't take theme or stylesheet arguments yet.** Use
-  `load_view(...)` plus `App.register(...)` for a themed screen.
 - **Hot reload doesn't watch theme or stylesheet files.**
   [`ViewWatcher`](hot-reload.md) watches the view, its includes,
   fragments and images; to pick up a theme edit, call `set_theme` again
-  with a freshly loaded theme.
+  with a freshly loaded theme. Watching theme and stylesheet files is
+  planned once [`tre` issue #8](https://github.com/mindderivative/tre/issues/8)
+  is fixed: today a re-theme makes bound values show their YAML
+  placeholder until they next change, and a stylesheet can't be
+  replaced on a live view.
