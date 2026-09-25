@@ -55,4 +55,6 @@ Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 
 
 Phase 2 done: the spec compiler (`spec/build.py`) and cascade (`spec/cascade.py`), checked against `tre`'s builder, with errors matching `tre`'s; 741 passed.
 
-**Up next:** M37 Phase 3 (the tree differ).
+Phase 3 done: 127 views identical to `tre`'s node by node (`tests/test_tree_parity.py`); 869 passed.
+
+**Up next:** M37 Phase 4 (View, reconciler, bindings).

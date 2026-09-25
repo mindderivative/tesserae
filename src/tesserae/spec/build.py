@@ -34,6 +34,8 @@ __all__ = ["Built", "SpecBuildError", "build"]
 
 RGBA = tuple[int, int, int, int]
 _TRANSPARENT: RGBA = (0, 0, 0, 0)
+#: The fixed colour `tre`'s TextField draws its text in (`engine-core`).
+_TEXT_FIELD_GLYPH: RGBA = (0x1C, 0x1B, 0x1F, 0xFF)
 #: `tre`'s MD3 baseline tints for the legacy kinds when there's no theme.
 _BASELINE = {
     "primary": (0x67, 0x50, 0xA4, 0xFF), "on_primary": (0xFF, 0xFF, 0xFF, 0xFF),
@@ -239,8 +241,13 @@ def _text_style(node: dict[str, Any], kind: str) -> dict[str, Any]:
         raise SpecBuildError(f'widget {_q(node["id"])}: {kind} requires text.font_size (or text.typography_role), none given')
     weight = text.get("font_weight") if text.get("font_weight") is not None else (role_style.font_weight if role_style else 400.0)
     line_height = text.get("line_height") if text.get("line_height") is not None else (role_style.line_height if role_style else None)
+    content = text.get("content", "")
+    if not isinstance(content, str):
+        raise SpecBuildError(
+            f'widget {_q(node["id"])}: text.content must be a string, got {type(content).__name__} {content!r}'
+        )
     return {
-        "text": str(text.get("content", "")),
+        "text": content,
         "font_family": family,
         "font_size": float(size),
         "font_weight": float(weight),
@@ -279,7 +286,9 @@ def _text_field(ctx, node, style):
     text = _text_style(node, "TextField")
     text.pop("line_height")
     outer = ctx.window.create("box", **_layout(style), **_paint(ctx, node["id"], style), fill=background)
-    inner = ctx.window.create("text_input", **text, flex_grow=1.0, align_self="stretch", role="textbox", focusable=True)
+    # `tre`'s TextField draws its text in MD3's baseline on_surface, not a theme role.
+    inner = ctx.window.create("text_input", **text, fill=_TEXT_FIELD_GLYPH, flex_grow=1.0, align_self="stretch",
+                              role="textbox", focusable=True)
     outer.add_child(inner)
     return outer, inner
 
@@ -345,7 +354,8 @@ def _legacy(ctx, node, style):
     else:  # TimePickerDial
         n = w.add_time_picker_dial(hour=int(node.get("hour") or 0), minute=int(node.get("minute") or 0), size=width or 256.0)
     n.remove()  # the factories attach to the window's root; the caller places it
-    n.set(**_layout(style), opacity=float(style.get("opacity", 1.0)))
+    # tre's View applies the cascade's corner radius, border and elevation to these kinds too
+    n.set(**_layout(style), **_paint(ctx, node_id, style))
     return n, n
 
 

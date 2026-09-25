@@ -196,3 +196,22 @@ User: "push it and start Phase 2". Pushed `dcc2bbd`, `fe7e6ee`.
 4. 42 tests. A test fix: `tre` reads path data back normalised.
    Mutants: 5/5 caught after adding the stylesheet-background Text case.
    741 passed.
+
+## M37 Phase 3 — tree parity
+
+User: "push it and start Phase 3". Pushed `6c6dde1`.
+
+1. The corpus: the fragment calls, generated from their `params:`, and
+   the suite's inline views, harvested with `ast`, plus the examples and
+   docs.
+2. The first exploratory run: 89/121 identical. Differences: the
+   TextField `fill` (tre reads back its text colour, fixed `#1C1B1F`,
+   found in `engine-core`); Checkbox/Slider corner radius (the cascade's
+   paint wasn't applied to the MD3 kinds); Link text unreadable on
+   tre's side; unsized root height (content-sized in `from_view`).
+3. Fixed each, and made the differ skip what tre can't read.
+   100/100, then 127/127 with the examples, docs and the Image fragment.
+4. The acceptance check first dropped 56 fragments because it built tre
+   views without a seed. SpinBox exposed Tesserae accepting a number as
+   text content; it's now rejected, as in tre.
+5. Mutants: 3 of 4 caught; level 5 is pinned by `test_tokens.py`.

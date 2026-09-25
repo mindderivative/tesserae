@@ -209,3 +209,12 @@ def test_a_background_from_a_stylesheet_rule_doesnt_break_text():
     view, built = _both(spec, stylesheet=sheet)
     tre.Window.from_view(view, width=10, height=10, title="t")
     assert built.nodes["t"].get("fill") == view.node("t").get("fill") == (0, 0, 0, 255)
+
+
+def test_text_content_must_be_a_string_as_in_tre():
+    spec = {"id": "x", "kind": "Text", "text": {"content": 5, "font_family": "Roboto", "font_size": 14},
+            "style": {"foreground": "#000000"}}
+    with pytest.raises(ValueError):
+        tre.View(spec=spec, theme_seed=SEED)
+    with pytest.raises(SpecBuildError, match="text.content must be a string, got int 5"):
+        build(_window(), spec, scheme=SCHEME)

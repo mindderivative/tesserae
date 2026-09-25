@@ -117,6 +117,23 @@ rule loses to a `kind:` rule, which loses to `classes:` (more classes
 win), which loses to `id:`. It's resolved when a view is built or
 reconciled, never per frame.
 
+### Tree parity (M37 Phase 3)
+
+`tests/test_tree_parity.py` builds 127 views with `tre`'s `View` and with
+Tesserae's compiler, and compares the two trees node by node: every one
+of the 67 fragments, every view written inline in the test suite that
+`tre` accepts, the five example views (from their files), and the whole
+views in the docs. They're identical: laid-out box, fill, border, corner
+radius, opacity, elevation against `shadows`, and text and font.
+
+Getting there found three things. A TextField's text is drawn in
+`tre`'s fixed baseline `on_surface` (`#1C1B1F`), which is also what its
+`fill` reads back. The MD3 kinds take the cascade's corner radius and
+border. And a `from_view` root with no height is sized to its content,
+so Tesserae mounts screens the same way. Two things can't be compared,
+because `tre` can't read them back: a Link's text and font, and a
+TextField's background.
+
 ### Reconciler, components, screens (M37)
 
 - **Reconciler:** a keyed diff by widget `id`. Unchanged nodes keep
