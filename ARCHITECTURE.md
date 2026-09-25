@@ -116,8 +116,13 @@ from_view`; every call after that switches the same live window via
 
 **Themes (M30):** one theme per `App` -- `App(theme_seed=, dark=,
 default_theme=, custom_theme=)` -- because in `tre` a theme belongs to
-the window (`Window.from_view` shares the first screen's theme and
-`Window.show_view` never switches it). A stylesheet is per-`View`:
+the window (`Window.show_view` never switches it). M31: `tre` keeps a
+view's theme (its YAML nodes) apart from the window's (imperative
+widgets, interaction tints), and building a `View` never sets the
+window's, so `App.show()` calls `Window.set_theme` with the app's theme,
+resolved the way a `View` resolves it. `App.set_theme_specs()` re-themes
+every built screen and the window; `run(hot_reload=True)` calls it when a
+theme file changes (a `FileWatcher` thread). A stylesheet is per-`View`:
 `App(stylesheet=)` is the default and `App.load(..., stylesheet=)`
 replaces it for one screen. `App.build_view()` gives a `register()`ed
 screen the same theme and stylesheet.

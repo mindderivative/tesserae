@@ -24,6 +24,10 @@ Two ways to drive it:
 
 `tre`'s `View` is single-threaded (`unsendable`): only the `LoopHandle`
 crosses threads, and the watcher thread never touches the view.
+
+M31: `FileWatcher` is the same background-thread pattern for a fixed set
+of files with no dependencies of their own -- `App.run(hot_reload=True)`
+uses it for theme and stylesheet files.
 """
 
 from __future__ import annotations
@@ -37,7 +41,7 @@ import watchfiles
 from tesserae.spec.images import Frame, push_frames
 from tesserae.spec.load import build_view_spec
 
-__all__ = ["ViewWatcher"]
+__all__ = ["FileWatcher", "ViewWatcher"]
 
 #: `(st_mtime_ns, st_size)`, or `None` for a file that doesn't exist.
 _Stamp = Optional[Tuple[int, int]]
@@ -178,5 +182,78 @@ class ViewWatcher:
                     handle.call_soon(lambda spec=spec, frames=frames: self._apply(spec, frames))
                     if sorted({p.parent for p in deps if p.parent.is_dir()}) != dirs:
                         break  # a dependency moved to a new directory: re-watch
+        except Exception as exc:  # the watcher itself failed; report it, don't die silently
+            handle.call_soon(_reraise(exc))
+
+
+class FileWatcher:
+    """Watches a fixed set of files on a background thread, the way
+    `ViewWatcher.start` does (M31). On a change, `rebuild()` runs on the
+    watcher thread -- the file work -- and `apply(result)` is queued on
+    `handle` with `call_soon`, so it runs on the event-loop thread. A
+    `rebuild()` that raises is queued as a callable that raises, and
+    watching carries on.
+    """
+
+    def __init__(
+        self,
+        files: list[str | Path],
+        rebuild: Callable[[], Any],
+        apply: Callable[[Any], None],
+        *,
+        name: str = "files",
+    ) -> None:
+        self._files = frozenset(Path(f).resolve() for f in files)
+        self._rebuild = rebuild
+        self._apply = apply
+        self._name = name
+        self._stop = threading.Event()
+        self._thread: threading.Thread | None = None
+
+    @property
+    def files(self) -> frozenset[Path]:
+        """Every file being watched, resolved."""
+        return self._files
+
+    @property
+    def running(self) -> bool:
+        """Whether the background thread is watching."""
+        return self._thread is not None and self._thread.is_alive()
+
+    def start(self, handle: Any) -> None:
+        """Starts watching. `handle` is `tre.App.thread_handle()`'s
+        `LoopHandle`."""
+        if self._thread is not None:
+            raise RuntimeError("FileWatcher.start() called twice without stop()")
+        self._stop.clear()
+        self._thread = threading.Thread(
+            target=self._watch, args=(handle,), name=f"tesserae-watch:{self._name}", daemon=True
+        )
+        self._thread.start()
+
+    def stop(self, timeout: float = 5.0) -> None:
+        """Stops the background thread and waits for it to finish."""
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout)
+            self._thread = None
+
+    def _watch(self, handle: Any) -> None:
+        try:
+            dirs = sorted({p.parent for p in self._files if p.parent.is_dir()})
+            if not dirs:
+                return
+            for _changes in watchfiles.watch(
+                *dirs,
+                watch_filter=lambda _change, changed: Path(changed).resolve() in self._files,
+                stop_event=self._stop,
+                recursive=False,
+            ):
+                try:
+                    result = self._rebuild()
+                except Exception as exc:
+                    handle.call_soon(_reraise(exc))
+                    continue
+                handle.call_soon(lambda result=result: self._apply(result))
         except Exception as exc:  # the watcher itself failed; report it, don't die silently
             handle.call_soon(_reraise(exc))

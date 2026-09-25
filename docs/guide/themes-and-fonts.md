@@ -21,10 +21,14 @@ app.load("Home_View.yaml", HomeViewModel)
 app.load("Settings_View.yaml", SettingsViewModel, stylesheet="styles/Settings.yaml")
 ```
 
-The theme is app-wide because in `tre` a theme belongs to the window:
-the window takes the first screen's theme and keeps it when you switch
-screens. A stylesheet belongs to a single view, so it can differ per
-screen. For a screen you pass to `App.register()`, build its view with
+The theme is app-wide because in `tre` a theme belongs to the window.
+The window's theme is what widgets from `tesserae.widgets` and
+hover/press tints use, and switching screens never changes it.
+`app.show()` gives the window the same theme as the screens: the same
+seed (`theme_seed=` first, then the custom theme's `seed:`, then the
+default theme's) and both themes' `colors:`. An app with no seed
+anywhere leaves the window unthemed, as `tre` does. A stylesheet belongs
+to a single view, so it can differ per screen. For a screen you pass to `App.register()`, build its view with
 `app.build_view("Foo_View.yaml")` so it gets the same theme and
 stylesheet.
 
@@ -73,8 +77,15 @@ wins over any rule.
 
 ## Switching themes later
 
-`load_theme` and `load_stylesheet` read a file into the dict `tre`
-takes, for `View.set_theme` and `Window.set_theme`:
+In an `App`, `app.set_theme_specs(default_theme_spec, custom_theme_spec)`
+re-themes every screen the app built, and the window, in one call. Both
+dicts are the complete new selection (`None` for none), and the seed and
+`dark` stay as given to `App(...)`. With `run(hot_reload=True)`, saving
+a theme file does this for you ([Hot Reload](hot-reload.md#theme-files)).
+
+For a single view or window, `load_theme` and `load_stylesheet` read a
+file into the dict `tre` takes, for `View.set_theme` and
+`Window.set_theme`:
 
 ```python
 from tesserae.spec import load_theme
@@ -124,11 +135,7 @@ warnings.filterwarnings("error", category=FontFallbackWarning)
 
 ## Not yet covered
 
-- **Hot reload doesn't watch theme or stylesheet files.**
-  [`ViewWatcher`](hot-reload.md) watches the view, its includes,
-  fragments and images; to pick up a theme edit, call `set_theme` again
-  with a freshly loaded theme. Watching theme and stylesheet files is
-  planned next (M31): `tre` 0.3.3 keeps bound values through a
-  re-theme and can replace a live view's stylesheet
-  ([`tre` issue #8](https://github.com/mindderivative/tre/issues/8)),
-  which is what it needed.
+- **Hot reload doesn't watch stylesheet files yet.** Theme files are
+  watched ([Hot Reload](hot-reload.md#theme-files)). Stylesheet files are
+  next (M31 Phase 2); until then, re-apply one with
+  `view.set_stylesheet(stylesheet_spec=load_stylesheet(...))`.

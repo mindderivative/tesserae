@@ -1,62 +1,35 @@
-# LOG — M32: Migrate to `tre` 0.3.3
+# LOG — M31: Hot Reload for Theme and Stylesheet Files
 
-*(Replaces M30's log — M30 is complete, committed and pushed.)*
+*(Replaces M32's log — M32 is complete, committed and pushed.)*
 
-- User: "scope the 0.3.3 migration as M32", then "go with your
-  recommendations for M32", then "push it and start Phase 2", then "accept both drops, send the questions, and start Phase 3", then "start Phase 4", then "Push and start" (Phase 5).
+- User: "Push, cleanup, and then start M31". Pushed `3fd0cf3` and
+  `dc6d34a`; removed the two scratch `tre` worktrees (`tre-v0.3.2`,
+  `tre-v0.3.3`).
 
-## Phase 1 — decisions
+## Phase 1 — theme files
 
-`tesserae.widgets` follows `tre` 0.3.3's names; `Switch`'s `is_on`
-becomes `selected`; `.venv` pinned to the `tre` v0.3.3 release.
+1. Probed `tre` 0.3.3 first. `set_theme` keeps the stylesheet,
+   `set_stylesheet` keeps the theme, and `reconcile` keeps both.
+2. Phase 1 Step 2's question ("does re-theming the first screen
+   re-theme the window?") answered by reading `view.rs`/`window.rs` at
+   the tag and testing: no. The window's `ThemeState` is shared with
+   the view but only `Window.set_theme` fills it. So every M30 `App`
+   window was unthemed (`Window.theme.is_set()` was `False`), and
+   imperative widgets and interaction tints ignored the app theme.
+3. Seed precedence differs: a `View` uses `theme_seed` > custom
+   `seed:` > default `seed:` plus both themes' `colors:`, while
+   `Window.set_theme` uses custom `seed:` > its `seed` argument and
+   ignores the default theme's seed and colors. `_window_theme`
+   rewrites the custom-theme dict so the window matches the view.
+4. `FileWatcher` (in `spec/watch.py`), `App.set_theme_specs()`,
+   `App._start_watchers()` (shared by `run()` and the tests).
+   `App.show()` themes the window on first open.
+5. 11 tests in `tests/test_theme_reload.py`; each window-theme piece
+   removed in turn to check a test fails. 245 passed.
+6. Docs: `guide/hot-reload.md`, `guide/themes-and-fonts.md`,
+   `api/app.md`, `ARCHITECTURE.md`. `mkdocs build --strict` clean.
 
-## Phase 2 — YAML migration
-
-1. `.venv` pinned: v0.3.3 wheel built offline from the tag, installed
-   in place of the `tre.pth` source-tree link. Verified it's the
-   release (has `set_stylesheet`, lacks 0.3.4's `create`).
-2. `tre`'s `migrate_views_0_3_3.py`: 66 files, committed unedited
-   (`1d0b932`). Found a bug in it: three `kind: Rect` nodes inside `.py`
-   strings got `background` -> `foreground`. All `.yaml` files were right.
-   Fixed separately (`c951f0f`).
-3. By hand: dict specs and assertions, a split Text style, `Switch`'s
-   `is_on` -> `selected`, `Image`'s stale PascalCase note.
-4. Docs: yaml snippets via the tool's `migrate_text()`, one mislabelled
-   fence fixed, installation/README rewritten for v0.3.3.
-
-81 -> 13 failures on `tre` 0.3.3; the 13 left are Python-API renames.
-
-## Phase 3 — Python API migration
-
-1. `tesserae.widgets` renamed to `tre` 0.3.3's names, checked against
-   the wheel's own signatures: `switch(selected=)`,
-   `divider(orientation=)`, `link(content)`, `dialog(supporting_text)`,
-   `toolbar(vibrant=)`; `icon`/`loading_indicator` pass `foreground=`
-   through (translations removed).
-2. Tests follow (`"value"`, `get_selected`, same-name parity tests).
-   `test_themes`' real-font test silently skipped under the pinned
-   wheel (no `.ttf` shipped); now also honors `TRE_SOURCE_DIR`.
-3. Docs: widget-catalog renames table; ARCHITECTURE binding names.
-
-**233 passed, 0 failed** on `tre` 0.3.3 (81 before M32); examples clean.
-
-## Phase 4 — verify
-
-1. 234 passed locally on `tre` 0.3.3; examples clean.
-2. CI pin `v0.3.2` -> `v0.3.3`; Phases 2-4 pushed (`7f39410..2a932e6`).
-   CI green: 233 passed, 1 skipped (no display), `tre` at `bc5e9b6`.
-3. New regression test: a reload editing a bound node keeps its live
-   value. Shows the placeholder on v0.3.2, `'live'` on v0.3.3 (M91).
-
-## Phase 5 — docs and tracker
-
-1. Docs sweep: no 0.3.2-era statements left; new "Layout rules in
-   stylesheets and themes" note (they take effect since 0.3.3); the
-   themes guide points at M31 for theme-file hot reload.
-2. Tracker: the 0.3.3 gap and M29's bound-value gap moved to Fixed;
-   theme/stylesheet hot reload marked unblocked (M31); PyPI gap -> v0.3.3.
-
-## Status
-
-**M32 complete.** 81 failing -> 0 on `tre` 0.3.3; CI green on the
-`v0.3.3` pin. Unblocks M31.
+Slip: while probing, a `git checkout v0.3.3` ran in `tre`'s main
+checkout by mistake; restored to `main` at once (`68c3883`), with the
+`tre` session's uncommitted `CLAUDE.md` edit intact. Source reads use
+`git show v0.3.3:...` from then on.

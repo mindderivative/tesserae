@@ -68,11 +68,20 @@ Then either:
 `watcher.files` lists every file being watched. It's recomputed on every
 reload, so a newly added include, fragment or image is picked up.
 
+## Theme files
+
+`App.run(hot_reload=True)` also watches the theme files given to
+`App(default_theme=..., custom_theme=...)`. When you save one, Tesserae
+re-reads both on the watcher thread, then re-themes every screen built
+by `app.load()` or `app.build_view()`, and the window, through
+`app.set_theme_specs(...)`. Bound values stay live. A theme given as a
+`*_spec=` dict has no file, so it isn't watched. A broken edit is logged
+like a failed view reload, and the app keeps its previous theme.
+
 ## Limits
 
-- **Theme and stylesheet files aren't watched.** After editing a theme,
-  call `set_theme` again with a freshly loaded one (see
-  [Themes & Fonts](themes-and-fonts.md)).
+- **Stylesheet files aren't watched yet** (M31 Phase 2). After editing
+  one, call `view.set_stylesheet(stylesheet_spec=load_stylesheet(...))`.
 - **Don't use `tre`'s own `View.poll_reload()`.** Tesserae gives `tre`
   the finished view as data, never a file, so `tre` has nothing to
   watch.

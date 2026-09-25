@@ -23,10 +23,22 @@ loads), and `tre` is given only the parsed data. Passing a file and its `*_spec=
 `ValueError`. See [Themes & Fonts](../guide/themes-and-fonts.md).
 
 The theme is app-wide rather than per screen because in `tre` a theme
-belongs to the window: the window takes the first screen's theme and
-keeps it when you switch screens, so widgets created with
-`tesserae.widgets` and hover/press tints would otherwise disagree with
-the screen's own widgets.
+belongs to the window. Building a view never themes the window, and
+switching screens never changes it, so `show()` gives the window the
+app's theme the first time it opens. Widgets created with
+`tesserae.widgets` and hover/press tints use it.
+
+## `set_theme_specs`
+
+**`set_theme_specs(default_theme_spec, custom_theme_spec) -> None`**
+
+Re-themes the running app in place: every view `load()` or
+`build_view()` made, and the window. Views built later use the new
+theme too. Both dicts are the complete new selection (`None` for none).
+The seed and `dark` stay as given to `App(...)`. Bound values stay live.
+If `tre` rejects the theme, it raises, and the app keeps its old theme.
+Call it on the event-loop thread; `run(hot_reload=True)` calls it when a
+theme file changes.
 
 ## `build_view`
 
@@ -82,7 +94,9 @@ if called before `show()`.
 the app runs, whenever its view file -- or anything it was built from --
 changes on disk. See [Hot Reload](../guide/hot-reload.md). Screens given
 to `register()` directly aren't watched, since Tesserae doesn't know
-their file.
+their file. The theme files given to `App(...)` are watched too, and an
+edit re-themes the running app (see
+[Hot Reload](../guide/hot-reload.md#theme-files)).
 
 ## `thread_handle`
 
