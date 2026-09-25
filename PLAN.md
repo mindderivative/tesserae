@@ -1,24 +1,20 @@
-# PLAN — M29: Tesserae Owns All File Handling; `tre` Gets Specs + Bytes Only
+# PLAN — M30: Theme Arguments on `App` and `App.load()`
 
-*(Replaces the prior M27 + M28 plan in this file — both are complete, committed.)*
+*(Replaces the M29 plan in this file — M29 is complete, committed and pushed. `LOG.md` still holds M29's record until M30 work starts.)*
 
 ## Goal
 
-User direction, relayed through a handoff from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Tesserae owns reading, parsing, decoding and watching files; `tre` gets specs and bytes.
+User-directed: "scope adding theme args to App.load()". Give `App` a theme API, closing the known gap that it has none. `load_view` already takes every theme argument (M29), so the real question is where a theme lives in a multi-screen app.
 
 ## Status
 
-**Complete (2026-09-25).** Tesserae gives `tre` no file path anywhere.
+**Scoped, not started — waiting on user decisions (Phase 1).**
 
-- **Phase 1 — views as data.** `load_view`/`instantiate` hand `tre` one finished dict via `spec=` (no YAML-text round-trip). `include:` resolved in Tesserae with `tre`'s own rules, before `component:` expansion. `tre`'s errors re-raised naming the source file. Unquoted YAML dates normalized (they break `spec=`).
-- **Phase 2 — images (Pillow).** `widgets.image` → `add_image_from_bytes`; every `kind: Image` `src:` removed after expansion, decoded, and pushed with `push_frame`.
-- **Phase 3 — hot reload (poll).** `ViewWatcher` tracks every file a view is built from; `poll()` for app-controlled loops. `load_view` stops passing `tre` a path.
-- **Phase 3b — hot reload inside `App.run()` (`watchfiles`).** After `tre` M87 (from `tre` issue #6, which this milestone opened): `ViewWatcher.start(handle)` watches for file events on a background thread and applies changes through `App.thread_handle()`; `app.run(hot_reload=True)`.
-- **Phase 4 — themes, stylesheets, fonts.** Read by Tesserae and passed as `*_spec=` dicts (`tre` M86); `tesserae.register_font(path)`; `FontFallbackWarning` where `tre` would silently substitute a font.
-- **Phase 5 — docs.** The rule stated in `README.md`, `docs/index.md` and both architecture pages; `ARCHITECTURE.md` gained a "Files and data" table. The sweep found Tesserae's own `multi_screen` example still using `tre.View(path)` — fixed.
+Key finding, checked in `tre` v0.3.2: a theme is window-level. `Window.from_view` shares the first screen's theme with the window, and `Window.show_view` never switches it — so per-screen themes would leave imperative `tesserae.widgets` and interaction tints on the first screen's theme after `app.show(...)`. A stylesheet, by contrast, is per-`View`. `View.set_theme` can re-theme a live screen (a complete selection each call; bindings not re-applied); `tre` has no `set_stylesheet`.
 
-CI's `tre` checkout is pinned to `0066203` (tip of `0.3.2`, with M84/M86/M87); switch to `main` or the `v0.3.2` tag once released.
+Plan (full detail in `BUILD_TRACKER.md` Milestone 30):
 
-`pytest tests/` 221 passed (up from 157). All 3 examples run clean; `mkdocs build --strict` clean.
-
-**Up next:** nothing scoped. Named candidates: theme arguments on `App.load()`; hot reload for theme/stylesheet files; hot reload for `App.register()`ed screens (Tesserae doesn't know their file); conditional per-item styling for the 5 Rust-internal-coloring widgets.
+1. **Decide** — recommended: an app-wide theme on `App(...)`, a per-screen stylesheet on `load()`; and whether theme-file hot reload is in scope.
+2. **Implement** — theme files read once via `load_theme`, passed to every `load()` as dicts; `register()` unchanged.
+3. **Hot reload for theme files** (if in scope) — watch them, re-theme every screen via `View.set_theme` on the loop thread. Stylesheets can't be hot-reloaded until `tre` gains `set_stylesheet`.
+4. **Tests, MkDocs, tracker.**
