@@ -44,3 +44,16 @@ User: "go with your recommendations for M33".
 
 Hook: a GateGuard pre-Bash check asked for the request and the
 command's purpose before the pin; stated, then run.
+
+## Phase 3 — verify, docs, tracker
+
+User: "start Phase 3".
+
+1. `tests/test_thread_gc.py`. The old `venv-033` pointed into the
+   removed worktree, so a fresh `venv-033w` was built from the saved
+   v0.3.3 wheel: there the test fails with the `PanicException`; on
+   0.3.4 it passes.
+2. `ci.yml` ref `v0.3.3` → `v0.3.4`. Not pushed, so no CI run yet.
+3. `installation.md`, `README.md` → v0.3.4 (release assets checked:
+   CPython 3.9–3.15 wheels). Transparency section in the themes guide.
+4. 419 passed; `mkdocs build --strict` clean. Gaps moved to fixed.

@@ -39,13 +39,13 @@ and the app's theme and stylesheet files.
 
 ## Install (development)
 
-Tesserae targets **`tre` v0.3.3** (the release its CI pins). Install that
+Tesserae targets **`tre` v0.3.4** (the release its CI pins). Install that
 `tre` first -- the wheel for your platform from the
-[v0.3.3 release](https://github.com/mindderivative/tre/releases/tag/v0.3.3),
+[v0.3.4 release](https://github.com/mindderivative/tre/releases/tag/v0.3.4),
 or built from the tag -- then Tesserae itself:
 
 ```bash
-pip install /path/to/tre-0.3.3-<your-platform>.whl
+pip install /path/to/tre-0.3.4-<your-platform>.whl
 pip install -e ".[dev]"
 ```
 

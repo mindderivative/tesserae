@@ -23,15 +23,16 @@ jobs:
         with:
           path: tesserae
 
-      # Pinned to `tre`'s v0.3.3 release tag (bc5e9b6), not a branch, so
+      # Pinned to `tre`'s v0.3.4 release tag (29800f3), not a branch, so
       # CI stays reproducible until it's deliberately bumped -- the same
-      # release the local `.venv` is pinned to (M32). v0.3.3 carries M90's
-      # schema renames (Tesserae migrated in M32), M91's fix for bound
-      # values on live updates plus `View.set_stylesheet`, and M92.
+      # release the local `.venv` is pinned to (M33). v0.3.4 adds the
+      # building-block API (M93-M96), renders a color's own alpha and makes
+      # `opacity` group opacity (Tesserae's YAML updated in M33), and fixes
+      # `tre` issue #10 (background-thread GC freeing a View).
       - uses: actions/checkout@v4
         with:
           repository: mindderivative/tre
-          ref: v0.3.3
+          ref: v0.3.4
           path: tre
 
       # No explicit Rust-toolchain-install action needed -- matches

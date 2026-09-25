@@ -75,6 +75,23 @@ upgrading, a screen whose stylesheet sets them may now lay out
 differently. A widget's own inline `style:` always applied, and still
 wins over any rule.
 
+## Transparency: color alpha and `opacity`
+
+Since `tre` 0.3.4, two things work the way they do in CSS:
+
+- **A color's own alpha renders.** `"#FFFFFF80"` is half-transparent
+  white, and `"#FFFFFF00"` is invisible. (Before 0.3.4 a color's alpha
+  was ignored, so `"#FFFFFF00"` painted solid white.) Give text an opaque
+  color.
+- **`opacity` fades the node and everything inside it**, as one layer.
+  To dim a background without dimming what sits on it, put the
+  translucency in the background's color instead. The built-in `Dialog`
+  and `SideSheetModal` fragments do this: their scrim is
+  `background: "#00000052"` (black at 32%, as `tre`'s own dialogs use)
+  with no `opacity`, so the panel stays fully opaque. A theme's
+  `colors: {scrim: ...}` doesn't reach those two fragments, since a YAML
+  color can't be "a theme role at 32%".
+
 ## Switching themes later
 
 In an `App`, `app.set_theme_specs(default_theme_spec, custom_theme_spec)`
