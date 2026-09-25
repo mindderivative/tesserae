@@ -122,7 +122,7 @@ def test_changing_an_image_file_reloads(tmp_path: Path):
 
 def test_a_newly_added_include_is_watched_after_reload(tmp_path: Path):
     view_path, view, watcher = _watched(tmp_path, _text_view("Hello"))
-    rect = 'id: extra\nkind: Rect\nstyle: {{width: {n}, height: {n}, foreground: "#112233"}}\n'
+    rect = 'id: extra\nkind: Rect\nstyle: {{width: {n}, height: {n}, background: "#112233"}}\n'
     part = _write(tmp_path / "extra.yaml", rect.format(n=5))
     assert part.resolve() not in watcher.files
 

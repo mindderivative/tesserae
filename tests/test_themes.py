@@ -19,7 +19,7 @@ from tesserae.fonts import FontFallbackWarning, available_families
 from tesserae.spec import load_stylesheet, load_theme, load_view
 
 SEED = (0x67, 0x50, 0xA4, 0xFF)
-RECT_VIEW = 'id: box\nkind: Rect\nstyle: {width: 10, height: 10, foreground: "#112233"}\n'
+RECT_VIEW = 'id: box\nkind: Rect\nstyle: {width: 10, height: 10, background: "#112233"}\n'
 ROBOTO = Path(tre.__file__).parents[2] / "crates" / "engine-render" / "assets" / "fonts" / "Roboto-Regular.ttf"
 
 
