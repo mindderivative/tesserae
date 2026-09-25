@@ -17,11 +17,16 @@ Uses `App.register()` directly rather than `App.load()`: each
 scope boundary, not an oversight. `load()` stays the right choice for
 the common case (`examples/counter/app.py`), where a `ViewModel` never
 needs to reach back into `App`.
+
+Each view is built with `tesserae.spec.load_view`, not `tre.View(path)`:
+Tesserae reads the file (and anything it includes) and hands `tre` only
+the finished spec (M29).
 """
 
 from pathlib import Path
 
-from tesserae import App, View
+from tesserae import App
+from tesserae.spec import load_view
 
 from Home_ViewModel import HomeViewModel
 from Settings_ViewModel import SettingsViewModel
@@ -30,11 +35,11 @@ directory = Path(__file__).parent
 
 app = App(width=240, height=120, title="Tesserae Multi-Screen")
 
-home_view = View(str(directory / "Home_View.yaml"))
+home_view = load_view(directory / "Home_View.yaml")
 home_vm = HomeViewModel(home_view, app)
 app.register("Home", home_view, home_vm)
 
-settings_view = View(str(directory / "Settings_View.yaml"))
+settings_view = load_view(directory / "Settings_View.yaml")
 settings_vm = SettingsViewModel(settings_view, app)
 app.register("Settings", settings_view, settings_vm)
 

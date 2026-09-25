@@ -19,11 +19,16 @@ tesserae.instantiate    -- embeds a Component with its own ViewModel
   |                          into a View/Component, enforcing the same
   |                          naming convention as App.load
   |
-tesserae.spec           -- `component:`/`with:`/`repeat:` macro
-  | (load_view/                expansion: a *_View.yaml can reuse one of
-  |  expand_components)        67 built-in MD3 *_Component.yaml
-  |                             fragments, purely at text/load time,
-  |                             before tre ever parses the file
+tesserae.spec           -- every file a screen is built from, read
+  | (load_view,                by Tesserae: include:, component:/with:/
+  |  load_theme,               repeat: expansion against 67 built-in MD3
+  |  ViewWatcher)              *_Component.yaml fragments, images
+  |                             (Pillow), themes/stylesheets, and hot
+  |                             reload (watchfiles) -- tre gets only the
+  |                             finished spec, dicts and pixels
+  |
+tesserae.fonts          -- register_font(path): font file -> bytes for
+  |                          tre, plus a warning for unavailable families
   |
 tesserae.widgets        -- one Python function per MD3 widget (~68),
   |                          thin delegates to tre's own Window.add_*
@@ -46,12 +51,19 @@ tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         embedding
 ```
 
+**Files stay on Tesserae's side.** Tesserae reads, parses, decodes and
+watches every file; `tre` receives only data (`View(spec=...)`,
+`reconcile(spec=...)`, `*_spec=` theme/stylesheet dicts, `push_frame`/
+`add_image_from_bytes` pixels, `register_font` bytes). Tesserae never
+gives `tre` a file path (M29).
+
 Tesserae does not duplicate `tre`'s own real capability in slower,
 less-tested Python -- `Signal`/`View`/`ViewModel`/`Component` are
 `tre`'s own classes, imported unmodified. Tesserae's own real,
 additive value is `App`, `instantiate`, `Repeater`, the declarative
-`component:`/`with:`/`repeat:` macro layer, and the `tesserae.widgets`
-imperative catalog.
+`component:`/`with:`/`repeat:` macro layer, the `tesserae.widgets`
+imperative catalog, and all file handling -- images, themes, fonts and
+hot reload.
 
 ## Build history
 

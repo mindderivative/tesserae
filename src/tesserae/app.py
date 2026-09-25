@@ -58,7 +58,7 @@ class App:
         self._tre_app: _TreApp | None = None
 
     def register(self, name: str, view: Any, viewmodel: Any) -> None:
-        """Registers `view` (already loaded, e.g. `View("Foo_View.yaml")`)
+        """Registers `view` (already loaded, e.g. `tesserae.spec.load_view("Foo_View.yaml")`)
         and its already-`_attach`ed `viewmodel` (e.g. `FooViewModel(view)`)
         under `name`, for a later `show(name)` to display. Raises if
         `name` is already registered -- a real, load-bearing collision a

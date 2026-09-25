@@ -36,11 +36,32 @@ end to end by three real vertical-slice examples. See
   for widgets built dynamically from Python.
 - **`Repeater`** -- automatic keyed add/remove diffing over a list
   `Signal`, no hand-rolled bookkeeping.
+- **Hot reload** -- `app.run(hot_reload=True)` updates a running app in
+  place when a view, or anything it's built from, changes on disk. See
+  [Hot Reload](guide/hot-reload.md).
+- **Themes, stylesheets and custom fonts** -- loaded from files, with a
+  warning when a font would silently fall back. See
+  [Themes & Fonts](guide/themes-and-fonts.md).
 - **A full reactivity layer** -- `Signal`, plus `tre`'s own richer
   `Computed`/`Effect`/`batch`/`untrack`, re-exported unmodified.
 - **An enforced naming convention** -- every real view is a
   `*_View.yaml` + `*_ViewModel.py` pair, checked at load time, not
   discovered as a cryptic failure later.
+
+## Files: Tesserae reads them, `tre` gets data
+
+You always give Tesserae file paths: views, component fragments,
+`include:`d files, images, themes, stylesheets and fonts. Tesserae
+reads, parses, decodes and watches them itself, and hands `tre` only
+data -- a finished view spec, theme and stylesheet dicts, image pixels
+and font bytes. Tesserae never gives `tre` a file path, so every error
+names the file you wrote, and a view and everything it's built from
+(includes, fragments, images) can be hot-reloaded.
+
+If you use `tre` directly alongside Tesserae, keep to the same rule:
+pass `tre` the `*_spec=` forms (e.g. `load_theme(...)` for
+`set_theme`), not paths, and use Tesserae's `ViewWatcher` rather than
+`tre`'s `poll_reload`.
 
 ## Where to go next
 

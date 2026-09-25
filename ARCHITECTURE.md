@@ -21,6 +21,21 @@ tesserae.Repeater       -- one list Signal as the single source of
   |                          truth; keeps one Component+ViewModel alive
   |                          per item present, via instantiate (above)
   |
+tesserae.spec           -- all file handling for a screen (M15-M29):
+  |                          include: resolution, component:/with:/repeat:
+  |                          expansion against spec/components/*_Component
+  |                          .yaml, image decoding (Pillow), theme and
+  |                          stylesheet loading, and hot reload
+  |                          (ViewWatcher: watchfiles on a background
+  |                          thread, applied via tre's LoopHandle)
+  |
+tesserae.fonts          -- register_font(path) -> font bytes for tre;
+  |                          FontFallbackWarning for unavailable families
+  |
+tesserae.widgets        -- one Python function per MD3 widget, thin
+  |                          delegates to tre's Window.add_* factories
+  |                          (image() decodes in Tesserae first)
+  |
 tesserae.{Signal,View,ViewModel,Component,
   |        Computed,Effect,batch,untrack}       -- thin re-exports of tre's
   |                                               own real, already-
@@ -39,7 +54,8 @@ tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
 
 Tesserae does not duplicate `tre`'s own real capability in slower,
 less-tested Python -- `Signal`/`View`/`ViewModel`/`Component` are `tre`'s
-own classes, imported unmodified. Tesserae's own real, additive value is
+own classes, imported unmodified. The one deliberate division of labour
+the other way is files (next section): Tesserae owns all of them. Tesserae's own real, additive value is
 `App` (the real "one entry point, named-screen registry, switch without
 re-bootstrapping" layer neither `tre` nor pyCopper's own `App`/`Engine`
 split provide in this exact shape), `instantiate` (the same real
@@ -48,6 +64,25 @@ enforced-naming discipline, applied to embedded components), and
 entirely in Python on top of it -- no new `engine-spec`/`engine-core`
 work needed; see its own module doc comment for why a YAML-level
 `for_each:` keyword was considered and set aside).
+
+## Files and data (M29)
+
+User direction: "Tesserae should not be pushing files directly to tre.
+It should be pushing spec information and handling the files itself."
+`tre` offers one data-ingestion path per concern; Tesserae owns reading,
+parsing, decoding and watching.
+
+| File | Tesserae does | `tre` receives |
+| --- | --- | --- |
+| `*_View.yaml`, `include:`d files, `*_Component.yaml` fragments | reads, resolves `include:` (a port of `tre`'s `include.rs` rules), expands `component:` | one finished dict: `View(spec=...)`, `instantiate("", into, spec=...)`, `reconcile(spec=...)` |
+| images (`kind: Image` `src:`, `widgets.image`) | decodes with Pillow to straight-alpha RGBA | pixels: `push_frame`, `add_image_from_bytes` |
+| themes, stylesheets | reads YAML (`load_theme`/`load_stylesheet`) | dicts: `stylesheet_spec=`/`default_theme_spec=`/`custom_theme_spec=` |
+| fonts | reads bytes (`register_font`), tracks families, warns on fallback | bytes: `tre.register_font` |
+| all of the above, over time | `ViewWatcher`: `watchfiles` events on a background thread, rebuild off the UI thread | `reconcile(spec=...)` + `push_frame`, queued on `App.thread_handle()` |
+
+Because `tre` only ever sees a dict, it can't say which file a problem
+came from; Tesserae re-raises `tre`'s `ValueError`s naming the source
+file. Theme and stylesheet files aren't watched for hot reload yet.
 
 ## `*_View.yaml` / `*_ViewModel.py`
 
@@ -96,10 +131,12 @@ component, viewmodel = instantiate(view, "Card_View.yaml", CardViewModel, contai
 ```
 
 `instantiate(parent, path, viewmodel_cls, into, *args, **kwargs)`
-(`tesserae.component`) checks the naming convention, then calls
-`parent.instantiate(str(path), into)` (real `tre` M43 capability --
-`parent` is a `View` or another `Component`, so components nest for
-free) and constructs `viewmodel_cls(component, *args, **kwargs)`.
+(`tesserae.component`) checks the naming convention, reads and expands
+`path` itself (see Files and data above), then calls
+`parent.instantiate("", into, spec=...)` (real `tre` M43 capability,
+given a finished dict and no path -- `parent` is a `View` or another
+`Component`, so components nest for free) and constructs
+`viewmodel_cls(component, *args, **kwargs)`.
 Extra `*args`/`**kwargs` are the real, common case a bare `App.load`
 call doesn't need: a component's own `ViewModel` often needs data (an
 item's own id) or a reference to shared state (`examples/todo_list/`'s
@@ -151,7 +188,10 @@ before tearing down" ordering.
   already provide: `{{ }}` binding expressions (a strict, non-`eval`
   whitelist), real `on_click`/`on_hover_enter`/`on_hover_exit`/
   `on_change` handler wiring, two-way binding for `checked`/
-  `thumb_position`/`text`, hot-reload via `View.poll_reload()`.
+  `thumb_position`/`text`.
+- Hot reload, owned by Tesserae (`tre`'s `View.poll_reload()` has no
+  file to watch, since `tre` reads none): `app.run(hot_reload=True)`,
+  or `tesserae.spec.ViewWatcher` directly.
 - `tre.Computed`/`Effect`/`batch`/`untrack` (M45), re-exported
   unmodified -- derived/cached values, side-effect-only reactions, and
   collapsing related writes into one notification pass, all duck-typed
@@ -161,8 +201,10 @@ before tearing down" ordering.
 
 ## Explicitly deferred
 
-See `README.md`'s own "Explicitly deferred" section -- a wider widget
-catalog, app-level state/routing beyond `App.show`, PyPI publishing.
+See `README.md`'s own "Explicitly deferred" section -- app-level
+state/routing beyond `App.show`, a `tesserae new` CLI, PyPI publishing.
+(The widget catalog once listed here is real now: 67 fragments plus
+`tesserae.widgets`.)
 `Repeater`'s own real, stated scope boundaries (no reordering, no
 per-item data re-application) are named directly above, not repeated
 here.

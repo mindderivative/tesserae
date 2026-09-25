@@ -17,8 +17,24 @@ screens, switched via `App.show()` from inside a real dispatched
 handler), and `examples/todo_list/` (a real dynamic list, one list
 `Signal` as the single source of truth, `Repeater` keeping components in
 sync automatically). `Computed`/`Effect`/`batch`/`untrack` (TRE M45) are
-also real and re-exported -- see Reactivity below. The widget catalog is
-still a real, deliberately deferred follow-up -- see below.
+also real and re-exported -- see Reactivity below. The MD3 widget catalog
+is real too: 67 declarative `component:` fragments for `*_View.yaml`
+files, plus `tesserae.widgets` for building widgets from Python. See the
+[documentation](https://mindderivative.github.io/tesserae/) for both.
+
+## Files: Tesserae reads them, `tre` gets data
+
+You give Tesserae file paths -- views, component fragments, `include:`d
+files, images, themes, stylesheets, fonts. Tesserae reads, parses,
+decodes and watches them itself, and hands `tre` only data: a finished
+view spec (`View(spec=...)`), theme and stylesheet dicts
+(`*_spec=`), RGBA pixels (`push_frame`/`add_image_from_bytes`) and
+font bytes (`register_font`). Tesserae never gives `tre` a file path.
+
+That's what lets Tesserae resolve `include:` and `component:` together,
+name the right file in every error, warn when a font would silently
+fall back, and hot-reload a running app when any of those files change
+(`app.run(hot_reload=True)`).
 
 ## Install (development)
 
@@ -178,8 +194,6 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 Named for the record, not designed in detail yet -- each is real, future
 work once this foundation is proven further:
 
-- A broad widget/component catalog beyond what `tre`'s own `add_*`
-  factories and `engine-spec`'s YAML builder already expose.
 - App-level state stores shared across screens, routing beyond a plain
   named `App.show(name)` (history/back-stack, URL-style deep links), a
   `tesserae new` CLI scaffolding tool.

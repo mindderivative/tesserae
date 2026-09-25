@@ -36,7 +36,8 @@ construction time -- e.g. to call `app.show(...)` from its own
 handler:
 
 ```python
-from tesserae import App, View, ViewModel
+from tesserae import App, ViewModel
+from tesserae.spec import load_view
 
 class HomeViewModel(ViewModel):
     def __init__(self, app, view):
@@ -47,7 +48,7 @@ class HomeViewModel(ViewModel):
         self.app.show("Settings")  # switches screens from inside a real click handler
 
 app = App(width=400, height=300, title="Multi-Screen")
-home_view = View("Home_View.yaml")
+home_view = load_view("Home_View.yaml")
 home_vm = HomeViewModel(app, home_view)
 app.register("Home", home_view, home_vm)
 ```
