@@ -23,18 +23,16 @@ jobs:
         with:
           path: tesserae
 
-      # Pinned to an exact commit on `tre`'s `0.3.2` release-prep branch
-      # (0066203, M87 Phase 2), not the branch name: later work on
-      # `0.3.2` can't break Tesserae's CI. It carries M84's declarative
-      # kinds (M27's fragments), M86's `*_spec=`/`register_font`
-      # (M29 Phase 4) and M87's `App.thread_handle()` (hot reload
-      # inside `App.run()`). Unpinned, CI tested `tre`'s `main` (v0.3.1) and
-      # failed 9 of 157 tests. Switch to `main` or the `v0.3.2` tag once
-      # v0.3.2 is released.
+      # Pinned to `tre`'s v0.3.2 release tag (c6f0913), not a branch, so
+      # CI stays reproducible until it's deliberately bumped. v0.3.2
+      # carries M84's declarative kinds (M27's fragments), M86's
+      # `*_spec=`/`register_font` (M29 Phase 4) and M87's
+      # `App.thread_handle()` (hot reload inside `App.run()`). Unpinned,
+      # CI tested `tre`'s `main` at v0.3.1 and failed 9 of 157 tests.
       - uses: actions/checkout@v4
         with:
           repository: mindderivative/tre
-          ref: 0066203038725e1d10fb19c8eaba05a831b9d4e9
+          ref: v0.3.2
           path: tre
 
       # No explicit Rust-toolchain-install action needed -- matches
