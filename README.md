@@ -34,7 +34,8 @@ font bytes (`register_font`). Tesserae never gives `tre` a file path.
 That's what lets Tesserae resolve `include:` and `component:` together,
 name the right file in every error, warn when a font would silently
 fall back, and hot-reload a running app when any of those files change
-(`app.run(hot_reload=True)`).
+(`app.run(hot_reload=True)`) -- views, includes, fragments and images,
+and the app's theme and stylesheet files.
 
 ## Install (development)
 

@@ -37,7 +37,8 @@ end to end by three real vertical-slice examples. See
 - **`Repeater`** -- automatic keyed add/remove diffing over a list
   `Signal`, no hand-rolled bookkeeping.
 - **Hot reload** -- `app.run(hot_reload=True)` updates a running app in
-  place when a view, or anything it's built from, changes on disk. See
+  place when a view, or anything it's built from, changes on disk --
+  and when a theme or stylesheet file does. See
   [Hot Reload](guide/hot-reload.md).
 - **Themes, stylesheets and custom fonts** -- loaded from files, with a
   warning when a font would silently fall back. See
@@ -56,7 +57,8 @@ reads, parses, decodes and watches them itself, and hands `tre` only
 data -- a finished view spec, theme and stylesheet dicts, image pixels
 and font bytes. Tesserae never gives `tre` a file path, so every error
 names the file you wrote, and a view and everything it's built from
-(includes, fragments, images) can be hot-reloaded.
+(includes, fragments, images) can be hot-reloaded, along with the app's
+theme and stylesheet files.
 
 If you use `tre` directly alongside Tesserae, keep to the same rule:
 pass `tre` the `*_spec=` forms (e.g. `load_theme(...)` for

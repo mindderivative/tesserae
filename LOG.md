@@ -55,3 +55,27 @@ User: "Push and start". Pushed `dae8402`.
 4. 9 tests in `tests/test_stylesheet_reload.py`; four code paths
    removed in turn, each caught. 254 passed. Docs updated;
    `mkdocs build --strict` clean.
+
+## Filed `tre` issue #12
+
+User: "Create an issue on TRE for the on_change firing on every reload
+even when something has not changed". A repro using only `tre` on v0.3.3
+(the handler ran once after `_attach`, `set_stylesheet`, `set_theme` and
+a same-spec `reconcile`, and zero times after a same-value
+`Signal.set`); code on `main` at `68c3883` (`set_checked`/`set_selected`/
+`set_text` fire `Change` unconditionally, reached through `reattach`);
+two fix options. Linked from the known gap and the hot-reload guide.
+
+## Phase 3 — tests, docs, tracker
+
+User: "Push and start Phase 3". Pushed `690fb5d`, `e709fbd`.
+
+1. Live test: a subprocess `App.run(hot_reload=True)` edits the custom
+   theme and default stylesheet files until the screen and the window
+   show the change. Passed (a display is present here; it skips on CI).
+   With the stylesheet watcher disabled it fails:
+   `stuck:(6.0,2.0,(0,0,255,255))`. 255 passed.
+2. Docs sweep: `README.md`, `docs/index.md`, hot-reload guide intro;
+   `mkdocs build --strict` clean.
+
+M31 complete.

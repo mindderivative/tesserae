@@ -2,7 +2,9 @@
 
 Tesserae reloads a screen when you edit any file it was built from: the
 `*_View.yaml` itself, any file it `include:`s, any `*_Component.yaml`
-fragment it uses, and any image it shows. The live view is updated in
+fragment it uses, and any image it shows. Inside an `App`, it also
+re-styles the running app when a theme or stylesheet file changes (see
+[below](#theme-and-stylesheet-files)). The live view is updated in
 place -- widgets that didn't change keep their identity, focus and any
 running animation.
 
