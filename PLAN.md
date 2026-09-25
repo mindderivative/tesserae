@@ -8,7 +8,7 @@ User direction, relayed through a handoff from the `tre` session: "Tesserae shou
 
 ## Status
 
-**In progress — Phases 1–2 of 5 done.**
+**In progress — Phases 1–3 of 5 done.**
 
 Phase 1: `load_view` and `instantiate` now hand `tre` the expanded dict via `spec=`; `expand_components_to_spec` is the primary entry point, with `expand_components` kept as a text wrapper. `include:` is resolved in Tesserae (a straight port of `tre`'s `include.rs`), since `tre` only splices it on its text path. `tre`'s `ValueError`s are re-raised naming the source file. One real regression the handoff didn't mention was found and closed: unquoted dates (`2026-09-24`) load as `datetime.date`, which `spec=` rejects, so they're normalized back to the same string the old text path produced.
 
@@ -16,8 +16,10 @@ One real change to the handoff's sequencing: `path` still reaches `tre` for now.
 
 Phase 2 (user chose Pillow): Tesserae decodes every image itself and hands `tre` only RGBA bytes. `widgets.image` uses `add_image_from_bytes`; for views, every `kind: Image`'s `src:` is removed after expansion (so hand-written images and the `Image` fragment are handled the same way, and the fragment needed no change), resolved with `tre`'s own path rules, decoded, and pushed onto the built node with `push_frame`. With both `include:` and `image.src:` now in Tesserae, `instantiate` gives `tre` no path at all; `load_view` still passes one, only for `poll_reload`.
 
-Also this session (user-directed): `ci.yml`'s `tre` checkout pinned to `0.3.2`, fixing CI's 9 failing M27 tests — confirmed green on push (172 passed).
+Phase 3 (user chose a plain poll loop): new `tesserae.spec.ViewWatcher`. `poll()` compares the modification time and size of every file the view was built from — the view, its includes, the fragments it used, its images — and on a change rebuilds through the same `build_view_spec` pipeline `load_view` uses and calls `view.reconcile(spec=...)`. Errors raise once per edit, naming the file. `load_view` now gives `tre` no path at all, so Tesserae hands `tre` no file path anywhere. Real limit found: `tre`'s `View` is single-threaded and `App.run()`'s event loop has no periodic Python hook, so the watcher works in an app-controlled loop but can't run inside `App.run()` yet — needs a `tre` addition.
 
-`pytest tests/` 188 passed (+16). Phases 1 and the CI pin pushed; Phase 2 committed locally, not pushed.
+Also this session: `ci.yml`'s `tre` checkout pinned to `0.3.2` (user-directed), fixing CI's 9 failing M27 tests — green on push, twice. Then pinned to the exact commit `d6c30ef` instead, relayed from the `tre` session as user-directed there.
 
-**Up next:** Phase 3 (hot reload) — needs a decision on file watching (plain poll loop vs. `watchfiles`). Phase 4 is unblocked locally (`tre` M86 landed on `0.3.2`, not yet pushed; CI would fail on it until `tre` pushes) and needs a go-ahead.
+`pytest tests/` 196 passed (+8). Phases 1–2 pushed; the exact-commit CI pin and Phase 3 committed locally, not pushed.
+
+**Up next:** Phase 4 (themes, stylesheets, fonts) — unblocked: `tre` M86 is pushed and CI's new pin (`d6c30ef`) includes it; needs a go-ahead. Separately, asking the `tre` session for a periodic hook would let hot reload run inside `App.run()`.

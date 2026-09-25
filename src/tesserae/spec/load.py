@@ -12,10 +12,11 @@ M29 Phase 2: every `kind: Image`'s `src:` is taken out, decoded by
 Tesserae, and pushed onto the built node (`spec/images.py`), so `tre`
 never opens an image file either.
 
-`path` is still passed to `tre`, for now, for one reason: it's the file
-`tre`'s own `poll_reload` watches. Phase 3 replaces that with
-Tesserae-owned watching and stops passing `path`. `tre` never *reads*
-the view file itself -- with `spec=` given, it only watches it.
+M29 Phase 3: `tre` is given no path at all -- `View(spec=...)` only.
+The one job the path still had (`tre`'s own `poll_reload` watch target)
+is replaced by Tesserae's `ViewWatcher` (`watch.py`), which reuses
+`build_view_spec` below so a reload runs the exact same pipeline as the
+first load.
 """
 
 from __future__ import annotations
@@ -25,10 +26,27 @@ from typing import Any
 
 from tre import View
 
-from tesserae.spec.expand import expand_components_to_spec
-from tesserae.spec.images import extract_images, push_frames
+from tesserae.spec.expand import expand_with_dependencies
+from tesserae.spec.images import Frame, extract_images, push_frames
 
-__all__ = ["load_view"]
+__all__ = ["build_view_spec", "load_view"]
+
+
+def build_view_spec(
+    path: str | Path, *, component_dirs: list[Path] | None = None
+) -> tuple[Any, list[Frame], set[Path]]:
+    """Reads `path` and runs the whole Tesserae-side pipeline --
+    `include:`, `component:`, then image extraction and decoding --
+    returning `(spec, frames, dependencies)`: the dict to hand `tre`, the
+    decoded images to push once it's built, and every file read along
+    the way (the view itself included), resolved."""
+    path = Path(path)
+    spec, deps = expand_with_dependencies(
+        path.read_text(encoding="utf-8"), component_dirs=component_dirs, base_dir=path.parent
+    )
+    deps.add(path.resolve())
+    spec, frames = extract_images(spec, path.parent, dependencies=deps)
+    return spec, frames, deps
 
 
 def load_view(path: str | Path, *, component_dirs: list[Path] | None = None, **view_kwargs: Any) -> View:
@@ -50,12 +68,9 @@ def load_view(path: str | Path, *, component_dirs: list[Path] | None = None, **v
     the problem came from.
     """
     path = Path(path)
-    spec = expand_components_to_spec(
-        path.read_text(encoding="utf-8"), component_dirs=component_dirs, base_dir=path.parent
-    )
-    spec, frames = extract_images(spec, path.parent)
+    spec, frames, _ = build_view_spec(path, component_dirs=component_dirs)
     try:
-        view = View(str(path), spec=spec, **view_kwargs)
+        view = View(spec=spec, **view_kwargs)
     except ValueError as exc:
         raise ValueError(f"{path}: {exc}") from exc
     push_frames(view, frames)

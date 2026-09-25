@@ -4,7 +4,7 @@
   file handling, `tre` gets specs and bytes. Recorded as M29 in
   `BUILD_TRACKER.md` after verifying every line reference and every
   `tre` API name against both codebases (`65e9d5a`).
-- User: "pin CI to 0.3.2 and start Phase 1", then "push it and use Pillow for Phase 2".
+- User: "pin CI to 0.3.2 and start Phase 1", then "push it and use Pillow for Phase 2", then "push it and use a poll loop for Phase 3".
 
 ## What shipped
 
@@ -43,16 +43,32 @@
      `poll_reload`.
    - Mutation-checked: disabling `src:` removal fails 3 of 4 end-to-end
      tests, with `tre` visibly opening the file itself.
-5. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
+5. Phase 3, hot reload (poll loop):
+   - `tesserae.spec.ViewWatcher(view, path)`: `poll()` checks
+     `(mtime_ns, size)` of every file the build read -- view,
+     includes, fragments, images -- and on change rebuilds via the
+     shared `build_view_spec` and calls `view.reconcile(spec=...)`.
+   - Errors raise once per edit, naming the file; view left as it was.
+   - `load_view` → `View(spec=...)` with no path: Tesserae now gives
+     `tre` no file path anywhere.
+   - Found: `tre`'s `View` is single-threaded and `App.run()` has no
+     periodic Python hook, so the watcher can't run inside
+     `App.run()` yet. Recorded as a known gap.
+   - Mutation-checked: watching only the view file fails exactly the 4
+     include/fragment/image tests.
+6. CI pin refined to the exact commit `d6c30ef` (relayed from the
+   `tre` session, user-directed there).
+7. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
    section, `expand_components_to_spec`, file-named errors);
    `guide/component-fragments.md` loading section updated.
 
 ## Status
 
-**Phases 1–2 of 5 done.** `pytest tests/` 188 passed (up from 157:
-+15 Phase 1, +16 Phase 2; 0 regressions); all 3 examples ran clean;
-`mkdocs build --strict` clean. CI green after the pin (172 passed on
-`82cf4f2`). Phase 2 committed locally, not pushed.
+**Phases 1–3 of 5 done.** `pytest tests/` 196 passed (up from 157:
++15 Phase 1, +16 Phase 2, +8 Phase 3; 0 regressions); all 3 examples
+ran clean; `mkdocs build --strict` clean (new `guide/hot-reload.md`).
+CI green after the pin and after Phase 2 (188 passed on `7108c9e`).
+The exact-commit pin and Phase 3 committed locally, not pushed.
 
-Phase 3 waits on a file-watching choice. Phase 4 is unblocked locally
-(`tre` M86 landed on `0.3.2`, not pushed) and waits on a go-ahead.
+Phase 4 is unblocked (`tre` M86 pushed, included in the new CI pin)
+and waits on a go-ahead.

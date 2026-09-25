@@ -54,6 +54,7 @@ nav:
       - Components & Embedding: guide/components.md
       - Declarative Component Fragments: guide/component-fragments.md
       - Widget Catalog: guide/widget-catalog.md
+      - Hot Reload: guide/hot-reload.md
       - Repeater (Lists): guide/repeater.md
       - Reactivity: guide/reactivity.md
       - Naming Convention: guide/naming-convention.md

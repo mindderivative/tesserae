@@ -47,7 +47,7 @@ def _resolve_src(base_dir: Path | None, src: str, node_id: str) -> Path:
     return canon_src
 
 
-def _extract(node: Any, base_dir: Path | None, frames: list[Frame]) -> Any:
+def _extract(node: Any, base_dir: Path | None, frames: list[Frame], deps: set[Path]) -> Any:
     if not isinstance(node, dict):
         return node
     out = dict(node)
@@ -60,6 +60,7 @@ def _extract(node: Any, base_dir: Path | None, frames: list[Frame]) -> Any:
         if not isinstance(src, str):
             raise ComponentError(f"widget {node_id!r}: image.src must be a string path, got {src!r}")
         path = _resolve_src(base_dir, src, node_id)
+        deps.add(path)
         try:
             rgba, width, height = decode_image(path)
         except OSError as exc:
@@ -68,16 +69,20 @@ def _extract(node: Any, base_dir: Path | None, frames: list[Frame]) -> Any:
         out["image"] = {k: v for k, v in image.items() if k != "src"}
     children = node.get("children")
     if isinstance(children, list):
-        out["children"] = [_extract(child, base_dir, frames) for child in children]
+        out["children"] = [_extract(child, base_dir, frames, deps) for child in children]
     return out
 
 
-def extract_images(spec: Any, base_dir: Path | None) -> tuple[Any, list[Frame]]:
+def extract_images(
+    spec: Any, base_dir: Path | None, *, dependencies: set[Path] | None = None
+) -> tuple[Any, list[Frame]]:
     """Returns `spec` with every `kind: Image`'s `image.src:` removed,
     plus one decoded `Frame` per image removed. `spec` itself is not
-    modified."""
+    modified. If `dependencies` is given, each image file's resolved
+    path is added to it (M29 Phase 3: `ViewWatcher` watches them)."""
     frames: list[Frame] = []
-    return _extract(spec, base_dir, frames), frames
+    deps = dependencies if dependencies is not None else set()
+    return _extract(spec, base_dir, frames, deps), frames
 
 
 def push_frames(owner: Any, frames: list[Frame]) -> None:

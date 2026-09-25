@@ -35,12 +35,10 @@ unchanged, so this is a safe drop-in for any existing `View(path)` call.
 `App.load()` calls this internally; you only need it directly for a
 tool, or for constructing a `View` outside `App`.
 
-!!! note "Still passed to `tre`, for now"
-    `path` is still given to `tre`, only as the file `tre`'s own
-    `poll_reload` watches -- `tre` never reads it. That goes away once
-    hot reload moves into Tesserae (M29 Phase 3 in
-    [`BUILD_TRACKER.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER.md)).
-    `tesserae.instantiate` already gives `tre` no path at all.
+`tre` is never given a file path -- not the view's, and not
+`tesserae.instantiate`'s component file either. For hot reload, use
+[`ViewWatcher`](#viewwatcher) rather than `tre`'s own
+`View.poll_reload()`, which has no file to watch.
 
 ## Images (`kind: Image` with `src:`)
 
@@ -63,6 +61,26 @@ is a `ComponentError` naming the widget and the file:
 ```text
 ComponentError: widget 'logo': image.src: 'assets/logo.png': cannot read ...
 ```
+
+## `ViewWatcher`
+
+**`ViewWatcher(view, path, *, component_dirs=None)`**
+
+Hot reload for a view built with `load_view`. Pass the same `path` and
+`component_dirs`.
+
+- **`poll() -> bool`** -- if any file the view was built from changed
+  since the last poll, rebuilds it and updates the live view in place
+  via `tre`'s `view.reconcile(spec=...)`, then returns `True`.
+  Otherwise returns `False`.
+- **`files -> frozenset[Path]`** -- every file being watched: the view,
+  each `include:`d file, each `*_Component.yaml` fragment it used, and
+  each image. Recomputed on every reload, so a newly added include,
+  fragment or image is picked up.
+
+A reload that fails raises (`ComponentError`, or `ValueError` naming
+the view file) and leaves the view unchanged; polling again returns
+`False` until the next edit. See [Hot Reload](../guide/hot-reload.md).
 
 ## `include:`
 

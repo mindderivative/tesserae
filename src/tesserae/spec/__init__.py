@@ -8,5 +8,6 @@ from __future__ import annotations
 
 from tesserae.spec.expand import ComponentError, expand_components, expand_components_to_spec
 from tesserae.spec.load import load_view
+from tesserae.spec.watch import ViewWatcher
 
-__all__ = ["ComponentError", "expand_components", "expand_components_to_spec", "load_view"]
+__all__ = ["ComponentError", "ViewWatcher", "expand_components", "expand_components_to_spec", "load_view"]

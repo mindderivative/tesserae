@@ -190,18 +190,18 @@ def _resolve_include_path(base_dir: Path, include_path: str) -> Path:
     return canon_joined
 
 
-def _expand_includes(node: Any, base_dir: Path | None, visited: list[Path]) -> Any:
+def _expand_includes(node: Any, base_dir: Path | None, visited: list[Path], deps: set[Path]) -> Any:
     """Replaces every `{include: path}` mapping with that file's parsed
     YAML, recursively -- a port of `tre`'s own `expand_includes`. Each
     included file's own includes resolve against *its* directory."""
     if len(visited) >= MAX_INCLUDE_DEPTH:
         raise ComponentError(f"`include:` nested more than {MAX_INCLUDE_DEPTH} deep")
     if isinstance(node, list):
-        return [_expand_includes(v, base_dir, visited) for v in node]
+        return [_expand_includes(v, base_dir, visited, deps) for v in node]
     if not isinstance(node, dict):
         return node
     if _INCLUDE_KEY not in node:
-        return {k: _expand_includes(v, base_dir, visited) for k, v in node.items()}
+        return {k: _expand_includes(v, base_dir, visited, deps) for k, v in node.items()}
 
     include_path = node[_INCLUDE_KEY]
     if not isinstance(include_path, str):
@@ -216,6 +216,7 @@ def _expand_includes(node: Any, base_dir: Path | None, visited: list[Path]) -> A
         )
 
     resolved = _resolve_include_path(base_dir, include_path)
+    deps.add(resolved)
     if resolved in visited:
         raise ComponentError(f"`include:` cycle through {resolved}")
     try:
@@ -227,7 +228,7 @@ def _expand_includes(node: Any, base_dir: Path | None, visited: list[Path]) -> A
 
     visited.append(resolved)
     try:
-        return _expand_includes(included, resolved.parent, visited)
+        return _expand_includes(included, resolved.parent, visited, deps)
     finally:
         visited.pop()
 
@@ -252,6 +253,7 @@ def _expand_component(
     node: dict[str, Any],
     component_dirs: list[Path],
     chain: tuple[str, ...],
+    deps: set[Path],
 ) -> list[dict[str, Any]]:
     """Replace one `{component: Name, with: {...}}` node with the
     fragment(s) it names, fully expanded and namespaced -- one element
@@ -273,6 +275,7 @@ def _expand_component(
         )
 
     path = _find_component_file(name, component_dirs)
+    deps.add(path.resolve())
     fragment_template = _load_fragment(path)
     declared = fragment_template.pop(_PARAMS_KEY, []) or []
     if not isinstance(declared, list):
@@ -340,7 +343,7 @@ def _expand_component(
         # Resolve any `component:` usage inside the fragment itself
         # before namespacing -- a nested fragment's own ids get
         # namespaced by the OUTER call site's id too, once, not twice.
-        fragment = _walk(fragment, component_dirs, (*chain, name))
+        fragment = _walk(fragment, component_dirs, (*chain, name), deps)
 
         local_id = fragment.get(_ID_KEY)
         fragment = _namespace_ids(fragment, local_call_id)
@@ -353,24 +356,24 @@ def _expand_component(
     return results
 
 
-def _expand_list_item(item: Any, component_dirs: list[Path], chain: tuple[str, ...]) -> list[Any]:
+def _expand_list_item(item: Any, component_dirs: list[Path], chain: tuple[str, ...], deps: set[Path]) -> list[Any]:
     """One `children:` entry expands to 0+ real nodes -- 1 for an
     ordinary node (component or not), N for a real `repeat:` (M28)."""
     if isinstance(item, dict) and _COMPONENT_KEY in item:
-        return _expand_component(dict(item), component_dirs, chain)
-    return [_walk(item, component_dirs, chain)]
+        return _expand_component(dict(item), component_dirs, chain, deps)
+    return [_walk(item, component_dirs, chain, deps)]
 
 
-def _walk(node: Any, component_dirs: list[Path], chain: tuple[str, ...]) -> Any:
+def _walk(node: Any, component_dirs: list[Path], chain: tuple[str, ...], deps: set[Path]) -> Any:
     if isinstance(node, list):
         out: list[Any] = []
         for item in node:
-            out.extend(_expand_list_item(item, component_dirs, chain))
+            out.extend(_expand_list_item(item, component_dirs, chain, deps))
         return out
     if not isinstance(node, dict):
         return node
     if _COMPONENT_KEY in node:
-        results = _expand_component(dict(node), component_dirs, chain)
+        results = _expand_component(dict(node), component_dirs, chain, deps)
         if len(results) != 1:
             raise ComponentError(
                 f"{_chain_text(chain)}: `repeat:` produced {len(results)} nodes, but this "
@@ -379,7 +382,7 @@ def _walk(node: Any, component_dirs: list[Path], chain: tuple[str, ...]) -> Any:
             )
         return results[0]
     return {
-        k: (_walk(v, component_dirs, chain) if k == _CHILDREN_KEY else v) for k, v in node.items()
+        k: (_walk(v, component_dirs, chain, deps) if k == _CHILDREN_KEY else v) for k, v in node.items()
     }
 
 
@@ -404,9 +407,24 @@ def expand_components_to_spec(
     directories (searched in order) to add or shadow components with
     an app's own -- not yet exercised by any real caller.
     """
+    spec, _ = expand_with_dependencies(yaml_text, component_dirs=component_dirs, base_dir=base_dir)
+    return spec
+
+
+def expand_with_dependencies(
+    yaml_text: str,
+    *,
+    component_dirs: list[Path] | None = None,
+    base_dir: Path | None = None,
+) -> tuple[Any, set[Path]]:
+    """`expand_components_to_spec`, plus the resolved path of every file
+    the expansion read -- each `include:`d file and each
+    `*_Component.yaml` fragment used (M29 Phase 3: what `ViewWatcher`
+    watches). Not the view file itself, which the caller already has."""
     dirs = component_dirs if component_dirs is not None else [Path(__file__).parent / "components"]
-    data = _expand_includes(yaml.safe_load(yaml_text), base_dir, [])
-    return _normalize_scalars(_walk(data, dirs, ()))
+    deps: set[Path] = set()
+    data = _expand_includes(yaml.safe_load(yaml_text), base_dir, [], deps)
+    return _normalize_scalars(_walk(data, dirs, (), deps)), deps
 
 
 def expand_components(
