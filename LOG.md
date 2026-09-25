@@ -179,3 +179,20 @@ User: "push it and go with your recommendations for M37". Pushed
 4. 74 tests. The type scale is compared at f32. A mutant that seemed to
    survive (`spec_version`) had only changed the docstring; mutating
    the call itself gives 18 failures.
+
+## M37 Phase 2 — compiler and cascade
+
+User: "push it and start Phase 2". Pushed `dcc2bbd`, `fe7e6ee`.
+
+1. Read `tre`'s per-kind build rules, `required_background`/
+   `required_foreground` (the not-a-fill check reads inline `style:`
+   only), the state-field checks, `resolve_style_layered`, the error
+   texts, the shipped default theme and the icon table.
+2. Probes: the legacy factory signatures; `text_input`'s `fill` is its
+   glyph colour; the new defaults match the legacy ones; `create` won't
+   take `align_items=None`.
+3. `icons.py` (extracted from `tre`'s source), `default_theme.yaml`,
+   `cascade.py`, `build.py`.
+4. 42 tests. A test fix: `tre` reads path data back normalised.
+   Mutants: 5/5 caught after adding the stylesheet-background Text case.
+   741 passed.

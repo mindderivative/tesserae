@@ -53,4 +53,6 @@ Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 
 
 **M37:** decisions Q1–Q4 as recommended. Phase 1 done: `tesserae.tokens` matches `tre` on 74 checks (roles, shapes, elevation shadows, type scale, colour strings); 698 passed.
 
-**Up next:** M37 Phase 2 (spec compiler and cascade).
+Phase 2 done: the spec compiler (`spec/build.py`) and cascade (`spec/cascade.py`), checked against `tre`'s builder, with errors matching `tre`'s; 741 passed.
+
+**Up next:** M37 Phase 3 (the tree differ).

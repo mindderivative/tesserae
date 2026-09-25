@@ -100,12 +100,16 @@ The compiler takes an expanded spec dict (from Tesserae's existing
 | `kind: Rect`, `kind: Container` | `create("box")` (`tre` D3) |
 | `kind: Text` | `create("text")` |
 | `kind: Icon` | `create("path")`, data from Tesserae's icon set (D4) |
-| `kind: TextField` | `create("text_input")` |
+| `kind: Link` | a `text` with `role="link"` and a pointer cursor |
+| the eight MD3 kinds (`Checkbox`, `Switch`, …) | until M40, `tre`'s legacy window factories, moved into the tree: the one temporary use of the old API |
+| `kind: TextField` | a `box` (its background) holding a `text_input`, whose `fill` is the glyph colour |
 | `kind: Image` | `create("image")` with decoded `rgba` |
 | `background` on a box, `foreground` on text or an icon | `fill` |
 | `border_color`/`border_width` | `stroke_color`/`stroke_width` |
 | a theme role (`primary`), shape token (`extra_large`), elevation (`level_3`), `typography_role` | resolved by the theme (M38) to tuples, numbers and `shadows` |
 | a hex or CSS color string | parsed by Tesserae to an `(r, g, b, a)` tuple |
+
+Built in M37 Phase 2 (`tesserae/spec/build.py`, `tesserae/spec/cascade.py`), checked against `tre`'s own builder: the cascade, fills, fonts and `tre`'s error messages. Every property is set explicitly, defaults included, so a later patch can reset one. `tre` reads path data back normalised to absolute commands.
 
 The cascade is `tre`'s rule, reproduced: default theme, then custom
 theme, then stylesheet, then inline `style:`. Within a sheet, a baseline
