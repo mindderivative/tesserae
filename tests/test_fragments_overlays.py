@@ -42,6 +42,17 @@ children:
     assert scrim.get("corner_radius") == imperative.get("corner_radius")
     assert panel.get("corner_radius") == 28.0
     assert panel.get("elevation") == 3.0
+    _assert_scrim_matches(scrim, panel, imperative)
+
+
+def _assert_scrim_matches(scrim, panel, imperative_scrim):
+    """M33 (`tre` 0.3.4): `opacity` is group opacity, so the scrim's 32%
+    lives in its color and nothing in the overlay sets `opacity` -- an
+    `opacity: 0.32` scrim would fade its child panel too. Matches
+    `tre`'s own scrim exactly, `(0, 0, 0, 82)`."""
+    assert scrim.get("fill") == imperative_scrim.get("fill") == (0, 0, 0, 82)
+    assert scrim.get("opacity") == imperative_scrim.get("opacity") == 1.0
+    assert panel.get("opacity") == 1.0
 
 
 def test_snackbar_matches_the_imperative_catalog():
@@ -100,7 +111,7 @@ children:
     imperative_modal = side_sheet(_themed_window(), width=360, height=300, modal=True)
     imperative_standard = side_sheet(_themed_window(), width=360, height=300, modal=False)
 
-    assert modal_scrim.get("opacity") == pytest.approx(imperative_modal.get("opacity"))
+    _assert_scrim_matches(modal_scrim, modal_panel, imperative_modal)
     assert modal_panel.get("elevation") == 1.0
     assert standard.get("elevation") == imperative_standard.get("elevation") == 0.0
 

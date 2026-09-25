@@ -27,3 +27,20 @@
 7. tre#10: `gc_repro2.py` panics on 0.3.3 and is clean on 0.3.4.
 8. There's no Python pixel read-back in 0.3.4, so tests will check
    declared values.
+
+## Phases 1–2 — decisions, migrate
+
+User: "go with your recommendations for M33".
+
+1. `.venv` pinned to the v0.3.4 wheel. Baseline 1 failed.
+2. `get("fill")` works on 0.3.4: `tre`'s dialog and side-sheet scrims
+   read `(0, 0, 0, 82)` with opacity 1.0, and a spec's `"#00000052"`
+   reads `(0, 0, 0, 82)`. So the fragments match exactly, and the tests
+   compare fills.
+3. Two fragments and six labels fixed; `_assert_scrim_matches` in the
+   overlay tests; `tests/test_paint_0_3_4.py` (163 cases). With the fix
+   stashed: 2 overlay failures and 8 scan failures (6 labels, 2 scrims).
+4. 418 passed; examples clean; `mkdocs build --strict` clean.
+
+Hook: a GateGuard pre-Bash check asked for the request and the
+command's purpose before the pin; stated, then run.

@@ -59,7 +59,7 @@ children:
   - id: label
     kind: Text
     text: {content: "", font_family: Roboto, font_size: 16}
-    style: {width: 180, height: 32, foreground: "#FFFFFF00"}
+    style: {width: 180, height: 32, foreground: "#FFFFFF"}
     bindings: {text: "{{ label.get() }}"}
   - id: remove_button
     kind: Rect

@@ -22,14 +22,21 @@
 # visual approximation (some rounding, matching the sheet's own real
 # intent) rather than matching the imperative's own literal `0.0`
 # (which would render as a fully square panel, visually wrong).
+# M33 (`tre` 0.3.4): the scrim is `background: "#00000052"` with no
+# `opacity`. `opacity` is group opacity on 0.3.4 and the panel is the
+# scrim's child, so `opacity: 0.32` would fade the panel too. `tre`'s own
+# scrim moved the 32% into its color (`scrim_fill`, `window_factory.rs`),
+# and reads back `(0, 0, 0, 82)`, exactly what `"#00000052"` gives. A
+# spec color can't be "a theme role at 32%", so this is literal black:
+# MD3's `scrim` role is black in every generated scheme, but a custom
+# theme's `colors: {scrim: ...}` override doesn't reach this fragment.
 params: [width, height, scrim_width, scrim_height]
 id: root
 kind: Container
 style:
   width: "{{ scrim_width }}"
   height: "{{ scrim_height }}"
-  background: scrim
-  opacity: 0.32
+  background: "#00000052"
   justify_content: flex_end
 children:
   - id: panel

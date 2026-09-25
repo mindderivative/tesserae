@@ -5,7 +5,7 @@ children:
   - id: label
     kind: Text
     text: {content: "Count: 0", font_family: Roboto, font_size: 20}
-    style: {width: 200, height: 32, foreground: "#FFFFFF00"}
+    style: {width: 200, height: 32, foreground: "#FFFFFF"}
     bindings: {text: "{{ label.get() }}"}
   - id: button
     kind: Rect

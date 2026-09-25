@@ -5,7 +5,7 @@ children:
   - id: label
     kind: Text
     text: {content: "Home", font_family: Roboto, font_size: 20}
-    style: {width: 200, height: 32, foreground: "#FFFFFF00"}
+    style: {width: 200, height: 32, foreground: "#FFFFFF"}
   - id: button
     kind: Rect
     style: {width: 160, height: 40, background: "#6750A4", corner_radius: 8}

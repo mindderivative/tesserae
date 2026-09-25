@@ -10,7 +10,7 @@ children:
   - id: label
     kind: Text
     text: {content: "Item", font_family: Roboto, font_size: 16}
-    style: {width: 160, height: 28, foreground: "#FFFFFF00"}
+    style: {width: 160, height: 28, foreground: "#FFFFFF"}
     bindings: {text: "{{ text.get() }}"}
   - id: remove_button
     kind: Rect

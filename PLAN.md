@@ -27,4 +27,8 @@ User-directed: "scope the tre 0.3.4 migration". Move Tesserae from `tre` v0.3.3 
 2. **Migrate** — pin `.venv`; fix the two fragments and six labels; tests that fail on the old YAML (no translucent glyph colors; overlay scrim and panel opacity 1.0).
 3. **Verify, docs, tracker** — suite and examples on 0.3.4; a tre#10 regression test; CI pinned to `v0.3.4`; `installation.md`; gaps moved to fixed.
 
-**Up next:** Phase 1, waiting on the user's decisions.
+## Status
+
+**In progress — Phase 2 of 3 done (2026-09-25).** Decisions: the user took all three recommendations. Phase 2: `.venv` on 0.3.4; scrims `"#00000052"` (reads back `(0, 0, 0, 82)`, the same as `tre`'s); labels `"#FFFFFF"`; `tests/test_paint_0_3_4.py` scans every view, fragment and docs snippet (fails 8 times on the old files). 418 passed.
+
+**Up next:** Phase 3, waiting on the user's go-ahead.
