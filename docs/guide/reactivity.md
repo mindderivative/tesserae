@@ -56,6 +56,8 @@ so a `{{ }}` binding in a `*_View.yaml` can point straight at a
 bindings: {text: "{{ total.get() }}"}
 ```
 
+See [Binding Expressions](bindings.md) for what a `{{ }}` expression can contain.
+
 ## Details worth knowing
 
 - **Unchanged writes don't notify.** `set` and `update` skip notification

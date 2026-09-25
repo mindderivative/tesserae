@@ -115,3 +115,20 @@ User: "push it and start M35". Pushed `7e508a7`.
    between the watcher thread's ERROR and DEBUG log lines. Fixed by
    waiting for the DEBUG line. 455 passed.
 5. Docs updated everywhere reactivity was called "tre's, re-exported".
+
+## M36 Phase 1 — evaluator
+
+User: "push it and start M36". Pushed `9d00521`.
+
+1. Read `tre`'s grammar, evaluator and resolver at v0.3.4. Found no
+   Python entry point to the evaluator, so the harness goes through a
+   `View` Text binding: `tre`'s "expects a string binding, got X"
+   message exposes its exact value form.
+2. `src/tesserae/binding.py` (lexer, parser, evaluator, resolver,
+   `value_debug`).
+3. Parity: 32 failures at first, all the harness's own (the error text
+   names the ViewModel's class, and the two sides used different class
+   names). Then 166/166. Checked tre's side was real values, not matching
+   harness errors (81 values, 82 errors, including wraps and `Float(inf)`).
+   6/6 mutants caught.
+4. `guide/bindings.md`.

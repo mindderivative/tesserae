@@ -59,6 +59,7 @@ nav:
       - Themes & Fonts: guide/themes-and-fonts.md
       - Repeater (Lists): guide/repeater.md
       - Reactivity: guide/reactivity.md
+      - Binding Expressions: guide/bindings.md
       - Naming Convention: guide/naming-convention.md
   - API Reference:
       - Overview: api/index.md
