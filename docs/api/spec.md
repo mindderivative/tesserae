@@ -19,12 +19,18 @@ and constructs a real `tre.View` from the resulting dict via `spec=`.
   in addition to Tesserae's own built-in `spec/components/`, letting
   an app add or shadow components with its own. Defaults to `None`
   (built-in directory only).
-- `**view_kwargs` -- forwarded straight to `tre.View` (`theme_seed`,
-  `custom_theme`, `dark`, `stylesheet`).
+- `stylesheet=`, `default_theme=`, `custom_theme=` -- file paths
+  (relative to the current directory). Tesserae reads them and passes
+  `tre` the dicts; the matching `*_spec=` arguments take a dict
+  directly. Give one form or the other, not both. See
+  [Themes & Fonts](../guide/themes-and-fonts.md).
+- Other keyword arguments (`theme_seed`, `dark`) are forwarded
+  straight to `tre.View`.
 
-If `tre` rejects the spec, the `ValueError` is re-raised with `path` at
-the front of the message -- `tre` only ever sees a dict, so it can't
-say which file the problem came from:
+If `tre` rejects the spec, the `ValueError` is re-raised naming the
+file it came from -- the theme or stylesheet file for an error in one
+of those, `path` otherwise. `tre` only ever sees dicts, so it can't say
+which file the problem came from:
 
 ```text
 ValueError: app/Settings_View.yaml: spec=: unknown variant `Rectangle`, ...
@@ -81,6 +87,18 @@ Hot reload for a view built with `load_view`. Pass the same `path` and
 A reload that fails raises (`ComponentError`, or `ValueError` naming
 the view file) and leaves the view unchanged; polling again returns
 `False` until the next edit. See [Hot Reload](../guide/hot-reload.md).
+
+## `load_theme` / `load_stylesheet`
+
+**`load_theme(path) -> dict`** · **`load_stylesheet(path) -> dict`**
+
+Read a theme or stylesheet YAML file into the dict `tre`'s `*_spec=`
+arguments take -- for `View.set_theme(custom_theme_spec=...)` or
+`Window.set_theme(seed, custom_theme_spec=...)`. An empty file is an
+empty dict; a file that isn't a mapping, or isn't valid YAML, raises
+`ValueError` naming it. `load_theme` also issues a
+`FontFallbackWarning` for any `typography:` font family that isn't
+available (see [`tesserae.register_font`](index.md)).
 
 ## `include:`
 

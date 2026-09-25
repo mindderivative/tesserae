@@ -26,6 +26,7 @@ from tre import Component, Computed, Effect, Signal, View, ViewModel, batch, unt
 
 from tesserae.app import App
 from tesserae.component import instantiate
+from tesserae.fonts import register_font
 from tesserae.repeater import Repeater
 
 __all__ = [
@@ -39,5 +40,6 @@ __all__ = [
     "ViewModel",
     "batch",
     "instantiate",
+    "register_font",
     "untrack",
 ]

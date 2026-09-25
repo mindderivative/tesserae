@@ -4,7 +4,7 @@
   file handling, `tre` gets specs and bytes. Recorded as M29 in
   `BUILD_TRACKER.md` after verifying every line reference and every
   `tre` API name against both codebases (`65e9d5a`).
-- User: "pin CI to 0.3.2 and start Phase 1", then "push it and use Pillow for Phase 2", then "push it and use a poll loop for Phase 3".
+- User: "pin CI to 0.3.2 and start Phase 1", then "push it and use Pillow for Phase 2", then "push it and use a poll loop for Phase 3", then "Create an issue on tre's github about the hot reload hook" ([tre#6](https://github.com/mindderivative/tre/issues/6)), then "push it and start Phase 4".
 
 ## What shipped
 
@@ -56,19 +56,31 @@
      `App.run()` yet. Recorded as a known gap.
    - Mutation-checked: watching only the view file fails exactly the 4
      include/fragment/image tests.
-6. CI pin refined to the exact commit `d6c30ef` (relayed from the
+6. Phase 4, themes, stylesheets and fonts:
+   - `load_theme`/`load_stylesheet` read YAML into `tre`'s `*_spec=`
+     dicts; `load_view`'s theme/stylesheet path arguments now go
+     through them, so `tre` gets only dicts.
+   - `tesserae.register_font(path)` reads a font file and hands `tre`
+     the bytes.
+   - `FontFallbackWarning` for any theme or view `font_family` that's
+     neither bundled nor registered (`tre` would substitute silently).
+   - Bundled families read from `tre` itself: Roboto, Noto Sans
+     Arabic, Hack Nerd Font Mono.
+   - Mutation-checked: passing theme paths through to `tre` again
+     fails the "only dicts" test.
+7. CI pin refined to the exact commit `d6c30ef` (relayed from the
    `tre` session, user-directed there).
-7. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
+8. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
    section, `expand_components_to_spec`, file-named errors);
    `guide/component-fragments.md` loading section updated.
 
 ## Status
 
-**Phases 1–3 of 5 done.** `pytest tests/` 196 passed (up from 157:
-+15 Phase 1, +16 Phase 2, +8 Phase 3; 0 regressions); all 3 examples
-ran clean; `mkdocs build --strict` clean (new `guide/hot-reload.md`).
-CI green after the pin and after Phase 2 (188 passed on `7108c9e`).
-The exact-commit pin and Phase 3 committed locally, not pushed.
+**Phases 1–4 of 5 done.** `pytest tests/` 214 passed (up from 157:
++15 Phase 1, +16 Phase 2, +8 Phase 3, +18 Phase 4; 0 regressions);
+all 3 examples ran clean; `mkdocs build --strict` clean (new
+`guide/hot-reload.md`, `guide/themes-and-fonts.md`). CI green after
+the pin and after Phase 2 (188 passed on `7108c9e`). Phase 4 committed
+locally, not pushed.
 
-Phase 4 is unblocked (`tre` M86 pushed, included in the new CI pin)
-and waits on a go-ahead.
+Only Phase 5 (final docs pass) remains.

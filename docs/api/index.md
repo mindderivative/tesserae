@@ -9,6 +9,9 @@ Tesserae's own real, additive public surface:
 | [`Repeater`](repeater.md) | Automatic keyed add/remove diffing over a list `Signal`. |
 | [`tesserae.spec` (`load_view`/`expand_components`)](spec.md) | Declarative `component:`/`with:`/`repeat:` macro expansion -- see the [Component Fragments](../guide/component-fragments.md) guide. |
 | [`tesserae.widgets`](../guide/widget-catalog.md) | Imperative, thin-delegate access to all ~68 real MD3 widgets. |
+| [`tesserae.spec.ViewWatcher`](spec.md#viewwatcher) | Hot reload: polls every file a view was built from and updates it in place. |
+| [`tesserae.spec.load_theme` / `load_stylesheet`](spec.md#load_theme-load_stylesheet) | Read a theme or stylesheet file into the dict `tre`'s `*_spec=` arguments take. |
+| `tesserae.register_font(path) -> list[str]` | Reads a font file and registers it with `tre`; returns its family names. See [Themes & Fonts](../guide/themes-and-fonts.md). |
 
 `tre`'s own real, already-working primitives, re-exported unmodified
 rather than duplicated -- see [`tre`'s own Python API reference](https://mindderivative.github.io/tre/api/python/index/)
