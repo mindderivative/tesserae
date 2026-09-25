@@ -1,17 +1,30 @@
-# PLAN — M31: Hot Reload for Theme and Stylesheet Files
+# PLAN — M33: Migrate to `tre` 0.3.4
 
-*(Replaces the M32 plan in this file — M32 is complete, committed and pushed.)*
+*(Replaces the M31 plan in this file — M31 is complete, committed and pushed.)*
 
 ## Goal
 
-User-directed: "Push, cleanup, and then start M31". With `run(hot_reload=True)`, editing a theme or stylesheet file re-styles the running app in place, keeping bound values live (`tre` 0.3.3, M91 / issue #8). Split out of M30; unblocked by M32.
+User-directed: "scope the tre 0.3.4 migration". Move Tesserae from `tre` v0.3.3 to the released v0.3.4 (tag on `29800f3`). 0.3.4 adds `tre`'s building-block API (M93–M96) and keeps the old API. This milestone is only the move; adopting the building blocks is the separate program `tre`'s M97 gate waits on.
 
-## Status
+## Sizing (a real 0.3.4 build, Tesserae unmodified)
 
-**Complete (2026-09-25).** 234 → 255 tests.
+- **1 of 255 tests fails**, no warnings, all 3 examples run clean.
+- **Breaks, both predicted by the known gaps:**
+  1. A color's alpha now renders: six Text glyphs colored `"#FFFFFF00"` (4 example views, 2 docs snippets) go from white to invisible. It's visual, so no test catches it.
+  2. `opacity` is group opacity: `Dialog`/`SideSheetModal` fragments put `opacity: 0.32` on a scrim that contains the panel, so the panel fades to 32% too. This is the one failing test, because `tre`'s own scrims moved the 32% into the color's alpha.
+- **Fixes that land:** `tre` issue #10 (background-thread GC panic); the M32 repro is clean on 0.3.4.
+- **Checked and unaffected:** `Node.remove()` detach semantics (Tesserae only calls `Component.remove()`, which still frees), `animate()` argument order, `blur` → `unfocus`, the wheel sign fix.
 
-1. **Theme files** — ✅ `FileWatcher` watches `App(default_theme=, custom_theme=)`; an edit queues `App.set_theme_specs()`, which re-themes every view `build_view()`/`load()` made plus the window. Found and fixed an M30 bug on the way: the window was never themed (building a `View` doesn't set the window's theme), so `App.show()` now calls `Window.set_theme`, resolving seed and colors the way a `View` does. 234 → 245 tests.
-2. **Stylesheet files** — ✅ the default (`App.set_stylesheet_spec()`) and each screen's own file are watched; a failed re-style is undone on the screens already changed. The M91 consequences are documented, not worked around: `on_change` fires once per reload on bound nodes (pinned by a test), and embedded components never get the host's theme or stylesheet (a `tre` limitation, found reading `View.instantiate`). 245 → 254 tests.
-3. **Tests, docs, tracker** — ✅ a subprocess live test edits a theme file and a stylesheet file inside a real `App.run(hot_reload=True)` (fails if the stylesheet watcher is switched off); `README.md`, `docs/index.md` and the hot-reload guide updated. `tre` issue #12 filed for `on_change` firing on every reload.
+## Decisions (Phase 1) — recommendations
 
-**Up next:** nothing started. Candidates: `tre`'s building-block program (0.3.4 released; a large Tesserae-side program, not yet scoped), hot reload for `App.register()`ed screens, conditional per-item styling.
+1. **Scrim:** `background: "#00000052"` and no `opacity`. It matches `tre`'s own scrim, since MD3's scrim role is always black. The cost: a custom theme's `scrim` override won't reach these two fragments. Alternatives: make the scrim a sibling of the panel, or ask `tre` for a role-with-alpha color syntax.
+2. **Labels:** `"#FFFFFF"`, which keeps today's look.
+3. **`.venv`:** pin to the v0.3.4 release wheel (already built from the tag).
+
+## Phases
+
+1. **Decisions** — the three above.
+2. **Migrate** — pin `.venv`; fix the two fragments and six labels; tests that fail on the old YAML (no translucent glyph colors; overlay scrim and panel opacity 1.0).
+3. **Verify, docs, tracker** — suite and examples on 0.3.4; a tre#10 regression test; CI pinned to `v0.3.4`; `installation.md`; gaps moved to fixed.
+
+**Up next:** Phase 1, waiting on the user's decisions.

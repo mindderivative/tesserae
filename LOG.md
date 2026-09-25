@@ -1,81 +1,29 @@
-# LOG — M31: Hot Reload for Theme and Stylesheet Files
+# LOG — M33: Migrate to `tre` 0.3.4
 
-*(Replaces M32's log — M32 is complete, committed and pushed.)*
+*(Replaces M31's log — M31 is complete, committed and pushed.)*
 
-- User: "Push, cleanup, and then start M31". Pushed `3fd0cf3` and
-  `dc6d34a`; removed the two scratch `tre` worktrees (`tre-v0.3.2`,
-  `tre-v0.3.3`).
+- User: "scope the tre 0.3.4 migration".
 
-## Phase 1 — theme files
+## Scoping
 
-1. Probed `tre` 0.3.3 first. `set_theme` keeps the stylesheet,
-   `set_stylesheet` keeps the theme, and `reconcile` keeps both.
-2. Phase 1 Step 2's question ("does re-theming the first screen
-   re-theme the window?") answered by reading `view.rs`/`window.rs` at
-   the tag and testing: no. The window's `ThemeState` is shared with
-   the view but only `Window.set_theme` fills it. So every M30 `App`
-   window was unthemed (`Window.theme.is_set()` was `False`), and
-   imperative widgets and interaction tints ignored the app theme.
-3. Seed precedence differs: a `View` uses `theme_seed` > custom
-   `seed:` > default `seed:` plus both themes' `colors:`, while
-   `Window.set_theme` uses custom `seed:` > its `seed` argument and
-   ignores the default theme's seed and colors. `_window_theme`
-   rewrites the custom-theme dict so the window matches the view.
-4. `FileWatcher` (in `spec/watch.py`), `App.set_theme_specs()`,
-   `App._start_watchers()` (shared by `run()` and the tests).
-   `App.show()` themes the window on first open.
-5. 11 tests in `tests/test_theme_reload.py`; each window-theme piece
-   removed in turn to check a test fails. 245 passed.
-6. Docs: `guide/hot-reload.md`, `guide/themes-and-fonts.md`,
-   `api/app.md`, `ARCHITECTURE.md`. `mkdocs build --strict` clean.
-
-Slip: while probing, a `git checkout v0.3.3` ran in `tre`'s main
-checkout by mistake; restored to `main` at once (`68c3883`), with the
-`tre` session's uncommitted `CLAUDE.md` edit intact. Source reads use
-`git show v0.3.3:...` from then on.
-
-## Phase 2 — stylesheet files
-
-User: "Push and start". Pushed `dae8402`.
-
-1. Probed both M91 consequences on 0.3.3 first. `on_change`: a bound
-   Checkbox and TextField each fired once after `set_stylesheet`,
-   `set_theme` and `reconcile`, and at first attach, with the value
-   unchanged. Embedded component: a `tesserae.instantiate` card had
-   `corner_radius` 0 and `elevation` 0 under the host's stylesheet and
-   theme, even at creation. `View.instantiate` (at the tag) hands
-   `instantiate_component` only the shared window `ThemeState`.
-2. Both documented rather than worked around (Tesserae has no hook for
-   either); both in known gaps as possible `tre` issues.
-3. `_Built` records per built view whether it has its own stylesheet
-   and from which file. `App.set_stylesheet_spec()` (public),
-   `_set_own_stylesheet`, a `FileWatcher` per stylesheet file, and
-   `_naming` so a `tre` rejection names the file. `_apply_all` undoes
-   screens already changed if one fails, for themes too.
-4. 9 tests in `tests/test_stylesheet_reload.py`; four code paths
-   removed in turn, each caught. 254 passed. Docs updated;
-   `mkdocs build --strict` clean.
-
-## Filed `tre` issue #12
-
-User: "Create an issue on TRE for the on_change firing on every reload
-even when something has not changed". A repro using only `tre` on v0.3.3
-(the handler ran once after `_attach`, `set_stylesheet`, `set_theme` and
-a same-spec `reconcile`, and zero times after a same-value
-`Signal.set`); code on `main` at `68c3883` (`set_checked`/`set_selected`/
-`set_text` fire `Change` unconditionally, reached through `reattach`);
-two fix options. Linked from the known gap and the hot-reload guide.
-
-## Phase 3 — tests, docs, tracker
-
-User: "Push and start Phase 3". Pushed `690fb5d`, `e709fbd`.
-
-1. Live test: a subprocess `App.run(hot_reload=True)` edits the custom
-   theme and default stylesheet files until the screen and the window
-   show the change. Passed (a display is present here; it skips on CI).
-   With the stylesheet watcher disabled it fails:
-   `stuck:(6.0,2.0,(0,0,255,255))`. 255 passed.
-2. Docs sweep: `README.md`, `docs/index.md`, hot-reload guide intro;
-   `mkdocs build --strict` clean.
-
-M31 complete.
+1. The GitHub release notes are empty, so it was scoped from
+   `git log v0.3.3..v0.3.4` (21 commits) and the source at the tag.
+2. Built v0.3.4 without touching `tre`'s checkout: `git archive v0.3.4`
+   into the scratchpad, `maturin build --release` offline with M32's
+   Cargo build dir. Installed into a scratch venv, `venv-034`, which
+   reaches `.venv`'s packages through a `site.addsitedir` `.pth` line
+   (a plain path line doesn't process the nested editable-install
+   `.pth`). Checked it's 0.3.4: it has `Window.create` and `Node.destroy`.
+3. Tesserae unmodified on 0.3.4: 1 failed / 254 passed; no unraisable
+   warnings; counter, multi_screen and todo_list run clean.
+4. The failure: `SideSheetModal`'s scrim opacity is 0.32 against `tre`'s
+   1.0. `tre` moved its scrims' 32% into the color (`scrim_fill`), since
+   group opacity would fade the panel. The spec's `resolve_color` has no
+   role-plus-alpha form.
+5. A scan for translucent colors and `opacity` found exactly the known
+   six `#FFFFFF00` labels and the two scrims.
+6. `Component.remove()` still frees (`Tree::remove` unchanged); only
+   `Node.remove()` became a detach, and Tesserae doesn't call it.
+7. tre#10: `gc_repro2.py` panics on 0.3.3 and is clean on 0.3.4.
+8. There's no Python pixel read-back in 0.3.4, so tests will check
+   declared values.
