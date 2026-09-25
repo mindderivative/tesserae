@@ -8,7 +8,7 @@ User-directed: "scope the 0.3.3 migration as M32". Move Tesserae from `tre` v0.3
 
 ## Status
 
-**Scoped, not started — waiting on user decisions (Phase 1).**
+**In progress — Phase 1 of 5 done (2026-09-25).** The user took all three recommendations: `tesserae.widgets` follows `tre` 0.3.3's names; `Switch`'s `is_on` becomes `selected`; `.venv` is pinned to the `tre` v0.3.3 release (a wheel in place of today's source-tree link) as Phase 2's first step. Phase 2 waits on the user's go-ahead.
 
 Sized against the real v0.3.3 release (built from its tag into a scratch venv): 81 of 233 tests and all 3 examples fail unmodified. `tre`'s migration script would change 58 of 72 YAML files and 8 `.py` files with embedded YAML; Python dict specs, Python calls and the docs' Markdown are manual.
 
