@@ -46,16 +46,16 @@ first, so a later write to a `Signal` it read from can't reach a
 
 ## A real example
 
-```python
+```yaml
 # TodoItem_View.yaml
 id: root
 kind: Container
-style: {flex_direction: Horizontal, width: 260, height: 36, gap: 8}
+style: {flex_direction: horizontal, width: 260, height: 36, gap: 8}
 children:
   - id: label
     kind: Text
     text: {content: "", font_family: Roboto, font_size: 16}
-    style: {width: 180, height: 32, background: "#FFFFFF00"}
+    style: {width: 180, height: 32, foreground: "#FFFFFF00"}
     bindings: {text: "{{ label.get() }}"}
   - id: remove_button
     kind: Rect

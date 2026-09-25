@@ -38,14 +38,19 @@ fall back, and hot-reload a running app when any of those files change
 
 ## Install (development)
 
-Tesserae depends on `tre`, currently installed as a local editable checkout
-(not yet published) since it needs a capability (`Window.show_view`,
-`Window.from_view`) only just landed:
+Tesserae targets **`tre` v0.3.3** (the release its CI pins). Install that
+`tre` first -- the wheel for your platform from the
+[v0.3.3 release](https://github.com/mindderivative/tre/releases/tag/v0.3.3),
+or built from the tag -- then Tesserae itself:
 
 ```bash
-pip install -e /path/to/tre
+pip install /path/to/tre-0.3.3-<your-platform>.whl
 pip install -e ".[dev]"
 ```
+
+See the [installation guide](https://mindderivative.github.io/tesserae/installation/)
+for building `tre` from source, and for testing against an unreleased
+`tre` checkout.
 
 ## The real vertical slices
 

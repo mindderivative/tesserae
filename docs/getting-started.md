@@ -9,12 +9,12 @@ loaded and shown by one `app.py` entry point.
 # Counter_View.yaml
 id: root
 kind: Container
-style: {flex_direction: Vertical, width: 240, height: 120, gap: 12, padding: 16}
+style: {flex_direction: vertical, width: 240, height: 120, gap: 12, padding: 16}
 children:
   - id: label
     kind: Text
     text: {content: "Count: 0", font_family: Roboto, font_size: 20}
-    style: {width: 200, height: 32, background: "#FFFFFF00"}
+    style: {width: 200, height: 32, foreground: "#FFFFFF00"}
     bindings: {text: "{{ label.get() }}"}
   - id: button
     kind: Rect

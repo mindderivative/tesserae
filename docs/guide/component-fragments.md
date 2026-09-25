@@ -30,7 +30,7 @@ to the exact subtree that template describes.
 # Some_View.yaml
 id: root
 kind: Container
-style: {flex_direction: Horizontal, gap: 8}
+style: {flex_direction: horizontal, gap: 8}
 children:
   - id: save_button
     component: ButtonFilled
@@ -54,7 +54,7 @@ This expands to something equivalent to:
 ```yaml
 id: root
 kind: Container
-style: {flex_direction: Horizontal, gap: 8}
+style: {flex_direction: horizontal, gap: 8}
 children:
   - id: save_button
     kind: Rect
@@ -62,7 +62,7 @@ children:
     children:
       - id: save_button.label
         kind: Text
-        text: {content: "Save", role: label_large}
+        text: {content: "Save", typography_role: label_large}
 ```
 
 (The real fragment content is theme-role-driven, not a literal hex
@@ -87,7 +87,7 @@ style:
 children:
   - id: label
     kind: Text
-    text: {content: "{{ label }}", role: label_large}
+    text: {content: "{{ label }}", typography_role: label_large}
 ```
 
 - `params:` declares every name the fragment accepts. It's popped off
@@ -128,10 +128,10 @@ PyYAML's default loader treats a bare, unquoted `on`/`off` as a YAML
 1.1 boolean literal. A fragment (or `params:` list) with a key
 literally named `on` gets silently coerced to `True` before
 `_substitute` ever runs, and `{{ on }}` is left as unresolved literal
-text in the output for `tre` to reject. `Switch_Component.yaml` uses
-`is_on` for exactly this reason -- prefer a name that isn't a YAML 1.1
-boolean keyword (`on`/`off`/`yes`/`no`/`true`/`false`) for any
-boolean-ish param.
+text in the output for `tre` to reject. That's why `Switch_Component.yaml`
+names its parameter `selected` rather than `on` -- prefer a name that
+isn't a YAML 1.1 boolean keyword (`on`/`off`/`yes`/`no`/`true`/`false`)
+for any boolean-ish param.
 
 ## Nesting
 
