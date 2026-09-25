@@ -227,11 +227,11 @@ BOUND = (
 )
 
 
-def test_a_restyle_keeps_bound_values_and_fires_on_change_once(tmp_path: Path):
-    """Pins `tre` 0.3.3's behaviour, documented in the hot-reload guide:
-    re-applying bindings after a re-style sets each bound value again,
-    so a declared `on_change` fires once -- as it does when the view is
-    first attached. If `tre` stops doing that, this test says so."""
+def test_a_restyle_keeps_bound_values_and_doesnt_fire_on_change(tmp_path: Path):
+    """A re-style re-applies bindings so bound values stay live. With `tre`
+    doing it, that fired a declared `on_change` once per re-style (`tre`
+    issue #12); with Tesserae wiring views (M37), setting a bound value is
+    never the user's edit, so `on_change` doesn't run."""
     view_path = _write(tmp_path / "Form_View.yaml", BOUND)
     module = _module(
         tmp_path / "Form_ViewModel.py",
@@ -246,4 +246,4 @@ def test_a_restyle_keeps_bound_values_and_fires_on_change_once(tmp_path: Path):
     app.set_stylesheet_spec(_spec(8))
 
     assert view.node("agree").get_checked() is True  # not the YAML's `false`
-    assert vm.calls == 1
+    assert vm.calls == 0

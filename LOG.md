@@ -235,3 +235,24 @@ User: "push it and start Phase 4". Pushed `29743ac`.
 4. `ViewWatcher` handles a Tesserae `View`.
 5. 23 tests. Mutants: the ordering one survived because `parent() is not
    outer` was always true; fixed with `!=`, then caught. 900 passed.
+
+## M37 Phase 5 — components and screens
+
+User: "push it and start Phase 5". Pushed `055737c`.
+
+1. `Component`, `View.instantiate`, `View.move_to`, path sources and
+   `View.click`; `tesserae.instantiate` builds into a Tesserae parent.
+2. `App` owns its window from the start, builds screens into it, and
+   switches them with attach and detach.
+3. The switch-over broke 17 tests:
+   - tests registering `tre` views, fixed by exporting Tesserae's
+     `View`, which takes a path;
+   - `get("elevation")` readbacks, now `helpers.elevation` from
+     `shadows`;
+   - an unvalidated malformed stylesheet (the cascade now validates);
+   - colour wording (now `tre`'s);
+   - two `tre`-only behaviours (updated);
+   - out-of-range elevation markers.
+   913 passed; the examples run.
+4. Mutants: the re-theme propagation survived until the test checked
+   each host change separately.

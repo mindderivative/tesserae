@@ -107,11 +107,6 @@ it or append to a list. This is [`tre` issue #12](https://github.com/mindderivat
 
 ## Limits
 
-- **Embedded components don't get the app's theme or stylesheet.** A
-  component added with [`tesserae.instantiate`](components.md) is built
-  by `tre` without the host view's theme and stylesheet `styles:`, so it
-  isn't styled by them when created or when either is reloaded. Style
-  it with its own inline `style:`.
 - **Don't use `tre`'s own `View.poll_reload()`.** Tesserae gives `tre`
   the finished view as data, never a file, so `tre` has nothing to
   watch.

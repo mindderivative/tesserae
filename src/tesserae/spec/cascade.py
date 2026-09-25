@@ -48,9 +48,24 @@ class Sheet:
         `None` for `None`."""
         if spec is None:
             return None
+        if not isinstance(spec, dict):
+            raise ValueError(f"a stylesheet or theme must be a mapping, got {type(spec).__name__}")
+        rules = spec.get("styles") or []
+        if not isinstance(rules, list):
+            raise ValueError(f"styles: must be a list of rules, got {type(rules).__name__} {rules!r}")
         sheet = cls()
-        for rule in spec.get("styles") or []:
+        for index, rule in enumerate(rules):
+            if not isinstance(rule, dict):
+                raise ValueError(f"styles[{index}]: a rule must be a mapping, got {type(rule).__name__}")
+            unknown = set(rule) - {"kind", "classes", "id", "style"}
+            if unknown:
+                raise ValueError(f"styles[{index}]: unknown field(s) {sorted(unknown)} (a rule has kind, classes, id, style)")
             style = rule.get("style") or {}
+            if not isinstance(style, dict):
+                raise ValueError(f"styles[{index}].style: must be a mapping, got {type(style).__name__}")
+            bad = set(style) - STYLE_FIELDS
+            if bad:
+                raise ValueError(f"styles[{index}].style: unknown field(s) {sorted(bad)}")
             kind, classes, node_id = rule.get("kind"), rule.get("classes") or [], rule.get("id")
             if kind is None and not classes and node_id is None:
                 sheet.baseline.append(style)

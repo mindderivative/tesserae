@@ -11,12 +11,16 @@ app.show("Counter")  # registered under the inferred prefix
 
 `App` is the single real entry point every app owns exactly one of --
 a registry of named `(View, ViewModel)` pairs, plus exactly one live
-`tre.Window`. `App.show(name)` switches which registered pair that one
-`Window` currently renders:
+`tre.Window`, created with the `App` and themed with the app's theme.
+Screens are built straight into it. `App.show(name)` switches which
+registered screen that window shows: it attaches the screen's root to
+the window and detaches the previous one, which stays alive, with its
+state and its bindings, until it's shown again.
 
-- The **first** call opens the real window (`tre.Window.from_view`).
-- Every call **after** switches the same live window
-  (`tre.Window.show_view`).
+A view you build yourself -- `app.build_view(...)`, or `tesserae.View(path)`
+-- can be given to `register()`. One built outside the app (`View(path)`)
+is rebuilt in the app's window when registered, keeping its ViewModel;
+look nodes up with `view.node(...)` after registering it.
 
 Neither a `View` nor its `ViewModel` is ever re-parsed, re-attached, or
 otherwise re-bootstrapped by a later `show()` -- each stays alive, its

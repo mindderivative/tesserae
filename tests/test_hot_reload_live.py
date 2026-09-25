@@ -92,6 +92,7 @@ STYLE_SCRIPT = textwrap.dedent(
     sys.path.insert(0, str(work))
     from Home_ViewModel import HomeViewModel
     from tesserae import App
+    from tesserae.tokens import elevation_shadows
 
     def rule(prop, value):
         return "styles:\\n  - kind: Rect\\n    style: {" + prop + ": " + str(value) + "}\\n"
@@ -110,13 +111,13 @@ STYLE_SCRIPT = textwrap.dedent(
     handle = app.thread_handle()
     state = {"frames": 0, "seen": None}
     deadline = time.monotonic() + 10
-    new_theme = rule("elevation", 6) + 'colors: {primary: "#0000FF"}\\n'
+    new_theme = rule("elevation", 5) + 'colors: {primary: "#0000FF"}\\n'
 
     def check():
         state["frames"] += 1
         box = view.node("box")
-        got = (box.get("elevation"), box.get("corner_radius"), window.theme.role("primary"))
-        if got == (6.0, 9.0, (0, 0, 255, 255)):
+        got = (box.get("shadows"), box.get("corner_radius"), window.theme.role("primary"))
+        if got == (elevation_shadows(5), 9.0, (0, 0, 255, 255)):
             state["seen"] = "restyled"
             return
         if time.monotonic() < deadline:

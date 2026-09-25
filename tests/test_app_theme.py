@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pytest
 
+from helpers import elevation
+
 import tesserae.app as app_module
 import tesserae.fonts as fonts
 from tesserae import App
@@ -59,7 +61,7 @@ def _pair(tmp_path: Path, prefix: str):
 
 def _look(view):
     node = view.node("box")
-    return node.get("elevation"), node.get("corner_radius")
+    return elevation(node), node.get("corner_radius")
 
 
 def test_an_app_wide_theme_reaches_every_loaded_screen(tmp_path: Path):
@@ -116,24 +118,18 @@ def test_load_rejects_both_stylesheet_forms(tmp_path: Path):
         app.load(*_pair(tmp_path, "Home"), stylesheet=sheet, stylesheet_spec={})
 
 
-def test_tre_gets_only_dicts(tmp_path: Path, monkeypatch):
+def test_screens_are_tesserae_views_built_in_the_apps_window(tmp_path: Path):
+    """M37: `App` builds its screens itself, with Tesserae's `View`, in its
+    own window, from the theme and stylesheet it read; `tre` gets nodes,
+    never files or dicts."""
+    from tesserae.view import View as TesseraeView
+
     theme = _write(tmp_path / "brand.yaml", _rule(elevation=3))
     sheet = _write(tmp_path / "default.yaml", _rule(corner_radius=8))
-    seen = []
-
-    def recording_load_view(path, **kwargs):
-        seen.append(kwargs)
-        return load_view(path, **kwargs)
-
-    monkeypatch.setattr(app_module, "load_view", recording_load_view)
     app = App(theme_seed=SEED, dark=True, custom_theme=theme, stylesheet=sheet)
-    app.load(*_pair(tmp_path, "Home"))
-
-    (kwargs,) = seen
-    assert set(kwargs) == {"theme_seed", "dark", "custom_theme_spec", "stylesheet_spec"}
-    assert kwargs["dark"] is True and kwargs["theme_seed"] == SEED
-    assert kwargs["custom_theme_spec"] == {"styles": [{"kind": "Rect", "style": {"elevation": 3}}]}
-    assert kwargs["stylesheet_spec"] == {"styles": [{"kind": "Rect", "style": {"corner_radius": 8}}]}
+    view, _ = app.load(*_pair(tmp_path, "Home"))
+    assert isinstance(view, TesseraeView) and view.window is app.show("Home")
+    assert _look(view) == (3.0, 8.0)
 
 
 def test_theme_files_are_read_once_so_a_font_warning_fires_once(tmp_path: Path):

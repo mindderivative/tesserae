@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pytest
 
+from helpers import elevation
+
 import tesserae.fonts as fonts
 from tesserae import App
 
@@ -138,7 +140,7 @@ def test_set_theme_specs_rethemes_every_screen_and_the_window(tmp_path: Path):
 
     app.set_theme_specs(None, {"styles": [{"kind": "Rect", "style": {"elevation": 4}}], "colors": {"primary": "#0000FF"}})
 
-    assert home.node("box").get("elevation") == settings.node("box").get("elevation") == 4.0
+    assert elevation(home.node("box")) == elevation(settings.node("box")) == 4.0
     assert window.theme.role("primary") == (0, 0, 255, 255)
 
 
@@ -147,9 +149,9 @@ def test_a_rejected_theme_leaves_the_app_as_it_was(tmp_path: Path):
     home, _ = app.load(*_pair(tmp_path, "Home"))
     with pytest.raises(Exception):
         app.set_theme_specs(None, {"styles": "not a list"})
-    assert home.node("box").get("elevation") == 1.0
+    assert elevation(home.node("box")) == 1.0
     app.set_theme_specs(None, {"styles": [{"kind": "Rect", "style": {"elevation": 2}}]})  # still usable
-    assert home.node("box").get("elevation") == 2.0
+    assert elevation(home.node("box")) == 2.0
 
 
 def test_later_screens_are_built_with_the_new_theme(tmp_path: Path):
@@ -157,7 +159,7 @@ def test_later_screens_are_built_with_the_new_theme(tmp_path: Path):
     app.load(*_pair(tmp_path, "Home"))
     app.set_theme_specs(None, {"styles": [{"kind": "Rect", "style": {"elevation": 5}}]})
     later, _ = app.load(*_pair(tmp_path, "Later"))
-    assert later.node("box").get("elevation") == 5.0
+    assert elevation(later.node("box")) == 5.0
 
 
 # -- hot reload of theme files ---------------------------------------
@@ -171,11 +173,11 @@ def test_editing_the_custom_theme_file_rethemes_the_running_app(tmp_path: Path, 
     window = app.show("Home")
     handle = watching(app)
 
-    reload = _edit_until_queued(handle, theme, _theme(6, primary="#0000FF"))
-    assert home.node("box").get("elevation") == 1.0  # nothing applied until the loop runs it
+    reload = _edit_until_queued(handle, theme, _theme(4, primary="#0000FF"))
+    assert elevation(home.node("box")) == 1.0  # nothing applied until the loop runs it
     reload()
 
-    assert home.node("box").get("elevation") == settings.node("box").get("elevation") == 6.0
+    assert elevation(home.node("box")) == elevation(settings.node("box")) == 4.0
     assert window.theme.role("primary") == (0, 0, 255, 255)
 
 
@@ -192,7 +194,7 @@ def test_editing_the_default_theme_file_keeps_the_custom_theme(tmp_path: Path, w
     _edit_until_queued(handle, base, "styles:\n  - kind: Rect\n    style: {corner_radius: 7}\n")()
 
     assert home.node("box").get("corner_radius") == 7.0
-    assert home.node("box").get("elevation") == 3.0
+    assert elevation(home.node("box")) == 3.0
 
 
 def test_a_broken_theme_edit_is_logged_and_the_watcher_carries_on(tmp_path: Path, watching, logs):
@@ -204,10 +206,10 @@ def test_a_broken_theme_edit_is_logged_and_the_watcher_carries_on(tmp_path: Path
     message = logs.edit_until(theme, "styles: [unclosed\n", "ERROR", "invalid YAML")
     assert str(theme) in message
     assert handle.queued.empty()
-    assert home.node("box").get("elevation") == 1.0
+    assert elevation(home.node("box")) == 1.0
 
-    _edit_until_queued(handle, theme, _theme(8))()
-    assert home.node("box").get("elevation") == 8.0
+    _edit_until_queued(handle, theme, _theme(2))()
+    assert elevation(home.node("box")) == 2.0
     assert f"re-themed the app from {theme}" in logs.messages("INFO")
 
 

@@ -154,7 +154,6 @@ warnings.filterwarnings("error", category=FontFallbackWarning)
 
 ## Not yet covered
 
-- **Embedded components don't get the theme or stylesheet.** A
-  component added with [`tesserae.instantiate`](components.md) isn't
-  styled by the host view's theme or stylesheet `styles:`
-  ([Hot Reload](hot-reload.md#limits)).
+- Nothing currently. A component added with
+  [`tesserae.instantiate`](components.md) gets its host's theme and
+  stylesheet, and follows them (M37).

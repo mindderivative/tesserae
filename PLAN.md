@@ -59,4 +59,6 @@ Phase 3 done: 127 views identical to `tre`'s node by node (`tests/test_tree_pari
 
 Phase 4 done: `tesserae.View` with the reconciler and Tesserae's own binding, handler and `two_way:` wiring; `on_change` only for user edits; 900 passed.
 
-**Up next:** M37 Phase 5 (components and screens).
+Phase 5 done: components on Tesserae's builder, with the host's theme and stylesheet (M31's gap closed); `App` builds screens in its own window; `tesserae.View`/`Component` are Tesserae's; 913 passed.
+
+**Up next:** M37 Phase 6 (tests and docs).

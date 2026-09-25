@@ -8,11 +8,8 @@
 `*_spec=` twin that takes a dict instead of a file path.)
 
 `width`/`height`/`title` describe the one real window this `App`
-opens the first time `show()` is called -- every registered view is
-shown inside that same window, at whatever size it already is, not its
-own independent size (matching `Window.show_view`'s own real, stated
-scope: only the *currently* active view's own `width`/`height` are
-kept in sync with the window).
+creates and shows its screens in. A screen root with no size of its own
+is sized to its content.
 
 The theme arguments set **one theme for the whole app**, used by every
 screen `load()` builds. `stylesheet=` is the **default stylesheet** for
@@ -65,8 +62,11 @@ replaces the app's default for this view.
 
 Registers an already-loaded `view` and its already-`_attach`ed
 `viewmodel` under `name`, for a later `show(name)` to display. Raises
-`ValueError` if `name` is already registered. Build the view with
-[`build_view`](#build_view) to give it the app's theme and stylesheet.
+`ValueError` if `name` is already registered, and `TypeError` if `view`
+isn't a `tesserae.View`. Build the view with
+[`build_view`](#build_view) to give it the app's theme and stylesheet; a
+view built on its own (`tesserae.View(path)`) is rebuilt in the app's
+window, keeping its ViewModel and its own theme.
 
 ## `load`
 
@@ -82,8 +82,9 @@ constructed `(view, viewmodel)` pair.
 
 **`show(name) -> Window`**
 
-Shows the view registered under `name`. The first call opens the real
-`Window`; every call after switches the same live `Window`.
+Shows the view registered under `name` in the app's window, detaching
+the one shown before, which stays alive with its state. Returns the
+window, the same one every time.
 
 ## `current`
 

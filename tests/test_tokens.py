@@ -108,9 +108,12 @@ def test_colour_strings_parse_as_tre_parses_them(raw):
     assert tokens.parse_color(raw) == view.node("r").get("fill")
 
 
-@pytest.mark.parametrize("raw", ["#12345", "notacolor", "rgb(1,2)", "rgb(a,b,c)"])
-def test_invalid_colours_raise(raw):
-    with pytest.raises(ValueError, match="invalid color"):
+@pytest.mark.parametrize("raw, message", [
+    ("#12345", "wrong number of hex digits"), ("notacolor", "unknown color identifier"),  # tre's wording
+    ("rgb(1,2)", "invalid color"), ("rgb(a,b,c)", "invalid color"),
+])
+def test_invalid_colours_raise(raw, message):
+    with pytest.raises(ValueError, match=message):
         tokens.parse_color(raw)
 
 

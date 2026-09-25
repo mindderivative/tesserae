@@ -142,8 +142,17 @@ def parse_color(raw: str) -> RGBA:
             return _functional(match.group(1), match.group(2))
         except ValueError:
             raise ValueError(f"invalid color {raw!r}") from None
-    if text.startswith("#") and len(text) == 5:  # #RGBA, which Pillow reads differently
-        text = "#" + "".join(c * 2 for c in text[1:])
+    if text.startswith("#"):
+        if len(text) - 1 not in (3, 4, 6, 8):
+            raise ValueError("wrong number of hex digits")  # tre's wording
+        if len(text) == 5:  # #RGBA, which Pillow reads differently
+            text = "#" + "".join(c * 2 for c in text[1:])
+    elif text.isidentifier() or text.replace("-", "").isalpha():
+        try:
+            value = ImageColor.getrgb(text)
+        except ValueError:
+            raise ValueError("unknown color identifier") from None  # tre's wording
+        return tuple(value) if len(value) == 4 else (*value, 255)
     try:
         value = ImageColor.getrgb(text)
     except ValueError as exc:

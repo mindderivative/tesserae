@@ -40,6 +40,7 @@ bound nodes show their live values.
 from __future__ import annotations
 
 import inspect
+from pathlib import Path
 from typing import Any, Callable, Optional
 
 import tre
@@ -48,7 +49,7 @@ from tesserae import reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
 from tesserae.spec.build import Built, _LEGACY_KINDS, build_with, patch, prepare_layers
 
-__all__ = ["View"]
+__all__ = ["Component", "View"]
 
 #: The size of the window a `View` builds itself into when not given one.
 DEFAULT_SIZE = (800, 600)
@@ -80,7 +81,7 @@ class View:
 
     def __init__(
         self,
-        spec: dict[str, Any],
+        source: Any,
         *,
         window: Any = None,
         frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
@@ -90,10 +91,20 @@ class View:
         custom_theme_spec: Optional[dict[str, Any]] = None,
         stylesheet_spec: Optional[dict[str, Any]] = None,
     ) -> None:
+        self.path: Optional[Path] = None
+        if isinstance(source, (str, Path)):
+            from tesserae.spec.load import build_view_spec
+
+            self.path = Path(source)
+            spec, file_frames, _ = build_view_spec(self.path)
+            frames = {**{node_id: (rgba, w, h) for node_id, rgba, w, h in file_frames}, **(frames or {})}
+        else:
+            spec = source
         self._theme = dict(theme_seed=theme_seed, dark=dark, default_theme_spec=default_theme_spec,
                            custom_theme_spec=custom_theme_spec)
         self._stylesheet_spec = stylesheet_spec
         self._frames = dict(frames or {})
+        self._components: list["Component"] = []
         self._scheme = tokens.resolve_scheme(theme_seed, dark, default_theme_spec, custom_theme_spec)
         self._layers = prepare_layers(default_theme_spec, custom_theme_spec, stylesheet_spec)
         self._owns_window = window is None
@@ -106,7 +117,13 @@ class View:
         self.window = window
         self._spec = spec
         self._built = Built(root=None)
-        self._built.root = build_with(window, spec, scheme=self._scheme, layers=self._layers, frames=self._frames, into=self._built)
+        try:
+            self._built.root = build_with(window, spec, scheme=self._scheme, layers=self._layers,
+                                          frames=self._frames, into=self._built)
+        except ValueError as exc:
+            if self.path is not None:
+                raise ValueError(f"{self.path}: {exc}") from exc
+            raise
         if self._owns_window:
             window.root.add_child(self._built.root)
         self._viewmodel: Any = None
@@ -130,6 +147,10 @@ class View:
             return self._built.nodes[widget_id]
         except KeyError:
             raise ValueError(f"no widget with id {widget_id!r} in this view") from None
+
+    def click(self, node: Any) -> None:
+        """A synthetic click on `node`, for tests: `window.simulate`."""
+        self.window.simulate("click", node=node)
 
     # -- updates ----------------------------------------------------------------
 
@@ -167,14 +188,51 @@ class View:
         self._theme = dict(theme_seed=theme_seed, dark=dark, default_theme_spec=default_theme_spec,
                            custom_theme_spec=custom_theme_spec)
         self._rewire()
+        for component in list(self._components):
+            component._host_restyled(self)
 
     def set_stylesheet(self, stylesheet_spec: Optional[dict[str, Any]] = None) -> None:
         """Replaces the stylesheet and re-styles every node in place;
-        `None` clears it."""
+        `None` clears it. Embedded components follow."""
         layers = prepare_layers(self._theme["default_theme_spec"], self._theme["custom_theme_spec"], stylesheet_spec)
         self._repatch(self._scheme, layers)
         self._layers, self._stylesheet_spec = layers, stylesheet_spec
         self._rewire()
+        for component in list(self._components):
+            component._host_restyled(self)
+
+    # -- components and windows -----------------------------------------------------
+
+    def instantiate(self, path: Any, into: Any, spec: Optional[dict[str, Any]] = None,
+                    frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> "Component":
+        """Builds a component -- a view of its own, with its own ViewModel
+        -- under `into`, a node of this view, in this view's window. It gets
+        this view's theme and stylesheet, and follows them when they change.
+        `spec` is the expanded spec; without it, `path` is read (the same
+        call shape as `tre`'s `View.instantiate`)."""
+        component = Component(self, spec if spec is not None else path, frames=frames)
+        into.add_child(component.root)
+        self._components.append(component)
+        return component
+
+    def move_to(self, window: Any) -> None:
+        """Rebuilds this view in `window`, keeping its spec, theme and
+        ViewModel: bindings and handlers are wired again on the new nodes.
+        For a view built on its own being shown by an `App`. Nodes looked up
+        before the move belong to the old tree."""
+        if window is self.window:
+            return
+        self._unwire()
+        old_root, old_window = self._built.root, self.window
+        self.window = window
+        self._built = Built(root=None)
+        self._built.root = build_with(window, self._spec, scheme=self._scheme, layers=self._layers,
+                                      frames=self._frames, into=self._built)
+        old_root.destroy()
+        self._owns_window = False
+        del old_window
+        if self._viewmodel is not None:
+            self._wire(self._spec)
 
     def _repatch(self, scheme: Any, layers: Any) -> None:
         for node_id, node_spec in self._built.specs.items():
@@ -369,6 +427,41 @@ class View:
             self._add_legacy_change(node, lambda: signal.set(read()))
             return
         self._add_listener(node, "change", lambda event_obj: signal.set(node.get(prop)))
+
+
+class Component(View):
+    """An embedded view with its own ViewModel, built by
+    `View.instantiate`/`Component.instantiate` (or `tesserae.instantiate`)
+    in its host's window, with its host's theme and stylesheet. It follows
+    them when the host is re-themed or re-styled. `remove()` unwires it
+    and frees its nodes."""
+
+    def __init__(self, host: View, source: Any, frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
+        self._host = host
+        super().__init__(
+            source, window=host.window, frames=frames, stylesheet_spec=host._stylesheet_spec, **host._theme,
+        )
+        self._scheme, self._layers = host._scheme, host._layers
+
+    def _host_restyled(self, host: View) -> None:
+        self._theme = dict(host._theme)
+        self._stylesheet_spec = host._stylesheet_spec
+        self._repatch(host._scheme, host._layers)
+        self._scheme, self._layers = host._scheme, host._layers
+        self._rewire()
+        for component in list(self._components):
+            component._host_restyled(self)
+
+    def remove(self) -> None:
+        """Unwires this component (its `Signal`s stop reaching it) and frees
+        its nodes, and any components inside it."""
+        for component in list(self._components):
+            component.remove()
+        self._unwire()
+        self._viewmodel = None
+        if self in self._host._components:
+            self._host._components.remove(self)
+        self._built.root.destroy()
 
 
 def _walk(spec: dict[str, Any]):

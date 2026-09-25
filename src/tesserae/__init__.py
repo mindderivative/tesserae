@@ -15,17 +15,16 @@ top of that: one list `Signal` as the single source of truth, automatic
 keyed add/remove diffing. `Signal`/`Computed`/`Effect`/`batch`/
 `untrack`/`ViewModel` are Tesserae's own (`tesserae.reactive`, M35),
 taken over from `tre`, which removes its copy in 0.3.5 (`tre` D5).
-`View`/`Component` are still `tre`'s, re-exported, until Tesserae builds
-views itself (M37).
+`View`/`Component` are Tesserae's too (`tesserae.view`, M37): views are
+built, reconciled and wired by Tesserae on `tre` 0.3.4's building blocks.
 """
-
-from tre import Component, View
 
 from tesserae.app import App
 from tesserae.component import instantiate
 from tesserae.fonts import register_font
 from tesserae.log import configure_logging
 from tesserae.reactive import Computed, Effect, Signal, ViewModel, batch, untrack
+from tesserae.view import Component, View
 from tesserae.repeater import Repeater
 
 __all__ = [

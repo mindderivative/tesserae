@@ -48,7 +48,7 @@ tesserae.{View,Component}                    -- re-exports of tre's, until
 tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         the declarative YAML+binding layer
                                         (engine-spec), the live-window
-                                        wiring (Window.from_view/show_view,
+                                        wiring (Window.from_view/show_view, no longer used by Tesserae since M37,
                                         tre's own M42), and real
                                         multi-instance component embedding
                                         (View.instantiate/Component,
@@ -117,17 +117,21 @@ than failing later when a handler name doesn't resolve.
 ```python
 app = App(width=240, height=120, title="My App")
 view, viewmodel = app.load("Counter_View.yaml", CounterViewModel)  # or register() directly
-app.show("Counter")   # opens the real Window (tre.Window.from_view)
+app.show("Counter")   # attaches Counter's root to the app's window
 ...
-app.show("Settings")  # switches the same live Window (tre.Window.show_view)
+app.show("Settings")  # detaches Counter (kept alive), attaches Settings
 app.run(max_frames=...)
 ```
 
-`App.show`'s first call opens the real `tre.Window` via `Window.
-from_view`; every call after that switches the same live window via
-`Window.show_view` -- both real, already-shipped `tre` capabilities
-(M42, both phases). Neither call re-parses YAML or re-attaches a
-`ViewModel`.
+M37: `App` creates its `tre.Window` up front (themed with the app's
+theme) and builds every screen into it with Tesserae's `View`. `show()`
+attaches a screen's root under `window.root` (no padding, and content-
+sized like a `from_view` root) and detaches the previous one with
+`remove()`, which keeps it alive; `Window.from_view`/`show_view` aren't
+used. Neither call re-parses YAML or re-attaches a `ViewModel`. A view
+built on its own is rebuilt in the app's window by `register()`
+(`View.move_to`). Components are built in their host's window with its
+theme and stylesheet, and follow them.
 
 **Themes (M30):** one theme per `App` -- `App(theme_seed=, dark=,
 default_theme=, custom_theme=)` -- because in `tre` a theme belongs to

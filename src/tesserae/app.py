@@ -27,7 +27,8 @@ from tre import App as _TreApp
 from tre import Window
 
 from tesserae.naming import check_naming_convention
-from tesserae.spec import ViewWatcher, load_stylesheet, load_theme, load_view
+from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
+from tesserae.view import View as TesseraeView
 from tesserae.spec.watch import FileWatcher
 
 #: `Window.set_theme` requires a seed even when the custom theme's own
@@ -156,9 +157,15 @@ class App:
         #: Each screen's own stylesheet file -> the dict `tre` last accepted.
         self._own_sheets: dict[Path, Any] = {}
         self._registered: dict[str, _Registered] = {}
-        self._window: Window | None = None
+        # M37: the app's one window exists from the start, so screens are built
+        # straight into it. Like a `Window.from_view` root: no padding, and a
+        # screen root with no size of its own is sized to its content.
+        self._window: Window = Window(width=width, height=height, title=title)
+        self._window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0,
+                              align_items="flex_start")
         self._current: str | None = None
         self._tre_app: _TreApp | None = None
+        self._set_window_theme()  # the legacy MD3 kinds read the window's theme until M40
 
     def _view_theme(self) -> dict[str, Any]:
         """The app's theme as `View(...)`/`View.set_theme` arguments."""
@@ -294,7 +301,10 @@ class App:
         kwargs = self._view_theme()
         if sheet is not None:
             kwargs["stylesheet_spec"] = sheet
-        built.view = load_view(view_path, **kwargs)
+        try:
+            built.view = TesseraeView(Path(view_path), window=self._window, **kwargs)
+        except ValueError:
+            raise
         self._built.append(built)
         return built.view
 
@@ -312,6 +322,12 @@ class App:
         """
         if name in self._registered:
             raise ValueError(f"a view named {name!r} is already registered")
+        if not isinstance(view, TesseraeView):
+            raise TypeError(
+                f"App.register({name!r}): the view must be a tesserae View (e.g. from app.build_view()), "
+                f"got {type(view).__name__}"
+            )
+        view.move_to(self._window)  # a view built on its own is rebuilt in this app's window
         self._registered[name] = _Registered(view, viewmodel)
 
     def load(
@@ -373,13 +389,11 @@ class App:
         registered = self._registered.get(name)
         if registered is None:
             raise KeyError(f"no view registered under {name!r} -- call register() first")
-        if self._window is None:
-            self._window = Window.from_view(
-                registered.view, width=self._width, height=self._height, title=self._title
-            )
-            self._set_window_theme()  # M31: building a View never themes the window
-        else:
-            self._window.show_view(registered.view)
+        if self._current is not None and self._current != name:
+            self._registered[self._current].view.root.remove()  # detached, kept alive with its state
+        root = registered.view.root
+        if root.parent() is None:
+            self._window.root.add_child(root)
         self._current = name
         logger.debug("showing {!r}", name)
         return self._window
@@ -485,7 +499,7 @@ class App:
         `set_stylesheet_spec`, to every screen using it) and each screen's
         own `stylesheet=` file (re-applied to the screens built with it).
         """
-        if self._window is None:
+        if self._current is None:
             raise RuntimeError("App.run() called before show() -- nothing to display yet")
         if self._tre_app is None:
             self._tre_app = _TreApp()

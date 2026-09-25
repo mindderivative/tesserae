@@ -54,10 +54,17 @@ def instantiate(
     path = Path(path)
     spec = expand_components_to_spec(path.read_text(encoding="utf-8"), base_dir=path.parent)
     spec, frames = extract_images(spec, path.parent)
+    from tesserae.view import View as TesseraeView
+
     try:
-        component = parent.instantiate("", into, spec=spec)
+        if isinstance(parent, TesseraeView):  # M37: Tesserae builds it, in the host's window and theme
+            component = parent.instantiate(path, into, spec=spec,
+                                           frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
+        else:
+            component = parent.instantiate("", into, spec=spec)
     except ValueError as exc:
         raise ValueError(f"{path}: {exc}") from exc
-    push_frames(component, frames)
+    if not isinstance(parent, TesseraeView):
+        push_frames(component, frames)
     viewmodel = viewmodel_cls(component, *args, **kwargs)
     return component, viewmodel

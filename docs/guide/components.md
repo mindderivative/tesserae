@@ -34,9 +34,10 @@ repeatedly. Confirmed (via `tre`'s own investigation): every instance
 gets its own real `NodeId`s, even for widget `id`s repeated identically
 across instances.
 
-A component isn't styled by the host view's theme or stylesheet
-`styles:` rules: `tre` builds it without them. Give it its own inline
-`style:`.
+A component is built in its host's window with the host's theme and
+stylesheet, so the host's `styles:` rules and theme roles style it too.
+When the host is re-themed or re-styled, including by hot reload, the
+component follows.
 
 ## Tearing a component down
 
