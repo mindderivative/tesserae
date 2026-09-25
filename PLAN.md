@@ -8,7 +8,7 @@ User-directed: "scope adding theme args to App.load()". Give `App` a theme API, 
 
 ## Status
 
-**Scoped, not started — waiting on user decisions (Phase 1).**
+**In progress — Phase 1 of 3 done (2026-09-25).** The user chose: an app-wide theme on `App(...)`; a stylesheet per screen on `load()`, with an app-wide default on `App(...)`; and to wait for `tre` issue #8 before any theme-file hot reload, which moves to a new M31. Phase 2 (implementation) waits on the user's go-ahead.
 
 Key finding, checked in `tre` v0.3.2: a theme is window-level. `Window.from_view` shares the first screen's theme with the window, and `Window.show_view` never switches it — so per-screen themes would leave imperative `tesserae.widgets` and interaction tints on the first screen's theme after `app.show(...)`. A stylesheet, by contrast, is per-`View`. `View.set_theme` can re-theme a live screen (a complete selection each call; bindings not re-applied); `tre` has no `set_stylesheet`.
 
