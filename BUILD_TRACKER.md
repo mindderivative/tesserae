@@ -1034,7 +1034,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 - **Still needed until M40/M41:** `App` calls `Window.set_theme` for the legacy MD3 kinds and `tesserae.widgets`. Removing that belongs with M41, not here.
 
 **Decisions for the user, each with a recommendation:**
-- Q1 **Theme `typography:` in views.** Recommended: **apply it** — a Text's `typography_role` resolves through the theme's overrides (default theme, then custom). That makes a theme's `typography:` mean the same in views as in widgets. It differs from `tre`, where it's ignored in views; views with no `typography:` look the same.
+- Q1 **Theme `typography:` in views.** **Decided (user, 2026-09-25):** apply it to **display text** — a Text's or Link's `typography_role`, and widget labels, resolve through the theme's overrides (default theme, then custom) — **but not to any text input**: single-line and multiline text fields and the code editor keep their own font (the code editor a monospace default), whatever the theme's `typography:` says. The user raised the exception ("there are exceptions, like the codeEditor or the multiline text field") and chose "every text input" over excluding only multiline fields and the editor. This differs from `tre`, where a theme's `typography:` is ignored in views; views with no `typography:` look the same.
 - Q2 **Dark mode.** Recommended: **`App(dark=False | True | "system")`**, default `False` as today, plus a runtime `App.set_dark(dark)`. `"system"` follows the OS through `color_scheme`, re-theming every screen and the window. With `True`/`False`, `App` re-asserts its own choice on `color_scheme`, so the legacy widgets no longer flip alone.
 - Q3 **The OS appearance at startup.** Recommended: **ask `tre` for a readable `window.get("dark")`**, the OS's appearance now. Until it exists, `"system"` starts light and switches on the first `color_scheme` event, and the docs say so.
 - Q4 **Emphasized easing.** Recommended: **use MD3's own single-bézier form of it, (0.2, 0, 0, 1)**, as MD3's web tokens do, and write the difference down. Alternative: ask `tre` for a two-segment (or named) easing.
@@ -1043,7 +1043,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 - Step 1: `tesserae.Theme`, resolved from seed, `dark` and the two theme dicts: `role(name)`, `shape(component, variant)`/`elevation(component, variant)` from `components:`, `typography(role)` with overrides, and the motion curves as easing tuples plus MD3's duration tokens — everything `tre`'s `Window.theme` answers, for M39–M42's widgets. Parity tests against `tre`'s `Window.theme` while 0.3.4 has it — ⬜
 
 ### Phase 2 — Typography in Views ⬜
-- Step 1: per Q1, views resolve `typography_role` through the theme; tests — ⬜
+- Step 1: per Q1, Text and Link resolve `typography_role` through the theme's `typography:`; a TextField (and, when they arrive in M42, multiline fields and the code editor) doesn't, even with a `typography_role`; tests for both — ⬜
 
 ### Phase 3 — Light and Dark ⬜
 - Step 1: per Q2 and Q3, `App(dark=...)`, `App.set_dark`, following `color_scheme` (simulated in tests with `window.simulate("color_scheme", dark=...)`), re-asserting a fixed choice — ⬜
