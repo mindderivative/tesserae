@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 def dialog(
     window: "Window",
     headline: str,
-    text: str,
+    supporting_text: str,
     width: float,
     height: float,
     border_color: tuple[int, int, int, int] | None = None,
@@ -30,7 +30,9 @@ def dialog(
 ) -> "Node":
     """A real MD3 dialog. Modal by default. Show/hide via
     `Window.open_dialog`/`close_dialog`."""
-    return window.add_dialog(headline, text, width, height, border_color=border_color, border_width=border_width)
+    return window.add_dialog(
+        headline, supporting_text, width, height, border_color=border_color, border_width=border_width
+    )
 
 
 def snackbar(

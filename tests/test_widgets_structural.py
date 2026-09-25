@@ -73,8 +73,8 @@ def test_badge_matches_native_add_badge():
 
 def test_divider_matches_native_add_divider():
     window = Window(width=400, height=300)
-    a = divider(window, 200, vertical=False)
-    b = window.add_divider(200, vertical=False)
+    a = divider(window, 200, orientation="horizontal")
+    b = window.add_divider(200, orientation="horizontal")
     assert a.get("border_width") == b.get("border_width")
 
 

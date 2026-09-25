@@ -35,7 +35,7 @@ children:
     view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
     declarative = view.node("t")
 
-    imperative = toolbar(_themed_window(), variant="docked", tone="standard", width=280)
+    imperative = toolbar(_themed_window(), variant="docked", vibrant=False, width=280)
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert declarative.get("elevation") == imperative.get("elevation")
@@ -56,7 +56,7 @@ children:
     declarative = view.node("t")
 
     imperative = toolbar(
-        _themed_window(), variant="floating", tone="vibrant", width=200, height=64
+        _themed_window(), variant="floating", vibrant=True, width=200, height=64
     )
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")

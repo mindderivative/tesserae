@@ -195,8 +195,9 @@ before tearing down" ordering.
 - Everything `tre.View`/`tre.Signal`/`tre.ViewModel`/`tre.Component`
   already provide: `{{ }}` binding expressions (a strict, non-`eval`
   whitelist), real `on_click`/`on_hover_enter`/`on_hover_exit`/
-  `on_change` handler wiring, two-way binding for `checked`/
-  `thumb_position`/`text`.
+  `on_change` handler wiring, two-way binding for `checked` (Checkbox),
+  `selected` (Switch/RadioButton), `value` (Slider) and `text` -- the
+  `tre` 0.3.3 names (M32).
 - Hot reload, owned by Tesserae (`tre`'s `View.poll_reload()` has no
   file to watch, since `tre` reads none): `app.run(hot_reload=True)`,
   or `tesserae.spec.ViewWatcher` directly.

@@ -2,14 +2,10 @@
 category -- `tabs`, `navigation_rail`, `navigation_drawer`, `toolbar`,
 `top_app_bar`, `status_bar`.
 
-Same thin-delegate shape as `buttons.py`/`selection.py`/`structural.py`.
-One real naming translation here: `tre`'s own `add_toolbar(color=...)`
-isn't an RGBA color at all -- it's a named container-tone selector
-(`"standard"`/`"vibrant"`, verified directly against `window_factory.rs`),
-genuinely confusing under the name `color` (a caller would reasonably
-expect an RGBA tuple, like every other `color`/`background` kwarg in this
-catalog takes). Tesserae's own `toolbar(...)` calls it `tone=` instead,
-translating internally when it delegates.
+Same thin-delegate shape as `buttons.py`/`selection.py`/`structural.py`,
+with no naming translation. `toolbar(vibrant=)` matches `tre` 0.3.3's
+`add_toolbar(vibrant=)`; before M32, `tre` took a confusing
+`color="standard"|"vibrant"` and Tesserae translated its own `tone=` to it.
 """
 
 from __future__ import annotations
@@ -95,7 +91,7 @@ def toolbar(
     window: "Window",
     variant: str = "docked",
     orientation: str | None = None,
-    tone: str | None = None,
+    vibrant: bool = False,
     width: float | None = None,
     height: float | None = None,
     x: float | None = None,
@@ -104,12 +100,12 @@ def toolbar(
     border_width: float | None = None,
 ) -> "Node":
     """A floating or docked action-icon bar. `variant`: docked/floating.
-    `tone`: standard/vibrant (named container tone, not an RGBA color --
-    `tre`'s own `add_toolbar` calls this `color=`, which we translate)."""
+    `vibrant=True` uses MD3's vibrant container tone instead of the
+    standard one."""
     return window.add_toolbar(
         variant=variant,
         orientation=orientation,
-        color=tone,
+        vibrant=vibrant,
         width=width,
         height=height,
         x=x,

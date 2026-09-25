@@ -122,27 +122,27 @@ def badge(
 def divider(
     window: "Window",
     length: float,
-    vertical: bool = False,
+    orientation: str = "horizontal",
     x: float | None = None,
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
 ) -> "Node":
-    """A single hairline."""
+    """A single hairline. `orientation`: "horizontal" or "vertical"."""
     return window.add_divider(
-        length, vertical=vertical, x=x, y=y, border_color=border_color, border_width=border_width
+        length, orientation=orientation, x=x, y=y, border_color=border_color, border_width=border_width
     )
 
 
 def link(
     window: "Window",
-    text: str,
+    content: str,
     width: float,
     x: float | None = None,
     y: float | None = None,
 ) -> "Node":
     """Styled, clickable text -- call `set_on_click` for navigation."""
-    return window.add_link(text, width, x=x, y=y)
+    return window.add_link(content, width, x=x, y=y)
 
 
 def accordion_header(

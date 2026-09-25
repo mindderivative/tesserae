@@ -58,7 +58,7 @@ children:
     expanded = expand_components(yaml_text)
     view = View("T.yaml", source=expanded)
     node = view.node("sl")
-    assert node.get("thumb_position") == 0.7
+    assert node.get("value") == 0.7
 
 
 def test_spin_box_matches_the_imperative_catalog():
@@ -145,9 +145,9 @@ children:
 
     window = Window(width=200, height=100)
     window.set_theme(THEME_SEED)
-    imperative = switch(window, width=52, height=32, on=False)
+    imperative = switch(window, width=52, height=32, selected=False)
 
-    assert declarative.get_on() == imperative.get_on() is False
+    assert declarative.get_selected() == imperative.get_selected() is False
 
 
 def test_switch_with_no_theme_still_builds_falling_back_to_the_real_md3_baseline():
@@ -166,4 +166,4 @@ children:
     expanded = expand_components(yaml_text)
     view = View("T.yaml", source=expanded)
     node = view.node("toggle")
-    assert node.get_on() is True
+    assert node.get_selected() is True

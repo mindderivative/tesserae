@@ -1,7 +1,7 @@
 """Real coverage for `tesserae.widgets`'s Navigation & Shell Composition
 category. Same thin-delegate parity strategy as the other widget test
-modules, plus one naming-translation check: Tesserae's `toolbar(tone=...)`
-must still reach `tre`'s own `add_toolbar(color=...)` correctly.
+modules, plus a check that `toolbar(vibrant=...)` really reaches `tre`'s
+own `add_toolbar(vibrant=...)`.
 """
 
 from tre import Window
@@ -38,13 +38,12 @@ def test_navigation_drawer_matches_native_add_navigation_drawer():
     assert len(a_entries) == len(b_entries) == 1
 
 
-def test_toolbar_tone_translates_to_native_color_kwarg():
-    # Tesserae calls this `tone=`; tre's own factory calls it `color=`.
-    # Prove the translation reaches the real underlying resolution by
-    # comparing against the native call with the matching `color=`.
+def test_toolbar_vibrant_matches_native_vibrant():
+    # Prove `vibrant=` reaches the real underlying resolution by comparing
+    # against the native call with the same argument.
     window = Window(width=400, height=300)
-    a = toolbar(window, variant="docked", tone="vibrant")
-    b = window.add_toolbar(variant="docked", color="vibrant")
+    a = toolbar(window, variant="docked", vibrant=True)
+    b = window.add_toolbar(variant="docked", vibrant=True)
     assert a.get("corner_radius") == b.get("corner_radius")
 
 

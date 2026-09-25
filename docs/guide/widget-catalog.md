@@ -66,6 +66,22 @@ is an implementation detail, not part of the stable import path.
 from tesserae.widgets import card, checkbox, tabs
 ```
 
+### Renamed with `tre` 0.3.3
+
+These arguments were renamed to match `tre` 0.3.3's own names. Old
+names now raise `TypeError`:
+
+| Function | Before | Now |
+| --- | --- | --- |
+| `switch` | `on=` | `selected=` (read back with `node.get_selected()`) |
+| `divider` | `vertical=True` | `orientation="vertical"` |
+| `link` | `text` | `content` |
+| `dialog` | `text` | `supporting_text` |
+| `toolbar` | `tone="vibrant"` | `vibrant=True` |
+
+`slider`'s position is read back as `node.get("value")` (was
+`"thumb_position"`). `icon` and `loading_indicator` keep `foreground=`.
+
 One function isn't a pure delegate: `image(window, path, ...)` decodes
 the file itself (with Pillow) and calls `tre`'s
 `add_image_from_bytes`, so `tre` only ever receives pixels, never a

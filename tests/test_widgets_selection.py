@@ -27,7 +27,7 @@ def test_slider_matches_native_add_slider():
     window = Window(width=200, height=100)
     a = slider(window, (0x03, 0xDA, 0xC6, 0xFF), 200, 32, value=0.7)
     b = window.add_slider((0x03, 0xDA, 0xC6, 0xFF), 200, 32, value=0.7)
-    assert a.get("thumb_position") == b.get("thumb_position") == 0.7
+    assert a.get("value") == b.get("value") == 0.7
 
 
 def test_radio_button_matches_native_add_radio_button():
@@ -39,8 +39,8 @@ def test_radio_button_matches_native_add_radio_button():
 
 def test_switch_matches_native_add_switch():
     window = Window(width=200, height=100)
-    a = switch(window, on=True)
-    b = window.add_switch(on=True)
+    a = switch(window, selected=True)
+    b = window.add_switch(selected=True)
     assert a.get("toggle_progress") == b.get("toggle_progress")
 
 

@@ -66,13 +66,14 @@ def switch(
     window: "Window",
     width: float = 52.0,
     height: float = 32.0,
-    on: bool = False,
+    selected: bool = False,
     x: float | None = None,
     y: float | None = None,
 ) -> "Node":
-    """A real MD3 switch. Shares `set_checked`/`get_checked` accessor
-    names with `checkbox`."""
-    return window.add_switch(width=width, height=height, on=on, x=x, y=y)
+    """A real MD3 switch. `selected` is its on/off state (`tre` 0.3.3
+    names it the same as `radio_button`'s; read it back with
+    `Node.get_selected`)."""
+    return window.add_switch(width=width, height=height, selected=selected, x=x, y=y)
 
 
 def spin_box(

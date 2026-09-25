@@ -1,12 +1,9 @@
 """Tesserae's own namespace for the Media & Graphics category --
 `image`, `video`, `icon`, `graph_node`, `node_graph`.
 
-`icon` gets the real naming translation M8 first identified as the true
-target: `tre`'s own `add_icon(color=...)` is the glyph's own paint (an
-icon has no background of its own -- confirmed directly against
-`window_factory.rs`, matching `docs/guide/components.md`'s own "No
-`background` param, same reasoning as `Image`" note). Tesserae's own
-`icon(...)` calls it `foreground=`, translating internally.
+`icon(foreground=)` is the glyph's own paint (an icon has no background
+of its own). `tre` 0.3.3 uses the same name, so it passes straight
+through; before M32, `tre` called it `color=` and Tesserae translated.
 
 `image`/`video` take no color at all (an image/video's content IS its
 own pixels -- no meaningful "behind it" fill). `graph_node`/`node_graph`
@@ -68,8 +65,7 @@ def icon(
     y: float | None = None,
 ) -> "Node":
     """One square `size` glyph, rendered as a vector fill in
-    `foreground` (`tre`'s own `add_icon` calls this `color=`, which we
-    translate). Currently curated icon names: home/search/menu/close/
+    `foreground`. Currently curated icon names: home/search/menu/close/
     check/arrow_back/add/settings/expand_more/remove/arrow_forward/
     chevron_right -- an unknown name raises `ValueError` listing the
     real known set."""

@@ -6,6 +6,7 @@ A theme's or stylesheet's effect is observed through `corner_radius`,
 which both can set via `styles:` and `Node.get` can read back.
 """
 
+import os
 import warnings
 from pathlib import Path
 
@@ -20,7 +21,15 @@ from tesserae.spec import load_stylesheet, load_theme, load_view
 
 SEED = (0x67, 0x50, 0xA4, 0xFF)
 RECT_VIEW = 'id: box\nkind: Rect\nstyle: {width: 10, height: 10, background: "#112233"}\n'
-ROBOTO = Path(tre.__file__).parents[2] / "crates" / "engine-render" / "assets" / "fonts" / "Roboto-Regular.ttf"
+_FONT = Path("crates") / "engine-render" / "assets" / "fonts" / "Roboto-Regular.ttf"
+# A real font file from tre's source tree: next to tre itself when it's
+# installed from a checkout (as on CI), or wherever TRE_SOURCE_DIR points
+# when tre is an installed wheel (the wheel ships no .ttf files).
+ROBOTO = next(
+    (p for p in (Path(os.environ["TRE_SOURCE_DIR"]) / _FONT if "TRE_SOURCE_DIR" in os.environ else None,
+                 Path(tre.__file__).parents[2] / _FONT) if p is not None and p.is_file()),
+    Path(tre.__file__).parents[2] / _FONT,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -124,7 +133,7 @@ def test_set_theme_takes_a_loaded_theme(tmp_path: Path):
 # -- fonts -------------------------------------------------------------
 
 
-@pytest.mark.skipif(not ROBOTO.is_file(), reason="needs tre's source tree for a real font file")
+@pytest.mark.skipif(not ROBOTO.is_file(), reason="needs a real font file from tre's source tree -- set TRE_SOURCE_DIR (runs on CI)")
 def test_register_font_hands_tre_the_bytes_and_returns_families():
     assert tesserae.register_font(ROBOTO) == ["Roboto"]
 

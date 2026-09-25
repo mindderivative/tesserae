@@ -3,12 +3,10 @@
 real `NodeKind` primitives in `tre`, wrapped for the same uniform-surface
 reason M9 wrapped `checkbox`/`slider`/etc.
 
-`loading_indicator` gets a real naming translation: `tre`'s own
-`add_loading_indicator(color=...)` is a genuine RGBA tint for the
-spinner's own glyph (it falls back to the theme's primary when omitted;
-the indicator has no background of its own) -- the same "glyph/tint, not
-a fill" concept M8 named `foreground`. Tesserae's own `loading_indicator`
-calls it `foreground=`, translating internally when it delegates.
+`loading_indicator(foreground=)` is the spinner's glyph color (it falls
+back to the theme's primary when omitted). `tre` 0.3.3 uses the same
+name, so it passes straight through; before M32, `tre` called it
+`color=` and Tesserae translated.
 """
 
 from __future__ import annotations
@@ -50,7 +48,6 @@ def loading_indicator(
     x: float | None = None,
     y: float | None = None,
 ) -> "Node":
-    """MD3's newer indeterminate spinner shape. `foreground` falls back
-    to the theme's primary when omitted (`tre`'s own `add_loading_
-    indicator` calls this `color=`, which we translate)."""
-    return window.add_loading_indicator(size=size, color=foreground, x=x, y=y)
+    """MD3's newer indeterminate spinner shape. `foreground` (its glyph
+    color) falls back to the theme's primary when omitted."""
+    return window.add_loading_indicator(size=size, foreground=foreground, x=x, y=y)
