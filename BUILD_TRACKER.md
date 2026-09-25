@@ -38,7 +38,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M26 — Detailed Scoping: `tre`-Side Primitive Additions & Macro-Layer Loop Construct | `██████████` 100% | ✅ Complete (2026-09-24) |
 | M27 — `RadioButton`/`Switch`/`CircularProgress`/`LinearProgress`/`LoadingIndicator`/`TimePickerDial`/`Link` Component Fragments | `██████████` 100% | ✅ Complete (2026-09-24) |
 | M28 — Macro-Layer `repeat:` Construct, Staged Against `ListItem` First | `██████████` 100% | ✅ Complete (2026-09-24) |
-| M29 — Tesserae Owns All File Handling; `tre` Gets Specs + Bytes Only | `░░░░░░░░░░` 0% | ⬜ Not started — awaiting user go-ahead |
+| M29 — Tesserae Owns All File Handling; `tre` Gets Specs + Bytes Only | `██░░░░░░░░` 20% | 🚧 In progress — Phase 1 of 5 done (2026-09-24) |
 
 **Just closed: M27 and M28**, both in one real pass — user-directed: "Start with M27 and then move onto M28."
 
@@ -48,7 +48,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 
 **Previously:** M15-M27 — the macro-expansion engine, its wiring, 7 full/partial widget categories (59 fragments), the M25 re-scoping correction (60 fragments), M26's own full technical scope for both real remaining fronts, and M27's 7 new primitive fragments. See their own entries below.
 
-**Up next:** M29 — Tesserae takes over all file handling (reading, parsing, decoding, watching) and hands `tre` only specs and bytes, per a user-directed handoff from the `tre` session (2026-09-24). Scoped below; **not started** — implementation waits on the user's explicit go-ahead, including a decision on the new Pillow dependency (Phase 2). Separately, the 5 Rust-internal-state-dependent-coloring widgets (`tabs`/`button_group`/`navigation_rail`/`navigation_drawer`/`menu`) remain a real, named, un-scoped future candidate for whenever conditional per-item styling gets designed -- not started.
+**Up next:** M29 — Tesserae takes over all file handling (reading, parsing, decoding, watching) and hands `tre` only specs and bytes, per a user-directed handoff from the `tre` session (2026-09-24). Scoped below. **Phase 1 done** (user go-ahead 2026-09-24: "pin CI to 0.3.2 and start Phase 1"); Phase 2 still waits on a decision about the new Pillow dependency. Separately, the 5 Rust-internal-state-dependent-coloring widgets (`tabs`/`button_group`/`navigation_rail`/`navigation_drawer`/`menu`) remain a real, named, un-scoped future candidate for whenever conditional per-item styling gets designed -- not started.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -649,7 +649,7 @@ The actual code change (`engine-spec::NodeKindSpec` + `build.rs`) is `tre`-scope
 
 ## Milestone 29 — Tesserae Owns All File Handling; `tre` Gets Specs + Bytes Only
 
-**Status: ⬜ Not started (scoped 2026-09-24).** User direction, relayed verbatim through a handoff from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." `tre` offers one data-ingestion path per concern; Tesserae owns reading, parsing, decoding and watching files. The `tre`-side counterpart is `tre`'s own M86 (scoped on `tre`'s `0.3.2` branch, not started). **Implementation waits on the user's explicit go-ahead** — the handoff itself is scoping, not approval.
+**Status: 🚧 In progress — Phase 1 of 5 done (2026-09-24).** Scoped 2026-09-24; User direction, relayed verbatim through a handoff from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." `tre` offers one data-ingestion path per concern; Tesserae owns reading, parsing, decoding and watching files. The `tre`-side counterpart is `tre`'s own M86 (scoped on `tre`'s `0.3.2` branch, not started). User go-ahead for Phase 1 given 2026-09-24 ("pin CI to 0.3.2 and start Phase 1"); later phases still need theirs.
 
 **Verified against current source before recording, not taken on trust:** every Tesserae line reference below matches today's code. On the `tre` side, `spec=` already exists on `View`, `View.instantiate`/`Component.instantiate` and `reconcile`, and `Window.add_image_from_bytes` (M82) and `Node.push_frame` exist too — on both `tre`'s `main` and `0.3.2`, so Phases 1–3 need no `tre` change and won't widen the CI/`tre`-branch gap (see the CI note below). `default_theme_spec=`/`custom_theme_spec=`/`stylesheet_spec=` and `tre.register_font` do **not** exist yet as Python API (the only source matches are an internal Rust local in `view.rs` and the renderer's own `register_fonts`), confirming Phase 4 is genuinely blocked on M86.
 
@@ -666,13 +666,19 @@ The actual code change (`engine-spec::NodeKindSpec` + `build.rs`) is `tre`-scope
 3. `tre`'s `poll_reload()` watches a file `tre` read, so it no longer applies; hot reload becomes Tesserae's job.
 4. `tre` prefixes `spec=` validation errors with `"spec=: ..."` and can't know the source file — Tesserae must re-raise naming the `*_View.yaml`.
 
-### Phase 1 — `spec=` Handoff, No Text Round-Trip (no `tre` change needed) ⬜
-- Step 1: split `expand_components` so a dict is the primary return value (e.g. `expand_components_to_spec(yaml_text) -> dict`); keep a text-returning wrapper only if something still needs it — nothing on the `tre` handoff path should — ⬜
-- Step 2: `load_view` → `View(spec=expanded_dict, ...)` — ⬜
-- Step 3: `instantiate` → `parent.instantiate("", into, spec=expanded_dict)` (`path=""` is `tre`'s supported "no base directory" value; still positional-required, never read when `spec=` is given) — ⬜
-- Step 4: reject or expand away any `include:` before handoff (gotcha 1) — ⬜
-- Step 5: catch `ValueError` from `View(spec=)`/`instantiate(spec=)` and re-raise naming the source `*_View.yaml` (gotcha 4) — ⬜
-- Step 6: tests + full verification chain — ⬜
+### Phase 1 — `spec=` Handoff, No Text Round-Trip (no `tre` change needed) ✅
+
+**One real change to the handoff's sequencing, found before writing code:** the handoff said to drop `path` entirely (`View(spec=...)`, `instantiate("", ...)`). Reading `tre`'s `View.__new__` showed that `path` does two more jobs even under `spec=`: it's the base directory `tre` resolves `image.src:` against (with none, `tre` raises `ImageSrcNoBaseDir`, and it always rejects absolute paths), and a non-empty `path` starts `tre`'s `ViewWatcher` for `poll_reload`. Dropping it now would break every `kind: Image` (including `Image_Component.yaml`'s own test) and `poll_reload` before Phases 2 and 3 replace them. So Phase 1 keeps passing `path`, with `tre` no longer *reading* the file, and removing it becomes Phase 3's last step.
+
+- Step 1: `expand_components_to_spec(yaml_text, *, component_dirs=None, base_dir=None) -> dict` is now the primary entry point; `expand_components` stays as a thin text wrapper (public API, used across the test suite and docs), and nothing on the `tre` handoff path uses it — ✅
+- Step 2: `load_view` → `View(str(path), spec=dict, ...)` — ✅
+- Step 3: `instantiate` → `parent.instantiate(str(path), into, spec=dict)` (`path` kept as the `image.src:` base directory; see above) — ✅
+- Step 4: `include:` (gotcha 1) — resolved in Tesserae rather than rejected, as a straight port of `tre`'s `engine-spec/src/include.rs`: same sole-key rule, same relative-to-the-including-file resolution, same confinement (no absolute paths, no `../` or symlink escapes), same cycle detection, same depth limit of 8. Resolved *before* `component:` expansion, so an included file can now use `component:` (under `tre`'s own text-path include it reached `tre` unexpanded and failed). `include:` inside a `*_Component.yaml` fragment is a clear `ComponentError` — fragments have no sensible base directory, and nested `component:` covers that use — ✅
+- Step 5: `load_view`/`instantiate` re-raise `tre`'s `ValueError` as `"<path>: <tre message>"` (gotcha 4), e.g. `app/Settings_View.yaml: spec=: unknown variant 'Rectangle', ...` — ✅
+- Step 6: one real regression found and closed that the handoff didn't mention: PyYAML's `safe_load` turns an unquoted `2026-09-24` into a `datetime.date`, which `tre`'s `spec=` rejects (confirmed directly: `'date' object is not an instance of 'str'`). The old text round-trip had turned it back into the string `"2026-09-24"`; a final `_normalize_scalars` pass does the same with `str()`, which gives exactly that string — ✅
+- Step 7: 15 new pytest tests (`test_spec_load.py` 13, `test_component.py` 2) — include resolution, nested relative resolution, `component:` inside an included file, every `include:` guard (cycle, depth, escape, absolute, non-sole key, no base dir, inside a fragment), the date regression, file-named errors from both `load_view` and `instantiate`, and dict/text parity — ✅
+- Step 8: full verification chain — ✅ (`pytest tests/` 172 passed, up from 157, +15, 0 regressions; all 3 examples ran clean; `mkdocs build --strict` clean.)
+- Step 9: docs — `api/spec.md` rewritten (`spec=` handoff, `expand_components_to_spec`, a new `include:` section, file-named errors, and a note that `path` still reaches `tre` until Phases 2–3); `guide/component-fragments.md`'s loading section updated — ✅
 
 ### Phase 2 — Tesserae-Side Image Decoding (**needs a user decision: adds a Pillow dependency**) ⬜
 - Step 1: decide the decoder — Pillow (`Image.open(...).convert("RGBA")`) is the handoff's suggestion; open question for the user, not assumed — ⬜
@@ -685,7 +691,8 @@ The actual code change (`engine-spec::NodeKindSpec` + `build.rs`) is `tre`-scope
 - Step 1: watch the source `*_View.yaml` **and** every `*_Component.yaml` fragment it expanded (watchfiles/watchdog or a poll loop — another dependency decision if not a plain poll loop) — ⬜
 - Step 2: on change, re-expand and call `view.reconcile(spec=...)` (unchanged widgets keep their `NodeId`s, focus and in-flight animations), then re-run Phase 2's frame push for any `Image` nodes — ⬜
 - Step 3: re-raise `reconcile(spec=)` errors naming the source file (gotcha 4) — ⬜
-- Step 4: tests + full verification chain — ⬜
+- Step 4: stop passing `path` to `tre` at all (`View(spec=...)`, `instantiate("", into, spec=...)`) — possible only once Phase 2 has removed every `image.src:` and this phase has replaced `poll_reload`; see Phase 1's sequencing note — ⬜
+- Step 5: tests + full verification chain — ⬜
 
 ### Phase 4 — Theme, Stylesheet & Font Loading (**blocked on `tre` M86**) ⬜
 - Step 1: Tesserae loads theme/stylesheet YAML itself and passes `default_theme_spec=`/`custom_theme_spec=`/`stylesheet_spec=` dicts to `View`/`View.set_theme`/`Window.set_theme` (passing a `*_spec=` together with its path counterpart raises `ValueError` in `tre`; no `*_json=` variants by design) — ⬜
@@ -696,4 +703,4 @@ The actual code change (`engine-spec::NodeKindSpec` + `build.rs`) is `tre`-scope
 - Step 1: update MkDocs with the new rule for Tesserae users: they give Tesserae file paths, and Tesserae never gives `tre` one (`guide/component-fragments.md`, `api/spec.md`, `guide/widget-catalog.md`'s `image` entry, and a hot-reload section) — ⬜
 - Step 2: update `ARCHITECTURE.md`'s layering to show Tesserae as the sole file-I/O owner — ⬜
 
-**Related, not part of this milestone:** CI currently fails 9 of 157 tests because `ci.yml` checks out `tre`'s `main` (v0.3.1) while `tre`'s M84 lives only on the `0.3.2` branch. Pinning CI's `tre` checkout is a pending, separate user decision.
+**Related, not part of this milestone:** CI failed 9 of 157 tests because `ci.yml` checked out `tre`'s `main` (v0.3.1) while `tre`'s M84 lives only on the `0.3.2` branch. Fixed 2026-09-24 (user-directed): `ci.yml`'s `tre` checkout is now pinned to `ref: "0.3.2"`, with a comment to switch it to the `v0.3.2` tag once that ships.

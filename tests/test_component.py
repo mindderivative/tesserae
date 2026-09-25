@@ -117,7 +117,7 @@ def test_multiple_instances_are_independent_and_removable(tmp_path):
 
 def test_instantiate_with_no_component_usage_still_works_unchanged(tmp_path):
     """Real regression proof: `instantiate()` now expands `path`'s
-    content and hands it off via `source=` (`tre`'s own M73 widening)
+    content and hands it off via `spec=` (M29; `source=` before that)
     instead of letting `parent.instantiate` read the file itself -- a
     `*_Component.yaml` with zero `component:` usage must still embed
     exactly as it always did (`expand_components`'s own real "true
@@ -167,3 +167,42 @@ def test_instantiate_genuinely_expands_component_usage(tmp_path):
 
     with pytest.raises(ValueError, match="unknown color identifier"):
         instantiate(view, item_path, vm_cls, container)
+
+
+BOGUS_ITEM_VIEW = """
+id: root
+kind: NotARealKind
+"""
+
+
+def test_instantiate_names_the_source_file_when_tre_rejects_the_spec(tmp_path):
+    """M29: `tre` only sees a dict via `spec=`, so it can't know which
+    file a bad spec came from -- `instantiate` must say."""
+    parent_path = write(tmp_path, PARENT_VIEW, "Parent_View.yaml")
+    item_path = write(tmp_path, BOGUS_ITEM_VIEW, "Item_View.yaml")
+    vm_cls = load_viewmodel_class(tmp_path, "Item_ViewModel.py", "ItemViewModel")
+
+    view = View(parent_path)
+    with pytest.raises(ValueError) as exc_info:
+        instantiate(view, item_path, vm_cls, view.node("item_list"))
+    assert str(exc_info.value).startswith(item_path)
+    assert "NotARealKind" in str(exc_info.value)
+
+
+def test_instantiate_resolves_include_relative_to_the_component_file(tmp_path):
+    parts = tmp_path / "parts"
+    parts.mkdir()
+    (parts / "body.yaml").write_text(
+        'id: body\nkind: Rect\nstyle: {width: 10, height: 10, background: "#112233"}\n'
+    )
+    parent_path = write(tmp_path, PARENT_VIEW, "Parent_View.yaml")
+    item_path = write(
+        tmp_path,
+        "id: root\nkind: Container\nchildren:\n  - include: parts/body.yaml\n",
+        "Item_View.yaml",
+    )
+    vm_cls = load_viewmodel_class(tmp_path, "Item_ViewModel.py", "ItemViewModel")
+
+    view = View(parent_path)
+    component, _ = instantiate(view, item_path, vm_cls, view.node("item_list"))
+    assert component.node("body") is not None

@@ -11,8 +11,8 @@ instantiation time instead of much later when a handler name doesn't
 resolve.
 
 Also applies `component:` macro-expansion (`tesserae.spec`) before
-handing off to `parent.instantiate`, using the real `source=` override
-`tre`'s own M73 gave `View.instantiate`/`Component.instantiate` --
+handing off to `parent.instantiate`, now via `spec=` (M29) rather than the
+`source=` override `tre`'s own M73 gave `View.instantiate`/`Component.instantiate` --
 previously only reachable for a top-level `View` (via `App.load`'s own
 `load_view`), never for an embedded component.
 """
@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from tesserae.naming import check_naming_convention
-from tesserae.spec import expand_components
+from tesserae.spec import expand_components_to_spec
 
 
 def instantiate(
@@ -39,14 +39,19 @@ def instantiate(
     and `component:` usage inside a nested component's own YAML expands
     the identical way).
 
-    `path`'s real content is expanded for `component:` usage before
-    handoff -- a true no-op for a `*_Component.yaml` with none (`expand_
-    components`'s own real design, matching `load_view`'s).
+    `path`'s real content is expanded for `include:`/`component:` usage
+    and handed to `tre` as a dict via `spec=` (M29 Phase 1), the same
+    as `load_view` -- a true no-op expansion for a file with neither.
+    `path` itself is still passed only as the base directory for any
+    `kind: Image` `src:`, until M29 Phase 2 moves image decoding into
+    Tesserae. A `ValueError` from `tre` is re-raised naming `path`.
     """
     check_naming_convention(path, viewmodel_cls)
     path = Path(path)
-    raw_text = path.read_text(encoding="utf-8")
-    expanded = expand_components(raw_text)
-    component = parent.instantiate(str(path), into, source=expanded)
+    spec = expand_components_to_spec(path.read_text(encoding="utf-8"), base_dir=path.parent)
+    try:
+        component = parent.instantiate(str(path), into, spec=spec)
+    except ValueError as exc:
+        raise ValueError(f"{path}: {exc}") from exc
     viewmodel = viewmodel_cls(component, *args, **kwargs)
     return component, viewmodel

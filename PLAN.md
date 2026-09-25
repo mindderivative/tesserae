@@ -1,19 +1,21 @@
-# PLAN — M27 + M28: Primitive Fragments (7) + Macro-Layer `repeat:` Construct
+# PLAN — M29: Tesserae Owns All File Handling; `tre` Gets Specs + Bytes Only
 
-*(Replaces the prior M26 plan in this file — M26 is complete, committed.)*
+*(Replaces the prior M27 + M28 plan in this file — both are complete, committed.)*
 
 ## Goal
 
-Build both fronts M26 scoped, in one real pass — user-directed: "Start with M27 and then move onto M28." Front A (M27): the 7 `tre`-side primitive additions land for real (not just designed), then their declarative fragments get authored here. Front B (M28): the macro-layer `repeat:` construct, staged narrowly against `ListItem` first, exactly as M26 recommended.
+User direction, relayed through a handoff from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Tesserae owns reading, parsing, decoding and watching files; `tre` gets specs and bytes. Five phases, in the handoff's order: (1) `spec=` handoff with no YAML-text round-trip, (2) image decoding in Tesserae, (3) Tesserae-owned hot reload, (4) theme/stylesheet/font loading (blocked on `tre` M86), (5) docs.
 
 ## Status
 
-**Complete.**
+**In progress — Phase 1 of 5 done.**
 
-**M27** — `tre`'s own side landed first, as `tre`'s own M84 (`NodeKindSpec` + `build.rs`), verified against M26's own scoping before writing anything; confirmed accurate on every field/role/constructor name, plus one real gap M26 missed: `Md3Baseline`'s fallback colors live in a crate `engine-spec` can't reach, resolved with a small local copy of just the 4 values needed, not a bigger shared-constants refactor. Once that landed, all 7 `*_Component.yaml` fragments were authored here (`RadioButton`/`Switch`/`CircularProgress`/`LinearProgress`/`LoadingIndicator`/`TimePickerDial`/`Link`), each checked directly against its own real imperative-catalog counterpart. One real bug caught here, not on the `tre` side: `Switch`'s first fragment draft named its toggle param `on` — PyYAML's default loader treats a bare `on`/`off` as a YAML 1.1 boolean literal, silently breaking `{{ on }}` substitution; renamed to `is_on`. A second real, small `tre`-side fix (`Node.get_text()` had no `Link` arm at all) shipped alongside `tre`'s own M84 too, found while writing this milestone's own `Link` test.
+Phase 1: `load_view` and `instantiate` now hand `tre` the expanded dict via `spec=`; `expand_components_to_spec` is the primary entry point, with `expand_components` kept as a text wrapper. `include:` is resolved in Tesserae (a straight port of `tre`'s `include.rs`), since `tre` only splices it on its text path. `tre`'s `ValueError`s are re-raised naming the source file. One real regression the handoff didn't mention was found and closed: unquoted dates (`2026-09-24`) load as `datetime.date`, which `spec=` rejects, so they're normalized back to the same string the old text path produced.
 
-**M28** — the macro-layer `repeat:` construct, staged exactly as M26 recommended: built against `list_`/`ListItem` alone, not the 5 Rust-internal-state-dependent-coloring widgets (`tabs`/`button_group`/`navigation_rail`/`navigation_drawer`/`menu`), which still need a second, separate, un-scoped capability (conditional per-item styling) for full fidelity. Real finding before designing anything: checked `add_list` itself first and found the real gap isn't a missing primitive at all — `add_list` takes pre-built `Node`s and does pure layout composition (no `NodeKind::List` exists), so "a list" was already expressible today as a plain `Container` with N `ListItem` children; the actual missing capability is repeating one fragment call N times from static data without hand-duplicating N near-identical `component:` blocks. New `repeat:` key on a `component:` node — a list of per-item mappings, each merged onto the shared `with:` values (a real key given in both is a clear, rejected error, not silently resolved), each iteration's own id auto-suffixed `.0`/`.1`/... A real architectural point, verified with its own test, not assumed: `repeat:`'s own value already supports `{{ param }}` substitution with zero extra code, since the existing general-purpose `_substitute` pass runs before `_walk` ever reaches a nested `component:` node, so a `repeat:` sourced from an *outer* component's own list-typed parameter composes correctly for free.
+One real change to the handoff's sequencing: `path` still reaches `tre` for now. Under `spec=`, `tre` uses it only as the base directory for `image.src:` and as `poll_reload`'s watch target; dropping it before Phases 2 and 3 exist would break both. Removing it is now Phase 3's last step.
 
-`BUILD_TRACKER.md` updated (28 milestones now recorded). MkDocs updated separately (a real gap found afterward: the whole macro-expansion layer and widget catalog had zero docs coverage — new `guide/component-fragments.md`, `guide/widget-catalog.md`, `api/spec.md` pages added, `mkdocs.yml` nav wired, verified with `mkdocs build --strict`). Committed locally (`052c2af`, `9512d3f`); push deferred pending explicit user confirmation. 67 fragments total, up from 60.
+Also this session (user-directed): `ci.yml`'s `tre` checkout pinned to `0.3.2`, fixing CI's 9 failing M27 tests.
 
-**Up next:** Nothing currently scoped. The 5 Rust-internal-state-dependent-coloring widgets (`tabs`/`button_group`/`navigation_rail`/`navigation_drawer`/`menu`) remain a real, named, un-scoped future candidate for whenever conditional per-item styling gets designed — not started.
+`pytest tests/` 172 passed (+15). Committed locally; not pushed.
+
+**Up next:** Phase 2 (image decoding) — needs the user's decision on adding a Pillow dependency. Phase 3 needs a decision on file watching (plain poll loop vs. `watchfiles`).

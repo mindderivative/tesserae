@@ -239,9 +239,13 @@ real `tre` factory it matches and any real MD3 token it hardcodes.
 
 Nothing extra is required at the call site -- `App.load()` (and
 `tesserae.instantiate`) already expand `component:` usage
-automatically, via `tesserae.spec.load_view` / `expand_components`
-under the hood. See [`load_view`](../api/spec.md) if you need to expand
-a fragment-using file manually (e.g. for a tool, or outside `App`).
+automatically, via `tesserae.spec.load_view` /
+`expand_components_to_spec` under the hood, and hand `tre` the finished
+dict -- `tre` never reads the view file itself. See
+[`load_view`](../api/spec.md) if you need to expand a fragment-using
+file manually (e.g. for a tool, or outside `App`), and for the
+[`include:`](../api/spec.md#include) rules, which Tesserae also
+resolves.
 
 A view with zero `component:` usage expands to itself unchanged, so
 this is a safe, no-op-preserving layer under every existing view --

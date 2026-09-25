@@ -8,10 +8,16 @@ design (`pycopper/spec/include.py`), adapted to `tre`'s real schema
 exists, so only `id:` needs namespacing, unlike pyCopper's own `name:`+
 `anchor:` pair).
 
-Deliberately does NOT touch a literal `include:` key -- `tre` already has
-a real, working, parameterization-free splice mechanism for that
-(`engine-spec/src/include.rs`); this module only adds the missing
-capability, parameterized reuse.
+M29: also resolves `include:` itself, a straight port of `tre`'s own
+`engine-spec/src/include.rs` (same sole-key rule, same relative-to-the-
+including-file resolution, same confinement, cycle and depth-8 rules).
+Tesserae now hands `tre` a finished dict via `spec=`, and `tre` only
+splices `include:` on its YAML-text path -- so this is where it has to
+happen, and it keeps file reading on Tesserae's side, per the user's
+own rule that `tre` gets specs and bytes, never files. An `include:`
+inside a `*_Component.yaml` fragment is rejected rather than resolved:
+fragments are parameterized reuse, and an include there has no
+sensible base directory.
 
 M28: `repeat:` lets one `component:` entry expand to N sibling
 instances from a literal, static list of per-item overrides -- real,
@@ -49,13 +55,14 @@ whole-value substitution reproduces it exactly, for `tre`'s own
 
 from __future__ import annotations
 
+import datetime
 import re
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-__all__ = ["ComponentError", "expand_components"]
+__all__ = ["ComponentError", "expand_components", "expand_components_to_spec"]
 
 _COMPONENT_KEY = "component"
 _WITH_KEY = "with"
@@ -63,6 +70,11 @@ _PARAMS_KEY = "params"
 _ID_KEY = "id"
 _CHILDREN_KEY = "children"
 _REPEAT_KEY = "repeat"
+_INCLUDE_KEY = "include"
+
+#: Matches `tre`'s own `MAX_INCLUDE_DEPTH` (`engine-spec/src/include.rs`),
+#: so a view that loaded under `tre`'s own `include:` still loads here.
+MAX_INCLUDE_DEPTH = 8
 
 #: A guard against pathological/adversarial nesting, not a real depth
 #: any legitimate component tree needs. `tre`'s own `include:` uses 8
@@ -146,7 +158,94 @@ def _load_fragment(path: Path) -> dict[str, Any]:
         raise ComponentError(f"cannot read {path}: {exc}") from exc
     if not isinstance(raw, dict):
         raise ComponentError(f"{path}: a component fragment must be a mapping, got {type(raw).__name__}")
+    if _contains_include(raw):
+        raise ComponentError(
+            f"{path}: `include:` is not supported inside a component fragment -- "
+            "use a nested `component:` instead"
+        )
     return raw
+
+
+def _contains_include(node: Any) -> bool:
+    if isinstance(node, list):
+        return any(_contains_include(v) for v in node)
+    if isinstance(node, dict):
+        return _INCLUDE_KEY in node or any(_contains_include(v) for v in node.values())
+    return False
+
+
+def _resolve_include_path(base_dir: Path, include_path: str) -> Path:
+    """`tre`'s own `resolve_confined`: relative only, and the resolved
+    file must stay inside `base_dir` -- no `../` escapes, no symlink
+    escapes (both sides are fully resolved before the check)."""
+    if Path(include_path).is_absolute():
+        raise ComponentError(f"`include: {include_path}` must be a relative path")
+    try:
+        canon_base = base_dir.resolve(strict=True)
+        canon_joined = (base_dir / include_path).resolve(strict=True)
+    except OSError as exc:
+        raise ComponentError(f"`include: {include_path}`: cannot read {base_dir / include_path}: {exc}") from exc
+    if not canon_joined.is_relative_to(canon_base):
+        raise ComponentError(f"`include: {include_path}` escapes its base directory {canon_base}")
+    return canon_joined
+
+
+def _expand_includes(node: Any, base_dir: Path | None, visited: list[Path]) -> Any:
+    """Replaces every `{include: path}` mapping with that file's parsed
+    YAML, recursively -- a port of `tre`'s own `expand_includes`. Each
+    included file's own includes resolve against *its* directory."""
+    if len(visited) >= MAX_INCLUDE_DEPTH:
+        raise ComponentError(f"`include:` nested more than {MAX_INCLUDE_DEPTH} deep")
+    if isinstance(node, list):
+        return [_expand_includes(v, base_dir, visited) for v in node]
+    if not isinstance(node, dict):
+        return node
+    if _INCLUDE_KEY not in node:
+        return {k: _expand_includes(v, base_dir, visited) for k, v in node.items()}
+
+    include_path = node[_INCLUDE_KEY]
+    if not isinstance(include_path, str):
+        raise ComponentError(f"`include:` must be a string path, got {include_path!r}")
+    if len(node) != 1:
+        extra = sorted(str(k) for k in node if k != _INCLUDE_KEY)
+        raise ComponentError(f"`include: {include_path}` must be the node's only key; also got {extra}")
+    if base_dir is None:
+        raise ComponentError(
+            f"`include: {include_path}` has no base directory to resolve against -- "
+            "pass base_dir= (load_view and instantiate do this automatically)"
+        )
+
+    resolved = _resolve_include_path(base_dir, include_path)
+    if resolved in visited:
+        raise ComponentError(f"`include:` cycle through {resolved}")
+    try:
+        included = yaml.safe_load(resolved.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        raise ComponentError(f"{resolved}: invalid YAML: {exc}") from exc
+    except OSError as exc:
+        raise ComponentError(f"cannot read {resolved}: {exc}") from exc
+
+    visited.append(resolved)
+    try:
+        return _expand_includes(included, resolved.parent, visited)
+    finally:
+        visited.pop()
+
+
+def _normalize_scalars(node: Any) -> Any:
+    """PyYAML's `safe_load` turns an unquoted `2026-09-24` into a
+    `datetime.date`, which `tre`'s `spec=` depythonizer can't read into a
+    string field. The old text round-trip (`safe_dump` then `tre`'s own
+    `serde_yaml_ng` parse) turned it back into the string `"2026-09-24"`;
+    `str()` gives that exact same string, so `spec=` sees what the text
+    path used to."""
+    if isinstance(node, list):
+        return [_normalize_scalars(v) for v in node]
+    if isinstance(node, dict):
+        return {k: _normalize_scalars(v) for k, v in node.items()}
+    if isinstance(node, (datetime.date, datetime.datetime)):
+        return str(node)
+    return node
 
 
 def _expand_component(
@@ -284,10 +383,21 @@ def _walk(node: Any, component_dirs: list[Path], chain: tuple[str, ...]) -> Any:
     }
 
 
-def expand_components(yaml_text: str, *, component_dirs: list[Path] | None = None) -> str:
-    """Expands every `component:` entry in `yaml_text`, returning fully
-    expanded `WidgetSpec`-shaped YAML text with no `component:`/`with:`/
-    `params:` keys remaining -- ready for `tre.View(source=...)`.
+def expand_components_to_spec(
+    yaml_text: str,
+    *,
+    component_dirs: list[Path] | None = None,
+    base_dir: Path | None = None,
+) -> Any:
+    """Resolves every `include:` and expands every `component:` entry in
+    `yaml_text`, returning the finished `WidgetSpec`-shaped dict with no
+    `include:`/`component:`/`with:`/`params:`/`repeat:` keys remaining --
+    ready for `tre.View(spec=...)`, with no YAML-text round-trip (M29).
+
+    `base_dir` is the directory `include:` paths resolve against --
+    normally the `*_View.yaml`'s own directory. `None` means there is
+    none, and any `include:` is a clear `ComponentError`, the same
+    contract `tre`'s own `include:` has.
 
     `component_dirs` defaults to Tesserae's own built-in
     `spec/components/` directory; a caller may pass additional
@@ -295,6 +405,19 @@ def expand_components(yaml_text: str, *, component_dirs: list[Path] | None = Non
     an app's own -- not yet exercised by any real caller.
     """
     dirs = component_dirs if component_dirs is not None else [Path(__file__).parent / "components"]
-    data = yaml.safe_load(yaml_text)
-    expanded = _walk(data, dirs, ())
-    return yaml.safe_dump(expanded, sort_keys=False)
+    data = _expand_includes(yaml.safe_load(yaml_text), base_dir, [])
+    return _normalize_scalars(_walk(data, dirs, ()))
+
+
+def expand_components(
+    yaml_text: str,
+    *,
+    component_dirs: list[Path] | None = None,
+    base_dir: Path | None = None,
+) -> str:
+    """`expand_components_to_spec`, dumped back to YAML text -- for
+    inspecting an expansion, or for `tre`'s own text-based `source=`
+    path. Nothing on Tesserae's own `tre` handoff path uses this any
+    more (`load_view`/`instantiate` pass the dict via `spec=`)."""
+    spec = expand_components_to_spec(yaml_text, component_dirs=component_dirs, base_dir=base_dir)
+    return yaml.safe_dump(spec, sort_keys=False)
