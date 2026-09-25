@@ -61,6 +61,16 @@ view = load_view(
   ValueError: themes/Brand.yaml: custom_theme_spec=: unknown field `colours`, ...
   ```
 
+## Layout rules in stylesheets and themes
+
+A stylesheet's or theme's `styles:` rules can set layout as well as
+paint -- `margin`, `flex_grow`, `flex_shrink`, `flex_basis`,
+`align_items` and `justify_content` -- and since `tre` 0.3.3 those rules
+take effect. Before 0.3.3 they were silently ignored, so if you're
+upgrading, a screen whose stylesheet sets them may now lay out
+differently. A widget's own inline `style:` always applied, and still
+wins over any rule.
+
 ## Switching themes later
 
 `load_theme` and `load_stylesheet` read a file into the dict `tre`
@@ -118,7 +128,7 @@ warnings.filterwarnings("error", category=FontFallbackWarning)
   [`ViewWatcher`](hot-reload.md) watches the view, its includes,
   fragments and images; to pick up a theme edit, call `set_theme` again
   with a freshly loaded theme. Watching theme and stylesheet files is
-  planned once [`tre` issue #8](https://github.com/mindderivative/tre/issues/8)
-  is fixed: today a re-theme makes bound values show their YAML
-  placeholder until they next change, and a stylesheet can't be
-  replaced on a live view.
+  planned next (M31): `tre` 0.3.3 keeps bound values through a
+  re-theme and can replace a live view's stylesheet
+  ([`tre` issue #8](https://github.com/mindderivative/tre/issues/8)),
+  which is what it needed.

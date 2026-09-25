@@ -1,9 +1,9 @@
-# LOG — M32: Migrate to `tre` 0.3.3 (in progress)
+# LOG — M32: Migrate to `tre` 0.3.3
 
 *(Replaces M30's log — M30 is complete, committed and pushed.)*
 
 - User: "scope the 0.3.3 migration as M32", then "go with your
-  recommendations for M32", then "push it and start Phase 2", then "accept both drops, send the questions, and start Phase 3", then "start Phase 4".
+  recommendations for M32", then "push it and start Phase 2", then "accept both drops, send the questions, and start Phase 3", then "start Phase 4", then "Push and start" (Phase 5).
 
 ## Phase 1 — decisions
 
@@ -47,3 +47,16 @@ becomes `selected`; `.venv` pinned to the `tre` v0.3.3 release.
    CI green: 233 passed, 1 skipped (no display), `tre` at `bc5e9b6`.
 3. New regression test: a reload editing a bound node keeps its live
    value. Shows the placeholder on v0.3.2, `'live'` on v0.3.3 (M91).
+
+## Phase 5 — docs and tracker
+
+1. Docs sweep: no 0.3.2-era statements left; new "Layout rules in
+   stylesheets and themes" note (they take effect since 0.3.3); the
+   themes guide points at M31 for theme-file hot reload.
+2. Tracker: the 0.3.3 gap and M29's bound-value gap moved to Fixed;
+   theme/stylesheet hot reload marked unblocked (M31); PyPI gap -> v0.3.3.
+
+## Status
+
+**M32 complete.** 81 failing -> 0 on `tre` 0.3.3; CI green on the
+`v0.3.3` pin. Unblocks M31.

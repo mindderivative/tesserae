@@ -1,6 +1,6 @@
 # PLAN — M32: Migrate to `tre` 0.3.3
 
-*(Replaces the M30 plan in this file — M30 is complete, committed and pushed. `LOG.md` still holds M30's record until M32 work starts.)*
+*(Replaces the M30 plan in this file — M30 is complete, committed and pushed.)*
 
 ## Goal
 
@@ -8,14 +8,12 @@ User-directed: "scope the 0.3.3 migration as M32". Move Tesserae from `tre` v0.3
 
 ## Status
 
-**In progress — Phase 1 of 5 done (2026-09-25).** The user took all three recommendations: `tesserae.widgets` follows `tre` 0.3.3's names; `Switch`'s `is_on` becomes `selected`; `.venv` is pinned to the `tre` v0.3.3 release (a wheel in place of today's source-tree link) as Phase 2's first step. Phase 2 done: `.venv` pinned to the v0.3.3 wheel; `tre`'s migration script run (66 files; a real bug in it — Rect `background`s rewritten inside `.py` strings — caught and fixed); dict specs, `Switch`'s `selected`, docs migrated by hand. 81 → 13 failures, all Phase 3 Python-API renames. Phase 3 done: `tesserae.widgets` follows `tre` 0.3.3's names, tests follow, catalog lists the renames — 233 passed, 0 failed on 0.3.3. Phase 4 done: CI pinned to `v0.3.3` and green (233 passed, 1 skipped for no display); Phases 2–4 pushed; a regression test proves M91's fix reaches Tesserae's hot reload. Phase 5 (close the gaps, final docs sweep) waits on the user's go-ahead.
+**Complete (2026-09-25).** 81 of 233 tests and all 3 examples failed unmodified on 0.3.3; now 0 fail, and CI (pinned to `v0.3.3`) is green.
 
-Sized against the real v0.3.3 release (built from its tag into a scratch venv): 81 of 233 tests and all 3 examples fail unmodified. `tre`'s migration script would change 58 of 72 YAML files and 8 `.py` files with embedded YAML; Python dict specs, Python calls and the docs' Markdown are manual.
+1. **Decisions** (user took all three recommendations): `tesserae.widgets` follows `tre` 0.3.3's names; `Switch`'s `is_on` → `selected`; `.venv` pinned to the v0.3.3 release.
+2. **YAML** — `.venv` pinned (a wheel built offline from the tag, replacing the source-tree link); `tre`'s migration script run and committed unedited, then reviewed: it wrongly rewrote three Rect `background`s inside `.py` strings (fixed); dict specs and docs by hand.
+3. **Python API** — `switch(selected=)`, `divider(orientation=)`, `link(content)`, `dialog(supporting_text)`, `toolbar(vibrant=)`; translations removed; renames table in the widget catalog.
+4. **Verify** — CI pinned to `v0.3.3` and green; a regression test proves bound values survive hot reload (M91; it failed on v0.3.2).
+5. **Docs and tracker** — cascade note (stylesheet layout rules now apply); gaps closed; M31 unblocked.
 
-Plan (full detail in `BUILD_TRACKER.md` Milestone 32):
-
-1. **Decide** — recommended: follow `tre` 0.3.3's names in `tesserae.widgets` (`switch(selected=)`, `divider(orientation=)`, `link(content=)`, `dialog(supporting_text=)`, `toolbar(vibrant=)`); rename `Switch`'s `is_on` fragment param to `selected`; pin `.venv` to the `tre` v0.3.3 release instead of `tre`'s source tree.
-2. **YAML migration** — run `tre`'s script, review and commit it separately, then hand-migrate dict specs.
-3. **Python API migration** — `tesserae.widgets`, the rest of `src/`, the tests.
-4. **Verify** — 0 failures on v0.3.3, examples clean, CI pinned to `v0.3.3`, M91's fix confirmed through Tesserae's hot reload.
-5. **Docs and tracker** — every snippet in `docs/` updated, a note on the cascade change, gaps closed.
+**Up next:** M31 (theme/stylesheet hot reload), waiting on the user's go-ahead. Then `tre`'s building-block program (a large Tesserae-side program, not yet scoped).
