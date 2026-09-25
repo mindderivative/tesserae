@@ -28,7 +28,7 @@ screen. For a screen you pass to `App.register()`, build its view with
 `app.build_view("Foo_View.yaml")` so it gets the same theme and
 stylesheet.
 
-Theme and stylesheet files are read once, when the `App` is created.
+The theme and default stylesheet files are read once, when the `App` is created, so a font warning appears once rather than once per screen. A screen's own stylesheet file is read when that screen loads.
 
 ## Themes and stylesheets on a single view
 

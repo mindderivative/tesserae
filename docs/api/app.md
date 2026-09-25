@@ -16,9 +16,10 @@ kept in sync with the window).
 
 The theme arguments set **one theme for the whole app**, used by every
 screen `load()` builds. `stylesheet=` is the **default stylesheet** for
-every screen; `load(stylesheet=...)` replaces it for one screen. Files
-are read once, when the `App` is created, and `tre` is given only the
-parsed data. Passing a file and its `*_spec=` twin together raises
+every screen; `load(stylesheet=...)` replaces it for one screen. The
+theme and default stylesheet files are read once, when the `App` is
+created (a screen's own stylesheet file is read when that screen
+loads), and `tre` is given only the parsed data. Passing a file and its `*_spec=` twin together raises
 `ValueError`. See [Themes & Fonts](../guide/themes-and-fonts.md).
 
 The theme is app-wide rather than per screen because in `tre` a theme

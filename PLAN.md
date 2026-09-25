@@ -1,24 +1,21 @@
 # PLAN — M30: Theme Arguments on `App` and `App.load()`
 
-*(Replaces the M29 plan in this file — M29 is complete, committed and pushed. `LOG.md` still holds M29's record until M30 work starts.)*
+*(Replaces the M29 plan in this file — M29 is complete, committed and pushed.)*
 
 ## Goal
 
-User-directed: "scope adding theme args to App.load()". Give `App` a theme API, closing the known gap that it has none. `load_view` already takes every theme argument (M29), so the real question is where a theme lives in a multi-screen app.
+User-directed: "scope adding theme args to App.load()". Give `App` a theme API, closing the known gap that it had none.
 
 ## Status
 
-**In progress — Phase 2 of 3 done (2026-09-25).** Phase 2: `App(...)` takes the app-wide theme and a default stylesheet, `load(stylesheet=...)` overrides per screen, new `App.build_view()` themes `register()`ed screens (the `multi_screen` example uses it); MkDocs updated; 221 tests pass. Phase 3 (committed tests, final docs check, tracker) waits on the user's go-ahead.
+**Complete (2026-09-25).**
 
-Phase 1: The user chose: an app-wide theme on `App(...)`; a stylesheet per screen on `load()`, with an app-wide default on `App(...)`; and to wait for `tre` issue #8 before any theme-file hot reload, which moves to a new M31. 
+- **Phase 1 — decisions (user):** an app-wide theme on `App(...)`; a stylesheet per screen on `load()`, with an app-wide default on `App(...)`; theme-file hot reload deferred until `tre` issue #8 is fixed — split out into M31.
+- **Phase 2 — implementation:** `App(..., theme_seed=, dark=, default_theme=, custom_theme=, stylesheet=)` plus `*_spec=` forms, files read once by Tesserae; `App.load(..., stylesheet=)`; new `App.build_view()` for `register()`ed screens (the `multi_screen` example uses it). MkDocs updated.
+- **Phase 3 — tests, docs, tracker:** 12 new tests, mutation-checked; verified against `tre` v0.3.2 built from source in a scratch venv, since this repo's `.venv` loads `tre`'s unreleased 0.3.3; a docs inaccuracy about when stylesheet files are read fixed.
 
-Key finding, checked in `tre` v0.3.2: a theme is window-level. `Window.from_view` shares the first screen's theme with the window, and `Window.show_view` never switches it — so per-screen themes would leave imperative `tesserae.widgets` and interaction tints on the first screen's theme after `app.show(...)`. A stylesheet, by contrast, is per-`View`. `View.set_theme` can re-theme a live screen (a complete selection each call; bindings not re-applied); `tre` has no `set_stylesheet`.
+Why app-wide: in `tre`, `Window.from_view` shares the first screen's theme with the window and `Window.show_view` never switches it, so per-screen themes would leave `tesserae.widgets` and interaction tints on the first screen's theme.
 
-Plan (full detail in `BUILD_TRACKER.md` Milestone 30):
+`pytest tests/` 233 passed against v0.3.2.
 
-1. **Decide** — recommended: an app-wide theme on `App(...)`, a per-screen stylesheet on `load()`; and whether theme-file hot reload is in scope.
-2. **Implement** — theme files read once via `load_theme`, passed to every `load()` as dicts; `register()` unchanged.
-3. **Hot reload for theme files** (if in scope) — watch them, re-theme every screen via `View.set_theme` on the loop thread. Stylesheets can't be hot-reloaded until `tre` gains `set_stylesheet`.
-
-   Filed [`tre` issue #8](https://github.com/mindderivative/tre/issues/8) (user-directed): `set_theme` and `reconcile` drop `{{ }}` bound values on the nodes they touch (reproduced — a bound label reverts to its static text), and there's no `View.set_stylesheet`. Fixes to either could change Phase 3: re-theming becomes safe to ship, and stylesheets become hot-reloadable. Part 1 also affects M29's shipped hot reload, now a known gap.
-4. **Tests, MkDocs, tracker.**
+**Up next:** nothing scoped. M31 waits on Tesserae's move to `tre` 0.3.3 (where issue #8 is fixed); that migration is the natural next milestone once 0.3.3 is released.

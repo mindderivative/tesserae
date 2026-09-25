@@ -66,9 +66,10 @@ class App:
     default stylesheet for every screen; `load(stylesheet=...)` replaces
     it for one screen (a stylesheet is genuinely per-`View` in `tre`).
 
-    Theme and stylesheet files are read once, here, by Tesserae (so a
-    `FontFallbackWarning` fires once, not once per screen); `tre` only
-    ever gets the dicts.
+    The theme and default stylesheet files are read once, here, by
+    Tesserae (so a `FontFallbackWarning` fires once, not once per
+    screen); a screen's own `load(stylesheet=...)` file is read when it
+    loads. `tre` only ever gets the dicts.
     """
 
     def __init__(

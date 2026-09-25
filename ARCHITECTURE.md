@@ -114,6 +114,14 @@ from_view`; every call after that switches the same live window via
 (M42, both phases). Neither call re-parses YAML or re-attaches a
 `ViewModel`.
 
+**Themes (M30):** one theme per `App` -- `App(theme_seed=, dark=,
+default_theme=, custom_theme=)` -- because in `tre` a theme belongs to
+the window (`Window.from_view` shares the first screen's theme and
+`Window.show_view` never switches it). A stylesheet is per-`View`:
+`App(stylesheet=)` is the default and `App.load(..., stylesheet=)`
+replaces it for one screen. `App.build_view()` gives a `register()`ed
+screen the same theme and stylesheet.
+
 `App.load` is the enforced-naming-convention path (`*_View.yaml`/
 `*_ViewModel.py`, checked via `inspect.getfile` against the
 `ViewModel` class's own defining file -- `tre.View` has no `path`
