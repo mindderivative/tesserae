@@ -23,9 +23,15 @@ jobs:
         with:
           path: tesserae
 
+      # Pinned to `tre`'s `0.3.2` release-prep branch, not its default
+      # `main` (v0.3.1): Tesserae's M27 fragments need `tre`'s M84
+      # declarative kinds, which live only on `0.3.2` so far. Unpinned,
+      # CI tested a different `tre` than local development and failed
+      # 9 of 157 tests. Switch this to the `v0.3.2` tag once it ships.
       - uses: actions/checkout@v4
         with:
           repository: mindderivative/tre
+          ref: "0.3.2"
           path: tre
 
       # No explicit Rust-toolchain-install action needed -- matches
