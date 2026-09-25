@@ -3,8 +3,9 @@
 
 Every behavioral test runs against both implementations while `tre`
 0.3.4 still has its own, so a difference shows up as one side failing.
-The bridge tests at the end cover what only Tesserae's side has: its
-signals feeding `tre`'s `View` bindings until M36.
+(M35's bridge, which fed `tre`'s own `View` bindings from Tesserae's
+signals, was removed in M37 Phase 6; bindings on Tesserae views are
+covered by `test_view.py`.)
 """
 
 import pytest
@@ -198,78 +199,3 @@ def test_tesserae_exports_its_own_reactivity():
     for name in ("Signal", "Computed", "Effect", "ViewModel", "batch", "untrack"):
         assert getattr(tesserae, name) is getattr(tesserae.reactive, name)
         assert getattr(tesserae, name) is not getattr(tre, name)
-
-
-BOUND = {
-    "id": "root",
-    "kind": "Container",
-    "children": [
-        {"id": "label", "kind": "Text", "text": {"content": "placeholder", "font_family": "Roboto", "font_size": 14},
-         "style": {"width": 100, "height": 20, "foreground": "#000000"}, "bindings": {"text": "{{ label.get() }}"}},
-        {"id": "total", "kind": "Text", "text": {"content": "placeholder", "font_family": "Roboto", "font_size": 14},
-         "style": {"width": 100, "height": 20, "foreground": "#000000"}, "bindings": {"text": "{{ total.get() }}"}},
-    ],
-}
-
-
-class _VM(tesserae.ViewModel):
-    def __init__(self, view):
-        self.label = tesserae.Signal("hello")
-        self.n = tesserae.Signal(2)
-        self.total = tesserae.Computed(lambda: f"total {self.n.get() * 10}")
-        super().__init__(view)
-
-
-def test_tre_bindings_track_tesserae_signals_and_computeds():
-    view = tre.View(spec=BOUND)
-    vm = _VM(view)
-    assert view.node("label").get_text() == "hello"
-    assert view.node("total").get_text() == "total 20"
-    vm.label.set("bye")
-    vm.n.set(3)
-    assert view.node("label").get_text() == "bye"
-    assert view.node("total").get_text() == "total 30"
-
-
-class _UntrackVM(tesserae.ViewModel):
-    def __init__(self, view):
-        self.label = tesserae.Signal("hello")
-        self.hidden = tesserae.Signal("x")
-        self.total = tesserae.Signal("")
-        self.n = tesserae.Signal(0)
-        self.info = _Info(self)
-        super().__init__(view)
-
-
-class _Info:
-    """`tre`'s grammar allows a zero-argument call only as a method on a
-    named value (`info.described()`), not a bare `described()`."""
-
-    def __init__(self, vm):
-        self._vm = vm
-
-    def described(self):
-        return self._vm.label.get() + tesserae.untrack(lambda: self._vm.hidden.get())
-
-
-UNTRACKED = {
-    "id": "root",
-    "kind": "Container",
-    "children": [
-        {"id": "label", "kind": "Text", "text": {"content": "placeholder", "font_family": "Roboto", "font_size": 14},
-         "style": {"width": 100, "height": 20, "foreground": "#000000"}, "bindings": {"text": "{{ info.described() }}"}},
-    ],
-}
-
-
-def test_a_tesserae_frame_inside_a_tre_binding_shadows_it():
-    """`untrack` (a Tesserae frame) opened while `tre` evaluates a binding
-    hides its reads from that binding, as a nested frame does on `tre`'s
-    own stack."""
-    view = tre.View(spec=UNTRACKED)
-    vm = _UntrackVM(view)
-    assert view.node("label").get_text() == "hellox"
-    vm.hidden.set("y")  # untracked: the binding doesn't re-run
-    assert view.node("label").get_text() == "hellox"
-    vm.label.set("bye")  # tracked: it re-runs and reads hidden's new value
-    assert view.node("label").get_text() == "byey"

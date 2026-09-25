@@ -27,9 +27,9 @@ files, plus `tesserae.widgets` for building widgets from Python. See the
 You give Tesserae file paths -- views, component fragments, `include:`d
 files, images, themes, stylesheets, fonts. Tesserae reads, parses,
 decodes and watches them itself, and hands `tre` only data: a finished
-view spec (`View(spec=...)`), theme and stylesheet dicts
-(`*_spec=`), RGBA pixels (`push_frame`/`add_image_from_bytes`) and
-font bytes (`register_font`). Tesserae never gives `tre` a file path.
+view built by Tesserae's own compiler onto `tre`'s building blocks
+(M37), RGBA pixels and font bytes (`register_font`). Tesserae never gives
+`tre` a file path.
 
 That's what lets Tesserae resolve `include:` and `component:` together,
 name the right file in every error, warn when a font would silently
@@ -92,8 +92,8 @@ one live window.
 
 `tesserae.instantiate(parent, path, viewmodel_cls, into, *args,
 **kwargs)` embeds another view's own YAML as a real, independent
-`Component` with its own `ViewModel` -- the enforced-naming counterpart
-to `tre.View.instantiate`/`Component.instantiate`. `parent` is a `View`
+`Component` with its own `ViewModel`, built in its host's window with
+the host's theme and stylesheet. `parent` is a `View`
 or another `Component` (they nest); `into` is the `Node` to embed under
 (e.g. `view.node("item_list")`); extra positional/keyword args are
 forwarded to `viewmodel_cls(component, *args, **kwargs)` -- the real,

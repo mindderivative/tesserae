@@ -1,5 +1,6 @@
-"""Real, enforced-naming counterpart to `tre.View.instantiate`/
-`Component.instantiate` (TRE M43) -- for a component whose `ViewModel`
+"""`instantiate`: embeds a component -- a `*_View.yaml` +
+`*_ViewModel.py` pair -- in a Tesserae `View` or `Component` (M37:
+built by Tesserae in the host's window). For a component whose `ViewModel`
 needs extra constructor arguments beyond the component itself (the
 real, common case: an item's own data, or a callback letting it remove
 itself from its parent's own bookkeeping), `tre`'s raw `parent
@@ -24,7 +25,7 @@ from typing import Any
 
 from tesserae.naming import check_naming_convention
 from tesserae.spec import expand_components_to_spec
-from tesserae.spec.images import extract_images, push_frames
+from tesserae.spec.images import extract_images
 
 
 def instantiate(
@@ -54,17 +55,11 @@ def instantiate(
     path = Path(path)
     spec = expand_components_to_spec(path.read_text(encoding="utf-8"), base_dir=path.parent)
     spec, frames = extract_images(spec, path.parent)
-    from tesserae.view import View as TesseraeView
-
     try:
-        if isinstance(parent, TesseraeView):  # M37: Tesserae builds it, in the host's window and theme
-            component = parent.instantiate(path, into, spec=spec,
-                                           frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
-        else:
-            component = parent.instantiate("", into, spec=spec)
+        # M37: Tesserae builds it, in the host's window with the host's theme and stylesheet
+        component = parent.instantiate(path, into, spec=spec,
+                                       frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
     except ValueError as exc:
         raise ValueError(f"{path}: {exc}") from exc
-    if not isinstance(parent, TesseraeView):
-        push_frames(component, frames)
     viewmodel = viewmodel_cls(component, *args, **kwargs)
     return component, viewmodel

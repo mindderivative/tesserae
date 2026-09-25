@@ -6,11 +6,10 @@ view/viewModel."
 
 Owns a registry of named `(View, ViewModel)` pairs -- each `*_View.yaml`
 + `*_ViewModel.py` file pair a real app registers once, up front -- and
-exactly one live `tre.Window`. `App.show(name)` switches which
-registered pair that one `Window` currently renders, via `tre.Window
-.show_view` (TRE M42 Phase 2) on every call after the first (which
-instead builds the `Window` for real, via `tre.Window.from_view`, TRE
-M42 Phase 1). Neither a `View` nor its `ViewModel` is ever re-parsed,
+exactly one live `tre.Window`, created with the `App`. Screens are built
+into it by Tesserae (M37); `App.show(name)` attaches that screen's root
+to the window and detaches the one shown before. Neither a `View` nor
+its `ViewModel` is ever re-parsed,
 re-attached, or otherwise re-bootstrapped by a later `show()` call --
 each stays alive, its own `Signal` subscriptions intact, for the whole
 life of the `App`.
@@ -381,10 +380,10 @@ class App:
         return view, viewmodel
 
     def show(self, name: str) -> Window:
-        """Shows the view registered under `name`. The very first call
-        opens the real `Window` (`Window.from_view`); every call after
-        that switches the same live `Window` to `name`'s own view
-        (`Window.show_view`) instead of opening a second one.
+        """Shows the view registered under `name` in the app's window: its
+        root is attached, and the previously shown screen's detached (kept
+        alive, with its state and bindings). Returns the window, the same one
+        every time.
         """
         registered = self._registered.get(name)
         if registered is None:

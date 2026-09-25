@@ -395,7 +395,7 @@ def expand_components_to_spec(
     """Resolves every `include:` and expands every `component:` entry in
     `yaml_text`, returning the finished `WidgetSpec`-shaped dict with no
     `include:`/`component:`/`with:`/`params:`/`repeat:` keys remaining --
-    ready for `tre.View(spec=...)`, with no YAML-text round-trip (M29).
+    ready for `tesserae.View(spec)`, with no YAML-text round-trip (M29).
 
     `base_dir` is the directory `include:` paths resolve against --
     normally the `*_View.yaml`'s own directory. `None` means there is

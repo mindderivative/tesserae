@@ -41,11 +41,11 @@ tesserae.Repeater       -- one list Signal as the single source of
 tesserae.{Signal,ViewModel,Computed,
   |        Effect,batch,untrack}                -- tesserae.reactive: Tesserae's
   |                                               own reactivity (M35, taken
-  |                                               over from tre); feeds tre's
-  |                                               binding tracking until M36
+  |                                               over from tre)
   |
-tesserae.{View,Component}                    -- re-exports of tre's, until
-  |                                               Tesserae builds views (M37)
+tesserae.{View,Component}                    -- tesserae.view: views built,
+  |                                               reconciled and wired by
+  |                                               Tesserae (M37)
   |
 tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         the declarative YAML+binding layer
@@ -55,7 +55,7 @@ tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
 ```
 
 **Files stay on Tesserae's side.** Tesserae reads, parses, decodes and
-watches every file; `tre` receives only data (`View(spec=...)`,
+watches every file; `tre` receives only data (nodes built with `window.create`/`set`,
 `reconcile(spec=...)`, `*_spec=` theme/stylesheet dicts, `push_frame`/
 `add_image_from_bytes` pixels, `register_font` bytes). Tesserae never
 gives `tre` a file path (M29).

@@ -256,3 +256,23 @@ User: "push it and start Phase 5". Pushed `055737c`.
    913 passed; the examples run.
 4. Mutants: the re-theme propagation survived until the test checked
    each host change separately.
+
+## M37 Phase 6 — tests, docs; M37 complete
+
+User: "push it and start Phase 6". Pushed `3d468a1`.
+
+1. Production: `load_view` builds a Tesserae `View`; the `tre` fallbacks
+   in `instantiate`/`ViewWatcher` and `push_frames` removed; the M35
+   bridge removed.
+2. Failures, and what they found:
+   - `test_images` (rewritten to check pixels);
+   - `test_themes`: a theme's unknown top-level key went unchecked, and
+     Tesserae now validates it, naming the file;
+   - `test_watch_thread`: a failed root rebuild destroyed the old tree,
+     so reconcile is now all or nothing.
+3. Fragment tests moved to `helpers.view_from`/`elevation`. The SpinBox
+   test reads the TextField's box via `parent()`, and the DatePickerDay
+   test uses a seed and Tesserae's wording.
+4. `get_text` became `get("text")` on Tesserae nodes; examples use
+   `simulate`.
+5. Docs and docstrings swept. 909 passed; examples clean.

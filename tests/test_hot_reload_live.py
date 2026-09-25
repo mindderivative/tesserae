@@ -51,7 +51,7 @@ SCRIPT = textwrap.dedent(
 
     def check():
         state["frames"] += 1
-        if view.node("label").get_text() == "Goodbye":
+        if view.node("label").get("text") == "Goodbye":
             state["seen"] = "Goodbye"
             return
         if time.monotonic() < deadline:

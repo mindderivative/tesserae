@@ -77,23 +77,13 @@ def test_load_stylesheet_reads_a_mapping(tmp_path: Path):
 # -- load_view ---------------------------------------------------------
 
 
-def test_load_view_reads_theme_and_stylesheet_files_and_gives_tre_only_dicts(tmp_path: Path, monkeypatch):
+def test_load_view_reads_theme_and_stylesheet_files(tmp_path: Path):
+    """Tesserae reads both files; the view is built from what they say."""
     theme = _write(tmp_path / "Theme.yaml", "colors: {primary: '#00FF00'}\n")
     sheet = _write(tmp_path / "Sheet.yaml", "styles:\n  - kind: Rect\n    style: {corner_radius: 8}\n")
-    seen = {}
-
-    def recording_view(*args, **kwargs):
-        seen.update(kwargs, args=args)
-        return tre.View(*args, **kwargs)
-
-    monkeypatch.setattr(load_module, "View", recording_view)
     view = load_view(_view(tmp_path), theme_seed=SEED, custom_theme=theme, stylesheet=sheet)
-
-    assert seen["args"] == ()
-    assert "custom_theme" not in seen and "stylesheet" not in seen
-    assert seen["custom_theme_spec"] == {"colors": {"primary": "#00FF00"}}
-    assert seen["stylesheet_spec"] == {"styles": [{"kind": "Rect", "style": {"corner_radius": 8}}]}
     assert view.node("box").get("corner_radius") == 8.0
+    assert view._theme["custom_theme_spec"] == {"colors": {"primary": "#00FF00"}}
 
 
 def test_a_theme_file_really_applies(tmp_path: Path):

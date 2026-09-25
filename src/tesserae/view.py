@@ -48,6 +48,7 @@ import tre
 from tesserae import reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
 from tesserae.spec.build import Built, _LEGACY_KINDS, build_with, patch, prepare_layers
+from tesserae.spec.cascade import check_stylesheet, check_theme
 
 __all__ = ["Component", "View"]
 
@@ -100,6 +101,13 @@ class View:
             frames = {**{node_id: (rgba, w, h) for node_id, rgba, w, h in file_frames}, **(frames or {})}
         else:
             spec = source
+        for arg, value, check in (("default_theme_spec", default_theme_spec, check_theme),
+                                  ("custom_theme_spec", custom_theme_spec, check_theme),
+                                  ("stylesheet_spec", stylesheet_spec, check_stylesheet)):
+            try:
+                check(value)
+            except ValueError as exc:
+                raise ValueError(f"{arg}=: {exc}") from None
         self._theme = dict(theme_seed=theme_seed, dark=dark, default_theme_spec=default_theme_spec,
                            custom_theme_spec=custom_theme_spec)
         self._stylesheet_spec = stylesheet_spec
@@ -158,6 +166,12 @@ class View:
         """Brings the live tree in line with `spec`, in place."""
         if frames is not None:
             self._frames = dict(frames)
+        # All or nothing: build the new spec on the side first, so an error
+        # (a bad kind, colour or token) leaves the live tree as it was.
+        trial = Built(root=None)
+        trial.root = build_with(self.window, spec, scheme=self._scheme, layers=self._layers, frames=self._frames,
+                                into=trial)
+        trial.root.destroy()
         old = self._spec
         if spec.get("id") != old.get("id") or spec.get("kind") != old.get("kind"):
             parent = self._built.root.parent()

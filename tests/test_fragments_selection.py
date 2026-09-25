@@ -5,7 +5,9 @@ support for both (this repo's own M27) -- see `BUILD_TRACKER.md`.
 """
 
 import pytest
-from tre import View, Window
+
+from helpers import elevation, view_from
+from tre import Window
 
 from tesserae.spec import ComponentError, expand_components
 from tesserae.widgets import radio_button, spin_box, switch
@@ -24,7 +26,7 @@ children:
     with: {background: "#6750A4FF", width: 24, height: 24, checked: true}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded)
+    view = view_from(expanded)
     node = view.node("cb")
     assert node.get_checked() is True
 
@@ -56,7 +58,7 @@ children:
     with: {background: "#03DAC6FF", width: 200, height: 32, value: 0.7}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded)
+    view = view_from(expanded)
     node = view.node("sl")
     assert node.get("value") == 0.7
 
@@ -72,7 +74,7 @@ children:
     with: {value: "3"}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     decrement = view.node("sb.decrement")
     field = view.node("sb.field")
     increment = view.node("sb.increment")
@@ -82,7 +84,8 @@ children:
     imp_field, imp_minus, imp_plus = spin_box(window, "3")
 
     assert decrement.get("corner_radius") == imp_minus.get("corner_radius")
-    assert field.get("corner_radius") == imp_field.get("corner_radius")
+    # a TextField's node is its text input; its box (background, corners) is the parent
+    assert field.parent().get("corner_radius") == imp_field.get("corner_radius")
     assert increment.get("corner_radius") == imp_plus.get("corner_radius")
 
 
@@ -103,7 +106,7 @@ children:
     with: {size: 20, selected: true}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("opt")
 
     window = Window(width=200, height=100)
@@ -140,7 +143,7 @@ children:
     with: {width: 52, height: 32, selected: false}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("toggle")
 
     window = Window(width=200, height=100)
@@ -164,6 +167,6 @@ children:
     with: {width: 52, height: 32, selected: true}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded)
+    view = view_from(expanded)
     node = view.node("toggle")
     assert node.get_selected() is True

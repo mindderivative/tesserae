@@ -6,7 +6,7 @@ live `Window`, entirely from inside a real dispatched click handler on
 each screen's own nav button.
 
 Mirrors `tre`'s own `examples/live_view_switch.py` (which proves the
-same real capability one layer lower, via `tre.Window.show_view`
+same real capability one layer lower, by attaching and detaching screen roots
 directly) -- this proves it through Tesserae's own real `App` entry
 point instead, the shape a real Tesserae app actually uses.
 
@@ -18,7 +18,7 @@ scope boundary, not an oversight. `load()` stays the right choice for
 the common case (`examples/counter/app.py`), where a `ViewModel` never
 needs to reach back into `App`.
 
-Each view is built with `app.build_view`, not `tre.View(path)`: Tesserae
+Each view is built with `app.build_view`, not `tesserae.View(path)`: Tesserae
 reads the file (and anything it includes) and hands `tre` only the
 finished spec (M29), using the app's theme and stylesheet (M30) -- the
 way to theme a screen given to `register()`.
@@ -58,13 +58,13 @@ settings_button = settings_view.node("button")
 # each switch happening *from inside* the handler App.show() calls into,
 # the exact reentrant scenario tre's own M42 Phase 2 caught and fixed a
 # real borrow-panic bug for.
-window.click(home_button)
+window.simulate("click", node=home_button)
 assert app.current == "Settings"
 
-window.click(settings_button)
+window.simulate("click", node=settings_button)
 assert app.current == "Home"
 
-window.click(home_button)
+window.simulate("click", node=home_button)
 assert app.current == "Settings"
 
 logger.info(f"final screen: {app.current!r}")

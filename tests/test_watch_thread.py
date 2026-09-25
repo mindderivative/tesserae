@@ -82,10 +82,10 @@ def test_an_edit_is_queued_from_the_watcher_thread_and_applies_on_this_one(start
     assert watcher.running
 
     reload = _edit_until_queued(handle, view_path, _text_view("Goodbye"))
-    assert view.node("label").get_text() == "Hello"  # nothing applied until the loop runs it
+    assert view.node("label").get("text") == "Hello"  # nothing applied until the loop runs it
     reload()
 
-    assert view.node("label").get_text() == "Goodbye"
+    assert view.node("label").get("text") == "Goodbye"
     assert handle.threads and all(name.startswith("tesserae-watch:") for name in handle.threads)
 
 
@@ -95,7 +95,7 @@ def test_an_included_file_edit_is_picked_up(started, tmp_path: Path):
 
     _edit_until_queued(handle, part, _text_view("v2").replace("id: root", "id: footer", 1))()
 
-    assert view.node("label").get_text() == "v2"
+    assert view.node("label").get("text") == "v2"
 
 
 def test_a_broken_edit_is_logged_and_the_watcher_carries_on(started, logs):
@@ -111,10 +111,10 @@ def test_a_broken_edit_is_logged_and_the_watcher_carries_on(started, logs):
     logs.wait_for("DEBUG", "traceback")  # logged just after the ERROR, on the watcher thread
     assert handle.queued.empty()  # nothing for the loop to run
     assert watcher.running
-    assert view.node("label").get_text() == "Hello"
+    assert view.node("label").get("text") == "Hello"
 
     _edit_until_queued(handle, view_path, _text_view("Fixed"))()
-    assert view.node("label").get_text() == "Fixed"
+    assert view.node("label").get("text") == "Fixed"
     assert f"reloaded {view_path}" in logs.messages("INFO")
 
 
@@ -126,7 +126,7 @@ def test_a_reload_tre_rejects_is_logged_on_the_loop(started, logs):
 
     message = logs.wait_for("ERROR", "NotARealKind")
     assert message.startswith(f"hot reload of {view_path} failed: {view_path}: ")
-    assert view.node("label").get_text() == "Hello"
+    assert view.node("label").get("text") == "Hello"
 
 
 def test_a_new_dependency_in_a_new_directory_is_watched_after_reload(started, tmp_path: Path):

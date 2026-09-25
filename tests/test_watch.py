@@ -65,8 +65,8 @@ def test_editing_the_view_file_reconciles_the_live_view(tmp_path: Path):
     _edit(view_path, _text_view("Goodbye"))
 
     assert watcher.poll() is True
-    assert view.node("label").get_text() == "Goodbye"
-    assert label.get_text() == "Goodbye"  # same node, updated in place
+    assert view.node("label").get("text") == "Goodbye"
+    assert label.get("text") == "Goodbye"  # same node, updated in place
     assert watcher.poll() is False
 
 
@@ -80,7 +80,7 @@ def test_editing_an_included_file_reloads(tmp_path: Path):
     _edit(part, _text_view("v2").replace("id: root", "id: footer", 1))
 
     assert watcher.poll() is True
-    assert view.node("label").get_text() == "v2"
+    assert view.node("label").get("text") == "v2"
 
 
 def test_editing_a_component_fragment_reloads(tmp_path: Path):
@@ -101,7 +101,7 @@ def test_editing_a_component_fragment_reloads(tmp_path: Path):
     _edit(fragment, fragment.read_text().replace('"Hi"', '"Hello there"'))
 
     assert watcher.poll() is True
-    assert view.node("greet").get_text() == "Hello there"
+    assert view.node("greet").get("text") == "Hello there"
 
 
 def test_changing_an_image_file_reloads(tmp_path: Path):
@@ -142,11 +142,11 @@ def test_a_broken_edit_raises_once_then_recovers(tmp_path: Path):
     with pytest.raises(ComponentError, match="unknown component 'NoSuchThing'"):
         watcher.poll()
     assert watcher.poll() is False  # same broken state: no repeat error
-    assert view.node("label").get_text() == "Hello"  # view left as it was
+    assert view.node("label").get("text") == "Hello"  # view left as it was
 
     _edit(view_path, _text_view("Fixed"))
     assert watcher.poll() is True
-    assert view.node("label").get_text() == "Fixed"
+    assert view.node("label").get("text") == "Fixed"
 
 
 def test_a_spec_tre_rejects_is_reported_naming_the_view_file(tmp_path: Path):
@@ -176,11 +176,11 @@ def test_a_reload_that_edits_a_bound_node_keeps_its_live_value(tmp_path: Path):
     view = load_view(view_path)
     module.LiveViewModel(view)
     watcher = ViewWatcher(view, view_path)
-    assert view.node("label").get_text() == "live"
+    assert view.node("label").get("text") == "live"
 
     _edit(view_path, _bound_view(width=140))  # touches the bound node itself
     assert watcher.poll() is True
-    assert view.node("label").get_text() == "live"  # not the placeholder
+    assert view.node("label").get("text") == "live"  # not the placeholder
 
 
 def _bound_view(width: int) -> str:

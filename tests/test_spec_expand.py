@@ -12,8 +12,10 @@ using the already-shipped `ListItem_Component.yaml` fragment.
 from pathlib import Path
 
 import pytest
+
+from helpers import elevation, view_from
 import yaml
-from tre import View, Window
+from tre import Window
 
 from tesserae.spec import ComponentError, expand_components
 from tesserae.spec.expand import MAX_DEPTH
@@ -55,7 +57,7 @@ def test_numeric_params_round_trip_as_real_numbers_not_quoted_strings():
 
 def test_expanded_button_constructs_a_real_view_matching_tesserae_widgets_button():
     expanded = expand_components(_button_view_yaml())
-    view = View("Save_View.yaml", source=expanded, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
+    view = view_from(expanded, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
     declarative_node = view.node("save_button")
 
     window = Window(width=300, height=200)
@@ -222,11 +224,11 @@ def test_repeat_expands_to_one_real_node_per_item():
 def test_repeat_matches_the_imperative_catalog():
     yaml_text = _repeat_view_yaml([{"headline": "Alice"}, {"headline": "Bob"}], extra_with={"width": 360})
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     alice = view.node("settings.0.headline")
     bob = view.node("settings.1.headline")
-    assert alice.get_text() == "Alice"
-    assert bob.get_text() == "Bob"
+    assert alice.get("text") == "Alice"
+    assert bob.get("text") == "Bob"
 
     # `list_item()`'s own real return value is the row's outer
     # container, not its internal headline child -- no public API

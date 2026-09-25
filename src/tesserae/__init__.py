@@ -5,9 +5,8 @@ GLFW/wgpu-py stack.
 Real, current surface (v1): `App`, the real single entry point owning a
 named `View`/`ViewModel` registry and one live `Window`, letting
 `App.show(name)` switch which pair is currently rendered without
-re-bootstrapping either -- powered directly by `tre.Window.show_view`
-(TRE M42 Phase 2). `Component`/`instantiate` are the real, multi-instance
-embedded-component layer (TRE M43) -- a component gets its own,
+re-bootstrapping either. `Component`/`instantiate` are the real,
+multi-instance embedded-component layer -- a component gets its own,
 independent `ViewModel`, and `instantiate` enforces the identical
 `*_View.yaml`/`*_ViewModel.py` naming convention `App.load` already does
 for top-level screens. `Repeater` is the declarative-*feeling* layer on

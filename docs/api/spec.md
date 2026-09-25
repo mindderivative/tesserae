@@ -4,16 +4,16 @@ The declarative component-fragment macro layer -- see
 [Declarative Component Fragments](../guide/component-fragments.md) for
 the full guide. This page is the API surface itself.
 
-Tesserae reads and expands every view file itself and hands `tre` the
-finished result as a plain dict (`tre.View(spec=...)`). `tre` never
-reads your `*_View.yaml`, `*_Component.yaml` or `include:` files.
+Tesserae reads and expands every view file itself and builds the result
+into `tre` nodes with its own compiler (M37). `tre` never reads your
+`*_View.yaml`, `*_Component.yaml` or `include:` files.
 
 ## `load_view`
 
-**`load_view(path, *, component_dirs=None, **view_kwargs) -> tre.View`**
+**`load_view(path, *, component_dirs=None, **view_kwargs) -> tesserae.View`**
 
 Reads `path`, resolves its `include:`s, expands its `component:` usage,
-and constructs a real `tre.View` from the resulting dict via `spec=`.
+and builds a `tesserae.View` from the result.
 
 - `component_dirs` -- extra fragment directories to search (in order),
   in addition to Tesserae's own built-in `spec/components/`, letting
@@ -25,7 +25,7 @@ and constructs a real `tre.View` from the resulting dict via `spec=`.
   directly. Give one form or the other, not both. See
   [Themes & Fonts](../guide/themes-and-fonts.md).
 - Other keyword arguments (`theme_seed`, `dark`) are forwarded
-  straight to `tre.View`.
+  straight to `tesserae.View`.
 
 If `tre` rejects the spec, the `ValueError` is re-raised naming the
 file it came from -- the theme or stylesheet file for an error in one
@@ -144,7 +144,7 @@ The function `load_view` and `tesserae.instantiate` build on: resolves
 every `include:` and expands every `component:` entry in `yaml_text` (a
 raw YAML string, not a path), returning the finished
 `WidgetSpec`-shaped dict with no `include:`/`component:`/`with:`/
-`params:`/`repeat:` keys remaining -- ready for `tre.View(spec=...)`.
+`params:`/`repeat:` keys remaining -- ready for `tesserae.View(spec)`.
 
 - `base_dir` -- the directory `include:` paths resolve against,
   normally the view file's own directory. With `None`, any `include:`

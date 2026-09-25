@@ -61,4 +61,6 @@ Phase 4 done: `tesserae.View` with the reconciler and Tesserae's own binding, ha
 
 Phase 5 done: components on Tesserae's builder, with the host's theme and stylesheet (M31's gap closed); `App` builds screens in its own window; `tesserae.View`/`Component` are Tesserae's; 913 passed.
 
-**Up next:** M37 Phase 6 (tests and docs).
+Phase 6 done: `load_view`, `instantiate`, `ViewWatcher` and the suite off `tre`'s `View` (reference tests excepted); the recording bridge removed; atomic reconcile; theme key validation; 909 passed. **M37 complete.**
+
+**Up next:** scope M38 (theme: motion curves, OS light/dark, the window theme).

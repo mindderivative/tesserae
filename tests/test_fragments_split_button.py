@@ -1,3 +1,4 @@
+from helpers import elevation, view_from
 """Real coverage for the `split_button` component fragment family
 (`src/tesserae/spec/components/SplitButton*_Component.yaml`) -- all 5
 real MD3 variants, rest-state only (the real hover/press inner-corner
@@ -5,7 +6,7 @@ shape-tightening animation has no public Python API, a stated scope
 boundary named in each fragment's own header comment).
 """
 
-from tre import View, Window
+from tre import Window
 
 from tesserae.spec import expand_components
 from tesserae.widgets import split_button
@@ -33,7 +34,7 @@ children:
     with: {{label: Send, width: 100, height: 40, corner_radius: 20}}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         leading = view.node("b.leading")
         trailing = view.node("b.trailing")
 
@@ -44,7 +45,7 @@ children:
         )
 
         assert leading.get("corner_radius") == imp_leading.get("corner_radius"), component_name
-        assert leading.get("elevation") == imp_leading.get("elevation"), component_name
+        assert elevation(leading) == elevation(imp_leading), component_name
         assert leading.get("border_width") == imp_leading.get("border_width"), component_name
         assert trailing.get("corner_radius") == imp_trailing.get("corner_radius"), component_name
 
@@ -60,7 +61,7 @@ children:
     with: {label: Send, width: 100, height: 40, corner_radius: 20}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     # Real, confirmed behavior: id-namespacing is flat -- every id
     # inside the fragment is prefixed once by the call-site's own id,
     # regardless of nesting depth (matching pyCopper's own real

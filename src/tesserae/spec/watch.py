@@ -16,7 +16,7 @@ Two ways to drive it:
 - **`start(handle)`** -- the user's own choice for reloading inside
   `App.run()`: a background thread watches for file-change events with
   `watchfiles`, rebuilds the spec there (all file I/O and expansion stay
-  off the UI thread), and hands only `reconcile` + `push_frame` to the
+  off the UI thread), and hands only the view's `reconcile` to the
   event loop through `tre`'s thread-safe `LoopHandle.call_soon` (tre M87,
   tre issue #6). `App.run(hot_reload=True)` does this for every screen.
 - **`poll()`** -- no thread: checks each file's modification time and
@@ -45,7 +45,7 @@ from typing import Any, Callable, Optional, Tuple
 import watchfiles
 from loguru import logger
 
-from tesserae.spec.images import Frame, push_frames
+from tesserae.spec.images import Frame
 from tesserae.spec.load import build_view_spec
 
 __all__ = ["FileWatcher", "ViewWatcher"]
@@ -123,20 +123,12 @@ class ViewWatcher:
         return build_view_spec(self._path, component_dirs=self._component_dirs)
 
     def _apply(self, spec: Any, frames: list[Frame]) -> None:
-        """The `tre` part -- only on the thread that owns the view. A
-        Tesserae `View` (M37) takes the frames with the spec; a `tre` `View`
-        gets them pushed afterwards."""
-        from tesserae.view import View as TesseraeView
-
+        """The `tre` part -- only on the thread that owns the view: the
+        view reconciles itself with the new spec and images (M37)."""
         try:
-            if isinstance(self._view, TesseraeView):
-                self._view.reconcile(spec, frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
-            else:
-                self._view.reconcile(spec=spec)
+            self._view.reconcile(spec, frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
         except ValueError as exc:
             raise ValueError(f"{self._path}: {exc}") from exc
-        if not isinstance(self._view, TesseraeView):
-            push_frames(self._view, frames)
         logger.info("reloaded {}", self._path)
 
     # -- no thread -------------------------------------------------

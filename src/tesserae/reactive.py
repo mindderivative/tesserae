@@ -17,15 +17,11 @@ Dependency tracking: `get()` records the object on the innermost open
 recording frame. `Computed`, `Effect` and `untrack` open frames on this
 module's own stack.
 
-**Until Tesserae evaluates bindings itself (M36), `tre` still does**, in
-`View._attach`, on a native recording stack of its own. So a read with
-no Tesserae frame open is passed on to `tre`'s `_record_read`, and a
-`{{ }}` binding in a `tre` `View` tracks Tesserae's signals as before. A
-Tesserae frame shadows `tre`'s, as an inner frame does on `tre`'s single
-stack. The one case this can't mirror is a `tre` binding evaluated
-inside a Tesserae frame (building and attaching a view inside an
-`Effect`): its reads land in the Tesserae frame. The bridge goes away in
-M36.
+Bindings are evaluated by Tesserae (`tesserae.binding`, wired by
+`tesserae.View`) in these same frames. (Until M37 Phase 6, a read with no
+frame open was passed on to `tre`'s native `_record_read`, so `tre`'s
+own `View` bindings tracked Tesserae's signals; no view uses `tre`'s
+evaluation any more.)
 
 Tesserae's classes track only each other, not `tre.Signal`, so an app
 uses these (`from tesserae import Signal`), not `tre`'s.
@@ -41,11 +37,6 @@ from typing import Any, Callable
 
 __all__ = ["Computed", "Effect", "Signal", "ViewModel", "batch", "untrack"]
 
-try:  # the M36 bridge; tre 0.3.5 removes it with View (M98)
-    from tre._core import _record_read as _tre_record_read
-except Exception:  # pragma: no cover - only without tre's recording stack
-    _tre_record_read = None
-
 #: The recording stack: one list of read objects per open frame.
 _frames: list[list[Any]] = []
 _batch_depth = 0
@@ -57,8 +48,6 @@ def _record_read(obj: Any) -> None:
         frame = _frames[-1]
         if not any(seen is obj for seen in frame):
             frame.append(obj)
-    elif _tre_record_read is not None:
-        _tre_record_read(obj)
 
 
 def _begin_recording() -> None:
@@ -117,9 +106,9 @@ def untrack(fn: Callable[[], Any]) -> Any:
 
 class _Notifiable:
     """The subscriber list and notification shared by `Signal` and
-    `Computed`. `_subscribe`/`_unsubscribe` are called by bindings
-    (`tre`'s `View._attach` until M36), by `Repeater`, and by `Computed`/
-    `Effect` tracking their dependencies; not public API."""
+    `Computed`. `_subscribe`/`_unsubscribe` are called by bindings, by
+    `Repeater`, and by `Computed`/`Effect` tracking their dependencies; not
+    public API."""
 
     def __init__(self) -> None:
         self._subscribers: list[Callable[[], None]] = []
@@ -283,8 +272,7 @@ class ViewModel:
             def bump(self):
                 self.clicks.update(lambda n: n + 1)
 
-    `view` is a `tre` `View` or `Component` until M37, when Tesserae
-    builds views itself.
+    `view` is a `tesserae.View` or `Component`.
     """
 
     def __init__(self, view: Any) -> None:

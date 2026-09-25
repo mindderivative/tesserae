@@ -1,3 +1,4 @@
+from helpers import elevation, view_from
 """Real coverage for the Navigation & Shell component fragments that
 are fixed-shape (not dynamic lists): `ToolbarDocked`/`ToolbarFloating`,
 `TopAppBar`, `StatusBar`. `tabs`/`navigation_rail`/`navigation_drawer`
@@ -7,7 +8,7 @@ of entries, a real structural limit this macro layer's current design
 already named for `button_group`/`list_`/`menu`).
 """
 
-from tre import View, Window
+from tre import Window
 
 from tesserae.spec import expand_components
 from tesserae.widgets import status_bar, toolbar, top_app_bar
@@ -32,13 +33,13 @@ children:
     with: {background: surface_container, width: 280}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("t")
 
     imperative = toolbar(_themed_window(), variant="docked", vibrant=False, width=280)
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
-    assert declarative.get("elevation") == imperative.get("elevation")
+    assert elevation(declarative) == elevation(imperative)
 
 
 def test_toolbar_floating_matches_the_imperative_catalog():
@@ -52,7 +53,7 @@ children:
     with: {background: primary_container, width: 200, corner_radius: 32}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("t")
 
     imperative = toolbar(
@@ -60,7 +61,7 @@ children:
     )
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
-    assert declarative.get("elevation") == imperative.get("elevation")
+    assert elevation(declarative) == elevation(imperative)
 
 
 def test_top_app_bar_matches_the_imperative_catalog():
@@ -74,7 +75,7 @@ children:
     with: {title: Home, width: 300}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("tab")
     assert view.node("tab.title") is not None
 
@@ -93,7 +94,7 @@ children:
     with: {text: Ready, width: 300}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("sb")
     assert view.node("sb.text") is not None
 

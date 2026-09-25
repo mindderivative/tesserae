@@ -16,11 +16,10 @@ import pytest
 import tre
 from PIL import Image
 
-import tesserae.spec.load as load_module
 from tesserae import View, instantiate
 from tesserae.images import decode_image
 from tesserae.spec import ComponentError, load_view
-from tesserae.spec.images import extract_images, push_frames
+from tesserae.spec.images import extract_images
 
 RED_BLUE = b"\xff\x00\x00\xff" + b"\x00\x00\xff\xff"
 
@@ -129,24 +128,6 @@ def test_extract_images_undecodable_file_names_the_widget(tmp_path: Path):
         extract_images(_image_node(), tmp_path)
 
 
-def test_push_frames_pushes_each_frame_onto_its_node():
-    pushed = []
-
-    class FakeNode:
-        def __init__(self, node_id):
-            self.node_id = node_id
-
-        def push_frame(self, rgba, width, height):
-            pushed.append((self.node_id, rgba, width, height))
-
-    class FakeOwner:
-        def node(self, node_id):
-            return FakeNode(node_id)
-
-    push_frames(FakeOwner(), [("a", b"1234", 1, 1), ("b.0", b"5678", 1, 1)])
-    assert pushed == [("a", b"1234", 1, 1), ("b.0", b"5678", 1, 1)]
-
-
 # -- end to end --------------------------------------------------------
 
 IMAGE_FRAGMENT_VIEW = """
@@ -160,22 +141,16 @@ children:
 """
 
 
-def test_load_view_decodes_images_and_no_src_reaches_tre(tmp_path: Path, monkeypatch):
+def test_load_view_decodes_images_into_image_nodes(tmp_path: Path):
+    """Tesserae decodes the file and builds its pixels into a `tre`
+    `image` node (M37); `tre` is given no path."""
     _png(tmp_path / "assets" / "rb.png")
     view_path = tmp_path / "Gallery_View.yaml"
     view_path.write_text(IMAGE_FRAGMENT_VIEW)
-
-    seen = []
-
-    def recording_view(*args, **kwargs):
-        seen.append(kwargs["spec"])
-        return tre.View(*args, **kwargs)
-
-    monkeypatch.setattr(load_module, "View", recording_view)
-    view = load_view(view_path)
-
-    assert view.node("img") is not None
-    assert seen[0]["children"][0]["image"] == {"fit": "cover"}
+    node = load_view(view_path).node("img")
+    rgba, width, height = decode_image(tmp_path / "assets" / "rb.png")
+    assert (node.get("pixel_width"), node.get("pixel_height"), node.get("fit")) == (width, height, "cover")
+    assert node.get("rgba") == rgba
 
 
 def test_load_view_decodes_a_hand_written_image_too(tmp_path: Path):
@@ -195,9 +170,9 @@ def test_load_view_missing_image_is_a_component_error(tmp_path: Path):
         load_view(view_path)
 
 
-def test_instantiate_gives_tre_no_path_and_no_src(tmp_path: Path):
-    """An embedded component needs no base directory once Tesserae owns
-    `include:` and `image.src:`, so `tre` gets `path=""`."""
+def test_instantiate_decodes_a_components_images(tmp_path: Path):
+    """An embedded component's images are decoded by Tesserae too, and the
+    spec its host builds has no `src:` left."""
     _png(tmp_path / "assets" / "rb.png")
     parent_path = tmp_path / "Parent_View.yaml"
     parent_path.write_text(
@@ -217,14 +192,16 @@ def test_instantiate_gives_tre_no_path_and_no_src(tmp_path: Path):
     view = View(str(parent_path))
     calls = []
 
-    class RecordingParent:
-        def instantiate(self, path, into, spec):
-            calls.append((path, spec))
-            return view.instantiate(path, into, spec=spec)
+    original = view.instantiate
 
-    component, _ = instantiate(RecordingParent(), item_path, module.TileViewModel, view.node("slot"))
+    def recording(path, into, spec=None, frames=None):
+        calls.append((spec, frames))
+        return original(path, into, spec=spec, frames=frames)
 
-    assert component.node("img") is not None
-    path, spec = calls[0]
-    assert path == ""
+    view.instantiate = recording
+    component, _ = instantiate(view, item_path, module.TileViewModel, view.node("slot"))
+
+    assert component.node("img").get("pixel_width") == 2
+    spec, frames = calls[0]
     assert spec["children"][0]["image"] == {"fit": "cover"}
+    assert set(frames) == {"img"}

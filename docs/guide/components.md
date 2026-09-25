@@ -10,8 +10,9 @@
 
 `tesserae.instantiate(parent, path, viewmodel_cls, into, *args,
 **kwargs)` embeds another view's own YAML as a real, independent
-`Component` with its own `ViewModel` -- the enforced-naming
-counterpart to `tre.View.instantiate`/`Component.instantiate`.
+`Component` with its own `ViewModel`, built by Tesserae in the host's
+window (M37), with the same `*_View.yaml`/`*_ViewModel.py` naming check
+`App.load` makes.
 
 ```python
 from tesserae import instantiate

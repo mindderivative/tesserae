@@ -188,7 +188,7 @@ def test_an_unquoted_date_still_loads_as_its_string(tmp_path: Path):
         "text: {content: 2026-09-24, font_family: Roboto, font_size: 16}\n",
     )
     view = load_view(view_path)
-    assert view.node("root").get_text() == "2026-09-24"
+    assert view.node("root").get("text") == "2026-09-24"
 
 
 def test_load_view_names_the_source_file_when_tre_rejects_the_spec(tmp_path: Path):

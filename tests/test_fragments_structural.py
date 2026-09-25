@@ -7,7 +7,9 @@ for it, this repo's own M27 -- see `BUILD_TRACKER.md`).
 """
 
 import pytest
-from tre import View, Window
+
+from helpers import elevation, view_from
+from tre import Window
 
 from tesserae.spec import ComponentError, expand_components
 from tesserae.widgets import accordion_header, badge, card, chip, divider, link, list_item, tree_node
@@ -43,13 +45,13 @@ children:
     with: {{width: 200, height: 100}}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("c")
 
         imperative = card(_themed_window(), 200, 100, variant=variant)
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
-        assert declarative.get("elevation") == imperative.get("elevation"), component_name
+        assert elevation(declarative) == elevation(imperative), component_name
         assert declarative.get("border_width") == imperative.get("border_width"), component_name
 
 
@@ -65,7 +67,7 @@ children:
     with: {{label: Tag, width: 100}}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("c")
 
         imperative = chip(_themed_window(), "Tag", 100, variant=variant, selected=selected)
@@ -85,7 +87,7 @@ children:
     with: {headline: Home, width: 260}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     assert view.node("li") is not None
     assert view.node("li.headline") is not None
 
@@ -100,7 +102,7 @@ children:
     component: BadgeDot
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("d")
     imperative = badge(_themed_window())
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
@@ -117,7 +119,7 @@ children:
     with: {label: "3", width: 20}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("p")
     imperative = badge(_themed_window(), label="3", width=20)
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
@@ -134,7 +136,7 @@ children:
     with: {width: 200, height: 1}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("d")
     imperative = divider(_themed_window(), 200)
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
@@ -151,7 +153,7 @@ children:
     with: {title: Section, width: 260}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     assert view.node("ah") is not None
     assert view.node("ah.chevron") is not None
     assert view.node("ah.title") is not None
@@ -168,7 +170,7 @@ children:
     with: {title: File, width: 260, left_padding: 40}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     assert view.node("leaf") is not None
     assert view.node("leaf.title") is not None
     with pytest.raises(ValueError):
@@ -186,7 +188,7 @@ children:
     with: {title: Folder, width: 260, left_padding: 16}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     assert view.node("branch") is not None
     assert view.node("branch.chevron") is not None
 
@@ -202,14 +204,14 @@ children:
     with: {text: "Docs", width: 60, height: 20}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("docs")
 
     window = Window(width=200, height=100)
     window.set_theme(THEME_SEED)
     imperative = link(window, "Docs", width=60)
 
-    assert declarative.get_text() == imperative.get_text() == "Docs"
+    assert declarative.get("text") == imperative.get_text() == "Docs"  # imperative: a legacy widget until M41
 
 
 def test_link_text_is_a_required_param_not_silently_defaulted():

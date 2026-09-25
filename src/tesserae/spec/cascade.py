@@ -22,7 +22,31 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Optional
 
-__all__ = ["STYLE_FIELDS", "Sheet", "resolve_style"]
+__all__ = ["STYLE_FIELDS", "Sheet", "check_stylesheet", "check_theme", "resolve_style"]
+
+_THEME_FIELDS = ("seed", "dark", "colors", "styles", "components", "typography")
+
+
+def _check_fields(spec: Any, allowed: tuple[str, ...]) -> None:
+    if spec is None:
+        return
+    if not isinstance(spec, dict):
+        raise ValueError(f"must be a mapping, got {type(spec).__name__}")
+    for key in spec:
+        if key not in allowed:
+            expected = ", ".join(f"`{name}`" for name in allowed)
+            raise ValueError(f"unknown field `{key}`, expected one of {expected}")  # tre's wording
+    Sheet.of(spec)
+
+
+def check_theme(spec: Any) -> None:
+    """Raises `ValueError` if `spec` isn't a valid theme dict."""
+    _check_fields(spec, _THEME_FIELDS)
+
+
+def check_stylesheet(spec: Any) -> None:
+    """Raises `ValueError` if `spec` isn't a valid stylesheet dict."""
+    _check_fields(spec, ("styles",))
 
 #: Every field a `style:` can hold, as in `tre`'s `StyleSpec`.
 STYLE_FIELDS = frozenset({

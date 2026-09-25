@@ -42,7 +42,7 @@ def item_texts():
 # `vm.items`, which the Repeater turns into a fresh, independent
 # TodoItem component + ViewModel automatically.
 for _ in range(3):
-    window.click(add_button)
+    window.simulate("click", node=add_button)
 assert len(vm.repeater) == 3
 assert item_texts() == ["Item 1", "Item 2", "Item 3"]
 
@@ -59,12 +59,12 @@ assert first_vm.done.get() is True
 # Remove the second item via its own dispatched "remove" click --
 # TodoItemViewModel.remove_self mutates the shared `items` Signal;
 # the Repeater notices id 2 is gone and tears its Component down.
-window.click(vm.repeater[2][0].node("remove_button"))
+window.simulate("click", node=vm.repeater[2][0].node("remove_button"))
 assert len(vm.repeater) == 2
 assert item_texts() == ["Item 1", "Item 3"]
 
 # The list stays healthy after a real removal -- one more "Add" works.
-window.click(add_button)
+window.simulate("click", node=add_button)
 assert len(vm.repeater) == 3
 
 logger.info(

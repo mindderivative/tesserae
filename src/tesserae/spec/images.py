@@ -1,8 +1,7 @@
 """M29 Phase 2: every `kind: Image` node's `image.src:` is taken out of
-the spec before `tre` sees it, decoded by Tesserae, and pushed onto the
-built node with `Node.push_frame`. `tre` builds a `kind: Image` with no
-`src:` as a blank image that keeps its `fit:` (valid since `tre` M75),
-so the pushed pixels display exactly as a `tre`-loaded file did.
+the spec, decoded by Tesserae, and returned as frames the builder puts
+into the `image` node (M37: `tre`'s `create("image", rgba=...)`). A
+`kind: Image` with no `src:` is a blank image that keeps its `fit:`.
 
 This covers hand-written views and the `Image` fragment alike, since it
 runs on the fully expanded tree -- ids are already final (namespaced)
@@ -24,7 +23,7 @@ from typing import Any
 from tesserae.images import decode_image
 from tesserae.spec.expand import ComponentError
 
-__all__ = ["Frame", "extract_images", "push_frames"]
+__all__ = ["Frame", "extract_images"]
 
 #: `(node_id, rgba, pixel_width, pixel_height)` -- one decoded image,
 #: waiting to be pushed onto its node once `tre` has built the view.
@@ -83,10 +82,3 @@ def extract_images(
     frames: list[Frame] = []
     deps = dependencies if dependencies is not None else set()
     return _extract(spec, base_dir, frames, deps), frames
-
-
-def push_frames(owner: Any, frames: list[Frame]) -> None:
-    """Pushes each decoded frame onto its node. `owner` is whatever
-    `tre` object has `node(id)` -- a `View` or a `Component`."""
-    for node_id, rgba, width, height in frames:
-        owner.node(node_id).push_frame(rgba, width, height)

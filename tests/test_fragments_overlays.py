@@ -6,7 +6,9 @@ limit already named for `tabs`/`navigation_rail`/etc.
 """
 
 import pytest
-from tre import View, Window
+
+from helpers import elevation, view_from
+from tre import Window
 
 from tesserae.spec import expand_components
 from tesserae.widgets import dialog, menu_item, side_sheet, snackbar, tooltip
@@ -31,7 +33,7 @@ children:
     with: {headline: 'Delete?', text: 'Cannot be undone.', width: 300, height: 150, scrim_width: 400, scrim_height: 300}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     scrim = view.node("d")
     panel = view.node("d.panel")
     assert view.node("d.headline") is not None
@@ -41,7 +43,7 @@ children:
 
     assert scrim.get("corner_radius") == imperative.get("corner_radius")
     assert panel.get("corner_radius") == 28.0
-    assert panel.get("elevation") == 3.0
+    assert elevation(panel) == 3.0
     _assert_scrim_matches(scrim, panel, imperative)
 
 
@@ -66,13 +68,13 @@ children:
     with: {text: Saved, width: 250}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("sb")
 
     imperative, imp_action, imp_close = snackbar(_themed_window(), "Saved", 250)
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
-    assert declarative.get("elevation") == imperative.get("elevation")
+    assert elevation(declarative) == elevation(imperative)
 
 
 def test_side_sheet_modal_and_standard_construct_with_correct_elevation():
@@ -103,7 +105,7 @@ children:
     with: {width: 360, height: 300}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     modal_scrim = view.node("modal")
     modal_panel = view.node("modal.panel")
     standard = view.node("standard")
@@ -112,8 +114,8 @@ children:
     imperative_standard = side_sheet(_themed_window(), width=360, height=300, modal=False)
 
     _assert_scrim_matches(modal_scrim, modal_panel, imperative_modal)
-    assert modal_panel.get("elevation") == 1.0
-    assert standard.get("elevation") == imperative_standard.get("elevation") == 0.0
+    assert elevation(modal_panel) == 1.0
+    assert elevation(standard) == elevation(imperative_standard) == 0.0
 
 
 def test_menu_item_matches_the_imperative_catalog():
@@ -127,7 +129,7 @@ children:
     with: {label: Settings, width: 200}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("mi")
 
     imperative = menu_item(_themed_window(), "Settings", width=200)
@@ -146,7 +148,7 @@ children:
     with: {text: Hint, width: 100}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("tt")
 
     imperative = tooltip(_themed_window(), "Hint", 100)

@@ -2,7 +2,7 @@
 """Tesserae's own real, first vertical slice (§ARCHITECTURE.md): a real
 `Counter_View.yaml` + `Counter_ViewModel.py` pair, registered and shown
 through `App`, proving the whole real stack end to end -- `*_View.yaml`/
-`*_ViewModel.py` -> `tesserae.App` -> `tre.Window.from_view` -> real GPU
+`*_ViewModel.py` -> `tesserae.App` -> Tesserae's own builder -> real GPU
 paint, and a real dispatched click re-evaluating a bound `text` property
 through `tre`'s own live Tree.
 
@@ -34,18 +34,18 @@ window = app.show("Counter")
 label = view.node("label")
 button = view.node("button")
 
-logger.info(f"before any click: label={label.get_text()!r}")
-assert label.get_text() == "Count: 0"
+logger.info(f"before any click: label={label.get("text")!r}")
+assert label.get("text") == "Count: 0"
 
 # Three real, dispatched clicks -- the same real proof `tre`'s own
 # live_view.py example already establishes for a single, un-wrapped
 # View, here going through Tesserae's own real App.show()/registry
 # layer instead.
 for _ in range(3):
-    window.click(button)
+    window.simulate("click", node=button)
 
-logger.info(f"after 3 clicks: label={label.get_text()!r}")
-assert label.get_text() == "Count: 3"
+logger.info(f"after 3 clicks: label={label.get("text")!r}")
+assert label.get("text") == "Count: 3"
 assert app.current == "Counter"
 
 app.run(max_frames=20)

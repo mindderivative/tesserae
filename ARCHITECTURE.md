@@ -39,11 +39,11 @@ tesserae.widgets        -- one Python function per MD3 widget, thin
 tesserae.{Signal,ViewModel,Computed,
   |        Effect,batch,untrack}                -- tesserae.reactive: Tesserae's
   |                                               own reactivity (M35, taken
-  |                                               over from tre); feeds tre's
-  |                                               binding tracking until M36
+  |                                               over from tre)
   |
-tesserae.{View,Component}                    -- re-exports of tre's, until
-  |                                               Tesserae builds views (M37)
+tesserae.{View,Component}                    -- tesserae.view: views built,
+  |                                               reconciled and wired by
+  |                                               Tesserae (M37)
   |
 tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
                                         the declarative YAML+binding layer
@@ -61,9 +61,9 @@ M93–M103); Tesserae takes it over in M34–M43
 (`tesserae/reactive.py`, taken over from `tre`'s pure-Python module with
 the same behaviour). Until M36, `tre` still evaluates `{{ }}` bindings on
 its native recording stack, so a Tesserae read with no Tesserae frame
-open is passed on to `tre._core._record_read`; a Tesserae frame shadows
-`tre`'s. `View`/`Component` are still `tre`'s. Files are Tesserae's too
-(next section). Tesserae's own real, additive value is
+open was passed on to `tre._core._record_read` (removed in M37 Phase 6,
+once no view used `tre`'s evaluation). `View`/`Component` are Tesserae's
+since M37 (`tesserae/view.py`). Files are Tesserae's too (next section). Tesserae's own real, additive value is
 `App` (the real "one entry point, named-screen registry, switch without
 re-bootstrapping" layer neither `tre` nor pyCopper's own `App`/`Engine`
 split provide in this exact shape), `instantiate` (the same real
@@ -219,8 +219,8 @@ before tearing down" ordering.
 - `instantiate`/`Component.remove()`/`Repeater`, exercised end to end
   by `examples/todo_list/` -- a real dynamic list driven by one list
   `Signal`, `Repeater` adding/removing components automatically.
-- Everything `tre.View`/`tre.Component` provide, with Tesserae's own
-  `Signal`/`ViewModel` (M35): `{{ }}` binding expressions (a strict, non-`eval`
+- What `tre.View`/`tre.Component` used to provide, now Tesserae's
+  (`tesserae.View`/`Component`, M37), with Tesserae's own `Signal`/`ViewModel`: `{{ }}` binding expressions (a strict, non-`eval`
   whitelist), real `on_click`/`on_hover_enter`/`on_hover_exit`/
   `on_change` handler wiring, two-way binding for `checked` (Checkbox),
   `selected` (Switch/RadioButton), `value` (Slider) and `text` -- the

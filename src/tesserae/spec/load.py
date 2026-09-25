@@ -1,8 +1,6 @@
-"""`load_view` -- the real integration point between `expand_components`
-and `tre.View`. Deliberately a plain function, not a `tre.View` subclass
-(`View` is a native `pyo3` class; wrapping it adds real complexity for
-uncertain benefit when a function returning the genuine object works
-just as well for every real caller so far).
+"""`load_view` -- reads a view file through Tesserae's whole pipeline and
+builds a `tesserae.View` from it (M37: Tesserae builds views itself on
+`tre`'s building blocks; before that, this built a `tre.View`).
 
 M29 Phase 1: hands `tre` the finished dict via `spec=` -- no more
 `yaml.safe_dump` back to text for `tre` to re-parse. Tesserae reads the
@@ -12,7 +10,7 @@ M29 Phase 2: every `kind: Image`'s `src:` is taken out, decoded by
 Tesserae, and pushed onto the built node (`spec/images.py`), so `tre`
 never opens an image file either.
 
-M29 Phase 3: `tre` is given no path at all -- `View(spec=...)` only.
+M29 Phase 3: `tre` is given no path at all.
 The one job the path still had (`tre`'s own `poll_reload` watch target)
 is replaced by Tesserae's `ViewWatcher` (`watch.py`), which reuses
 `build_view_spec` below so a reload runs the exact same pipeline as the
@@ -31,11 +29,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from tre import View
 
 from tesserae.fonts import check_font_families
 from tesserae.spec.expand import expand_with_dependencies
-from tesserae.spec.images import Frame, extract_images, push_frames
+from tesserae.spec.images import Frame, extract_images
 from tesserae.spec.themes import load_stylesheet, load_theme, view_font_families
 
 __all__ = ["build_view_spec", "load_view"]
@@ -67,29 +64,27 @@ def build_view_spec(
     return spec, frames, deps
 
 
-def load_view(path: str | Path, *, component_dirs: list[Path] | None = None, **view_kwargs: Any) -> View:
+def load_view(path: str | Path, *, component_dirs: list[Path] | None = None, **view_kwargs: Any) -> Any:
     """Reads `path`, resolves its `include:`s and expands its
-    `component:` usage, and constructs a real `tre.View` from the
-    resulting dict via `spec=`.
+    `component:` usage, and builds a Tesserae `View` from the result
+    (M37: Tesserae builds views itself on `tre`'s building blocks).
 
     `stylesheet=`, `default_theme=` and `custom_theme=` take file paths
     (relative to the current directory, as before); Tesserae reads them
     and passes `tre` the dicts. Their `*_spec=` forms take a dict
     directly -- give one form or the other, not both. Everything else
-    (`theme_seed=`, `dark=`) forwards straight to `tre.View`.
+    (`theme_seed=`, `dark=`) forwards straight to `tesserae.View`.
 
     A view with no `include:`/`component:` usage expands to itself
     unchanged, so this is a safe drop-in for any existing `View(path)`
     call, not just ones that use the new capability.
 
-    Every `kind: Image`'s `src:` is decoded by Tesserae and pushed onto
-    the built node; a missing or undecodable image is a
-    `ComponentError` naming the widget and file.
+    Every `kind: Image`'s `src:` is decoded by Tesserae and built into
+    its node; a missing or undecodable image is a `ComponentError` naming
+    the widget and file.
 
-    A `ValueError` from `tre` (a spec it rejects) is re-raised naming the
-    file it came from -- the theme or stylesheet file for an error in
-    one of those, `path` otherwise. `tre` only ever sees dicts, so it
-    can't say which file a problem came from.
+    An error in the view is raised naming `path`; one in a theme or
+    stylesheet file names that file.
     """
     path = Path(path)
     spec, frames, _ = build_view_spec(path, component_dirs=component_dirs)
@@ -102,11 +97,13 @@ def load_view(path: str | Path, *, component_dirs: list[Path] | None = None, **v
             raise ValueError(f"load_view: pass {file_arg}= or {spec_arg}=, not both")
         view_kwargs[spec_arg] = loader(file)
         sources[spec_arg] = Path(file)
+    from tesserae.view import View
+
     try:
-        view = View(spec=spec, **view_kwargs)
+        view = View(spec, frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames}, **view_kwargs)
     except ValueError as exc:
         message = str(exc)
         source = next((f for arg, f in sources.items() if message.startswith(f"{arg}=")), path)
         raise ValueError(f"{source}: {message}") from exc
-    push_frames(view, frames)
+    view.path = path
     return view

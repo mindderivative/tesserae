@@ -12,7 +12,9 @@ progress.py` for the sibling `CircularProgress`/`LinearProgress`/
 from pathlib import Path
 
 import pytest
-from tre import View, Window
+
+from helpers import elevation, view_from
+from tre import Window
 
 from tesserae.spec import ComponentError, expand_components
 from tesserae.widgets import date_picker_day, period_selector, search_bar, search_view, time_picker_dial
@@ -39,7 +41,7 @@ children:
     with: {placeholder: "Search...", width: 360, corner_radius: 28}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("sb")
     assert view.node("sb.field") is not None
 
@@ -48,7 +50,7 @@ children:
     )
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
-    assert declarative.get("elevation") == imperative.get("elevation")
+    assert elevation(declarative) == elevation(imperative)
 
 
 def test_search_view_matches_the_imperative_catalog():
@@ -62,13 +64,13 @@ children:
     with: {width: 360, height: 200}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("sv")
 
     imperative = search_view(_themed_window(), 360, 200)
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
-    assert declarative.get("elevation") == imperative.get("elevation")
+    assert elevation(declarative) == elevation(imperative)
 
 
 def test_image_constructs_from_a_real_file():
@@ -86,9 +88,14 @@ children:
     component: Image
     with: {src: fixtures/pixel.png, width: 100, height: 100, fit: cover}
 """
-    expanded = expand_components(yaml_text)
-    view = View(FIXTURES_VIEW_PATH, source=expanded)
-    assert view.node("img") is not None
+    import yaml
+
+    from tesserae import View
+    from tesserae.spec.images import extract_images
+
+    spec, frames = extract_images(yaml.safe_load(expand_components(yaml_text)), Path(FIXTURES_VIEW_PATH).parent)
+    view = View(spec, frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
+    assert view.node("img").get("pixel_width") > 0
 
 
 DATE_PICKER_DAY_CASES = [
@@ -111,7 +118,7 @@ children:
     with: {{day: "15"}}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("d")
 
         imperative = date_picker_day(_themed_window(), 15, **kwargs)
@@ -126,7 +133,8 @@ def test_date_picker_day_requires_a_quoted_string_day():
     # `String`-typed, and whole-value substitution preserves the
     # supplied Python type verbatim. `expand_components` itself is a
     # pure string-substitution pass with no schema validation -- the
-    # real error only surfaces once `tre.View` parses the result.
+    # real error only surfaces once the view is built (Tesserae's compiler
+    # rejects it as `tre`'s parser did).
     yaml_text = """
 id: root
 kind: Container
@@ -136,8 +144,8 @@ children:
     with: {day: 15}
 """
     expanded = expand_components(yaml_text)
-    with pytest.raises(ValueError, match="expected a string"):
-        View("T.yaml", source=expanded)
+    with pytest.raises(ValueError, match="text.content must be a string, got int 15"):
+        view_from(expanded, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
 
 
 def test_period_selector_am_and_pm_match_the_imperative_catalog():
@@ -151,7 +159,7 @@ children:
     component: {component_name}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         am = view.node("ps.am")
         pm = view.node("ps.pm")
 
@@ -172,7 +180,7 @@ children:
     with: {size: 256, hour: 13, minute: 45}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("dial")
 
     imperative = time_picker_dial(_themed_window(300, 300), hour=13, minute=45, size=256)

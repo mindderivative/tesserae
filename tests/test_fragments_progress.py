@@ -1,3 +1,4 @@
+from helpers import elevation, view_from
 """Real coverage for the Progress & Status component fragments --
 `CircularProgress`/`LinearProgress`/`LoadingIndicator`. All 3 were
 blocked until `tre`'s own M84 added declarative `NodeKindSpec` support
@@ -29,7 +30,7 @@ children:
     with: {size: 48, value: 0.4}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("spinner")
 
     window = Window(width=100, height=100)
@@ -50,7 +51,7 @@ children:
     with: {width: 200, height: 4, value: 0.75}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("bar")
 
     window = Window(width=200, height=50)
@@ -71,7 +72,7 @@ children:
     with: {size: 48, background: primary}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+    view = view_from(expanded, theme_seed=THEME_SEED)
     node = view.node("spinner")
     assert isinstance(node, Node)
 
@@ -86,6 +87,6 @@ children:
     with: {size: 48, background: "#6750A4FF"}
 """
     expanded = expand_components(yaml_text)
-    view = View("T.yaml", source=expanded)
+    view = view_from(expanded)
     node = view.node("spinner")
     assert isinstance(node, Node)

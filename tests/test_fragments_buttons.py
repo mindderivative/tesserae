@@ -1,3 +1,4 @@
+from helpers import elevation, view_from
 """Real coverage for the `icon_button`/`fab`/`extended_fab` component
 fragment families (`src/tesserae/spec/components/`). Same cross-check
 strategy as `test_spec_expand.py`'s own `Button` test: expand a real
@@ -6,7 +7,7 @@ against `tesserae.widgets`'s own imperative output for the identical
 widget/variant.
 """
 
-from tre import View, Window
+from tre import Window
 
 from tesserae.spec import expand_components
 from tesserae.widgets import extended_fab, fab, icon_button
@@ -53,7 +54,7 @@ children:
     with: {{icon: settings, size: 40, corner_radius: 20}}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("b")
 
         window = _themed_window(200, 200)
@@ -75,14 +76,14 @@ children:
     with: {{icon: add, size: 56, corner_radius: 16}}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("b")
 
         window = _themed_window(200, 200)
         imperative = fab(window, "add", size="default", variant=variant)
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
-        assert declarative.get("elevation") == imperative.get("elevation"), component_name
+        assert elevation(declarative) == elevation(imperative), component_name
 
 
 def test_all_extended_fab_variants_match_the_imperative_catalog():
@@ -97,11 +98,11 @@ children:
     with: {{label: Compose, icon: add, width: 160}}
 """
         expanded = expand_components(yaml_text)
-        view = View("T.yaml", source=expanded, theme_seed=THEME_SEED)
+        view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("b")
 
         window = _themed_window(300, 100)
         imperative = extended_fab(window, "Compose", 160, icon="add", variant=variant)
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
-        assert declarative.get("elevation") == imperative.get("elevation"), component_name
+        assert elevation(declarative) == elevation(imperative), component_name
