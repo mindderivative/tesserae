@@ -38,6 +38,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M26 — Detailed Scoping: `tre`-Side Primitive Additions & Macro-Layer Loop Construct | `██████████` 100% | ✅ Complete (2026-09-24) |
 | M27 — `RadioButton`/`Switch`/`CircularProgress`/`LinearProgress`/`LoadingIndicator`/`TimePickerDial`/`Link` Component Fragments | `██████████` 100% | ✅ Complete (2026-09-24) |
 | M28 — Macro-Layer `repeat:` Construct, Staged Against `ListItem` First | `██████████` 100% | ✅ Complete (2026-09-24) |
+| M29 — Tesserae Owns All File Handling; `tre` Gets Specs + Bytes Only | `░░░░░░░░░░` 0% | ⬜ Not started — awaiting user go-ahead |
 
 **Just closed: M27 and M28**, both in one real pass — user-directed: "Start with M27 and then move onto M28."
 
@@ -47,7 +48,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 
 **Previously:** M15-M27 — the macro-expansion engine, its wiring, 7 full/partial widget categories (59 fragments), the M25 re-scoping correction (60 fragments), M26's own full technical scope for both real remaining fronts, and M27's 7 new primitive fragments. See their own entries below.
 
-**Up next:** Nothing currently scoped. The 5 Rust-internal-state-dependent-coloring widgets (`tabs`/`button_group`/`navigation_rail`/`navigation_drawer`/`menu`) remain a real, named, un-scoped future candidate for whenever conditional per-item styling gets designed -- not started.
+**Up next:** M29 — Tesserae takes over all file handling (reading, parsing, decoding, watching) and hands `tre` only specs and bytes, per a user-directed handoff from the `tre` session (2026-09-24). Scoped below; **not started** — implementation waits on the user's explicit go-ahead, including a decision on the new Pillow dependency (Phase 2). Separately, the 5 Rust-internal-state-dependent-coloring widgets (`tabs`/`button_group`/`navigation_rail`/`navigation_drawer`/`menu`) remain a real, named, un-scoped future candidate for whenever conditional per-item styling gets designed -- not started.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -643,3 +644,56 @@ The actual code change (`engine-spec::NodeKindSpec` + `build.rs`) is `tre`-scope
 - Step 8: full verification chain — ✅ (`pytest tests/` 157 passed, up from 147, +10; all 3 real examples ran clean end to end.)
 
 **With this milestone, both real fronts M25/M26 identified are complete.** The only remaining, named, un-scoped future work is the conditional-per-item-styling capability the 5 Rust-internal-coloring widgets would need for full `repeat:` fidelity -- a real, separate design question for whenever it's picked up, not started here.
+
+---
+
+## Milestone 29 — Tesserae Owns All File Handling; `tre` Gets Specs + Bytes Only
+
+**Status: ⬜ Not started (scoped 2026-09-24).** User direction, relayed verbatim through a handoff from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." `tre` offers one data-ingestion path per concern; Tesserae owns reading, parsing, decoding and watching files. The `tre`-side counterpart is `tre`'s own M86 (scoped on `tre`'s `0.3.2` branch, not started). **Implementation waits on the user's explicit go-ahead** — the handoff itself is scoping, not approval.
+
+**Verified against current source before recording, not taken on trust:** every Tesserae line reference below matches today's code. On the `tre` side, `spec=` already exists on `View`, `View.instantiate`/`Component.instantiate` and `reconcile`, and `Window.add_image_from_bytes` (M82) and `Node.push_frame` exist too — on both `tre`'s `main` and `0.3.2`, so Phases 1–3 need no `tre` change and won't widen the CI/`tre`-branch gap (see the CI note below). `default_theme_spec=`/`custom_theme_spec=`/`stylesheet_spec=` and `tre.register_font` do **not** exist yet as Python API (the only source matches are an internal Rust local in `view.rs` and the renderer's own `register_fonts`), confirming Phase 4 is genuinely blocked on M86.
+
+**Where Tesserae breaks the rule today:**
+- `src/tesserae/spec/load.py:43` — `View(str(path), source=expanded, ...)`: `expand_components` builds a dict, `yaml.safe_dump`s it back to text (`expand.py:300`), and `tre` re-parses it.
+- `src/tesserae/component.py:50` — `parent.instantiate(str(path), into, source=expanded)`: the same text round-trip.
+- `src/tesserae/widgets/media.py:36` — `window.add_image(path, ...)`: `tre` opens and decodes the file.
+- `src/tesserae/spec/components/Image_Component.yaml` — `image: {src: "{{ src }}"}`: `tre` loads the file during build.
+- `load_view(**view_kwargs)` — forwards `custom_theme=`/`default_theme=`/`stylesheet=` to `tre` as file paths.
+
+**Real gotchas carried over from the handoff (each one shapes a phase below):**
+1. `include:` is only resolved on `tre`'s YAML-text path (`engine-spec/src/include.rs`); a `spec=` dict goes straight to `WidgetSpec`, which rejects unknown keys. Expand everything before handoff and never pass `include:` through.
+2. Any `kind: Image` with `src:` that reaches `tre` makes `tre` open the file — including in hand-written views, not just the `Image` fragment.
+3. `tre`'s `poll_reload()` watches a file `tre` read, so it no longer applies; hot reload becomes Tesserae's job.
+4. `tre` prefixes `spec=` validation errors with `"spec=: ..."` and can't know the source file — Tesserae must re-raise naming the `*_View.yaml`.
+
+### Phase 1 — `spec=` Handoff, No Text Round-Trip (no `tre` change needed) ⬜
+- Step 1: split `expand_components` so a dict is the primary return value (e.g. `expand_components_to_spec(yaml_text) -> dict`); keep a text-returning wrapper only if something still needs it — nothing on the `tre` handoff path should — ⬜
+- Step 2: `load_view` → `View(spec=expanded_dict, ...)` — ⬜
+- Step 3: `instantiate` → `parent.instantiate("", into, spec=expanded_dict)` (`path=""` is `tre`'s supported "no base directory" value; still positional-required, never read when `spec=` is given) — ⬜
+- Step 4: reject or expand away any `include:` before handoff (gotcha 1) — ⬜
+- Step 5: catch `ValueError` from `View(spec=)`/`instantiate(spec=)` and re-raise naming the source `*_View.yaml` (gotcha 4) — ⬜
+- Step 6: tests + full verification chain — ⬜
+
+### Phase 2 — Tesserae-Side Image Decoding (**needs a user decision: adds a Pillow dependency**) ⬜
+- Step 1: decide the decoder — Pillow (`Image.open(...).convert("RGBA")`) is the handoff's suggestion; open question for the user, not assumed — ⬜
+- Step 2: `widgets.image` → decode in Tesserae, then `window.add_image_from_bytes(rgba, pixel_width, pixel_height, width, height, fit=..., x=..., y=...)` — ⬜
+- Step 3: `Image_Component.yaml` → a blank `kind: Image` with no `src:` (valid since `tre` M75); after the view is built, decode and call `view.node(id).push_frame(rgba, w, h)` — ⬜
+- Step 4: the expansion walk strips every `image.src:` (hand-written views too, gotcha 2), records `(node_id, path)`, and pushes decoded frames after `View(spec=...)` — ⬜
+- Step 5: tests + full verification chain — ⬜
+
+### Phase 3 — Tesserae-Owned Hot Reload ⬜
+- Step 1: watch the source `*_View.yaml` **and** every `*_Component.yaml` fragment it expanded (watchfiles/watchdog or a poll loop — another dependency decision if not a plain poll loop) — ⬜
+- Step 2: on change, re-expand and call `view.reconcile(spec=...)` (unchanged widgets keep their `NodeId`s, focus and in-flight animations), then re-run Phase 2's frame push for any `Image` nodes — ⬜
+- Step 3: re-raise `reconcile(spec=)` errors naming the source file (gotcha 4) — ⬜
+- Step 4: tests + full verification chain — ⬜
+
+### Phase 4 — Theme, Stylesheet & Font Loading (**blocked on `tre` M86**) ⬜
+- Step 1: Tesserae loads theme/stylesheet YAML itself and passes `default_theme_spec=`/`custom_theme_spec=`/`stylesheet_spec=` dicts to `View`/`View.set_theme`/`Window.set_theme` (passing a `*_spec=` together with its path counterpart raises `ValueError` in `tre`; no `*_json=` variants by design) — ⬜
+- Step 2: font files read by Tesserae and handed to `tre.register_font(data: bytes) -> list[str]` (process-global); verify the returned family names cover every `typography: {role: {font_family: ...}}` a theme uses — ⬜
+- Step 3: tests + full verification chain — ⬜
+
+### Phase 5 — Docs ⬜
+- Step 1: update MkDocs with the new rule for Tesserae users: they give Tesserae file paths, and Tesserae never gives `tre` one (`guide/component-fragments.md`, `api/spec.md`, `guide/widget-catalog.md`'s `image` entry, and a hot-reload section) — ⬜
+- Step 2: update `ARCHITECTURE.md`'s layering to show Tesserae as the sole file-I/O owner — ⬜
+
+**Related, not part of this milestone:** CI currently fails 9 of 157 tests because `ci.yml` checks out `tre`'s `main` (v0.3.1) while `tre`'s M84 lives only on the `0.3.2` branch. Pinning CI's `tre` checkout is a pending, separate user decision.
