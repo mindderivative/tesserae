@@ -154,3 +154,38 @@ def test_a_spec_tre_rejects_is_reported_naming_the_view_file(tmp_path: Path):
     _edit(view_path, "id: root\nkind: NotARealKind\n")
     with pytest.raises(ValueError, match=rf"^{re.escape(str(view_path))}: .*NotARealKind"):
         watcher.poll()
+
+
+def test_a_reload_that_edits_a_bound_node_keeps_its_live_value(tmp_path: Path):
+    """M32: `tre` 0.3.3 (M91, `tre` issue #8) re-applies bindings after
+    `reconcile`. Before it, editing any property of a bound node made the
+    node show its YAML placeholder until its `Signal` next changed."""
+    import importlib.util, sys
+
+    view_path = _write(tmp_path / "Live_View.yaml", _bound_view(width=100))
+    vm_path = _write(
+        tmp_path / "Live_ViewModel.py",
+        "from tesserae import Signal, ViewModel\n\n\nclass LiveViewModel(ViewModel):\n"
+        "    def __init__(self, view):\n        self.label = Signal('live')\n        super().__init__(view)\n",
+    )
+    spec = importlib.util.spec_from_file_location(vm_path.stem, vm_path)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+
+    view = load_view(view_path)
+    module.LiveViewModel(view)
+    watcher = ViewWatcher(view, view_path)
+    assert view.node("label").get_text() == "live"
+
+    _edit(view_path, _bound_view(width=140))  # touches the bound node itself
+    assert watcher.poll() is True
+    assert view.node("label").get_text() == "live"  # not the placeholder
+
+
+def _bound_view(width: int) -> str:
+    return (
+        "id: root\nkind: Container\nchildren:\n"
+        f"  - {{id: label, kind: Text, text: {{content: placeholder, font_family: Roboto, font_size: 16}},"
+        f' style: {{width: {width}, height: 20, foreground: "#000000"}}, bindings: {{text: "{{{{ label.get() }}}}"}}}}\n'
+    )

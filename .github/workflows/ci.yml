@@ -23,16 +23,15 @@ jobs:
         with:
           path: tesserae
 
-      # Pinned to `tre`'s v0.3.2 release tag (c6f0913), not a branch, so
-      # CI stays reproducible until it's deliberately bumped. v0.3.2
-      # carries M84's declarative kinds (M27's fragments), M86's
-      # `*_spec=`/`register_font` (M29 Phase 4) and M87's
-      # `App.thread_handle()` (hot reload inside `App.run()`). Unpinned,
-      # CI tested `tre`'s `main` at v0.3.1 and failed 9 of 157 tests.
+      # Pinned to `tre`'s v0.3.3 release tag (bc5e9b6), not a branch, so
+      # CI stays reproducible until it's deliberately bumped -- the same
+      # release the local `.venv` is pinned to (M32). v0.3.3 carries M90's
+      # schema renames (Tesserae migrated in M32), M91's fix for bound
+      # values on live updates plus `View.set_stylesheet`, and M92.
       - uses: actions/checkout@v4
         with:
           repository: mindderivative/tre
-          ref: v0.3.2
+          ref: v0.3.3
           path: tre
 
       # No explicit Rust-toolchain-install action needed -- matches
