@@ -8,7 +8,7 @@ User-directed: "scope tre's building-block program". `tre`'s approved plan (its 
 
 ## Status
 
-**Scoped, not approved (2026-09-25).** Waiting on the user's approval and decisions P1–P8.
+**Approved (2026-09-25)** with all eight recommendations. M34 Phase 1 Steps 1–2 done: `docs/design/building-blocks.md` written. Finding: `tre`'s reactivity is already pure Python apart from a native recording stack, so M35 is small. P3 corrected: `Computed` is eager, not lazy.
 
 ## Evidence
 
@@ -34,11 +34,11 @@ User-directed: "scope tre's building-block program". `tre`'s approved plan (its 
 
 1. **P1 YAML format:** keep Tesserae's schema unchanged for app authors, translated to primitives inside Tesserae.
 2. **P2 Color science:** a maintained Python port of `material-color-utilities`, accepted only if it matches `tre`'s schemes on reference seeds.
-3. **P3 Reactivity:** reproduce `tre`'s semantics exactly, with one test suite run against both.
+3. **P3 Reactivity:** reproduce `tre`'s semantics exactly (`Computed` is eager), with one test suite run against both.
 4. **P4 Bindings:** port `binding.rs`'s safe grammar exactly, and check both evaluators agree on every expression in the repo.
 5. **P5 Order:** incremental, bottom-up, suite green after each step.
 6. **P6 Public API:** keep every public name. One break, written down: stateful `tesserae.widgets` factories return a small widget object (`.node` plus state) instead of a bare `tre.Node`.
 7. **P7 Scope:** rebuild the whole catalog, staged by category; the node graph, docking and app shell last.
 8. **P8 Names:** build on `tre` 0.3.4's new API only (`create`, `set`, `on`, `show_layer`, `fill`).
 
-**Up next:** the user's approval and decisions; then M34 Phase 1.
+**Up next:** M34 Phase 1 Step 3 (message `tre`: waiting on the user's OK) and Phase 2's spikes (the color-science one needs a package download: waiting on the user's OK).

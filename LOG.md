@@ -24,3 +24,20 @@
    `set_theme` 2.3 ms.
 5. Program M34–M43 written into the tracker, with decisions P1–P8.
    Not approved yet.
+
+## M34 Phase 1 — design, decisions
+
+User: "push it and go with your recommendations for M34". Pushed
+`32abc04`.
+
+1. Read `tre`'s reactivity (`python/tre/__init__.py` at v0.3.4): pure
+   Python, ~400 lines; native only for the recording stack. `Computed`
+   recomputes eagerly on a dependency change, so P3's "lazy" was wrong
+   and is corrected.
+2. Sized the Rust pieces Tesserae takes over (non-test lines): binding
+   ~530, cascade ~230, reconciler ~420, spec ~530, build ~1,080, theme
+   ~140, MD3 color/typography/shape ~600, icons ~120.
+3. `docs/design/building-blocks.md` plus a "Design" nav section;
+   `mkdocs build --strict` clean.
+4. Step 3 (ask `tre` for its migration guide) and the color-science
+   spike's package download wait on the user's OK.

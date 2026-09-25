@@ -1,0 +1,184 @@
+# Design: Tesserae on `tre`'s Building Blocks
+
+*Status: design for M34 (2026-09-25), decisions P1–P8 settled. It will
+change as each milestone is scoped against the source.*
+
+## Why
+
+`tre` is becoming an engine of building blocks: a node tree, flex layout,
+paint, text, animation, input, accessibility, layers and the event loop
+(`tre`'s M93–M96, released in 0.3.4). Everything a framework can build
+from those moves out of `tre` and into Tesserae:
+
+- the declarative layer: views, the style cascade, reconciling,
+  components and `{{ }}` bindings;
+- reactivity: `Signal`, `Computed`, `Effect`, `ViewModel`, `batch`,
+  `untrack`;
+- the MD3 widget catalog and MD3 theming.
+
+`tre` 0.3.5 deletes the old API (its M98–M99), but only once Tesserae
+no longer calls any of it (`tre`'s M97 gate). This page is the plan for
+getting there without app authors noticing.
+
+## What app authors see
+
+Nothing changes for them (P1, P6):
+
+- `*_View.yaml` files keep today's schema: `kind: Rect`/`Container`/
+  `Text`/`Icon`/`Image`/`TextField`, `style: {background, foreground,
+  ...}`, `bindings:`, `handlers:`, `two_way:`, `component:`/`with:`/
+  `repeat:`, `include:`.
+- `*_ViewModel.py` files keep `Signal`, `Computed`, `Effect`, `batch`,
+  `untrack` and `ViewModel`, now imported from Tesserae's own code.
+- `App`, `instantiate`, `Repeater`, `load_view`, the theme and stylesheet
+  arguments, and hot reload keep their signatures.
+- **One break, written down:** a stateful `tesserae.widgets` factory
+  (checkbox, radio, switch, slider, …) returns a small Tesserae widget
+  object, which holds `.node` (the `tre` node) and its state. Today it
+  returns a bare `tre.Node`. Once `tre` stops holding a checkbox's
+  `checked`, something in Tesserae has to.
+
+## Layers
+
+```
+ app code:  *_View.yaml   *_ViewModel.py   App / widgets
+               │                │              │
+ Tesserae:  expand (component:/include:, today) ─┐
+            spec compiler ── cascade ── theme ───┤
+            reconciler                           │
+            bindings ── reactivity               │
+            widgets (controls, composed, overlays)
+               │
+ tre 0.3.4: window.create / set / get / animate / on / show_layer
+            add_child / insert_child / remove / destroy
+```
+
+### Reactivity (M35)
+
+`tre`'s reactivity is already pure Python (`python/tre/__init__.py`,
+~400 lines). The only native parts are three small functions: a
+dependency-recording stack (`_record_read`, `_begin_recording`,
+`_end_recording`). Tesserae takes the module over and keeps a recording
+stack of its own. Semantics stay exactly `tre`'s (P3):
+
+- a same-value `set` doesn't notify;
+- `Computed` recomputes when a dependency changes, and notifies only if
+  its value changed;
+- `batch` defers notification and runs each subscriber once;
+- `untrack` hides reads from the enclosing scope;
+- writing to a `Signal` while it's still notifying raises a clear error.
+
+One test suite runs against both implementations while `tre` 0.3.4 still
+has its own.
+
+### Bindings and handlers (M36)
+
+A port of `tre`'s safe `{{ }}` grammar (`engine-spec/src/binding.rs`, P4).
+It supports attribute access, indexing, comparison, arithmetic, boolean
+logic and zero-argument method calls, and never uses `eval`. Evaluating
+a binding inside a recording scope finds its dependencies. A change
+re-evaluates it and `set`s the node property. **A value that didn't
+change isn't set again**, so `on_change` doesn't fire on a reload
+(`tre` issue #12 disappears on Tesserae's side). Handlers are
+`node.on(event, ...)` calls, and `two_way:` is a handler that writes the
+`Signal`.
+
+### Spec compiler and cascade (M37)
+
+The compiler takes an expanded spec dict (from Tesserae's existing
+`expand` stage) and builds nodes:
+
+| Tesserae YAML | `tre` 0.3.4 |
+|---|---|
+| `kind: Rect`, `kind: Container` | `create("box")` (`tre` D3) |
+| `kind: Text` | `create("text")` |
+| `kind: Icon` | `create("path")`, data from Tesserae's icon set (D4) |
+| `kind: TextField` | `create("text_input")` |
+| `kind: Image` | `create("image")` with decoded `rgba` |
+| `background` on a box, `foreground` on text or an icon | `fill` |
+| `border_color`/`border_width` | `stroke_color`/`stroke_width` |
+| a theme role (`primary`), shape token (`extra_large`), elevation (`level_3`), `typography_role` | resolved by the theme (M38) to tuples, numbers and `shadows` |
+| a hex or CSS color string | parsed by Tesserae to an `(r, g, b, a)` tuple |
+
+The cascade is `tre`'s rule, reproduced: default theme, then custom
+theme, then stylesheet, then inline `style:`. Within a sheet, a baseline
+rule loses to a `kind:` rule, which loses to `classes:` (more classes
+win), which loses to `id:`. It's resolved when a view is built or
+reconciled, never per frame.
+
+### Reconciler, components, screens (M37)
+
+- **Reconciler:** a keyed diff by widget `id`. Unchanged nodes keep
+  their identity, focus and running animations. Changed properties are
+  `set`, moved children use `insert_child`, and removed ones are
+  `destroy`ed. Hot reload (`ViewWatcher`) calls it instead of
+  `View.reconcile`.
+- **Components:** `instantiate` builds a component with the host's theme
+  and stylesheet. That closes M31's gap, where an embedded component got
+  neither.
+- **Screens:** `App.show` attaches a screen's root to `window.root` and
+  detaches the previous one with `remove()`, which keeps it alive with
+  its state (`tre` R5). This replaces `Window.from_view`/`show_view`.
+
+### Theme (M38)
+
+`tre` keeps no theme (D7), so Tesserae owns all of it:
+
+- colour schemes from a seed, light and dark, with `colors:` overrides.
+  The colour science comes from a maintained Python port of Google's
+  `material-color-utilities` (P2), if M34's spike shows it matches `tre`'s
+  schemes;
+- the shape, elevation (MD3's key and ambient shadows), typography and
+  motion tokens;
+- theme files as today.
+
+A theme change re-resolves the cascade and `set`s the changed values.
+M34's measurement puts that well within budget: re-`set`ting `fill` on
+4,000 nodes took 0.8 ms. The OS light/dark switch arrives as the
+window's `color_scheme` event.
+
+### Interaction and widgets (M39–M42)
+
+`tre` draws no ripple, state layer, scrim or focus ring (D8, R12).
+Tesserae builds them:
+
+- **Ripple:** a clipped box holding a circle `path`, animated by `scale`
+  and `opacity`.
+- **State layers:** from the `pointer_enter`/`pointer_leave` subtree
+  events.
+- **Focus rings:** from bubbling `focus`/`unfocus`.
+- **Accessibility:** each widget sets its own `role`, state and
+  `a11y_action`s.
+
+Every MD3 widget is then built from these and the primitives, following
+`tre`'s own table ("Rebuilding the MD3 widgets from building blocks" in
+`tre`'s `docs/design/target-api.md`). The whole catalog is rebuilt,
+staged by category: stateful controls, then composed widgets and
+overlays on `show_layer`, then inputs, date and time, media, the node
+graph and docking (P7).
+
+## Rules
+
+- **Build only on `tre` 0.3.4's new API** (P8): `create`, `set`/`get`/
+  `animate`, `on`, `show_layer`, `insert_child`/`remove`/`destroy`,
+  `fill`/`stroke_color`. Never a name `tre` M98–M99 deletes, so the
+  move to 0.3.5 is deletions, not a second migration.
+- **Incremental** (P5): one subsystem at a time, suite green after each
+  step. Old and new coexist on 0.3.4 until M43.
+- **Proved against `tre`, not assumed:** while `tre` 0.3.4 still has
+  its own reactivity, binding evaluator, cascade and themes, each
+  Tesserae replacement is tested for identical results against it.
+- **The gate check** (M43, `tre` M97 Phase 2 Step 2): Tesserae's full
+  suite and examples pass with every removed `tre` name stubbed to raise.
+
+## Measured so far
+
+On `tre` 0.3.4, this machine, 2,000 boxes each holding a text node:
+
+| | Tesserae via `create`/`set` | `tre`'s `View` |
+|---|---|---|
+| build | 9.5 ms | 10.9 ms |
+| re-colour every node | 0.8 ms | 2.3 ms (`set_theme`) |
+
+Not yet measured: Tesserae's own cascade and binding evaluation in Python
+on the same tree (M34 Phase 2).
