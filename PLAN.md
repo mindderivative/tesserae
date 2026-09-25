@@ -63,4 +63,6 @@ Phase 5 done: components on Tesserae's builder, with the host's theme and styles
 
 Phase 6 done: `load_view`, `instantiate`, `ViewWatcher` and the suite off `tre`'s `View` (reference tests excepted); the recording bridge removed; atomic reconcile; theme key validation; 909 passed. **M37 complete.**
 
-**Up next:** scope M38 (theme: motion curves, OS light/dark, the window theme).
+**M38 scoped (2026-09-25):** a `tesserae.Theme` (roles, `components:`, `typography:`, motion), theme typography in views, light/dark with the OS, docs; decisions Q1–Q4 in `BUILD_TRACKER.md`.
+
+**Up next:** the user's decisions on M38's Q1–Q4.

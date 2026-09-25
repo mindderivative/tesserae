@@ -276,3 +276,14 @@ User: "push it and start Phase 6". Pushed `3d468a1`.
 4. `get_text` became `get("text")` on Tesserae nodes; examples use
    `simulate`.
 5. Docs and docstrings swept. 909 passed; examples clean.
+
+## M38 scoping
+
+User: "push it and scope M38". Pushed `cf39d3d`.
+
+Read `tre`'s motion curves (Emphasized is two cubic segments), its
+`ThemeChanged` handling (it flips only the window theme and fires
+`color_scheme`), the window properties (the OS appearance isn't
+readable), `ThemeSpec` (`components:`/`typography:`), and the
+typography/shape lookups (overrides reach factories only, not views).
+Four phases and decisions Q1–Q4 written into the tracker.

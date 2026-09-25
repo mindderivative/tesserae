@@ -47,7 +47,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M35 — Reactivity in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M36 — Bindings and Handlers in Tesserae | `██████████` 100% | ✅ Complete — the evaluator; wiring moved to M37 (2026-09-25) |
 | M37 — Declarative Engine on `tre` Primitives | `██████████` 100% | ✅ Complete (2026-09-25) |
-| M38 — MD3 Theme in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
+| M38 — MD3 Theme in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped in detail, decisions pending (2026-09-25) |
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
@@ -69,7 +69,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M38** (MD3 theme in Tesserae), to be scoped against the source: M37 already brought the static tokens forward and live re-theming works through `View.set_theme`/`App.set_theme_specs`, so what's left is likely the motion curves, the OS light/dark switch through the window's `color_scheme` event, and taking the window's own theme (`Window.set_theme`, still called for the legacy MD3 kinds) out once M40 lands — waiting on the user's go-ahead. `tre` is building the migration guide and the `TRE_FORBID_REMOVED` gate shim as its M97 Phase 2. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
+**Up next:** **M38** is scoped in detail and waiting on the user's decisions Q1–Q4 (see Milestone 38). `tre` is building the migration guide and the `TRE_FORBID_REMOVED` gate shim as its M97 Phase 2. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1025,14 +1025,31 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 38 — MD3 Theme in Tesserae
 
-**Status: ⬜ Proposed — approved, not started (2026-09-25).** `tre` D7: `tre` keeps no theme concept.
+**Status: ⬜ Proposed — scoped in detail, decisions pending (2026-09-25).** User: "push it and scope M38". `tre` D7: `tre` keeps no theme concept. Smaller than first planned: M37 Phase 1 brought the static tokens forward (colour roles, shape, elevation as `shadows`, the type scale, colour parsing), and live re-theming already works through `View.set_theme` and `App.set_theme_specs`.
 
-### Phase 1 — Tokens ⬜
-- Step 1: if M37's Q1 is taken, the static tokens (roles, shape, elevation, typography) are built in M37 Phase 1 and this step is the motion curves only; otherwise all of them: colour schemes from a seed, light and dark, with `colors:` overrides (P2); roles; shape, elevation (MD3 key and ambient `shadows`), typography scale and motion curves — ⬜
-- Step 2: theme files (`seed`, `colors`, `styles`, `components`, `typography`) read as today — ⬜
+**Scoped against the source and 0.3.4's API (2026-09-25):**
+- **What's left of `tre`'s theme in Tesserae:** a theme's `components:` (per-component `corner_radius`/`elevation`, looked up as `"<component>.<variant>"` then `"<component>"`, field by field) and `typography:` (per-role field overrides; a custom theme's role entry replaces the default theme's) live only in the window's `ThemeState`, which `tre`'s imperative factories read — `tesserae.widgets` until M41. **In views, a theme's `typography:` does nothing**: a Text's `typography_role` resolves against the fixed scale in `tre` too (`engine_md3::type_style_named`), and Tesserae copied that.
+- **Motion:** `tre`'s seven curves (`engine-core/src/animation.rs`). Standard (0.2, 0, 0, 1), StandardDecelerate (0, 0, 0, 1), StandardAccelerate (0.3, 0, 1, 1), EmphasizedDecelerate (0.05, 0.7, 0.1, 1) and EmphasizedAccelerate (0.3, 0, 0.8, 0.15) are single cubic béziers, which 0.3.4's `animate(easing=(x1, y1, x2, y2))` takes exactly. **Emphasized is two cubic segments** joined at x ≈ 0.167, which one bézier can't express.
+- **Light and dark:** 0.3.4 delivers an OS switch as the window's `color_scheme` event (`dark`). `tre` also still flips the window's own theme on it (legacy widgets and hover tints follow), while Tesserae-built screens don't. So today an OS switch gives dark legacy widgets on light screens. **The OS's current appearance can't be read at startup**: `window.get` has only `width`, `height`, `title` and `scale_factor`.
+- **Still needed until M40/M41:** `App` calls `Window.set_theme` for the legacy MD3 kinds and `tesserae.widgets`. Removing that belongs with M41, not here.
 
-### Phase 2 — Live ⬜
-- Step 1: re-theme by re-`set`ting colors (0.8 ms per 4,000 nodes measured); OS light/dark through the window's `color_scheme` event; M31's hot reload on top — ⬜
+**Decisions for the user, each with a recommendation:**
+- Q1 **Theme `typography:` in views.** Recommended: **apply it** — a Text's `typography_role` resolves through the theme's overrides (default theme, then custom). That makes a theme's `typography:` mean the same in views as in widgets. It differs from `tre`, where it's ignored in views; views with no `typography:` look the same.
+- Q2 **Dark mode.** Recommended: **`App(dark=False | True | "system")`**, default `False` as today, plus a runtime `App.set_dark(dark)`. `"system"` follows the OS through `color_scheme`, re-theming every screen and the window. With `True`/`False`, `App` re-asserts its own choice on `color_scheme`, so the legacy widgets no longer flip alone.
+- Q3 **The OS appearance at startup.** Recommended: **ask `tre` for a readable `window.get("dark")`**, the OS's appearance now. Until it exists, `"system"` starts light and switches on the first `color_scheme` event, and the docs say so.
+- Q4 **Emphasized easing.** Recommended: **use MD3's own single-bézier form of it, (0.2, 0, 0, 1)**, as MD3's web tokens do, and write the difference down. Alternative: ask `tre` for a two-segment (or named) easing.
+
+### Phase 1 — Theme ⬜
+- Step 1: `tesserae.Theme`, resolved from seed, `dark` and the two theme dicts: `role(name)`, `shape(component, variant)`/`elevation(component, variant)` from `components:`, `typography(role)` with overrides, and the motion curves as easing tuples plus MD3's duration tokens — everything `tre`'s `Window.theme` answers, for M39–M42's widgets. Parity tests against `tre`'s `Window.theme` while 0.3.4 has it — ⬜
+
+### Phase 2 — Typography in Views ⬜
+- Step 1: per Q1, views resolve `typography_role` through the theme; tests — ⬜
+
+### Phase 3 — Light and Dark ⬜
+- Step 1: per Q2 and Q3, `App(dark=...)`, `App.set_dark`, following `color_scheme` (simulated in tests with `window.simulate("color_scheme", dark=...)`), re-asserting a fixed choice — ⬜
+
+### Phase 4 — Tests, Docs, Tracker ⬜
+- Step 1: `guide/themes-and-fonts.md` (typography, dark mode, motion), `api/app.md`, the design page; tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
 
 ---
 
