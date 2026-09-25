@@ -49,4 +49,6 @@ Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 
 
 **M36 complete (2026-09-25):** `tesserae.binding`, identical to `tre`'s on 166 expressions. The wiring moved to M37 (user's choice), because `tre`'s new API can't drive the legacy Checkbox/Switch state; bindings on `checked`/`selected`/`value` move to M40.
 
-**Up next:** M37 (the declarative engine), waiting on the user's go-ahead.
+**M37 scoped in detail (2026-09-25):** six phases (tokens, compiler and cascade, tree parity, View/reconciler/bindings, components and screens, tests and docs) and four decisions, Q1–Q4, in `BUILD_TRACKER.md`.
+
+**Up next:** the user's decisions on M37's Q1–Q4.

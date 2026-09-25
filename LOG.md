@@ -143,3 +143,22 @@ legacy Checkbox or Switch, `set(checked=)`/`set(selected=)` sets only
 the a11y flag, and no synthetic click toggles one. Asked the user; they
 chose "Move wiring into M37". M36 closed as the evaluator; wiring steps
 added to M37 Phase 2 and M40.
+
+## M37 scoping
+
+User: "push it and scope M37". Pushed `cbdf82c`.
+
+1. Read `tre`'s `spec.rs` (15 kinds, the style fields) and `build.rs`
+   (`build_tree`, `patch_node`, layout, paint, text, per-kind fields,
+   token resolution through `engine-md3`).
+2. Probes on 0.3.4:
+   - `box` defaults to horizontal/`auto`;
+   - no `elevation` property, only `shadows`;
+   - a `text` node has no intrinsic size, and neither does a `View`
+     Text (0 px tall), so no regression;
+   - `window.root` has 16 px padding;
+   - a legacy `add_checkbox` node moves into a created tree and still
+     works, but a node from another window's tree doesn't.
+3. Coupling counts: 15/39 test files use `tre.View`; 135 `.node()`
+   lookups; 28 `get_text()`.
+4. Six phases and decisions Q1–Q4 written into the tracker.

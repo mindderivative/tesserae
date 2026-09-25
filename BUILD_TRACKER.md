@@ -46,7 +46,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M34 — Building-Block Program: Design and Spikes | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M35 — Reactivity in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M36 — Bindings and Handlers in Tesserae | `██████████` 100% | ✅ Complete — the evaluator; wiring moved to M37 (2026-09-25) |
-| M37 — Declarative Engine on `tre` Primitives | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
+| M37 — Declarative Engine on `tre` Primitives | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped in detail, decisions pending (2026-09-25) |
 | M38 — MD3 Theme in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
@@ -69,7 +69,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M37** (the declarative engine on `tre`'s primitives: spec compiler, cascade, reconciler, components, screens, and now the binding and handler wiring from M36) — approved, waiting on the user's go-ahead; each milestone gets its own detailed scoping first. `tre` is building the migration guide and the `TRE_FORBID_REMOVED` gate shim as its M97 Phase 2. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40, since Tesserae will own those widgets).
+**Up next:** **M37** is scoped in detail and waiting on the user's decisions Q1–Q4 (see Milestone 37). `tre` is building the migration guide and the `TRE_FORBID_REMOVED` gate shim as its M97 Phase 2. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -980,19 +980,42 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 37 — Declarative Engine on `tre` Primitives
 
-**Status: ⬜ Proposed — approved, not started (2026-09-25).** Replaces `View`, `reconcile`, `instantiate`/`Component`, the style cascade and `Window.from_view`/`show_view`.
+**Status: ⬜ Proposed — scoped in detail, decisions pending (2026-09-25).** User: "push it and scope M37". Replaces `View`, `reconcile`, `instantiate`/`Component`, the style cascade, `tre`'s binding wiring (moved here from M36) and `Window.from_view`/`show_view`. The largest milestone in the program.
 
-### Phase 1 — Build ⬜
-- Step 1: a spec compiler from Tesserae's YAML schema (P1) to `window.create`/`set`/`add_child`: `Rect`/`Container` → `box`, `Text` → `text`, `Icon` → `path`, `TextField` → `text_input`, `Image` → `image`; layout and paint properties mapped — ⬜
-- Step 2: the cascade (default theme < custom theme < stylesheet < inline), including layout rules — ⬜
+**Scoped against the source and by probes on `tre` 0.3.4 (2026-09-25):**
+- **What `tre`'s builder does** (`engine-spec/src/build.rs`, ~1,080 non-test lines; `spec.rs` ~530): 15 kinds. Layout: a horizontal default, pixel lengths, uniform or per-side `padding`/`margin`, `gap`, `flex_grow`/`flex_shrink` (default 1)/`flex_basis`, `align_items`/`justify_content`. Paint: `background`/`foreground` as a theme role or a colour, `corner_radius` as a number or shape token, `opacity`, `border_*`, `elevation` as a number or MD3 level. Text: `typography_role` supplies family, weight, size and line height, otherwise `font_family` and `font_size` are required. Per-kind required fields with their own errors (a Rect needs `background`, a Text needs `foreground`); images; icons by name; and the state fields of the MD3 kinds (`checked`, `selected`, `value`, `hour`/`minute`).
+- **It depends on the theme.** Roles, shape tokens, elevation levels and typography roles all resolve through `engine-md3`, so the builder needs M38's tokens first. **0.3.4 has no `elevation` property**, only `shadows` (checked: `set(elevation=3)` is an unknown property), so MD3's levels need Tesserae's own shadow table.
+- **Five kinds map onto primitives:** `Rect`/`Container` to `box`, `Text` to `text`, `TextField` to `text_input`, `Image` to `image`; `Icon` becomes a `path` from `tre`'s 12 curated SVG `d=` strings; `Link` is a `text` plus `click`. **The nine MD3 kinds** (`Checkbox`, `RadioButton`, `Switch`, `Slider`, the three progress kinds, `LoadingIndicator`, `TimePickerDial`) have no primitive until M40. Probed: a node from a legacy window factory (`add_checkbox`) **can** be moved into a Tesserae-built tree on the same window and keeps working (`set_checked` still toggles it); a node from another window's tree can't.
+- **Views need a window.** A 0.3.4 node belongs to one window's tree, while a `tre` `View` today is built without one. So Tesserae builds each screen in the app's window, and `load_view()` on its own builds in a private headless window.
+- **Layout differences to handle:** 0.3.4's `window.root` has 16 px padding and a horizontal direction, while a `from_view` root has none, so `App` zeroes it. A `text` node has no intrinsic size in either system: a Text built by a `View` is 0 px tall without a height too, so there's no regression (content-sized text via `measure_text` is a later enhancement).
+- **The suite's coupling:** 15 of 39 test files call `tre.View` directly, mostly the fragment tests comparing a `tre`-built fragment with `tesserae.widgets`; there are 135 `.node("…")` lookups, and 28 calls to the legacy `get_text()` plus a few `get_checked`/`set_checked` (removed in 0.3.5).
 
-### Phase 2 — Reconcile ⬜
-- Step 1: a keyed reconciler (`insert_child`, `remove`/`destroy`) that keeps unchanged nodes, focus and running animations; hot reload moves onto it — ⬜
-- Step 2: `tesserae.instantiate` and `Repeater` on it, and embedded components now get the host's theme and stylesheet (the M31 gap) — ⬜
-- Step 3: bindings, `handlers:` and `two_way:` wired by Tesserae (moved from M36): each binding evaluated with `tesserae.binding` in a `tesserae.reactive` recording frame and applied with `set`, re-evaluated on a dependency change, and not set again when unchanged; handlers via `node.on(...)` (the `on_click`/`on_hover_enter`/`on_hover_exit`/`on_change`/`on_focus_enter`/`on_focus_exit` names mapped to `click`/`pointer_enter`/`pointer_leave`/`change`/`focus`/`unfocus`); `two_way:` for `text`, with `tre`'s rule that it must be a plain `signal.get()`; the reconciler re-applies what it patched. `tre`'s `View._attach` and M35's recording bridge removed; `on_change` fires only for user edits (`tre` issue #12 gone on Tesserae's side) — ⬜
+**Decisions for the user, each with a recommendation:**
+- Q1 **Tokens first.** Recommended: **move M38's static tokens ahead, as this milestone's Phase 1.** That means colour roles via `materialyoucolor` (the settings M34 proved exact), the shape scale, elevation as MD3 key and ambient `shadows`, and the typography scale, with `tre`'s exact values. M38 keeps live re-theming, the OS light/dark switch and theme files. Alternative: read tokens from `tre` for now (`Window.theme`), which 0.3.5 removes.
+- Q2 **The nine MD3 kinds until M40.** Recommended: **build them with the legacy window factories inside Tesserae's own trees** (probed: it works), the one temporary use of the old API, removed in M40 and caught by M43's `TRE_FORBID_REMOVED` gate. This keeps one build path. Alternative: keep `tre`'s `View` for any view containing one, which means two build paths and two binding systems until M40.
+- Q3 **`tesserae.View`.** Recommended: **Tesserae's own class with the same surface Tesserae uses today** — `node(id)` returning a `tre` `Node`, `reconcile(spec=)`, `set_theme`/`set_stylesheet`, `instantiate` — plus `root`. Tests move to 0.3.4's names as they're touched (`get("text")` for `get_text()`), since 0.3.5 removes the old ones.
+- Q4 **Proving parity.** Recommended: **a tree differ**. While 0.3.4 still has `tre`'s `View`, build every fragment (67) and every example view both ways and compare the two trees node by node through `get()` (kind, laid-out box, fill, stroke, corner radius, opacity, shadows, text and font), using `tre`'s `tools/dump_widget.py` output format when it arrives.
 
-### Phase 3 — Screens ⬜
-- Step 1: `App.show` via `root.add_child`/`remove`, keeping screens alive; `App` no longer uses `View`/`Window.from_view`/`show_view` — ⬜
+### Phase 1 — Tokens (from M38) ⬜
+- Step 1: colour roles from a seed, light and dark, with `colors:` overrides (`materialyoucolor`, `spec_version="2021"`, tone 10 for the four light `on_*_container` roles); the shape scale; elevation levels as `shadows`; the typography scale — values taken from `tre`'s source (`engine-md3`) and its handover; parity tests against `tre`'s `Window.theme` while it exists — ⬜
+
+### Phase 2 — Spec Compiler and Cascade ⬜
+- Step 1: kinds to primitives, and layout, paint and text mapped as `tre` maps them, including its required-field errors; images (already decoded by Tesserae) and icons (the SVG set; an unknown name is an error); the nine MD3 kinds through the legacy factories (Q2) — ⬜
+- Step 2: the cascade (default theme < custom theme < stylesheet < inline; baseline < `kind:` < `classes:` < `id:`), with rules indexed by kind, class and id (M34's spike: the naive scan was half the build time) — ⬜
+
+### Phase 3 — Tree Parity ⬜
+- Step 1: the tree differ (Q4); every fragment and example view built by `tre` and by Tesserae and compared; differences fixed or written down — ⬜
+
+### Phase 4 — View, Reconciler, Bindings ⬜
+- Step 1: `tesserae.View` (Q3), built in a window; a keyed reconciler (`insert_child`, `remove`/`destroy`) that keeps unchanged nodes, focus and running animations; hot reload (`ViewWatcher`) and M31's theme and stylesheet reloads onto it — ⬜
+- Step 2: bindings, `handlers:` and `two_way:` wired by Tesserae (moved from M36): each binding evaluated with `tesserae.binding` in a `tesserae.reactive` recording frame and applied with `set`, re-evaluated on a dependency change, and not set again when unchanged; handlers via `node.on(...)` (`on_click`/`on_hover_enter`/`on_hover_exit`/`on_change`/`on_focus_enter`/`on_focus_exit` mapped to `click`/`pointer_enter`/`pointer_leave`/`change`/`focus`/`unfocus`); `two_way:` for `text`, with `tre`'s rule that it must be a plain `signal.get()`; the reconciler re-applies what it patched. `on_change` fires only for user edits (`tre` issue #12 gone on Tesserae's side). For Tesserae-built views, `tre`'s `View._attach` and M35's recording bridge go — ⬜
+
+### Phase 5 — Components and Screens ⬜
+- Step 1: `tesserae.instantiate` and `Component` on Tesserae's builder, with the host's theme and stylesheet (closing M31's embedded-component gap); `Repeater` on it — ⬜
+- Step 2: `App` creates its window first and builds screens in it; `show()` attaches a screen's root under `window.root` (padding zeroed) and detaches the previous one with `remove()`, keeping it alive; no `Window.from_view`/`show_view` — ⬜
+
+### Phase 6 — Tests, Docs, Tracker ⬜
+- Step 1: tests moved off `tre.View` and the legacy node getters; full suite and examples; docs (`architecture.md`, `ARCHITECTURE.md`, the design page, the guides that describe `View`); tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
 
 ---
 
@@ -1001,7 +1024,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 **Status: ⬜ Proposed — approved, not started (2026-09-25).** `tre` D7: `tre` keeps no theme concept.
 
 ### Phase 1 — Tokens ⬜
-- Step 1: color schemes from a seed, light and dark, with `colors:` overrides (P2); roles; shape, elevation (MD3 key and ambient `shadows`), typography scale and motion curves — ⬜
+- Step 1: if M37's Q1 is taken, the static tokens (roles, shape, elevation, typography) are built in M37 Phase 1 and this step is the motion curves only; otherwise all of them: colour schemes from a seed, light and dark, with `colors:` overrides (P2); roles; shape, elevation (MD3 key and ambient `shadows`), typography scale and motion curves — ⬜
 - Step 2: theme files (`seed`, `colors`, `styles`, `components`, `typography`) read as today — ⬜
 
 ### Phase 2 — Live ⬜
