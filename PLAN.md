@@ -41,4 +41,6 @@ User-directed: "scope tre's building-block program". `tre`'s approved plan (its 
 7. **P7 Scope:** rebuild the whole catalog, staged by category; the node graph, docking and app shell last.
 8. **P8 Names:** build on `tre` 0.3.4's new API only (`create`, `set`, `on`, `show_layer`, `fill`).
 
-**Up next:** M34 Phase 1 Step 3 (message `tre`: waiting on the user's OK) and Phase 2's spikes (the color-science one needs a package download: waiting on the user's OK).
+Colour spike done: `materialyoucolor` with `spec_version="2021"` and tone 10 for the four light `on_*_container` roles matches `tre` exactly (784/784), so P2 is accepted. Message sent to `tre`.
+
+**Up next:** `tre`'s reply; the cascade/binding cost spike and the checkbox-on-primitives spike.

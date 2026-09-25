@@ -125,9 +125,12 @@ reconciled, never per frame.
 `tre` keeps no theme (D7), so Tesserae owns all of it:
 
 - colour schemes from a seed, light and dark, with `colors:` overrides.
-  The colour science comes from a maintained Python port of Google's
-  `material-color-utilities` (P2), if M34's spike shows it matches `tre`'s
-  schemes;
+  The colour science comes from `materialyoucolor` (P2), a pure-Python,
+  MIT-licensed port of Google's `material-color-utilities`. M34's spike
+  showed it reproduces `tre`'s schemes exactly (784 of 784 role values,
+  8 seeds, light and dark) with two settings: `spec_version="2021"`, and
+  tone 10 for the four light-mode `on_*_container` roles, where current
+  `material-color-utilities` uses tone 30;
 - the shape, elevation (MD3's key and ambient shadows), typography and
   motion tokens;
 - theme files as today.

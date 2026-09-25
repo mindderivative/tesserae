@@ -41,3 +41,21 @@ User: "push it and go with your recommendations for M34". Pushed
    `mkdocs build --strict` clean.
 4. Step 3 (ask `tre` for its migration guide) and the color-science
    spike's package download wait on the user's OK.
+
+## M34 — message to `tre`, colour spike
+
+User: "push it, send the message to tre, and download it". Pushed
+`761191f`.
+
+1. Message sent to the `tre` session: the same socket address as every
+   earlier exchange, checked in this session's transcript. The one
+   ListAgents peer is titled "Milestone 5". It asks for the migration
+   guide, proposes the gate-check shim, asks about the node graph, and
+   notes tre#12.
+2. `pip install materialyoucolor` into a scratch `venv-mcu`: 3.0.4,
+   MIT, pure Python, needs Pillow.
+3. Parity against `tre`'s `Window.theme.role` for 49 roles, 8 seeds,
+   light and dark (784 values): spec 2025 differs in 695; spec 2021
+   differs in 32, all light `on_*_container`. `tre` uses tone 10 and
+   materialyoucolor tone 30; tone 10 from the scheme's palettes matches
+   all 32. 784/784.
