@@ -1,5 +1,13 @@
 # Components & Embedding
 
+!!! note
+    This page covers `tesserae.instantiate` -- embedding a whole,
+    independently-stateful `*_View.yaml` + `*_ViewModel.py` pair. For
+    reusing one of Tesserae's 67 built-in MD3 widget shapes
+    (a button, a card, a checkbox, ...) declaratively inside a
+    `*_View.yaml`, see
+    [Declarative Component Fragments](component-fragments.md) instead.
+
 `tesserae.instantiate(parent, path, viewmodel_cls, into, *args,
 **kwargs)` embeds another view's own YAML as a real, independent
 `Component` with its own `ViewModel` -- the enforced-naming

@@ -52,6 +52,8 @@ nav:
   - Guide:
       - Apps & Screens: guide/apps-and-screens.md
       - Components & Embedding: guide/components.md
+      - Declarative Component Fragments: guide/component-fragments.md
+      - Widget Catalog: guide/widget-catalog.md
       - Repeater (Lists): guide/repeater.md
       - Reactivity: guide/reactivity.md
       - Naming Convention: guide/naming-convention.md
@@ -60,4 +62,5 @@ nav:
       - App: api/app.md
       - instantiate: api/instantiate.md
       - Repeater: api/repeater.md
+      - spec (load_view/expand_components): api/spec.md
   - Architecture: architecture.md

@@ -26,6 +26,14 @@ end to end by three real vertical-slice examples. See
   another view's own YAML as an independent, reusable component with
   its own `ViewModel`; multiple simultaneous instances stay fully
   independent.
+- **Declarative component fragments** -- `component: Name` / `with:`
+  / `repeat:` in a `*_View.yaml` expands, at load time, to one of 67
+  built-in MD3 widget fragments (buttons, cards, chips, progress
+  indicators, and more), so a screen never has to hand-write a
+  widget's raw `WidgetSpec` shape.
+- **A full imperative MD3 widget catalog** (`tesserae.widgets`) --
+  thin, faithful delegates to `tre`'s own `Window.add_*` factories,
+  for widgets built dynamically from Python.
 - **`Repeater`** -- automatic keyed add/remove diffing over a list
   `Signal`, no hand-rolled bookkeeping.
 - **A full reactivity layer** -- `Signal`, plus `tre`'s own richer
@@ -42,8 +50,9 @@ end to end by three real vertical-slice examples. See
 - **[Getting Started](getting-started.md)** -- build and run your
   first screen in a few lines.
 - **[Guide](guide/apps-and-screens.md)** -- apps and screens,
-  components, lists, reactivity, and the naming convention that ties
-  it together.
+  components, [declarative component fragments](guide/component-fragments.md),
+  the [widget catalog](guide/widget-catalog.md), lists, reactivity,
+  and the naming convention that ties it together.
 - **[API Reference](api/index.md)** -- every real, public class and
   function.
 - **[Architecture](architecture.md)** -- how Tesserae layers on top of

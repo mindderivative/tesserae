@@ -19,6 +19,16 @@ tesserae.instantiate    -- embeds a Component with its own ViewModel
   |                          into a View/Component, enforcing the same
   |                          naming convention as App.load
   |
+tesserae.spec           -- `component:`/`with:`/`repeat:` macro
+  | (load_view/                expansion: a *_View.yaml can reuse one of
+  |  expand_components)        67 built-in MD3 *_Component.yaml
+  |                             fragments, purely at text/load time,
+  |                             before tre ever parses the file
+  |
+tesserae.widgets        -- one Python function per MD3 widget (~68),
+  |                          thin delegates to tre's own Window.add_*
+  |                          factories, for widgets built dynamically
+  |
 tesserae.Repeater       -- one list Signal as the single source of
   |                          truth; keeps one Component+ViewModel alive
   |                          per item present, via instantiate (above)
@@ -39,7 +49,9 @@ tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
 Tesserae does not duplicate `tre`'s own real capability in slower,
 less-tested Python -- `Signal`/`View`/`ViewModel`/`Component` are
 `tre`'s own classes, imported unmodified. Tesserae's own real,
-additive value is `App`, `instantiate`, and `Repeater`.
+additive value is `App`, `instantiate`, `Repeater`, the declarative
+`component:`/`with:`/`repeat:` macro layer, and the `tesserae.widgets`
+imperative catalog.
 
 ## Build history
 
