@@ -22,7 +22,7 @@ style:
   background: surface_container_high
   corner_radius: "{{ corner_radius }}"
   elevation: level_3
-  align_items: Center
+  align_items: center
   padding: {left: 4, right: 4, top: 0, bottom: 0}
 children:
   - id: field

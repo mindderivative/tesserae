@@ -44,7 +44,7 @@ def _text_view(content: str, extra: str = "") -> str:
     return (
         "id: root\nkind: Container\nchildren:\n"
         f"  - {{id: label, kind: Text, text: {{content: {content}, font_family: Roboto, font_size: 16}},"
-        ' style: {width: 100, height: 20, background: "#000000"}}\n' + extra
+        ' style: {width: 100, height: 20, foreground: "#000000"}}\n' + extra
     )
 
 
@@ -114,7 +114,7 @@ def test_a_broken_edit_is_queued_as_a_raising_callable_and_the_watcher_carries_o
 
 
 def test_a_new_dependency_in_a_new_directory_is_watched_after_reload(started, tmp_path: Path):
-    rect = 'id: extra\nkind: Rect\nstyle: {{width: {n}, height: {n}, background: "#112233"}}\n'
+    rect = 'id: extra\nkind: Rect\nstyle: {{width: {n}, height: {n}, foreground: "#112233"}}\n'
     extra = _write(tmp_path / "more" / "extra.yaml", rect.format(n=5))
     view_path, view, watcher, handle = started(_text_view("Hello"))
 

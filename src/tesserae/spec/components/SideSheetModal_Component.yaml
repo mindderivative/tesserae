@@ -30,7 +30,7 @@ style:
   height: "{{ scrim_height }}"
   background: scrim
   opacity: 0.32
-  justify_content: FlexEnd
+  justify_content: flex_end
 children:
   - id: panel
     kind: Rect

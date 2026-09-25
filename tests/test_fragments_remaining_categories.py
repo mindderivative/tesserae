@@ -84,7 +84,7 @@ style: {width: 200, height: 200}
 children:
   - id: img
     component: Image
-    with: {src: fixtures/pixel.png, width: 100, height: 100, fit: Cover}
+    with: {src: fixtures/pixel.png, width: 100, height: 100, fit: cover}
 """
     expanded = expand_components(yaml_text)
     view = View(FIXTURES_VIEW_PATH, source=expanded)

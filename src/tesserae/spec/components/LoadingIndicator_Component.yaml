@@ -15,4 +15,4 @@ kind: LoadingIndicator
 style:
   width: "{{ size }}"
   height: "{{ size }}"
-  background: "{{ background }}"
+  foreground: "{{ background }}"

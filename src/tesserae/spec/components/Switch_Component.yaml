@@ -14,7 +14,7 @@
 params: [width, height, is_on]
 id: root
 kind: Switch
-checked: "{{ is_on }}"
+selected: "{{ is_on }}"
 style:
   width: "{{ width }}"
   height: "{{ height }}"

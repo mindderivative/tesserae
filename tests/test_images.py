@@ -156,7 +156,7 @@ style: {width: 200, height: 200}
 children:
   - id: img
     component: Image
-    with: {src: assets/rb.png, width: 100, height: 100, fit: Cover}
+    with: {src: assets/rb.png, width: 100, height: 100, fit: cover}
 """
 
 

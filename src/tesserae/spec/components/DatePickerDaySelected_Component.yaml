@@ -26,10 +26,10 @@ style:
   height: 48
   background: primary
   corner_radius: 24
-  justify_content: Center
-  align_items: Center
+  justify_content: center
+  align_items: center
 children:
   - id: label
     kind: Text
-    text: {content: "{{ day }}", role: body_large}
-    style: {background: on_primary}
+    text: {content: "{{ day }}", typography_role: body_large}
+    style: {foreground: on_primary}

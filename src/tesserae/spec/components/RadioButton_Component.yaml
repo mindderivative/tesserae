@@ -12,7 +12,7 @@
 params: [size, selected]
 id: root
 kind: RadioButton
-checked: "{{ selected }}"
+selected: "{{ selected }}"
 style:
   width: "{{ size }}"
   height: "{{ size }}"

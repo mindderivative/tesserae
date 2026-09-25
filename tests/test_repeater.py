@@ -13,11 +13,11 @@ from tesserae import Repeater, Signal, View
 PARENT_VIEW = """
 id: root
 kind: Container
-style: {flex_direction: Vertical, width: 300, height: 200, gap: 8, padding: 8}
+style: {flex_direction: vertical, width: 300, height: 200, gap: 8, padding: 8}
 children:
   - id: item_list
     kind: Container
-    style: {flex_direction: Vertical, gap: 4, width: 280, height: 180}
+    style: {flex_direction: vertical, gap: 4, width: 280, height: 180}
 """
 
 ITEM_VIEW = """

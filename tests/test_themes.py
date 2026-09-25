@@ -19,7 +19,7 @@ from tesserae.fonts import FontFallbackWarning, available_families
 from tesserae.spec import load_stylesheet, load_theme, load_view
 
 SEED = (0x67, 0x50, 0xA4, 0xFF)
-RECT_VIEW = 'id: box\nkind: Rect\nstyle: {width: 10, height: 10, background: "#112233"}\n'
+RECT_VIEW = 'id: box\nkind: Rect\nstyle: {width: 10, height: 10, foreground: "#112233"}\n'
 ROBOTO = Path(tre.__file__).parents[2] / "crates" / "engine-render" / "assets" / "fonts" / "Roboto-Regular.ttf"
 
 
@@ -177,7 +177,7 @@ def test_a_view_naming_an_unavailable_font_warns(tmp_path: Path):
         tmp_path,
         "id: root\nkind: Container\nchildren:\n"
         "  - {id: t, kind: Text, text: {content: Hi, font_family: Comic Sans, font_size: 16},"
-        ' style: {width: 50, height: 20, background: "#000000"}}\n',
+        ' style: {width: 50, height: 20, foreground: "#000000"}}\n',
     )
     with pytest.warns(FontFallbackWarning, match=r"Box_View\.yaml: font_family 'Comic Sans'"):
         load_view(view_path)

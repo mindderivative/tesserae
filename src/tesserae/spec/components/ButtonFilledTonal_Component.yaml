@@ -15,6 +15,6 @@ children:
     kind: Text
     text:
       content: "{{ label }}"
-      role: label_large
+      typography_role: label_large
     style:
-      background: on_secondary_container
+      foreground: on_secondary_container

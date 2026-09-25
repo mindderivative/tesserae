@@ -2,7 +2,7 @@
 # `PeriodSelectorAM_Component.yaml` for the shared real design.
 id: root
 kind: Container
-style: {flex_direction: Vertical, width: 52, height: 72}
+style: {flex_direction: vertical, width: 52, height: 72}
 children:
   - id: am
     kind: Container
@@ -11,13 +11,13 @@ children:
       height: 36
       background: transparent
       corner_radius: small
-      justify_content: Center
-      align_items: Center
+      justify_content: center
+      align_items: center
     children:
       - id: am_label
         kind: Text
-        text: {content: AM, role: label_large}
-        style: {background: on_surface}
+        text: {content: AM, typography_role: label_large}
+        style: {foreground: on_surface}
   - id: pm
     kind: Container
     style:
@@ -25,10 +25,10 @@ children:
       height: 36
       background: tertiary_container
       corner_radius: small
-      justify_content: Center
-      align_items: Center
+      justify_content: center
+      align_items: center
     children:
       - id: pm_label
         kind: Text
-        text: {content: PM, role: label_large}
-        style: {background: on_tertiary_container}
+        text: {content: PM, typography_role: label_large}
+        style: {foreground: on_tertiary_container}

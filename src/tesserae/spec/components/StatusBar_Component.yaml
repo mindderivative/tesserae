@@ -12,10 +12,10 @@ style:
   width: "{{ width }}"
   height: 24
   background: surface_container
-  align_items: Center
+  align_items: center
   padding: {left: 8, right: 8, top: 0, bottom: 0}
 children:
   - id: text
     kind: Text
-    text: {content: "{{ text }}", role: label_small}
-    style: {background: on_surface_variant}
+    text: {content: "{{ text }}", typography_role: label_small}
+    style: {foreground: on_surface_variant}

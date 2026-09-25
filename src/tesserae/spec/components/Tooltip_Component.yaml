@@ -11,11 +11,11 @@ style:
   height: 24
   background: inverse_surface
   corner_radius: extra_small
-  justify_content: Center
-  align_items: Center
+  justify_content: center
+  align_items: center
   padding: {left: 8, right: 8, top: 0, bottom: 0}
 children:
   - id: text
     kind: Text
-    text: {content: "{{ text }}", role: body_small}
-    style: {background: inverse_on_surface}
+    text: {content: "{{ text }}", typography_role: body_small}
+    style: {foreground: inverse_on_surface}

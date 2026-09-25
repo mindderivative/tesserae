@@ -12,7 +12,7 @@
 # headline=on_surface, body=on_surface_variant. Real, useful finding:
 # omitting `width` on `headline`/`body` lets them stretch to the
 # panel's own cross-axis width automatically (taffy's real default
-# `align_items: Stretch`), avoiding `add_dialog`'s own `content_width
+# `align_items: stretch`), avoiding `add_dialog`'s own `content_width
 # = width - 2*padding` arithmetic entirely; `flex_grow: 1` on `body`
 # similarly avoids its own `body_height` subtraction.
 params: [headline, text, width, height, scrim_width, scrim_height]
@@ -23,13 +23,13 @@ style:
   height: "{{ scrim_height }}"
   background: scrim
   opacity: 0.32
-  justify_content: Center
-  align_items: Center
+  justify_content: center
+  align_items: center
 children:
   - id: panel
     kind: Container
     style:
-      flex_direction: Vertical
+      flex_direction: vertical
       width: "{{ width }}"
       height: "{{ height }}"
       background: surface_container_high
@@ -40,9 +40,9 @@ children:
     children:
       - id: headline
         kind: Text
-        text: {content: "{{ headline }}", role: headline_small}
-        style: {background: on_surface}
+        text: {content: "{{ headline }}", typography_role: headline_small}
+        style: {foreground: on_surface}
       - id: body
         kind: Text
-        text: {content: "{{ text }}", role: body_medium}
-        style: {background: on_surface_variant, flex_grow: 1}
+        text: {content: "{{ text }}", typography_role: body_medium}
+        style: {foreground: on_surface_variant, flex_grow: 1}

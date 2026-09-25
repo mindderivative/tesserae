@@ -4,7 +4,7 @@
 # (`field_x = base_x + SPIN_BOX_BUTTON_SIZE + SPIN_BOX_GAP`) -- `{{ }}`
 # substitution has no arithmetic, so this fragment composes the
 # identical real visual result (minus/field/plus, `SPIN_BOX_GAP=4.0`
-# apart) via a `Container` + `flex_direction: Horizontal` instead, the
+# apart) via a `Container` + `flex_direction: horizontal` instead, the
 # same real flexbox idiom every other fragment in this catalog already
 # uses.
 #
@@ -28,7 +28,7 @@ params: [value]
 id: root
 kind: Container
 style:
-  flex_direction: Horizontal
+  flex_direction: horizontal
   gap: 4
 children:
   - id: decrement
@@ -38,7 +38,7 @@ children:
       - id: decrement_icon
         kind: Icon
         icon: {name: remove}
-        style: {width: 24, height: 24, background: on_surface_variant}
+        style: {width: 24, height: 24, foreground: on_surface_variant}
   - id: field
     kind: TextField
     text: {content: "{{ value }}", font_family: Roboto, font_weight: 400, font_size: 14}
@@ -50,4 +50,4 @@ children:
       - id: increment_icon
         kind: Icon
         icon: {name: add}
-        style: {width: 24, height: 24, background: on_surface_variant}
+        style: {width: 24, height: 24, foreground: on_surface_variant}

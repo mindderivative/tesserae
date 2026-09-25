@@ -15,14 +15,14 @@ params: [background, width, corner_radius]
 id: root
 kind: Container
 style:
-  flex_direction: Horizontal
+  flex_direction: horizontal
   width: "{{ width }}"
   height: 64
   background: "{{ background }}"
   corner_radius: "{{ corner_radius }}"
   elevation: level_3
-  align_items: Center
-  justify_content: Center
+  align_items: center
+  justify_content: center
   padding: 16
   gap: 32
 children: []

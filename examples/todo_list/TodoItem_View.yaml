@@ -1,6 +1,6 @@
 id: root
 kind: Container
-style: {flex_direction: Horizontal, width: 260, height: 36, gap: 8}
+style: {flex_direction: horizontal, width: 260, height: 36, gap: 8}
 children:
   - id: check
     kind: Checkbox
@@ -10,7 +10,7 @@ children:
   - id: label
     kind: Text
     text: {content: "Item", font_family: Roboto, font_size: 16}
-    style: {width: 160, height: 28, background: "#FFFFFF00"}
+    style: {width: 160, height: 28, foreground: "#FFFFFF00"}
     bindings: {text: "{{ text.get() }}"}
   - id: remove_button
     kind: Rect

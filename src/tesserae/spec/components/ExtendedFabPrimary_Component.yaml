@@ -6,21 +6,21 @@ params: [label, icon, width]
 id: root
 kind: Container
 style:
-  flex_direction: Horizontal
+  flex_direction: horizontal
   width: "{{ width }}"
   height: 56
   background: primary_container
   corner_radius: large
   elevation: level_3
-  align_items: Center
+  align_items: center
   padding: {left: 16, right: 20, top: 0, bottom: 0}
   gap: 8
 children:
   - id: icon
     kind: Icon
     icon: {name: "{{ icon }}"}
-    style: {width: 24, height: 24, background: on_primary_container}
+    style: {width: 24, height: 24, foreground: on_primary_container}
   - id: label
     kind: Text
-    text: {content: "{{ label }}", role: label_large}
-    style: {background: on_primary_container}
+    text: {content: "{{ label }}", typography_role: label_large}
+    style: {foreground: on_primary_container}

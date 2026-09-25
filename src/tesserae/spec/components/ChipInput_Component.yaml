@@ -17,5 +17,5 @@ style:
 children:
   - id: label
     kind: Text
-    text: {content: "{{ label }}", role: label_large}
-    style: {background: on_surface_variant}
+    text: {content: "{{ label }}", typography_role: label_large}
+    style: {foreground: on_surface_variant}

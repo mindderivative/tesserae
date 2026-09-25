@@ -16,15 +16,15 @@ kind: Container
 style:
   width: "{{ width }}"
   height: 56
-  align_items: Center
+  align_items: center
   padding: 16
   gap: 12
 children:
   - id: title
     kind: Text
-    text: {content: "{{ title }}", role: label_large}
-    style: {background: on_surface, flex_grow: 1}
+    text: {content: "{{ title }}", typography_role: label_large}
+    style: {foreground: on_surface, flex_grow: 1}
   - id: chevron
     kind: Icon
     icon: {name: expand_more}
-    style: {width: 24, height: 24, background: on_surface_variant}
+    style: {width: 24, height: 24, foreground: on_surface_variant}

@@ -12,10 +12,10 @@ style:
   height: 16
   background: error
   corner_radius: small
-  justify_content: Center
-  align_items: Center
+  justify_content: center
+  align_items: center
 children:
   - id: label
     kind: Text
-    text: {content: "{{ label }}", role: label_small}
-    style: {background: on_error}
+    text: {content: "{{ label }}", typography_role: label_small}
+    style: {foreground: on_error}

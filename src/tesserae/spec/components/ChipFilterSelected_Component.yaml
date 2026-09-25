@@ -18,8 +18,8 @@ children:
   - id: check
     kind: Icon
     icon: {name: check}
-    style: {width: 18, height: 18, background: on_secondary_container}
+    style: {width: 18, height: 18, foreground: on_secondary_container}
   - id: label
     kind: Text
-    text: {content: "{{ label }}", role: label_large}
-    style: {background: on_secondary_container}
+    text: {content: "{{ label }}", typography_role: label_large}
+    style: {foreground: on_secondary_container}

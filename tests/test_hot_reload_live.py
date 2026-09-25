@@ -36,7 +36,7 @@ SCRIPT = textwrap.dedent(
         return (
             "id: root\\nkind: Container\\nchildren:\\n"
             "  - {id: label, kind: Text, text: {content: " + content + ", font_family: Roboto, font_size: 16},"
-            ' style: {width: 100, height: 20, background: "#000000"}}\\n'
+            ' style: {width: 100, height: 20, foreground: "#000000"}}\\n'
         )
 
     view_path = work / "Home_View.yaml"

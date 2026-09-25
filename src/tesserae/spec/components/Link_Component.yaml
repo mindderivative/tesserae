@@ -21,8 +21,8 @@ id: root
 kind: Link
 text:
   content: "{{ text }}"
-  role: body_large
+  typography_role: body_large
 style:
   width: "{{ width }}"
   height: "{{ height }}"
-  background: primary
+  foreground: primary

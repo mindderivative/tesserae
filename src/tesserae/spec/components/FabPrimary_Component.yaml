@@ -15,4 +15,4 @@ children:
   - id: icon
     kind: Icon
     icon: {name: "{{ icon }}"}
-    style: {width: 24, height: 24, background: on_primary_container}
+    style: {width: 24, height: 24, foreground: on_primary_container}

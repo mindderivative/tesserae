@@ -16,10 +16,10 @@ kind: Container
 style:
   width: "{{ width }}"
   height: 56
-  align_items: Center
+  align_items: center
   padding: {left: "{{ left_padding }}", right: 16, top: 0, bottom: 0}
 children:
   - id: title
     kind: Text
-    text: {content: "{{ title }}", role: label_large}
-    style: {background: on_surface}
+    text: {content: "{{ title }}", typography_role: label_large}
+    style: {foreground: on_surface}

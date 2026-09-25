@@ -11,10 +11,10 @@ kind: Container
 style:
   width: "{{ width }}"
   height: 56
-  align_items: Center
+  align_items: center
   padding: 16
 children:
   - id: label
     kind: Text
-    text: {content: "{{ label }}", role: label_large}
-    style: {background: on_surface}
+    text: {content: "{{ label }}", typography_role: label_large}
+    style: {foreground: on_surface}

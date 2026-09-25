@@ -35,7 +35,7 @@ def _text_view(content: str, extra_children: str = "") -> str:
     return (
         "id: root\nkind: Container\nchildren:\n"
         f"  - {{id: label, kind: Text, text: {{content: {content}, font_family: Roboto, font_size: 16}},"
-        ' style: {width: 100, height: 20, background: "#000000"}}\n'
+        ' style: {width: 100, height: 20, foreground: "#000000"}}\n'
         + extra_children
     )
 
@@ -89,7 +89,7 @@ def test_editing_a_component_fragment_reloads(tmp_path: Path):
         frags / "Greeting_Component.yaml",
         "params: [width]\nid: root\nkind: Text\n"
         'text: {content: "Hi", font_family: Roboto, font_size: 16}\n'
-        'style: {width: "{{ width }}", height: 20, background: "#000000"}\n',
+        'style: {width: "{{ width }}", height: 20, foreground: "#000000"}\n',
     )
     _, view, watcher = _watched(
         tmp_path,
@@ -122,7 +122,7 @@ def test_changing_an_image_file_reloads(tmp_path: Path):
 
 def test_a_newly_added_include_is_watched_after_reload(tmp_path: Path):
     view_path, view, watcher = _watched(tmp_path, _text_view("Hello"))
-    rect = 'id: extra\nkind: Rect\nstyle: {{width: {n}, height: {n}, background: "#112233"}}\n'
+    rect = 'id: extra\nkind: Rect\nstyle: {{width: {n}, height: {n}, foreground: "#112233"}}\n'
     part = _write(tmp_path / "extra.yaml", rect.format(n=5))
     assert part.resolve() not in watcher.files
 

@@ -23,10 +23,10 @@ style:
   width: "{{ width }}"
   height: 64
   background: surface
-  align_items: Center
+  align_items: center
   padding: {left: 4, right: 4, top: 0, bottom: 0}
 children:
   - id: title
     kind: Text
-    text: {content: "{{ title }}", role: title_large}
-    style: {background: on_surface, flex_grow: 1, margin: {left: 16, right: 0, top: 0, bottom: 0}}
+    text: {content: "{{ title }}", typography_role: title_large}
+    style: {foreground: on_surface, flex_grow: 1, margin: {left: 16, right: 0, top: 0, bottom: 0}}

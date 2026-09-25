@@ -6,7 +6,7 @@ params: [label, width, height, corner_radius]
 id: root
 kind: Container
 style:
-  flex_direction: Horizontal
+  flex_direction: horizontal
   gap: 2
 children:
   - id: leading
@@ -19,8 +19,8 @@ children:
     children:
       - id: label
         kind: Text
-        text: {content: "{{ label }}", role: label_large}
-        style: {background: primary}
+        text: {content: "{{ label }}", typography_role: label_large}
+        style: {foreground: primary}
   - id: trailing
     kind: Rect
     style:
@@ -32,4 +32,4 @@ children:
       - id: chevron
         kind: Icon
         icon: {name: expand_more}
-        style: {width: 22, height: 22, background: primary}
+        style: {width: 22, height: 22, foreground: primary}
