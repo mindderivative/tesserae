@@ -30,7 +30,7 @@ from tesserae import tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
-__all__ = ["Built", "SpecBuildError", "build"]
+__all__ = ["Built", "SpecBuildError", "build", "patch", "prepare_layers", "shipped_default_theme"]
 
 RGBA = tuple[int, int, int, int]
 _TRANSPARENT: RGBA = (0, 0, 0, 0)
@@ -103,6 +103,34 @@ def build(
     return built
 
 
+def prepare_layers(
+    default_theme: Optional[dict[str, Any]],
+    custom_theme: Optional[dict[str, Any]],
+    stylesheet: Optional[dict[str, Any]],
+) -> tuple[Optional[Sheet], ...]:
+    """The cascade's three layers, prepared once (`default_theme` defaults
+    to `tre`'s shipped one)."""
+    if default_theme is None:
+        default_theme = shipped_default_theme()
+    return (Sheet.of(default_theme), Sheet.of(custom_theme), Sheet.of(stylesheet))
+
+
+def build_with(
+    window: Any,
+    spec: dict[str, Any],
+    *,
+    scheme: Optional[dict[str, RGBA]],
+    layers: tuple[Optional[Sheet], ...],
+    frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
+    into: Optional[Built] = None,
+) -> Any:
+    """Builds `spec` with already-prepared layers, recording its nodes in
+    `into` (a new `Built` if none); returns the subtree's outer root."""
+    ctx = _Context(window, layers, scheme, frames or {})
+    built = into if into is not None else Built(root=None)
+    return _build(ctx, spec, built)
+
+
 _shipped: Optional[dict[str, Any]] = None
 
 
@@ -132,7 +160,7 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     if unknown_style:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}")
 
-    outer, inner = _KIND_BUILDERS[kind](ctx, node, style)
+    outer, inner = _create(ctx, node, style)
     built.nodes[node_id] = inner
     built.outer[node_id] = outer
     built.specs[node_id] = node
@@ -261,51 +289,49 @@ def _check_state(node: dict[str, Any], kind: str, expected: str, given: str) -> 
 
 
 # -- kinds ----------------------------------------------------------------------------------
+#
+# Each kind has a props function giving `(outer_props, inner_props)` -- what
+# to create a node with, and what `patch` sets on an existing one -- so a
+# rebuild and a patch can't drift apart.
 
 
-def _box(ctx, node, style):
-    kind = node["kind"]
-    fill = _required_background(ctx, node, style, "Rect") if kind == "Rect" else (
+def _box_props(ctx, node, style):
+    fill = _required_background(ctx, node, style, "Rect") if node["kind"] == "Rect" else (
         _color(ctx, node["id"], "background", style["background"]) if "background" in style else _TRANSPARENT
     )
-    n = ctx.window.create("box", **_layout(style), **_paint(ctx, node["id"], style), fill=fill)
-    return n, n
+    return {**_layout(style), **_paint(ctx, node["id"], style), "fill": fill}, None
 
 
-def _text(ctx, node, style):
+def _text_props(ctx, node, style):
     fill = _required_foreground(ctx, node, style, node["kind"])
     props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(node, node["kind"]), "fill": fill}
     if node["kind"] == "Link":
         props.update(role="link", cursor="pointer", focusable=True)
-    n = ctx.window.create("text", **props)
-    return n, n
+    return props, None
 
 
-def _text_field(ctx, node, style):
+def _text_field_props(ctx, node, style):
     background = _required_background(ctx, node, style, "TextField")
     text = _text_style(node, "TextField")
     text.pop("line_height")
-    outer = ctx.window.create("box", **_layout(style), **_paint(ctx, node["id"], style), fill=background)
+    outer = {**_layout(style), **_paint(ctx, node["id"], style), "fill": background}
     # `tre`'s TextField draws its text in MD3's baseline on_surface, not a theme role.
-    inner = ctx.window.create("text_input", **text, fill=_TEXT_FIELD_GLYPH, flex_grow=1.0, align_self="stretch",
-                              role="textbox", focusable=True)
-    outer.add_child(inner)
+    inner = {**text, "fill": _TEXT_FIELD_GLYPH, "flex_grow": 1.0, "align_self": "stretch", "role": "textbox", "focusable": True}
     return outer, inner
 
 
-def _image(ctx, node, style):
+def _image_props(ctx, node, style):
     image = node.get("image")
     if not isinstance(image, dict):
         raise SpecBuildError(f'widget {_q(node["id"])}: Image requires image, none given')
     rgba, width, height = ctx.frames.get(node["id"], (bytes(4), 1, 1))
-    n = ctx.window.create(
-        "image", **_layout(style), **_paint(ctx, node["id"], style),
-        rgba=rgba, pixel_width=width, pixel_height=height, fit=str(image.get("fit", "cover")).lower(),
-    )
-    return n, n
+    return {
+        **_layout(style), **_paint(ctx, node["id"], style),
+        "rgba": rgba, "pixel_width": width, "pixel_height": height, "fit": str(image.get("fit", "cover")).lower(),
+    }, None
 
 
-def _icon(ctx, node, style):
+def _icon_props(ctx, node, style):
     icon = node.get("icon")
     if not isinstance(icon, dict):
         raise SpecBuildError(f'widget {_q(node["id"])}: Icon requires icon, none given')
@@ -313,15 +339,82 @@ def _icon(ctx, node, style):
     if data is None:
         raise SpecBuildError(f'widget {_q(node["id"])}: unknown icon "{icon.get("name")}"')
     tint = _required_foreground(ctx, node, style, "Icon")
-    n = ctx.window.create(
-        "path", **_layout(style), **_paint(ctx, node["id"], style, corner_radius=False),
-        data=data, view_box=ICON_VIEW_BOX, fill=tint,
-    )
-    return n, n
+    return {**_layout(style), **_paint(ctx, node["id"], style, corner_radius=False),
+            "data": data, "view_box": ICON_VIEW_BOX, "fill": tint}, None
+
+
+_PRIMITIVE = {
+    "Rect": ("box", _box_props), "Container": ("box", _box_props), "Text": ("text", _text_props),
+    "Link": ("text", _text_props), "TextField": ("box", _text_field_props), "Image": ("image", _image_props),
+    "Icon": ("path", _icon_props),
+}
+
+
+def _create(ctx, node, style):
+    kind = node["kind"]
+    if kind in _LEGACY_KINDS:
+        return _legacy(ctx, node, style)
+    tre_kind, props_of = _PRIMITIVE[kind]
+    outer_props, inner_props = props_of(ctx, node, style)
+    outer = ctx.window.create(tre_kind, **outer_props)
+    if inner_props is None:
+        return outer, outer
+    inner = ctx.window.create("text_input", **inner_props)
+    outer.add_child(inner)
+    return outer, inner
+
+
+#: What an unset alignment resets to on a patch: flexbox's defaults,
+#: since `set` won't take `None`.
+_ALIGNMENT_DEFAULTS = {"align_items": "stretch", "justify_content": "flex_start"}
+
+
+def patch(
+    window: Any,
+    node: dict[str, Any],
+    outer: Any,
+    inner: Any,
+    *,
+    scheme: Optional[dict[str, RGBA]] = None,
+    layers: tuple[Optional[Sheet], ...] = (),
+    frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
+    state: bool = True,
+    set_state: Optional[Callable[[Callable[[Any], None], Any], None]] = None,
+) -> None:
+    """Sets `node`'s properties on its existing nodes, in place -- what
+    `tre`'s `patch_node` does. The node keeps its identity, focus and
+    running animations. Children aren't touched.
+
+    `state=False` restyles only, leaving a legacy MD3 widget's
+    `checked`/`selected` alone (a theme or stylesheet change). `set_state`
+    applies a state change (default: call the setter)."""
+    ctx = _Context(window, layers, scheme, frames or {})
+    style = resolve_style(node, layers)
+    kind = node["kind"]
+    if kind in _LEGACY_KINDS:
+        outer.set(**_ALIGNMENT_DEFAULTS, **_layout(style), **_paint(ctx, node["id"], style))
+        if state:
+            _legacy_state(node, outer, set_state or (lambda setter, value: setter(value)))
+        return
+    _, props_of = _PRIMITIVE[kind]
+    outer_props, inner_props = props_of(ctx, node, style)
+    outer.set(**_ALIGNMENT_DEFAULTS, **outer_props)
+    if inner_props is not None:
+        inner.set(**inner_props)
 
 
 def _role(ctx, name):
     return (ctx.scheme or {}).get(name, _BASELINE[name])
+
+
+def _legacy_state(node: dict[str, Any], n: Any, set_state: Callable[[Callable[[Any], None], Any], None]) -> None:
+    """A legacy MD3 kind's state from its spec (a reconcile patch resets
+    it, as `tre`'s does; bindings re-apply their values afterwards)."""
+    kind = node["kind"]
+    if kind == "Checkbox" and n.get_checked() != bool(node.get("checked") or False):
+        set_state(n.set_checked, bool(node.get("checked") or False))
+    elif kind in ("Switch", "RadioButton") and n.get_selected() != bool(node.get("selected") or False):
+        set_state(n.set_selected, bool(node.get("selected") or False))
 
 
 def _legacy(ctx, node, style):
@@ -357,9 +450,3 @@ def _legacy(ctx, node, style):
     # tre's View applies the cascade's corner radius, border and elevation to these kinds too
     n.set(**_layout(style), **_paint(ctx, node_id, style))
     return n, n
-
-
-_KIND_BUILDERS: dict[str, Callable[..., tuple[Any, Any]]] = {
-    "Rect": _box, "Container": _box, "Text": _text, "Link": _text, "TextField": _text_field,
-    "Image": _image, "Icon": _icon, **{kind: _legacy for kind in _LEGACY_KINDS},
-}

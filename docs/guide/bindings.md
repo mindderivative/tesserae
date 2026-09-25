@@ -72,8 +72,13 @@ widget "label" binding on "text" ("{{ -1 }}"): failed to parse binding expressio
 
 ## Who evaluates it
 
-Today `tre` evaluates bindings, in `View._attach`. Tesserae has its own
-evaluator, `tesserae.binding`, a port of `tre`'s that gives the same
-result or the same error for every expression (tested side by side). It
-takes over when Tesserae builds and wires views itself (M37), because
-`tre` removes its own in 0.3.5.
+Tesserae does, with `tesserae.binding`, a port of `tre`'s evaluator that
+gives the same result or the same error for every expression (tested
+side by side), in a Tesserae `View` (`tesserae.view.View`, M37). A view
+still built by `tre`'s `View` is evaluated by `tre` until Tesserae builds
+every view itself (M37 Phase 6); `tre` removes its evaluator in 0.3.5.
+
+In a Tesserae view, a binding that changes a value sets it; one whose
+value hasn't changed does nothing. Setting a value from a binding never
+counts as the user's edit, so `on_change` runs only when the user changes
+the widget: typing in a text field, or toggling a checkbox.

@@ -215,3 +215,23 @@ User: "push it and start Phase 3". Pushed `6c6dde1`.
    views without a seed. SpinBox exposed Tesserae accepting a number as
    text content; it's now rejected, as in tre.
 5. Mutants: 3 of 4 caught; level 5 is pinned by `test_tokens.py`.
+
+## M37 Phase 4 — View, reconciler, wiring
+
+User: "push it and start Phase 4". Pushed `29743ac`.
+
+1. Read `tre`'s `reconcile.rs`: match by id; patch when props differ;
+   rebuild on a kind change; remove missing children; append only.
+2. Split `build.py` into props functions plus `create`/`patch`;
+   170 compiler and parity tests unchanged.
+3. `view.py`. Smoke-testing found:
+   - `Node.off(event)` takes no handler;
+   - `on` keeps one listener per event, so each node and event gets a
+     dispatcher;
+   - the legacy Checkbox's change slot fired during binding application
+     (now suppressed);
+   - a re-style reset the legacy checkbox state, and two-way wrote False
+     back (restyles now leave state alone).
+4. `ViewWatcher` handles a Tesserae `View`.
+5. 23 tests. Mutants: the ordering one survived because `parent() is not
+   outer` was always true; fixed with `!=`, then caught. 900 passed.

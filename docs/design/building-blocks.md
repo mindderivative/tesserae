@@ -134,6 +134,32 @@ so Tesserae mounts screens the same way. Two things can't be compared,
 because `tre` can't read them back: a Link's text and font, and a
 TextField's background.
 
+### View, reconciler and wiring (M37 Phase 4)
+
+`tesserae/view.py` is Tesserae's `View`, with the surface Tesserae used
+on `tre`'s: `node(id)`, `reconcile(spec)`, `set_theme`, `set_stylesheet`,
+and `_attach` for `ViewModel`, plus `root` and `window`. Built without a
+window, it makes and themes its own.
+
+- **Bindings** are evaluated by `tesserae.binding` in a
+  `tesserae.reactive` frame, re-tracked on every evaluation, and applied
+  with `tre`'s type rules and messages; an unchanged value isn't set.
+- **Handlers:** `node.on` keeps one listener per event, so each node and
+  event gets one dispatcher, shared by `on_change` and `two_way:`. A
+  handler taking one argument gets the event.
+- **The legacy MD3 widgets** have one `set_on_change` slot, which fires on
+  programmatic changes too, so it's suppressed while a binding sets their
+  state, and a theme or stylesheet change restyles them without resetting
+  it.
+- **The reconciler** keeps unchanged nodes (identity, focus) and orders
+  children as the new spec does, with `insert_child`, where `tre` could
+  only append.
+- **Rewiring:** after any update, handlers and bindings are unwired and
+  wired again, without doubling listeners.
+
+`on_change` runs only for user edits (`tre` issue #12 is `tre`-side
+only).
+
 ### Reconciler, components, screens (M37)
 
 - **Reconciler:** a keyed diff by widget `id`. Unchanged nodes keep

@@ -57,4 +57,6 @@ Phase 2 done: the spec compiler (`spec/build.py`) and cascade (`spec/cascade.py`
 
 Phase 3 done: 127 views identical to `tre`'s node by node (`tests/test_tree_parity.py`); 870 passed.
 
-**Up next:** M37 Phase 4 (View, reconciler, bindings).
+Phase 4 done: `tesserae.View` with the reconciler and Tesserae's own binding, handler and `two_way:` wiring; `on_change` only for user edits; 900 passed.
+
+**Up next:** M37 Phase 5 (components and screens).

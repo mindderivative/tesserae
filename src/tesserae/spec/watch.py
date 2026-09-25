@@ -123,12 +123,20 @@ class ViewWatcher:
         return build_view_spec(self._path, component_dirs=self._component_dirs)
 
     def _apply(self, spec: Any, frames: list[Frame]) -> None:
-        """The `tre` part -- only on the thread that owns the view."""
+        """The `tre` part -- only on the thread that owns the view. A
+        Tesserae `View` (M37) takes the frames with the spec; a `tre` `View`
+        gets them pushed afterwards."""
+        from tesserae.view import View as TesseraeView
+
         try:
-            self._view.reconcile(spec=spec)
+            if isinstance(self._view, TesseraeView):
+                self._view.reconcile(spec, frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
+            else:
+                self._view.reconcile(spec=spec)
         except ValueError as exc:
             raise ValueError(f"{self._path}: {exc}") from exc
-        push_frames(self._view, frames)
+        if not isinstance(self._view, TesseraeView):
+            push_frames(self._view, frames)
         logger.info("reloaded {}", self._path)
 
     # -- no thread -------------------------------------------------
