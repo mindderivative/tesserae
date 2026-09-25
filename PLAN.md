@@ -47,4 +47,6 @@ Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 
 
 **M35 complete (2026-09-25):** `tesserae.reactive`, the parity suite (both implementations), and the recording bridge to `tre`'s bindings until M36; 455 passed.
 
-**Up next:** M36 (bindings and handlers), waiting on the user's go-ahead.
+**M36 complete (2026-09-25):** `tesserae.binding`, identical to `tre`'s on 166 expressions. The wiring moved to M37 (user's choice), because `tre`'s new API can't drive the legacy Checkbox/Switch state; bindings on `checked`/`selected`/`value` move to M40.
+
+**Up next:** M37 (the declarative engine), waiting on the user's go-ahead.

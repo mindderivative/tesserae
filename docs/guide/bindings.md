@@ -75,5 +75,5 @@ widget "label" binding on "text" ("{{ -1 }}"): failed to parse binding expressio
 Today `tre` evaluates bindings, in `View._attach`. Tesserae has its own
 evaluator, `tesserae.binding`, a port of `tre`'s that gives the same
 result or the same error for every expression (tested side by side). It
-takes over when Tesserae wires bindings itself (M36), because `tre`
-removes its own in 0.3.5.
+takes over when Tesserae builds and wires views itself (M37), because
+`tre` removes its own in 0.3.5.

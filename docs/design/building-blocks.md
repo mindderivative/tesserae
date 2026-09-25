@@ -83,6 +83,13 @@ change isn't set again**, so `on_change` doesn't fire on a reload
 `node.on(event, ...)` calls, and `two_way:` is a handler that writes the
 `Signal`.
 
+The evaluator shipped in M36; the wiring lands with M37's builder. It
+can't come sooner: on nodes a `tre` `View` builds, 0.3.4's new API sets
+text, paint and layout, but `set(checked=...)` on a legacy Checkbox
+only sets its accessibility flag, and nothing but the legacy
+`set_checked` reaches its state. Bindings on `checked`/`selected`/`value`
+therefore arrive with Tesserae's own controls (M40).
+
 ### Spec compiler and cascade (M37)
 
 The compiler takes an expanded spec dict (from Tesserae's existing

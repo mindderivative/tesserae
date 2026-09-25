@@ -132,3 +132,14 @@ User: "push it and start M36". Pushed `9d00521`.
    harness errors (81 values, 82 errors, including wraps and `Float(inf)`).
    6/6 mutants caught.
 4. `guide/bindings.md`.
+
+## M36 Phase 2 — wiring staged into M37
+
+Read `tre`'s `apply_binding_value` and handler wiring: all legacy calls
+(`set_checked`/`set_selected`/`set_text`/`set_layout`/`animate` with old
+names/`set_on_*`). Probed the new API on `View`-built nodes: text, fill
+and width work, and programmatic `set` fires no change event. On a
+legacy Checkbox or Switch, `set(checked=)`/`set(selected=)` sets only
+the a11y flag, and no synthetic click toggles one. Asked the user; they
+chose "Move wiring into M37". M36 closed as the evaluator; wiring steps
+added to M37 Phase 2 and M40.
