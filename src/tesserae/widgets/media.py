@@ -17,6 +17,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from tesserae.images import decode_image
+
 if TYPE_CHECKING:
     from tre import Node, Window
 
@@ -30,10 +32,18 @@ def image(
     x: float | None = None,
     y: float | None = None,
 ) -> "Node":
-    """Loads and decodes a real file from disk (png/jpeg) at call time,
-    uploaded as a GPU texture. `fit`: cover/contain/fill. Raises
-    `OSError` if the file can't be read or decoded."""
-    return window.add_image(path, width, height, fit=fit, x=x, y=y)
+    """Loads and decodes a real file from disk at call time, uploaded
+    as a GPU texture. `fit`: cover/contain/fill. Raises `OSError` if the
+    file can't be read or decoded.
+
+    M29 Phase 2: Tesserae decodes the file itself (Pillow) and hands
+    `tre` only the pixels, via `add_image_from_bytes` -- `tre` never
+    opens the file. The one real departure from `tre`'s own `add_image`
+    delegation this module otherwise follows."""
+    rgba, pixel_width, pixel_height = decode_image(path)
+    return window.add_image_from_bytes(
+        rgba, pixel_width, pixel_height, width, height, fit=fit, x=x, y=y
+    )
 
 
 def video(

@@ -4,7 +4,7 @@
   file handling, `tre` gets specs and bytes. Recorded as M29 in
   `BUILD_TRACKER.md` after verifying every line reference and every
   `tre` API name against both codebases (`65e9d5a`).
-- User: "pin CI to 0.3.2 and start Phase 1".
+- User: "pin CI to 0.3.2 and start Phase 1", then "push it and use Pillow for Phase 2".
 
 ## What shipped
 
@@ -30,15 +30,29 @@
    as the `image.src:` base directory and `poll_reload` target (both
    confirmed in `tre`'s `View.__new__`). Dropping it now would break
    images and hot reload; moved to Phase 3's last step.
-4. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
+4. Phase 2, image decoding (Pillow):
+   - `tesserae.images.decode_image` → straight-alpha RGBA bytes plus
+     pixel size, raising `OSError` naming the file.
+   - `widgets.image` → `add_image_from_bytes`.
+   - `spec/images.py`: every `kind: Image`'s `src:` removed after
+     expansion, resolved with `tre`'s rules, decoded, pushed with
+     `push_frame` once `tre` builds the node. `Image_Component.yaml`
+     needed no change.
+   - `instantiate` now passes `path=""` -- `tre` gets no file path for
+     embedded components. `load_view` keeps `path` only for
+     `poll_reload`.
+   - Mutation-checked: disabling `src:` removal fails 3 of 4 end-to-end
+     tests, with `tre` visibly opening the file itself.
+5. Docs: `api/spec.md` rewritten (`spec=` handoff, new `include:`
    section, `expand_components_to_spec`, file-named errors);
    `guide/component-fragments.md` loading section updated.
 
 ## Status
 
-**Phase 1 of 5 done.** `pytest tests/` 172 passed (up from 157, +15,
-0 regressions); all 3 examples ran clean; `mkdocs build --strict`
-clean. Committed locally; not pushed.
+**Phases 1–2 of 5 done.** `pytest tests/` 188 passed (up from 157:
++15 Phase 1, +16 Phase 2; 0 regressions); all 3 examples ran clean;
+`mkdocs build --strict` clean. CI green after the pin (172 passed on
+`82cf4f2`). Phase 2 committed locally, not pushed.
 
-Phase 2 waits on the user's Pillow decision; Phase 3 on a file-watching
-choice; Phase 4 on `tre` M86.
+Phase 3 waits on a file-watching choice. Phase 4 is unblocked locally
+(`tre` M86 landed on `0.3.2`, not pushed) and waits on a go-ahead.

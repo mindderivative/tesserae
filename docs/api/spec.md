@@ -36,11 +36,33 @@ unchanged, so this is a safe drop-in for any existing `View(path)` call.
 tool, or for constructing a `View` outside `App`.
 
 !!! note "Still passed to `tre`, for now"
-    `path` is still given to `tre` as the base directory a
-    `kind: Image`'s `src:` resolves against, and as the file `tre`'s
-    own `poll_reload` watches. Both go away once image decoding and hot
-    reload move into Tesserae (M29 Phases 2 and 3 in
+    `path` is still given to `tre`, only as the file `tre`'s own
+    `poll_reload` watches -- `tre` never reads it. That goes away once
+    hot reload moves into Tesserae (M29 Phase 3 in
     [`BUILD_TRACKER.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER.md)).
+    `tesserae.instantiate` already gives `tre` no path at all.
+
+## Images (`kind: Image` with `src:`)
+
+Tesserae decodes every image a view names -- hand-written
+`kind: Image` nodes and the `Image` fragment alike -- and hands `tre`
+only the pixels:
+
+1. After expansion, each `kind: Image`'s `image.src:` is removed from
+   the spec (`fit:` is kept).
+2. Tesserae decodes the file with Pillow to straight-alpha RGBA.
+3. `tre` builds the node as a blank image, and Tesserae pushes the
+   decoded pixels onto it with `Node.push_frame`.
+
+`src:` follows the same rules `tre` used when it loaded images itself,
+so existing views don't change: relative to the top-level view file's
+directory (including images inside an `include:`d file), no absolute
+paths, and no escaping that directory. A missing or undecodable image
+is a `ComponentError` naming the widget and the file:
+
+```text
+ComponentError: widget 'logo': image.src: 'assets/logo.png': cannot read ...
+```
 
 ## `include:`
 
@@ -92,13 +114,13 @@ inspecting what a view expands to; nothing on Tesserae's own path to
 
 ## `ComponentError`
 
-A `ValueError` subclass raised for any `component:` or `include:` that
-can't be expanded -- an unknown component name, a missing or unknown
-parameter, a missing `id:`, a cycle, exceeding a depth limit, a
-malformed `repeat:`, or an `include:` that breaks one of the rules
-above. For `component:` errors the message includes the call chain that
-led to the failure (e.g. `Card -> ButtonFilled: ...`), not just the
-innermost fragment.
+A `ValueError` subclass raised for any `component:`, `include:` or
+image that can't be expanded -- an unknown component name, a missing or
+unknown parameter, a missing `id:`, a cycle, exceeding a depth limit, a
+malformed `repeat:`, an `include:` that breaks one of the rules above,
+or an image that can't be found or decoded. For `component:` errors the
+message includes the call chain that led to the failure (e.g.
+`Card -> ButtonFilled: ...`), not just the innermost fragment.
 
 ```python
 from tesserae.spec import ComponentError, load_view

@@ -24,6 +24,7 @@ from typing import Any
 
 from tesserae.naming import check_naming_convention
 from tesserae.spec import expand_components_to_spec
+from tesserae.spec.images import extract_images, push_frames
 
 
 def instantiate(
@@ -42,16 +43,21 @@ def instantiate(
     `path`'s real content is expanded for `include:`/`component:` usage
     and handed to `tre` as a dict via `spec=` (M29 Phase 1), the same
     as `load_view` -- a true no-op expansion for a file with neither.
-    `path` itself is still passed only as the base directory for any
-    `kind: Image` `src:`, until M29 Phase 2 moves image decoding into
-    Tesserae. A `ValueError` from `tre` is re-raised naming `path`.
+    Every `kind: Image`'s `src:` is decoded by Tesserae and pushed onto
+    the built node (M29 Phase 2), so `tre` is given no file path at all
+    -- `path=""` is `tre`'s own "no base directory" value, and with
+    `include:` and `image.src:` both handled here, `tre` has nothing
+    left to resolve against one. A `ValueError` from `tre` is re-raised
+    naming `path`.
     """
     check_naming_convention(path, viewmodel_cls)
     path = Path(path)
     spec = expand_components_to_spec(path.read_text(encoding="utf-8"), base_dir=path.parent)
+    spec, frames = extract_images(spec, path.parent)
     try:
-        component = parent.instantiate(str(path), into, spec=spec)
+        component = parent.instantiate("", into, spec=spec)
     except ValueError as exc:
         raise ValueError(f"{path}: {exc}") from exc
+    push_frames(component, frames)
     viewmodel = viewmodel_cls(component, *args, **kwargs)
     return component, viewmodel

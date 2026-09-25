@@ -6,7 +6,10 @@
 # directory (the same base directory `include:`/every other `image.
 # src:` already resolves against), not this fragment file's own
 # directory -- the natural, correct behavior for an app referencing its
-# own image assets. No `background` param -- an image has no
+# own image assets. M29 Phase 2: `tre` never loads that file -- Tesserae
+# removes `src:` after expansion, decodes it with Pillow, and pushes the
+# pixels onto this node (`spec/images.py`); the fragment itself is
+# unchanged. No `background` param -- an image has no
 # meaningful "behind it" fill, the identical real reasoning `docs/
 # guide/components.md` already states for `add_image` itself.
 #

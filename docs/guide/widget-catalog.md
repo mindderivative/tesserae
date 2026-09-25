@@ -66,6 +66,12 @@ is an implementation detail, not part of the stable import path.
 from tesserae.widgets import card, checkbox, tabs
 ```
 
+One function isn't a pure delegate: `image(window, path, ...)` decodes
+the file itself (with Pillow) and calls `tre`'s
+`add_image_from_bytes`, so `tre` only ever receives pixels, never a
+file path. Its parameters and its `OSError` on a missing or undecodable
+file are unchanged.
+
 ## `list_`/`list_item` vs. `repeat:`
 
 `list_` in this catalog takes pre-built `Node`s and does pure layout
