@@ -65,4 +65,10 @@ Phase 6 done: `load_view`, `instantiate`, `ViewWatcher` and the suite off `tre`'
 
 **M38 scoped (2026-09-25):** a `tesserae.Theme` (roles, `components:`, `typography:`, motion), theme typography in views, light/dark with the OS, docs; decisions Q1–Q4 in `BUILD_TRACKER.md`.
 
-**Up next:** the user's decisions on M38's Q1–Q4.
+**M38 decisions (user):**
+- Q1: theme typography for display text, not text inputs.
+- Q2: `App(dark="system")` by default, plus `set_dark`.
+- Q3: `"system"` starts dark.
+- Q4: Emphasized as (0.2, 0, 0, 1).
+
+**Up next:** M38 Phase 1 (`tesserae.Theme`).
