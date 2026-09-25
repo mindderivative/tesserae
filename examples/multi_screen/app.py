@@ -26,10 +26,14 @@ way to theme a screen given to `register()`.
 
 from pathlib import Path
 
-from tesserae import App
+from loguru import logger
+
+from tesserae import App, configure_logging
 
 from Home_ViewModel import HomeViewModel
 from Settings_ViewModel import SettingsViewModel
+
+configure_logging()  # Tesserae's console format; configure_logging("DEBUG") shows more
 
 directory = Path(__file__).parent
 
@@ -63,7 +67,7 @@ assert app.current == "Home"
 window.click(home_button)
 assert app.current == "Settings"
 
-print(f"final screen: {app.current!r}")
+logger.info(f"final screen: {app.current!r}")
 
 app.run(max_frames=20)
-print("examples/multi_screen/app.py: exited cleanly after a real 20-frame render loop")
+logger.info("examples/multi_screen/app.py: exited cleanly after a real 20-frame render loop")

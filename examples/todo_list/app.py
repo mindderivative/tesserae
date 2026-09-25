@@ -17,9 +17,13 @@ stack this repo's earlier, pre-`Repeater` version already did --
 
 from pathlib import Path
 
-from tesserae import App
+from loguru import logger
+
+from tesserae import App, configure_logging
 
 from Todo_ViewModel import TodoViewModel
+
+configure_logging()  # Tesserae's console format; configure_logging("DEBUG") shows more
 
 directory = Path(__file__).parent
 
@@ -63,10 +67,10 @@ assert item_texts() == ["Item 1", "Item 3"]
 window.click(add_button)
 assert len(vm.repeater) == 3
 
-print(
+logger.info(
     f"final items: "
     f"{[(item_vm.text.get(), item_vm.done.get()) for _k, _c, item_vm in vm.repeater]!r}"
 )
 
 app.run(max_frames=20)
-print("todo_list/app.py: exited cleanly after a real 20-frame render loop")
+logger.info("todo_list/app.py: exited cleanly after a real 20-frame render loop")

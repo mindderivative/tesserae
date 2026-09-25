@@ -30,9 +30,10 @@ and hands only the final update to the event loop through
 ## When an edit is broken
 
 If a reload fails -- invalid YAML, an unknown component, a widget `tre`
-rejects -- the error names the file, is logged the same way as an
-exception in an event handler, and the screen stays as it was. The app
-and the watcher keep running: fix the file, save, and it reloads.
+rejects -- Tesserae logs one `ERROR` line naming the file and the error
+(the traceback is at `DEBUG`), and the screen stays as it was. The app
+and the watcher keep running: fix the file, save, and it reloads. Each
+reload that works is logged at `INFO`. See [Logging](logging.md).
 
 ## Using `ViewWatcher` directly
 
@@ -78,7 +79,7 @@ re-reads both on the watcher thread, then re-themes every screen built
 by `app.load()` or `app.build_view()`, and the window, through
 `app.set_theme_specs(...)`. Bound values stay live. A theme given as a
 `*_spec=` dict has no file, so it isn't watched. A broken edit is logged
-like a failed view reload, and the app keeps its previous theme.
+at `ERROR` like a failed view reload, and the app keeps its previous theme.
 
 Stylesheet files are watched the same way:
 

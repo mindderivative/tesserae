@@ -37,6 +37,11 @@ fall back, and hot-reload a running app when any of those files change
 (`app.run(hot_reload=True)`) -- views, includes, fragments and images,
 and the app's theme and stylesheet files.
 
+Tesserae logs through [loguru](https://loguru.readthedocs.io/): hot
+reloads, failed reloads naming the file, and warnings. Call
+`tesserae.configure_logging()` in `app.py` for its console format, or
+`logger.disable("tesserae")` to silence it.
+
 ## Install (development)
 
 Tesserae targets **`tre` v0.3.4** (the release its CI pins). Install that

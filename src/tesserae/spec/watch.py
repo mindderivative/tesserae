@@ -22,8 +22,14 @@ Two ways to drive it:
 - **`poll()`** -- no thread: checks each file's modification time and
   size. For a loop the app controls itself.
 
-`tre`'s `View` is single-threaded (`unsendable`): only the `LoopHandle`
-crosses threads, and the watcher thread never touches the view.
+`tre`'s `View` is single-threaded: only the `LoopHandle` crosses
+threads, and the watcher thread never touches the view.
+
+Reloads are logged with loguru (`tesserae.log`): each applied reload at
+INFO. A reload that fails in the background (a YAML error, a bad
+component, a spec `tre` rejects) is logged at ERROR, naming the file,
+with its traceback at DEBUG, and the view stays as it was. `poll()`
+raises instead, since the app's own loop called it.
 
 M31: `FileWatcher` is the same background-thread pattern for a fixed set
 of files with no dependencies of their own -- `App.run(hot_reload=True)`
@@ -37,6 +43,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional, Tuple
 
 import watchfiles
+from loguru import logger
 
 from tesserae.spec.images import Frame, push_frames
 from tesserae.spec.load import build_view_spec
@@ -55,11 +62,24 @@ def _stamp(path: Path) -> _Stamp:
     return (stat.st_mtime_ns, stat.st_size)
 
 
-def _reraise(exc: BaseException) -> Callable[[], None]:
-    def reraise() -> None:
-        raise exc
+def _log_failure(what: str, exc: BaseException) -> None:
+    """One ERROR line naming `what` and the error, with the traceback at
+    DEBUG -- a YAML typo shouldn't print a stack trace by default."""
+    logger.error("hot reload of {} failed: {}", what, exc)
+    logger.opt(exception=exc).debug("hot reload of {} failed, traceback:", what)
 
-    return reraise
+
+def _guarded(what: str, fn: Callable[[], None]) -> Callable[[], None]:
+    """`fn`, for the event loop to run: a failure is logged, not raised,
+    so the loop and the watcher carry on and the view stays as it was."""
+
+    def run() -> None:
+        try:
+            fn()
+        except Exception as exc:
+            _log_failure(what, exc)
+
+    return run
 
 
 class ViewWatcher:
@@ -109,6 +129,7 @@ class ViewWatcher:
         except ValueError as exc:
             raise ValueError(f"{self._path}: {exc}") from exc
         push_frames(self._view, frames)
+        logger.info("reloaded {}", self._path)
 
     # -- no thread -------------------------------------------------
 
@@ -141,9 +162,8 @@ class ViewWatcher:
         `tre.App.thread_handle()`'s `LoopHandle`; each reload is queued
         on it with `call_soon`, so it runs on the event-loop thread.
 
-        A failed reload is queued too, as a callable that raises -- `tre`
-        logs it the way it logs an input handler's exception, and the
-        loop, and the watcher, carry on.
+        A reload that fails is logged at ERROR, naming the file, and the
+        view stays as it was; the loop and the watcher carry on.
         """
         if self._thread is not None:
             raise RuntimeError("ViewWatcher.start() called twice without stop()")
@@ -176,22 +196,24 @@ class ViewWatcher:
                     try:
                         spec, frames, deps = self._rebuild()
                     except Exception as exc:
-                        handle.call_soon(_reraise(exc))
+                        _log_failure(str(self._path), exc)
                         continue
                     self._stamps = {p: _stamp(p) for p in deps}
-                    handle.call_soon(lambda spec=spec, frames=frames: self._apply(spec, frames))
+                    handle.call_soon(
+                        _guarded(str(self._path), lambda spec=spec, frames=frames: self._apply(spec, frames))
+                    )
                     if sorted({p.parent for p in deps if p.parent.is_dir()}) != dirs:
                         break  # a dependency moved to a new directory: re-watch
         except Exception as exc:  # the watcher itself failed; report it, don't die silently
-            handle.call_soon(_reraise(exc))
+            logger.opt(exception=exc).error("the hot-reload watcher for {} stopped", self._path)
 
 
 class FileWatcher:
     """Watches a fixed set of files on a background thread, the way
     `ViewWatcher.start` does (M31). On a change, `rebuild()` runs on the
     watcher thread -- the file work -- and `apply(result)` is queued on
-    `handle` with `call_soon`, so it runs on the event-loop thread. A
-    `rebuild()` that raises is queued as a callable that raises, and
+    `handle` with `call_soon`, so it runs on the event-loop thread. If
+    either raises, the error is logged at ERROR, naming the file, and
     watching carries on.
     """
 
@@ -207,6 +229,8 @@ class FileWatcher:
         self._rebuild = rebuild
         self._apply = apply
         self._name = name
+        #: How a log message names what's watched.
+        self._what = ", ".join(sorted(str(f) for f in self._files))
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
 
@@ -252,8 +276,8 @@ class FileWatcher:
                 try:
                     result = self._rebuild()
                 except Exception as exc:
-                    handle.call_soon(_reraise(exc))
+                    _log_failure(self._what, exc)
                     continue
-                handle.call_soon(lambda result=result: self._apply(result))
+                handle.call_soon(_guarded(self._what, lambda result=result: self._apply(result)))
         except Exception as exc:  # the watcher itself failed; report it, don't die silently
-            handle.call_soon(_reraise(exc))
+            logger.opt(exception=exc).error("the hot-reload watcher for {} stopped", self._what)

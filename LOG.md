@@ -72,3 +72,13 @@ not pushed):
 - icons are 12 SVG `d=` strings (view box `0 -960 960 960`);
 - the node graph goes on primitives, with edges on `canvas`.
 Recorded in M34 Phase 1 Step 3, M41, M42 and M43.
+
+## M44 — logging with loguru (outside the program)
+
+User: "Id like to use loguru for logs and console outputs for tesserae.
+Can we set that up while we wait for tre". Asked three questions; the
+user took the recommendations: on by default, failed background reloads
+logged (not raised through `tre`), examples on `logger`. `loguru` 0.7.3
+installed. `tesserae/log.py` with `configure_logging`; logging in
+`watch.py` and `app.py`; the `logs` fixture; four tests rewritten, seven
+added; docs. 426 passed. Recorded as M44.

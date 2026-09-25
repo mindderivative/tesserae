@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from loguru import logger
 from tre import App as _TreApp
 from tre import Window
 
@@ -72,15 +73,17 @@ def _apply_all(views: list[Any], apply: Any, undo: Any) -> None:
         raise
 
 
-def _naming(path: Path, fn: Any) -> Any:
-    """Wraps `fn(arg)` so a `ValueError` from `tre` names the file the
-    change came from, as a failed view reload does."""
+def _from_file(path: Path, what: str, fn: Any) -> Any:
+    """Wraps `fn(arg)`, a change read from `path`: a `ValueError` from
+    `tre` names the file, as a failed view reload does, and a change that
+    applies is logged."""
 
     def apply(arg: Any) -> None:
         try:
             fn(arg)
         except ValueError as exc:
             raise ValueError(f"{path}: {exc}") from exc
+        logger.info("{} from {}", what, path)
 
     return apply
 
@@ -358,6 +361,7 @@ class App:
         viewmodel = viewmodel_cls(view)
         self.register(name or prefix, view, viewmodel)
         self._registered[name or prefix].path = view_path
+        logger.debug("loaded {!r} from {}", name or prefix, view_path)
         return view, viewmodel
 
     def show(self, name: str) -> Window:
@@ -377,6 +381,7 @@ class App:
         else:
             self._window.show_view(registered.view)
         self._current = name
+        logger.debug("showing {!r}", name)
         return self._window
 
     @property
@@ -413,7 +418,7 @@ class App:
                 FileWatcher(
                     [path],
                     lambda path=path: load_stylesheet(path),
-                    _naming(path, self.set_stylesheet_spec),
+                    _from_file(path, "re-styled the screens using the default stylesheet", self.set_stylesheet_spec),
                     name="stylesheet",
                 )
             )
@@ -422,7 +427,11 @@ class App:
                 FileWatcher(
                     [path],
                     lambda path=path: load_stylesheet(path),
-                    _naming(path, lambda spec, path=path: self._set_own_stylesheet(path, spec)),
+                    _from_file(
+                        path,
+                        "re-styled the screens loaded with this stylesheet",
+                        lambda spec, path=path: self._set_own_stylesheet(path, spec),
+                    ),
                     name=f"stylesheet:{path.name}",
                 )
             )
@@ -432,13 +441,24 @@ class App:
                 FileWatcher(
                     theme_files,
                     self._read_theme_files,
-                    lambda specs: self.set_theme_specs(*specs),
+                    self._apply_theme_files,
                     name="theme",
                 )
             )
         for watcher in watchers:
             watcher.start(handle)
+        views = sum(isinstance(w, ViewWatcher) for w in watchers)
+        logger.info(
+            "hot reload on: watching {} screen(s) and {} theme/stylesheet file(s)",
+            views,
+            sum(len(w.files) for w in watchers if not isinstance(w, ViewWatcher)),
+        )
         return watchers
+
+    def _apply_theme_files(self, specs: tuple[Any, Any]) -> None:
+        self.set_theme_specs(*specs)
+        files = ", ".join(str(f) for f in self._theme_files.values() if f is not None)
+        logger.info("re-themed the app from {}", files)
 
     def run(self, max_frames: int | None = None, *, hot_reload: bool = False) -> None:
         """The one blocking call -- opens the real `Window` `show()` has

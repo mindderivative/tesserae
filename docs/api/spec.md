@@ -80,9 +80,10 @@ every screen registered with `App.load()`.
   (`watchfiles`) on a background thread. `handle` is
   `App.thread_handle()`; each reload is rebuilt on the watcher thread
   and applied on the event-loop thread via `handle.call_soon`. A failed
-  reload is queued as a callable that raises, so it's logged like an
-  event handler's exception and the watcher carries on. `running` says
-  whether the thread is active.
+  reload is logged at `ERROR` through loguru, naming the file (traceback
+  at `DEBUG`); the view stays as it was and the watcher carries on. Each
+  reload is logged at `INFO` (see [Logging](../guide/logging.md)).
+  `running` says whether the thread is active.
 - **`poll() -> bool`** -- if any file the view was built from changed
   since the last poll, rebuilds it and updates the live view in place
   via `tre`'s `view.reconcile(spec=...)`, then returns `True`.

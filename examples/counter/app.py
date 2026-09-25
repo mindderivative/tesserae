@@ -13,9 +13,13 @@ the view/viewModel").
 
 from pathlib import Path
 
-from tesserae import App
+from loguru import logger
+
+from tesserae import App, configure_logging
 
 from Counter_ViewModel import CounterViewModel
+
+configure_logging()  # Tesserae's console format; configure_logging("DEBUG") shows more
 
 directory = Path(__file__).parent
 
@@ -30,7 +34,7 @@ window = app.show("Counter")
 label = view.node("label")
 button = view.node("button")
 
-print(f"before any click: label={label.get_text()!r}")
+logger.info(f"before any click: label={label.get_text()!r}")
 assert label.get_text() == "Count: 0"
 
 # Three real, dispatched clicks -- the same real proof `tre`'s own
@@ -40,9 +44,9 @@ assert label.get_text() == "Count: 0"
 for _ in range(3):
     window.click(button)
 
-print(f"after 3 clicks: label={label.get_text()!r}")
+logger.info(f"after 3 clicks: label={label.get_text()!r}")
 assert label.get_text() == "Count: 3"
 assert app.current == "Counter"
 
 app.run(max_frames=20)
-print("examples/counter/app.py: exited cleanly after a real 20-frame render loop")
+logger.info("examples/counter/app.py: exited cleanly after a real 20-frame render loop")

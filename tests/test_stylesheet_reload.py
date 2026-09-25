@@ -177,29 +177,31 @@ def test_editing_a_screens_own_stylesheet_file_restyles_only_the_screens_using_i
     assert _radius(plain) == 1.0
 
 
-def test_a_broken_stylesheet_edit_raises_on_the_loop_and_the_watcher_carries_on(tmp_path: Path, watching):
+def test_a_broken_stylesheet_edit_is_logged_and_the_watcher_carries_on(tmp_path: Path, watching, logs):
     default = _write(tmp_path / "default.yaml", _sheet(2))
     app = App(theme_seed=SEED, stylesheet=default)
     home, _ = app.load(*_pair(tmp_path, "Home"))
     handle = watching(app)
 
-    with pytest.raises(ValueError, match="invalid YAML"):
-        _edit_until_queued(handle, default, "styles: [unclosed\n")()
+    logs.edit_until(default, "styles: [unclosed\n", "ERROR", "invalid YAML")
+    assert handle.queued.empty()
     assert _radius(home) == 2.0
 
     _edit_until_queued(handle, default, _sheet(6))()
     assert _radius(home) == 6.0
+    assert any(m.endswith(f"from {default.resolve()}") for m in logs.messages("INFO"))
 
 
-def test_a_stylesheet_tre_rejects_is_reported_naming_the_file(tmp_path: Path, watching):
+def test_a_stylesheet_tre_rejects_is_logged_naming_the_file(tmp_path: Path, watching, logs):
     own = _write(tmp_path / "own.yaml", _sheet(3))
     app = App(theme_seed=SEED)
     home, _ = app.load(*_pair(tmp_path, "Home"), stylesheet=own)
     handle = watching(app)
 
     rejected = _edit_until_queued(handle, own, "styles: not a list\n")
-    with pytest.raises(ValueError, match=rf"^{re.escape(str(own.resolve()))}: "):
-        rejected()
+    rejected()  # logs instead of raising
+    message = logs.wait_for("ERROR", "failed")
+    assert re.search(rf"failed: {re.escape(str(own.resolve()))}: ", message)
     assert _radius(home) == 3.0
 
 

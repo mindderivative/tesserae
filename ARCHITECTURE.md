@@ -82,7 +82,14 @@ parsing, decoding and watching.
 
 Because `tre` only ever sees a dict, it can't say which file a problem
 came from; Tesserae re-raises `tre`'s `ValueError`s naming the source
-file. Theme and stylesheet files aren't watched for hot reload yet.
+file. Theme and stylesheet files are watched too (M31, `FileWatcher`).
+
+**Logging:** Tesserae logs through loguru's shared `logger`
+(`tesserae/log.py`) and adds no handler of its own, so an app's loguru
+setup decides where messages go; `configure_logging()` is the one-call
+console setup. A background hot reload that fails is logged at `ERROR`
+(traceback at `DEBUG`) rather than raised through `tre`'s loop;
+`ViewWatcher.poll()` still raises.
 
 ## `*_View.yaml` / `*_ViewModel.py`
 

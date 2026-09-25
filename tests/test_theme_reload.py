@@ -195,19 +195,20 @@ def test_editing_the_default_theme_file_keeps_the_custom_theme(tmp_path: Path, w
     assert home.node("box").get("elevation") == 3.0
 
 
-def test_a_broken_theme_edit_raises_on_the_loop_and_the_watcher_carries_on(tmp_path: Path, watching):
+def test_a_broken_theme_edit_is_logged_and_the_watcher_carries_on(tmp_path: Path, watching, logs):
     theme = _write(tmp_path / "brand.yaml", _theme(1))
     app = App(theme_seed=SEED, custom_theme=theme)
     home, _ = app.load(*_pair(tmp_path, "Home"))
     handle = watching(app)
 
-    broken = _edit_until_queued(handle, theme, "styles: [unclosed\n")
-    with pytest.raises(ValueError, match="invalid YAML"):
-        broken()
+    message = logs.edit_until(theme, "styles: [unclosed\n", "ERROR", "invalid YAML")
+    assert str(theme) in message
+    assert handle.queued.empty()
     assert home.node("box").get("elevation") == 1.0
 
     _edit_until_queued(handle, theme, _theme(8))()
     assert home.node("box").get("elevation") == 8.0
+    assert f"re-themed the app from {theme}" in logs.messages("INFO")
 
 
 def test_theme_specs_are_not_watched(tmp_path: Path, watching):

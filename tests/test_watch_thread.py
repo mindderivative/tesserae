@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 
-from tesserae.spec import ComponentError, ViewWatcher, load_view
+from tesserae.spec import ViewWatcher, load_view
 
 
 class FakeHandle:
@@ -98,19 +98,35 @@ def test_an_included_file_edit_is_picked_up(started, tmp_path: Path):
     assert view.node("label").get_text() == "v2"
 
 
-def test_a_broken_edit_is_queued_as_a_raising_callable_and_the_watcher_carries_on(started):
+def test_a_broken_edit_is_logged_and_the_watcher_carries_on(started, logs):
     view_path, view, watcher, handle = started(_text_view("Hello"))
 
-    broken = _edit_until_queued(
-        handle, view_path, "id: root\nkind: Container\nchildren:\n  - {id: x, component: NoSuchThing}\n"
+    message = logs.edit_until(
+        view_path,
+        "id: root\nkind: Container\nchildren:\n  - {id: x, component: NoSuchThing}\n",
+        "ERROR",
+        "unknown component 'NoSuchThing'",
     )
-    with pytest.raises(ComponentError, match="unknown component 'NoSuchThing'"):
-        broken()
+    assert message.startswith(f"hot reload of {view_path} failed: ")
+    assert any("traceback" in m for m in logs.messages("DEBUG"))
+    assert handle.queued.empty()  # nothing for the loop to run
     assert watcher.running
     assert view.node("label").get_text() == "Hello"
 
     _edit_until_queued(handle, view_path, _text_view("Fixed"))()
     assert view.node("label").get_text() == "Fixed"
+    assert f"reloaded {view_path}" in logs.messages("INFO")
+
+
+def test_a_reload_tre_rejects_is_logged_on_the_loop(started, logs):
+    view_path, view, _, handle = started(_text_view("Hello"))
+
+    rejected = _edit_until_queued(handle, view_path, "id: root\nkind: NotARealKind\n")
+    rejected()  # logs instead of raising, so tre's loop carries on
+
+    message = logs.wait_for("ERROR", "NotARealKind")
+    assert message.startswith(f"hot reload of {view_path} failed: {view_path}: ")
+    assert view.node("label").get_text() == "Hello"
 
 
 def test_a_new_dependency_in_a_new_directory_is_watched_after_reload(started, tmp_path: Path):
