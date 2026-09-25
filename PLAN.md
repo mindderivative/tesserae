@@ -17,4 +17,6 @@ Plan (full detail in `BUILD_TRACKER.md` Milestone 30):
 1. **Decide** — recommended: an app-wide theme on `App(...)`, a per-screen stylesheet on `load()`; and whether theme-file hot reload is in scope.
 2. **Implement** — theme files read once via `load_theme`, passed to every `load()` as dicts; `register()` unchanged.
 3. **Hot reload for theme files** (if in scope) — watch them, re-theme every screen via `View.set_theme` on the loop thread. Stylesheets can't be hot-reloaded until `tre` gains `set_stylesheet`.
+
+   Filed [`tre` issue #8](https://github.com/mindderivative/tre/issues/8) (user-directed): `set_theme` and `reconcile` drop `{{ }}` bound values on the nodes they touch (reproduced — a bound label reverts to its static text), and there's no `View.set_stylesheet`. Fixes to either could change Phase 3: re-theming becomes safe to ship, and stylesheets become hot-reloadable. Part 1 also affects M29's shipped hot reload, now a known gap.
 4. **Tests, MkDocs, tracker.**
