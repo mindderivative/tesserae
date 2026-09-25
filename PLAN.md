@@ -41,6 +41,6 @@ User-directed: "scope tre's building-block program". `tre`'s approved plan (its 
 7. **P7 Scope:** rebuild the whole catalog, staged by category; the node graph, docking and app shell last.
 8. **P8 Names:** build on `tre` 0.3.4's new API only (`create`, `set`, `on`, `show_layer`, `fill`).
 
-Colour spike done: `materialyoucolor` with `spec_version="2021"` and tone 10 for the four light `on_*_container` roles matches `tre` exactly (784/784), so P2 is accepted. Message sent to `tre`.
+Colour spike done: `materialyoucolor` with `spec_version="2021"` and tone 10 for the four light `on_*_container` roles matches `tre` exactly (784/784), so P2 is accepted. Message sent to `tre`; it agreed and is building the migration guide and the `TRE_FORBID_REMOVED=1` gate shim (its M97 Phase 2).
 
-**Up next:** `tre`'s reply; the cascade/binding cost spike and the checkbox-on-primitives spike.
+**Up next:** the cascade/binding cost spike and the checkbox-on-primitives spike.

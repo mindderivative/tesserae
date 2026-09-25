@@ -59,3 +59,16 @@ User: "push it, send the message to tre, and download it". Pushed
    differs in 32, all light `on_*_container`. `tre` uses tone 10 and
    materialyoucolor tone 30; tone 10 from the scheme's palettes matches
    all 32. 784/784.
+
+## `tre`'s reply
+
+`tre` agreed to everything and started its M97 Phase 2 (local commits,
+not pushed):
+- `TRE_FORBID_REMOVED=1` switches on a `tre/_removed.py` shim covering
+  all of 0.3.5;
+- `tools/dump_widget.py` dumps widgets as diffable JSON, with a reference
+  page for all 57 legacy factories;
+- behaviour write-ups, and an audit of `binding.rs`/`cascade.rs`;
+- icons are 12 SVG `d=` strings (view box `0 -960 960 960`);
+- the node graph goes on primitives, with edges on `canvas`.
+Recorded in M34 Phase 1 Step 3, M41, M42 and M43.

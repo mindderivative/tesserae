@@ -43,7 +43,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M31 — Hot Reload for Theme and Stylesheet Files | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M32 — Migrate to `tre` 0.3.3 | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M33 — Migrate to `tre` 0.3.4 | `██████████` 100% | ✅ Complete (2026-09-25) |
-| M34 — Building-Block Program: Design and Spikes | `█████░░░░░` 50% | 🚧 In progress — design, decisions and color spike done (2026-09-25) |
+| M34 — Building-Block Program: Design and Spikes | `███████░░░` 67% | 🚧 In progress — Phase 1 done; color spike done (2026-09-25) |
 | M35 — Reactivity in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M36 — Bindings and Handlers in Tesserae | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M37 — Declarative Engine on `tre` Primitives | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
@@ -68,7 +68,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** `tre`'s reply to M34's message (migration guide, gate check, node graph), and M34 Phase 2's two remaining spikes: cascade and binding cost in Python on a 2,000-node view, and one checkbox built end to end on primitives. Other candidates: **`tre`'s building-block program**: `tre` 0.3.4 is released (2026-09-25, tag on `29800f3`: the additive building blocks, M93–M96, with the old API still present), and its M97 gate waits on Tesserae taking over `tre`'s declarative layer, reactivity, MD3 components and theming — a large Tesserae-side program, not yet scoped (known gaps list what 0.3.4 will break). Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
+**Up next:** M34 Phase 2's two remaining spikes (`tre` is building the migration guide and the `TRE_FORBID_REMOVED` shim as its M97 Phase 2): cascade and binding cost in Python on a 2,000-node view, and one checkbox built end to end on primitives. Other candidates: **`tre`'s building-block program**: `tre` 0.3.4 is released (2026-09-25, tag on `29800f3`: the additive building blocks, M93–M96, with the old API still present), and its M97 gate waits on Tesserae taking over `tre`'s declarative layer, reactivity, MD3 components and theming — a large Tesserae-side program, not yet scoped (known gaps list what 0.3.4 will break). Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -924,7 +924,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 34 — Building-Block Program: Design and Spikes
 
-**Status: 🚧 In progress — design, decisions and color spike done (2026-09-25).** User: "push it and go with your recommendations for M34"; the program is approved with all eight recommendations. The program's approval gate, the counterpart of `tre`'s M93. Nothing is rebuilt until the design and decisions are agreed.
+**Status: 🚧 In progress — Phase 1 done; color spike done (2026-09-25).** User: "push it and go with your recommendations for M34"; the program is approved with all eight recommendations. The program's approval gate, the counterpart of `tre`'s M93. Nothing is rebuilt until the design and decisions are agreed.
 
 **Decisions for the user, each with a recommendation:**
 - P1 **The YAML view format.** Recommended: **keep Tesserae's current schema unchanged for app authors** (`kind: Rect`/`Container`/`Text`/`Icon`, `style: {background, foreground, ...}`, `bindings:`, `handlers:`, `component:`/`with:`/`repeat:`, `include:`) and translate it to `tre`'s primitives inside Tesserae. Every existing view keeps working. The alternative, adopting `tre`'s new names (`box`, `fill`) in YAML, breaks every app's views for no user benefit.
@@ -936,10 +936,10 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 - P7 **Catalog scope.** Recommended: **rebuild the whole catalog**, all ~50 factories and 67 fragments, staged by category (M40–M42), with the node graph, docking presentation and app shell last. The alternative is to trim rarely-used widgets and name them as dropped.
 - P8 **Which `tre` names to build on.** Recommended: **`tre` 0.3.4's new API only** (`window.create`, `set`/`get`/`animate`, `on`, `show_layer`, `fill`/`stroke_color`), which are the target names, so `tre` 0.3.5 is mostly deletions for Tesserae. Anything R1-renamed in 0.3.5 gets a short follow-up.
 
-### Phase 1 — Design 🚧
+### Phase 1 — Design ✅
 - Step 1: `docs/design/building-blocks.md` (new MkDocs "Design" section): what app authors see (nothing changes but the one P6 break), the layers, and the plan for reactivity, bindings, the spec compiler with its YAML → `tre` mapping table, the cascade rules, the reconciler, components, screens, theme and widgets, the rules (new API only, incremental, proved against `tre`, the gate check) and the measurements. Sized from `tre`'s source (non-test lines): binding evaluator ~530, cascade ~230, reconciler ~420, spec model ~530, builder ~1,080, theme spec ~140, MD3 color/typography/shape ~600, icons ~120. **Finding:** `tre`'s reactivity is already pure Python (`python/tre/__init__.py`, ~400 lines); only its dependency-recording stack is native (`_record_read`, `_begin_recording`, `_end_recording`), so M35 is mostly taking that module over. `mkdocs build --strict` clean — ✅
 - Step 2: decisions P1–P8 settled: the user took all eight recommendations (P3's description corrected: `Computed` is eager, not lazy) — ✅
-- Step 3: sent to the `tre` session at the user's request ("send the message to tre", 2026-09-25). It asks for M97 Phase 2 Step 1's migration guide, most useful as (a) a node-by-node mapping of each removed MD3 kind and factory (structure, properties, animation timings and curves, a11y role and state), (b) the form of the `engine-md3` handover, especially the icon data, and (c) any binding or cascade behavior that differs from its doc comments. It proposes the gate check: `tre` provides a switch or test shim that makes every M98–M99-removed Python name raise, naming its replacement, and Tesserae runs its full suite and examples with it on, then keeps that run in CI from M43. It asks whether target-api.md's migration table is the source of truth, and how the node graph should be built (the table says "framework", nothing says which primitive). Waiting on the reply — 🚧
+- Step 3: sent to the `tre` session at the user's request ("send the message to tre", 2026-09-25). It asks for M97 Phase 2 Step 1's migration guide, most useful as (a) a node-by-node mapping of each removed MD3 kind and factory (structure, properties, animation timings and curves, a11y role and state), (b) the form of the `engine-md3` handover, especially the icon data, and (c) any binding or cascade behavior that differs from its doc comments. It proposes the gate check: `tre` provides a switch or test shim that makes every M98–M99-removed Python name raise, naming its replacement, and Tesserae runs its full suite and examples with it on, then keeps that run in CI from M43. It asks whether target-api.md's migration table is the source of truth, and how the node graph should be built (the table says "framework", nothing says which primitive).   **`tre` replied (2026-09-25), agreeing, and started the work as its M97 Phase 2 (local commits; it pushes only with the user's go-ahead).** Gate check: a Python shim `tre/_removed.py`, switched on by `TRE_FORBID_REMOVED=1`, read in `tre/__init__.py`, so Tesserae's suite and examples run unmodified. It covers **all of 0.3.5**, M100's renames as well as M98–M99's deletions. Removed methods and classes raise `AttributeError` naming the replacement, and value-level renames (`animate("background")`, legacy `get` names) raise too. `_removed.py` is the machine-readable source of truth; a `tre` test keeps it in step with target-api.md's table. The gate passes when Tesserae's suite and examples are green with it on, and Tesserae keeps that run in CI from M43. Migration guide: a `tools/dump_widget.py` that dumps any widget's subtree as diffable JSON through the new `get()`, a reference page of all 57 legacy factories at their defaults, write-ups of behavior a dump can't show (state layer and ripple timings, state-change animations, how the Rust-painted kinds draw), and an audit of `binding.rs`/`cascade.rs` against their doc comments. Icons: `engine-md3` has 12 curated Material Symbols as verbatim SVG `d=` strings sharing view box `0 -960 960 960`, usable directly as `create("path", data=d, view_box=(0, -960, 960, 960))`; the color science, type, shape and motion scales come with exact values. Node graph: primitives — a clipped viewport box panned and zoomed by `translate_x`/`translate_y`/`scale`, nodes placed by `x`/`y` and dragged with `capture_pointer`, and edges on `canvas` (one per edge with `set_hit_test_path` for stroke-accurate hits, or one shared canvas with Tesserae's own nearest-edge maths). `tre` offered stroke-accurate hit-testing for `path` nodes as a later addition if Tesserae prefers paths. tre#12 closes with `View` in M98 unless the user wants a 0.3.x fix — ✅
 
 ### Phase 2 — Spikes 🚧
 - Step 1: cost of Tesserae's own cascade and binding evaluation in Python on a 2,000-node view (build, one theme switch, one bound update) against `tre`'s `View` — ⬜
@@ -1030,7 +1030,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ### Phase 1 — Composed Widgets ⬜
 - Step 1: buttons (all variants, FABs, split and grouped), cards, chips, badges, dividers, lists and list items, accordion and tree nodes, tabs, navigation rail and drawer, toolbars, top app bar, status bar — ⬜
-- Step 2: the icon set as `path` data, handed over by `tre` (M99 Phase 1 Step 3) — ⬜
+- Step 2: the icon set as `path` data: `tre`'s 12 curated Material Symbols, SVG `d=` strings with view box `0 -960 960 960` (M99 Phase 1 Step 3) — ⬜
 
 ### Phase 2 — Overlays ⬜
 - Step 1: dialogs, menus, snackbars, tooltips, side sheets, navigation drawers and context menus on `show_layer` (modal, focus trap, dismissal, anchoring), with scrims as Tesserae boxes — ⬜
@@ -1043,7 +1043,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ### Phase 1 — The Rest ⬜
 - Step 1: text fields and search on `text_input`; date picker days, time input, period selector — ⬜
-- Step 2: video on `image` plus `set(rgba=...)`; the node graph on `canvas`; pagination and popovers — ⬜
+- Step 2: video on `image` plus `set(rgba=...)`; the node graph on primitives per `tre`'s M34 answer (clipped viewport, `x`/`y` nodes dragged with `capture_pointer`, edges on `canvas` with `set_hit_test_path`, or a shared canvas); pagination and popovers — ⬜
 - Step 3: docking presentation (tab strips, handles, drop highlights) on `tre`'s bare-bones docking (D10), and the app shell `build_shell` provided — ⬜
 
 ---
@@ -1053,5 +1053,5 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 **Status: ⬜ Proposed — approved, not started (2026-09-25).** Tesserae's side of `tre` M97 Phase 2 Step 2.
 
 ### Phase 1 — Prove It ⬜
-- Step 1: run Tesserae's full suite and examples with every name `tre` M98–M99 removes stubbed to raise, per the check agreed in M34; fix whatever it finds — ⬜
+- Step 1: run Tesserae's full suite and examples with `TRE_FORBID_REMOVED=1` (`tre`'s `_removed.py` shim, agreed in M34: every name 0.3.5 removes or renames raises), and add that run to CI; fix whatever it finds — ⬜
 - Step 2: report the result to `tre` so M98 can start; docs rewritten for Tesserae-owned reactivity, bindings, theming and widgets; tracker, `PLAN.md`/`LOG.md` — ⬜
