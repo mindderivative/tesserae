@@ -1,7 +1,8 @@
 """Real coverage for `tesserae.widgets`'s Buttons & Actions category --
 `button`/`icon_button`/`fab`/`extended_fab`/`split_button`/`button_group`.
 
-These are deliberately thin delegates to `tre`'s own native `Window.add_*`
+`button` is built from its fragment since M41 (`tests/test_composed_widgets.py`
+covers it); the rest are, until M41 Phase 2, deliberately thin delegates to `tre`'s own native `Window.add_*`
 factories (see `buttons.py`'s own module docstring for why), so the real
 risk here isn't MD3 color/shape math -- `tre` already gets that right --
 it's argument-forwarding: wrong positional/keyword mapping, a dropped
@@ -22,30 +23,6 @@ from tesserae.widgets import (
     icon_button,
     split_button,
 )
-
-
-def test_button_matches_native_add_button():
-    window = Window(width=400, height=200)
-    a = button(window, "Save", 120, 40, variant="filled")
-    b = window.add_button("Save", 120, 40, variant="filled")
-    assert a.get("corner_radius") == b.get("corner_radius")
-
-
-def test_button_default_variant_matches_native_default():
-    window = Window(width=400, height=200)
-    a = button(window, "Cancel", 120, 40)
-    b = window.add_button("Cancel", 120, 40)
-    assert a.get("corner_radius") == b.get("corner_radius")
-
-
-def test_button_variant_kwarg_really_flows_through():
-    # Proves `variant=` isn't silently dropped by the delegate -- MD3
-    # buttons share one pill corner radius across variants, but only
-    # "outlined" resolves a real, nonzero border width.
-    window = Window(width=400, height=200)
-    outlined = button(window, "Cancel", 120, 40, variant="outlined")
-    filled = button(window, "Save", 120, 40, variant="filled")
-    assert outlined.get("border_width") != filled.get("border_width")
 
 
 def test_icon_button_matches_native_add_icon_button():

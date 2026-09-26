@@ -35,6 +35,25 @@ should go. `spin_box` returns one `SpinBox` rather than
 (MD3's baseline colours without one), not the window's. See
 [Controls](controls.md).
 
+**The composed ones are built from their fragments (M41, in progress).**
+So far `button`: it expands the same `*_Component.yaml` a
+`component: ButtonFilled` does and builds it with Tesserae's compiler,
+so the Python and YAML paths are one definition. It returns a `Widget`:
+
+```python
+from tesserae.widgets import button
+
+save = button(window, "Save", 120, 40, variant="filled", theme=app.theme, on_click=viewmodel.save)
+save.node              # the root, attached to the window's root
+save.part("label")     # a named piece
+save.on_click(fn)      # a focusable button: Enter and Space activate it
+save.set_theme(theme)
+```
+
+It's a pill unless you pass `corner_radius=`, with MD3's hover, press and
+focus feedback in its label's colour. Where you used the node `button()`
+returned, use `.node`.
+
 Every other function here is a **thin, faithful delegate** straight to
 the matching `Window.add_*` factory in `tre` itself -- same parameter
 names, order, and defaults. This is deliberate, not a placeholder:

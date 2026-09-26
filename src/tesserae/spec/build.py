@@ -31,7 +31,8 @@ from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
 __all__ = [
-    "Built", "Layers", "SpecBuildError", "build", "control_shape", "focus_ring_color", "interaction_tint", "patch",
+    "Built", "Layers", "SpecBuildError", "build", "control_shape", "focus_ring_color", "interaction_tint", "natural_size",
+    "patch",
     "prepare_layers",
     "shipped_default_theme",
 ]
@@ -333,9 +334,23 @@ def _box_props(ctx, node, style):
     return {**_layout(style), **_paint(ctx, node["id"], style), "fill": fill}, None
 
 
+def natural_size(window: Any, props: dict[str, Any], style: dict[str, Any]) -> dict[str, float]:
+    """A Text or Link's measured `width`/`height` for whichever its style
+    leaves out (M41): `tre` 0.3.4's text has no intrinsic size, so text
+    without one was 0 px wide -- every fragment's label was invisible."""
+    missing = [d for d in ("width", "height") if style.get(d) is None]
+    if not missing:
+        return {}
+    width, height = window.measure_text(props["text"], font_family=props["font_family"],
+                                        font_size=props["font_size"], font_weight=props["font_weight"],
+                                        line_height=props.get("line_height"))
+    return {d: float(v) for d, v in (("width", width), ("height", height)) if d in missing}
+
+
 def _text_props(ctx, node, style):
     fill = _required_foreground(ctx, node, style, node["kind"])
     props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(ctx, node, node["kind"]), "fill": fill}
+    props.update(natural_size(ctx.window, props, style))
     if node["kind"] == "Link":
         props.update(role="link", cursor="pointer", focusable=True)
     return props, None
@@ -523,7 +538,7 @@ def patch(
     _, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
     (outer_props if inner_props is None else inner_props).update(_a11y_props(node, patching=True))
-    outer.set(**_ALIGNMENT_DEFAULTS, **outer_props)
+    outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins
     if inner_props is not None:
         inner.set(**inner_props)
 

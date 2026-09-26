@@ -28,11 +28,15 @@ CONTROLS = frozenset({"Checkbox", "RadioButton", "Switch", "Slider", "CircularPr
                       "LoadingIndicator", "TimePickerDial"})
 
 
-def for_tre(spec):
-    """`spec` without Tesserae-only fields, for `tre`'s builder."""
+def for_tre(spec, sizes=None):
+    """`spec` without Tesserae-only fields, for `tre`'s builder. `sizes`
+    (id -> width/height) gives text the content size Tesserae measures for
+    it (M41), since `tre`'s text has none."""
     out = {k: v for k, v in spec.items() if k not in TESSERAE_ONLY}
+    if sizes and spec.get("id") in sizes:
+        out["style"] = {**sizes[spec["id"]], **(spec.get("style") or {})}
     if "children" in spec:
-        out["children"] = [for_tre(child) for child in spec["children"] or []]
+        out["children"] = [for_tre(child, sizes) for child in spec["children"] or []]
     return out
 
 
@@ -50,8 +54,21 @@ def ids(spec):
         yield from ids(child)
 
 
+def _text_sizes(built, spec):
+    sizes = {}
+    for node_id, node_spec in ids(spec):
+        if node_spec.get("kind") in ("Text", "Link"):
+            style = node_spec.get("style") or {}
+            node = built.nodes[node_id]
+            sizes[node_id] = {d: node.get(d) for d in ("width", "height") if style.get(d) is None}
+    return sizes
+
+
 def build_both(spec, frames=None, stylesheet=None):
-    view = tre.View(spec=for_tre(spec), theme_seed=SEED, **({"stylesheet_spec": stylesheet} if stylesheet else {}))
+    probe = tre.Window(width=SIZE[0], height=SIZE[1])
+    sizes = _text_sizes(build(probe, spec, scheme=tokens.color_scheme(SEED), stylesheet=stylesheet, frames=frames),
+                        spec)
+    view = tre.View(spec=for_tre(spec, sizes), theme_seed=SEED, **({"stylesheet_spec": stylesheet} if stylesheet else {}))
     if frames:
         for node_id, (rgba, w, h) in frames.items():
             view.node(node_id).push_frame(rgba, w, h)

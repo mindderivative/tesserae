@@ -62,7 +62,7 @@ def test_expanded_button_constructs_a_real_view_matching_tesserae_widgets_button
 
     window = Window(width=300, height=200)
     window.set_theme((0x67, 0x50, 0xA4, 0xFF))
-    imperative_node = imperative_button(window, "Save", 120, 40, variant="filled")
+    imperative_node = imperative_button(window, "Save", 120, 40, variant="filled").node  # a Widget since M41
 
     assert declarative_node.get("corner_radius") == imperative_node.get("corner_radius")
 

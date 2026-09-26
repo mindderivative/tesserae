@@ -20,10 +20,27 @@ not `tre` happens to implement it as a composition under the hood.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable
+
+from tesserae.widgets._composed import Widget
 
 if TYPE_CHECKING:
+    from tesserae.theme import Theme
     from tre import Node, Window
+
+
+#: `button`'s variants: the fragment, and its label's colour role (its feedback's too).
+_BUTTONS = {
+    "elevated": ("ButtonElevated", "primary"),
+    "filled": ("ButtonFilled", "on_primary"),
+    "filled_tonal": ("ButtonFilledTonal", "on_secondary_container"),
+    "outlined": ("ButtonOutlined", "primary"),
+    "text": ("ButtonText", "primary"),
+}
+
+
+def _hex(color: tuple[int, int, int, int]) -> str:
+    return "#" + "".join(f"{c:02X}" for c in color)
 
 
 def button(
@@ -36,18 +53,31 @@ def button(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """A real MD3 button. `variant`: elevated/filled/filled_tonal/outlined/text."""
-    return window.add_button(
-        label,
-        width,
-        height,
-        variant=variant,
-        x=x,
-        y=y,
-        border_color=border_color,
-        border_width=border_width,
-    )
+    *,
+    corner_radius: float | None = None,
+    theme: "Theme | None" = None,
+    on_click: Callable[[], Any] | None = None,
+) -> Widget:
+    """MD3's button, built from its fragment (M41). `variant`: elevated,
+    filled, filled_tonal, outlined or text. It's a pill (`corner_radius`
+    half the height) unless told otherwise. `on_click` makes it a focusable
+    button that Enter and Space activate, with MD3's feedback."""
+    if variant not in _BUTTONS:
+        raise ValueError(f"unknown button variant {variant!r}; expected one of {sorted(_BUTTONS)}")
+    fragment, content = _BUTTONS[variant]
+    radius = float(height) / 2 if corner_radius is None else float(corner_radius)
+
+    def edit(spec: dict[str, Any]) -> None:
+        if border_color is not None:
+            spec["style"]["border_color"] = _hex(border_color)
+        if border_width is not None:
+            spec["style"]["border_width"] = float(border_width)
+
+    widget = Widget(window, fragment, {"label": label, "width": width, "height": height, "corner_radius": radius},
+                    theme=theme, x=x, y=y, interactive={None: content}, edit=edit, name="button")
+    if on_click is not None:
+        widget.on_click(on_click)
+    return widget
 
 
 def icon_button(

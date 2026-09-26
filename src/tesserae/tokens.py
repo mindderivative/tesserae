@@ -32,7 +32,7 @@ from materialyoucolor.scheme.scheme_tonal_spot import SchemeTonalSpot
 from PIL import ImageColor
 
 __all__ = [
-    "BASELINE", "ELEVATION_LEVELS", "ROLES", "SHAPES", "TYPE_SCALE", "TypeStyle", "color_scheme",
+    "BASELINE", "ELEVATION_LEVELS", "baseline_scheme", "ROLES", "SHAPES", "TYPE_SCALE", "TypeStyle", "color_scheme",
     "elevation", "elevation_shadows", "parse_color", "resolve_scheme", "shape", "type_style",
 ]
 
@@ -76,6 +76,13 @@ BASELINE: dict[str, RGBA] = {role: _hex(value) for role, value in {
     "surface_container_low": "#F7F2FA", "tertiary_container": "#FFD8E4",
     "on_surface": "#1D1B20", "secondary": "#625B71",
 }.items()}
+
+def baseline_scheme() -> dict[str, RGBA]:
+    """Every role, for widgets with no theme: the scheme MD3's baseline
+    seed (#6750A4) generates, with MD3's published `BASELINE` values over
+    it where they differ."""
+    return {**color_scheme(BASELINE["primary"]), **BASELINE}
+
 
 #: The four roles `tre` keeps at tone 10 in light mode.
 _TONE_10_LIGHT = {

@@ -50,12 +50,12 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M38 — MD3 Theme in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
-| M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25) |
+| M41 — Widgets II: Composed Catalog and Overlays | `██░░░░░░░░` 17% | 🚧 In progress — Phase 1 of 6 done (2026-09-25) |
 | M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
 
-**Just closed:** M40 (2026-09-25), all 6 phases — Tesserae's own MD3 controls (checkbox, radio button with groups, switch, slider, spin box, linear and circular progress, loading indicator, time picker dial), with the YAML control kinds and `tesserae.widgets`' stateful factories moved onto them; none of tre's control API is left in `src/tesserae`, and the examples run clean under tre's removal shim; 1114 → 1183.
+**Just closed:** M41 Phase 1 (2026-09-25) — the composed-widget base (`Widget`, built from fragments), proved on `button`; content-sized text; an M37 patch bug fixed; 1183 → 1198. Before that, M40 (same day) — Tesserae's MD3 controls.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -69,7 +69,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M41** is scoped (6 phases: foundation, buttons, containment and lists, navigation, overlays, gate) — waiting on the user's decisions Q1–Q4. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M41–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
+**Up next:** **M41 Phase 2** (icon buttons, FABs, the split button and the button group) — waiting on the user's go-ahead. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M41–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -92,6 +92,8 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 - `App(dark="system")` (the default) starts dark and only learns the OS's appearance at its first light/dark switch: `tre` 0.3.4 fires `color_scheme` on a change but has no way to read the current appearance (`window.get` has only `width`, `height`, `title`, `scale_factor`). Accepted by the user (M38 Q3); a readable `window.get("dark")` in `tre` would let `"system"` start right. Found in M38.
 
 **Fixed gaps:**
+- ~~A node whose style set `align_items`/`justify_content` couldn't be patched: `patch` passed them twice, so a re-theme, re-style or reconcile raised `TypeError` (from M37 Phase 4).~~ **Fixed (M41 Phase 1).** The node's own alignment now wins over the defaults.
+- ~~Text with no width was 0 px wide (tre 0.3.4's text has no intrinsic size), so fragment labels didn't show.~~ **Fixed (M41 Phase 1).** It's sized to its content with `measure_text`, and bound text is measured again.
 - ~~YAML checkboxes, switches and radio buttons are inert: a click never toggles them and Tab skips them (`tre`'s own `View` was the same).~~ **Fixed (M40 Phase 5).** They're Tesserae's MD3 controls, which toggle, take focus and write back through `two_way:`.
 - ~~Keyboard users couldn't reach clickable YAML nodes (a regression from M37): an `on_click` handler no longer made a node focusable or a Tab stop, as `tre`'s `set_on_click` had.~~ **Fixed (M39 Phase 1).** A clickable node is a focusable `role="button"` Tab stop that Enter and Space activate, matching `tre` and going further on the role.
 - ~~An embedded component (`tesserae.instantiate`) wasn't styled by its host view's theme or stylesheet `styles:`, at creation or on reload: `tre`'s `View.instantiate` passed it only the shared window theme state.~~ **Fixed (M37 Phase 5).** Tesserae builds a component in its host's window with the host's scheme and cascade layers, and re-patches it when the host is re-themed or re-styled, nested components included.
@@ -1141,7 +1143,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 41 — Widgets II: Composed Catalog and Overlays
 
-**Status: ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25).** Rebuilds the composed MD3 factories and the overlays that `tre` M99 deletes, on 0.3.4's building blocks, M39's interaction and M40's controls. Scoped from `src/tesserae/widgets` (a scan of its `tre` calls), the fragments in `spec/components/`, `tre`'s `legacy-behavior.md` (0.3.5), and 0.3.4's `show_layer`/`hide_layer`.
+**Status: 🚧 In progress — Phase 1 of 6 done (2026-09-25).** User: "Push it and go with your recommendations for M41" — Q1–Q4 as recommended (built from the fragments, MD3's behaviour, `tesserae.overlays`, the window-theme removal at M42's end). Rebuilds the composed MD3 factories and the overlays that `tre` M99 deletes, on 0.3.4's building blocks, M39's interaction and M40's controls. Scoped from `src/tesserae/widgets` (a scan of its `tre` calls), the fragments in `spec/components/`, `tre`'s `legacy-behavior.md` (0.3.5), and 0.3.4's `show_layer`/`hide_layer`.
 
 **What exists today:**
 - **Factories:** `tesserae.widgets` still delegates 36 functions to `tre`.
@@ -1169,8 +1171,8 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 - Q3 **Overlays.** Recommended: **`tesserae.overlays`**: `Dialog`, `Menu` (anchored, and a context menu at the pointer on `secondary_click`), `Snackbar`, `Tooltip`, `SideSheet` and a modal `NavigationDrawer`. Each has `open()`/`close()` on `show_layer`, closes itself on the dismissals `tre`'s legacy overlays allowed, and has an `on_close` callback. MD3 timing is added where `tre` had none: a snackbar hides itself after 4 s unless `duration=None`, and a tooltip opens after a 500 ms hover. Placement flips to fit, as `show_layer` does. Alternative: `tre`'s exact behaviour (no timers).
 - Q4 **The window's theme.** Recommended: **move "`App` stops calling `Window.set_theme`" to the end of M42**, when the last `tre`-drawn widget goes. M41 keeps it, and M43's gate checks it's gone. Alternative: keep it in M41 and drop window theming for M42's widgets early.
 
-### Phase 1 — Foundation ⬜
-- Step 1: `tesserae.widgets`' composed-widget base per Q1: a fragment expanded with arguments and built by the compiler into the window, a `Widget` (`.node`, `.part(id)`, `on_click` making a part a focusable `role="button"` with M39's feedback, `set_theme`), `theme=`/`label=` as M40's factories take them, placed on the root and at `x`/`y`; proved on `button` (all five variants) — ⬜
+### Phase 1 — Foundation ✅
+- Step 1: `tesserae.widgets._composed.Widget`: a fragment expanded with a factory's arguments (`expand_components_to_spec`) and built as a `View` into the window, then attached to the root and placed at `x`/`y`. It has `.node`, `.part(name)`, `.interaction(part)`, `on_click(fn, part=)` (the part becomes a focusable `role="button"`; Enter and Space click it; it returns a stopper), `set_theme(theme)` (new `View._use_scheme`) and `destroy()`. The parts a factory names get M39's feedback in their content's colour (`interaction: {color: ...}`). With no theme it uses `tokens.baseline_scheme()` (new: all 49 roles, the baseline seed's scheme with MD3's published baseline over it), since fragments name roles that need a scheme. `button` is proved on it: five variants (elevated, filled, filled tonal, outlined, text), a pill unless `corner_radius=`, and `border_color`/`border_width`, `theme=` and `on_click=`. Found while auditing the fragments against MD3: their labels were 0 px wide and uncentred, since tre 0.3.4's text has no intrinsic size (the "later enhancement" M37 named). Now the compiler sizes a `Text`/`Link` with no width or height to its content (`build.natural_size`, via `window.measure_text`; tre's `line_height` is a multiple of the font size), a bound `text` is re-measured, and the five button fragments centre their label. `treediff` gives tre's copy the same measured sizes, so parity still holds. Also found and fixed a bug from M37 Phase 4 (`055737c`): `patch` passed the alignment defaults and the node's props as two `**` expansions, so re-theming, re-styling or reconciling any node whose style set `align_items`/`justify_content` raised `TypeError`; a regression test covers it. `tests/test_composed_widgets.py` has 14 tests, plus 3 in `test_view.py`; the 3 `button`-vs-`add_button` parity tests are gone. Mutation-checked with 8 mutants; one survived until a test built after a re-colour; now each fails a test. 1183 → 1198 passed. Docs: widget catalog, component fragments, API index, `ARCHITECTURE.md` — ✅
 
 ### Phase 2 — Buttons and Actions ⬜
 - Step 1: `icon_button` (four variants), `fab`, `extended_fab`, `split_button` (the facing corners tighten on hover) and `button_group` (the pressed child's corners tighten and the row reflows, restoring on release) — ⬜
@@ -1197,6 +1199,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 - Step 1: text fields and search on `text_input`; date picker days, time input, period selector — ⬜
 - Step 2: video on `image` plus `set(rgba=...)`; the node graph on primitives per `tre`'s M34 answer (clipped viewport, `x`/`y` nodes dragged with `capture_pointer`, edges on `canvas` with `set_hit_test_path`, or a shared canvas); pagination and popovers — ⬜
 - Step 3: docking presentation (tab strips, handles, drop highlights) on `tre`'s bare-bones docking (D10), and the app shell `build_shell` provided — ⬜
+- Step 4: with the last `tre`-drawn widget gone, `App` stops calling `Window.set_theme`, and `tesserae.Theme` is the only theme (moved here from M41 by its Q4) — ⬜
 
 ---
 

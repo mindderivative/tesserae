@@ -105,4 +105,6 @@ Phase 6 done: the static gate, the examples clean under tre's removal shim, the 
 
 **M41 scoped (2026-09-25):** 6 phases. The composed factories are to be built from the fragments through the compiler, returning `Widget` objects, with MD3 feedback and selection, `tesserae.overlays` on `show_layer`, and a gate. The window-theme removal moves to M42's end. Decisions Q1–Q4 pending.
 
-**Up next:** the user's decisions on M41.
+**M41:** Q1–Q4 as recommended. Phase 1 done: the `Widget` base (built from fragments) and `button`; content-sized text; an M37 patch bug fixed; 1198 passed.
+
+**Up next:** M41 Phase 2 (icon buttons, FABs, split button, button group).

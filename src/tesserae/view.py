@@ -51,8 +51,10 @@ from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners
 from tesserae.spec.build import (
-    Built, _CONTROL_KINDS, build_with, control_shape, focus_ring_color, interaction_tint, patch, prepare_layers,
+    Built, _CONTROL_KINDS, build_with, control_shape, focus_ring_color, interaction_tint, natural_size, patch,
+    prepare_layers,
 )
+from tesserae.spec.cascade import resolve_style
 from tesserae.spec.cascade import check_stylesheet, check_theme
 
 __all__ = ["Component", "View"]
@@ -284,6 +286,12 @@ class View:
         if self._viewmodel is not None:
             self._wire(self._spec)
 
+    def _use_scheme(self, scheme: Any) -> None:
+        """Re-colours every node from `scheme` (a resolved `Theme`'s roles),
+        for a composed widget given a `tesserae.Theme` (M41)."""
+        self._repatch(scheme, self._layers)
+        self._scheme = scheme
+
     def _repatch(self, scheme: Any, layers: Any) -> None:
         for node_id, node_spec in self._built.specs.items():
             patch(self.window, node_spec, self._built.outer[node_id], self._built.nodes[node_id],
@@ -457,6 +465,10 @@ class View:
         node = self._node_for(node_spec, prop)
         kind = node_spec.get("kind")
         control = self._built.controls.get(node_id)
+        style = resolve_style(node_spec, self._layers)
+        # a Text/Link without a size is sized to its content, so new text is measured again (M41)
+        measured = prop == "text" and kind in ("Text", "Link") and (style.get("width") is None
+                                                                    or style.get("height") is None)
         subscribed: list[Any] = []
 
         def run() -> None:
@@ -475,6 +487,8 @@ class View:
                 _apply_to_control(control, kind, prop, value)
             else:
                 _apply(node, kind, prop, value)
+                if measured:
+                    _remeasure(self.window, node, style)
 
         run()
 
@@ -576,6 +590,13 @@ def _arity_adapter(method: Callable[..., Any]) -> Callable[[Any], Any]:
     if params:
         return lambda event_obj: method(event_obj)
     return lambda event_obj: method()
+
+
+def _remeasure(window: Any, node: Any, style: dict[str, Any]) -> None:
+    props = {name: node.get(name) for name in ("text", "font_family", "font_size", "font_weight", "line_height")}
+    size = natural_size(window, props, style)
+    if size:
+        node.set(**size)
 
 
 #: A control's state a binding sets on the control (M40), and the type each takes.

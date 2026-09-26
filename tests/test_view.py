@@ -329,3 +329,51 @@ def test_reconcile_keeps_focus_on_an_unchanged_field():
     view.reconcile(_root(FIELD, _rect("a", style={"width": 60, "height": 20, "background": "#112233"})))
     assert view.node("name").get("focused") is True
     assert view.node("a").get("width") == 60.0
+
+
+def test_a_node_that_sets_its_alignment_can_be_restyled():
+    """A re-theme, re-style or reconcile patched every node with the
+    alignment defaults and its own props as two `**` expansions, so one
+    whose style set `align_items`/`justify_content` raised TypeError
+    (from M37 Phase 4, found in M41)."""
+    spec = {"id": "root", "kind": "Container", "style": {"align_items": "center", "justify_content": "flex_end"},
+            "children": []}
+    view = View(spec)
+    view.set_theme(theme_seed=(0x67, 0x50, 0xA4, 0xFF))
+    view.reconcile(dict(spec, style={"align_items": "flex_end"}))
+    assert view.root.get("align_items") == "flex_end" and view.root.get("justify_content") == "flex_start"
+
+
+def test_text_is_sized_to_its_content_and_bound_text_is_measured_again():
+    """M41: `tre` 0.3.4's text has no intrinsic size, so a Text with no
+    width was 0 px wide; Tesserae measures it (`window.measure_text`)."""
+    class Greeting(tesserae.ViewModel):
+        def __init__(self, view):
+            self.name = tesserae.Signal("Al")
+            super().__init__(view)
+
+    spec = {"id": "root", "kind": "Container", "children": [
+        {"id": "hi", "kind": "Text", "text": {"content": "", "font_family": "Roboto", "font_size": 16},
+         "style": {"foreground": "#000000"}, "bindings": {"text": "{{ name.get() }}"}},
+        {"id": "fixed", "kind": "Text", "text": {"content": "Wide text here", "font_family": "Roboto", "font_size": 16},
+         "style": {"foreground": "#000000", "width": 12}},
+    ]}
+    view = View(spec)
+    vm = Greeting(view)
+    node = view.node("hi")
+    short = node.get("width")
+    assert short == view.window.measure_text("Al", font_family="Roboto", font_size=16.0)[0] > 0
+    vm.name.set("Alexandra")
+    assert node.get("width") > short
+    assert view.node("fixed").get("width") == 12.0  # a given width is kept
+
+
+def test_a_scheme_a_view_is_given_colours_what_it_builds_later():
+    from tesserae import tokens
+
+    red = tokens.color_scheme((0xB3, 0x26, 0x1E, 0xFF))
+    view = View({"id": "root", "kind": "Container", "children": []}, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
+    view._use_scheme(red)
+    view.reconcile({"id": "root", "kind": "Container", "children": [
+        {"id": "new", "kind": "Rect", "style": {"width": 4, "height": 4, "background": "primary"}}]})
+    assert view.node("new").get("fill") == red["primary"]

@@ -211,6 +211,16 @@ it when its size or `group:` changes (`control_shape`). A forgotten or
 moved control is disposed. RadioButtons sharing a `group:` name share a
 `RadioGroup` per view.
 
+**Composed widgets, M41:** `tesserae.widgets._composed.Widget` expands a
+fragment with a factory's arguments (through `expand_components_to_spec`)
+and builds it as a `View` into the window, so it gets the compiler,
+feedback, listeners and re-colouring (`View._use_scheme`) for free. With
+no theme it uses `tokens.baseline_scheme()`: all 49 roles, from MD3's
+baseline seed with the published baseline values over it. The compiler
+sizes a `Text`/`Link` with no width or height to its content
+(`build.natural_size`, via `window.measure_text`; `tre`'s `line_height`
+is a multiple of the font size), and a bound `text` is measured again.
+
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`
 field compiles through it (`build._a11y_props`, which also owns the

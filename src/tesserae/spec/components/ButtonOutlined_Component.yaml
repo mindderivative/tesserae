@@ -8,6 +8,8 @@ kind: Rect
 style:
   width: "{{ width }}"
   height: "{{ height }}"
+  align_items: center
+  justify_content: center
   background: transparent
   corner_radius: "{{ corner_radius }}"
   border_color: outline

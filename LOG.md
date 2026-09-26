@@ -552,3 +552,20 @@ Conflict found: removing `App`'s `Window.set_theme` can't be done in M41,
 since M42's widgets still read the window's theme (Q4).
 
 Q1–Q4 are in the tracker, with recommendations.
+
+## M41 Phase 1: the composed-widget base
+
+User: "Push it and go with your recommendations for M41". Pushed
+`411ddca`; Q1–Q4 as recommended. Q4 moves the window-theme step to M42
+Step 4.
+
+Found while auditing the button fragment:
+- Its label was 0 px wide and uncentred: tre's text has no intrinsic
+  size. The compiler now measures text (`measure_text`; `line_height` is
+  a multiple of the font size, which a test first got wrong).
+- `patch` passed `align_items`/`justify_content` twice, a TypeError on
+  any re-theme of such a node since M37 Phase 4. Fixed, with a
+  regression test.
+
+Mutants: 8 of 8 caught after a test for building after a re-colour.
+1198 passed.
