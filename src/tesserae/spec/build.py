@@ -30,7 +30,7 @@ from tesserae import tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
-__all__ = ["Built", "SpecBuildError", "build", "patch", "prepare_layers", "shipped_default_theme"]
+__all__ = ["Built", "Layers", "SpecBuildError", "build", "patch", "prepare_layers", "shipped_default_theme"]
 
 RGBA = tuple[int, int, int, int]
 _TRANSPARENT: RGBA = (0, 0, 0, 0)
@@ -92,27 +92,38 @@ def build(
     an Image's id to its decoded `(rgba, width, height)`."""
     if default_theme is None:
         default_theme = shipped_default_theme()
-    ctx = _Context(
-        window,
-        (Sheet.of(default_theme), Sheet.of(custom_theme), Sheet.of(stylesheet)),
-        scheme,
-        frames or {},
-    )
+    ctx = _Context(window, prepare_layers(default_theme, custom_theme, stylesheet), scheme, frames or {})
     built = Built(root=None)
     built.root = _build(ctx, spec, built)
     return built
+
+
+class Layers(tuple):
+    """The cascade's three prepared layers (default theme, custom theme,
+    stylesheet), plus the two themes' `typography:` overrides (M38),
+    which display text resolves its `typography_role` through."""
+
+    typography: dict[str, dict[str, Any]]
 
 
 def prepare_layers(
     default_theme: Optional[dict[str, Any]],
     custom_theme: Optional[dict[str, Any]],
     stylesheet: Optional[dict[str, Any]],
-) -> tuple[Optional[Sheet], ...]:
+) -> Layers:
     """The cascade's three layers, prepared once (`default_theme` defaults
-    to `tre`'s shipped one)."""
+    to `tre`'s shipped one), with the themes' typography overrides: a
+    custom theme's role entry replaces the default theme's."""
+    from tesserae.theme import _type_override
+
     if default_theme is None:
         default_theme = shipped_default_theme()
-    return (Sheet.of(default_theme), Sheet.of(custom_theme), Sheet.of(stylesheet))
+    layers = Layers((Sheet.of(default_theme), Sheet.of(custom_theme), Sheet.of(stylesheet)))
+    layers.typography = {}
+    for theme in (default_theme, custom_theme):
+        for role, raw in ((theme or {}).get("typography") or {}).items():
+            layers.typography[role] = _type_override(role, raw)
+    return layers
 
 
 def build_with(
@@ -251,7 +262,12 @@ def _required_foreground(ctx: _Context, node: dict[str, Any], style: dict[str, A
     return _color(ctx, node["id"], "foreground", style["foreground"])
 
 
-def _text_style(node: dict[str, Any], kind: str) -> dict[str, Any]:
+#: The kinds whose `typography_role` follows the theme's `typography:`:
+#: display text. Text inputs keep their own font (M38 Q1).
+_THEMED_TEXT = frozenset({"Text", "Link"})
+
+
+def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any]:
     text = node.get("text")
     if not isinstance(text, dict):
         raise SpecBuildError(f'widget {_q(node["id"])}: {kind} requires text, none given')
@@ -261,6 +277,10 @@ def _text_style(node: dict[str, Any], kind: str) -> dict[str, Any]:
         role_style = tokens.type_style(role)
         if role_style is None:
             raise SpecBuildError(f'widget {_q(node["id"])}: unknown text.typography_role "{role}"')
+        override = getattr(ctx.layers, "typography", {}).get(role) if kind in _THEMED_TEXT else None
+        if override:
+            role_style = tokens.TypeStyle(**{f: override.get(f, getattr(role_style, f))
+                                             for f in ("font_family", "font_weight", "font_size", "line_height")})
     family = text.get("font_family") or (role_style.font_family if role_style else None)
     if family is None:
         raise SpecBuildError(f'widget {_q(node["id"])}: {kind} requires text.font_family (or text.typography_role), none given')
@@ -304,7 +324,7 @@ def _box_props(ctx, node, style):
 
 def _text_props(ctx, node, style):
     fill = _required_foreground(ctx, node, style, node["kind"])
-    props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(node, node["kind"]), "fill": fill}
+    props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(ctx, node, node["kind"]), "fill": fill}
     if node["kind"] == "Link":
         props.update(role="link", cursor="pointer", focusable=True)
     return props, None
@@ -312,7 +332,7 @@ def _text_props(ctx, node, style):
 
 def _text_field_props(ctx, node, style):
     background = _required_background(ctx, node, style, "TextField")
-    text = _text_style(node, "TextField")
+    text = _text_style(ctx, node, "TextField")
     text.pop("line_height")
     outer = {**_layout(style), **_paint(ctx, node["id"], style), "fill": background}
     # `tre`'s TextField draws its text in MD3's baseline on_surface, not a theme role.

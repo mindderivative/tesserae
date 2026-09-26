@@ -73,4 +73,6 @@ Phase 6 done: `load_view`, `instantiate`, `ViewWatcher` and the suite off `tre`'
 
 Phase 1 done: `tesserae.Theme`, matching `tre`'s `Window.theme`; 1019 passed.
 
-**Up next:** M38 Phase 2 (theme typography in views).
+Phase 2 done: theme typography for Text and Link, not text inputs; 1029 passed.
+
+**Up next:** M38 Phase 3 (light and dark).

@@ -92,6 +92,28 @@ Since `tre` 0.3.4, two things work the way they do in CSS:
   `colors: {scrim: ...}` doesn't reach those two fragments, since a YAML
   color can't be "a theme role at 32%".
 
+## Typography in a theme
+
+A theme's `typography:` overrides fields of MD3's type roles:
+
+```yaml
+typography:
+  body_large: {font_family: Inter, font_size: 17}
+  title_medium: {font_weight: 600}
+```
+
+Display text follows it: a `Text` or `Link` with `typography_role:
+body_large` takes the theme's `body_large`. Fields the node sets itself
+(`font_size:` and so on) still win. **Text inputs don't follow it:** a
+text field keeps its own font even with a `typography_role`, so typed
+text, and later multiline fields and the code editor, isn't restyled by
+the theme. A custom theme's entry for a role replaces the default
+theme's entry for that role, rather than merging with it. Re-theming,
+including hot reload of a theme file, updates the text in place.
+
+(`tre` applied a theme's `typography:` only to its imperative widgets,
+never to a view; Tesserae applies it to both.)
+
 ## Reading the theme from code
 
 `app.theme` (and `view.theme`) is the resolved theme, a `tesserae.Theme`:

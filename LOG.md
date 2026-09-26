@@ -295,3 +295,10 @@ Read `tre`'s component lookup (variant, then bare key) and
 `resolve_components`. `theme.py`, `app.theme`/`view.theme`. 110 tests,
 109 of them against `tre`'s `Window.theme`; 3/3 mutants caught. 1019
 passed.
+
+## M38 Phase 2 — typography in views
+
+User: "push it and start Phase 2". Pushed `17df8a0`. Typography
+overrides ride on the prepared layers (`Layers`), so no call site
+changed; `_text_style` applies them for Text/Link only. 8 tests, 3/3
+mutants caught, 1029 passed.
