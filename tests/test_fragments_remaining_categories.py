@@ -45,9 +45,7 @@ children:
     declarative = view.node("sb")
     assert view.node("sb.field") is not None
 
-    imperative, imp_field, imp_leading, imp_trailing = search_bar(
-        _themed_window(), "Search...", 360
-    )
+    imperative = search_bar(_themed_window(), "Search...", 360).node  # a Widget since M42
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
@@ -67,7 +65,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("sv")
 
-    imperative = search_view(_themed_window(), 360, 200)
+    imperative = search_view(_themed_window(), 360, 200).node  # an overlay since M42
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)

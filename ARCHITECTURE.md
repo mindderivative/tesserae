@@ -244,7 +244,10 @@ built with `attach=False` and shows it with `window.show_layer`
 chooses which dismissals apply by its flags and its scrim: a full-window
 scrim takes outside presses, which leaves Escape. Timers (the snackbar's
 4 s, the tooltip's 500 ms) are animations of a private box in no tree
-(`_Timer`), since animations run there too.
+(`_Timer`), since animations run there too. `SearchView` (M42) listens
+to its bar's field through the bar's own dispatcher. It builds its
+`max_results` rows once and attaches or detaches them as results change,
+so no listener outlives a node.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

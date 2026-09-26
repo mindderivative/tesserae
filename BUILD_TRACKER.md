@@ -51,12 +51,12 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
-| M42 — Widgets III: Search, Date and Time, Media, the Node Graph, the Rest, Off the Window's Theme | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions made, not started (2026-09-25) |
+| M42 — Widgets III: Search, Date and Time, Media, the Node Graph, the Rest, Off the Window's Theme | `█░░░░░░░░░` 13% | 🚧 In progress — Phase 1 of 8 done (2026-09-25) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, after M43 (2026-09-25) |
 
-**Just closed:** M41 (2026-09-25), all 6 phases — `tesserae.widgets`' composed catalog built from its fragments (buttons, containment and lists, navigation), with MD3 feedback, selection and expansion, and `tesserae.overlays` on tre's layers; content-sized text, an M37 patch crash and keyboard-only Links fixed on the way; `src/tesserae` uses none of M41's removed names, and the examples run clean under tre's shim; 1183 → 1227.
+**Just closed:** M42 Phase 1 (2026-09-25) — MD3's search bar (the placeholder as hint text, `.query`) and `tesserae.overlays.SearchView` (results under the bar, keys); 1227 → 1233. Before that, M41 (same day) — the composed catalog and overlays.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -70,7 +70,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M42 Phase 1** (the search bar and `tesserae.overlays.SearchView`) — decisions made (Q1: build them all in M42; Q2–Q4 as recommended); waiting on the user's go-ahead to start. M42 is now 8 phases. M45 (docking and the app shell) follows M43. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
+**Up next:** **M42 Phase 2** (the date-picker day, the period selector and the time input field) — waiting on the user's go-ahead. M45 (docking and the app shell) follows M43. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1196,7 +1196,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 42 — Widgets III: Search, Date and Time, Media, the Node Graph, the Rest, Off the Window's Theme
 
-**Status: ⬜ Scoped — decisions made, not started (2026-09-25).** User: Q1 "Build them all in M42"; Q2, Q3 and Q4 as recommended. The last of the migration (the eight `tesserae.widgets` functions still delegated to `tre`, and `App` off `Window.set_theme`) and, by Q1, the widgets `tre` has that Tesserae never wrapped. Docking and the app shell go to M45, after M43 (Q2). Scoped from `tre`'s removal list (`python/tre/_removed.py`, 0.3.5), its `target-api.md` and 0.3.4's factory docs.
+**Status: 🚧 In progress — Phase 1 of 8 done (2026-09-25).** User: Q1 "Build them all in M42"; Q2, Q3 and Q4 as recommended. The last of the migration (the eight `tesserae.widgets` functions still delegated to `tre`, and `App` off `Window.set_theme`) and, by Q1, the widgets `tre` has that Tesserae never wrapped. Docking and the app shell go to M45, after M43 (Q2). Scoped from `tre`'s removal list (`python/tre/_removed.py`, 0.3.5), its `target-api.md` and 0.3.4's factory docs.
 
 **What's left:**
 - **Delegated functions:** `search_bar`, `search_view`, `date_picker_day`, `period_selector`, `video`, `node_graph`, `graph_node` and `image`. All eight are on the removal list; `image`'s `add_image_from_bytes` is too, though D6 said it would stay.
@@ -1217,8 +1217,8 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
   - Alternative: `tre`'s empty panel, filled and opened by the app.
 - Q4 **The node graph.** Recommended: **`tre`'s viewport and nodes, plus what 0.3.4 now allows**: pan by dragging the background, zoom with the wheel about the pointer, drag nodes (pointer capture), and `edge(a, b)` curves (a `path`) that follow the nodes. Alternative: `tre`'s parity only (no dragging, no edges).
 
-### Phase 1 — Search ⬜
-- Step 1: `search_bar` per Q3 (from its fragment; parts `field`, `leading`, `trailing0`..; `.query` a `Signal` of the text) and `tesserae.overlays.SearchView` (results, keys, `on_query`); `search_view` returns it — ⬜
+### Phase 1 — Search ✅
+- Step 1: `search_bar`, from its fragment: a 56 px `surface_container_high` pill with elevation; a 24 px leading icon (`on_surface`, default `search`); a `text_input` whose `placeholder` is now hint text in `on_surface_variant` (tre's, and the fragment, put it in the field as its text), typed text in `on_surface` and a `primary` caret, labelled by the placeholder; 48 px trailing icon buttons (`on_surface_variant`). `.query` is a `Signal` of the text, and `.on_query(fn)` hears each change; parts `field`, `leading`, `trailing0`... `tesserae.overlays.SearchView`: MD3's docked results panel (`surface_container_high`, 28 px corners, elevation, `max_height`) of 56 px `body_large` rows, `menu`/`menuitem`. With a `bar`, it opens below it on the field's focus or typing when there are results; down from the field enters the rows, the arrows wrap, and up from the first returns to the field; a click or Enter calls the row and closes it; an outside press or Escape closes it. `set_results` attaches or detaches pre-built rows, closing when empty; `on_query` goes through the bar. `search_view` returns one (`bar=`, `results=`). `test_widgets_search.py` (tre-parity) is replaced by `tests/test_search.py` (9); the fragment tests read `.node`. Mutation-checked with 10 mutants: two survived at first (one break didn't apply and was redone; shrinking results wasn't tested) and each fails a test now. 1227 → 1233 passed. Docs: widget catalog, overlays guide, API index, `ARCHITECTURE.md` — ✅
 
 ### Phase 2 — Date and Time ⬜
 - Step 1: `date_picker_day` (MD3's 40 px day: selected `primary`/`on_primary`, today outlined in `primary`, outside the month dimmed; `on_click`, `role="button"`, `selected`), `period_selector` (MD3's AM/PM segmented toggle, `.period` a `Signal`, arrow keys) and, new by Q1, `time_input_field` (MD3's 96×72 `surface_container_highest` field with a `display_medium` numeral, on `text_input`, validated to hours or minutes, arrows step it) — ⬜

@@ -27,6 +27,7 @@ Every overlay has `open()`, `close()`, `is_open`, `on_close(fn)` and
 | `NavigationDrawer` | the window's start, over a scrim, sliding in | -- | closes | yes |
 | `Snackbar` | 24 px in, 72 px from the bottom | no | no | no |
 | `Tooltip` | below its anchor | closes | closes | no |
+| `SearchView` | below its search bar | closes | closes | no |
 
 A modal overlay's scrim (black at 32%) fills the window, so a press
 outside the panel lands on the scrim, and Escape is what closes it. A
@@ -58,8 +59,16 @@ modal overlay keeps Tab inside it.
   navigation drawer. `.drawer` is the drawer widget (`.drawer.selected`,
   `.drawer.on_change`), and choosing an item closes it.
 
+- **`SearchView(window, bar=None, width=360, max_height=336, results=None)`:**
+  MD3's docked search view, the results under a `search_bar`. Given the
+  `bar`, it opens below it when the field has focus or is typed in and
+  there are results. The down arrow in the field moves into the rows, up
+  from the first row goes back, and a click or Enter calls the row's
+  `fn` and closes it. `set_results([(text, fn)])` replaces the rows, and
+  `on_query(fn)` hears the bar's typing.
+
 `tesserae.widgets`' `dialog`, `snackbar`, `side_sheet(modal=True)`,
-`menu` and `tooltip` return these.
+`menu`, `tooltip` and `search_view` return these.
 
 ## Not yet covered
 

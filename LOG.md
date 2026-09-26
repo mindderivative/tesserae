@@ -680,3 +680,17 @@ Q4 - Recommended".
 - Docking and the app shell become M45, after M43, on 0.3.5's docking
   events.
 - Nothing pushed; no push was asked for.
+
+## M42 Phase 1: search
+
+User: "Push it and start Phase 1". Pushed `0df3db2`.
+
+- Audit: tre's search bar (and the fragment) put the placeholder in the
+  field as text; it's hint text now. `text_input` takes no
+  `line_height`.
+- SearchView is an overlay under the bar, driven by the field's focus,
+  typing and keys, with rows built once and attached as needed.
+- Mutants: 10 of 10 caught after redoing a break that hadn't applied
+  and adding a test for shrinking results.
+
+1233 passed.

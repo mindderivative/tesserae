@@ -14,6 +14,7 @@ closes itself on the dismissals `tre`'s legacy overlays allowed:
 | `SideSheet`, `NavigationDrawer` | at the window's end / start, over a scrim | -- | closes | yes |
 | `Snackbar` | 24 px in, 72 px from the bottom | no | no | no |
 | `Tooltip` | below its anchor | closes | closes | no |
+| `SearchView` | below its search bar | closes | closes | no |
 
 A modal overlay's scrim fills the window (sized when it opens), so an
 outside press lands on the scrim. MD3's timing, which `tre` never had: a
@@ -29,7 +30,7 @@ from tesserae import a11y
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget, fragment
 
-__all__ = ["Dialog", "Menu", "NavigationDrawer", "Overlay", "SideSheet", "Snackbar", "Tooltip"]
+__all__ = ["Dialog", "Menu", "NavigationDrawer", "Overlay", "SearchView", "SideSheet", "Snackbar", "Tooltip"]
 
 #: MD3's scrim: black at 32%, as the fragments' own.
 SCRIM = "#00000052"
@@ -407,3 +408,110 @@ class NavigationDrawer(_EdgeSheet):
     def set_theme(self, theme: Theme) -> None:
         super().set_theme(theme)
         self.drawer.set_theme(theme)
+
+
+class SearchView(Overlay):
+    """MD3's docked search view (M42): the results under a search bar, a
+    `surface_container_high` panel with 28 px corners and elevation, of
+    56 px `body_large` rows (`role="menuitem"`), at most `max_height` tall.
+
+    With a `bar` (`tesserae.widgets.search_bar`), it opens below it when
+    the field has focus or is typed in, as long as there are results;
+    the down arrow in the field moves into the rows, the arrows move
+    between them (up from the first goes back to the field), and a click
+    or Enter calls a row's `fn` and closes it. An outside press or Escape
+    closes it. `set_results([(text, fn)])` replaces the rows (at most
+    `max_results`); `on_query(fn)` hears the bar's typing."""
+
+    ROW = 56.0
+
+    def __init__(self, window: Any, *, bar: Optional[Widget] = None, width: float = 360.0,
+                 max_height: float = 336.0, results: Optional[list[tuple[str, Optional[Callable[[], Any]]]]] = None,
+                 max_results: int = 8, theme: Optional[Theme] = None) -> None:
+        name = "search_view"
+        self.bar = bar
+        rows = [{"id": f"{name}.row{i}", "kind": "Container",
+                 "style": {"width": width, "height": self.ROW, "align_items": "center",
+                           "padding": {"left": 16, "right": 16, "top": 0, "bottom": 0}},
+                 "children": [{"id": f"{name}.row{i}.label", "kind": "Text",
+                               "text": {"content": " ", "typography_role": "body_large"},
+                               "style": {"foreground": "on_surface", "width": width - 32, "height": 24}}]}
+                for i in range(max_results)]
+        spec = {"id": name, "kind": "Container",
+                "style": {"width": width, "flex_direction": "vertical", "background": "surface_container_high",
+                          "corner_radius": "extra_large", "elevation": "level_3",
+                          "padding": {"left": 0, "right": 0, "top": 8, "bottom": 8}},
+                "children": rows}
+        widget = Widget(window, spec=spec, theme=theme, name=name, attach=False,
+                        interactive={f"row{i}": "on_surface" for i in range(max_results)})
+        super().__init__(window, widget)
+        self.node.set(clip_children=True, max_height=float(max_height))
+        a11y.describe(self.node, role="menu", label="Results")
+        self.rows = [widget.part(f"row{i}") for i in range(max_results)]
+        self._actions: list[Optional[Callable[[], Any]]] = [None] * max_results
+        self._count = 0
+        for i, row in enumerate(self.rows):
+            row.set(focusable=True, role="menuitem", cursor="pointer")
+            widget._undo.append(widget.view._listen(row, "click", lambda e, i=i: self._choose(i)))
+            widget._undo.append(widget.view._listen(row, "key_down", lambda e, i=i: self._key(e, i)))
+            row.remove()
+        self.set_results(results or [])
+        if bar is not None:
+            field = bar.part("field")
+            listen = bar.view._listen
+            self._undo += [
+                listen(field, "focus", lambda e: self._show()),
+                listen(field, "change", lambda e: self._show()),
+                listen(field, "key_down", self._field_key),
+            ]
+
+    # -- for app code ------------------------------------------------------------
+
+    def set_results(self, results: list[tuple[str, Optional[Callable[[], Any]]]]) -> None:
+        """Replaces the rows with `results`, `(text, fn)` each."""
+        results = list(results)[: len(self.rows)]
+        for i, row in enumerate(self.rows):
+            if i < len(results):
+                text, fn = results[i]
+                self.widget.part(f"row{i}.label").set(text=text)
+                row.set(label=text)
+                self._actions[i] = fn
+                if row.parent() is None:
+                    self.node.add_child(row)
+            elif row.parent() is not None:
+                row.remove()
+        self._count = len(results)
+        if self._count == 0:
+            self.close()
+
+    def on_query(self, fn: Callable[[str], Any]) -> Callable[[], None]:
+        """Hears the bar's typing (`fn(text)`)."""
+        if self.bar is None:
+            raise ValueError("a search view hears a query through its bar")
+        return self.bar.on_query(fn)
+
+    # -- internals -------------------------------------------------------------------
+
+    def _show(self) -> None:
+        if self._count and self.bar is not None:
+            self.open(self.bar.node)
+
+    def _choose(self, i: int) -> None:
+        fn = self._actions[i]
+        self.close()
+        if fn is not None:
+            fn()
+
+    def _field_key(self, event: Any) -> None:
+        if event.key == "arrow_down" and self._count:
+            self._show()
+            self.rows[0].focus()
+
+    def _key(self, event: Any, i: int) -> None:
+        if event.key == "arrow_down":
+            self.rows[(i + 1) % self._count].focus()
+        elif event.key == "arrow_up":
+            if i == 0 and self.bar is not None:
+                self.bar.part("field").focus()
+            else:
+                self.rows[(i - 1) % self._count].focus()

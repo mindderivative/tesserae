@@ -93,9 +93,16 @@ on.
 Where you used the node (or tuple) these returned, use `.node` or
 `.part(...)`.
 
-**Still `tre`'s, until M42:** `search_bar`, `search_view`,
-`date_picker_day`, `period_selector`, `video`, `node_graph`,
-`graph_node` and `image`. These are thin delegates to the matching
+**Search (M42).** `search_bar(window, placeholder, width,
+leading_icon="search", trailing_icons=None)` is MD3's search bar: its
+`placeholder` is hint text, `.query` is a `Signal` of what's typed, and
+`.on_query(fn)` hears it. Its parts are `field`, `leading` and
+`trailing0`, and so on. `search_view(window, width, height, bar=bar,
+results=[(text, fn)])` is the docked results panel, an overlay that
+opens below the bar: see [Overlays](overlays.md#each-one).
+
+**Still `tre`'s, until later in M42:** `date_picker_day`,
+`period_selector`, `video`, `node_graph`, `graph_node` and `image`. These are thin delegates to the matching
 `Window.add_*` factory in `tre`, with the same parameter names, order and
 defaults, and they return `tre` nodes themed by the window's theme. M42
 rebuilds them too.
