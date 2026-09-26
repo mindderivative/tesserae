@@ -669,3 +669,14 @@ User: "Push it and scope M42". Pushed `6e48798`.
 - tre's node graph has no drag or edges.
 
 Q1–Q4 are in the tracker, with recommendations.
+
+## M42 decisions
+
+User: "Q1 - Build them all in M42 / Q2 - Recommended / Q3 - Recommended /
+Q4 - Recommended".
+
+- M42 grows to 8 phases: the new widgets (segmented button, pagination,
+  popover, time input field, carousel, splitter) join it.
+- Docking and the app shell become M45, after M43, on 0.3.5's docking
+  events.
+- Nothing pushed; no push was asked for.

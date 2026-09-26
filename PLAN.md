@@ -119,4 +119,6 @@ Phase 6 done: the gate covers M41's names; the examples and 152 widget tests are
 
 **M42 scoped (2026-09-25):** 6 phases. The migration only: search, date and time, media, the node graph, and off the window's theme, then the gate. Docking can't be built on 0.3.4 (its API is 0.3.5's). Decisions Q1–Q4 pending; Q1–Q2 would add M45 for new widgets, docking and the shell.
 
-**Up next:** the user's decisions on M42.
+**M42 decisions:** Q1 "Build them all in M42" (segmented button, pagination, popover, time input field, carousel, splitter join it; 8 phases); Q2–Q4 as recommended. Docking and the app shell are the new M45, after M43.
+
+**Up next:** M42 Phase 1 (search).

@@ -51,9 +51,10 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
-| M42 — Widgets III: Search, Date and Time, Media, the Node Graph, Off the Window's Theme | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25) |
+| M42 — Widgets III: Search, Date and Time, Media, the Node Graph, the Rest, Off the Window's Theme | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions made, not started (2026-09-25) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
+| M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, after M43 (2026-09-25) |
 
 **Just closed:** M41 (2026-09-25), all 6 phases — `tesserae.widgets`' composed catalog built from its fragments (buttons, containment and lists, navigation), with MD3 feedback, selection and expansion, and `tesserae.overlays` on tre's layers; content-sized text, an M37 patch crash and keyboard-only Links fixed on the way; `src/tesserae` uses none of M41's removed names, and the examples run clean under tre's shim; 1183 → 1227.
 
@@ -69,7 +70,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M42** is scoped (6 phases: search, date and time, media, the node graph, off the window's theme, the gate) — waiting on the user's decisions Q1–Q4 (Q1–Q2 would add an M45 for the widgets Tesserae never wrapped, docking and the app shell, after M43). `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
+**Up next:** **M42 Phase 1** (the search bar and `tesserae.overlays.SearchView`) — decisions made (Q1: build them all in M42; Q2–Q4 as recommended); waiting on the user's go-ahead to start. M42 is now 8 phases. M45 (docking and the app shell) follows M43. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1193,9 +1194,9 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ---
 
-## Milestone 42 — Widgets III: Search, Date and Time, Media, the Node Graph, Off the Window's Theme
+## Milestone 42 — Widgets III: Search, Date and Time, Media, the Node Graph, the Rest, Off the Window's Theme
 
-**Status: ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25).** The last of the migration: the eight `tesserae.widgets` functions still delegated to `tre`, and `App` off `Window.set_theme`. Scoped from `tre`'s removal list (`python/tre/_removed.py`, 0.3.5), its `target-api.md` and 0.3.4's factory docs.
+**Status: ⬜ Scoped — decisions made, not started (2026-09-25).** User: Q1 "Build them all in M42"; Q2, Q3 and Q4 as recommended. The last of the migration (the eight `tesserae.widgets` functions still delegated to `tre`, and `App` off `Window.set_theme`) and, by Q1, the widgets `tre` has that Tesserae never wrapped. Docking and the app shell go to M45, after M43 (Q2). Scoped from `tre`'s removal list (`python/tre/_removed.py`, 0.3.5), its `target-api.md` and 0.3.4's factory docs.
 
 **What's left:**
 - **Delegated functions:** `search_bar`, `search_view`, `date_picker_day`, `period_selector`, `video`, `node_graph`, `graph_node` and `image`. All eight are on the removal list; `image`'s `add_image_from_bytes` is too, though D6 said it would stay.
@@ -1220,7 +1221,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 - Step 1: `search_bar` per Q3 (from its fragment; parts `field`, `leading`, `trailing0`..; `.query` a `Signal` of the text) and `tesserae.overlays.SearchView` (results, keys, `on_query`); `search_view` returns it — ⬜
 
 ### Phase 2 — Date and Time ⬜
-- Step 1: `date_picker_day` (MD3's 40 px day: selected `primary`/`on_primary`, today outlined in `primary`, outside the month dimmed; `on_click`, `role="button"`, `selected`) and `period_selector` (MD3's AM/PM segmented toggle, `.period` a `Signal`, arrow keys) — ⬜
+- Step 1: `date_picker_day` (MD3's 40 px day: selected `primary`/`on_primary`, today outlined in `primary`, outside the month dimmed; `on_click`, `role="button"`, `selected`), `period_selector` (MD3's AM/PM segmented toggle, `.period` a `Signal`, arrow keys) and, new by Q1, `time_input_field` (MD3's 96×72 `surface_container_highest` field with a `display_medium` numeral, on `text_input`, validated to hours or minutes, arrows step it) — ⬜
 
 ### Phase 3 — Media ⬜
 - Step 1: `image` built with `window.create("image")` and decoded `rgba` (off `add_image_from_bytes`), and `video` as an `image` node with `frame(rgba, width, height)` pushing frames through `set(rgba=...)` — ⬜
@@ -1228,11 +1229,17 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 ### Phase 4 — The Node Graph ⬜
 - Step 1: `node_graph` and `graph_node` per Q4: a clipped viewport whose content pans (`translate_x`/`translate_y`) and zooms (`scale`); draggable nodes (title bar over a body, MD3 surface colours); `edge(a, b)` paths re-routed as nodes move — ⬜
 
-### Phase 5 — Off the Window's Theme ⬜
+### Phase 5 — Segmented Button, Pagination, Popover ⬜
+- Step 1: new by Q1: `segmented_button` (MD3's connected segments with one outline and dividers, a check on selected ones, single- or multi-select as a `Signal`, arrow keys), `pagination` (previous, numbered pages and next, `.current` a `Signal`, the ends disabled at the bounds) and `tesserae.overlays.Popover` (MD3's rich tooltip: `surface_container`, 12 px corners, a subhead and supporting text; persistent until dismissed, anchored) — ⬜
+
+### Phase 6 — Carousel and Splitter ⬜
+- Step 1: new by Q1, per `tre`'s `legacy-behavior.md`: `carousel` (a clip holding absolutely placed items, 16 px in and 8 apart; `uncontained` scrolls by pixel, `hero` and `multi_browse` snap through large/medium/small slots, blending widths with a fractional position; moving to an index animates over 300 ms, standard; wheel and drag move it; `.index` a `Signal`) and `splitter` (a handle between two siblings with a `col_resize`/`row_resize` cursor; dragging with pointer capture sets their shares, clamped; arrow keys nudge it; `.position` a `Signal`, `role="slider"`) — ⬜
+
+### Phase 7 — Off the Window's Theme ⬜
 - Step 1: `App` stops calling `Window.set_theme` and reading `Window.theme`; the fragment tests stop theming windows (their `_themed_window` helpers); `tesserae.Theme` is the only theme — ⬜
 
-### Phase 6 — Tests, Docs, Tracker, Gate ⬜
-- Step 1: tests per widget; `tests/test_no_tre_controls.py` extended to M42's names, `set_theme` and `theme`; the whole suite under `tre`'s shim, with only M43's `tre.View`/`tre.Signal` reference tests left failing; docs (the widget catalog, a search section, the node graph); tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
+### Phase 8 — Tests, Docs, Tracker, Gate ⬜
+- Step 1: tests per widget; `tests/test_no_tre_controls.py` extended to M42's names, `set_theme` and `theme`; the whole suite under `tre`'s shim, with only M43's `tre.View`/`tre.Signal` reference tests left failing; docs (the widget catalog, search, the node graph, the new widgets); tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
 
 ---
 
@@ -1260,3 +1267,12 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 ### Phase 2 — Tests, Docs ✅
 - Step 1: `tests/conftest.py` gains a `logs` fixture capturing loguru records (locked, since watcher threads log). The four background-failure tests now assert the logged ERROR, the DEBUG traceback, and that nothing was queued, instead of a raising callable; a new test covers a `tre` rejection logged on the loop. `tests/test_log.py` (6 tests): the format and module name, level filtering, `logger.disable("tesserae")`, warnings through loguru that still become errors under `filterwarnings("error")`, `capture_warnings=False`, and the "hot reload on" line. 419 → 426 passed — ✅
 - Step 2: docs: new `guide/logging.md` (in the nav) — setup, what's logged at each level, failed reloads, warnings, turning messages off; `guide/hot-reload.md` and `api/spec.md` say failures are logged; `api/index.md` lists `configure_logging`; `README.md`; `ARCHITECTURE.md` gained a logging note and lost a stale M31-era line saying theme and stylesheet files weren't watched. `mkdocs build --strict` clean — ✅
+## Milestone 45 — Docking and the App Shell
+
+**Status: ⬜ Proposed — approved, after M43 (2026-09-25).** Moved out of M42 by its Q2 (user: as recommended). `tre` keeps docking as a bare mechanism (D10) and moves its presentation and `build_shell` to the framework. The framework-side API is 0.3.5's (`dock_target`/`dock_drop` window events, `set_active_panel`), not 0.3.4's, so this waits until Tesserae is on 0.3.5 (M43).
+
+### Phase 1 — Docking and the Shell ⬜
+- Step 1: docking presentation on 0.3.5's bare-bones docking: tab strips for zones (`set_active_panel`), drag handles, and drop highlights drawn from `dock_target`, committed on `dock_drop`; an app shell composing a top app bar, navigation, docked panels and a status bar (what `build_shell` did) — ⬜
+
+---
+
