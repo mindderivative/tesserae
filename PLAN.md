@@ -79,4 +79,6 @@ Phase 3 done: `App(dark="system")` by default, following the OS; `set_dark`; 104
 
 Phase 4 done: final docs; a known gap for `"system"` starting dark. **M38 complete.**
 
-**Up next:** scope M39 (interaction).
+**M39 scoped (2026-09-25):** from `tre`'s legacy behaviour write-up. It found a keyboard regression from M37 (`on_click` nodes aren't Tab stops), which Phase 1 fixes. Decisions Q1–Q3 pending.
+
+**Up next:** the user's decisions on M39.

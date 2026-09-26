@@ -48,7 +48,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M36 — Bindings and Handlers in Tesserae | `██████████` 100% | ✅ Complete — the evaluator; wiring moved to M37 (2026-09-25) |
 | M37 — Declarative Engine on `tre` Primitives | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M38 — MD3 Theme in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
-| M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
+| M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped in detail, decisions pending (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
@@ -69,7 +69,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M39** (interaction: state layers, ripple, focus rings, accessibility), to be scoped against the source — waiting on the user's go-ahead. `tre` is building the migration guide (its write-ups of the state layer and ripple timings feed M39) and the `TRE_FORBID_REMOVED` gate shim as its M97 Phase 2. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
+**Up next:** **M39** is scoped and waiting on the user's decisions Q1–Q3; Phase 1 fixes a keyboard-accessibility regression from M37. `tre` has committed its migration guide locally on its `0.3.5` branch (the widget dump tool and reference, the legacy behaviour write-up, the MD3 handover); the `TRE_FORBID_REMOVED` shim is still to come. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -87,6 +87,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 - Not published to PyPI. `tre` v0.3.4 is a published GitHub Release with 24 attached assets (`github.com/mindderivative/tre/releases/tag/v0.3.4`, 2026-09-25; wheels for CPython 3.9–3.15 on Linux, macOS arm64 and Windows), and both Tesserae's CI and its local `.venv` pin it (M33), but neither `tre` nor Tesserae is on PyPI yet.
 - Tesserae's colour parsing (`tesserae.tokens.parse_color`) doesn't accept CSS's wide-gamut colour functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser does; it raises a clear error instead. Nothing in the repo uses them. Found in M37 Phase 1.
 - `App(dark="system")` (the default) starts dark and only learns the OS's appearance at its first light/dark switch: `tre` 0.3.4 fires `color_scheme` on a change but has no way to read the current appearance (`window.get` has only `width`, `height`, `title`, `scale_factor`). Accepted by the user (M38 Q3); a readable `window.get("dark")` in `tre` would let `"system"` start right. Found in M38.
+- **Keyboard users can't reach clickable YAML nodes** (a regression from M37): in `tre`'s `View`, an `on_click` handler made the node focusable, a Tab stop and Enter-activated; Tesserae's `node.on("click")` doesn't. Scoped as M39 Phase 1.
 
 **Fixed gaps:**
 - ~~An embedded component (`tesserae.instantiate`) wasn't styled by its host view's theme or stylesheet `styles:`, at creation or on reload: `tre`'s `View.instantiate` passed it only the shared window theme state.~~ **Fixed (M37 Phase 5).** Tesserae builds a component in its host's window with the host's scheme and cascade layers, and re-patches it when the host is re-themed or re-styled, nested components included.
@@ -1057,11 +1058,33 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 39 — Interaction: State Layer, Ripple, Focus, Accessibility
 
-**Status: ⬜ Proposed — approved, not started (2026-09-25).** `tre` D8 and R12: `tre` draws no ripple, state layer, scrim or focus ring.
+**Status: ⬜ Proposed — scoped in detail, decisions pending (2026-09-25).** User: "Yes" (scope M39). `tre` D8 and R12: `tre` draws no ripple, state layer, scrim or focus ring. Scoped from `tre`'s new `docs/design/legacy-behavior.md` (its M97 Phase 2 Step 2, on its local `0.3.5` branch, `9f926d6`) and probes on 0.3.4.
 
-### Phase 1 — Primitives ⬜
-- Step 1: hover and press state layers, the ripple (clipped box plus a circle `path` animated by `scale` and `opacity`), focus rings from bubbling `focus`/`unfocus`, `tab_index` — ⬜
-- Step 2: accessibility: every Tesserae widget sets its own `role`, state and actions (`a11y_action`) — ⬜
+**What `tre`'s legacy interaction does** (the write-up, read from source):
+- **Hover:** the node under the pointer (never its ancestors) animates a layer to 8% over 100 ms, linear.
+- **Ripple:** every press spawns one at the press point, radius 0 → 100 px (a fixed size, not fitted to the node) and opacity 12% → 0 over 300 ms, linear, with no separate press and release phases.
+- Both paint in the theme's `on_surface`, clipped to the node's rounded box.
+- **Focus ring:** never painted.
+- **Opt-in only:** no factory turns any of this on; a node gets it only from the app calling `enable_interaction()`, or from its first press, and then tinted black.
+
+**A regression from M37, found scoping this:** in `tre`'s `View`, `handlers: {on_click: ...}` made a node focusable, a Tab stop, and activated by Enter (`set_on_click` added a click action). In Tesserae's `View`, `node.on("click")` doesn't: the same Rect isn't focusable, Tab skips it, and Enter does nothing. Probed side by side. Keyboard users can't reach YAML buttons until this is fixed. Accessibility is otherwise not worse: `tre`'s `View` nodes report no role through `get()`, and Tesserae's already set `role="link"` and `role="textbox"`.
+
+**Decisions for the user, each with a recommendation:**
+- Q1 **Clickable YAML nodes.** Recommended: **a node with an `on_click` handler becomes focusable, a Tab stop, and `role="button"` unless it has a role**, so Enter and Space activate it and assistive technology offers the action. That restores `tre`'s keyboard reachability, and the role goes further than `tre` did. Fix it first, as Phase 1.
+- Q2 **Which numbers.** Recommended: **MD3's**, for Tesserae's widgets: hover 8%, focus 10%, pressed 10%, dragged 16%, in the content's colour; a ripple that covers the node, spreads while pressed and fades on release; and a visible focus ring on keyboard focus only (`focus_visible`), which `tre` never drew. The alternative is `tre`'s legacy numbers above (fixed 100 px ripple, no focus ring).
+- Q3 **Plain YAML nodes.** Recommended: **a node with `on_click` gets the state layer and ripple automatically** (tinted `on_surface`, with `interaction: false` to opt out), so the button fragments feel like MD3 buttons. Alternatives: an explicit opt-in field, or none on YAML nodes (only on Tesserae's widgets, M40+).
+
+### Phase 1 — Clickable Nodes Reachable ⬜
+- Step 1: per Q1, nodes with `on_click` are focusable Tab stops with `role="button"` (unless set), activated by Enter and Space; tested against `tre`'s `View` behaviour (focus by Tab, Enter clicks), and in the fragments — ⬜
+
+### Phase 2 — State Layer and Ripple ⬜
+- Step 1: `tesserae.interaction`: a state layer (hover, focus, pressed, dragged) and a ripple built from 0.3.4's primitives as the write-up's recipe shows (an absolute layer child, `clip_children`, `pointer_enter`/`pointer_leave`/`pointer_down`/`pointer_up`), with Q2's numbers and `Theme` easing and durations; per Q3, applied to YAML nodes with `on_click` — ⬜
+
+### Phase 3 — Focus Ring and Accessibility ⬜
+- Step 1: a focus ring on keyboard focus (`focus_visible`), MD3's shape (3 px, `secondary`, outside the node); roles, labels and states for Tesserae's widgets to use in M40; `a11y_action` wiring — ⬜
+
+### Phase 4 — Tests, Docs, Tracker ⬜
+- Step 1: tests with `simulate`/`advance` (M34's checkbox spike is the model); docs; tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
 
 ---
 

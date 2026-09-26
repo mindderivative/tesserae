@@ -315,3 +315,12 @@ mutants caught. 1042 passed.
 User: "Yes". Pushed `349d0bb`, `1dceb2b`. M38 added to `ARCHITECTURE.md`
 and the design page; a known gap for `"system"` starting dark;
 `Window.set_theme` removal moved to M41.
+
+## M39 scoping
+
+User: "Yes". Pushed `315cfb7`. `tre`'s `0.3.5` branch has `dump_widget.py`,
+`legacy-behavior.md` and the MD3 handover (local commits `da2f475`,
+`9f926d6`, `1686796`). Read the state layer and ripple section. Probe:
+an `on_click` Rect is focusable, a Tab stop and Enter-activated in
+`tre`'s `View`, but none of those in Tesserae's -- a regression, now in
+known gaps. Roles: `tre`'s `View` nodes report none via `get()`.
