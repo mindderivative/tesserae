@@ -149,6 +149,15 @@ it (`View.set_stylesheet`, `tre` M91). A stylesheet is per-`View`:
 replaces it for one screen. `App.build_view()` gives a `register()`ed
 screen the same theme and stylesheet.
 
+**Theme, M38:** `tesserae.Theme` (`theme.py`) is the resolved theme --
+roles, `components:` shape and elevation, `typography:`, and MD3 motion
+tokens -- replacing `tre`'s `Window.theme` for Tesserae's own widgets
+(M39–M42). A theme's `typography:` styles display text in views (Text,
+Link; not text inputs), carried on the cascade's prepared layers.
+`App(dark="system")` is the default: it starts dark and follows the
+window's `color_scheme` event; `set_dark` fixes or releases it. `App`
+still calls `Window.set_theme` for `tre`'s legacy widgets until M41.
+
 `App.load` is the enforced-naming-convention path (`*_View.yaml`/
 `*_ViewModel.py`, checked via `inspect.getfile` against the
 `ViewModel` class's own defining file -- `tre.View` has no `path`

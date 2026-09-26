@@ -199,6 +199,15 @@ and Tesserae doesn't yet: it raises a clear error instead.
 tokens. It's checked against `tre`'s `Window.theme` (109 cases) and is
 what M39–M42's widgets read. `app.theme`/`view.theme` return one.
 
+A theme's `typography:` styles display text in views (Phase 2): Text and
+Link resolve `typography_role` through it, text inputs don't (the user's
+M38 Q1). Light and dark (Phase 3): `App(dark="system")`, the default,
+starts dark (the OS's appearance can't be read before its first
+`color_scheme` event) and follows the OS; `True`/`False` fix it and are
+re-asserted when `tre` flips the window's own theme on an OS switch.
+`App` keeps calling `Window.set_theme` for `tre`'s legacy widgets until
+M41 replaces them.
+
 
 `tre` keeps no theme (D7), so Tesserae owns all of it:
 

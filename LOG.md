@@ -309,3 +309,9 @@ User: "Push and start phase 3". Pushed `8437295`. `App` gained
 `dark="system"`, `set_dark`, the `color_scheme` listener, and
 `dark`/`dark_mode`. No existing test assumed light. 10 tests; 3/3
 mutants caught. 1042 passed.
+
+## M38 Phase 4 — docs; M38 complete
+
+User: "Yes". Pushed `349d0bb`, `1dceb2b`. M38 added to `ARCHITECTURE.md`
+and the design page; a known gap for `"system"` starting dark;
+`Window.set_theme` removal moved to M41.
