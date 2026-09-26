@@ -2,7 +2,7 @@
 
 ## `App`
 
-**`App(width=480, height=320, title="Tesserae App", *, theme_seed=None, dark=False, default_theme=None, custom_theme=None, stylesheet=None)`**
+**`App(width=480, height=320, title="Tesserae App", *, theme_seed=None, dark="system", default_theme=None, custom_theme=None, stylesheet=None)`**
 
 (Each of `default_theme=`, `custom_theme=` and `stylesheet=` also has a
 `*_spec=` twin that takes a dict instead of a file path.)
@@ -32,10 +32,27 @@ app's theme the first time it opens. Widgets created with
 Re-themes the running app in place: every view `load()` or
 `build_view()` made, and the window. Views built later use the new
 theme too. Both dicts are the complete new selection (`None` for none).
-The seed and `dark` stay as given to `App(...)`. Bound values stay live.
+The seed and the light/dark appearance stay as they are. Bound values stay live.
 If `tre` rejects the theme, it raises, and the app keeps its old theme.
 Call it on the event-loop thread; `run(hot_reload=True)` calls it when a
 theme file changes.
+
+## Light and dark
+
+`dark="system"` (the default) follows the OS: when it switches between
+light and dark, every screen and the window are re-themed in place, with
+bound values kept. It **starts dark**, because `tre` 0.3.4 can't read the
+OS's appearance until the first switch. `dark=True` or `dark=False` fixes
+the appearance, whatever the OS does.
+
+**`set_dark(dark) -> None`** -- `True`/`False` switches to that
+appearance now, and keeps it; `"system"` goes back to following the OS
+from its next switch.
+
+**`dark -> bool`** -- whether the dark scheme is showing now.
+**`dark_mode -> bool | str`** -- `"system"`, or the fixed `True`/`False`.
+**`theme -> tesserae.Theme`** -- the app's resolved theme, for the
+current appearance.
 
 ## `set_stylesheet_spec`
 

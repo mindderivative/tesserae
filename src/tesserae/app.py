@@ -131,7 +131,7 @@ class App:
         title: str = "Tesserae App",
         *,
         theme_seed: tuple[int, int, int, int] | None = None,
-        dark: bool = False,
+        dark: bool | str = "system",
         default_theme: str | Path | None = None,
         default_theme_spec: dict[str, Any] | None = None,
         custom_theme: str | Path | None = None,
@@ -143,7 +143,13 @@ class App:
         self._height = height
         self._title = title
         self._theme_seed = theme_seed
-        self._dark = dark
+        if dark not in (True, False, "system"):
+            raise ValueError(f'App: dark must be True, False or "system", got {dark!r}')
+        #: "system" follows the OS; True/False is the app's own fixed choice (M38).
+        self._dark_mode: bool | str = dark
+        #: The appearance in use. "system" starts dark: 0.3.4 can't read the
+        #: OS's appearance until its first `color_scheme` event (M38 Q3).
+        self._dark: bool = True if dark == "system" else bool(dark)
         self._default_theme_spec = _file_or_spec("App", "default_theme", default_theme, default_theme_spec, load_theme)
         self._custom_theme_spec = _file_or_spec("App", "custom_theme", custom_theme, custom_theme_spec, load_theme)
         #: The theme files, for `run(hot_reload=True)` to watch (M31).
@@ -165,6 +171,58 @@ class App:
         self._current: str | None = None
         self._tre_app: _TreApp | None = None
         self._set_window_theme()  # the legacy MD3 kinds read the window's theme until M40
+        self._window.on("color_scheme", self._on_color_scheme)
+
+    # -- light and dark (M38) ---------------------------------------------------
+
+    @property
+    def dark(self) -> bool:
+        """Whether the app is showing its dark scheme right now."""
+        return self._dark
+
+    @property
+    def dark_mode(self) -> bool | str:
+        """`"system"` (following the OS), or the app's fixed `True`/`False`."""
+        return self._dark_mode
+
+    def set_dark(self, dark: bool | str) -> None:
+        """`True`/`False` fixes the app dark or light, re-theming every
+        screen and the window in place; `"system"` goes back to following
+        the OS from its next switch."""
+        if dark not in (True, False, "system"):
+            raise ValueError(f'App.set_dark: dark must be True, False or "system", got {dark!r}')
+        self._dark_mode = dark
+        if dark != "system":
+            self._apply_dark(bool(dark))
+
+    def _on_color_scheme(self, event: Any) -> None:
+        """The OS switched between light and dark. `tre` has already flipped
+        the window's own theme (the legacy widgets and hover tints read it):
+        following the OS, the whole app follows; with a fixed choice, the
+        window is put back to it."""
+        if self._dark_mode == "system":
+            self._apply_dark(bool(event.dark))
+        else:
+            self._set_window_theme()
+
+    def _apply_dark(self, dark: bool) -> None:
+        if dark == self._dark:
+            self._set_window_theme()
+            return
+        old_theme = self._view_theme()
+        self._dark = dark
+        new_theme = self._view_theme()
+        try:
+            _apply_all(
+                [b.view for b in self._built],
+                lambda view: view.set_theme(**new_theme),
+                lambda view: view.set_theme(**old_theme),
+            )
+        except Exception:
+            self._dark = not dark
+            raise
+        self._set_window_theme()
+        logger.info("switched to the {} scheme", "dark" if dark else "light")
 
     def _view_theme(self) -> dict[str, Any]:
         """The app's theme as `View(...)`/`View.set_theme` arguments."""
@@ -237,7 +295,7 @@ class App:
         `build_view()`/`load()` made, and the window. Both theme dicts
         are the complete new selection (`None` for none), as in `tre`,
         where each `set_theme` call is a fresh choice, not a patch; the
-        seed and `dark` stay as given to `App(...)`. Bound values stay
+        seed and light/dark stay as they are. Bound values stay
         live (`tre` M91). Runs `tre` code, so call it on the event-loop
         thread -- `run(hot_reload=True)` does, for theme-file edits.
         """

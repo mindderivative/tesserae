@@ -75,4 +75,6 @@ Phase 1 done: `tesserae.Theme`, matching `tre`'s `Window.theme`; 1019 passed.
 
 Phase 2 done: theme typography for Text and Link, not text inputs; 1029 passed.
 
-**Up next:** M38 Phase 3 (light and dark).
+Phase 3 done: `App(dark="system")` by default, following the OS; `set_dark`; 1039 passed.
+
+**Up next:** M38 Phase 4 (final docs, tracker).

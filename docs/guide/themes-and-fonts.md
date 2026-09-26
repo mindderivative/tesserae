@@ -92,6 +92,20 @@ Since `tre` 0.3.4, two things work the way they do in CSS:
   `colors: {scrim: ...}` doesn't reach those two fragments, since a YAML
   color can't be "a theme role at 32%".
 
+## Light and dark
+
+An `App` follows the OS by default (`dark="system"`): when the OS
+switches between light and dark, every screen and the window switch
+with it, in place. It starts dark, since the OS's appearance can't be
+read until it first switches. To fix the appearance instead, pass
+`dark=True` or `dark=False`, or call `app.set_dark(...)` at any time;
+`app.set_dark("system")` goes back to following the OS.
+
+```python
+app = App(theme_seed=(0x67, 0x50, 0xA4, 0xFF))   # follows the OS, starts dark
+app.set_dark(False)                               # light from now on
+```
+
 ## Typography in a theme
 
 A theme's `typography:` overrides fields of MD3's type roles:
@@ -141,7 +155,7 @@ tokens are all there. `emphasized` is MD3's single-curve form
 In an `App`, `app.set_theme_specs(default_theme_spec, custom_theme_spec)`
 re-themes every screen the app built, and the window, in one call. Both
 dicts are the complete new selection (`None` for none), and the seed and
-`dark` stay as given to `App(...)`. With `run(hot_reload=True)`, saving
+the light/dark appearance stay as they are. With `run(hot_reload=True)`, saving
 a theme file does this for you ([Hot Reload](hot-reload.md#theme-and-stylesheet-files)).
 `app.set_stylesheet_spec(stylesheet_spec)` does the same for the app's
 default stylesheet, re-styling every screen that uses it.

@@ -302,3 +302,10 @@ User: "push it and start Phase 2". Pushed `17df8a0`. Typography
 overrides ride on the prepared layers (`Layers`), so no call site
 changed; `_text_style` applies them for Text/Link only. 8 tests, 3/3
 mutants caught, 1029 passed.
+
+## M38 Phase 3 — light and dark
+
+User: "Push and start phase 3". Pushed `8437295`. `App` gained
+`dark="system"`, `set_dark`, the `color_scheme` listener, and
+`dark`/`dark_mode`. No existing test assumed light. 10 tests; 3/3
+mutants caught. 1039 passed.
