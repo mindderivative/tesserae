@@ -50,7 +50,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M38 — MD3 Theme in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
-| M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
+| M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25) |
 | M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
@@ -69,7 +69,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M41** (Widgets II: the composed catalog and overlays; approved, to be scoped in detail) — waiting on the user's go-ahead. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; Tesserae's dry-run gate report was sent — M99 waits on M41–M42 now that M40 is done. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
+**Up next:** **M41** is scoped (6 phases: foundation, buttons, containment and lists, navigation, overlays, gate) — waiting on the user's decisions Q1–Q4. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M41–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1141,15 +1141,51 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 41 — Widgets II: Composed Catalog and Overlays
 
-**Status: ⬜ Proposed — approved, not started (2026-09-25).** The MD3 composition factories `tre` M99 deletes.
+**Status: ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25).** Rebuilds the composed MD3 factories and the overlays that `tre` M99 deletes, on 0.3.4's building blocks, M39's interaction and M40's controls. Scoped from `src/tesserae/widgets` (a scan of its `tre` calls), the fragments in `spec/components/`, `tre`'s `legacy-behavior.md` (0.3.5), and 0.3.4's `show_layer`/`hide_layer`.
 
-### Phase 1 — Composed Widgets ⬜
-- Step 1: buttons (all variants, FABs, split and grouped), cards, chips, badges, dividers, lists and list items, accordion and tree nodes, tabs, navigation rail and drawer, toolbars, top app bar, status bar — ⬜
-- Step 2: the icon set as `path` data: `tre`'s 12 curated Material Symbols, SVG `d=` strings with view box `0 -960 960 960` (M99 Phase 1 Step 3) — ⬜
-- Step 3: with `tre`'s legacy widgets gone (M40, this milestone), `App` stops calling `Window.set_theme` and `tre`'s window-level theme is no longer used; `tesserae.Theme` is the only theme (from M38) — ⬜
+**What exists today:**
+- **Factories:** `tesserae.widgets` still delegates 36 functions to `tre`.
+  - M41's share: `button`, `icon_button`, `fab`, `extended_fab`, `split_button`, `button_group`, `card`, `chip`, `badge`, `divider`, `list_`, `list_item`, `accordion_header`, `tree_node`, `link`, `icon`, `tabs`, `navigation_rail`, `navigation_drawer`, `toolbar`, `top_app_bar`, `status_bar`, `dialog`, `menu`/`menu_item` (`build_menu`), `snackbar`, `tooltip` and `side_sheet`.
+  - M42's share: search, date and time, `video`, `node_graph`/`graph_node`, pagination, popovers and docking. (`image` uses `add_image_from_bytes`, which D6 keeps.)
+- **Fragments:** 67 already build these widgets from primitives with Tesserae's compiler, matched against `tre`'s factories when they were written (M17–M27).
+  - They cover every fixed-shape widget here.
+  - The list-driven ones (`tabs`, `navigation_rail`, `navigation_drawer`, `button_group`, `list_`) have none.
+  - Fragments can't take `handlers:`, and they have no behaviour.
+- **Icons:** Tesserae already has `tre`'s 12 icons (`tesserae.icons`, M37), so the old Step 2 here is done.
+- **Overlays:** `tre` 0.3.4 gives `show_layer(node, anchor=, placement=, modal=, dismissible=)`, `hide_layer`, a `dismiss` event, modality and a Tab scope. `tre`'s legacy overlays closed themselves on the dismissals they allowed (`legacy-behavior.md` has the table), and never flipped to fit the window.
+- **`legacy-behavior.md`** notes two corner morphs and a bug:
+  - `split_button` tightens its facing corners on hover (100 ms);
+  - `button_group` tightens the pressed child's corners and reflows its row;
+  - that reflow compounds on every layout pass and never restores, so the intent should be rebuilt, not the bug.
+- **A conflict in the plan:** the old Step 3 here (stop `App` calling `Window.set_theme`) can't happen in M41, because M42's widgets are still `tre`'s and read the window's theme.
 
-### Phase 2 — Overlays ⬜
-- Step 1: dialogs, menus, snackbars, tooltips, side sheets, navigation drawers and context menus on `show_layer` (modal, focus trap, dismissal, anchoring), with scrims as Tesserae boxes — ⬜
+**Decisions for the user, each with a recommendation:**
+- Q1 **How to build them.** Recommended: **from the fragments, through Tesserae's compiler.** A factory expands its fragment with its arguments and builds it, so the YAML and Python paths share one definition. The list-driven widgets are built in Python from item fragments. Each factory returns a small `Widget` object: `.node`, `.part(id)`, `on_click(fn)`, and `set_theme`. That's the same kind of break as M40's: a composed factory stops returning a bare `tre.Node`, though `.node` is one. The fragments are audited against MD3's specification as each is moved. Alternative: hand-written Python per widget, as M40's controls are.
+- Q2 **Behaviour.**
+  - Recommended: **MD3's**: the state layer, ripple and focus ring on every interactive part (buttons, chips, list items, menu items, tabs, navigation items).
+  - Selection state as `Signal`s for tabs, the navigation rail and drawer, and the button group, with the arrow keys moving it; expand/collapse for accordion headers and tree nodes.
+  - The split-button and button-group morphs rebuilt as intended.
+  - Alternative: static widgets, as `tre`'s factories were.
+- Q3 **Overlays.** Recommended: **`tesserae.overlays`**: `Dialog`, `Menu` (anchored, and a context menu at the pointer on `secondary_click`), `Snackbar`, `Tooltip`, `SideSheet` and a modal `NavigationDrawer`. Each has `open()`/`close()` on `show_layer`, closes itself on the dismissals `tre`'s legacy overlays allowed, and has an `on_close` callback. MD3 timing is added where `tre` had none: a snackbar hides itself after 4 s unless `duration=None`, and a tooltip opens after a 500 ms hover. Placement flips to fit, as `show_layer` does. Alternative: `tre`'s exact behaviour (no timers).
+- Q4 **The window's theme.** Recommended: **move "`App` stops calling `Window.set_theme`" to the end of M42**, when the last `tre`-drawn widget goes. M41 keeps it, and M43's gate checks it's gone. Alternative: keep it in M41 and drop window theming for M42's widgets early.
+
+### Phase 1 — Foundation ⬜
+- Step 1: `tesserae.widgets`' composed-widget base per Q1: a fragment expanded with arguments and built by the compiler into the window, a `Widget` (`.node`, `.part(id)`, `on_click` making a part a focusable `role="button"` with M39's feedback, `set_theme`), `theme=`/`label=` as M40's factories take them, placed on the root and at `x`/`y`; proved on `button` (all five variants) — ⬜
+
+### Phase 2 — Buttons and Actions ⬜
+- Step 1: `icon_button` (four variants), `fab`, `extended_fab`, `split_button` (the facing corners tighten on hover) and `button_group` (the pressed child's corners tighten and the row reflows, restoring on release) — ⬜
+
+### Phase 3 — Containment and Lists ⬜
+- Step 1: `card` (three variants), `chip` (five), `badge`, `divider`, `link`, `icon`, `list_` and `list_item`, `accordion_header` and `tree_node` (expanded as a `Signal`, toggled by click or keys) — ⬜
+
+### Phase 4 — Navigation ⬜
+- Step 1: `tabs`, `navigation_rail` and `navigation_drawer` (the selected item a `Signal`; arrow keys; MD3's active indicator), `toolbar`, `top_app_bar`, `status_bar` — ⬜
+
+### Phase 5 — Overlays ⬜
+- Step 1: `tesserae.overlays` per Q3 on `show_layer`: `Dialog` (modal, a scrim, Escape closes), `Menu` with `menu_item`s (anchored below, and a context menu at the pointer), `Snackbar`, `Tooltip`, `SideSheet` (standard and modal) and the modal `NavigationDrawer`; `tesserae.widgets`' `dialog`/`menu`/`snackbar`/`tooltip`/`side_sheet` move onto them — ⬜
+
+### Phase 6 — Tests, Docs, Tracker, Gate ⬜
+- Step 1: tests per widget (structure against MD3, behaviour with `simulate`/`advance`); `tests/test_no_tre_controls.py` extended to M41's factories and `tre`'s `open_*`/`close_*`/`build_menu`/`set_active_tab`; the examples under `tre`'s shim; docs (the widget catalog, component fragments, a new overlays guide); tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
 
 ---
 

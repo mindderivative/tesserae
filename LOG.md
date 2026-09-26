@@ -538,3 +538,17 @@ User: "Push it and start Phase 6". Pushed `ec8272a`.
   clean. Recorded in memory; the check now runs without `-q`.
 
 1183 passed.
+
+## M41 scoped
+
+User: "Push it and scope M41". Pushed `4c06650`.
+
+Scanned `tesserae.widgets` for `tre` calls: 36 remain, 27 of them
+M41's. The fragments cover the fixed-shape widgets; the list-driven ones
+have none. `tesserae.icons` already has `tre`'s 12 icons.
+`show_layer`/`hide_layer` are 0.3.4's overlay primitives.
+
+Conflict found: removing `App`'s `Window.set_theme` can't be done in M41,
+since M42's widgets still read the window's theme (Q4).
+
+Q1–Q4 are in the tracker, with recommendations.

@@ -103,4 +103,6 @@ Phase 5 done: the YAML control kinds and the stateful factories are Tesserae's c
 
 Phase 6 done: the static gate, the examples clean under tre's removal shim, the controls guide. **M40 complete**; 1183 passed.
 
-**Up next:** M41 (composed catalog and overlays), to scope.
+**M41 scoped (2026-09-25):** 6 phases. The composed factories are to be built from the fragments through the compiler, returning `Widget` objects, with MD3 feedback and selection, `tesserae.overlays` on `show_layer`, and a gate. The window-theme removal moves to M42's end. Decisions Q1–Q4 pending.
+
+**Up next:** the user's decisions on M41.
