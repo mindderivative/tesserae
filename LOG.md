@@ -639,3 +639,19 @@ ahead because that command chained with `;`, so `13434a3` pointed its nav
 at a missing page. `mkdocs build --strict`, now run without `-q`,
 reported it (exit 1). The page is added in the next commit; commits now
 chain on `&&`.
+
+## M41 Phase 6: the gate; M41 complete
+
+User: "Push it and start Phase 6". Pushed `e3682f3`.
+
+- `test_no_tre_controls.py` now forbids M41's names too; clean.
+- Under tre's shim: the examples and the 152 widget tests are clean.
+  The whole suite is 599/497 (was 327/583); the rest is planned
+  (`tre.View`/`tre.Signal` tests for M43, `Window.set_theme` for M42,
+  M42's widgets).
+- Found: the shim removes `add_image_from_bytes`, which D6 kept, so
+  `image()` joins M42.
+- The widget catalog's pro-delegation paragraph was out of date after
+  Phase 2; rewritten.
+
+1227 passed.

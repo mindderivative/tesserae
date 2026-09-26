@@ -1,8 +1,9 @@
 # Widget Catalog (`tesserae.widgets`)
 
-`tesserae.widgets` is Tesserae's own namespace for `tre`'s full MD3
-(Material Design 3) widget catalog -- one Python function per widget,
-called **imperatively** against a live `Window`:
+`tesserae.widgets` is Tesserae's MD3 (Material Design 3) widget
+catalog -- one Python function per widget, called **imperatively**
+against a live `Window`. Since M40 and M41 Tesserae draws almost all of
+them itself, on `tre`'s building blocks:
 
 ```python
 from tesserae.widgets import button
@@ -35,7 +36,7 @@ should go. `spin_box` returns one `SpinBox` rather than
 (MD3's baseline colours without one), not the window's. See
 [Controls](controls.md).
 
-**The composed ones are built from their fragments (M41, in progress).**
+**The composed ones are built from their fragments (M41).**
 So far the buttons and actions (`button`, `icon_button`, `fab`,
 `extended_fab`, `split_button`, `button_group`) and the containment and
 list widgets (`card`, `chip`, `badge`, `divider`, `link`, `icon`,
@@ -92,20 +93,12 @@ on.
 Where you used the node (or tuple) these returned, use `.node` or
 `.part(...)`.
 
-Every other function here is a **thin, faithful delegate** straight to
-the matching `Window.add_*` factory in `tre` itself -- same parameter
-names, order, and defaults. This is deliberate, not a placeholder:
-`tre`'s own factories already resolve MD3 color/shape/elevation
-correctly against the live theme, and some widgets
-(`split_button`/`button_group`) have real hover/press
-shape-tightening and reflow animation driven by internal `tre` state
-(`PaintProperties.button_group_reflow`/`shape`/
-`press_interactive_shape`) that no public Python API exposes -- a
-from-scratch Python port could only ever reproduce their rest state.
-Delegating keeps full fidelity for every widget and gives every
-Tesserae app one consistent `tesserae.widgets` surface to import from,
-whether or not `tre` happens to implement a given widget as a
-composition under the hood.
+**Still `tre`'s, until M42:** `search_bar`, `search_view`,
+`date_picker_day`, `period_selector`, `video`, `node_graph`,
+`graph_node` and `image`. These are thin delegates to the matching
+`Window.add_*` factory in `tre`, with the same parameter names, order and
+defaults, and they return `tre` nodes themed by the window's theme. M42
+rebuilds them too.
 
 ## When to use this vs. a declarative fragment
 

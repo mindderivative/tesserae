@@ -115,4 +115,6 @@ Phase 4 done: tabs, navigation rail and drawer, toolbars, top app bar, status ba
 
 Phase 5 done: `tesserae.overlays` (dialog, menu, snackbar, tooltip, side sheet, navigation drawer); 1227 passed.
 
-**Up next:** M41 Phase 6 (gate, docs, close M41).
+Phase 6 done: the gate covers M41's names; the examples and 152 widget tests are clean under tre's shim. **M41 complete**; 1227 passed.
+
+**Up next:** M42 (Widgets III), to scope.

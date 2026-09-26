@@ -50,12 +50,12 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M38 — MD3 Theme in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
-| M41 — Widgets II: Composed Catalog and Overlays | `████████░░` 83% | 🚧 In progress — Phase 5 of 6 done (2026-09-25) |
+| M41 — Widgets II: Composed Catalog and Overlays | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
 | M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
 
-**Just closed:** M41 Phase 5 (2026-09-25) — `tesserae.overlays` on tre's layers: dialogs, menus and context menus, snackbars, tooltips, modal side sheets and navigation drawers; 1214 → 1227. Before that, M41 Phase 4 (same day) — navigation.
+**Just closed:** M41 (2026-09-25), all 6 phases — `tesserae.widgets`' composed catalog built from its fragments (buttons, containment and lists, navigation), with MD3 feedback, selection and expansion, and `tesserae.overlays` on tre's layers; content-sized text, an M37 patch crash and keyboard-only Links fixed on the way; `src/tesserae` uses none of M41's removed names, and the examples run clean under tre's shim; 1183 → 1227.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -69,7 +69,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M41 Phase 6** (the gate: `test_no_tre_controls.py` extended to M41's factories and tre's `open_*`/`close_*`/`build_menu`; the examples under tre's shim; docs; closing M41) — waiting on the user's go-ahead. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 waits on M41–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
+**Up next:** **M42** (Widgets III: text fields and search, date and time inputs, video and images, the node graph, docking, and `App` dropping `Window.set_theme`; approved, to be scoped in detail) — waiting on the user's go-ahead. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; M99 now waits on M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1145,7 +1145,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 41 — Widgets II: Composed Catalog and Overlays
 
-**Status: 🚧 In progress — Phase 5 of 6 done (2026-09-25).** User: "Push it and go with your recommendations for M41" — Q1–Q4 as recommended (built from the fragments, MD3's behaviour, `tesserae.overlays`, the window-theme removal at M42's end). Rebuilds the composed MD3 factories and the overlays that `tre` M99 deletes, on 0.3.4's building blocks, M39's interaction and M40's controls. Scoped from `src/tesserae/widgets` (a scan of its `tre` calls), the fragments in `spec/components/`, `tre`'s `legacy-behavior.md` (0.3.5), and 0.3.4's `show_layer`/`hide_layer`.
+**Status: ✅ Complete — all 6 phases done (2026-09-25).** User: "Push it and go with your recommendations for M41" — Q1–Q4 as recommended (built from the fragments, MD3's behaviour, `tesserae.overlays`, the window-theme removal at M42's end). Rebuilds the composed MD3 factories and the overlays that `tre` M99 deletes, on 0.3.4's building blocks, M39's interaction and M40's controls. Scoped from `src/tesserae/widgets` (a scan of its `tre` calls), the fragments in `spec/components/`, `tre`'s `legacy-behavior.md` (0.3.5), and 0.3.4's `show_layer`/`hide_layer`.
 
 **What exists today:**
 - **Factories:** `tesserae.widgets` still delegates 36 functions to `tre`.
@@ -1188,8 +1188,8 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 ### Phase 5 — Overlays ✅
 - Step 1: `tesserae.overlays` on `show_layer`/`hide_layer`. Probed first: an anchored layer flips to fit; `dismiss` comes on Escape and on an outside press, and the layer stays open until hidden; hiding returns focus; a modal layer takes focus and keeps Tab inside it; animations run on a node in no tree (so they serve as timers). `Overlay` (open/close/`is_open`/`on_close`/`set_theme`) closes itself on `dismiss`; a modal overlay's full-window scrim takes outside presses, leaving Escape, as tre's legacy table has it. `Dialog`: its fragment plus right-aligned text-button `actions`, each calling its function and closing; `role="dialog"` named by its headline. `Menu`: MD3's `surface_container` panel (4 px corners, elevation 2) of 48 px `menuitem`s, either `(label, fn)` pairs or `menu_item` widgets (moved in, keeping their own dispatcher); focus moves to the first item, the arrows wrap, and click or Enter chooses and closes; `open(anchor)`, `open_at(x, y)`, `attach_context(node)` on `secondary_click`. `Snackbar`: 24 px in and 72 px up, not dismissible, an `inverse_primary` action and a "Close" icon button, `role="alert"` announced politely, hiding itself after 4 s (`duration=None` keeps it) via `_Timer`. `Tooltip`: fitted to its text, below its anchor 500 ms after hover or at once on keyboard focus, hidden on leave or unfocus, naming its anchor. `SideSheet` and `NavigationDrawer` (modal, over a scrim) slide in from the end or start (`medium4`, emphasized decelerate); the drawer closes when an item is chosen. `Widget` takes `attach=False`. `tesserae.widgets`' `dialog`, `snackbar`, `side_sheet` (modal is `SideSheet`, standard a `Widget`), `menu`, `menu_item` and `tooltip` move onto them. `test_widgets_overlays.py` (tre-parity) is replaced by `tests/test_overlays.py` (20); the fragment tests read `.node`. Mutation-checked with 12 mutants: 11 caught, 1 equivalent (the timer's generation check, since cancelling stops the animation and tre never completes a stopped one). 1214 → 1227 passed. Docs: new `guide/overlays.md`, widget catalog, API index, `ARCHITECTURE.md` — ✅
 
-### Phase 6 — Tests, Docs, Tracker, Gate ⬜
-- Step 1: tests per widget (structure against MD3, behaviour with `simulate`/`advance`); `tests/test_no_tre_controls.py` extended to M41's factories and `tre`'s `open_*`/`close_*`/`build_menu`/`set_active_tab`; the examples under `tre`'s shim; docs (the widget catalog, component fragments, a new overlays guide); tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
+### Phase 6 — Tests, Docs, Tracker, Gate ✅
+- Step 1: The per-widget tests were written phase by phase: `test_composed_widgets.py` (54) and `test_overlays.py` (20), each mutation-checked, replacing four tre-parity files. The gate: `tests/test_no_tre_controls.py` now also forbids M41's 28 factories and tre's `open_*`/`close_*`, `build_menu` and `set_active_tab`; `src/tesserae` uses none. Under tre's `TRE_FORBID_REMOVED` shim: all three examples are clean; the control, widget and overlay tests (152) all pass; the whole suite is 599 passed / 497 failed, against M43's dry run of 327 / 583. What still fails is planned: `tre.View` reference tests (250) and `tre.Signal` parity tests (14), both M43's; `Window.set_theme` (219: `App` and the tests' themed windows, M42 Step 4); and M42's widgets. Found under the shim: tre's removal list includes `add_image_from_bytes`, which D6 said would stay, so `tesserae.widgets.image` needs M42 too (added there). Docs: the widget catalog's opening and its paragraph arguing for delegation (whose split-button and button-group reasons Phase 2 answered) are rewritten; it now lists the eight functions still tre's until M42 — ✅
 
 ---
 
@@ -1199,7 +1199,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ### Phase 1 — The Rest ⬜
 - Step 1: text fields and search on `text_input`; date picker days, time input, period selector — ⬜
-- Step 2: video on `image` plus `set(rgba=...)`; the node graph on primitives per `tre`'s M34 answer (clipped viewport, `x`/`y` nodes dragged with `capture_pointer`, edges on `canvas` with `set_hit_test_path`, or a shared canvas); pagination and popovers — ⬜
+- Step 2: video on `image` plus `set(rgba=...)`, and `tesserae.widgets.image` off `add_image_from_bytes` (tre's removal list has it, though D6 said it would stay; found in M41 Phase 6); the node graph on primitives per `tre`'s M34 answer (clipped viewport, `x`/`y` nodes dragged with `capture_pointer`, edges on `canvas` with `set_hit_test_path`, or a shared canvas); pagination and popovers — ⬜
 - Step 3: docking presentation (tab strips, handles, drop highlights) on `tre`'s bare-bones docking (D10), and the app shell `build_shell` provided — ⬜
 - Step 4: with the last `tre`-drawn widget gone, `App` stops calling `Window.set_theme`, and `tesserae.Theme` is the only theme (moved here from M41 by its Q4) — ⬜
 
