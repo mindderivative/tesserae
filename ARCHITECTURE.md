@@ -161,14 +161,21 @@ still calls `Window.set_theme` for `tre`'s legacy widgets until M41.
 **Interaction, M39:** a clickable YAML node is a focusable
 `role="button"` Tab stop (the compiler sets it, as `tre`'s
 `set_on_click` did). `tesserae.interaction.Interaction` draws MD3's
-state layer and ripple from building blocks. It adds an absolute layer
-child after the content, plus one circle child per press, and clips the
-node. A `View` keeps one per `Rect` or `Container` whose spec wants it
-(`interaction_tint`). `_sync_interactions` adds, removes and re-tints
+state layer, ripple and focus ring from building blocks. It adds two
+absolute children after the content. One is a clip box that follows the
+node's corners and holds the layer and one circle per press. The other is
+the ring, a stroked box 5 px outside the node, since a box's stroke is
+drawn inside it. The node itself stays unclipped. A `View` keeps one per
+`Rect` or `Container` whose spec wants it (`interaction_tint`,
+`focus_ring_color`). `_sync_interactions` adds, removes and re-tints
 them after every build, reconcile, re-theme and re-style. The extra
 children stay after the spec's children, so the reconciler's indices
 still hold. Their listeners go through the same per-node dispatcher as
 the ViewModel's (`View._listen`), but they aren't unwired with it.
+`tesserae.a11y` checks accessibility fields against `tre`'s lists
+(`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`
+field compiles through it (`build._a11y_props`, which also owns the
+clickable node's focus and role, and resets dropped fields on a patch).
 
 `App.load` is the enforced-naming-convention path (`*_View.yaml`/
 `*_ViewModel.py`, checked via `inspect.getfile` against the

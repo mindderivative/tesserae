@@ -48,11 +48,16 @@ def test_a_clickable_node_gets_a_state_layer_covering_it():
     it = view.interaction("btn")
     node = view.node("btn")
     assert it is not None and view.interaction("plain") is None
-    assert node.children()[-1] == it.layer  # after the content, so it paints over it
-    assert (it.layer.get("layout_x"), it.layer.get("layout_y")) == (0.0, 0.0)
-    assert (it.layer.get("layout_width"), it.layer.get("layout_height")) == (200.0, 80.0)
-    assert it.layer.get("hit_testable") is False and it.layer.get("opacity") == 0.0
-    assert node.get("clip_children") is True  # clipped to the node's rounded box
+    assert node.children() == [it.clip, it.ring]  # after any content, so they paint over it
+    assert it.clip.children() == [it.layer]
+    for box in (it.clip, it.layer):
+        assert (box.get("layout_x"), box.get("layout_y")) == (0.0, 0.0)
+        assert (box.get("layout_width"), box.get("layout_height")) == (200.0, 80.0)
+        assert box.get("hit_testable") is False and box.get("a11y_hidden") is True
+    assert it.layer.get("opacity") == 0.0
+    # the clip box follows the node's rounded box; the node isn't clipped
+    assert it.clip.get("clip_children") is True and it.clip.get("corner_radius") == 20.0
+    assert node.get("clip_children") is False
 
 
 def test_opting_out_and_in():
@@ -84,7 +89,8 @@ def test_hover_raises_the_layer_to_8_percent_including_over_children():
     child = {"id": "inner", "kind": "Rect", "style": {"width": 40, "height": 20, "background": "#000000"}}
     view, window = _built(_rect("btn", handlers={"on_click": "go"}, children=[child]))
     layer = view.interaction("btn").layer
-    assert view.node("btn").children() == [view.node("inner"), layer]  # over the content
+    it = view.interaction("btn")
+    assert view.node("btn").children() == [view.node("inner"), it.clip, it.ring]  # over the content
     window.simulate("pointer_move", x=150, y=60)
     _frames(window, 32)
     assert layer.get("opacity") == pytest.approx(interaction.HOVERED)
@@ -113,7 +119,7 @@ def test_a_press_ripples_from_the_press_point_and_covers_the_node():
     window.simulate("pointer_up", x=10, y=10)
     _frames(window, interaction.RELEASE_FADE_MS + 32)
     assert it.ripples == []
-    assert view.node("btn").children() == [it.layer]  # the circle is freed
+    assert it.clip.children() == [it.layer]  # the circle is freed
 
 
 def test_a_quick_tap_still_shows_the_ripple_for_the_minimum_press():
@@ -206,14 +212,14 @@ def test_reconcile_adds_and_removes_the_interaction():
     assert view.interaction("btn") is None
     view.reconcile(_spec(_rect("btn", handlers={"on_click": "go"})))
     it = view.interaction("btn")
-    assert it is not None and view.node("btn").children()[-1] == it.layer
+    assert it is not None and view.node("btn").children() == [it.clip, it.ring]
     view.reconcile(_spec(_rect("btn", handlers={"on_click": "go"},
                                children=[_rect("a", width=10, height=10)])))
     assert view.interaction("btn") is it  # kept, and still after the content
-    assert view.node("btn").children() == [view.node("a"), it.layer]
+    assert view.node("btn").children() == [view.node("a"), it.clip, it.ring]
     view.reconcile(_spec(_rect("btn")))
     assert view.interaction("btn") is None
-    assert view.node("btn").children() == [] and view.node("btn").get("clip_children") is False
+    assert view.node("btn").children() == []
 
 
 def test_a_removed_component_drops_its_interactions():

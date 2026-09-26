@@ -1,22 +1,28 @@
 """MD3 interaction feedback (M39): a state layer and a ripple, built from
 `tre` 0.3.4's building blocks, since `tre` 0.3.5 draws none (`tre` D7).
 
-A node that gets an `Interaction` holds two kinds of extra child, both
-absolutely positioned, never hit-tested, and clipped to the node's rounded
-box (`clip_children`):
+A node that gets an `Interaction` holds two extra children, after its
+content, absolutely positioned, never hit-tested and hidden from
+assistive technology:
 
-- **The state layer**, a box covering the node, in the tint. Its opacity
-  is the strongest state the node is in: dragged 16%, else focused 10% (on
-  keyboard focus only, `focus_visible`), else hovered 8%.
-- **Ripples**, one per press: a circle centred on the press point that
-  grows until it covers the node while the press is held, at the pressed
-  opacity (10%), and fades once it's released. A keyboard click (Enter or
-  Space) ripples from the centre.
+- **A clip box** covering the node, clipped to the node's rounded box,
+  holding:
+  - **the state layer**, in the tint. Its opacity is the strongest state
+    the node is in: dragged 16%, else focused 10% (keyboard focus only,
+    `focus_visible`), else hovered 8%;
+  - **ripples**, one per press: a circle centred on the press point that
+    grows until it covers the node while the press is held, at the
+    pressed opacity (10%), and fades once it's released. A keyboard
+    click (Enter or Space) ripples from the centre.
+- **The focus ring**, shown on keyboard focus only: MD3's focus indicator,
+  3 px in `secondary`, 2 px outside the node and following its corners.
 
-The opacities are MD3's state-layer values; the ripple's timing is Material
-Web's (`md-ripple`), MD3's reference implementation. Both paint over the
-node's content, as in Material Web and Compose. Views apply this to
-clickable YAML nodes (`tesserae.view`); M40's widgets use it directly.
+The opacities and the ring are MD3's; the ripple's timing is Material
+Web's (`md-ripple`), MD3's reference implementation. The layer and ripples
+paint over the node's content, as in Material Web and Compose. The node
+itself isn't clipped, so its children and the ring can overflow it. Views
+apply this to clickable YAML nodes (`tesserae.view`); M40's widgets use
+it directly.
 """
 
 from __future__ import annotations
@@ -41,6 +47,9 @@ PRESS_GROW_MS = 450
 PRESS_FADE_IN_MS = 105
 MINIMUM_PRESS_MS = 225
 RELEASE_FADE_MS = 375
+#: MD3's focus indicator, in px: its thickness, and its gap outside the node.
+RING_WIDTH = 3.0
+RING_OFFSET = 2.0
 #: The ripple starts at this fraction of the node's larger side.
 INITIAL_SCALE = 0.2
 #: MD3's standard easing, which `md-ripple` grows with.
@@ -48,22 +57,31 @@ STANDARD = (0.2, 0.0, 0.0, 1.0)
 
 
 class Interaction:
-    """The state layer and ripple on one `box` node, tinted `tint`.
+    """The state layer, ripple and focus ring on one `box` node: the layer
+    and ripple tinted `tint`, the ring `ring_color`.
 
     `listen` registers the pointer and focus listeners (see `Listen`).
-    Call `detach()` to remove everything this added."""
+    Call `refresh()` after the node's corners change, and `detach()` to
+    remove everything this added."""
 
-    def __init__(self, window: Any, node: Any, tint: RGBA, listen: Listen) -> None:
+    def __init__(self, window: Any, node: Any, tint: RGBA, listen: Listen, ring_color: RGBA) -> None:
         self.window = window
         self.node = node
         self.tint = tint
+        self.ring_color = ring_color
         self.hovered = self.focused = self.dragged = False
         self._ripples: list[_Ripple] = []
-        self._clipped = node.get("clip_children")
-        node.set(clip_children=True)
-        self.layer = window.create("box", position="absolute", x=0, y=0, width="100%", height="100%",
-                                   fill=tint, opacity=0.0, hit_testable=False)
-        node.add_child(self.layer)
+        decoration = dict(position="absolute", hit_testable=False, a11y_hidden=True)
+        self.clip = window.create("box", x=0, y=0, width="100%", height="100%", clip_children=True,
+                                  **decoration)
+        self.layer = window.create("box", x=0, y=0, width="100%", height="100%", fill=tint, opacity=0.0,
+                                   **decoration)
+        self.ring = window.create("box", stroke_color=ring_color, stroke_width=RING_WIDTH, visible=False,
+                                  **decoration)
+        self.clip.add_child(self.layer)
+        node.add_child(self.clip)
+        node.add_child(self.ring)
+        self.refresh()
         _INTERACTIVE.append(node)
         self._undo = [listen(node, event, handler) for event, handler in (
             ("pointer_enter", self._on_enter), ("pointer_leave", self._on_leave),
@@ -92,12 +110,33 @@ class Interaction:
         self.dragged = dragged
         self._update()
 
-    def retint(self, tint: RGBA) -> None:
-        """A new tint (a theme change), for the layer and live ripples."""
-        self.tint = tint
+    @property
+    def ring_visible(self) -> bool:
+        return bool(self.ring.get("visible"))
+
+    def retint(self, tint: RGBA, ring_color: RGBA) -> None:
+        """New colours (a theme change), for the layer, live ripples and ring."""
+        self.tint, self.ring_color = tint, ring_color
         self.layer.set(fill=tint)
+        self.ring.set(stroke_color=ring_color)
         for ripple in self._ripples:
             ripple.circle.set(fill=tint)
+
+    def refresh(self) -> None:
+        """Follows the node's corners (and, for the ring, its size)."""
+        radius = self.node.get("corner_radius") or 0.0
+        self.clip.set(corner_radius=radius)
+        self._place_ring()
+
+    def _place_ring(self) -> None:
+        # A box's stroke is drawn inside it, so the ring's box starts the
+        # gap and the stroke's width outside the node.
+        out = RING_OFFSET + RING_WIDTH
+        radius = self.node.get("corner_radius") or 0.0
+        grown = (tuple(r + out if r else 0.0 for r in radius) if isinstance(radius, (tuple, list))
+                 else radius + out if radius else 0.0)
+        width, height = self.node.get("layout_width") or 0.0, self.node.get("layout_height") or 0.0
+        self.ring.set(x=-out, y=-out, width=width + 2 * out, height=height + 2 * out, corner_radius=grown)
 
     def detach(self) -> None:
         """Removes the listeners, the layer and any ripples. Safe after the
@@ -105,12 +144,11 @@ class Interaction:
         for undo in self._undo:
             _quietly(undo)
         self._undo = []
-        for node in [self.layer, *self.ripples]:
+        for node in (self.clip, self.ring):
             _quietly(node.destroy)
         self._ripples = []
         if self.node in _INTERACTIVE:
             _INTERACTIVE.remove(self.node)
-        _quietly(lambda: self.node.set(clip_children=self._clipped))
 
     def _update(self) -> None:
         self.layer.animate("opacity", self.opacity, HOVER_MS)
@@ -153,11 +191,15 @@ class Interaction:
     def _on_focus(self, event: Any) -> None:
         if event.target == self.node:
             self.focused = bool(event.focus_visible)
+            if self.focused:
+                self._place_ring()  # the node may have been resized since
+            self.ring.set(visible=self.focused)
             self._update()
 
     def _on_unfocus(self, event: Any) -> None:
         if event.target == self.node:
             self.focused = False
+            self.ring.set(visible=False)
             self._update()
 
     def _release_all(self) -> None:
@@ -182,8 +224,9 @@ class _Ripple:
         start = min(1.0, INITIAL_SCALE * max(width, height) / (2 * radius))
         self.circle = owner.window.create(
             "box", position="absolute", x=x - radius, y=y - radius, width=2 * radius, height=2 * radius,
-            corner_radius=radius, fill=owner.tint, opacity=0.0, scale=start, hit_testable=False)
-        node.add_child(self.circle)
+            corner_radius=radius, fill=owner.tint, opacity=0.0, scale=start, hit_testable=False,
+            a11y_hidden=True)
+        owner.clip.add_child(self.circle)
         self.circle.animate("scale", 1.0, PRESS_GROW_MS, easing=STANDARD)
         self.circle.animate("opacity", PRESSED, PRESS_FADE_IN_MS)
         # `tre` has no timers; an invisible animation of the circle's

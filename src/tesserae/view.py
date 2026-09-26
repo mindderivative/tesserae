@@ -48,7 +48,9 @@ import tre
 from tesserae import reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
 from tesserae.interaction import Interaction
-from tesserae.spec.build import Built, _LEGACY_KINDS, build_with, interaction_tint, patch, prepare_layers
+from tesserae.spec.build import (
+    Built, _LEGACY_KINDS, build_with, focus_ring_color, interaction_tint, patch, prepare_layers,
+)
 from tesserae.spec.cascade import check_stylesheet, check_theme
 
 __all__ = ["Component", "View"]
@@ -66,9 +68,9 @@ _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius"
 
 def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     """`tre`'s `node_props_equal`, plus the state fields Tesserae builds from."""
-    # `handlers` too: adding or removing `on_click` changes focus and role (M39)
+    # `handlers` and `a11y` too: they change focus, role and label (M39)
     keys = ("kind", "classes", "style", "text", "image", "icon", "checked", "selected", "value", "hour", "minute",
-            "handlers")
+            "handlers", "a11y")
     return all(a.get(k) == b.get(k) for k in keys)
 
 
@@ -288,13 +290,16 @@ class View:
             if node_id not in wanted or current.node is not self._built.outer.get(node_id):
                 current.detach()
                 del self._interactions[node_id]
+        ring = focus_ring_color(scheme)
         for node_id, tint in wanted.items():
             current = self._interactions.get(node_id)
             if current is None:
                 self._interactions[node_id] = Interaction(self.window, self._built.outer[node_id], tint,
-                                                          self._listen)
-            elif current.tint != tint:
-                current.retint(tint)
+                                                          self._listen, ring)
+                continue
+            if (current.tint, current.ring_color) != (tint, ring):
+                current.retint(tint, ring)
+            current.refresh()
 
     def _drop_interactions(self) -> None:
         for current in self._interactions.values():

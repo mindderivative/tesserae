@@ -26,12 +26,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
-from tesserae import tokens
+from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
 __all__ = [
-    "Built", "Layers", "SpecBuildError", "build", "interaction_tint", "patch", "prepare_layers",
+    "Built", "Layers", "SpecBuildError", "build", "focus_ring_color", "interaction_tint", "patch", "prepare_layers",
     "shipped_default_theme",
 ]
 
@@ -43,7 +43,7 @@ _TEXT_FIELD_GLYPH: RGBA = (0x1C, 0x1B, 0x1F, 0xFF)
 _BASELINE = {
     "primary": (0x67, 0x50, 0xA4, 0xFF), "on_primary": (0xFF, 0xFF, 0xFF, 0xFF),
     "outline": (0x79, 0x74, 0x7E, 0xFF), "surface_container_highest": (0xE6, 0xE0, 0xE9, 0xFF),
-    "on_surface": (0x1D, 0x1B, 0x20, 0xFF),
+    "on_surface": (0x1D, 0x1B, 0x20, 0xFF), "secondary": (0x62, 0x5B, 0x71, 0xFF),
 }
 _LEGACY_KINDS = frozenset({
     "Checkbox", "RadioButton", "Switch", "Slider", "CircularProgress", "LinearProgress",
@@ -52,7 +52,7 @@ _LEGACY_KINDS = frozenset({
 _KINDS = _LEGACY_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "bindings", "handlers", "two_way", "interaction", "children",
+    "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "children",
 })
 
 
@@ -172,6 +172,7 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown field(s) {sorted(unknown)}")
     style = resolve_style(node, ctx.layers)
     _check_interaction(node)
+    _a11y_fields(node)
     unknown_style = set(style) - STYLE_FIELDS
     if unknown_style:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}")
@@ -400,6 +401,55 @@ def _check_interaction(node: dict[str, Any]) -> None:
                              f"not a {node['kind']}")
 
 
+def focus_ring_color(scheme: Optional[dict[str, RGBA]]) -> RGBA:
+    """MD3's focus indicator colour: the theme's `secondary`."""
+    return _role(_Context(None, (), scheme, {}), "secondary")
+
+
+#: The `a11y:` fields a YAML node may set; widget states (`checked`, ...)
+#: belong to Tesserae's widgets (M40).
+_A11Y_YAML = ("label", "role", "hidden", "live", "level")
+#: What each `a11y:` field resets to when a patch drops it.
+_A11Y_RESET = {"label": None, "a11y_hidden": False, "live": None, "level": None}
+
+
+def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
+    """The node's `a11y:` field, checked, as `tre` properties."""
+    value = node.get("a11y")
+    if value is None:
+        return {}
+    where = f"widget {_q(node['id'])}"
+    if not isinstance(value, dict):
+        raise SpecBuildError(f"{where}: `a11y:` takes a mapping of {', '.join(_A11Y_YAML)}, got {value!r}")
+    unknown = set(value) - set(_A11Y_YAML)
+    if unknown:
+        raise SpecBuildError(f"{where}: unknown a11y field(s) {sorted(unknown)} (known: {', '.join(_A11Y_YAML)})")
+    if "role" in value and node["kind"] in _OWN_ROLE:
+        raise SpecBuildError(f"{where}: a {node['kind']} has its own role; `a11y:` can't set `role`")
+    try:
+        return a11y.check(value, where)
+    except ValueError as exc:
+        raise SpecBuildError(str(exc)) from None
+
+
+def _a11y_props(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:
+    """Accessibility properties for the node that carries them (a
+    TextField's `text_input`, otherwise the node): the `a11y:` field, and
+    a clickable node's focus and role (M39). On a patch, dropped fields
+    reset."""
+    fields = _a11y_fields(node)
+    props = {**_A11Y_RESET, **{k: v for k, v in fields.items() if k != "role"}} if patching else {
+        k: v for k, v in fields.items() if k != "role"}
+    if node["kind"] not in _OWN_ROLE:
+        if _clickable(node):
+            props.update(focusable=True, role=fields.get("role", "button"))
+        elif "role" in fields or patching:
+            props["role"] = fields.get("role", "none")
+            if patching:
+                props["focusable"] = False
+    return props
+
+
 def interaction_tint(node: dict[str, Any], scheme: Optional[dict[str, RGBA]]) -> Optional[RGBA]:
     """The state layer and ripple's tint for `node` (M39), or `None` for no
     interaction feedback. A clickable Rect or Container gets it in the
@@ -421,10 +471,9 @@ def _create(ctx, node, style):
         return _legacy(ctx, node, style)
     tre_kind, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
-    if _clickable(node):
-        # M39 Phase 1: as `tre`'s `set_on_click` did, a clickable node is a
-        # focusable Tab stop that Enter and Space activate -- and a button.
-        outer_props.update(focusable=True, role="button")
+    # M39: as `tre`'s `set_on_click` did, a clickable node is a focusable
+    # Tab stop that Enter and Space activate -- and a button.
+    (outer_props if inner_props is None else inner_props).update(_a11y_props(node, patching=False))
     outer = ctx.window.create(tre_kind, **outer_props)
     if inner_props is None:
         return outer, outer
@@ -467,10 +516,7 @@ def patch(
         return
     _, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
-    if _clickable(node):
-        outer_props.update(focusable=True, role="button")
-    elif kind not in _OWN_ROLE and outer.get("role") == "button":
-        outer_props.update(focusable=False, role="none")  # its on_click was removed
+    (outer_props if inner_props is None else inner_props).update(_a11y_props(node, patching=True))
     outer.set(**_ALIGNMENT_DEFAULTS, **outer_props)
     if inner_props is not None:
         inner.set(**inner_props)

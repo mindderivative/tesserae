@@ -83,6 +83,8 @@ Phase 4 done: final docs; a known gap for `"system"` starting dark. **M38 comple
 
 **M39:** decisions Q1–Q3 as recommended. Phase 1 done: clickable nodes are keyboard-reachable buttons; 1048 passed. The dry-run gate report went to `tre`.
 
-Phase 2 done: MD3's state layer and ripple on clickable Rect/Container nodes (`tesserae.interaction`, `interaction:`); 1064 passed.
+Phase 2 done: MD3's state layer and ripple on clickable Rect/Container nodes (`tesserae.interaction`, `interaction:`); 1068 passed.
 
-**Up next:** M39 Phase 3 (focus ring and accessibility).
+Phase 3 done: the focus ring, YAML `a11y:`, `tesserae.a11y`; 1094 passed.
+
+**Up next:** M39 Phase 4 (closing pass).

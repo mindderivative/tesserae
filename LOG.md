@@ -370,3 +370,29 @@ Design choices:
 
 16 tests; 8/8 mutants caught (one needed a stronger assertion on layer
 order with content). 1064 passed.
+
+## M39 Phase 3: focus ring and accessibility
+
+User: "Yes". Pushed `7082b6c`.
+
+Probes on 0.3.4:
+- The `set()` error lists every property; the accessibility ones are
+  `role`, `label`, `value*`, `checked`, `selected`, `expanded`,
+  `disabled`, `level`, `live` and `a11y_hidden`.
+- `a11y_action` takes `increment`, `decrement`, `expand`, `collapse`,
+  `scroll_into_view` and `set_value`. `click` and `focus` aren't among
+  them.
+- `disabled=True` still takes Tab focus and clicks: it's only announced.
+- `live` is off/polite/assertive or None; `level` is a positive int or None.
+- A box's stroke is drawn inside it (tre's paint docs), so the ring is a
+  box 5 px out with a 3 px stroke.
+
+Design: the node's own `clip_children` (Phase 2) would clip a ring
+outside it, so a clip box now holds the layer and ripples, and the node
+stays unclipped. That also lifts Phase 2's limit.
+
+Correction: Phase 2's commit says 1048 -> 1064, but it holds 1068 tests.
+`test_paint_0_3_4.py` checks every YAML block in the docs, and the new
+guide's blocks were written after the test run.
+
+24 new tests; 11/11 mutants caught (one needed a new test). 1094 passed.
