@@ -1220,10 +1220,10 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 - Step 1: `search_bar` per Q3 (from its fragment; parts `field`, `leading`, `trailing0`..; `.query` a `Signal` of the text) and `tesserae.overlays.SearchView` (results, keys, `on_query`); `search_view` returns it — ⬜
 
 ### Phase 2 — Date and Time ⬜
-- Step 1: `date_picker_day` (MD3's 40 px day: selected `primary`/`on_primary`, today outlined in `primary`, outside the month dimmed; `on_click`, `role=\"button\"`, `selected`) and `period_selector` (MD3's AM/PM segmented toggle, `.period` a `Signal`, arrow keys) — ⬜
+- Step 1: `date_picker_day` (MD3's 40 px day: selected `primary`/`on_primary`, today outlined in `primary`, outside the month dimmed; `on_click`, `role="button"`, `selected`) and `period_selector` (MD3's AM/PM segmented toggle, `.period` a `Signal`, arrow keys) — ⬜
 
 ### Phase 3 — Media ⬜
-- Step 1: `image` built with `window.create(\"image\")` and decoded `rgba` (off `add_image_from_bytes`), and `video` as an `image` node with `frame(rgba, width, height)` pushing frames through `set(rgba=...)` — ⬜
+- Step 1: `image` built with `window.create("image")` and decoded `rgba` (off `add_image_from_bytes`), and `video` as an `image` node with `frame(rgba, width, height)` pushing frames through `set(rgba=...)` — ⬜
 
 ### Phase 4 — The Node Graph ⬜
 - Step 1: `node_graph` and `graph_node` per Q4: a clipped viewport whose content pans (`translate_x`/`translate_y`) and zooms (`scale`); draggable nodes (title bar over a body, MD3 surface colours); `edge(a, b)` paths re-routed as nodes move — ⬜
