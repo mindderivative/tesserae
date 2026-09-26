@@ -10,3 +10,4 @@ children:
     kind: Rect
     style: {width: 160, height: 40, background: "#03DAC6", corner_radius: 8}
     handlers: {on_click: "go_to_home"}
+    a11y: {label: "Back to home"}

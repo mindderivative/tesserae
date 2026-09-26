@@ -16,3 +16,5 @@ children:
     kind: Rect
     style: {width: 32, height: 28, background: "#B3261E", corner_radius: 4}
     handlers: {on_click: "remove_self"}
+    a11y: {label: "Remove item"}
+    interaction: {color: "#FFFFFF"}

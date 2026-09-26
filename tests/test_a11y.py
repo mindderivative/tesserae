@@ -238,3 +238,28 @@ def test_the_ring_fits_a_node_resized_outside_a_reconcile():
     _tab(window)
     assert view.interaction("btn").ring.get("layout_width") == 150 + 2 * (
         interaction.RING_OFFSET + interaction.RING_WIDTH)
+
+
+def test_the_counter_example_works_from_the_keyboard_alone():
+    import importlib.util
+    import sys
+    from pathlib import Path
+
+    directory = Path(__file__).resolve().parent.parent / "examples" / "counter"
+    spec = importlib.util.spec_from_file_location("Counter_ViewModel", directory / "Counter_ViewModel.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    app = tesserae.App(width=240, height=120, dark=True)
+    view, _ = app.load(directory / "Counter_View.yaml", module.CounterViewModel)
+    window = app.show("Counter")
+    window.advance(16)
+    _tab(window)
+    button = view.node("button")
+    assert (button.get("focused"), button.get("role"), button.get("label")) == (True, "button", "Increment")
+    assert view.interaction("button").ring_visible
+    assert view.interaction("button").layer.get("fill") == (0xFF, 0xFF, 0xFF, 0xFF)
+    window.simulate("key_down", key="enter")
+    window.simulate("key_down", key="space")
+    window.simulate("key_up", key="space")
+    assert view.node("label").get("text") == "Count: 2"

@@ -19,6 +19,17 @@ SIZE = (500, 400)
 LAYOUT = ("layout_x", "layout_y", "layout_width", "layout_height")
 PAINT = ("fill", "stroke_color", "stroke_width", "corner_radius", "opacity")
 TEXT = ("text", "font_family", "font_size", "font_weight", "line_height")
+#: Fields `tre` never had (M39): its builder rejects them, so its copy of
+#: the spec goes without; they add no layout or paint the differ reads.
+TESSERAE_ONLY = ("a11y", "interaction")
+
+
+def for_tre(spec):
+    """`spec` without Tesserae-only fields, for `tre`'s builder."""
+    out = {k: v for k, v in spec.items() if k not in TESSERAE_ONLY}
+    if "children" in spec:
+        out["children"] = [for_tre(child) for child in spec["children"] or []]
+    return out
 
 
 def _get(node, prop):
@@ -36,7 +47,7 @@ def ids(spec):
 
 
 def build_both(spec, frames=None, stylesheet=None):
-    view = tre.View(spec=spec, theme_seed=SEED, **({"stylesheet_spec": stylesheet} if stylesheet else {}))
+    view = tre.View(spec=for_tre(spec), theme_seed=SEED, **({"stylesheet_spec": stylesheet} if stylesheet else {}))
     if frames:
         for node_id, (rgba, w, h) in frames.items():
             view.node(node_id).push_frame(rgba, w, h)

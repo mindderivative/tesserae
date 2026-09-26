@@ -48,14 +48,14 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M36 — Bindings and Handlers in Tesserae | `██████████` 100% | ✅ Complete — the evaluator; wiring moved to M37 (2026-09-25) |
 | M37 — Declarative Engine on `tre` Primitives | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M38 — MD3 Theme in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
-| M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `████████░░` 75% | 🚧 In progress — Phase 3 of 4 done (2026-09-25) |
+| M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
 
-**Just closed:** M39 Phase 3 (2026-09-25) — MD3's focus ring on keyboard focus (and clickable nodes no longer clip their children), YAML's `a11y:` field, and `tesserae.a11y` for M40's widgets; 1068 → 1094. Before that, M39 Phase 2 (same day) — MD3's state layer and ripple on clickable `Rect`/`Container` nodes.
+**Just closed:** M39 (2026-09-25), all 4 phases — clickable YAML nodes are keyboard-reachable buttons again (an M37 regression, fixed); MD3's state layer, ripple and focus ring (`tesserae.interaction`), drawn by Tesserae since `tre` 0.3.5 draws none; YAML `a11y:` and `tesserae.a11y` for M40's widgets; the examples are labelled; 1042 → 1095.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -69,7 +69,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M39 Phase 4** (the milestone's closing pass: tests, docs, tracker; much is already done per phase) — waiting on the user's go-ahead. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch); Tesserae's dry-run gate report was sent — M98 is not blocked by Tesserae's code, M99 waits on M40–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
+**Up next:** **M40** (Widgets I: the 12 stateful MD3 controls `tre` M99 deletes, rebuilt from primitives on `tesserae.interaction` and `tesserae.a11y`) — approved but not yet scoped in detail; waiting on the user's go-ahead. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch); Tesserae's dry-run gate report was sent — M98 is not blocked by Tesserae's code, M99 waits on M40–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1059,7 +1059,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 39 — Interaction: State Layer, Ripple, Focus, Accessibility
 
-**Status: 🚧 In progress — Phase 3 of 4 done (2026-09-25).** User: "Yes" (scope M39), then "Yes do as recommended" — Q1–Q3 as recommended. `tre` D8 and R12: `tre` draws no ripple, state layer, scrim or focus ring. Scoped from `tre`'s new `docs/design/legacy-behavior.md` (its M97 Phase 2 Step 2, on its local `0.3.5` branch, `9f926d6`) and probes on 0.3.4.
+**Status: ✅ Complete — all 4 phases done (2026-09-25).** User: "Yes" (scope M39), then "Yes do as recommended" — Q1–Q3 as recommended. `tre` D8 and R12: `tre` draws no ripple, state layer, scrim or focus ring. Scoped from `tre`'s new `docs/design/legacy-behavior.md` (its M97 Phase 2 Step 2, on its local `0.3.5` branch, `9f926d6`) and probes on 0.3.4.
 
 **What `tre`'s legacy interaction does** (the write-up, read from source):
 - **Hover:** the node under the pointer (never its ancestors) animates a layer to 8% over 100 ms, linear.
@@ -1084,8 +1084,8 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 ### Phase 3 — Focus Ring and Accessibility ✅
 - Step 1: MD3's focus ring on keyboard focus (`focus_visible`), in `Interaction`: 3 px in `secondary` (MD3's baseline without a theme), 2 px outside the node, its corners grown by 5 px (each corner, for per-corner radii; square stays square). It's a stroked box at −5 px, because a box's stroke is drawn inside it (`tre`'s paint docs). It's placed again whenever focus arrives, hidden on `unfocus`, and never shown for pointer focus. For the ring to show outside the node, the node is no longer clipped: an inner clip box that follows the node's corners holds the state layer and ripples, which lifts Phase 2's clipping limit. All decoration nodes are `a11y_hidden`. `tesserae.a11y` gives `ROLES`/`LIVE`/`ACTIONS` (probed from 0.3.4's errors: `click` isn't an `a11y_action`), `check`/`describe` (every field checked before any is set; `hidden` becomes `a11y_hidden`) and `on_action` (per-action routing, on a view's shared dispatcher or alone). The YAML `a11y:` field takes `label`, `role`, `hidden`, `live` and `level`. `role` overrides a clickable's `button` and isn't allowed on Links or TextFields; a TextField's fields go on its input; a patch resets dropped fields; errors name the widget. Probed: `tre`'s `disabled` is announced only (the node still focuses and clicks), so it's left to M40's controls. `tests/test_a11y.py` has 24 tests, and 7 Phase 2 tests were updated for the clip box. Mutation-checked with 11 mutants; one (the ring not re-placed on focus) survived until a test resized a node outside a reconcile; now each fails a test. 1068 → 1094 passed. Docs: the guide is now `Interaction & Accessibility`, with the `api/index.md` entries (and its stale "View is still `tre`'s" paragraph fixed), and `ARCHITECTURE.md` — ✅
 
-### Phase 4 — Tests, Docs, Tracker ⬜
-- Step 1: tests with `simulate`/`advance` (M34's checkbox spike is the model); docs; tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
+### Phase 4 — Tests, Docs, Tracker ✅
+- Step 1: the closing pass. Tests (`simulate`/`advance`, as M34's spike) and docs were written phase by phase: `test_clickable.py` (5), `test_interaction.py` (16) and `test_a11y.py` (25), each mutation-checked, and the guide `Interaction & Accessibility`. The pass added: `a11y:` labels on every example button ("Increment", "Open settings", "Back to home", "Add item", "Remove item"), and `interaction: {color: "#FFFFFF"}` on the filled purple and red ones, since MD3 tints a filled button in its content colour; all three examples run cleanly. A test drives the counter example by keyboard alone, through `App`: Tab, ring, role and label, then Enter and Space. `tests/treediff.py` gives `tre`'s builder a copy of each spec without `a11y`/`interaction` (`for_tre`), since `tre` rejects fields it never had. `docs/index.md` lists the feature. 1094 → 1095 passed — ✅
 
 ---
 

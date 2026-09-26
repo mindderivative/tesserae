@@ -87,4 +87,6 @@ Phase 2 done: MD3's state layer and ripple on clickable Rect/Container nodes (`t
 
 Phase 3 done: the focus ring, YAML `a11y:`, `tesserae.a11y`; 1094 passed.
 
-**Up next:** M39 Phase 4 (closing pass).
+Phase 4 done: examples labelled, a keyboard-only test of the counter, the parity differ strips Tesserae-only fields for `tre`. **M39 complete**; 1095 passed.
+
+**Up next:** M40 (Widgets I: stateful controls).

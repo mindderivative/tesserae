@@ -6,6 +6,7 @@ children:
     kind: Rect
     style: {width: 268, height: 32, background: "#03DAC6", corner_radius: 4}
     handlers: {on_click: "add_item"}
+    a11y: {label: "Add item"}
   - id: item_list
     kind: Container
     style: {flex_direction: vertical, gap: 8, width: 268, height: 240}

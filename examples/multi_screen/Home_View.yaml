@@ -10,3 +10,5 @@ children:
     kind: Rect
     style: {width: 160, height: 40, background: "#6750A4", corner_radius: 8}
     handlers: {on_click: "go_to_settings"}
+    a11y: {label: "Open settings"}
+    interaction: {color: "#FFFFFF"}

@@ -396,3 +396,17 @@ Correction: Phase 2's commit says 1048 -> 1064, but it holds 1068 tests.
 guide's blocks were written after the test run.
 
 24 new tests; 11/11 mutants caught (one needed a new test). 1094 passed.
+
+## M39 Phase 4: closing pass; M39 complete
+
+User: "Yes". Pushed `66d5b8a`.
+
+- Example buttons had no labels, so a screen reader would say only
+  "button". Each now has `a11y: {label: ...}`. The purple and red filled
+  buttons also have a white tint, since the default `on_surface` would
+  hardly show on them.
+- Adding those fields broke 5 tree-parity cases: `tre`'s builder rejects
+  unknown fields. `treediff.for_tre` strips `a11y`/`interaction` from
+  `tre`'s copy.
+- A keyboard-only test of the counter example, through `App`.
+- All three examples run cleanly. 1095 passed.
