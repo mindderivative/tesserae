@@ -39,7 +39,7 @@ children:
     assert view.node("d.headline") is not None
     assert view.node("d.body") is not None
 
-    imperative = dialog(_themed_window(), "Delete?", "Cannot be undone.", 300, 150)
+    imperative = dialog(_themed_window(), "Delete?", "Cannot be undone.", 300, 150).node  # an overlay since M41
 
     assert scrim.get("corner_radius") == imperative.get("corner_radius")
     assert panel.get("corner_radius") == 28.0
@@ -71,7 +71,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("sb")
 
-    imperative, imp_action, imp_close = snackbar(_themed_window(), "Saved", 250)
+    imperative = snackbar(_themed_window(), "Saved", 250).node  # an overlay since M41
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
@@ -110,8 +110,8 @@ children:
     modal_panel = view.node("modal.panel")
     standard = view.node("standard")
 
-    imperative_modal = side_sheet(_themed_window(), width=360, height=300, modal=True)
-    imperative_standard = side_sheet(_themed_window(), width=360, height=300, modal=False)
+    imperative_modal = side_sheet(_themed_window(), width=360, height=300, modal=True).node  # an overlay since M41
+    imperative_standard = side_sheet(_themed_window(), width=360, height=300, modal=False).node
 
     _assert_scrim_matches(modal_scrim, modal_panel, imperative_modal)
     assert elevation(modal_panel) == 1.0
@@ -132,7 +132,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("mi")
 
-    imperative = menu_item(_themed_window(), "Settings", width=200)
+    imperative = menu_item(_themed_window(), "Settings", width=200).node  # a Widget since M41
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
@@ -151,6 +151,6 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("tt")
 
-    imperative = tooltip(_themed_window(), "Hint", 100)
+    imperative = tooltip(_themed_window(), "Hint", 100).node  # an overlay since M41
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")

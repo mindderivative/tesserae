@@ -49,7 +49,8 @@ class Widget:
                  spec: Optional[dict[str, Any]] = None, theme: Optional[Theme] = None,
                  label: Optional[str] = None, x: Optional[float] = None, y: Optional[float] = None,
                  interactive: Optional[dict[Optional[str], Optional[str]]] = None,
-                 edit: Optional[Callable[[dict[str, Any]], None]] = None, name: str = "widget") -> None:
+                 edit: Optional[Callable[[dict[str, Any]], None]] = None, name: str = "widget",
+                 attach: bool = True) -> None:
         from tesserae.view import View
 
         self.window = window
@@ -69,7 +70,8 @@ class Widget:
         self.node = self.view.root
         if label is not None:
             a11y.describe(self.node, label=label)
-        window.root.add_child(self.node)
+        if attach:  # an overlay isn't in the tree: `tesserae.overlays` shows it as a layer
+            window.root.add_child(self.node)
         if x is not None or y is not None:
             self.node.set(position="absolute", x=float(x or 0.0), y=float(y or 0.0))
         self._undo: list[Callable[[], None]] = []

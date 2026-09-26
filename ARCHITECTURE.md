@@ -238,6 +238,14 @@ tabs' indicator is a box whose width is set to the label's and whose
 `translate_x` animates. A factory's `edit` runs before its `interactive`
 parts are marked, so parts it adds can be interactive.
 
+**Overlays, M41 Phase 5:** `tesserae.overlays.Overlay` wraps a `Widget`
+built with `attach=False` and shows it with `window.show_layer`
+(`modal`, `dismissible`). On `dismiss` it closes itself, so each overlay
+chooses which dismissals apply by its flags and its scrim: a full-window
+scrim takes outside presses, which leaves Escape. Timers (the snackbar's
+4 s, the tooltip's 500 ms) are animations of a private box in no tree
+(`_Timer`), since animations run there too.
+
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`
 field compiles through it (`build._a11y_props`, which also owns the

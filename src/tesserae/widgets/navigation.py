@@ -230,7 +230,7 @@ def navigation_drawer(
     each item 56 px with a 24 px icon and a `label_large` label; the
     selected one a full-width `secondary_container` pill. `modal=True` is
     the modal drawer's look (rounded on its end side); open it as an
-    overlay with `tesserae.overlays` (M41 Phase 5). `.selected`,
+    overlay with `tesserae.overlays.NavigationDrawer`. `.selected`,
     `.on_change(fn)`; the up and down arrows move it."""
     count = len(labels)
     if count == 0 or len(icons) != count:

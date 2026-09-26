@@ -13,9 +13,14 @@ with no real value. `menu` delegates to `tre`'s own `build_menu` (not
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Callable, Optional
+
+from tesserae import overlays
+from tesserae.widgets._composed import Widget
+from tesserae.widgets.buttons import _borders
 
 if TYPE_CHECKING:
+    from tesserae.theme import Theme
     from tre import Node, Window
 
 
@@ -27,12 +32,19 @@ def dialog(
     height: float,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """A real MD3 dialog. Modal by default. Show/hide via
-    `Window.open_dialog`/`close_dialog`."""
-    return window.add_dialog(
-        headline, supporting_text, width, height, border_color=border_color, border_width=border_width
-    )
+    *,
+    actions: list[tuple[str, Optional[Callable[[], Any]]]] | None = None,
+    theme: "Theme | None" = None,
+) -> overlays.Dialog:
+    """MD3's dialog (M41: `tesserae.overlays.Dialog`). `open()` it; Escape
+    or an action closes it."""
+    d = overlays.Dialog(window, headline, supporting_text, width=width, height=height, actions=actions, theme=theme)
+    border = _borders([None], border_color, border_width)
+    if border is not None:
+        panel = d.widget.part("panel")
+        panel.set(**({"stroke_color": tuple(border_color)} if border_color else {}),
+                  **({"stroke_width": float(border_width)} if border_width is not None else {}))
+    return d
 
 
 def snackbar(
@@ -43,18 +55,19 @@ def snackbar(
     closable: bool = False,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> tuple["Node", "Node | None", "Node | None"]:
-    """Returns `(container, action_button, close_button)` -- the latter
-    two are `None` when `action_label`/`closable` weren't given.
-    Non-modal; auto-dismiss is the app's own timer."""
-    return window.add_snackbar(
-        text,
-        width,
-        action_label=action_label,
-        closable=closable,
-        border_color=border_color,
-        border_width=border_width,
-    )
+    *,
+    on_action: Callable[[], Any] | None = None,
+    duration: int | None = 4000,
+    theme: "Theme | None" = None,
+) -> overlays.Snackbar:
+    """MD3's snackbar (M41: `tesserae.overlays.Snackbar`). `open()` it; it
+    hides itself after `duration` ms (`None` keeps it)."""
+    s = overlays.Snackbar(window, text, width=width, action=action_label, on_action=on_action, closable=closable,
+                          duration=duration, theme=theme)
+    if border_color is not None or border_width is not None:
+        s.node.set(**({"stroke_color": tuple(border_color)} if border_color else {}),
+                   **({"stroke_width": float(border_width)} if border_width is not None else {}))
+    return s
 
 
 def side_sheet(
@@ -66,19 +79,26 @@ def side_sheet(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """Show/hide via `Window.open_side_sheet`/`close_side_sheet`."""
-    return window.add_side_sheet(
-        width=width, height=height, modal=modal, x=x, y=y, border_color=border_color, border_width=border_width
-    )
+    *,
+    theme: "Theme | None" = None,
+) -> "Widget | overlays.SideSheet":
+    """MD3's side sheet. `modal=True` is `tesserae.overlays.SideSheet` (an
+    overlay: `open()` it); otherwise a standard sheet, a `surface` panel in
+    the layout, built from its fragment. Put content in `.panel`/`.node`."""
+    if modal:
+        return overlays.SideSheet(window, width=width, theme=theme)
+    widget = Widget(window, "SideSheetStandard", {"width": width, "height": height if height is not None else 400},
+                    theme=theme, x=x, y=y, edit=_borders([None], border_color, border_width), name="side_sheet")
+    widget.panel = widget.node
+    return widget
 
 
-def menu(window: "Window", items: list["Node"], width: float = 200.0) -> "Node":
-    """A panel of `menu_item(...)` rows. Show anchored below a node via
-    `Window.open_menu(anchor, menu)`; hide via `close_menu(menu)`.
-    `tooltip`'s and the search-results panel's own overlays reuse this
-    identical open/close pair, matching `tre`'s own `build_menu`."""
-    return window.build_menu(items, width=width)
+def menu(window: "Window", items: list[Any], width: float = 200.0, *,
+         theme: "Theme | None" = None) -> overlays.Menu:
+    """MD3's menu (M41: `tesserae.overlays.Menu`) of `menu_item(...)`s or
+    `(label, fn)` pairs. `open(anchor)` below a node, `open_at(x, y)`, or
+    `attach_context(node)` for a right-click."""
+    return overlays.Menu(window, items, width=width, theme=theme)
 
 
 def menu_item(
@@ -91,32 +111,50 @@ def menu_item(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """One row for `menu(...)`. `submenu=True` paints a trailing
-    disclosure affordance -- the app still owns opening a nested `menu`
-    on click, no automatic nesting."""
-    return window.add_menu_item(
-        label,
-        icon=icon,
-        submenu=submenu,
-        width=width,
-        x=x,
-        y=y,
-        border_color=border_color,
-        border_width=border_width,
-    )
+    *,
+    on_click: Callable[[], Any] | None = None,
+    theme: "Theme | None" = None,
+) -> Widget:
+    """One of MD3's 48 px menu items (M41: built from its fragment), for
+    `menu(...)`: a `label_large` label, an optional 24 px leading `icon`,
+    and a trailing chevron when `submenu`. `on_click` runs when it's
+    chosen (the menu closes)."""
+    name = "menu_item"
+
+    def edit(spec: dict[str, Any]) -> None:
+        spec["style"].update(height=48, gap=12, padding={"left": 12, "right": 12, "top": 0, "bottom": 0})
+        spec["children"][0].setdefault("style", {})["flex_grow"] = 1
+        glyph = lambda node_id, n: {"id": node_id, "kind": "Icon", "icon": {"name": n},
+                                    "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}}
+        if icon is not None:
+            spec["children"].insert(0, glyph(f"{name}.icon", icon))
+        if submenu:
+            spec["children"].append(glyph(f"{name}.submenu", "chevron_right"))
+        border = _borders([None], border_color, border_width)
+        if border is not None:
+            border(spec)
+
+    widget = Widget(window, "MenuItem", {"label": label, "width": width}, theme=theme, x=x, y=y, edit=edit,
+                    interactive={None: "on_surface"}, name=name)
+    widget._menu_action = on_click
+    return widget
 
 
 def tooltip(
     window: "Window",
     text: str,
-    width: float,
+    width: float | None = None,
     x: float | None = None,
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """Show/hide via the same `Window.open_menu`/`close_menu` pair
-    `menu(...)` uses, matching `tre`'s own real design (no dedicated
-    tooltip open/close pair)."""
-    return window.add_tooltip(text, width, x=x, y=y, border_color=border_color, border_width=border_width)
+    *,
+    anchor: Any = None,
+    theme: "Theme | None" = None,
+) -> overlays.Tooltip:
+    """MD3's plain tooltip (M41: `tesserae.overlays.Tooltip`).
+    `attach(anchor)` (or `anchor=`) shows it on hover and keyboard focus."""
+    t = overlays.Tooltip(window, text, width=width, theme=theme)
+    if anchor is not None:
+        t.attach(getattr(anchor, "node", anchor))
+    return t

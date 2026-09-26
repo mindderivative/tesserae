@@ -113,4 +113,6 @@ Phase 3 done: cards, chips, badges, dividers, links, icons, lists, accordion hea
 
 Phase 4 done: tabs, navigation rail and drawer, toolbars, top app bar, status bar; 1214 passed.
 
-**Up next:** M41 Phase 5 (overlays).
+Phase 5 done: `tesserae.overlays` (dialog, menu, snackbar, tooltip, side sheet, navigation drawer); 1227 passed.
+
+**Up next:** M41 Phase 6 (gate, docs, close M41).

@@ -81,8 +81,10 @@ content yourself, from `.expanded`. `icon` is Tesserae's own; give it
 `item1`, and so on. A click or Enter selects. The group is one Tab stop,
 and the arrow keys move the selection (left and right for tabs, up and
 down for the rail and drawer). The tabs' indicator slides to the new tab.
-`navigation_drawer(modal=True)` has the modal drawer's look; opening it
-as an overlay comes with `tesserae.overlays`. A `toolbar` holds your
+`navigation_drawer(modal=True)` has the modal drawer's look; to open one
+as an overlay, use `tesserae.overlays.NavigationDrawer`. `dialog`,
+`snackbar`, `side_sheet(modal=True)`, `menu` and `tooltip` return
+overlays with `open()` and `close()`; see [Overlays](overlays.md). A `toolbar` holds your
 action icon buttons (add them to `.node`). The `top_app_bar`'s icons are
 buttons: `bar.on_click(fn, part="leading")`, `part="trailing0"`, and so
 on.

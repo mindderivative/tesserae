@@ -59,6 +59,7 @@ nav:
       - Themes & Fonts: guide/themes-and-fonts.md
       - Interaction & Accessibility: guide/interaction.md
       - Controls: guide/controls.md
+      - Overlays: guide/overlays.md
       - Repeater (Lists): guide/repeater.md
       - Reactivity: guide/reactivity.md
       - Binding Expressions: guide/bindings.md

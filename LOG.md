@@ -617,3 +617,19 @@ User: "Push it and start Phase 4". Pushed `e8d6ea4`.
 - Mutants: 10 of 10 caught after tightening three tests.
 
 1214 passed.
+
+## M41 Phase 5: overlays
+
+User: "Push it and start Phase 5". Pushed `f5c2d64`.
+
+Probed tre's layers: anchored placement flips to fit; `dismiss` comes
+on Escape and on an outside press without hiding; hiding returns focus;
+modal layers trap focus; animations run on nodes in no tree, so they
+work as timers.
+
+- `tesserae.overlays` has six overlays; the factories move onto them.
+- A menu of `menu_item` widgets must use each item's own dispatcher, or
+  its listeners would replace the item's (tre keeps one per event).
+- Mutants: 11 of 12 caught; the timer's generation check is equivalent.
+
+1227 passed.
