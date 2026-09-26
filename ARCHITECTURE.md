@@ -185,7 +185,12 @@ one radio selected and one Tab stop (a roving focus, via `_focusable()`),
 and moves the selection with the arrow keys. A `Switch` slides its handle
 and state-layer circle with `translate_x` and sizes the handle with
 `scale`, since tre won't animate layout; its focus ring goes around the
-track (`Interaction`'s `ring_around`).
+track (`Interaction`'s `ring_around`). A `Slider` captures the pointer
+on press, so a drag can leave it, and positions its handle at once
+rather than animating it. Its value snaps half up, as HTML's range input
+does. `SpinBox` isn't a `Control`, since it's three targets (two icon
+buttons, each with its own `Interaction`, and a `text_input` field), but
+it has the same API.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

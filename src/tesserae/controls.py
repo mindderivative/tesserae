@@ -20,9 +20,11 @@ theme); `set_theme` re-tints. Motion uses MD3's duration and easing tokens.
 
 from __future__ import annotations
 
+import math
 from typing import Any, Callable, Optional
 
 from tesserae import a11y, tokens
+from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners
 from tesserae.reactive import Effect, Signal, untrack
@@ -30,7 +32,7 @@ from tesserae.theme import Theme
 
 __all__ = [
     "DISABLED_CONTAINER", "DISABLED_CONTENT", "Checkbox", "Control", "RadioButton", "RadioGroup", "STATE_LAYER_SIZE",
-    "Switch", "TARGET_SIZE",
+    "Slider", "SpinBox", "Switch", "TARGET_SIZE",
 ]
 
 RGBA = tuple[int, int, int, int]
@@ -439,3 +441,325 @@ class Switch(Control):
     def _activate(self) -> None:
         self.selected.set(not self.selected.get())
         self._changed(self.selected.get())
+
+
+def _clamp(value: float, low: float, high: float) -> float:
+    return max(low, min(high, value))
+
+
+class Slider(Control):
+    """MD3's slider: a 4 px track, `primary` up to the value and
+    `surface_container_highest` after it, and a 20 px `primary` handle.
+    Dragging the handle, or pressing anywhere on the track, sets the value
+    (the pointer is captured, so a drag can leave the slider). The arrow
+    keys step it, Page Up/Down by ten steps, Home/End to the ends, and
+    assistive technology's increment/decrement/set_value work too.
+    `on_change` fires once a drag ends, and after each key.
+
+    `value` runs from `min` to `max`, snapped to `step` when one is given;
+    the keys move by `step`, else a hundredth of the range. While dragged,
+    the handle's state layer shows MD3's dragged opacity."""
+
+    role = "slider"
+    TRACK = 4.0
+    HANDLE = 20.0
+
+    def __init__(self, window: Any, *, value: float = 0.0, min: float = 0.0, max: float = 1.0,
+                 step: Optional[float] = None, width: float = 200.0, color: Optional[RGBA] = None,
+                 **kwargs: Any) -> None:
+        if not max > min:
+            raise ValueError(f"a slider needs max > min, got min={min!r}, max={max!r}")
+        if step is not None and not step > 0:
+            raise ValueError(f"a slider's step must be positive, got {step!r}")
+        self.min, self.max, self.step = float(min), float(max), step
+        self.width = float(width)
+        self.target = (self.width, TARGET_SIZE)
+        self._color = color
+        self._dragging = False
+        self._start: float = 0.0
+        self.value = Signal(self._snap(value))
+        super().__init__(window, **kwargs)
+        for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
+                               ("pointer_up", self._on_up), ("key_down", self._on_key)):
+            self._undo.append(self._listen(self.node, event, handler))
+        self._undo.append(a11y.on_action(self.node, {
+            "increment": lambda e: self._user_set(self.value.get() + self._key_step()),
+            "decrement": lambda e: self._user_set(self.value.get() - self._key_step()),
+            "set_value": lambda e: self._user_set(float(e.value)) if e.value is not None else None,
+        }, listen=self._listen))
+
+    @property
+    def _span(self) -> float:
+        """How far the handle's centre travels."""
+        return self.width - self.HANDLE
+
+    def _snap(self, value: float) -> float:
+        value = _clamp(float(value), self.min, self.max)
+        if self.step:
+            # half rounds up, as HTML's range input does (Python's round() goes to even)
+            value = self.min + math.floor((value - self.min) / self.step + 0.5) * self.step
+            value = _clamp(round(value, 10), self.min, self.max)
+        return value
+
+    def _key_step(self) -> float:
+        return self.step or (self.max - self.min) / 100
+
+    def _fraction(self) -> float:
+        return (self._snap(self.value.get()) - self.min) / (self.max - self.min)
+
+    def _build(self) -> None:
+        centre_y = TARGET_SIZE / 2
+        radius = self.HANDLE / 2
+        self.inactive = self.window.create("box", position="absolute", x=radius, y=centre_y - self.TRACK / 2,
+                                           width=self._span, height=self.TRACK, corner_radius=self.TRACK / 2,
+                                           hit_testable=False, a11y_hidden=True)
+        self.active = self.window.create("box", position="absolute", x=radius, y=centre_y - self.TRACK / 2,
+                                         width=0.0, height=self.TRACK, corner_radius=self.TRACK / 2,
+                                         hit_testable=False, a11y_hidden=True)
+        self.handle = self.window.create("box", position="absolute", x=0.0, y=centre_y - radius, width=self.HANDLE,
+                                         height=self.HANDLE, corner_radius=radius, hit_testable=False,
+                                         a11y_hidden=True)
+        for child in (self.inactive, self.active, self.handle):
+            self.node.add_child(child)
+        self.surface.set(x=radius - STATE_LAYER_SIZE / 2)  # centred on the handle at the start
+
+    def _on_colour(self) -> RGBA:
+        return self._color or self.color("primary")
+
+    def _tint(self) -> RGBA:
+        return self._on_colour()
+
+    def _paint(self, animate: bool) -> None:
+        value, disabled = self._snap(self.value.get()), self.disabled.get()
+        self.node.set(value=value, value_min=self.min, value_max=self.max, value_step=self._key_step())
+        on_surface = self.color("on_surface")
+        if disabled:
+            active = handle = with_alpha(on_surface, DISABLED_CONTENT)
+            inactive = with_alpha(on_surface, DISABLED_CONTAINER)
+        else:
+            active = handle = self._on_colour()
+            inactive = self.color("surface_container_highest")
+        ms = self._ms(animate, "short3")
+        self._to(self.active, "fill", active, ms)
+        self._to(self.inactive, "fill", inactive, ms)
+        self._to(self.handle, "fill", handle, ms)
+        # position follows the value at once: a drag mustn't lag behind the pointer
+        offset = self._fraction() * self._span
+        self.active.set(width=offset)
+        self._to(self.handle, "translate_x", offset, 0)
+        self._to(self.surface, "translate_x", offset, 0)
+
+    def _activate(self) -> None:
+        pass  # a click has already set the value, at pointer_down
+
+    def _user_set(self, value: float) -> None:
+        before = self.value.get()
+        self.value.set(self._snap(value))
+        if self.value.get() != before:
+            self._changed(self.value.get())
+
+    def _from_x(self, x: float) -> float:
+        return self.min + _clamp((x - self.HANDLE / 2) / self._span, 0.0, 1.0) * (self.max - self.min)
+
+    def _on_down(self, event: Any) -> None:
+        if self.disabled.get() or event.x is None:
+            return
+        self._dragging = True
+        self._start = self.value.get()
+        self.node.capture_pointer()
+        self.interaction.set_dragged(True)
+        self.value.set(self._snap(self._from_x(event.x)))
+
+    def _on_move(self, event: Any) -> None:
+        if self._dragging and event.x is not None:
+            self.value.set(self._snap(self._from_x(event.x)))
+
+    def _on_up(self, event: Any) -> None:
+        if not self._dragging:
+            return
+        self._dragging = False
+        self.node.release_pointer()
+        self.interaction.set_dragged(False)
+        if self.value.get() != self._start:
+            self._changed(self.value.get())
+
+    def _on_key(self, event: Any) -> None:
+        if self.disabled.get():
+            return
+        step = self._key_step()
+        moves = {"arrow_right": step, "arrow_up": step, "arrow_left": -step, "arrow_down": -step,
+                 "page_up": 10 * step, "page_down": -10 * step}
+        if event.key in moves:
+            self._user_set(self.value.get() + moves[event.key])
+        elif event.key == "home":
+            self._user_set(self.min)
+        elif event.key == "end":
+            self._user_set(self.max)
+
+
+class SpinBox:
+    """A number field between − and + buttons, as `tre`'s spin box was
+    (MD3 has no spin box of its own, so it's built from MD3's parts: two
+    40 px icon buttons and a filled field).
+
+    `value` (a `Signal`) steps by `step` with the buttons, the up and down
+    arrows in the field, and assistive technology's increment/decrement;
+    typing a number sets it once it parses and fits `min`..`max`, and
+    leaving the field puts back the value's text if what was typed didn't.
+    A button whose step would pass a bound is disabled. `on_change` hears
+    the user's changes. Not a `Control`: it's three targets, not one."""
+
+    BUTTON = 40.0
+    FIELD = (64.0, 40.0)
+
+    def __init__(self, window: Any, *, value: float = 0, min: Optional[float] = None, max: Optional[float] = None,
+                 step: float = 1, theme: Optional[Theme] = None, label: Optional[str] = None,
+                 disabled: bool = False, listen: Optional[Listen] = None) -> None:
+        if step <= 0:
+            raise ValueError(f"a spin box's step must be positive, got {step!r}")
+        if min is not None and max is not None and max < min:
+            raise ValueError(f"a spin box needs max >= min, got min={min!r}, max={max!r}")
+        self.window = window
+        self.theme = theme if theme is not None else Theme.resolve()
+        self.min, self.max, self.step = min, max, step
+        self.value = Signal(self._fit(value))
+        self.disabled = Signal(bool(disabled))
+        self._listen: Listen = listen if listen is not None else Listeners().listen
+        self._changes: list[Callable[[Any], None]] = []
+        self._undo: list[Callable[[], None]] = []
+        self.node = window.create("box", flex_direction="horizontal", align_items="center", gap=4.0)
+        self.decrement, self._dec_icon, self._dec_it = self._button("remove", "Decrease", -1)
+        self.field = window.create("box", width=self.FIELD[0], height=self.FIELD[1], corner_radius=8.0,
+                                   padding_left=8.0, padding_right=8.0, align_items="center")
+        self.input = window.create("text_input", text=self._format(self.value.get()), font_family="Roboto",
+                                   font_size=14.0, flex_grow=1.0, focusable=True, role="textbox")
+        self.field.add_child(self.input)
+        if label is not None:
+            a11y.describe(self.input, label=label)
+        self.increment, self._inc_icon, self._inc_it = self._button("add", "Increase", 1)
+        for child in (self.decrement, self.field, self.increment):
+            self.node.add_child(child)
+        for event, handler in (("change", self._on_typed), ("unfocus", self._on_leave_field),
+                               ("key_down", self._on_key)):
+            self._undo.append(self._listen(self.input, event, handler))
+        self._undo.append(a11y.on_action(self.input, {"increment": lambda e: self._bump(1),
+                                                     "decrement": lambda e: self._bump(-1)}, listen=self._listen))
+        self._effect = Effect(self._render)
+
+    # -- for app code -------------------------------------------------------------
+
+    def on_change(self, fn: Callable[[Any], None]) -> Callable[[], None]:
+        self._changes.append(fn)
+        return lambda: self._changes.remove(fn) if fn in self._changes else None
+
+    def color(self, role: str) -> RGBA:
+        return self.theme.role(role) or tokens.BASELINE[role]
+
+    def set_theme(self, theme: Theme) -> None:
+        self.theme = theme
+        for it in (self._dec_it, self._inc_it):
+            it.retint(self.color("on_surface_variant"), self.color("secondary"))
+        untrack(self._paint)
+
+    def destroy(self) -> None:
+        self._effect.dispose()
+        for undo in self._undo:
+            undo()
+        self._undo = []
+        for it in (self._dec_it, self._inc_it):
+            it.detach()
+        self.node.destroy()
+
+    # -- internals -----------------------------------------------------------------
+
+    def _button(self, icon: str, label: str, direction: int) -> tuple[Any, Any, Interaction]:
+        button = self.window.create("box", width=self.BUTTON, height=self.BUTTON, corner_radius=self.BUTTON / 2,
+                                    align_items="center", justify_content="center", focusable=True,
+                                    role="button", label=label, cursor="pointer")
+        glyph = self.window.create("path", data=icon_path(icon), view_box=ICON_VIEW_BOX, width=24.0, height=24.0,
+                                   hit_testable=False, a11y_hidden=True)
+        button.add_child(glyph)
+        it = Interaction(self.window, button, self.color("on_surface_variant"), self._listen, self.color("secondary"))
+        self._undo.append(self._listen(button, "click", lambda e: self._bump(direction)))
+        return button, glyph, it
+
+    def _fit(self, value: float) -> float:
+        """`value` held within `min`..`max`."""
+        if self.min is not None and value < self.min:
+            value = self.min
+        if self.max is not None and value > self.max:
+            value = self.max
+        return value
+
+    def _format(self, value: float) -> str:
+        whole = all(isinstance(n, int) or float(n).is_integer() for n in (value, self.step))
+        return str(int(value)) if whole else f"{value:g}"
+
+    def _can(self, direction: int) -> bool:
+        if self.disabled.get():
+            return False
+        bound = self.max if direction > 0 else self.min
+        return bound is None or (self.value.get() + direction * self.step) * direction <= bound * direction
+
+    def _bump(self, direction: int) -> None:
+        if self._can(direction):
+            self._user_set(self.value.get() + direction * self.step)
+
+    def _user_set(self, value: float) -> None:
+        before = self.value.get()
+        value = round(value, 10)
+        if isinstance(self.step, int) and float(value).is_integer():
+            value = int(value)
+        self.value.set(self._fit(value))
+        self.input.set(text=self._format(self.value.get()))
+        if self.value.get() != before:
+            for fn in list(self._changes):
+                fn(self.value.get())
+
+    def _parse(self, text: str) -> Optional[float]:
+        try:
+            number = float(text)
+        except ValueError:
+            return None
+        if (self.min is not None and number < self.min) or (self.max is not None and number > self.max):
+            return None
+        return int(number) if number.is_integer() and isinstance(self.step, int) else number
+
+    def _on_typed(self, event: Any) -> None:
+        number = self._parse(self.input.get("text") or "")
+        if number is not None and number != self.value.get():
+            self.value.set(number)
+            for fn in list(self._changes):
+                fn(number)
+
+    def _on_leave_field(self, event: Any) -> None:
+        if self._parse(self.input.get("text") or "") != self.value.get():
+            self.input.set(text=self._format(self.value.get()))
+
+    def _on_key(self, event: Any) -> None:
+        if event.key == "arrow_up":
+            self._bump(1)
+        elif event.key == "arrow_down":
+            self._bump(-1)
+
+    def _render(self) -> None:
+        self.value.get()
+        self.disabled.get()
+        self._paint()
+
+    def _paint(self) -> None:
+        value, disabled = self.value.get(), self.disabled.get()
+        if not self.input.get("focused") or self._parse(self.input.get("text") or "") != value:
+            self.input.set(text=self._format(value))
+        on_surface = self.color("on_surface")
+        text = with_alpha(on_surface, DISABLED_CONTENT) if disabled else on_surface
+        field = (with_alpha(on_surface, DISABLED_CONTAINER) if disabled
+                 else self.color("surface_container_highest"))
+        self.field.set(fill=field)
+        self.input.set(fill=text, caret_color=self.color("primary"), focusable=not disabled, disabled=disabled)
+        for direction, button, glyph, it in ((-1, self.decrement, self._dec_icon, self._dec_it),
+                                             (1, self.increment, self._inc_icon, self._inc_it)):
+            usable = self._can(direction)
+            glyph.set(fill=self.color("on_surface_variant") if usable else with_alpha(on_surface, DISABLED_CONTENT))
+            button.set(focusable=usable, disabled=not usable, cursor="pointer" if usable else "default")
+            it.enabled = usable

@@ -466,3 +466,18 @@ circle, scaled to 16, 24 or 28 px, and slides with `translate_x`.
 - `Interaction(ring_around=)` puts the switch's ring around its track.
 
 13 tests; 11/11 mutants caught. 1127 passed.
+
+## M40 Phase 3: the slider and the spin box
+
+User: "Push it and start Phase 3". Pushed `72ed9e0`.
+
+Probed:
+- After `capture_pointer()`, moves and the release arrive with `x`
+  relative to the node, however far outside.
+- A `text_input` fires `change` on every edit.
+
+Found by a test: Python's `round()` rounds half to even, so 5 with step
+2 snapped to 4. It now rounds half up, as HTML's range input does.
+
+SpinBox is three targets, so it isn't a `Control`; same API.
+15 tests; 12/12 mutants caught. 1142 passed.

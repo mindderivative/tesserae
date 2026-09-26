@@ -1,6 +1,7 @@
 """M40: Tesserae's MD3 controls (`tesserae.controls`) -- Phase 1's
-foundation, proved on the checkbox, and Phase 2's radio buttons (with
-`RadioGroup`) and switch. Driven headlessly with `simulate`/`advance`.
+foundation, proved on the checkbox; Phase 2's radio buttons (with
+`RadioGroup`) and switch; Phase 3's slider and spin box. Driven headlessly
+with `simulate`/`advance`.
 """
 
 import math
@@ -411,3 +412,185 @@ def test_switch_and_radio_follow_the_theme():
     sw.set_theme(dark)
     radio.set_theme(dark)
     assert sw.track.get("fill") == dark.role("primary") and radio.ring.get("stroke_color") == dark.role("primary")
+
+
+# == M40 Phase 3: the slider and the spin box ===========================================
+
+from tesserae.controls import Slider, SpinBox  # noqa: E402
+
+
+def _slider(**kwargs):
+    window, before = _window()
+    window.root.set(flex_direction="vertical")
+    return _placed(Slider(window, **kwargs), window), window, before
+
+
+def test_a_slider_is_md3s_track_and_handle():
+    s, window, _ = _slider(value=0.25, label="Volume")
+    x = s.node.get("layout_x")
+    assert (s.node.get("layout_width"), s.node.get("layout_height"), s.node.get("role")) == (200.0, 48.0, "slider")
+    assert (s.node.get("value"), s.node.get("value_min"), s.node.get("value_max")) == (0.25, 0.0, 1.0)
+    assert (s.inactive.get("layout_height"), s.inactive.get("layout_width")) == (4.0, 180.0)
+    assert s.inactive.get("fill") == tokens.BASELINE["surface_container_highest"]
+    assert s.active.get("fill") == tokens.BASELINE["primary"] and s.active.get("layout_width") == 45.0
+    assert s.handle.get("layout_width") == 20.0 and s.handle.get("translate_x") == 45.0
+    assert s.surface.get("layout_x") - x == pytest.approx(10 - 20 + 45)  # the state layer rides the handle
+
+
+def test_pressing_and_dragging_set_the_value_and_change_fires_once_at_the_end():
+    s, window, _ = _slider()
+    seen = []
+    s.on_change(seen.append)
+    x, y = s.node.get("layout_x"), s.node.get("layout_y")
+    window.simulate("pointer_down", x=x + 10 + 90, y=y + 24)  # the middle of the track
+    assert s.value.get() == pytest.approx(0.5) and s.interaction.dragged
+    window.simulate("pointer_move", x=x + 10 + 45, y=y + 24)
+    assert s.value.get() == pytest.approx(0.25) and seen == []
+    window.simulate("pointer_move", x=x + 900, y=y + 300)  # captured: the drag can leave the slider
+    assert s.value.get() == 1.0
+    window.simulate("pointer_up", x=x + 900, y=y + 300)
+    assert seen == [1.0] and not s.interaction.dragged
+    window.advance(16)
+    assert s.interaction.layer.get("opacity") != pytest.approx(interaction.DRAGGED)
+
+
+def test_the_dragged_state_layer_is_16_percent():
+    s, window, _ = _slider()
+    x, y = s.node.get("layout_x"), s.node.get("layout_y")
+    window.simulate("pointer_down", x=x + 10, y=y + 24)
+    _frames(window, 32)
+    assert s.interaction.layer.get("opacity") == pytest.approx(interaction.DRAGGED)
+
+
+def test_the_keys_step_the_value():
+    s, window, _ = _slider(value=0.5)
+    seen = []
+    s.on_change(seen.append)
+    s.node.focus()
+    for key, expected in (("arrow_right", 0.51), ("arrow_up", 0.52), ("arrow_left", 0.51), ("arrow_down", 0.50),
+                          ("page_up", 0.60), ("page_down", 0.50), ("end", 1.0), ("home", 0.0)):
+        window.simulate("key_down", key=key)
+        assert s.value.get() == pytest.approx(expected), key
+    window.simulate("key_down", key="arrow_left")  # already at the start: no change
+    assert len(seen) == 8
+
+
+def test_a_stepped_range_snaps():
+    s, window, _ = _slider(min=0, max=10, step=2, value=5)
+    assert s.value.get() == 6.0  # halfway snaps up, as HTML's range input does
+    x, y = s.node.get("layout_x"), s.node.get("layout_y")
+    window.simulate("pointer_down", x=x + 10 + 180 * 0.33, y=y + 24)
+    assert s.value.get() == 4.0
+    s.node.focus()
+    window.simulate("key_down", key="arrow_right")
+    assert s.value.get() == 6.0 and s.node.get("value_step") == 2.0
+
+
+def test_assistive_technology_can_set_and_step_the_value():
+    s, window, _ = _slider(value=0.5)
+    seen = []
+    s.on_change(seen.append)
+    window.simulate("a11y_action", node=s.node, action="increment")
+    window.simulate("a11y_action", node=s.node, action="decrement")
+    window.simulate("a11y_action", node=s.node, action="set_value", value=2.0)  # clamped
+    assert seen == [pytest.approx(0.51), pytest.approx(0.5), 1.0]
+
+
+def test_a_disabled_slider_ignores_the_pointer_and_keys():
+    s, window, _ = _slider(value=0.5, disabled=True)
+    on_surface = tokens.BASELINE["on_surface"]
+    assert s.handle.get("fill") == (*on_surface[:3], round(255 * DISABLED_CONTENT))
+    assert s.inactive.get("fill") == (*on_surface[:3], round(255 * DISABLED_CONTAINER))
+    x, y = s.node.get("layout_x"), s.node.get("layout_y")
+    window.simulate("pointer_down", x=x + 10, y=y + 24)
+    window.simulate("key_down", key="home")
+    assert s.value.get() == 0.5 and s.node.get("focusable") is False
+
+
+def test_setting_the_value_moves_the_handle_at_once():
+    s, window, _ = _slider()
+    s.value.set(0.75)
+    assert s.handle.get("translate_x") == pytest.approx(135.0) and s.node.get("value") == 0.75
+
+
+def test_a_bad_range_or_step_is_an_error():
+    window, _ = _window()
+    with pytest.raises(ValueError, match="max > min"):
+        Slider(window, min=1, max=1)
+    with pytest.raises(ValueError, match="step must be positive"):
+        Slider(window, step=0)
+
+
+def _spin(**kwargs):
+    window, before = _window()
+    return _placed(SpinBox(window, **kwargs), window), window, before
+
+
+def test_a_spin_box_is_two_buttons_and_a_field():
+    sb, window, _ = _spin(value=5, label="Copies")
+    assert [c == n for c, n in zip(sb.node.children(), (sb.decrement, sb.field, sb.increment))] == [True] * 3
+    assert (sb.input.get("text"), sb.input.get("role"), sb.input.get("label")) == ("5", "textbox", "Copies")
+    assert (sb.decrement.get("role"), sb.decrement.get("label"), sb.increment.get("label")) == (
+        "button", "Decrease", "Increase")
+    assert sb.field.get("fill") == tokens.BASELINE["surface_container_highest"]
+    assert (sb.decrement.get("layout_width"), sb.field.get("layout_width")) == (40.0, 64.0)
+
+
+def test_the_buttons_arrows_and_assistive_technology_step_it():
+    sb, window, _ = _spin(value=5)
+    seen = []
+    sb.on_change(seen.append)
+    window.simulate("click", node=sb.increment)
+    window.simulate("click", node=sb.decrement)
+    window.simulate("click", node=sb.decrement)
+    sb.input.focus()
+    window.simulate("key_down", key="arrow_up")
+    window.simulate("a11y_action", node=sb.input, action="increment")
+    assert seen == [6, 5, 4, 5, 6] and sb.input.get("text") == "6"
+
+
+def test_typing_a_number_sets_it_and_leaving_restores_bad_text():
+    sb, window, before = _spin(value=5, min=0, max=10)
+    seen = []
+    sb.on_change(seen.append)
+    sb.input.focus()
+    window.simulate("key_down", key="end")
+    window.simulate("key_down", key="backspace")
+    window.simulate("input", text="8")
+    assert sb.value.get() == 8 and seen == [8]
+    window.simulate("input", text="0")  # "80" is past max: not taken
+    assert sb.value.get() == 8 and sb.input.get("text") == "80"
+    before.focus()
+    window.advance(16)
+    assert sb.input.get("text") == "8"
+
+
+def test_a_bound_disables_the_button_that_would_pass_it():
+    sb, window, _ = _spin(value=9, max=10)
+    window.simulate("click", node=sb.increment)
+    window.advance(16)
+    assert sb.value.get() == 10
+    assert (sb.increment.get("focusable"), sb.increment.get("disabled")) == (False, True)
+    window.simulate("click", node=sb.increment)
+    assert sb.value.get() == 10
+    assert sb.decrement.get("focusable") is True
+
+
+def test_fractional_steps_and_disabled():
+    sb, window, _ = _spin(value=0.5, step=0.25)
+    window.simulate("click", node=sb.increment)
+    assert sb.value.get() == 0.75 and sb.input.get("text") == "0.75"
+    sb.disabled.set(True)
+    window.advance(16)
+    assert sb.input.get("focusable") is False and sb.increment.get("disabled") is True
+    window.simulate("click", node=sb.increment)
+    assert sb.value.get() == 0.75
+
+
+def test_the_spin_box_follows_the_theme():
+    light, dark = Theme.resolve(theme_seed=SEED), Theme.resolve(theme_seed=SEED, dark=True)
+    sb, window, _ = _spin(theme=light)
+    assert sb.field.get("fill") == light.role("surface_container_highest")
+    sb.set_theme(dark)
+    assert sb.field.get("fill") == dark.role("surface_container_highest")
+    assert sb.input.get("fill") == dark.role("on_surface")

@@ -95,4 +95,6 @@ Phase 4 done: examples labelled, a keyboard-only test of the counter, the parity
 
 Phase 2 done: RadioButton with RadioGroup, and Switch; 1127 passed.
 
-**Up next:** M40 Phase 3 (Slider and SpinBox).
+Phase 3 done: Slider and SpinBox; 1142 passed.
+
+**Up next:** M40 Phase 4 (progress, loading indicator, time picker dial).
