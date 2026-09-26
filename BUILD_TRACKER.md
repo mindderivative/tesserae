@@ -48,7 +48,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M36 — Bindings and Handlers in Tesserae | `██████████` 100% | ✅ Complete — the evaluator; wiring moved to M37 (2026-09-25) |
 | M37 — Declarative Engine on `tre` Primitives | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M38 — MD3 Theme in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
-| M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `░░░░░░░░░░` 0% | ⬜ Proposed — scoped in detail, decisions pending (2026-09-25) |
+| M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `░░░░░░░░░░` 0% | 🚧 In progress — decisions made (2026-09-25) |
 | M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
@@ -1058,7 +1058,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 39 — Interaction: State Layer, Ripple, Focus, Accessibility
 
-**Status: ⬜ Proposed — scoped in detail, decisions pending (2026-09-25).** User: "Yes" (scope M39). `tre` D8 and R12: `tre` draws no ripple, state layer, scrim or focus ring. Scoped from `tre`'s new `docs/design/legacy-behavior.md` (its M97 Phase 2 Step 2, on its local `0.3.5` branch, `9f926d6`) and probes on 0.3.4.
+**Status: 🚧 In progress — decisions made (2026-09-25).** User: "Yes" (scope M39), then "Yes do as recommended" — Q1–Q3 as recommended. `tre` D8 and R12: `tre` draws no ripple, state layer, scrim or focus ring. Scoped from `tre`'s new `docs/design/legacy-behavior.md` (its M97 Phase 2 Step 2, on its local `0.3.5` branch, `9f926d6`) and probes on 0.3.4.
 
 **What `tre`'s legacy interaction does** (the write-up, read from source):
 - **Hover:** the node under the pointer (never its ancestors) animates a layer to 8% over 100 ms, linear.
@@ -1131,6 +1131,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ### Phase 1 — Prove It ⬜
 - Step 1: run Tesserae's full suite and examples with `TRE_FORBID_REMOVED=1` (`tre`'s `_removed.py` shim, agreed in M34: every name 0.3.5 removes or renames raises), and add that run to CI; fix whatever it finds — ⬜
+- Step 2 (dry run, 2026-09-25, at `tre`'s request for its M97 Phase 2 Step 6): `tre`'s `_removed.py` (0.3.5 branch, `c49b85f`) installed from a pytest plugin in the scratchpad, against the pinned v0.3.4 wheel. **`src/tesserae` uses nothing M98 removes** (static scan against every `REMOVED` table: no `View`, `Component`, reactivity, binding, `reconcile`, `instantiate`, `from_view`/`show_view`, `push_frame`, old property names or `Theme`). **What remains is M99's:** the 8 legacy MD3 kinds in `spec/build.py` with `get_checked`/`get_selected`/`set_on_change` (M40), ~45 factories in `tesserae.widgets` (M41–M42), and `Window.set_theme` in `App`/`View` (goes with them). Suite: 583 failed / 327 passed, nearly all at `Window.set_theme` (516), which every themed `App` and stand-alone `View` calls; the rest the factories and the deliberate reference tests. Examples: `counter` and `multi_screen` run clean with the switch on, `todo_list` stops at `add_checkbox`. Found and fixed an unused `from tre import View` in a test (`dae9ff3`). Reported to `tre` at the user's request — ✅
 - Step 2: report the result to `tre` so M98 can start; docs rewritten for Tesserae-owned reactivity, bindings, theming and widgets; tracker, `PLAN.md`/`LOG.md` — ⬜
 
 ---
