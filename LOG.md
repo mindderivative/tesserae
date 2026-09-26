@@ -633,3 +633,9 @@ work as timers.
 - Mutants: 11 of 12 caught; the timer's generation check is equivalent.
 
 1227 passed.
+
+Follow-up: the gate blocked `docs/guide/overlays.md`, and the commit went
+ahead because that command chained with `;`, so `13434a3` pointed its nav
+at a missing page. `mkdocs build --strict`, now run without `-q`,
+reported it (exit 1). The page is added in the next commit; commits now
+chain on `&&`.
