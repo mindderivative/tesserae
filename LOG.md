@@ -655,3 +655,17 @@ User: "Push it and start Phase 6". Pushed `e3682f3`.
   Phase 2; rewritten.
 
 1227 passed.
+
+## M42 scoped
+
+User: "Push it and scope M42". Pushed `6e48798`.
+
+- Read tre's removal list and `target-api.md` (0.3.5).
+- Eight `tesserae.widgets` functions are still tre's. `App` and six test
+  helpers theme windows (219 shim failures).
+- Found: docking's framework API (`dock_target`/`dock_drop`,
+  `set_active_panel`) is 0.3.5-only, so docking can't be built on 0.3.4.
+  Tesserae never exposed it, so M99 doesn't wait on it.
+- tre's node graph has no drag or edges.
+
+Q1–Q4 are in the tracker, with recommendations.

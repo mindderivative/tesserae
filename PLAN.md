@@ -117,4 +117,6 @@ Phase 5 done: `tesserae.overlays` (dialog, menu, snackbar, tooltip, side sheet, 
 
 Phase 6 done: the gate covers M41's names; the examples and 152 widget tests are clean under tre's shim. **M41 complete**; 1227 passed.
 
-**Up next:** M42 (Widgets III), to scope.
+**M42 scoped (2026-09-25):** 6 phases. The migration only: search, date and time, media, the node graph, and off the window's theme, then the gate. Docking can't be built on 0.3.4 (its API is 0.3.5's). Decisions Q1–Q4 pending; Q1–Q2 would add M45 for new widgets, docking and the shell.
+
+**Up next:** the user's decisions on M42.
