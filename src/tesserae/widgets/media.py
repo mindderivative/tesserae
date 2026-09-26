@@ -120,20 +120,11 @@ def icon(
     return widget
 
 
-def graph_node(
-    window: "Window",
-    graph: "Node",
-    label: str,
-    x: float,
-    y: float,
-    width: float,
-    height: float,
-    border_color: tuple[int, int, int, int] | None = None,
-    border_width: float | None = None,
-) -> "Node":
-    """One node inside a `node_graph(...)` canvas. `x`/`y` are graph
-    coordinates, not window-absolute."""
-    return window.add_graph_node(graph, label, x, y, width, height, border_color=border_color, border_width=border_width)
+#: `node_graph`'s zoom range, and how far one wheel notch zooms.
+ZOOM_RANGE = (0.25, 4.0)
+ZOOM_STEP = 1.1
+#: The coordinate space an edge's `path` spans, centred on the graph's origin.
+_EDGE_SPACE = 20000.0
 
 
 def node_graph(
@@ -144,7 +135,210 @@ def node_graph(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """A `Canvas`-backed container for `graph_node(...)` children plus
-    app-drawn edges between them."""
-    return window.add_node_graph(width, height, x=x, y=y, border_color=border_color, border_width=border_width)
+    *,
+    theme: "Theme | None" = None,
+) -> "Widget":
+    """A node graph's viewport (M42: built from its fragment, off `tre`'s
+    `add_node_graph`): a clipped `surface_container_low` area whose
+    content pans and zooms. Drag the background to pan; the wheel zooms
+    about the pointer (`ZOOM_RANGE`). `.offset` (x, y) and `.zoom` are
+    `Signal`s. Add nodes with `graph_node(window, graph, ...)` and connect
+    them with `graph.edge(a, b)`. `.content` holds them."""
+    from tesserae import a11y
+    from tesserae.reactive import Effect, Signal
+    from tesserae.widgets._composed import Widget
+    from tesserae.widgets.buttons import _borders
+
+    widget = Widget(window, "NodeGraph", {"width": width, "height": height}, theme=theme, x=x, y=y,
+                    edit=_borders([None], border_color, border_width), name="node_graph")
+    viewport = widget.node
+    viewport.set(clip_children=True)
+    a11y.describe(viewport, role="group", label="Node graph")
+    # a 0x0 box scales about its own origin, so a graph point p shows at offset + p * zoom
+    content = window.create("box", position="absolute", x=0.0, y=0.0, width=0.0, height=0.0, hit_testable=False)
+    edges = window.create("box", position="absolute", x=0.0, y=0.0, width=0.0, height=0.0, hit_testable=False,
+                          a11y_hidden=True)
+    content.add_child(edges)
+    viewport.add_child(content)
+    widget.content, widget._edges_layer = content, edges
+    widget.offset, widget.zoom = Signal((0.0, 0.0)), Signal(1.0)
+    widget.graph_nodes: list[Any] = []
+    widget.edges: list[tuple[Any, Any, Any]] = []
+
+    def apply() -> None:
+        ox, oy = widget.offset.get()
+        content.set(translate_x=float(ox), translate_y=float(oy), scale=float(widget.zoom.get()))
+
+    effect = Effect(apply)
+    widget._undo.append(effect.dispose)
+    drag: dict[str, Any] = {}
+
+    def in_a_node(target: Any) -> bool:
+        node = target
+        while node is not None and node != viewport:
+            if any(node == n.node for n in widget.graph_nodes):
+                return True
+            node = node.parent()
+        return False
+
+    def down(event: Any) -> None:
+        if event.window_x is None or in_a_node(event.target):
+            return
+        drag.update(start=(event.window_x, event.window_y), offset=widget.offset.get())
+        viewport.capture_pointer()
+
+    def move(event: Any) -> None:
+        if drag and event.window_x is not None:
+            (sx, sy), (ox, oy) = drag["start"], drag["offset"]
+            widget.offset.set((ox + event.window_x - sx, oy + event.window_y - sy))
+
+    def up(event: Any) -> None:
+        if drag:
+            drag.clear()
+            viewport.release_pointer()
+
+    def wheel(event: Any) -> None:
+        if event.delta_y is None or event.x is None:
+            return
+        zoom = widget.zoom.get()
+        target = min(max(zoom * ZOOM_STEP ** (-float(event.delta_y)), ZOOM_RANGE[0]), ZOOM_RANGE[1])
+        if target == zoom:
+            return
+        # keep the graph point under the pointer where it is
+        ox, oy = widget.offset.get()
+        ratio = target / zoom
+        widget.offset.set((event.x - (event.x - ox) * ratio, event.y - (event.y - oy) * ratio))
+        widget.zoom.set(target)
+
+    listen = widget.view._listen
+    for name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("wheel", wheel)):
+        widget._undo.append(listen(viewport, name, fn))
+
+    def route(a: Any, b: Any, path: Any) -> None:
+        (ax, ay), (bx, by) = a.position.get(), b.position.get()
+        x1, y1 = ax + a.size[0], ay + a.size[1] / 2
+        x2, y2 = bx, by + b.size[1] / 2
+        bend = max(40.0, abs(x2 - x1) / 2)
+        path.set(data=f"M{x1:.2f},{y1:.2f} C{x1 + bend:.2f},{y1:.2f} {x2 - bend:.2f},{y2:.2f} {x2:.2f},{y2:.2f}")
+
+    def edge(a: Any, b: Any) -> Any:
+        """A curve from `a`'s right side to `b`'s left, following them as
+        they move. Returns its `path` node."""
+        half = _EDGE_SPACE / 2
+        path = window.create("path", position="absolute", x=-half, y=-half, width=_EDGE_SPACE, height=_EDGE_SPACE,
+                             view_box=(-half, -half, _EDGE_SPACE, _EDGE_SPACE), fill=(0, 0, 0, 0),
+                             stroke_width=2.0, stroke_color=widget.color("outline"), hit_testable=False,
+                             a11y_hidden=True, data="M0,0")
+        edges.add_child(path)
+        widget.edges.append((a, b, path))
+        route(a, b, path)
+        return path
+
+    def reroute(moved: Any) -> None:
+        for a, b, path in widget.edges:
+            if moved is a or moved is b:
+                route(a, b, path)
+
+    widget.edge = edge
+    widget._reroute = reroute
+    widget.after_theme(lambda: [p.set(stroke_color=widget.color("outline")) for _, _, p in widget.edges])
+    return widget
+
+
+def graph_node(
+    window: "Window",
+    graph: "Widget",
+    label: str,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    border_color: tuple[int, int, int, int] | None = None,
+    border_width: float | None = None,
+    *,
+    theme: "Theme | None" = None,
+) -> "Widget":
+    """A node in a `node_graph` (M42, off `tre`'s `add_graph_node`): a
+    `surface_container_high` card with 12 px corners and an
+    `outline_variant` border, a 32 px `title_small` title bar
+    (`surface_container_highest`) over its body, at `x`, `y` in the
+    graph's coordinates. Drag it to move it (its edges follow); focused,
+    the arrow keys move it 8 px. `.position` (x, y) is a `Signal`, and
+    `.on_move(fn)` hears the user's moves. Put content in `.part("body")`."""
+    from tesserae import a11y
+    from tesserae.reactive import Effect, Signal
+    from tesserae.widgets._composed import Widget
+    from tesserae.widgets.buttons import _borders
+
+    name = "graph_node"
+    spec = {"id": name, "kind": "Container",
+            "style": {"width": width, "height": height, "flex_direction": "vertical",
+                      "background": "surface_container_high", "corner_radius": "medium",
+                      "border_color": "outline_variant", "border_width": 1.0},
+            "children": [
+                {"id": f"{name}.title", "kind": "Container",
+                 "style": {"height": 32, "background": "surface_container_highest", "align_items": "center",
+                           "padding": {"left": 12, "right": 12, "top": 0, "bottom": 0}},
+                 "children": [{"id": f"{name}.label", "kind": "Text",
+                               "text": {"content": label, "typography_role": "title_small"},
+                               "style": {"foreground": "on_surface"}}]},
+                {"id": f"{name}.body", "kind": "Container", "style": {"flex_grow": 1}},
+            ]}
+    widget = Widget(window, spec=spec, theme=theme if theme is not None else graph.theme, name=name, attach=False,
+                    edit=_borders([None], border_color, border_width))
+    node = widget.node
+    node.set(position="absolute", clip_children=True, focusable=True, cursor="grab")
+    a11y.describe(node, role="group", label=label)
+    graph.content.add_child(node)
+    graph.graph_nodes.append(widget)
+    widget.graph = graph
+    widget.size = (float(width), float(height))
+    widget.position = Signal((float(x), float(y)))
+    moves: list[Any] = []
+    widget.on_move = lambda fn: (moves.append(fn), lambda: moves.remove(fn) if fn in moves else None)[1]
+
+    def place() -> None:
+        px, py = widget.position.get()
+        node.set(x=float(px), y=float(py))
+        graph._reroute(widget)
+
+    effect = Effect(place)  # a re-colour leaves it: its place isn't in its style
+    widget._undo.append(effect.dispose)
+
+    def user_move(to: tuple[float, float]) -> None:
+        if widget.position.get() != to:
+            widget.position.set(to)
+            for fn in list(moves):
+                fn(to)
+
+    drag: dict[str, Any] = {}
+
+    def down(event: Any) -> None:
+        if event.window_x is None:
+            return
+        drag.update(start=(event.window_x, event.window_y), position=widget.position.get())
+        node.capture_pointer()
+        node.set(cursor="grabbing")
+
+    def move(event: Any) -> None:
+        if drag and event.window_x is not None:
+            (sx, sy), (px, py) = drag["start"], drag["position"]
+            zoom = graph.zoom.get()
+            user_move((px + (event.window_x - sx) / zoom, py + (event.window_y - sy) / zoom))
+
+    def up(event: Any) -> None:
+        if drag:
+            drag.clear()
+            node.release_pointer()
+            node.set(cursor="grab")
+
+    def key(event: Any) -> None:
+        step = {"arrow_left": (-8, 0), "arrow_right": (8, 0), "arrow_up": (0, -8), "arrow_down": (0, 8)}.get(event.key)
+        if step is not None:
+            px, py = widget.position.get()
+            user_move((px + step[0], py + step[1]))
+
+    listen = widget.view._listen
+    for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("key_down", key)):
+        widget._undo.append(listen(node, event_name, fn))
+    return widget

@@ -112,7 +112,17 @@ with `.period` a `Signal`, and a click or the arrows switch it.
 `.value` is a `Signal` shown as two digits, typing sets it when the number
 is in range, and the up and down arrows step it and wrap.
 
-**Still `tre`'s, until later in M42:** `node_graph` and `graph_node`. These are thin delegates to the matching
+**The node graph (M42).** `node_graph(window, width, height)` is a
+clipped viewport: drag its background to pan, and use the wheel to zoom
+about the pointer (0.25× to 4×). `.offset` and `.zoom` are `Signal`s.
+`graph_node(window, graph, label, x, y, width, height)` adds a node at
+graph coordinates: a titled card with its content in `.part("body")`.
+Drag it (or focus it and use the arrow keys) to move it; `.position` is a
+`Signal`, and `.on_move(fn)` hears the user's moves. `graph.edge(a, b)`
+draws a curve from `a`'s right side to `b`'s left that follows them.
+
+Every function in `tesserae.widgets` is now built by Tesserae; none
+delegates to `tre`. These are thin delegates to the matching
 `Window.add_*` factory in `tre`, with the same parameter names, order and
 defaults, and they return `tre` nodes themed by the window's theme. M42
 rebuilds them too.

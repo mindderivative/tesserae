@@ -127,4 +127,6 @@ Phase 2 done: the date-picker day, period selector and time input field; 1242 pa
 
 Phase 3 done: `image` and `video` on Tesserae's own image nodes; 1244 passed.
 
-**Up next:** M42 Phase 4 (the node graph).
+Phase 4 done: the node graph (pan, zoom, drag, edges); no widget delegates to tre now; 1251 passed.
+
+**Up next:** M42 Phase 5 (segmented button, pagination, popover).

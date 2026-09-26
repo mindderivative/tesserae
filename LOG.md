@@ -723,3 +723,16 @@ User: "Push it and start Phase 3". Pushed `40d1bfb`.
 - Mutants: 6 of 6 caught.
 
 1244 passed.
+
+## M42 Phase 4: the node graph
+
+User: "Push it and start Phase 4". Pushed `24f3add`.
+
+- Probed transforms: a 0x0 box scales about its origin, and hit testing
+  follows the transform, so panning and zooming are a translate and a
+  scale on one content box.
+- Edges are cubic paths re-routed on moves.
+- Mutants: 8 of 9 caught; the 9th exposed dead re-colour code, removed.
+- With this phase, no `tesserae.widgets` function delegates to tre.
+
+1251 passed.

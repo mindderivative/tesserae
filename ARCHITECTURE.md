@@ -250,7 +250,12 @@ to its bar's field through the bar's own dispatcher. It builds its
 so no listener outlives a node. `image` and `video` (M42) are `Widget`s
 over a `kind: Image` spec, built with frames (`Widget(frames=)`).
 `video.frame()` sets the pixels and records them in the view's frames, so
-a re-colour, which re-applies the frames, keeps the latest.
+a re-colour, which re-applies the frames, keeps the latest. The node
+graph's content is a 0×0 box, which scales about its own origin, so a
+graph point `p` shows at `offset + p × zoom` and zooming about the
+pointer is arithmetic. `tre` hit-tests through the transform. Edges are
+`path`s spanning a fixed coordinate space around the origin, re-routed
+when a node moves.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

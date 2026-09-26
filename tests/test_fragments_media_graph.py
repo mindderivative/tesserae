@@ -37,7 +37,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("ng")
 
-    imperative = node_graph(_themed_window(), 360, 200)
+    imperative = node_graph(_themed_window(), 360, 200).node  # a Widget since M42
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
