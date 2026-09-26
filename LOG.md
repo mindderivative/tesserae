@@ -481,3 +481,23 @@ Found by a test: Python's `round()` rounds half to even, so 5 with step
 
 SpinBox is three targets, so it isn't a `Control`; same API.
 15 tests; 12/12 mutants caught. 1142 passed.
+
+## M40 Phase 4: progress, loading, the time picker dial
+
+User: "Push it and start Phase 4". Pushed `5c86537`.
+
+Probed:
+- `path` takes arcs and curves.
+- `rotation_deg` and `trim_*` animate.
+- `animate("data")` morphs any two outlines, resampling them itself, so
+  the handover's shapes needn't share commands.
+- `get("data")` reads back normalised.
+- The window root lays out in a row. A first probe placed the dial past
+  the window's edge and looked like a bug.
+
+Mutants: 11 of 12 caught, after the linear sweep test was tightened to
+count wraps. The generation bump on settling is equivalent: settling's
+`stop_animation` ends the loop, since a stopped animation never
+completes.
+
+15 tests; 1157 passed.

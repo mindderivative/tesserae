@@ -97,4 +97,6 @@ Phase 2 done: RadioButton with RadioGroup, and Switch; 1127 passed.
 
 Phase 3 done: Slider and SpinBox; 1142 passed.
 
-**Up next:** M40 Phase 4 (progress, loading indicator, time picker dial).
+Phase 4 done: progress (linear and circular, indeterminate too), the loading indicator, the time picker dial; 1157 passed.
+
+**Up next:** M40 Phase 5 (wiring).

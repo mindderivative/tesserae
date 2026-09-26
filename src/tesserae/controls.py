@@ -32,7 +32,8 @@ from tesserae.theme import Theme
 
 __all__ = [
     "DISABLED_CONTAINER", "DISABLED_CONTENT", "Checkbox", "Control", "RadioButton", "RadioGroup", "STATE_LAYER_SIZE",
-    "Slider", "SpinBox", "Switch", "TARGET_SIZE",
+    "CircularProgress", "LinearProgress", "LoadingIndicator", "Slider", "SpinBox", "Switch", "TARGET_SIZE",
+    "TimePickerDial",
 ]
 
 RGBA = tuple[int, int, int, int]
@@ -763,3 +764,394 @@ class SpinBox:
             glyph.set(fill=self.color("on_surface_variant") if usable else with_alpha(on_surface, DISABLED_CONTENT))
             button.set(focusable=usable, disabled=not usable, cursor="pointer" if usable else "default")
             it.enabled = usable
+
+
+class Indicator:
+    """The shared part of the progress and loading indicators: a node with
+    `role="progressbar"` that isn't focusable or interactive. `value` is
+    a `Signal`, 0..1, or `None` for indeterminate (animated forever until
+    it gets a value). Colours are theme roles; `color` replaces `primary`."""
+
+    def __init__(self, window: Any, *, value: Optional[float] = None, theme: Optional[Theme] = None,
+                 label: Optional[str] = None, color: Optional[RGBA] = None) -> None:
+        self.window = window
+        self.theme = theme if theme is not None else Theme.resolve()
+        self.value = Signal(value)
+        self._color = color
+        self._painted = False
+        self._generation = 0  # bumped to stop a running loop
+        self._looping = False
+        self.node = self._build()
+        a11y.describe(self.node, role="progressbar", value_min=0.0, value_max=1.0)
+        if label is not None:
+            a11y.describe(self.node, label=label)
+        self._effect = Effect(self._render)
+
+    def color(self, role: str) -> RGBA:
+        return self.theme.role(role) or tokens.BASELINE[role]
+
+    def _on_colour(self) -> RGBA:
+        return self._color or self.color("primary")
+
+    def set_theme(self, theme: Theme) -> None:
+        self.theme = theme
+        untrack(lambda: self._paint(animate=False))
+
+    def destroy(self) -> None:
+        self._effect.dispose()
+        self._generation += 1
+        self.node.destroy()
+
+    @property
+    def indeterminate(self) -> bool:
+        return self.value.get() is None
+
+    def _render(self) -> None:
+        value = self.value.get()
+        if value is not None:
+            value = _clamp(float(value), 0.0, 1.0)
+        self.node.set(value=value)
+        self._paint(animate=self._painted)
+        if value is None and not self._looping:
+            self._looping = True
+            self._generation += 1
+            untrack(lambda: self._loop(self._generation))
+        elif value is not None and self._looping:
+            self._looping = False
+            self._generation += 1
+            untrack(self._settle)
+        self._painted = True
+
+    def _alive(self, generation: int) -> bool:
+        return generation == self._generation
+
+    # subclasses
+    def _build(self) -> Any:
+        raise NotImplementedError
+
+    def _paint(self, animate: bool) -> None:
+        raise NotImplementedError
+
+    def _loop(self, generation: int) -> None:
+        raise NotImplementedError
+
+    def _settle(self) -> None:
+        """Leaves the indeterminate animation for the determinate look."""
+
+
+class LinearProgress(Indicator):
+    """MD3's linear progress indicator: a 4 px `surface_container_highest`
+    track and a `primary` bar. Determinate, the bar fills to the value
+    (sliding in over `medium1`); indeterminate, a bar 40% of the width
+    sweeps across again and again (MD3's two-bar sweep, simplified to one)."""
+
+    HEIGHT = 4.0
+    SWEEP_MS = 1500
+    SWEEP = 0.4
+
+    def __init__(self, window: Any, *, width: float = 240.0, **kwargs: Any) -> None:
+        self.width = float(width)
+        super().__init__(window, **kwargs)
+
+    def _build(self) -> Any:
+        node = self.window.create("box", width=self.width, height=self.HEIGHT, corner_radius=self.HEIGHT / 2,
+                                  clip_children=True)
+        # the bar is full width, slid left out of the clip by the unfilled part
+        self.bar = self.window.create("box", position="absolute", x=0.0, y=0.0, width=self.width,
+                                      height=self.HEIGHT, corner_radius=self.HEIGHT / 2, translate_x=-self.width,
+                                      hit_testable=False, a11y_hidden=True)
+        node.add_child(self.bar)
+        return node
+
+    def _paint(self, animate: bool) -> None:
+        self.node.set(fill=self.color("surface_container_highest"))
+        self.bar.set(fill=self._on_colour())
+        value = self.value.get()
+        if value is not None:
+            Control._to(self.bar, "translate_x", (_clamp(float(value), 0.0, 1.0) - 1.0) * self.width,
+                        Theme.duration("medium1") if animate else 0, Theme.easing("standard"))
+
+    def _loop(self, generation: int) -> None:
+        if not self._alive(generation):
+            return
+        self.bar.set(width=self.SWEEP * self.width)
+        self.bar.stop_animation("translate_x")
+        self.bar.set(translate_x=-self.SWEEP * self.width)
+        self.bar.animate("translate_x", self.width, self.SWEEP_MS, easing=Theme.easing("standard"),
+                         on_complete=lambda: self._loop(generation))
+
+    def _settle(self) -> None:
+        self.bar.set(width=self.width)
+        self._paint(animate=False)
+
+
+class CircularProgress(Indicator):
+    """MD3's circular progress indicator: a 4 px `primary` arc in a 48 px
+    box. Determinate, the arc runs clockwise from 12 o'clock for the
+    value's share of the circle; indeterminate, the arc spins (one turn
+    per 1568 ms) while it lengthens and shortens (666 ms each way)."""
+
+    SIZE = 48.0
+    STROKE = 4.0
+    CIRCLE = "M24,4 A20,20 0 1,1 24,44 A20,20 0 1,1 24,4"  # clockwise from the top
+    TURN_MS = 1568
+    ARC_MS = 666
+
+    def __init__(self, window: Any, *, size: float = SIZE, **kwargs: Any) -> None:
+        self.size = float(size)
+        super().__init__(window, **kwargs)
+
+    def _build(self) -> Any:
+        node = self.window.create("box", width=self.size, height=self.size)
+        self.arc = self.window.create("path", data=self.CIRCLE, view_box=(0, 0, self.SIZE, self.SIZE),
+                                      width=self.size, height=self.size, stroke_width=self.STROKE, fill=_CLEAR,
+                                      trim_start=0.0, trim_end=0.0, hit_testable=False, a11y_hidden=True)
+        node.add_child(self.arc)
+        return node
+
+    def _paint(self, animate: bool) -> None:
+        self.arc.set(stroke_color=self._on_colour())
+        value = self.value.get()
+        if value is not None:
+            Control._to(self.arc, "trim_end", _clamp(float(value), 0.0, 1.0),
+                        Theme.duration("medium1") if animate else 0, Theme.easing("standard"))
+
+    def _loop(self, generation: int) -> None:
+        self._spin(generation)
+        self._stretch(generation, longer=True)
+
+    def _spin(self, generation: int) -> None:
+        if not self._alive(generation):
+            return
+        self.arc.stop_animation("rotation_deg")
+        self.arc.set(rotation_deg=0.0)
+        self.arc.animate("rotation_deg", 360.0, self.TURN_MS, on_complete=lambda: self._spin(generation))
+
+    def _stretch(self, generation: int, longer: bool) -> None:
+        if not self._alive(generation):
+            return
+        self.arc.animate("trim_end", 0.75 if longer else 0.1, self.ARC_MS, easing=Theme.easing("standard"),
+                         on_complete=lambda: self._stretch(generation, not longer))
+
+    def _settle(self) -> None:
+        for prop in ("rotation_deg", "trim_end"):
+            self.arc.stop_animation(prop)
+        self.arc.set(rotation_deg=0.0, trim_start=0.0)
+        self._paint(animate=False)
+
+
+class LoadingIndicator(Indicator):
+    """MD3's loading indicator: a filled `primary` shape, 38 px in a 48 px
+    box, morphing forever through a pentagon, a pill, a cookie and an oval,
+    650 ms per step, linear. These are the outlines `tre`'s MD3 handover
+    defines (its `intended` pill and oval, not the diamonds `tre` drew).
+    Always indeterminate; `value` is ignored."""
+
+    SIZE = 48.0
+    SHAPE = 38.0
+    STEP_MS = 650
+    SHAPES = (
+        "M24.00,0.00L46.83,16.58L38.11,43.42L9.89,43.42L1.17,16.58Z",
+        "M0.00,24.00C0.00,10.75 10.75,0.00 24.00,0.00L24.00,0.00C37.25,0.00 48.00,10.75 48.00,24.00L48.00,24.00"
+        "C48.00,37.25 37.25,48.00 24.00,48.00L24.00,48.00C10.75,48.00 0.00,37.25 0.00,24.00Z",
+        "M24.00,0.00L33.84,6.96L44.78,12.00L43.68,24.00L44.78,36.00L33.84,41.04L24.00,48.00L14.16,41.04L3.22,36.00"
+        "L4.32,24.00L3.22,12.00L14.16,6.96Z",
+        "M48.00,24.00C48.00,30.63 37.25,36.00 24.00,36.00C10.75,36.00 0.00,30.63 0.00,24.00C0.00,17.37 10.75,12.00 "
+        "24.00,12.00C37.25,12.00 48.00,17.37 48.00,24.00",
+    )
+
+    def __init__(self, window: Any, **kwargs: Any) -> None:
+        kwargs["value"] = None
+        self._step = 0
+        super().__init__(window, **kwargs)
+
+    def _build(self) -> Any:
+        node = self.window.create("box", width=self.SIZE, height=self.SIZE, align_items="center",
+                                  justify_content="center")
+        self.shape = self.window.create("path", data=self.SHAPES[0], view_box=(0, 0, 48, 48), width=self.SHAPE,
+                                        height=self.SHAPE, hit_testable=False, a11y_hidden=True)
+        node.add_child(self.shape)
+        return node
+
+    def _paint(self, animate: bool) -> None:
+        self.shape.set(fill=self._on_colour())
+
+    def _loop(self, generation: int) -> None:
+        if not self._alive(generation):
+            return
+        self._step = (self._step + 1) % len(self.SHAPES)
+        self.shape.animate("data", self.SHAPES[self._step], self.STEP_MS, on_complete=lambda: self._loop(generation))
+
+
+class TimePickerDial(Control):
+    """MD3's time picker dial: a 256 px `surface_container_highest` face
+    with the twelve hours (or the minutes, in fives) around it, a `primary`
+    hand from the centre to a 48 px `primary` selector, which shows its
+    number in `on_primary`.
+
+    `hour` (0..23) and `minute` (0..59) are `Signal`s, and `mode` is
+    `"hour"` or `"minute"`: which hand the dial shows and sets. Pressing or
+    dragging on the face points the hand; the hour snaps to twelve
+    positions and keeps its AM/PM half, the minute snaps to fives. Letting
+    go in hour mode moves on to minutes, as MD3's picker does (unless
+    `auto_advance=False`). The arrow keys and assistive technology's
+    increment/decrement step the hour by one or the minute by five.
+    `on_change` gets `(hour, minute)`."""
+
+    role = "slider"
+    SIZE = 256.0
+    SELECTOR = 48.0
+    RADIUS = 256.0 / 2 - 24.0 - 4.0  # the numbers' circle: the selector sits inside the face's edge
+
+    def __init__(self, window: Any, *, hour: int = 0, minute: int = 0, mode: str = "hour",
+                 auto_advance: bool = True, **kwargs: Any) -> None:
+        if mode not in ("hour", "minute"):
+            raise ValueError(f"a time picker dial's mode is 'hour' or 'minute', got {mode!r}")
+        self.target = (self.SIZE, self.SIZE)
+        self.hour = Signal(int(hour) % 24)
+        self.minute = Signal(int(minute) % 60)
+        self.mode = Signal(mode)
+        self.auto_advance = auto_advance
+        self._dragging = False
+        self._start: tuple[int, int] = (0, 0)
+        super().__init__(window, **kwargs)
+        for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
+                               ("pointer_up", self._on_up), ("key_down", self._on_key)):
+            self._undo.append(self._listen(self.node, event, handler))
+        self._undo.append(a11y.on_action(self.node, {"increment": lambda e: self._step(1),
+                                                    "decrement": lambda e: self._step(-1)}, listen=self._listen))
+
+    # -- geometry ----------------------------------------------------------------
+
+    def _angle(self) -> float:
+        """The active hand's angle, in degrees clockwise from 12 o'clock."""
+        if self.mode.get() == "hour":
+            return (self.hour.get() % 12) * 30.0
+        return self.minute.get() * 6.0
+
+    def _tip(self, degrees: float) -> tuple[float, float]:
+        rad = math.radians(degrees)
+        centre = self.SIZE / 2
+        return centre + self.RADIUS * math.sin(rad), centre - self.RADIUS * math.cos(rad)
+
+    def _build(self) -> None:
+        centre = self.SIZE / 2
+        self.face = self.window.create("box", position="absolute", x=0.0, y=0.0, width=self.SIZE, height=self.SIZE,
+                                       corner_radius=centre, hit_testable=False, a11y_hidden=True)
+        self.hand = self.window.create("path", position="absolute", x=0.0, y=0.0, width=self.SIZE, height=self.SIZE,
+                                       view_box=(0, 0, self.SIZE, self.SIZE), data=f"M{centre},{centre} L{centre},0",
+                                       stroke_width=2.0, fill=_CLEAR, hit_testable=False, a11y_hidden=True)
+        half = self.SELECTOR / 2
+        self.selector = self.window.create("box", position="absolute", x=centre - half, y=centre - half,
+                                           width=self.SELECTOR, height=self.SELECTOR, corner_radius=half,
+                                           hit_testable=False, a11y_hidden=True)
+        self.hub = self.window.create("box", position="absolute", x=centre - 4, y=centre - 4, width=8.0, height=8.0,
+                                      corner_radius=4.0, hit_testable=False, a11y_hidden=True)
+        self.numbers = []
+        for i in range(12):
+            x, y = self._tip(i * 30.0)
+            number = self.window.create("text", text="", position="absolute", x=x - half, y=y - 12.0,
+                                        width=self.SELECTOR, height=24.0, font_family="Roboto", font_size=16.0,
+                                        text_align="center", hit_testable=False, a11y_hidden=True)
+            self.numbers.append(number)
+        for child in (self.face, self.hand, self.selector, self.hub, *self.numbers):
+            self.node.add_child(child)
+        # the state layer rides on the selector
+        self.surface.set(width=self.SELECTOR, height=self.SELECTOR, corner_radius=half,
+                         x=centre - half, y=centre - half)
+
+    def _ring_around(self) -> Any:
+        return self.face
+
+    def _tint(self) -> RGBA:
+        return self.color("primary")
+
+    # -- painting ------------------------------------------------------------------
+
+    def _paint(self, animate: bool) -> None:
+        hour, minute, mode, disabled = self.hour.get(), self.minute.get(), self.mode.get(), self.disabled.get()
+        maximum = 23 if mode == "hour" else 59
+        self.node.set(value=float(hour if mode == "hour" else minute), value_min=0.0, value_max=float(maximum),
+                      value_step=1.0 if mode == "hour" else 5.0)
+        on_surface = self.color("on_surface")
+        accent = with_alpha(on_surface, DISABLED_CONTENT) if disabled else self.color("primary")
+        self.face.set(fill=with_alpha(on_surface, DISABLED_CONTAINER) if disabled
+                      else self.color("surface_container_highest"))
+        self.hand.set(stroke_color=accent)
+        self.selector.set(fill=accent)
+        self.hub.set(fill=accent)
+        chosen = (hour % 12) if mode == "hour" else (minute // 5 if minute % 5 == 0 else None)
+        for i, number in enumerate(self.numbers):
+            label = str(12 if i == 0 else i) if mode == "hour" else f"{i * 5:02d}"
+            ink = self.color("on_primary") if i == chosen and not disabled else (
+                with_alpha(on_surface, DISABLED_CONTENT) if disabled else on_surface)
+            number.set(text=label, fill=ink)
+        x, y = self._tip(self._angle())
+        centre = self.SIZE / 2
+        ms = self._ms(animate and not self._dragging, "medium1")
+        easing = Theme.easing("emphasized_decelerate")
+        data = f"M{centre},{centre} L{x:.3f},{y:.3f}"
+        if ms:
+            self.hand.animate("data", data, ms, easing=easing)
+        else:
+            self.hand.stop_animation("data")
+            self.hand.set(data=data)
+        for node in (self.selector, self.surface):
+            self._to(node, "translate_x", x - centre, ms, easing)
+            self._to(node, "translate_y", y - centre, ms, easing)
+
+    # -- input -----------------------------------------------------------------------
+
+    def _activate(self) -> None:
+        pass  # a press has already pointed the hand
+
+    def _point(self, x: float, y: float) -> None:
+        centre = self.SIZE / 2
+        degrees = math.degrees(math.atan2(x - centre, centre - y)) % 360.0
+        if self.mode.get() == "hour":
+            position = math.floor(degrees / 30.0 + 0.5) % 12
+            self.hour.set(position + (12 if self.hour.get() >= 12 else 0))
+        else:
+            self.minute.set((math.floor(degrees / 30.0 + 0.5) % 12) * 5)
+
+    def _on_down(self, event: Any) -> None:
+        if self.disabled.get() or event.x is None:
+            return
+        self._dragging = True
+        self._start = (self.hour.get(), self.minute.get())
+        self.node.capture_pointer()
+        self.interaction.set_dragged(True)
+        self._point(event.x, event.y)
+
+    def _on_move(self, event: Any) -> None:
+        if self._dragging and event.x is not None:
+            self._point(event.x, event.y)
+
+    def _on_up(self, event: Any) -> None:
+        if not self._dragging:
+            return
+        self._dragging = False
+        self.node.release_pointer()
+        self.interaction.set_dragged(False)
+        untrack(lambda: self._paint(animate=False))
+        if (self.hour.get(), self.minute.get()) != self._start:
+            self._changed((self.hour.get(), self.minute.get()))
+        if self.mode.get() == "hour" and self.auto_advance:
+            self.mode.set("minute")
+
+    def _step(self, by: int) -> None:
+        if self.disabled.get():
+            return
+        before = (self.hour.get(), self.minute.get())
+        if self.mode.get() == "hour":
+            half = 12 if self.hour.get() >= 12 else 0
+            self.hour.set(half + (self.hour.get() % 12 + by) % 12)
+        else:
+            self.minute.set((self.minute.get() // 5 * 5 + 5 * by) % 60)
+        if (self.hour.get(), self.minute.get()) != before:
+            self._changed((self.hour.get(), self.minute.get()))
+
+    def _on_key(self, event: Any) -> None:
+        step = {"arrow_right": 1, "arrow_up": 1, "arrow_left": -1, "arrow_down": -1}.get(event.key)
+        if step is not None:
+            self._step(step)

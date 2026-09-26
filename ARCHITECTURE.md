@@ -190,7 +190,13 @@ on press, so a drag can leave it, and positions its handle at once
 rather than animating it. Its value snaps half up, as HTML's range input
 does. `SpinBox` isn't a `Control`, since it's three targets (two icon
 buttons, each with its own `Interaction`, and a `text_input` field), but
-it has the same API.
+it has the same API. The indicators (`LinearProgress`, `CircularProgress`,
+`LoadingIndicator`) share an `Indicator` base. It isn't focusable. It loops
+its indeterminate animation by chaining `on_complete`, with a generation
+counter so a settled or destroyed indicator stops. The loading indicator
+lets tre morph `path` `data` between outlines, which tre resamples itself.
+`TimePickerDial` is a `Control`: its hand is a `path`, and the selector
+and state-layer circle move by `translate_x`/`translate_y`.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

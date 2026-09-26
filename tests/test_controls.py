@@ -1,6 +1,7 @@
 """M40: Tesserae's MD3 controls (`tesserae.controls`) -- Phase 1's
 foundation, proved on the checkbox; Phase 2's radio buttons (with
-`RadioGroup`) and switch; Phase 3's slider and spin box. Driven headlessly
+`RadioGroup`) and switch; Phase 3's slider and spin box; Phase 4's
+progress and loading indicators and time picker dial. Driven headlessly
 with `simulate`/`advance`.
 """
 
@@ -594,3 +595,201 @@ def test_the_spin_box_follows_the_theme():
     sb.set_theme(dark)
     assert sb.field.get("fill") == dark.role("surface_container_highest")
     assert sb.input.get("fill") == dark.role("on_surface")
+
+
+# == M40 Phase 4: progress, loading, the time picker dial =================================
+
+from tesserae.controls import CircularProgress, LinearProgress, LoadingIndicator, TimePickerDial  # noqa: E402
+
+
+def _numbers(data):
+    import re
+    return [float(n) for n in re.findall(r"-?\d+(?:\.\d+)?(?:e-?\d+)?", data)]
+
+
+def _indicator(cls, **kwargs):
+    window = tre.Window(width=400, height=300)
+    window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
+    ind = cls(window, **kwargs)
+    window.root.add_child(ind.node)
+    window.advance(16)
+    return ind, window
+
+
+def test_linear_progress_is_md3s_track_and_bar():
+    lp, window = _indicator(LinearProgress, value=0.5, label="Upload")
+    assert (lp.node.get("role"), lp.node.get("label"), lp.node.get("value")) == ("progressbar", "Upload", 0.5)
+    assert (lp.node.get("layout_width"), lp.node.get("layout_height")) == (240.0, 4.0)
+    assert lp.node.get("fill") == tokens.BASELINE["surface_container_highest"] and lp.node.get("focusable") is False
+    assert lp.bar.get("fill") == tokens.BASELINE["primary"]
+    assert lp.bar.get("translate_x") == -120.0 and lp.node.get("clip_children") is True  # half shows
+
+
+def test_linear_progress_slides_to_a_new_value():
+    lp, window = _indicator(LinearProgress, value=0.0)
+    lp.value.set(0.75)
+    _frames(window, 64)
+    assert -240.0 < lp.bar.get("translate_x") < -60.0
+    _frames(window, Theme.duration("medium1"))
+    assert lp.bar.get("translate_x") == pytest.approx(-60.0) and lp.node.get("value") == 0.75
+
+
+def test_indeterminate_linear_progress_sweeps_forever_and_settles_on_a_value():
+    lp, window = _indicator(LinearProgress)
+    assert lp.indeterminate and lp.node.get("value") is None
+    assert lp.bar.get("layout_width") == pytest.approx(0.4 * 240)
+    wraps, last = 0, lp.bar.get("translate_x")
+    for _ in range(3 * LinearProgress.SWEEP_MS // 16 + 8):
+        window.advance(16)
+        now = lp.bar.get("translate_x")
+        wraps += now < last - 100  # jumped back to the start
+        last = now
+    assert wraps >= 2  # it sweeps again and again
+    lp.value.set(0.25)
+    window.advance(16)
+    assert lp.bar.get("layout_width") == 240.0 and lp.bar.get("translate_x") == pytest.approx(-180.0)
+    _frames(window, LinearProgress.SWEEP_MS * 2)
+    assert lp.bar.get("translate_x") == pytest.approx(-180.0)  # the sweep stopped
+
+
+def test_circular_progress_draws_the_value_clockwise_from_the_top():
+    cp, window = _indicator(CircularProgress, value=0.25)
+    assert (cp.node.get("layout_width"), cp.node.get("role")) == (48.0, "progressbar")
+    # tre reads path data back normalised (arcs as curves), so check where it starts and ends
+    assert cp.arc.get("data").startswith("M24,4 C") and cp.arc.get("stroke_width") == 4.0
+    assert _numbers(cp.arc.get("data"))[-2:] == pytest.approx([24.0, 4.0])  # round the circle, back to the top
+    assert cp.arc.get("trim_end") == 0.25 and cp.arc.get("stroke_color") == tokens.BASELINE["primary"]
+
+
+def test_indeterminate_circular_progress_spins_and_stretches():
+    cp, window = _indicator(CircularProgress)
+    angles, arcs = set(), set()
+    for _ in range(2 * CircularProgress.TURN_MS // 16):
+        window.advance(16)
+        angles.add(int(cp.arc.get("rotation_deg") // 45))
+        arcs.add(round(cp.arc.get("trim_end"), 1))
+    assert len(angles) == 8 and max(arcs) >= 0.7 and min(arcs) <= 0.2
+    cp.value.set(0.5)
+    window.advance(16)
+    assert cp.arc.get("rotation_deg") == 0.0 and cp.arc.get("trim_end") == 0.5
+
+
+def test_the_loading_indicator_morphs_through_md3s_shapes():
+    li, window = _indicator(LoadingIndicator, color=(0xFF, 0, 0, 0xFF))
+    assert (li.node.get("layout_width"), li.shape.get("layout_width")) == (48.0, 38.0)
+    assert li.shape.get("fill") == (0xFF, 0, 0, 0xFF) and li.node.get("role") == "progressbar"
+    assert _numbers(li.shape.get("data"))[:2] == pytest.approx([24.0, 0.0])  # the pentagon's top point
+    steps = []
+    for _ in range(4 * LoadingIndicator.STEP_MS // 16 + 8):
+        window.advance(16)
+        steps.append(li._step)
+    assert set(steps) == {0, 1, 2, 3}  # every shape, and round again
+    assert "C" in LoadingIndicator.SHAPES[1] and "C" in LoadingIndicator.SHAPES[3]  # the defined pill and oval
+
+
+def test_destroying_an_indicator_stops_its_loop():
+    li, window = _indicator(LoadingIndicator)
+    li.destroy()
+    _frames(window, 2 * LoadingIndicator.STEP_MS)  # no error from a loop on freed nodes
+
+
+def test_indicators_follow_the_theme():
+    light, dark = Theme.resolve(theme_seed=SEED), Theme.resolve(theme_seed=SEED, dark=True)
+    lp, _ = _indicator(LinearProgress, value=0.5, theme=light)
+    lp.set_theme(dark)
+    assert lp.bar.get("fill") == dark.role("primary") != light.role("primary")
+    assert lp.node.get("fill") == dark.role("surface_container_highest")
+
+
+def _dial(**kwargs):
+    window = tre.Window(width=400, height=400)
+    window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
+    before = window.create("box", width=40, height=40, focusable=True, role="button")
+    window.root.add_child(before)
+    dial = TimePickerDial(window, **kwargs)
+    window.root.add_child(dial.node)
+    window.advance(16)
+    return dial, window, before
+
+
+def _on_dial(dial, degrees, radius=90.0):
+    x = dial.node.get("layout_x") + 128 + radius * math.sin(math.radians(degrees))
+    y = dial.node.get("layout_y") + 128 - radius * math.cos(math.radians(degrees))
+    return x, y
+
+
+def test_a_dial_is_md3s_face_hand_selector_and_numbers():
+    dial, window, _ = _dial(hour=15, minute=30, label="Hour")
+    assert (dial.node.get("layout_width"), dial.node.get("role"), dial.node.get("label")) == (256.0, "slider", "Hour")
+    assert (dial.node.get("value"), dial.node.get("value_max")) == (15.0, 23.0)
+    assert dial.face.get("fill") == tokens.BASELINE["surface_container_highest"]
+    assert [n.get("text") for n in dial.numbers] == ["12"] + [str(i) for i in range(1, 12)]
+    assert dial.numbers[3].get("fill") == tokens.BASELINE["on_primary"]  # 3 sits under the selector
+    assert dial.numbers[4].get("fill") == tokens.BASELINE["on_surface"]
+    assert (dial.selector.get("translate_x"), dial.selector.get("translate_y")) == pytest.approx((dial.RADIUS, 0.0))
+    assert dial.selector.get("fill") == tokens.BASELINE["primary"] and dial.selector.get("layout_width") == 48.0
+    assert _numbers(dial.hand.get("data")) == pytest.approx([128.0, 128.0, 128 + dial.RADIUS, 128.0])
+
+
+def test_pressing_the_face_points_the_hour_and_moves_on_to_minutes():
+    dial, window, _ = _dial(hour=14, minute=30)
+    seen = []
+    dial.on_change(seen.append)
+    x, y = _on_dial(dial, 100)  # nearest 3 o'clock
+    window.simulate("pointer_down", x=x, y=y)
+    assert dial.hour.get() == 15 and dial.interaction.dragged  # kept PM
+    x, y = _on_dial(dial, 185)
+    window.simulate("pointer_move", x=x, y=y)
+    assert dial.hour.get() == 18 and seen == []
+    window.simulate("pointer_up", x=x, y=y)
+    assert seen == [(18, 30)] and dial.mode.get() == "minute"
+    window.advance(16)
+    assert [n.get("text") for n in dial.numbers][:3] == ["00", "05", "10"]
+    assert dial.node.get("value_max") == 59.0 and dial.numbers[6].get("fill") == tokens.BASELINE["on_primary"]
+
+
+def test_minutes_snap_to_fives():
+    dial, window, _ = _dial(mode="minute")
+    x, y = _on_dial(dial, 6 * 22)  # 22 minutes
+    window.simulate("pointer_down", x=x, y=y)
+    window.simulate("pointer_up", x=x, y=y)
+    assert dial.minute.get() == 20 and dial.mode.get() == "minute"
+
+
+def test_the_keys_and_assistive_technology_step_the_active_hand():
+    dial, window, before = _dial(hour=11, minute=55)
+    before.focus()
+    window.simulate("key_down", key="tab")
+    window.advance(16)
+    assert dial.node.get("focused") and dial.interaction.ring_visible
+    assert dial.interaction.ring.parent() == dial.face
+    window.simulate("key_down", key="arrow_up")
+    assert dial.hour.get() == 0  # 11 → 12 in the AM half
+    window.simulate("a11y_action", node=dial.node, action="decrement")
+    assert dial.hour.get() == 11
+    dial.mode.set("minute")
+    window.simulate("key_down", key="arrow_right")
+    assert dial.minute.get() == 0
+
+
+def test_a_disabled_dial_ignores_input():
+    dial, window, _ = _dial(hour=3, disabled=True)
+    x, y = _on_dial(dial, 180)
+    window.simulate("pointer_down", x=x, y=y)
+    window.simulate("key_down", key="arrow_up")
+    assert dial.hour.get() == 3 and dial.node.get("focusable") is False
+    assert dial.selector.get("fill") == (*tokens.BASELINE["on_surface"][:3], round(255 * DISABLED_CONTENT))
+
+
+def test_setting_the_hour_moves_the_hand():
+    dial, window, _ = _dial(hour=0)
+    dial.hour.set(6)
+    _frames(window, Theme.duration("medium1") + 16)
+    assert (dial.selector.get("translate_x"), dial.selector.get("translate_y")) == pytest.approx(
+        (0.0, dial.RADIUS), abs=0.01)
+
+
+def test_a_bad_dial_mode_is_an_error():
+    window = tre.Window(width=100, height=100)
+    with pytest.raises(ValueError, match="'hour' or 'minute'"):
+        TimePickerDial(window, mode="second")
