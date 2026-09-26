@@ -709,3 +709,17 @@ User: "Push it and start Phase 2". Pushed `9b1cb55`.
   centring check.
 
 1242 passed.
+
+## M42 Phase 3: media
+
+User: "Push it and start Phase 3". Pushed `40d1bfb`.
+
+- `push_frame` is on tre's removal list too; its replacement is setting
+  `rgba`/`pixel_width`/`pixel_height`.
+- A re-colour re-applies a view's frames, so `video.frame()` records the
+  latest there.
+- Found: the video's spec id was `image`, so its frames were keyed
+  wrongly; a re-colour test caught it.
+- Mutants: 6 of 6 caught.
+
+1244 passed.

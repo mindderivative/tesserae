@@ -56,9 +56,9 @@ tre (Rust/Python hybrid engine)   -- Tree/layout/paint/dispatch/render,
 
 **Files stay on Tesserae's side.** Tesserae reads, parses, decodes and
 watches every file; `tre` receives only data (nodes built with `window.create`/`set`,
-`reconcile(spec=...)`, `*_spec=` theme/stylesheet dicts, `push_frame`/
-`add_image_from_bytes` pixels, `register_font` bytes). Tesserae never
-gives `tre` a file path (M29).
+`reconcile(spec=...)`, `*_spec=` theme/stylesheet dicts, image pixels as
+`rgba` on an `image` node, `register_font` bytes). Tesserae never gives
+`tre` a file path (M29).
 
 `tre` is moving everything a framework can build out of the engine (its
 M93–M103), and Tesserae is taking it over (M34–M43, see

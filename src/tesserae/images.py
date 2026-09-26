@@ -1,7 +1,7 @@
 """M29 Phase 2: Tesserae decodes image files itself and hands `tre` only
-pixels -- straight-alpha RGBA8 bytes plus their pixel size, the exact
-contract `tre`'s `Window.add_image_from_bytes` (M82) and `Node.push_frame`
-take. Per the user's own rule, `tre` gets specs and bytes, never a file.
+pixels -- straight-alpha RGBA8 bytes plus their pixel size, what an
+`image` node's `rgba`/`pixel_width`/`pixel_height` take (M42; before,
+`tre`'s `add_image_from_bytes` and `push_frame`, which 0.3.5 removes). Per the user's own rule, `tre` gets specs and bytes, never a file.
 
 Pillow does the decoding. `.convert("RGBA")` gives straight (not
 premultiplied) alpha, matching what `tre`'s own `image::open(...)

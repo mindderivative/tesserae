@@ -125,4 +125,6 @@ Phase 1 done: the search bar and SearchView; 1233 passed.
 
 Phase 2 done: the date-picker day, period selector and time input field; 1242 passed.
 
-**Up next:** M42 Phase 3 (media).
+Phase 3 done: `image` and `video` on Tesserae's own image nodes; 1244 passed.
+
+**Up next:** M42 Phase 4 (the node graph).

@@ -252,11 +252,10 @@ real `tre` factory it matches and any real MD3 token it hardcodes.
 
 ### What has no fragment yet, and why
 
-- **`video`** -- a fragment can declare the same synthetic blank
-  placeholder `add_video` builds (an `Image` with no `src:`), but real
-  video content still needs the app to fetch the resulting `Node` and
-  call `push_frame` imperatively afterward -- no way for a one-shot
-  static expansion to wire that up on its own.
+- **`video`** -- a fragment can declare a blank `Image` (no `src:`), but
+  video content needs frames pushed from Python as it plays, which a
+  one-shot static expansion can't do. Use `tesserae.widgets.video(...)`
+  and its `frame(rgba, width, height)`.
 - **`graph_node`** -- structurally unfragmentable: it needs a live node
   reference as its own attachment parent, which textual expansion can't
   express.

@@ -12,7 +12,7 @@ only take the already-clear `border_color`.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from tesserae.images import decode_image
 
@@ -20,6 +20,12 @@ if TYPE_CHECKING:
     from tesserae.theme import Theme
     from tesserae.widgets._composed import Widget
     from tre import Node, Window
+
+
+def _image_spec(node_id: str, width: float, height: float, fit: str) -> dict[str, Any]:
+    if fit not in ("cover", "contain", "fill"):
+        raise ValueError(f"an image's fit is 'cover', 'contain' or 'fill', got {fit!r}")
+    return {"id": node_id, "kind": "Image", "image": {"fit": fit}, "style": {"width": width, "height": height}}
 
 
 def image(
@@ -30,19 +36,23 @@ def image(
     fit: str = "fill",
     x: float | None = None,
     y: float | None = None,
-) -> "Node":
-    """Loads and decodes a real file from disk at call time, uploaded
-    as a GPU texture. `fit`: cover/contain/fill. Raises `OSError` if the
-    file can't be read or decoded.
+    *,
+    label: str | None = None,
+) -> "Widget":
+    """An image from a file, `width`x`height`, `fit` cover, contain or
+    fill. Tesserae decodes the file (Pillow) and M42 builds the node itself
+    (`window.create("image")` with the pixels), off `tre`'s
+    `add_image_from_bytes`, which 0.3.5 removes. Raises `OSError` if the
+    file can't be read or decoded. Decorative unless given `label=`, then
+    `role="img"`."""
+    from tesserae import a11y
+    from tesserae.widgets._composed import Widget
 
-    M29 Phase 2: Tesserae decodes the file itself (Pillow) and hands
-    `tre` only the pixels, via `add_image_from_bytes` -- `tre` never
-    opens the file. The one real departure from `tre`'s own `add_image`
-    delegation this module otherwise follows."""
     rgba, pixel_width, pixel_height = decode_image(path)
-    return window.add_image_from_bytes(
-        rgba, pixel_width, pixel_height, width, height, fit=fit, x=x, y=y
-    )
+    widget = Widget(window, spec=_image_spec("image", width, height, fit), x=x, y=y, name="image",
+                    frames={"image": (rgba, pixel_width, pixel_height)})
+    a11y.describe(widget.node, **({"role": "img", "label": label} if label is not None else {"hidden": True}))
+    return widget
 
 
 def video(
@@ -52,10 +62,30 @@ def video(
     fit: str = "fill",
     x: float | None = None,
     y: float | None = None,
-) -> "Node":
-    """Same `fit` contract as `image`; frames are pushed at runtime via
-    `node.push_frame(...)`, not loaded from a path at construction."""
-    return window.add_video(width, height, fit=fit, x=x, y=y)
+    *,
+    label: str | None = None,
+) -> "Widget":
+    """A surface for video frames (M42: an `image` node Tesserae builds,
+    off `tre`'s `add_video`). `video.frame(rgba, width, height)` shows a
+    frame (RGBA bytes, `width*height*4` of them); frames can change size.
+    It starts blank. Decorative unless given `label=`."""
+    from tesserae import a11y
+    from tesserae.widgets._composed import Widget
+
+    widget = Widget(window, spec=_image_spec("video", width, height, fit), x=x, y=y, name="video",
+                    frames={"video": (bytes(4), 1, 1)})
+    a11y.describe(widget.node, **({"role": "img", "label": label} if label is not None else {"hidden": True}))
+
+    def frame(rgba: bytes, frame_width: int, frame_height: int) -> None:
+        if len(rgba) != int(frame_width) * int(frame_height) * 4:
+            raise ValueError(f"a {frame_width}x{frame_height} frame is {frame_width * frame_height * 4} bytes of "
+                             f"RGBA, got {len(rgba)}")
+        widget.node.set(rgba=bytes(rgba), pixel_width=int(frame_width), pixel_height=int(frame_height))
+        # a re-colour re-applies the view's frames: keep the latest there
+        widget.view._frames["video"] = (bytes(rgba), int(frame_width), int(frame_height))
+
+    widget.frame = frame
+    return widget
 
 
 def icon(

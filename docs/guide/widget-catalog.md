@@ -112,8 +112,7 @@ with `.period` a `Signal`, and a click or the arrows switch it.
 `.value` is a `Signal` shown as two digits, typing sets it when the number
 is in range, and the up and down arrows step it and wrap.
 
-**Still `tre`'s, until later in M42:** `video`, `node_graph`, `graph_node`
-and `image`. These are thin delegates to the matching
+**Still `tre`'s, until later in M42:** `node_graph` and `graph_node`. These are thin delegates to the matching
 `Window.add_*` factory in `tre`, with the same parameter names, order and
 defaults, and they return `tre` nodes themed by the window's theme. M42
 rebuilds them too.
@@ -176,11 +175,13 @@ names now raise `TypeError`:
 `node.get("value")`, and `"thumb_position"` before that). `icon` and
 `loading_indicator` keep `foreground=`.
 
-One function isn't a pure delegate: `image(window, path, ...)` decodes
-the file itself (with Pillow) and calls `tre`'s
-`add_image_from_bytes`, so `tre` only ever receives pixels, never a
-file path. Its parameters and its `OSError` on a missing or undecodable
-file are unchanged.
+**Images and video (M42).** `image(window, path, width, height,
+fit="fill", label=None)` decodes the file itself (with Pillow) and builds
+an `image` node from the pixels, so `tre` never receives a file path. A
+missing or undecodable file is an `OSError`, and an image is decorative
+unless given `label=`. `video(window, width, height)` is a blank surface
+until you call `video.frame(rgba, width, height)` with RGBA bytes; frames
+can change size. Both return `Widget`s.
 
 ## `list_`/`list_item` vs. `repeat:`
 

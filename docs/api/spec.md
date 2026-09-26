@@ -55,8 +55,8 @@ only the pixels:
 1. After expansion, each `kind: Image`'s `image.src:` is removed from
    the spec (`fit:` is kept).
 2. Tesserae decodes the file with Pillow to straight-alpha RGBA.
-3. `tre` builds the node as a blank image, and Tesserae pushes the
-   decoded pixels onto it with `Node.push_frame`.
+3. Tesserae's compiler builds the node with `window.create("image")`
+   and the decoded pixels (`rgba`, `pixel_width`, `pixel_height`).
 
 `src:` follows the same rules `tre` used when it loaded images itself,
 so existing views don't change: relative to the top-level view file's

@@ -50,7 +50,7 @@ class Widget:
                  label: Optional[str] = None, x: Optional[float] = None, y: Optional[float] = None,
                  interactive: Optional[dict[Optional[str], Optional[str]]] = None,
                  edit: Optional[Callable[[dict[str, Any]], None]] = None, name: str = "widget",
-                 attach: bool = True) -> None:
+                 attach: bool = True, frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
         from tesserae.view import View
 
         self.window = window
@@ -65,7 +65,7 @@ class Widget:
             role = role or content_role(node_spec) or "on_surface"
             node_spec["interaction"] = {"color": role}
         self.spec = spec
-        self.view = View(spec, window=window, theme_seed=tokens.BASELINE["primary"])
+        self.view = View(spec, window=window, theme_seed=tokens.BASELINE["primary"], frames=frames)
         self.view._use_scheme(self._scheme())
         self.node = self.view.root
         if label is not None:

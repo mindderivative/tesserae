@@ -247,7 +247,10 @@ scrim takes outside presses, which leaves Escape. Timers (the snackbar's
 (`_Timer`), since animations run there too. `SearchView` (M42) listens
 to its bar's field through the bar's own dispatcher. It builds its
 `max_results` rows once and attaches or detaches them as results change,
-so no listener outlives a node.
+so no listener outlives a node. `image` and `video` (M42) are `Widget`s
+over a `kind: Image` spec, built with frames (`Widget(frames=)`).
+`video.frame()` sets the pixels and records them in the view's frames, so
+a re-colour, which re-applies the frames, keeps the latest.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`
