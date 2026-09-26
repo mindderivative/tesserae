@@ -231,7 +231,12 @@ label) holding a `text` (`build._link_props`, `_INNER`), because `tre`
 0.3.4's `text` never gets pointer events. Handlers go on the box and text
 bindings on the text. `Widget.on_click` gives any part feedback on
 demand (`interactive`), and `after_theme` lets a widget whose state sets
-colours (the filter chip) reapply them after a re-colour.
+colours (the filter chip) reapply them after a re-colour. Tabs, the
+navigation rail and the drawer share `navigation._Selection`: a
+`selected` `Signal`, one roving Tab stop, and wrapping arrow keys. The
+tabs' indicator is a box whose width is set to the label's and whose
+`translate_x` animates. A factory's `edit` runs before its `interactive`
+parts are marked, so parts it adds can be interactive.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

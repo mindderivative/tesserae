@@ -36,7 +36,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("t")
 
-    imperative = toolbar(_themed_window(), variant="docked", vibrant=False, width=280)
+    imperative = toolbar(_themed_window(), variant="docked", vibrant=False, width=280).node  # a Widget since M41
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
@@ -58,7 +58,7 @@ children:
 
     imperative = toolbar(
         _themed_window(), variant="floating", vibrant=True, width=200, height=64
-    )
+    ).node  # a Widget since M41
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
@@ -79,7 +79,7 @@ children:
     declarative = view.node("tab")
     assert view.node("tab.title") is not None
 
-    imperative, imp_leading, imp_trailing = top_app_bar(_themed_window(), "Home", width=300)
+    imperative = top_app_bar(_themed_window(), "Home", width=300).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -98,5 +98,5 @@ children:
     declarative = view.node("sb")
     assert view.node("sb.text") is not None
 
-    imperative = status_bar(_themed_window(), "Ready", width=300)
+    imperative = status_bar(_themed_window(), "Ready", width=300).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")

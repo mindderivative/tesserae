@@ -601,3 +601,19 @@ User: "Push it and start Phase 3". Pushed `c18a8a4`.
 - Mutants: 12 of 12 caught.
 
 1209 passed (14 tre-parity tests went with their file).
+
+## M41 Phase 4: navigation
+
+User: "Push it and start Phase 4". Pushed `e8d6ea4`.
+
+- Tabs, rail and drawer are built in Python (no fragments) on a shared
+  selection helper; toolbars, the top app bar and the status bar come
+  from their fragments.
+- Measured tre's widgets first (150x48 tabs, 80x52 rail items, a 356 px
+  drawer), then used MD3's numbers.
+- Found: `Widget` marked interactive parts before running `edit`, so the
+  app bar's added icon buttons "didn't exist". Reordered.
+- A toolbar test overflowed its window and flexbox shrank the toolbar.
+- Mutants: 10 of 10 caught after tightening three tests.
+
+1214 passed.

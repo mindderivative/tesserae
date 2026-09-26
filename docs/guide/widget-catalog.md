@@ -39,7 +39,9 @@ should go. `spin_box` returns one `SpinBox` rather than
 So far the buttons and actions (`button`, `icon_button`, `fab`,
 `extended_fab`, `split_button`, `button_group`) and the containment and
 list widgets (`card`, `chip`, `badge`, `divider`, `link`, `icon`,
-`list_`, `list_item`, `accordion_header`, `tree_node`). Each expands the same `*_Component.yaml` a
+`list_`, `list_item`, `accordion_header`, `tree_node`) and navigation
+(`tabs`, `navigation_rail`, `navigation_drawer`, `toolbar`,
+`top_app_bar`, `status_bar`). Each expands the same `*_Component.yaml` a
 `component: ButtonFilled` does and builds it with Tesserae's compiler,
 so the Python and YAML paths are one definition. It returns a `Widget`:
 
@@ -73,6 +75,17 @@ items. An `accordion_header` and a branch `tree_node` have `.expanded` (a
 tree node's right and left arrows set it, and the chevron turns. Show the
 content yourself, from `.expanded`. `icon` is Tesserae's own; give it
 `label=` if it isn't decorative.
+
+`tabs`, `navigation_rail` and `navigation_drawer` have `.selected` (a
+`Signal`, an index or `None`) and `.on_change(fn)`, and parts `item0`,
+`item1`, and so on. A click or Enter selects. The group is one Tab stop,
+and the arrow keys move the selection (left and right for tabs, up and
+down for the rail and drawer). The tabs' indicator slides to the new tab.
+`navigation_drawer(modal=True)` has the modal drawer's look; opening it
+as an overlay comes with `tesserae.overlays`. A `toolbar` holds your
+action icon buttons (add them to `.node`). The `top_app_bar`'s icons are
+buttons: `bar.on_click(fn, part="leading")`, `part="trailing0"`, and so
+on.
 
 Where you used the node (or tuple) these returned, use `.node` or
 `.part(...)`.

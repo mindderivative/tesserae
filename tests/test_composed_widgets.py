@@ -450,3 +450,166 @@ def test_icon_is_tesseraes_own():
     assert (named.node.get("role"), named.node.get("label")) == ("img", "Search")
     with pytest.raises(ValueError, match="unknown icon 'nope'"):
         icon(window, "nope", (0, 0, 0, 255), 24)
+
+
+# == M41 Phase 4: navigation ===================================================================
+
+from tesserae.widgets import navigation_drawer, navigation_rail, status_bar, tabs, toolbar, top_app_bar  # noqa: E402
+
+
+def test_tabs_are_md3s_primary_tabs():
+    window = _window()
+    tb = tabs(window, ["Photos", "Videos", "Music"], selected=0, width=360)
+    window.advance(16)
+    assert tb.node.get("layout_height") == 48.0 and tb.part("item0").get("layout_width") == 120.0
+    assert tb.part("row").get("role") == "tablist"
+    assert [tb.part(f"item{i}").get("role") for i in range(3)] == ["tab"] * 3
+    assert tb.part("item0.label").get("fill") == BASE["primary"]
+    assert tb.part("item1.label").get("fill") == BASE["on_surface_variant"]
+    assert tb.part("item0.label").get("font_size") == 14.0  # title_small
+    label = tb.part("item0.label")
+    assert tb.indicator.get("width") == pytest.approx(label.get("width"))  # it spans the label
+    assert tb.indicator.get("layout_height") == 3.0 and tb.indicator.get("fill") == BASE["primary"]
+    assert tb.part("divider").get("fill") == BASE["surface_variant"]
+
+
+def test_clicking_a_tab_selects_it_and_the_indicator_slides():
+    window = _window()
+    tb = tabs(window, ["A", "B", "C"], selected=0, width=300)
+    heard = []
+    tb.on_change(heard.append)
+    window.advance(16)
+    start = tb.indicator.get("translate_x")
+    window.simulate("click", node=tb.part("item2"))
+    span = tb.indicator.get("width")
+    final = 200 + (100 - span) / 2
+    _frames(window, 64)
+    assert start < tb.indicator.get("translate_x") < final - 5  # sliding, not there yet
+    _frames(window, 400)
+    assert tb.indicator.get("translate_x") == pytest.approx(final)
+    assert tb.selected.get() == 2 and heard == [2] and tb.part("item2").get("selected") is True
+
+
+def test_tabs_keep_their_selection_colours_through_a_theme_change():
+    window = _window()
+    tb = tabs(window, ["A", "B"], selected=1, width=200)
+    dark = Theme.resolve(theme_seed=SEED, dark=True)
+    tb.set_theme(dark)
+    assert tb.part("item1.label").get("fill") == dark.role("primary")
+    assert tb.part("item0.label").get("fill") == dark.role("on_surface_variant")
+
+
+def test_tabs_are_one_tab_stop_and_the_arrows_move_the_selection():
+    window = _window()
+    tb = tabs(window, ["A", "B", "C"], selected=1, width=300)
+    window.advance(16)
+    assert [tb.part(f"item{i}").get("focusable") for i in range(3)] == [False, True, False]
+    tb.part("item1").focus()
+    window.simulate("key_down", key="arrow_right")
+    assert tb.selected.get() == 2 and tb.part("item2").get("focused")
+    window.simulate("key_down", key="arrow_right")
+    assert tb.selected.get() == 0  # wraps
+    window.simulate("key_down", key="arrow_left")
+    assert tb.selected.get() == 2
+
+
+def test_tabs_with_icons_are_64px_and_the_app_can_select_without_a_change():
+    window = _window()
+    tb = tabs(window, ["Home", "Find"], icons=["home", "search"], width=200)
+    heard = []
+    tb.on_change(heard.append)
+    window.advance(16)
+    assert tb.node.get("layout_height") == 64.0 and tb.selected.get() is None
+    assert tb.indicator.get("visible") is False
+    tb.selected.set(1)
+    window.advance(16)
+    assert tb.part("item1.icon").get("fill") == BASE["primary"] and tb.indicator.get("visible") is True
+    assert heard == []
+
+
+def test_navigation_tabs_reject_bad_arguments():
+    window = _window()
+    with pytest.raises(ValueError, match="out of range"):
+        tabs(window, ["A"], selected=3)
+    with pytest.raises(ValueError, match="2 icons for 1 tabs"):
+        tabs(window, ["A"], icons=["home", "add"])
+    with pytest.raises(ValueError, match="a label and an icon per item"):
+        navigation_rail(window, ["A", "B"], ["home"])
+
+
+def test_the_navigation_rail_is_md3s():
+    window = _window()
+    rail = navigation_rail(window, ["Home", "Mail", "Chat"], ["home", "search", "menu"], selected=1)
+    window.advance(16)
+    assert rail.node.get("layout_width") == 80.0
+    pill = rail.part("item1.pill")
+    assert (pill.get("layout_width"), pill.get("layout_height"), pill.get("corner_radius")) == (56.0, 32.0, 16.0)
+    assert pill.get("fill") == BASE["secondary_container"]
+    assert rail.part("item1.icon").get("fill") == BASE["on_secondary_container"]
+    assert rail.part("item0.pill").get("fill") == (0, 0, 0, 0)
+    assert rail.part("item0.label").get("font_size") == 12.0  # label_medium
+    rail.part("item1").focus()
+    window.simulate("key_down", key="arrow_down")
+    assert rail.selected.get() == 2
+
+
+def test_the_navigation_drawer_is_md3s():
+    window = _window()
+    drawer = navigation_drawer(window, ["Inbox", "Sent"], ["home", "search"], selected=0)
+    window.advance(16)
+    assert drawer.node.get("layout_width") == 360.0 and drawer.node.get("fill") == BASE["surface_container_low"]
+    item = drawer.part("item0")
+    assert (item.get("layout_width"), item.get("layout_height"), item.get("corner_radius")) == (336.0, 56.0, 28.0)
+    assert item.get("fill") == BASE["secondary_container"] and drawer.part("item1").get("fill") == (0, 0, 0, 0)
+    window.simulate("click", node=drawer.part("item1"))
+    window.advance(16)
+    assert drawer.selected.get() == 1 and drawer.part("item1.label").get("fill") == BASE["on_secondary_container"]
+
+
+def test_a_modal_drawer_is_rounded_on_its_end_side_through_a_theme_change():
+    window = _window()
+    drawer = navigation_drawer(window, ["Inbox"], ["home"], modal=True)
+    assert tuple(drawer.node.get("corner_radius")) == (0.0, 16.0, 16.0, 0.0)
+    drawer.set_theme(Theme.resolve(theme_seed=SEED, dark=True))
+    assert tuple(drawer.node.get("corner_radius")) == (0.0, 16.0, 16.0, 0.0)
+
+
+def test_toolbars():
+    windows = [_window() for _ in range(3)]  # side by side they'd overflow one window and shrink
+    docked, floating = toolbar(windows[0]), toolbar(windows[1], variant="floating", vibrant=True)
+    upright = toolbar(windows[2], variant="floating", orientation="vertical")
+    window = windows[0]
+    for w in windows:
+        w.advance(16)
+    assert (docked.node.get("layout_height"), docked.node.get("fill")) == (64.0, BASE["surface_container"])
+    assert floating.node.get("corner_radius") == 32.0 and floating.node.get("fill") == BASE["primary_container"]
+    assert (upright.node.get("layout_width"), upright.node.get("flex_direction")) == (64.0, "vertical")
+    with pytest.raises(ValueError, match="unknown toolbar variant"):
+        toolbar(window, variant="sticky")
+
+
+def test_the_top_app_bar_is_md3s_small_one():
+    window = _window()
+    opened = []
+    bar = top_app_bar(window, "Inbox", leading_icon="menu", trailing_icons=["search", "settings"])
+    bar.on_click(lambda: opened.append("menu"), part="leading")
+    window.advance(16)
+    assert (bar.node.get("layout_height"), bar.node.get("fill")) == (64.0, BASE["surface"])
+    assert bar.part("title").get("font_size") == 22.0  # title_large
+    lead = bar.part("leading")
+    assert (lead.get("layout_width"), lead.get("role"), lead.get("focusable")) == (48.0, "button", True)
+    assert bar.part("leading.icon").get("fill") == BASE["on_surface"]
+    assert bar.part("trailing1.icon").get("fill") == BASE["on_surface_variant"]
+    assert bar.interaction("trailing0") is not None
+    trailing = bar.part("trailing1")  # a button even before anything listens to it
+    assert (trailing.get("role"), trailing.get("focusable"), trailing.get("label")) == ("button", True, "settings")
+    window.simulate("click", node=lead)
+    assert opened == ["menu"]
+
+
+def test_the_status_bar_announces_its_text():
+    window = _window()
+    s = status_bar(window, "Ready")
+    window.advance(16)
+    assert s.node.get("layout_height") == 24.0 and s.node.get("live") == "polite"
+    assert s.part("text").get("text") == "Ready" and s.part("text").get("fill") == BASE["on_surface_variant"]

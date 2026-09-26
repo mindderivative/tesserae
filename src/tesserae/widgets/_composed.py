@@ -57,12 +57,12 @@ class Widget:
         self.name = name
         if spec is None:
             spec = fragment(fragment_name, params or {}, name)
+        if edit is not None:  # first, so the parts it adds can be interactive
+            edit(spec)
         for part, role in (interactive or {}).items():
             node_spec = self._spec_of(spec, part)
             role = role or content_role(node_spec) or "on_surface"
             node_spec["interaction"] = {"color": role}
-        if edit is not None:
-            edit(spec)
         self.spec = spec
         self.view = View(spec, window=window, theme_seed=tokens.BASELINE["primary"])
         self.view._use_scheme(self._scheme())
