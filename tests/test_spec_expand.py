@@ -230,14 +230,10 @@ def test_repeat_matches_the_imperative_catalog():
     assert alice.get("text") == "Alice"
     assert bob.get("text") == "Bob"
 
-    # `list_item()`'s own real return value is the row's outer
-    # container, not its internal headline child -- no public API
-    # reaches that child from Python, so this can only prove the
-    # imperative call builds too, not do a direct text comparison.
+    # since M41 `list_item()` is built from the same fragment and its parts are reachable
     window = Window(width=400, height=300)
-    window.set_theme(THEME_SEED)
     imperative_alice = imperative_list_item(window, "Alice", width=360)
-    assert isinstance(imperative_alice, type(view.node("root")))
+    assert imperative_alice.part("headline").get("text") == alice.get("text") == "Alice"
 
 
 def test_repeat_produces_real_namespaced_ids_with_no_collisions():

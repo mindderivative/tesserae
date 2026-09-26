@@ -99,3 +99,25 @@ def test_a_button_fragment_wrapped_as_a_clickable_is_reachable():
     view = View(spec, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
     focused, clicks = _keyboard(view, view.window, "save")
     assert focused is True and clicks == 2
+
+
+def test_a_yaml_link_takes_a_pointer_click():
+    """M41: a Link was a bare `text`, which `tre` 0.3.4 never gives pointer
+    events, so only the keyboard could follow it. It's a box holding its
+    text now; the box takes the click, the focus and the role."""
+    link = {"id": "more", "kind": "Link", "text": {"content": "More", "font_family": "Roboto", "font_size": 14},
+            "style": {"foreground": "#0000FF"}, "handlers": {"on_click": "go"}}
+    view = View(_spec(link))
+    vm = VM(view)
+    view.window.advance(16)
+    node = view.node("more")
+    assert (node.get("role"), node.get("label"), node.get("focusable")) == ("link", "More", True)
+    x, y = node.get("layout_x"), node.get("layout_y")
+    view.window.simulate("pointer_down", x=x + 5, y=y + 5)
+    view.window.simulate("pointer_up", x=x + 5, y=y + 5)
+    assert vm.clicks == 1
+    node.focus()
+    view.window.simulate("key_down", key="enter")
+    assert vm.clicks == 2
+    text = node.children()[0]
+    assert text.get("text") == "More" and text.get("hit_testable") is False and text.get("a11y_hidden") is True

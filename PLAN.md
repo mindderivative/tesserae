@@ -109,4 +109,6 @@ Phase 6 done: the static gate, the examples clean under tre's removal shim, the 
 
 Phase 2 done: icon buttons, FABs, extended FABs, the split button and the button group; 1205 passed.
 
-**Up next:** M41 Phase 3 (containment and lists).
+Phase 3 done: cards, chips, badges, dividers, links, icons, lists, accordion headers, tree nodes; Links take pointer clicks again; 1209 passed.
+
+**Up next:** M41 Phase 4 (navigation).

@@ -166,8 +166,11 @@ class View:
         return Theme.resolve(**self._theme)
 
     def node(self, widget_id: str) -> Any:
-        """The node `widget_id` names (a TextField's `text_input`)."""
+        """The node `widget_id` names (a TextField's `text_input`; a Link's
+        box, which holds its text)."""
         try:
+            if self._built.specs[widget_id].get("kind") == "Link":
+                return self._built.outer[widget_id]
             return self._built.nodes[widget_id]
         except KeyError:
             raise ValueError(f"no widget with id {widget_id!r} in this view") from None
@@ -419,6 +422,8 @@ class View:
 
     def _node_for(self, node_spec: dict[str, Any], prop: str) -> Any:
         node_id = node_spec["id"]
+        if node_spec.get("kind") == "Link" and prop in ("width", "height", "padding", "gap", "opacity"):
+            return self._built.outer[node_id]
         if node_spec.get("kind") == "TextField" and prop in ("width", "height", "padding", "gap", "background",
                                                               "corner_radius", "border_width", "border_color",
                                                               "opacity", "elevation"):
@@ -438,7 +443,8 @@ class View:
         if tre_event is None:
             return  # validated, not wired -- as in tre
         call = _arity_adapter(method)
-        node = self._built.nodes[node_id]
+        # a Link's box takes the events (its text never gets any, M41)
+        node = self._built.outer[node_id] if node_spec.get("kind") == "Link" else self._built.nodes[node_id]
         control = self._built.controls.get(node_id)
         if tre_event == "change" and control is not None:
             if hasattr(control, "on_change"):
@@ -489,6 +495,8 @@ class View:
                 _apply(node, kind, prop, value)
                 if measured:
                     _remeasure(self.window, node, style)
+                if kind == "Link" and prop == "text":
+                    self._built.outer[node_id].set(label=value)  # its name is its text
 
         run()
 

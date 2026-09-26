@@ -226,6 +226,12 @@ content's colour (`content_role`). The split button's hover and the
 button group's press morph animate `corner_radius` on the part and on
 its feedback's clip together. Widths don't animate in tre, so the group's
 reflow is set at once, from the resting width, which can't compound.
+A `Link` compiles to a box (events, focus, `role="link"`, its text as its
+label) holding a `text` (`build._link_props`, `_INNER`), because `tre`
+0.3.4's `text` never gets pointer events. Handlers go on the box and text
+bindings on the text. `Widget.on_click` gives any part feedback on
+demand (`interactive`), and `after_theme` lets a widget whose state sets
+colours (the filter chip) reapply them after a re-colour.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

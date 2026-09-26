@@ -37,7 +37,8 @@ def _font(node):
 
 def test_text_and_link_follow_the_themes_typography():
     view = View(_spec(_text("t"), _text("l", "Link")), theme_seed=SEED, custom_theme_spec=THEME)
-    assert _font(view.node("t")) == _font(view.node("l")) == (MONO, 20.0, 700.0)
+    link_text = view.node("l").children()[0]  # a Link is a box holding its text (M41)
+    assert _font(view.node("t")) == _font(link_text) == (MONO, 20.0, 700.0)
 
 
 def test_a_text_input_keeps_its_own_font_even_with_a_typography_role():

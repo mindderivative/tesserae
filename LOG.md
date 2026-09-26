@@ -585,3 +585,19 @@ User: "Push it and start Phase 2". Pushed `4b476cd`.
   split test; `release()` before a press is equivalent.
 
 1205 passed.
+
+## M41 Phase 3: containment and lists
+
+User: "Push it and start Phase 3". Pushed `c18a8a4`.
+
+- Ten factories built from fragments, with behaviour: filter chips
+  toggle, input chips remove, accordion headers and tree nodes expand.
+- Found: a `link()`'s click never fired, because tre 0.3.4's `text`
+  gets no pointer events, so every YAML `Link` since M37 was
+  keyboard-only. A Link is now a box holding its text. Then a patch's
+  a11y reset cleared the box's label, fixed.
+- Audit: chips are padded and centred; the list headline is
+  `body_large`.
+- Mutants: 12 of 12 caught.
+
+1209 passed (14 tre-parity tests went with their file).

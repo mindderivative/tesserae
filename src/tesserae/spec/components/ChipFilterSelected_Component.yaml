@@ -12,6 +12,9 @@ kind: Rect
 style:
   width: "{{ width }}"
   height: 32
+  align_items: center
+  padding: {left: 16, right: 16, top: 0, bottom: 0}
+  gap: 8
   background: secondary_container
   corner_radius: small
 children:

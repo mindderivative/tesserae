@@ -22,5 +22,5 @@ style:
 children:
   - id: headline
     kind: Text
-    text: {content: "{{ headline }}", typography_role: label_large}
+    text: {content: "{{ headline }}", typography_role: body_large}  # MD3's list headline (tre used label_large)
     style: {foreground: on_surface}

@@ -48,7 +48,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("c")
 
-        imperative = card(_themed_window(), 200, 100, variant=variant)
+        imperative = card(_themed_window(), 200, 100, variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert elevation(declarative) == elevation(imperative), component_name
@@ -70,7 +70,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("c")
 
-        imperative = chip(_themed_window(), "Tag", 100, variant=variant, selected=selected)
+        imperative = chip(_themed_window(), "Tag", 100, variant=variant, selected=selected).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert declarative.get("border_width") == imperative.get("border_width"), component_name
@@ -104,7 +104,7 @@ children:
     expanded = expand_components(yaml_text)
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("d")
-    imperative = badge(_themed_window())
+    imperative = badge(_themed_window()).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -121,7 +121,7 @@ children:
     expanded = expand_components(yaml_text)
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("p")
-    imperative = badge(_themed_window(), label="3", width=20)
+    imperative = badge(_themed_window(), label="3", width=20).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -138,7 +138,7 @@ children:
     expanded = expand_components(yaml_text)
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("d")
-    imperative = divider(_themed_window(), 200)
+    imperative = divider(_themed_window(), 200).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -209,9 +209,12 @@ children:
 
     window = Window(width=200, height=100)
     window.set_theme(THEME_SEED)
-    imperative = link(window, "Docs", width=60)
+    imperative = link(window, "Docs", width=60)  # a Widget since M41
 
-    assert declarative.get("text") == imperative.get_text() == "Docs"  # imperative: a legacy widget until M41
+    # a Link is a box (role, focus, events) holding its text since M41
+    assert declarative.get("label") == imperative.node.get("label") == "Docs"
+    assert declarative.get("role") == imperative.node.get("role") == "link"
+    assert view.node("docs").children()[0].get("text") == imperative.node.children()[0].get("text") == "Docs"
 
 
 def test_link_text_is_a_required_param_not_silently_defaulted():

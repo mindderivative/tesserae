@@ -73,6 +73,7 @@ class Widget:
         if x is not None or y is not None:
             self.node.set(position="absolute", x=float(x or 0.0), y=float(y or 0.0))
         self._undo: list[Callable[[], None]] = []
+        self._restyles: list[Callable[[], Any]] = []
 
     # -- parts ----------------------------------------------------------------
 
@@ -99,20 +100,40 @@ class Widget:
 
     # -- behaviour -------------------------------------------------------------
 
-    def on_click(self, fn: Callable[[], Any], part: Optional[str] = None) -> Callable[[], None]:
+    def on_click(self, fn: Callable[[], Any], part: Optional[str] = None, role: str = "button") -> Callable[[], None]:
         """Calls `fn()` when the part (the root by default) is clicked, or
-        activated with Enter or Space: it becomes a focusable button.
-        Returns the function that stops it."""
+        activated with Enter or Space: it becomes focusable, with `role`,
+        and gets MD3's feedback if it hasn't any. Returns the function that
+        stops it."""
+        self.interactive(part)
         node = self.part(part)
-        node.set(focusable=True, role="button", cursor="pointer")
+        node.set(focusable=True, role=role, cursor="pointer")
         undo = self.view._listen(node, "click", lambda event: fn())
         self._undo.append(undo)
         return undo
+
+    def interactive(self, part: Optional[str] = None, role: Optional[str] = None) -> None:
+        """Gives a part MD3's feedback (in its content's colour, or `role`'s)."""
+        node_spec = self._spec_of(self.view.spec, part)
+        if node_spec.get("interaction") is None:
+            node_spec["interaction"] = {"color": role or content_role(node_spec) or "on_surface"}
+            self.view._sync_interactions()
+
+    def color(self, role: str) -> tuple[int, int, int, int]:
+        """A colour role of this widget's theme (MD3's baseline without one)."""
+        return self._scheme()[role]
+
+    def after_theme(self, fn: Callable[[], Any]) -> None:
+        """Calls `fn()` after each re-colouring: a widget whose state
+        changes its colours reapplies them there."""
+        self._restyles.append(fn)
 
     def set_theme(self, theme: Theme) -> None:
         """Re-colours the widget for `theme`, at once."""
         self.theme = theme
         self.view._use_scheme(self._scheme())
+        for fn in list(self._restyles):
+            fn()
 
     def _scheme(self) -> dict[str, Any]:
         return self.theme.roles if self.theme.roles is not None else tokens.baseline_scheme()

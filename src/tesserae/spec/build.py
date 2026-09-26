@@ -351,9 +351,25 @@ def _text_props(ctx, node, style):
     fill = _required_foreground(ctx, node, style, node["kind"])
     props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(ctx, node, node["kind"]), "fill": fill}
     props.update(natural_size(ctx.window, props, style))
-    if node["kind"] == "Link":
-        props.update(role="link", cursor="pointer", focusable=True)
     return props, None
+
+
+_PLACED = ("margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
+           "align_self", "position", "x", "y")
+
+
+def _link_props(ctx, node, style):
+    """A Link is a box holding its text (M41): `tre` 0.3.4's `text` never
+    gets pointer events, so a Link that was a bare `text` could only be
+    clicked from the keyboard. The box takes the events, focus, role and
+    label (the text's content); the text is only drawn."""
+    text, _ = _text_props(ctx, node, style)
+    layout = _layout(style)
+    outer = {k: v for k, v in layout.items() if k in _PLACED or k in ("width", "height")}
+    outer.update(role="link", cursor="pointer", focusable=True, label=text["text"])
+    inner = {k: v for k, v in text.items() if k not in _PLACED}
+    inner.update(hit_testable=False, a11y_hidden=True)
+    return outer, inner
 
 
 def _text_field_props(ctx, node, style):
@@ -391,9 +407,20 @@ def _icon_props(ctx, node, style):
 
 _PRIMITIVE = {
     "Rect": ("box", _box_props), "Container": ("box", _box_props), "Text": ("text", _text_props),
-    "Link": ("text", _text_props), "TextField": ("box", _text_field_props), "Image": ("image", _image_props),
+    "Link": ("box", _link_props), "TextField": ("box", _text_field_props), "Image": ("image", _image_props),
     "Icon": ("path", _icon_props),
 }
+
+
+def _a11y_for(node: dict[str, Any], kind: str, *, patching: bool) -> dict[str, Any]:
+    props = _a11y_props(node, patching=patching)
+    if kind == "Link" and props.get("label") is None:
+        props.pop("label", None)  # a Link without an `a11y:` label is named by its text
+    return props
+
+
+#: The node inside a two-node kind's box: what it's drawn with.
+_INNER = {"TextField": "text_input", "Link": "text"}
 
 
 #: Kinds with their own role and focus (a Link, a TextField's input, and
@@ -495,11 +522,11 @@ def _create(ctx, node, style, built):
     outer_props, inner_props = props_of(ctx, node, style)
     # M39: as `tre`'s `set_on_click` did, a clickable node is a focusable
     # Tab stop that Enter and Space activate -- and a button.
-    (outer_props if inner_props is None else inner_props).update(_a11y_props(node, patching=False))
+    (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=False))
     outer = ctx.window.create(tre_kind, **outer_props)
     if inner_props is None:
         return outer, outer
-    inner = ctx.window.create("text_input", **inner_props)
+    inner = ctx.window.create(_INNER[kind], **inner_props)
     outer.add_child(inner)
     return outer, inner
 
@@ -537,7 +564,7 @@ def patch(
         return
     _, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
-    (outer_props if inner_props is None else inner_props).update(_a11y_props(node, patching=True))
+    (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=True))
     outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins
     if inner_props is not None:
         inner.set(**inner_props)

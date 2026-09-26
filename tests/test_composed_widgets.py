@@ -282,3 +282,171 @@ def test_repeated_presses_dont_compound():
         window.simulate("pointer_down", x=b0.get("layout_x") + 5, y=b0.get("layout_y") + 5)
         _frames(window, 50)
     assert bg.part("b0").get("width") == 72.0
+
+
+# == M41 Phase 3: containment and lists ======================================================
+
+from tesserae.widgets import (  # noqa: E402
+    accordion_header, badge, card, chip, divider, icon, link, list_, list_item, tree_node,
+)
+
+
+@pytest.mark.parametrize("variant, fill", [("elevated", "surface_container_low"),
+                                           ("filled", "surface_container_highest"), ("outlined", "surface")])
+def test_cards_are_md3s_and_actionable_ones_get_feedback(variant, fill):
+    window = _window()
+    plain = card(window, 200, 100, variant=variant)
+    clicks = []
+    actionable = card(window, 200, 100, variant=variant, on_click=lambda: clicks.append(1))
+    window.advance(16)
+    assert plain.node.get("fill") == BASE[fill] and plain.node.get("corner_radius") == 12.0
+    assert plain.interaction() is None and plain.node.get("focusable") is False
+    assert actionable.interaction() is not None and actionable.node.get("role") == "button"
+    window.simulate("click", node=actionable.node)
+    assert clicks == [1]
+
+
+def test_a_chips_content_is_padded_and_centred():
+    window = _window()
+    c = chip(window, "Help", 100)
+    window.advance(16)
+    label = c.part("label")
+    assert c.node.get("layout_height") == 32.0 and c.node.get("stroke_color") == BASE["outline"]
+    x, y = _offset(label, c.node)
+    assert x == 16.0 and y == pytest.approx((32 - label.get("height")) / 2, abs=1.0)
+
+
+def test_a_filter_chip_toggles_its_selection():
+    window = _window()
+    c = chip(window, "Wi-Fi", 110, variant="filter")
+    window.advance(16)
+    assert c.selected.get() is False and c.part("check").parent() is None
+    assert c.node.get("role") == "checkbox" and c.node.get("checked") is False
+    window.simulate("click", node=c.node)
+    window.advance(16)
+    assert c.selected.get() is True and c.node.get("checked") is True
+    assert c.node.get("fill") == BASE["secondary_container"] and c.node.get("stroke_width") == 0.0
+    assert c.part("check").parent() == c.node and c.part("label").get("fill") == BASE["on_secondary_container"]
+    window.simulate("key_down", key="space")
+    window.simulate("key_up", key="space")
+    assert c.selected.get() is False and c.part("check").parent() is None
+
+
+def test_a_filter_chip_keeps_its_selection_through_a_theme_change():
+    window = _window()
+    c = chip(window, "On", 100, variant="filter", selected=True)
+    dark = Theme.resolve(theme_seed=SEED, dark=True)
+    c.set_theme(dark)
+    assert c.node.get("fill") == dark.role("secondary_container")
+
+
+def test_a_removable_input_chip_has_a_close_button():
+    window = _window()
+    removed = []
+    c = chip(window, "Ana", 100, variant="input", removable=True, on_remove=lambda: removed.append(1))
+    window.advance(16)
+    close = c.part("remove")
+    assert (close.get("role"), close.get("label")) == ("button", "Remove Ana")
+    window.simulate("click", node=close)
+    assert removed == [1]
+
+
+def test_badges_are_md3s():
+    window = _window()
+    dot, labelled, fitted = badge(window), badge(window, "3", width=20), badge(window, "999+")
+    window.advance(16)
+    assert (dot.node.get("layout_width"), dot.node.get("fill")) == (6.0, BASE["error"])
+    assert labelled.node.get("layout_height") == 16.0 and labelled.part("label").get("fill") == BASE["on_error"]
+    assert fitted.node.get("width") == pytest.approx(fitted.part("label").get("width") + 8.0)
+
+
+def test_dividers():
+    window = _window()
+    h, v = divider(window, 200), divider(window, 40, orientation="vertical", border_width=2)
+    window.advance(16)
+    assert (h.node.get("layout_width"), h.node.get("layout_height"), h.node.get("fill")) == (
+        200.0, 1.0, BASE["outline_variant"])
+    assert (v.node.get("layout_width"), v.node.get("layout_height")) == (2.0, 40.0)
+    assert h.node.get("a11y_hidden") is True
+    with pytest.raises(ValueError, match="'horizontal' or 'vertical'"):
+        divider(window, 10, orientation="diagonal")
+
+
+def test_a_link_is_a_box_holding_its_text():
+    window = _window()
+    followed = []
+    ln = link(window, "Docs", 60, on_click=lambda: followed.append(1))
+    window.advance(16)
+    assert (ln.node.get("role"), ln.node.get("label")) == ("link", "Docs")
+    window.simulate("pointer_down", node=ln.node)
+    window.simulate("pointer_up", node=ln.node)
+    assert followed == [1]
+
+
+def test_list_items_are_md3s_one_and_two_line_rows():
+    window = _window()
+    one = list_item(window, "Inbox", leading_icon="home", trailing_icon="chevron_right", width=300)
+    two = list_item(window, "Drafts", supporting_text="3 messages", width=300)
+    window.advance(16)
+    assert one.node.get("layout_height") == 56.0 and two.node.get("layout_height") == 72.0
+    headline = one.part("headline")
+    assert headline.get("font_size") == 16.0 and headline.get("fill") == BASE["on_surface"]  # body_large
+    assert one.part("leading").get("fill") == BASE["on_surface_variant"] and one.part("trailing") is not None
+    assert _offset(one.part("leading"), one.node)[0] == 16.0
+    supporting = two.part("supporting")
+    assert supporting.get("text") == "3 messages" and supporting.get("fill") == BASE["on_surface_variant"]
+
+
+def test_a_list_holds_its_items():
+    window = _window()
+    items = [list_item(window, "A"), list_item(window, "B")]
+    ls = list_(window, items, width=240)
+    window.advance(16)
+    assert ls.node.get("role") == "list" and [c == i.node for c, i in zip(ls.node.children(), items)] == [True] * 2
+    assert all(i.node.get("role") == "listitem" and i.node.get("width") == 240.0 for i in items)
+    with pytest.raises(ValueError, match="at least one item"):
+        list_(window, [])
+
+
+def test_an_accordion_header_expands_and_its_chevron_turns():
+    window = _window()
+    acc = accordion_header(window, "Details")
+    heard = []
+    acc.on_change(heard.append)
+    window.advance(16)
+    chevron = acc.part("chevron")
+    assert acc.expanded.get() is False and acc.node.get("expanded") is False and chevron.get("rotation_deg") == 0.0
+    window.simulate("click", node=acc.node)
+    _frames(window, 200)
+    assert acc.expanded.get() is True and acc.node.get("expanded") is True and chevron.get("rotation_deg") == 180.0
+    window.simulate("a11y_action", node=acc.node, action="collapse")
+    assert acc.expanded.get() is False and heard == [True, False]
+    acc.expanded.set(True)  # the app's change: no on_change
+    assert heard == [True, False]
+
+
+def test_a_tree_node_is_a_treeitem_and_the_arrows_expand_it():
+    window = _window()
+    branch = tree_node(window, "src", depth=1)
+    leaf = tree_node(window, "a.py", depth=2, leaf=True)
+    window.advance(16)
+    assert (branch.node.get("role"), branch.node.get("level"), leaf.node.get("level")) == ("treeitem", 2, 3)
+    assert branch.part("chevron").get("rotation_deg") == -90.0  # collapsed: pointing right
+    assert _offset(branch.part("title"), branch.node)[0] == 16 + 24
+    branch.node.focus()
+    window.simulate("key_down", key="arrow_right")
+    _frames(window, 200)
+    assert branch.expanded.get() is True and branch.part("chevron").get("rotation_deg") == 0.0
+    window.simulate("key_down", key="arrow_left")
+    assert branch.expanded.get() is False
+    assert leaf.expanded is None and leaf.node.get("focusable") is True
+
+
+def test_icon_is_tesseraes_own():
+    window = _window()
+    ic = icon(window, "home", (1, 2, 3, 255), 24)
+    named = icon(window, "search", (0, 0, 0, 255), 24, label="Search")
+    assert ic.node.get("fill") == (1, 2, 3, 255) and ic.node.get("a11y_hidden") is True
+    assert (named.node.get("role"), named.node.get("label")) == ("img", "Search")
+    with pytest.raises(ValueError, match="unknown icon 'nope'"):
+        icon(window, "nope", (0, 0, 0, 255), 24)

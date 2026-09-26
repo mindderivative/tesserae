@@ -100,7 +100,8 @@ def diff(spec, frames=None, stylesheet=None):
         for prop in props:
             # On a TextField, tre's `fill` reads back its text colour, which
             # Tesserae's inner `text_input` carries; its background can't be read.
-            ours_node = inner if (kind == "TextField" and (prop in TEXT or prop == "fill")) else outer
+            # a Link is a box holding its text since M41; its text props are the text's
+            ours_node = inner if (kind in ("TextField", "Link") and (prop in TEXT or prop == "fill")) else outer
             a, b = _get(theirs, prop), _get(ours_node, prop)
             if isinstance(a, tuple) and a[:1] == ("n/a",):
                 if prop == "text" and hasattr(theirs, "get_text"):

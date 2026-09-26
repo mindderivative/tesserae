@@ -36,8 +36,10 @@ should go. `spin_box` returns one `SpinBox` rather than
 [Controls](controls.md).
 
 **The composed ones are built from their fragments (M41, in progress).**
-So far the buttons and actions: `button`, `icon_button`, `fab`,
-`extended_fab`, `split_button` and `button_group`. Each expands the same `*_Component.yaml` a
+So far the buttons and actions (`button`, `icon_button`, `fab`,
+`extended_fab`, `split_button`, `button_group`) and the containment and
+list widgets (`card`, `chip`, `badge`, `divider`, `link`, `icon`,
+`list_`, `list_item`, `accordion_header`, `tree_node`). Each expands the same `*_Component.yaml` a
 `component: ButtonFilled` does and builds it with Tesserae's compiler,
 so the Python and YAML paths are one definition. It returns a `Widget`:
 
@@ -59,7 +61,20 @@ large (96) size. Give the icon-only ones `label=` for screen readers. A
 `on_menu`, and its facing corners tighten while it's hovered. A
 `button_group` has parts `b0`, `b1` and so on, with `on_click(index)`,
 and the pressed button reshapes and widens while its neighbours share the
-loss. Where you used the node (or tuple) these returned, use `.node` or
+loss.
+
+A `card` gets feedback when given `on_click`. A filter `chip` toggles
+`.selected` (a `Signal`) when clicked, and an input chip with
+`removable=True` has a close button that calls `on_remove`. A
+`list_item` has `headline`, `supporting`, `leading` and `trailing`
+parts, and is 56 px tall, or 72 with `supporting_text`. `list_` takes the
+items. An `accordion_header` and a branch `tree_node` have `.expanded` (a
+`Signal`) and `.on_change(fn)`: a click, Enter or Space toggles them, a
+tree node's right and left arrows set it, and the chevron turns. Show the
+content yourself, from `.expanded`. `icon` is Tesserae's own; give it
+`label=` if it isn't decorative.
+
+Where you used the node (or tuple) these returned, use `.node` or
 `.part(...)`.
 
 Every other function here is a **thin, faithful delegate** straight to

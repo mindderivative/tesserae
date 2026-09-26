@@ -240,7 +240,10 @@ own; `tesserae.widgets.spin_box` gives a working one.
 Since M41 a `Text` or `Link` with no `width` or `height` is sized to its
 content (`tre` 0.3.4's text has no size of its own, so before M41 such a
 label was 0 px wide and didn't show). The button fragments centre their
-label.
+label, the chips pad theirs, and a list item's headline is MD3's
+`body_large`. A `Link` is a box holding its text since M41: `tre`'s
+`text` never gets pointer events, so before, only the keyboard could
+follow a link. `view.node(id)` for a Link is the box.
 
 For each fragment's exact `params:` and structure, read the file
 directly under `src/tesserae/spec/components/` -- every one is short

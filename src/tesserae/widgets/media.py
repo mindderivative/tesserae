@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING
 from tesserae.images import decode_image
 
 if TYPE_CHECKING:
+    from tesserae.theme import Theme
+    from tesserae.widgets._composed import Widget
     from tre import Node, Window
 
 
@@ -63,13 +65,29 @@ def icon(
     size: float,
     x: float | None = None,
     y: float | None = None,
-) -> "Node":
-    """One square `size` glyph, rendered as a vector fill in
-    `foreground`. Currently curated icon names: home/search/menu/close/
-    check/arrow_back/add/settings/expand_more/remove/arrow_forward/
-    chevron_right -- an unknown name raises `ValueError` listing the
-    real known set."""
-    return window.add_icon(name, foreground, size, x=x, y=y)
+    *,
+    theme: "Theme | None" = None,
+    label: str | None = None,
+) -> "Widget":
+    """One of Tesserae's icons (`tesserae.icons`: home, search, menu,
+    close, check, arrow_back, add, settings, expand_more, remove,
+    arrow_forward, chevron_right), `size` square in `foreground`. M41:
+    Tesserae's own Icon, not `tre`'s. An unknown name raises `ValueError`.
+    Decorative unless given a `label=`."""
+    from tesserae import a11y
+    from tesserae.icons import icon_path
+    from tesserae.widgets._composed import Widget
+    from tesserae.widgets.buttons import _hex
+
+    if icon_path(name) is None:
+        from tesserae.icons import ICONS
+
+        raise ValueError(f"unknown icon {name!r}; expected one of {sorted(ICONS)}")
+    widget = Widget(window, spec={"id": "icon", "kind": "Icon", "icon": {"name": name},
+                                  "style": {"width": size, "height": size, "foreground": _hex(foreground)}},
+                    theme=theme, x=x, y=y, name="icon")
+    a11y.describe(widget.node, **({"label": label, "role": "img"} if label is not None else {"hidden": True}))
+    return widget
 
 
 def graph_node(
