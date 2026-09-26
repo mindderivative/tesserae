@@ -370,12 +370,25 @@ _PRIMITIVE = {
 }
 
 
+#: Kinds with their own role and focus (a Link, a TextField's input, and
+#: the legacy MD3 kinds); `on_click` doesn't change them.
+_OWN_ROLE = frozenset({"Link", "TextField"}) | _LEGACY_KINDS
+
+
+def _clickable(node: dict[str, Any]) -> bool:
+    return "on_click" in (node.get("handlers") or {}) and node["kind"] not in _OWN_ROLE
+
+
 def _create(ctx, node, style):
     kind = node["kind"]
     if kind in _LEGACY_KINDS:
         return _legacy(ctx, node, style)
     tre_kind, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
+    if _clickable(node):
+        # M39 Phase 1: as `tre`'s `set_on_click` did, a clickable node is a
+        # focusable Tab stop that Enter and Space activate -- and a button.
+        outer_props.update(focusable=True, role="button")
     outer = ctx.window.create(tre_kind, **outer_props)
     if inner_props is None:
         return outer, outer
@@ -418,6 +431,10 @@ def patch(
         return
     _, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
+    if _clickable(node):
+        outer_props.update(focusable=True, role="button")
+    elif kind not in _OWN_ROLE and outer.get("role") == "button":
+        outer_props.update(focusable=False, role="none")  # its on_click was removed
     outer.set(**_ALIGNMENT_DEFAULTS, **outer_props)
     if inner_props is not None:
         inner.set(**inner_props)

@@ -65,7 +65,9 @@ _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius"
 
 def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     """`tre`'s `node_props_equal`, plus the state fields Tesserae builds from."""
-    keys = ("kind", "classes", "style", "text", "image", "icon", "checked", "selected", "value", "hour", "minute")
+    # `handlers` too: adding or removing `on_click` changes focus and role (M39)
+    keys = ("kind", "classes", "style", "text", "image", "icon", "checked", "selected", "value", "hour", "minute",
+            "handlers")
     return all(a.get(k) == b.get(k) for k in keys)
 
 

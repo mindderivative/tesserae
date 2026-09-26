@@ -81,4 +81,6 @@ Phase 4 done: final docs; a known gap for `"system"` starting dark. **M38 comple
 
 **M39 scoped (2026-09-25):** from `tre`'s legacy behaviour write-up. It found a keyboard regression from M37 (`on_click` nodes aren't Tab stops), which Phase 1 fixes. Decisions Q1–Q3 pending.
 
-**Up next:** the user's decisions on M39.
+**M39:** decisions Q1–Q3 as recommended. Phase 1 done: clickable nodes are keyboard-reachable buttons; 1048 passed. The dry-run gate report went to `tre`.
+
+**Up next:** M39 Phase 2 (state layer and ripple).

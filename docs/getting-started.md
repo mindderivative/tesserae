@@ -22,11 +22,14 @@ children:
     handlers: {on_click: "increment"}
 ```
 
-This is a plain `tre` declarative view -- Tesserae doesn't wrap or
-reinterpret the YAML schema. `text: {content: ...}` seeds the initial
-label; `bindings: {text: "{{ label.get() }}"}` keeps it live-bound to
-a `Signal` your `ViewModel` owns; `handlers: {on_click: "increment"}`
-names a method on that `ViewModel` to call on a real dispatched click.
+Tesserae builds this view itself on `tre`'s building blocks.
+`text: {content: ...}` seeds the initial label;
+`bindings: {text: "{{ label.get() }}"}` keeps it live-bound to a
+`Signal` your `ViewModel` owns; `handlers: {on_click: "increment"}`
+names a method on that `ViewModel` to call on a click. A node with
+`on_click` is also a button for the keyboard and for assistive
+technology: Tab reaches it, Enter or Space clicks it, and it has
+`role="button"`.
 
 ## The ViewModel
 

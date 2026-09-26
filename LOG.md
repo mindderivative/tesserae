@@ -324,3 +324,24 @@ User: "Yes". Pushed `315cfb7`. `tre`'s `0.3.5` branch has `dump_widget.py`,
 an `on_click` Rect is focusable, a Tab stop and Enter-activated in
 `tre`'s `View`, but none of those in Tesserae's -- a regression, now in
 known gaps. Roles: `tre`'s `View` nodes report none via `get()`.
+
+## `tre`'s handover; the gate dry run; M39 Phase 1
+
+`tre` sent its M97 Phase 2 handover and asked for Step 6.
+
+1. Dry run of `_removed.py` (0.3.5, `c49b85f`) from a scratchpad pytest
+   plugin: 583 failed / 327 passed, nearly all at `Window.set_theme`.
+2. A static scan showed `src/tesserae` uses none of M98's names; the
+   rest is M99's (the legacy kinds, `tesserae.widgets`, `set_theme`).
+3. Examples: counter and multi_screen run clean; todo_list stops at
+   `add_checkbox`.
+4. Fixed an unused `from tre import View` (`dae9ff3`).
+
+User: "Yes do as recommended". Sent the report to `tre`; pushed
+`cd1632e`, `dae9ff3`, `3631991`. (`3631991` carried a tracker line the
+generator rejected, because a pipe hid its failure; fixed in the next
+commit.)
+
+M39 Phase 1: on_click nodes are focusable buttons. `role=None` isn't
+settable, so removal uses `role="none"`. The reconciler patches on
+handler changes. 5 tests; 3/3 mutants caught; 1048 passed.
