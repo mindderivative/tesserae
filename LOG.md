@@ -429,3 +429,25 @@ Carousel and Splitter were never in `tesserae.widgets`; Link is
 Tesserae's since M37.
 
 Q1–Q4 are in the tracker, with recommendations.
+
+## M40 Phase 1: the control foundation
+
+User: "Push it and go with your recommendations for M40". Pushed
+`f19573b`; Q1–Q4 as recommended.
+
+- `Interaction` gained `surface=` (events from the target, feedback in
+  a child) and `enabled`.
+- `Listeners` was taken out of `View._listen`, so controls share a
+  view's dispatcher.
+- `tokens.BASELINE` holds MD3's published colours, from `tre`'s
+  handover plus `on_surface` and `secondary`; `build._BASELINE` reuses it.
+
+Found while building:
+- `layout_x`/`layout_y` are window-wide, not parent-relative. The first
+  surface ripple offset was wrong off the origin; a test places the
+  control at x > 0.
+- `animate(prop, v, 0)` lands on the next frame, so a non-animated
+  repaint uses `set` (`Control._to`).
+- The tracker generator needs each Step on one line.
+
+19 tests; 10/10 mutants caught. 1114 passed.

@@ -61,12 +61,19 @@ class Interaction:
     and ripple tinted `tint`, the ring `ring_color`.
 
     `listen` registers the pointer and focus listeners (see `Listen`).
-    Call `refresh()` after the node's corners change, and `detach()` to
-    remove everything this added."""
+    `surface`, a child of `node`, is where the layer, ripples and ring are
+    drawn and sized, when that isn't the node itself: a selection
+    control's 40 px circle inside its 48 px touch target (M40). Events
+    still come from `node`. `enabled = False` shows no feedback (a
+    disabled control). Call `refresh()` after the surface's corners
+    change, and `detach()` to remove everything this added."""
 
-    def __init__(self, window: Any, node: Any, tint: RGBA, listen: Listen, ring_color: RGBA) -> None:
+    def __init__(self, window: Any, node: Any, tint: RGBA, listen: Listen, ring_color: RGBA,
+                 surface: Any = None) -> None:
         self.window = window
         self.node = node
+        self.surface = node if surface is None else surface
+        self._enabled = True
         self.tint = tint
         self.ring_color = ring_color
         self.hovered = self.focused = self.dragged = False
@@ -79,8 +86,8 @@ class Interaction:
         self.ring = window.create("box", stroke_color=ring_color, stroke_width=RING_WIDTH, visible=False,
                                   **decoration)
         self.clip.add_child(self.layer)
-        node.add_child(self.clip)
-        node.add_child(self.ring)
+        self.surface.add_child(self.clip)
+        self.surface.add_child(self.ring)
         self.refresh()
         _INTERACTIVE.append(node)
         self._undo = [listen(node, event, handler) for event, handler in (
@@ -99,6 +106,23 @@ class Interaction:
         if self.focused:
             return FOCUSED
         return HOVERED if self.hovered else 0.0
+
+    @property
+    def enabled(self) -> bool:
+        return self._enabled
+
+    @enabled.setter
+    def enabled(self, enabled: bool) -> None:
+        """Turning it off clears the feedback at once and shows none until
+        it's turned on again."""
+        self._enabled = enabled
+        if not enabled:
+            self.hovered = self.focused = self.dragged = False
+            self.ring.set(visible=False)
+            for ripple in self._ripples:
+                ripple.circle.set(opacity=0.0)
+                ripple.release()
+            self.layer.animate("opacity", 0.0, 0)
 
     @property
     def ripples(self) -> list[Any]:
@@ -124,7 +148,7 @@ class Interaction:
 
     def refresh(self) -> None:
         """Follows the node's corners (and, for the ring, its size)."""
-        radius = self.node.get("corner_radius") or 0.0
+        radius = self.surface.get("corner_radius") or 0.0
         self.clip.set(corner_radius=radius)
         self._place_ring()
 
@@ -132,10 +156,10 @@ class Interaction:
         # A box's stroke is drawn inside it, so the ring's box starts the
         # gap and the stroke's width outside the node.
         out = RING_OFFSET + RING_WIDTH
-        radius = self.node.get("corner_radius") or 0.0
+        radius = self.surface.get("corner_radius") or 0.0
         grown = (tuple(r + out if r else 0.0 for r in radius) if isinstance(radius, (tuple, list))
                  else radius + out if radius else 0.0)
-        width, height = self.node.get("layout_width") or 0.0, self.node.get("layout_height") or 0.0
+        width, height = self.surface.get("layout_width") or 0.0, self.surface.get("layout_height") or 0.0
         self.ring.set(x=-out, y=-out, width=width + 2 * out, height=height + 2 * out, corner_radius=grown)
 
     def detach(self) -> None:
@@ -166,6 +190,8 @@ class Interaction:
         return True
 
     def _on_enter(self, event: Any) -> None:
+        if not self._enabled:
+            return
         self.hovered = True
         self._update()
 
@@ -175,21 +201,25 @@ class Interaction:
         self._release_all()  # a press dragged off the node is cancelled
 
     def _on_down(self, event: Any) -> None:
-        if self._mine(event) and event.x is not None:
-            self._ripples.append(_Ripple(self, event.x, event.y))
+        if self._enabled and self._mine(event) and event.x is not None:
+            x, y = event.x, event.y
+            if self.surface is not self.node:  # the event is local to the node; layout is window-wide
+                x -= (self.surface.get("layout_x") or 0.0) - (self.node.get("layout_x") or 0.0)
+                y -= (self.surface.get("layout_y") or 0.0) - (self.node.get("layout_y") or 0.0)
+            self._ripples.append(_Ripple(self, x, y))
 
     def _on_up(self, event: Any) -> None:
         self._release_all()
 
     def _on_click(self, event: Any) -> None:
         # A keyboard click has no position, and no press came first.
-        if event.x is None and self._mine(event):
+        if self._enabled and event.x is None and self._mine(event):
             ripple = _Ripple(self, None, None)
             self._ripples.append(ripple)
             ripple.release()
 
     def _on_focus(self, event: Any) -> None:
-        if event.target == self.node:
+        if event.target == self.node and self._enabled:
             self.focused = bool(event.focus_visible)
             if self.focused:
                 self._place_ring()  # the node may have been resized since
@@ -215,7 +245,7 @@ class _Ripple:
         self.owner = owner
         self.released = False
         self.held_long_enough = False
-        node = owner.node
+        node = owner.surface
         width, height = node.get("layout_width") or 0.0, node.get("layout_height") or 0.0
         if x is None:
             x, y = width / 2, height / 2

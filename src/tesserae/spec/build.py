@@ -39,12 +39,8 @@ RGBA = tuple[int, int, int, int]
 _TRANSPARENT: RGBA = (0, 0, 0, 0)
 #: The fixed colour `tre`'s TextField draws its text in (`engine-core`).
 _TEXT_FIELD_GLYPH: RGBA = (0x1C, 0x1B, 0x1F, 0xFF)
-#: `tre`'s MD3 baseline tints for the legacy kinds when there's no theme.
-_BASELINE = {
-    "primary": (0x67, 0x50, 0xA4, 0xFF), "on_primary": (0xFF, 0xFF, 0xFF, 0xFF),
-    "outline": (0x79, 0x74, 0x7E, 0xFF), "surface_container_highest": (0xE6, 0xE0, 0xE9, 0xFF),
-    "on_surface": (0x1D, 0x1B, 0x20, 0xFF), "secondary": (0x62, 0x5B, 0x71, 0xFF),
-}
+#: MD3's baseline colours, for nodes with no theme.
+_BASELINE = tokens.BASELINE
 _LEGACY_KINDS = frozenset({
     "Checkbox", "RadioButton", "Switch", "Slider", "CircularProgress", "LinearProgress",
     "LoadingIndicator", "TimePickerDial",

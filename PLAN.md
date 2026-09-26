@@ -91,4 +91,6 @@ Phase 4 done: examples labelled, a keyboard-only test of the counter, the parity
 
 **M40 scoped (2026-09-25):** 6 phases: a control foundation, then selection controls, slider and spin box, progress/loading/time dial, wiring (YAML kinds, bindings, fragments, factories), and tests and docs with the gate check. Found: YAML checkboxes, switches and radios never toggle and aren't Tab stops, as in `tre`. Decisions Q1–Q4 pending.
 
-**Up next:** the user's decisions on M40.
+**M40:** Q1–Q4 as recommended. Phase 1 done: `tesserae.controls.Control` (with `Listeners` and `tokens.BASELINE`), proved on MD3's checkbox; 1114 passed.
+
+**Up next:** M40 Phase 2 (RadioButton and Switch).

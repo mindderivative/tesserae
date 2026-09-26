@@ -172,6 +172,16 @@ them after every build, reconcile, re-theme and re-style. The extra
 children stay after the spec's children, so the reconciler's indices
 still hold. Their listeners go through the same per-node dispatcher as
 the ViewModel's (`View._listen`), but they aren't unwired with it.
+**Controls, M40:** `tesserae.controls.Control` is the base of the
+stateful MD3 controls that replace `tre`'s. It holds `.node`, a
+focusable 48 px target with the control's role. A 40 px circle inside the
+target is the `Interaction`'s `surface`, so events come from the target
+while the feedback draws in the circle. The state and `disabled` are
+Tesserae `Signal`s, and one `Effect` repaints when they change. `on_change`
+hears only the user's changes. `tesserae.listeners.Listeners` is the
+shared per-node dispatcher, which `View` uses too. `tokens.BASELINE` is
+MD3's published colours, for controls with no theme.
+
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`
 field compiles through it (`build._a11y_props`, which also owns the

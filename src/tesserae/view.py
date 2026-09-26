@@ -48,6 +48,7 @@ import tre
 from tesserae import reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
 from tesserae.interaction import Interaction
+from tesserae.listeners import Listeners
 from tesserae.spec.build import (
     Built, _LEGACY_KINDS, build_with, focus_ring_color, interaction_tint, patch, prepare_layers,
 )
@@ -142,6 +143,7 @@ class View:
         self._viewmodel: Any = None
         self._wiring: list[Callable[[], None]] = []  # undo steps
         self._listeners: dict[tuple[int, str], list[Any]] = {}
+        self._events = Listeners()
         self._interactions: dict[str, Interaction] = {}
         self._sync_interactions()
 
@@ -412,20 +414,7 @@ class View:
     def _listen(self, node: Any, event: str, fn: Callable[[Any], None]) -> Callable[[], None]:
         """`node.on` keeps one listener per event, so every callback for a
         node and event shares one dispatcher. Returns the undo."""
-        key = (id(node), event)
-        slot = self._listeners.get(key)
-        if slot is None:
-            slot = self._listeners[key] = []
-            node.on(event, lambda event_obj: [cb(event_obj) for cb in list(slot)])
-        slot.append(fn)
-
-        def undo() -> None:
-            if fn in slot:
-                slot.remove(fn)
-            if not slot and self._listeners.get(key) is slot:
-                del self._listeners[key]
-                node.off(event)
-        return undo
+        return self._events.listen(node, event, fn)
 
     def _add_legacy_change(self, node: Any, fn: Callable[[], None]) -> None:
         """A legacy MD3 widget has one change slot (`set_on_change`), and it
