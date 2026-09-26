@@ -1,9 +1,5 @@
-# `add_linear_progress`'s declarative counterpart -- `value` maps
-# directly onto `WidgetSpec`'s own top-level `value` field. No
-# `background` param -- both `track_tint`/`indicator_tint` are
-# real-theme-resolved at declarative build time (`tre`'s `build.rs`,
-# M84), the identical "no color param" contract `add_linear_progress`
-# itself already has.
+# MD3's linear progress indicator (Tesserae's `controls.LinearProgress`,
+# M40): `value` in 0..1, `width`/`height` its track.
 params: [width, height, value]
 id: root
 kind: LinearProgress

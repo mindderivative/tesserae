@@ -21,7 +21,11 @@ PAINT = ("fill", "stroke_color", "stroke_width", "corner_radius", "opacity")
 TEXT = ("text", "font_family", "font_size", "font_weight", "line_height")
 #: Fields `tre` never had (M39): its builder rejects them, so its copy of
 #: the spec goes without; they add no layout or paint the differ reads.
-TESSERAE_ONLY = ("a11y", "interaction")
+TESSERAE_ONLY = ("a11y", "interaction", "group")
+#: Kinds Tesserae draws as MD3's controls since M40 (Q2: MD3's look, not
+#: tre's legacy one), so they aren't compared.
+CONTROLS = frozenset({"Checkbox", "RadioButton", "Switch", "Slider", "CircularProgress", "LinearProgress",
+                      "LoadingIndicator", "TimePickerDial"})
 
 
 def for_tre(spec):
@@ -71,6 +75,8 @@ def diff(spec, frames=None, stylesheet=None):
     for node_id, node_spec in ids(spec):
         theirs, outer, inner = view.node(node_id), built.outer[node_id], built.nodes[node_id]
         kind = node_spec.get("kind")
+        if kind in CONTROLS:
+            continue  # MD3's controls, deliberately not tre's legacy drawing (M40 Q2)
         props = LAYOUT + PAINT
         if kind in ("Text", "Link", "TextField"):
             props = props + TEXT

@@ -13,7 +13,7 @@ Each kind maps onto `tre`'s building blocks:
 | `TextField` | a `box` (its `background`) holding a `text_input` |
 | `Image` | an `image`, from pixels Tesserae decoded |
 | `Icon` | a `path` from `tesserae.icons` (needs `foreground`) |
-| `Checkbox`, `RadioButton`, `Switch`, `Slider`, `CircularProgress`, `LinearProgress`, `LoadingIndicator`, `TimePickerDial` | **for now**, `tre`'s legacy window factories (`add_checkbox`, ...), moved into the tree. Tesserae's own controls replace them in M40; they're the one use of `tre`'s old API here, and `TRE_FORBID_REMOVED` (M43) catches any left |
+| `Checkbox`, `RadioButton`, `Switch`, `Slider`, `CircularProgress`, `LinearProgress`, `LoadingIndicator`, `TimePickerDial` | Tesserae's own MD3 controls (`tesserae.controls`, M40), whose `.node` goes in the tree; `Built.controls` keeps them |
 
 Styles resolve through `tesserae.spec.cascade`; theme roles, shape
 tokens, elevation levels and type roles through `tesserae.tokens`. Errors
@@ -31,7 +31,8 @@ from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
 __all__ = [
-    "Built", "Layers", "SpecBuildError", "build", "focus_ring_color", "interaction_tint", "patch", "prepare_layers",
+    "Built", "Layers", "SpecBuildError", "build", "control_shape", "focus_ring_color", "interaction_tint", "patch",
+    "prepare_layers",
     "shipped_default_theme",
 ]
 
@@ -41,14 +42,14 @@ _TRANSPARENT: RGBA = (0, 0, 0, 0)
 _TEXT_FIELD_GLYPH: RGBA = (0x1C, 0x1B, 0x1F, 0xFF)
 #: MD3's baseline colours, for nodes with no theme.
 _BASELINE = tokens.BASELINE
-_LEGACY_KINDS = frozenset({
+_CONTROL_KINDS = frozenset({
     "Checkbox", "RadioButton", "Switch", "Slider", "CircularProgress", "LinearProgress",
     "LoadingIndicator", "TimePickerDial",
 })
-_KINDS = _LEGACY_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
+_KINDS = _CONTROL_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "children",
+    "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
 })
 
 
@@ -66,6 +67,10 @@ class Built:
     nodes: dict[str, Any] = field(default_factory=dict)
     outer: dict[str, Any] = field(default_factory=dict)
     specs: dict[str, dict[str, Any]] = field(default_factory=dict)
+    #: The control (`tesserae.controls`) behind each control kind's id.
+    controls: dict[str, Any] = field(default_factory=dict)
+    #: RadioButtons' `group:` names, each one `tesserae.controls.RadioGroup`.
+    radio_groups: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -74,6 +79,8 @@ class _Context:
     layers: tuple[Optional[Sheet], ...]
     scheme: Optional[dict[str, RGBA]]
     frames: dict[str, tuple[bytes, int, int]]
+    #: The shared listener registrar controls use (a View's; otherwise their own).
+    listen: Optional[Callable[..., Any]] = None
 
 
 def build(
@@ -134,10 +141,12 @@ def build_with(
     layers: tuple[Optional[Sheet], ...],
     frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
     into: Optional[Built] = None,
+    listen: Optional[Callable[..., Any]] = None,
 ) -> Any:
     """Builds `spec` with already-prepared layers, recording its nodes in
-    `into` (a new `Built` if none); returns the subtree's outer root."""
-    ctx = _Context(window, layers, scheme, frames or {})
+    `into` (a new `Built` if none); returns the subtree's outer root.
+    `listen` is the listener registrar the controls share with the view."""
+    ctx = _Context(window, layers, scheme, frames or {}, listen)
     built = into if into is not None else Built(root=None)
     return _build(ctx, spec, built)
 
@@ -173,7 +182,7 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     if unknown_style:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}")
 
-    outer, inner = _create(ctx, node, style)
+    outer, inner = _create(ctx, node, style, built)
     built.nodes[node_id] = inner
     built.outer[node_id] = outer
     built.specs[node_id] = node
@@ -373,8 +382,8 @@ _PRIMITIVE = {
 
 
 #: Kinds with their own role and focus (a Link, a TextField's input, and
-#: the legacy MD3 kinds); `on_click` doesn't change them.
-_OWN_ROLE = frozenset({"Link", "TextField"}) | _LEGACY_KINDS
+#: the MD3 controls); `on_click` doesn't change them.
+_OWN_ROLE = frozenset({"Link", "TextField"}) | _CONTROL_KINDS
 
 
 def _clickable(node: dict[str, Any]) -> bool:
@@ -461,10 +470,12 @@ def interaction_tint(node: dict[str, Any], scheme: Optional[dict[str, RGBA]]) ->
     return _role(ctx, "on_surface")
 
 
-def _create(ctx, node, style):
+def _create(ctx, node, style, built):
     kind = node["kind"]
-    if kind in _LEGACY_KINDS:
-        return _legacy(ctx, node, style)
+    if kind in _CONTROL_KINDS:
+        control = _control(ctx, node, style, built)
+        built.controls[node["id"]] = control
+        return control.node, control.node
     tre_kind, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
     # M39: as `tre`'s `set_on_click` did, a clickable node is a focusable
@@ -493,22 +504,21 @@ def patch(
     layers: tuple[Optional[Sheet], ...] = (),
     frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
     state: bool = True,
-    set_state: Optional[Callable[[Callable[[Any], None], Any], None]] = None,
+    control: Any = None,
 ) -> None:
     """Sets `node`'s properties on its existing nodes, in place -- what
     `tre`'s `patch_node` does. The node keeps its identity, focus and
     running animations. Children aren't touched.
 
-    `state=False` restyles only, leaving a legacy MD3 widget's
-    `checked`/`selected` alone (a theme or stylesheet change). `set_state`
-    applies a state change (default: call the setter)."""
+    For a control kind, `control` is its control: it's re-themed, and its
+    state set from the spec unless `state=False` (a theme or stylesheet
+    change, which leaves what the user did)."""
     ctx = _Context(window, layers, scheme, frames or {})
     style = resolve_style(node, layers)
     kind = node["kind"]
-    if kind in _LEGACY_KINDS:
-        outer.set(**_ALIGNMENT_DEFAULTS, **_layout(style), **_paint(ctx, node["id"], style))
-        if state:
-            _legacy_state(node, outer, set_state or (lambda setter, value: setter(value)))
+    if kind in _CONTROL_KINDS:
+        if control is not None:
+            _patch_control(ctx, node, style, control, state)
         return
     _, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
@@ -522,46 +532,106 @@ def _role(ctx, name):
     return (ctx.scheme or {}).get(name, _BASELINE[name])
 
 
-def _legacy_state(node: dict[str, Any], n: Any, set_state: Callable[[Callable[[Any], None], Any], None]) -> None:
-    """A legacy MD3 kind's state from its spec (a reconcile patch resets
-    it, as `tre`'s does; bindings re-apply their values afterwards)."""
-    kind = node["kind"]
-    if kind == "Checkbox" and n.get_checked() != bool(node.get("checked") or False):
-        set_state(n.set_checked, bool(node.get("checked") or False))
-    elif kind in ("Switch", "RadioButton") and n.get_selected() != bool(node.get("selected") or False):
-        set_state(n.set_selected, bool(node.get("selected") or False))
+#: Layout a control's node takes from its style: where it sits, not its
+#: size (a control is built at its size) or its own content alignment.
+_PLACEMENT = frozenset({
+    "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
+    "align_self", "position", "x", "y",
+})
+_PLACEMENT_RESET = {"margin_top": 0.0, "margin_right": 0.0, "margin_bottom": 0.0, "margin_left": 0.0,
+                    "flex_grow": 0.0, "flex_shrink": 1.0}
 
 
-def _legacy(ctx, node, style):
-    """The eight MD3 kinds `tre` still draws itself, until M40: built with
-    its legacy factories, then given the node's layout."""
-    w, kind, node_id = ctx.window, node["kind"], node["id"]
-    width, height = style.get("width"), style.get("height")
+def _theme(ctx: _Context) -> Any:
+    from tesserae.theme import Theme
+
+    return Theme(None, False, ctx.scheme, {}, {})
+
+
+def _control_colour(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) -> Optional[RGBA]:
+    """The selected/active colour a control's style gives: `background`
+    (the fragments' param) or, for the indicators, `foreground`."""
+    field = "foreground" if node["kind"] in _INDICATOR_KINDS else "background"
+    raw = style.get(field)
+    return None if raw is None else _color(ctx, node["id"], field, raw)
+
+
+_INDICATOR_KINDS = frozenset({"CircularProgress", "LinearProgress", "LoadingIndicator"})
+
+
+def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: Built) -> Any:
+    """The MD3 control for one of the eight control kinds (M40)."""
+    from tesserae import controls
+
+    kind, width, height = node["kind"], style.get("width"), style.get("height")
     if kind == "Checkbox":
         _check_state(node, "Checkbox", "checked", "selected")
-        n = w.add_checkbox(_required_background(ctx, node, style, "Checkbox"), width or 18.0, height or 18.0,
-                           checked=bool(node.get("checked") or False))
-    elif kind == "Slider":
-        n = w.add_slider(_required_background(ctx, node, style, "Slider"), width or 200.0, height or 40.0,
-                         value=float(node.get("value") or 0.0))
-    elif kind == "RadioButton":
-        _check_state(node, "RadioButton", "selected", "checked")
-        n = w.add_radio_button(size=width or 20.0, selected=bool(node.get("selected") or False))
-    elif kind == "Switch":
-        _check_state(node, "Switch", "selected", "checked")
-        n = w.add_switch(width=width or 52.0, height=height or 32.0, selected=bool(node.get("selected") or False))
-    elif kind == "CircularProgress":
-        n = w.add_circular_progress(size=width or 48.0, value=float(node.get("value") or 0.0))
-    elif kind == "LinearProgress":
-        n = w.add_linear_progress(width or 200.0, height=height or 4.0, value=float(node.get("value") or 0.0))
-    elif kind == "LoadingIndicator":
-        if width is None or height is None:
-            missing = "style.width" if width is None else "style.height"
-            raise SpecBuildError(f'widget {_q(node_id)}: LoadingIndicator requires {missing}, none given')
-        n = w.add_loading_indicator(size=width, foreground=_required_foreground(ctx, node, style, "LoadingIndicator"))
-    else:  # TimePickerDial
-        n = w.add_time_picker_dial(hour=int(node.get("hour") or 0), minute=int(node.get("minute") or 0), size=width or 256.0)
-    n.remove()  # the factories attach to the window's root; the caller places it
-    # tre's View applies the cascade's corner radius, border and elevation to these kinds too
-    n.set(**_layout(style), **_paint(ctx, node_id, style))
-    return n, n
+    elif kind in ("Switch", "RadioButton"):
+        _check_state(node, kind, "selected", "checked")
+    group = node.get("group")
+    if group is not None and (kind != "RadioButton" or not isinstance(group, str)):
+        raise SpecBuildError(f"widget {_q(node['id'])}: `group:` is a RadioButton's, and a name "
+                             f"(radio buttons with the same one exclude each other), got {group!r} on a {kind}")
+    common = dict(theme=_theme(ctx), color=_control_colour(ctx, node, style))
+    size = {k: float(v) for k, v in (("width", width), ("height", height)) if v is not None}
+    if kind in _INDICATOR_KINDS:
+        value = node.get("value")
+        if kind == "LinearProgress":
+            control = controls.LinearProgress(ctx.window, value=float(value or 0.0), width=size.get("width", 240.0),
+                                              **common)
+            if "height" in size:
+                control.node.set(height=size["height"])
+                control.bar.set(height=size["height"])
+        elif kind == "CircularProgress":
+            control = controls.CircularProgress(ctx.window, value=float(value or 0.0), size=size.get("width", 48.0),
+                                                **common)
+        else:
+            control = controls.LoadingIndicator(ctx.window, size=size.get("width", 48.0), **common)
+    else:
+        common["listen"] = ctx.listen
+        if kind == "Checkbox":
+            control = controls.Checkbox(ctx.window, checked=bool(node.get("checked") or False), **size, **common)
+        elif kind == "RadioButton":
+            radio_group = None
+            if group is not None:
+                radio_group = built.radio_groups.setdefault(group, controls.RadioGroup())
+            control = controls.RadioButton(ctx.window, selected=bool(node.get("selected") or False),
+                                           group=radio_group, **size, **common)
+        elif kind == "Switch":
+            control = controls.Switch(ctx.window, selected=bool(node.get("selected") or False), **size, **common)
+        elif kind == "Slider":
+            control = controls.Slider(ctx.window, value=float(node.get("value") or 0.0), **size, **common)
+        else:  # TimePickerDial
+            common.pop("color")
+            control = controls.TimePickerDial(ctx.window, hour=int(node.get("hour") or 0),
+                                              minute=int(node.get("minute") or 0), size=size.get("width", 256.0),
+                                              **common)
+    placement = {k: v for k, v in _layout(style).items() if k in _PLACEMENT}
+    if placement:
+        control.node.set(**placement)
+    return control
+
+
+def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], control: Any, state: bool) -> None:
+    control.node.set(**{**_PLACEMENT_RESET, **{k: v for k, v in _layout(style).items() if k in _PLACEMENT}})
+    control._color = _control_colour(ctx, node, style)
+    control.set_theme(_theme(ctx))
+    if not state:
+        return
+    kind = node["kind"]
+    if kind == "Checkbox":
+        control.checked.set(bool(node.get("checked") or False))
+    elif kind in ("Switch", "RadioButton"):
+        control.selected.set(bool(node.get("selected") or False))
+    elif kind in ("Slider", "CircularProgress", "LinearProgress"):
+        control.value.set(float(node.get("value") or 0.0))
+    elif kind == "TimePickerDial":
+        control.hour.set(int(node.get("hour") or 0) % 24)
+        control.minute.set(int(node.get("minute") or 0) % 60)
+
+
+def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> tuple[Any, ...]:
+    """What a control is built at (its kind and size): when it changes,
+    the reconciler rebuilds the control rather than patching it."""
+    style = resolve_style(node, layers)
+    return node.get("kind"), style.get("width"), style.get("height"), node.get("group")

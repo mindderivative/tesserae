@@ -185,7 +185,9 @@ children:
 
     imperative = time_picker_dial(_themed_window(300, 300), hour=13, minute=45, size=256)
 
-    assert declarative.get_time_picker_dial_time() == imperative.get_time_picker_dial_time() == (13, 45)
+    dial = view.control("dial")
+    assert (dial.hour.get(), dial.minute.get()) == (imperative.hour.get(), imperative.minute.get()) == (13, 45)
+    assert declarative.get("layout_width") == 256.0 and declarative.get("role") == "slider"
 
 
 def test_time_picker_dial_hour_and_minute_are_required_params():

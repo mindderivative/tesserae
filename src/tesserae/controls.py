@@ -62,7 +62,8 @@ class Control:
     target = (TARGET_SIZE, TARGET_SIZE)
 
     def __init__(self, window: Any, *, theme: Optional[Theme] = None, label: Optional[str] = None,
-                 disabled: bool = False, listen: Optional[Listen] = None, size: Optional[float] = None) -> None:
+                 disabled: bool = False, listen: Optional[Listen] = None, size: Optional[float] = None,
+                 width: Optional[float] = None, height: Optional[float] = None) -> None:
         self.window = window
         self.theme = theme if theme is not None else Theme.resolve()
         self.disabled = Signal(bool(disabled))
@@ -70,7 +71,9 @@ class Control:
         self._changes: list[Callable[[Any], None]] = []
         self._undo: list[Callable[[], None]] = []
         self._painted = False
-        width, height = (size, size) if size is not None else self.target
+        width = float(width if width is not None else size if size is not None else self.target[0])
+        height = float(height if height is not None else size if size is not None else self.target[1])
+        self.target = (width, height)
         self.node = window.create("box", width=width, height=height, align_items="center",
                                   justify_content="center", focusable=True, role=self.role, cursor="pointer")
         if label is not None:
@@ -104,13 +107,18 @@ class Control:
         self.interaction.retint(self._tint(), self.color("secondary"))
         untrack(lambda: self._paint(animate=False))
 
-    def destroy(self) -> None:
-        """Stops the control and frees its nodes."""
+    def dispose(self) -> None:
+        """Stops the control (its repainting and listeners) but leaves its
+        node, for a caller about to free the tree it sits in."""
         self._effect.dispose()
         for undo in self._undo:
             undo()
         self._undo = []
         self.interaction.detach()
+
+    def destroy(self) -> None:
+        """Stops the control and frees its nodes."""
+        self.dispose()
         self.node.destroy()
 
     # -- for subclasses --------------------------------------------------------------
@@ -391,7 +399,7 @@ class Switch(Control):
         self.track.add_child(self.handle)
         self.node.add_child(self.track)
         # the state layer's circle rides on the handle
-        offset = (self.target[1] - self.HEIGHT) / 2
+        offset = (self.target[1] - self.HEIGHT) / 2  # the track is centred in the target
         self.surface.set(x=centre - STATE_LAYER_SIZE / 2, y=offset + centre - STATE_LAYER_SIZE / 2)
 
     def _ring_around(self) -> Any:
@@ -466,20 +474,19 @@ class Slider(Control):
     HANDLE = 20.0
 
     def __init__(self, window: Any, *, value: float = 0.0, min: float = 0.0, max: float = 1.0,
-                 step: Optional[float] = None, width: float = 200.0, color: Optional[RGBA] = None,
-                 **kwargs: Any) -> None:
+                 step: Optional[float] = None, width: float = 200.0, height: float = TARGET_SIZE,
+                 color: Optional[RGBA] = None, **kwargs: Any) -> None:
         if not max > min:
             raise ValueError(f"a slider needs max > min, got min={min!r}, max={max!r}")
         if step is not None and not step > 0:
             raise ValueError(f"a slider's step must be positive, got {step!r}")
         self.min, self.max, self.step = float(min), float(max), step
         self.width = float(width)
-        self.target = (self.width, TARGET_SIZE)
         self._color = color
         self._dragging = False
         self._start: float = 0.0
         self.value = Signal(self._snap(value))
-        super().__init__(window, **kwargs)
+        super().__init__(window, width=self.width, height=height, **kwargs)
         for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
                                ("pointer_up", self._on_up), ("key_down", self._on_key)):
             self._undo.append(self._listen(self.node, event, handler))
@@ -509,7 +516,7 @@ class Slider(Control):
         return (self._snap(self.value.get()) - self.min) / (self.max - self.min)
 
     def _build(self) -> None:
-        centre_y = TARGET_SIZE / 2
+        centre_y = self.target[1] / 2
         radius = self.HANDLE / 2
         self.inactive = self.window.create("box", position="absolute", x=radius, y=centre_y - self.TRACK / 2,
                                            width=self._span, height=self.TRACK, corner_radius=self.TRACK / 2,
@@ -797,9 +804,13 @@ class Indicator:
         self.theme = theme
         untrack(lambda: self._paint(animate=False))
 
-    def destroy(self) -> None:
+    def dispose(self) -> None:
+        """Stops the indicator's repainting and loop but leaves its node."""
         self._effect.dispose()
         self._generation += 1
+
+    def destroy(self) -> None:
+        self.dispose()
         self.node.destroy()
 
     @property
@@ -960,16 +971,18 @@ class LoadingIndicator(Indicator):
         "24.00,12.00C37.25,12.00 48.00,17.37 48.00,24.00",
     )
 
-    def __init__(self, window: Any, **kwargs: Any) -> None:
+    def __init__(self, window: Any, *, size: float = SIZE, **kwargs: Any) -> None:
         kwargs["value"] = None
         self._step = 0
+        self.size = float(size)
         super().__init__(window, **kwargs)
 
     def _build(self) -> Any:
-        node = self.window.create("box", width=self.SIZE, height=self.SIZE, align_items="center",
+        node = self.window.create("box", width=self.size, height=self.size, align_items="center",
                                   justify_content="center")
-        self.shape = self.window.create("path", data=self.SHAPES[0], view_box=(0, 0, 48, 48), width=self.SHAPE,
-                                        height=self.SHAPE, hit_testable=False, a11y_hidden=True)
+        shape = self.size * self.SHAPE / self.SIZE  # MD3: 38 of 48
+        self.shape = self.window.create("path", data=self.SHAPES[0], view_box=(0, 0, 48, 48), width=shape,
+                                        height=shape, hit_testable=False, a11y_hidden=True)
         node.add_child(self.shape)
         return node
 
@@ -999,15 +1012,16 @@ class TimePickerDial(Control):
     `on_change` gets `(hour, minute)`."""
 
     role = "slider"
-    SIZE = 256.0
     SELECTOR = 48.0
-    RADIUS = 256.0 / 2 - 24.0 - 4.0  # the numbers' circle: the selector sits inside the face's edge
 
     def __init__(self, window: Any, *, hour: int = 0, minute: int = 0, mode: str = "hour",
-                 auto_advance: bool = True, **kwargs: Any) -> None:
+                 auto_advance: bool = True, size: float = 256.0, **kwargs: Any) -> None:
         if mode not in ("hour", "minute"):
             raise ValueError(f"a time picker dial's mode is 'hour' or 'minute', got {mode!r}")
-        self.target = (self.SIZE, self.SIZE)
+        self.SIZE = float(size)
+        # the numbers' circle: the selector sits just inside the face's edge
+        self.RADIUS = self.SIZE / 2 - self.SELECTOR / 2 - 4.0
+        kwargs["size"] = self.SIZE
         self.hour = Signal(int(hour) % 24)
         self.minute = Signal(int(minute) % 60)
         self.mode = Signal(mode)

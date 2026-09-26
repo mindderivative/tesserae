@@ -88,7 +88,8 @@ can't come sooner: on nodes a `tre` `View` builds, 0.3.4's new API sets
 text, paint and layout, but `set(checked=...)` on a legacy Checkbox
 only sets its accessibility flag, and nothing but the legacy
 `set_checked` reaches its state. Bindings on `checked`/`selected`/`value`
-therefore arrive with Tesserae's own controls (M40).
+therefore arrived with Tesserae's own controls (M40), which hold that
+state in `Signal`s.
 
 ### Spec compiler and cascade (M37)
 
@@ -101,7 +102,7 @@ The compiler takes an expanded spec dict (from Tesserae's existing
 | `kind: Text` | `create("text")` |
 | `kind: Icon` | `create("path")`, data from Tesserae's icon set (D4) |
 | `kind: Link` | a `text` with `role="link"` and a pointer cursor |
-| the eight MD3 kinds (`Checkbox`, `Switch`, …) | until M40, `tre`'s legacy window factories, moved into the tree: the one temporary use of the old API |
+| the eight MD3 kinds (`Checkbox`, `Switch`, …) | Tesserae's MD3 controls (`tesserae.controls`, M40), built from `box`, `path` and `text`; `tre`'s legacy factories until then |
 | `kind: TextField` | a `box` (its background) holding a `text_input`, whose `fill` is the glyph colour |
 | `kind: Image` | `create("image")` with decoded `rgba` |
 | `background` on a box, `foreground` on text or an icon | `fill` |
@@ -147,10 +148,13 @@ window, it makes and themes its own.
 - **Handlers:** `node.on` keeps one listener per event, so each node and
   event gets one dispatcher, shared by `on_change` and `two_way:`. A
   handler taking one argument gets the event.
-- **The legacy MD3 widgets** have one `set_on_change` slot, which fires on
-  programmatic changes too, so it's suppressed while a binding sets their
-  state, and a theme or stylesheet change restyles them without resetting
-  it.
+- **The MD3 controls** (M40) hold their state in `Signal`s: a binding
+  sets the `Signal`, and `on_change` and `two_way:` hear the control's
+  `on_change`, which fires for the user's changes only, so there's
+  nothing to suppress. A theme or stylesheet change re-tints them
+  without resetting what the user did. (Until M40, `tre`'s legacy
+  widgets had one `set_on_change` slot that fired on programmatic
+  changes too, and needed suppressing.)
 - **The reconciler** keeps unchanged nodes (identity, focus) and orders
   children as the new spec does, with `insert_child`, where `tre` could
   only append.

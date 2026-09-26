@@ -14,10 +14,11 @@ by Tesserae; a change re-evaluates the expression (re-tracking what it
 reads) and sets the property. A value that hasn't changed isn't set
 again. On `tre` 0.3.4's building blocks a programmatic `set` fires no
 `change` event, so a declared `on_change` runs only for the user's own
-edits (`tre` issue #12 doesn't happen here). The eight MD3 kinds are
-still `tre`'s legacy widgets until M40 (see `tesserae.spec.build`); their
-`checked`/`selected`/`value` bindings and `on_change` go through their
-legacy methods, guarded so an unchanged value isn't set.
+edits (`tre` issue #12 doesn't happen here). The eight MD3 control kinds
+are Tesserae's controls (M40, `tesserae.controls`): their `checked`/
+`selected`/`value`/`hour`/`minute` and `disabled` bindings set the
+control's `Signal`s, and `on_change` and `two_way:` hear the control's
+`on_change`, which fires for the user's changes only.
 
 **Handlers** are `node.on(...)` listeners: `on_click` → `click`,
 `on_hover_enter` → `pointer_enter`, `on_hover_exit` → `pointer_leave`,
@@ -50,7 +51,7 @@ from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners
 from tesserae.spec.build import (
-    Built, _LEGACY_KINDS, build_with, focus_ring_color, interaction_tint, patch, prepare_layers,
+    Built, _CONTROL_KINDS, build_with, control_shape, focus_ring_color, interaction_tint, patch, prepare_layers,
 )
 from tesserae.spec.cascade import check_stylesheet, check_theme
 
@@ -83,8 +84,8 @@ class View:
     dark flag, and the three `*_spec` dicts.
 
     `window` is the `tre.Window` to build into. Without one, the view
-    makes its own, mounts its root there, and themes it (the legacy MD3
-    kinds read the window's theme until M40)."""
+    makes its own, mounts its root there, and themes it (`tre`'s own
+    widgets, from `tesserae.widgets`, read the window's theme until M41)."""
 
     def __init__(
         self,
@@ -131,9 +132,10 @@ class View:
         self.window = window
         self._spec = spec
         self._built = Built(root=None)
+        self._events = Listeners()
         try:
             self._built.root = build_with(window, spec, scheme=self._scheme, layers=self._layers,
-                                          frames=self._frames, into=self._built)
+                                          frames=self._frames, into=self._built, listen=self._events.listen)
         except ValueError as exc:
             if self.path is not None:
                 raise ValueError(f"{self.path}: {exc}") from exc
@@ -142,8 +144,6 @@ class View:
             window.root.add_child(self._built.root)
         self._viewmodel: Any = None
         self._wiring: list[Callable[[], None]] = []  # undo steps
-        self._listeners: dict[tuple[int, str], list[Any]] = {}
-        self._events = Listeners()
         self._interactions: dict[str, Interaction] = {}
         self._sync_interactions()
 
@@ -172,6 +172,15 @@ class View:
         except KeyError:
             raise ValueError(f"no widget with id {widget_id!r} in this view") from None
 
+    def control(self, widget_id: str) -> Any:
+        """The MD3 control (`tesserae.controls`) behind `widget_id`, one of
+        the eight control kinds (M40); its `.node` is `node(widget_id)`."""
+        self.node(widget_id)
+        try:
+            return self._built.controls[widget_id]
+        except KeyError:
+            raise ValueError(f"widget {widget_id!r} isn't a control kind") from None
+
     def interaction(self, widget_id: str) -> Optional[Interaction]:
         """The state layer and ripple on `widget_id`'s node (M39), or `None`
         when it has none."""
@@ -192,15 +201,17 @@ class View:
         # (a bad kind, colour or token) leaves the live tree as it was.
         trial = Built(root=None)
         trial.root = build_with(self.window, spec, scheme=self._scheme, layers=self._layers, frames=self._frames,
-                                into=trial)
+                                into=trial, listen=Listeners().listen)
+        for control in trial.controls.values():
+            control.dispose()
         trial.root.destroy()
         old = self._spec
-        if spec.get("id") != old.get("id") or spec.get("kind") != old.get("kind"):
+        if spec.get("id") != old.get("id") or not self._same_shape(old, spec):
             parent = self._built.root.parent()
             self._forget(old)
             self._built.root.destroy()
             self._built.root = build_with(self.window, spec, scheme=self._scheme, layers=self._layers,
-                                          frames=self._frames, into=self._built)
+                                          frames=self._frames, into=self._built, listen=self._events.listen)
             if parent is not None:
                 parent.add_child(self._built.root)
         else:
@@ -263,9 +274,11 @@ class View:
         self._drop_interactions()
         old_root, old_window = self._built.root, self.window
         self.window = window
+        self._dispose_controls()
         self._built = Built(root=None)
+        self._events = Listeners()
         self._built.root = build_with(window, self._spec, scheme=self._scheme, layers=self._layers,
-                                      frames=self._frames, into=self._built)
+                                      frames=self._frames, into=self._built, listen=self._events.listen)
         old_root.destroy()
         self._owns_window = False
         del old_window
@@ -276,7 +289,8 @@ class View:
     def _repatch(self, scheme: Any, layers: Any) -> None:
         for node_id, node_spec in self._built.specs.items():
             patch(self.window, node_spec, self._built.outer[node_id], self._built.nodes[node_id],
-                  scheme=scheme, layers=layers, frames=self._frames, state=False)
+                  scheme=scheme, layers=layers, frames=self._frames, state=False,
+                  control=self._built.controls.get(node_id))
         self._sync_interactions(scheme)
 
     def _sync_interactions(self, scheme: Any = None) -> None:
@@ -313,13 +327,13 @@ class View:
         outer = self._built.outer[node_id]
         if not _props_equal(old, new):
             patch(self.window, new, outer, self._built.nodes[node_id], scheme=self._scheme, layers=self._layers,
-                  frames=self._frames, set_state=_legacy_set)
+                  frames=self._frames, control=self._built.controls.get(node_id))
         self._built.specs[node_id] = new
         old_children = {c["id"]: c for c in old.get("children") or []}
         kept: set[str] = set()
         for index, child in enumerate(new.get("children") or []):
             previous = old_children.get(child["id"])
-            if previous is not None and previous.get("kind") == child.get("kind"):
+            if previous is not None and self._same_shape(previous, child):
                 kept.add(child["id"])
                 self._reconcile_node(previous, child)
                 child_node = self._built.outer[child["id"]]
@@ -329,7 +343,7 @@ class View:
                     self._forget(previous)
                     self._built.outer.get(child["id"]) and self._built.outer[child["id"]].destroy()
                 child_node = build_with(self.window, child, scheme=self._scheme, layers=self._layers,
-                                        frames=self._frames, into=self._built)
+                                        frames=self._frames, into=self._built, listen=self._events.listen)
             # a tre Node is a fresh handle on each call, so compare with ==, not `is`
             if child_node.parent() != outer or _child_index(outer, child_node) != index:
                 outer.insert_child(index, child_node)
@@ -340,7 +354,24 @@ class View:
                 if node is not None:
                     node.destroy()
 
+    def _same_shape(self, old: dict[str, Any], new: dict[str, Any]) -> bool:
+        """Whether `old`'s node can be patched into `new` rather than
+        rebuilt: the same kind, and for a control, the same size."""
+        if old.get("kind") != new.get("kind"):
+            return False
+        if new.get("kind") in _CONTROL_KINDS:
+            return control_shape(old, self._layers) == control_shape(new, self._layers)
+        return True
+
+    def _dispose_controls(self) -> None:
+        for control in self._built.controls.values():
+            control.dispose()
+        self._built.controls.clear()
+
     def _forget(self, spec: dict[str, Any]) -> None:
+        control = self._built.controls.pop(spec["id"], None)
+        if control is not None:
+            control.dispose()
         for key in ("nodes", "outer", "specs"):
             getattr(self._built, key).pop(spec["id"], None)
         for child in spec.get("children") or []:
@@ -402,8 +433,10 @@ class View:
             return  # validated, not wired -- as in tre
         call = _arity_adapter(method)
         node = self._built.nodes[node_id]
-        if tre_event == "change" and node_spec.get("kind") in _LEGACY_KINDS:
-            self._add_legacy_change(node, lambda: call(None))
+        control = self._built.controls.get(node_id)
+        if tre_event == "change" and control is not None:
+            if hasattr(control, "on_change"):
+                self._wiring.append(control.on_change(lambda value: call(None)))
             return
         self._add_listener(node, tre_event, call)
 
@@ -416,22 +449,6 @@ class View:
         node and event shares one dispatcher. Returns the undo."""
         return self._events.listen(node, event, fn)
 
-    def _add_legacy_change(self, node: Any, fn: Callable[[], None]) -> None:
-        """A legacy MD3 widget has one change slot (`set_on_change`), and it
-        fires on programmatic changes too; callbacks share the slot, and are
-        skipped while a binding is applying its value."""
-        key = (id(node), "legacy change")
-        slot = self._listeners.get(key)
-        if slot is None:
-            slot = self._listeners[key] = []
-            node.set_on_change(lambda: None if _applying else [cb() for cb in list(slot)])
-        slot.append(fn)
-
-        def undo() -> None:
-            if fn in slot:
-                slot.remove(fn)
-        self._wiring.append(undo)
-
     def _wire_binding(self, node_spec: dict[str, Any], prop: str, raw: str) -> None:
         node_id = node_spec["id"]
         where = f'widget "{node_id}" binding on "{prop}" ({_quoted(raw)})'
@@ -441,6 +458,7 @@ class View:
             raise ValueError(f"{where}: {exc}") from None
         node = self._node_for(node_spec, prop)
         kind = node_spec.get("kind")
+        control = self._built.controls.get(node_id)
         subscribed: list[Any] = []
 
         def run() -> None:
@@ -455,7 +473,10 @@ class View:
                 subscribed[:] = reactive._end_recording()
             for dependency in subscribed:
                 dependency._subscribe(run)
-            _apply(node, kind, prop, value)
+            if control is not None and prop in _CONTROL_STATE:
+                _apply_to_control(control, kind, prop, value)
+            else:
+                _apply(node, kind, prop, value)
 
         run()
 
@@ -481,10 +502,13 @@ class View:
             raise ValueError(f'widget "{node_id}": two_way binding names "{name}", which has no matching attribute '
                              "on the ViewModel")
         node = self._node_for(node_spec, prop)
-        kind = node_spec.get("kind")
-        if kind in _LEGACY_KINDS:
-            read = {"checked": node.get_checked, "selected": node.get_selected}.get(prop, lambda: node.get(prop))
-            self._add_legacy_change(node, lambda: signal.set(read()))
+        control = self._built.controls.get(node_id)
+        if control is not None:
+            state = getattr(control, prop, None)
+            if not isinstance(state, reactive.Signal) or not hasattr(control, "on_change"):
+                raise ValueError(f'widget "{node_id}": a {node_spec.get("kind")} has no user-editable "{prop}" '
+                                 "for two_way")
+            self._wiring.append(control.on_change(lambda value: signal.set(state.get())))
             return
         self._add_listener(node, "change", lambda event_obj: signal.set(node.get(prop)))
 
@@ -519,6 +543,7 @@ class Component(View):
             component.remove()
         self._unwire()
         self._drop_interactions()
+        self._dispose_controls()
         self._viewmodel = None
         if self in self._host._components:
             self._host._components.remove(self)
@@ -560,18 +585,23 @@ def _arity_adapter(method: Callable[..., Any]) -> Callable[[Any], Any]:
     return lambda event_obj: method()
 
 
-#: True while a binding sets a legacy widget's state, whose change slot
-#: fires on programmatic changes too; its callbacks are skipped then.
-_applying = False
+#: A control's state a binding sets on the control (M40), and the type each takes.
+_CONTROL_STATE = {"checked": bool, "selected": bool, "disabled": bool, "value": float, "hour": int, "minute": int}
 
 
-def _legacy_set(setter: Callable[[Any], None], value: Any) -> None:
-    global _applying
-    _applying = True
-    try:
-        setter(value)
-    finally:
-        _applying = False
+def _apply_to_control(control: Any, kind: Optional[str], prop: str, value: Any) -> None:
+    """Sets a bound value on a control's `Signal`, with `tre`'s type rules
+    and messages."""
+    expected = _CONTROL_STATE[prop]
+    if expected is bool:
+        if not isinstance(value, bool):
+            raise ValueError(f'widget property "{prop}" expects a boolean binding, got {value_debug(value)}')
+    elif isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f'widget property "{prop}" expects a numeric binding, got {value_debug(value)}')
+    state = getattr(control, prop, None)
+    if not isinstance(state, reactive.Signal):
+        raise ValueError(f'a {kind} has no "{prop}" to bind')
+    state.set(expected(value))
 
 
 def _apply(node: Any, kind: Optional[str], prop: str, value: Any) -> None:
@@ -580,12 +610,6 @@ def _apply(node: Any, kind: Optional[str], prop: str, value: Any) -> None:
     if prop in ("checked", "selected"):
         if not isinstance(value, bool):
             raise ValueError(f'widget property "{prop}" expects a boolean binding, got {value_debug(value)}')
-        if kind in _LEGACY_KINDS:
-            getter, setter = ((node.get_checked, node.set_checked) if prop == "checked"
-                              else (node.get_selected, node.set_selected))
-            if getter() != value:
-                _legacy_set(setter, value)
-            return
         if node.get(prop) != value:
             node.set(**{prop: value})
         return
@@ -617,9 +641,6 @@ def _apply(node: Any, kind: Optional[str], prop: str, value: Any) -> None:
         node.set(**{target: tokens.elevation_shadows(raw) if prop == "elevation" else raw})
         return
     if isinstance(value, (int, float)) and not isinstance(value, bool):
-        if prop == "value" and kind in _LEGACY_KINDS:
-            node.animate("value", float(value), 0)  # a legacy MD3 widget's own value, until M40
-            return
         new = tokens.elevation_shadows(float(value)) if prop == "elevation" else float(value)
         if node.get(target) != new:
             node.set(**{target: new})

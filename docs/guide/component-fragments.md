@@ -217,6 +217,25 @@ covering every MD3 category:
 | Media & Graphics | `Image`, `NodeGraph` |
 | Date & Time | `DatePickerDay`/`DatePickerDaySelected`/`DatePickerDayToday`/`DatePickerDayOutsideMonth`, `PeriodSelector{AM,PM}`, `TimePickerDial` |
 
+The Selection & Input, Progress & Status and `TimePickerDial` fragments
+expand to the eight **control kinds** (`Checkbox`, `RadioButton`,
+`Switch`, `Slider`, `CircularProgress`, `LinearProgress`,
+`LoadingIndicator`, `TimePickerDial`). Since M40 these are Tesserae's MD3
+controls, which respond to the pointer and keyboard themselves: a
+checkbox ticks, a slider drags. Their state takes bindings and
+`two_way:` (`checked`, `selected`, `value`, `hour`, `minute`), as does
+`disabled`, and `on_change` runs for the user's changes. Radio buttons
+with the same `group:` name exclude each other and are one Tab stop:
+
+```yaml
+- {id: small, kind: RadioButton, selected: true, group: size, style: {}}
+- {id: large, kind: RadioButton, selected: false, group: size, style: {}}
+```
+
+`view.control("small")` returns a control, whose `Signal`s are its state.
+The `SpinBox` fragment is still a composition, with no behaviour of its
+own; `tesserae.widgets.spin_box` gives a working one.
+
 For each fragment's exact `params:` and structure, read the file
 directly under `src/tesserae/spec/components/` -- every one is short
 (typically under 25 lines) and carries its own comment explaining which

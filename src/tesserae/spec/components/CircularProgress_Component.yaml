@@ -1,9 +1,5 @@
-# `add_circular_progress`'s declarative counterpart -- `value` maps
-# directly onto `WidgetSpec`'s own top-level `value` field, the identical
-# real shape `Slider_Component.yaml` uses. No `background` param --
-# `indicator_tint` is real-theme-resolved at declarative build time
-# (`tre`'s `build.rs`, M84), the identical "no color param" contract
-# `add_circular_progress` itself already has.
+# MD3's circular progress indicator (Tesserae's
+# `controls.CircularProgress`, M40): `value` in 0..1, `size` its box.
 params: [size, value]
 id: root
 kind: CircularProgress

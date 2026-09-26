@@ -1,14 +1,7 @@
-# `add_loading_indicator`'s declarative counterpart. Unlike the other 4
-# new kinds this milestone adds, this one DOES take a `background` param
-# -- its "background" is really the glyph's own tint color (`required_
-# background`, the identical real semantic `kind: Icon`'s own `style.
-# background` already has), not a fill behind content. Pass a real MD3
-# role name like `primary` (the same real value `add_loading_
-# indicator`'s own `color=None` default resolves to when a theme is
-# set) or a literal color. `params:` has no default mechanism (every
-# declared name is required on every use), so unlike the imperative
-# factory's own optional `color=` kwarg, this fragment always needs one
-# supplied explicitly.
+# MD3's loading indicator (Tesserae's `controls.LoadingIndicator`, M40):
+# a shape morphing forever, `size` its box. `background` is the shape's
+# colour (a role such as `primary`, or a literal colour); `params:` has
+# no defaults, so it's always given.
 params: [size, background]
 id: root
 kind: LoadingIndicator

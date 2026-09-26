@@ -99,4 +99,6 @@ Phase 3 done: Slider and SpinBox; 1142 passed.
 
 Phase 4 done: progress (linear and circular, indeterminate too), the loading indicator, the time picker dial; 1157 passed.
 
-**Up next:** M40 Phase 5 (wiring).
+Phase 5 done: the YAML control kinds and the stateful factories are Tesserae's controls; the todo_list checkbox ticks; 1179 passed.
+
+**Up next:** M40 Phase 6 (gate check, controls guide, close M40).

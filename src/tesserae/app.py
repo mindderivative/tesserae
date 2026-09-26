@@ -170,7 +170,7 @@ class App:
                               align_items="flex_start")
         self._current: str | None = None
         self._tre_app: _TreApp | None = None
-        self._set_window_theme()  # the legacy MD3 kinds read the window's theme until M40
+        self._set_window_theme()  # tesserae.widgets' composed widgets read the window's theme until M41
         self._window.on("color_scheme", self._on_color_scheme)
 
     # -- light and dark (M38) ---------------------------------------------------

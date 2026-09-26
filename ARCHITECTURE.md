@@ -156,7 +156,8 @@ tokens -- replacing `tre`'s `Window.theme` for Tesserae's own widgets
 Link; not text inputs), carried on the cascade's prepared layers.
 `App(dark="system")` is the default: it starts dark and follows the
 window's `color_scheme` event; `set_dark` fixes or releases it. `App`
-still calls `Window.set_theme` for `tre`'s legacy widgets until M41.
+still calls `Window.set_theme` for `tre`'s own widgets (`tesserae.widgets`'
+composed ones) until M41.
 
 **Interaction, M39:** a clickable YAML node is a focusable
 `role="button"` Tab stop (the compiler sets it, as `tre`'s
@@ -197,6 +198,18 @@ counter so a settled or destroyed indicator stops. The loading indicator
 lets tre morph `path` `data` between outlines, which tre resamples itself.
 `TimePickerDial` is a `Control`: its hand is a `path`, and the selector
 and state-layer circle move by `translate_x`/`translate_y`.
+
+**Controls in views, M40 Phase 5:** the compiler builds the eight
+control kinds as controls (`build._control`), recorded in
+`Built.controls`, and `View.control(id)` returns one. They share the
+view's `Listeners`. A trial build gets its own dispatcher, and its
+controls are disposed. Bindings on `checked`/`selected`/`value`/`hour`/
+`minute`/`disabled` set the control's `Signal`s. `on_change` and
+`two_way:` use the control's `on_change`. A reconcile patches a control
+in place (placement, colour, theme, and the YAML's state), but rebuilds
+it when its size or `group:` changes (`control_shape`). A forgotten or
+moved control is disposed. RadioButtons sharing a `group:` name share a
+`RadioGroup` per view.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

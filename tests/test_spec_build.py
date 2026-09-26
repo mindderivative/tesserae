@@ -144,21 +144,37 @@ def test_images_take_decoded_pixels_and_fit():
     ("LoadingIndicator", {"style": {"width": 48, "height": 48, "foreground": "primary"}}),
     ("TimePickerDial", {"hour": 3, "minute": 30, "style": {"width": 256, "height": 256}}),
 ])
-def test_the_md3_kinds_build_with_their_state_until_m40(kind, fields):
+def test_the_md3_kinds_build_as_tesserae_controls(kind, fields):
+    """Since M40 the eight kinds are Tesserae's MD3 controls, sized by
+    their style and holding their spec's state."""
     spec = {"id": "root", "kind": "Container", "children": [{"id": "w", "kind": kind, **fields}]}
     window = _window()
     built = build(window, spec, scheme=SCHEME)
-    node = built.nodes["w"]
-    assert node.parent() is not None  # moved into the tree, off the window's root
+    control, node = built.controls["w"], built.nodes["w"]
+    assert node == control.node and node.parent() is not None
     window.root.add_child(built.root)
     window.advance(16)
     assert node.get("layout_width") == fields["style"]["width"]
     if kind == "Checkbox":
-        assert node.get_checked() is True
+        assert control.checked.get() is True and node.get("checked") is True
     elif kind in ("Switch", "RadioButton"):
-        assert node.get_selected() is True
+        assert control.selected.get() is True and node.get("checked") is True
     elif kind in ("Slider", "CircularProgress", "LinearProgress"):
-        assert node.get("value") == pytest.approx(fields["value"])
+        assert control.value.get() == pytest.approx(fields["value"]) and node.get("value") == pytest.approx(fields["value"])
+    elif kind == "TimePickerDial":
+        assert (control.hour.get(), control.minute.get()) == (3, 30)
+
+
+def test_a_loading_indicator_needs_no_size_now():
+    """`tre` required a LoadingIndicator's width; Tesserae's is MD3's 48 px unless given."""
+    built = build(_window(), {"id": "w", "kind": "LoadingIndicator", "style": {}}, scheme=SCHEME)
+    assert built.nodes["w"].get("width") == 48.0
+
+
+def test_a_controls_colour_comes_from_its_style():
+    spec = {"id": "c", "kind": "Checkbox", "checked": True, "style": {"background": "#FF0000"}}
+    control = build(_window(), spec, scheme=SCHEME).controls["c"]
+    assert control.box.get("fill") == (0xFF, 0, 0, 0xFF)
 
 
 ERROR_CASES = {
@@ -174,7 +190,6 @@ ERROR_CASES = {
     "unknown icon": {"id": "x", "kind": "Icon", "icon": {"name": "nope"}, "style": {"foreground": "#000000"}},
     "Checkbox with selected": {"id": "x", "kind": "Checkbox", "selected": True, "style": {"background": "#000000"}},
     "Switch with checked": {"id": "x", "kind": "Switch", "checked": True, "style": {}},
-    "LoadingIndicator without width": {"id": "x", "kind": "LoadingIndicator", "style": {"foreground": "#000000", "height": 4}},
 }
 
 

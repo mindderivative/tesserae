@@ -1,7 +1,7 @@
 """Real coverage for the Selection & Input component fragments
-(`Checkbox`/`Slider`/`SpinBox`/`RadioButton`/`Switch`). The latter two
-were blocked until `tre`'s own M84 added declarative `NodeKindSpec`
-support for both (this repo's own M27) -- see `BUILD_TRACKER.md`.
+(`Checkbox`/`Slider`/`SpinBox`/`RadioButton`/`Switch`). Since M40 the
+kinds they expand to are Tesserae's MD3 controls, so each is checked
+against the `tesserae.widgets` factory's control by state.
 """
 
 import pytest
@@ -27,8 +27,7 @@ children:
 """
     expanded = expand_components(yaml_text)
     view = view_from(expanded)
-    node = view.node("cb")
-    assert node.get_checked() is True
+    assert view.control("cb").checked.get() is True and view.node("cb").get("checked") is True
 
 
 def test_checkbox_checked_is_a_required_param_not_silently_defaulted():
@@ -80,13 +79,14 @@ children:
     increment = view.node("sb.increment")
 
     window = Window(width=200, height=100)
-    window.set_theme(THEME_SEED)
-    imp_field, imp_minus, imp_plus = spin_box(window, "3")
+    control = spin_box(window, "3")
 
-    assert decrement.get("corner_radius") == imp_minus.get("corner_radius")
+    # the fragment is still a composition (no SpinBox kind): it matches the control's shape
+    assert decrement.get("corner_radius") == control.decrement.get("corner_radius")
     # a TextField's node is its text input; its box (background, corners) is the parent
-    assert field.parent().get("corner_radius") == imp_field.get("corner_radius")
-    assert increment.get("corner_radius") == imp_plus.get("corner_radius")
+    assert field.parent().get("corner_radius") == control.field.get("corner_radius")
+    assert increment.get("corner_radius") == control.increment.get("corner_radius")
+    assert control.value.get() == 3 and control.input.get("text") == "3"
 
 
 def test_radio_button_matches_the_imperative_catalog():
@@ -110,10 +110,10 @@ children:
     declarative = view.node("opt")
 
     window = Window(width=200, height=100)
-    window.set_theme(THEME_SEED)
     imperative = radio_button(window, size=20, selected=True)
 
-    assert declarative.get_selected() == imperative.get_selected() is True
+    assert view.control("opt").selected.get() is imperative.selected.get() is True
+    assert declarative.get("layout_width") == imperative.node.get("width") == 20.0
 
 
 def test_radio_button_selected_is_a_required_param_not_silently_defaulted():
@@ -147,10 +147,10 @@ children:
     declarative = view.node("toggle")
 
     window = Window(width=200, height=100)
-    window.set_theme(THEME_SEED)
     imperative = switch(window, width=52, height=32, selected=False)
 
-    assert declarative.get_selected() == imperative.get_selected() is False
+    assert view.control("toggle").selected.get() is imperative.selected.get() is False
+    assert declarative.get("checked") is imperative.node.get("checked") is False
 
 
 def test_switch_with_no_theme_still_builds_falling_back_to_the_real_md3_baseline():
@@ -168,5 +168,6 @@ children:
 """
     expanded = expand_components(yaml_text)
     view = view_from(expanded)
-    node = view.node("toggle")
-    assert node.get_selected() is True
+    control = view.control("toggle")
+    assert control.selected.get() is True
+    assert control.track.get("fill") == (0x67, 0x50, 0xA4, 0xFF)  # MD3's baseline primary

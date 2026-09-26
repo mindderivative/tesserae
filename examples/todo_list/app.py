@@ -46,14 +46,11 @@ for _ in range(3):
 assert len(vm.repeater) == 3
 assert item_texts() == ["Item 1", "Item 2", "Item 3"]
 
-# Toggle the first item's checkbox -- a real two-way binding write-back.
-# `Node.set_checked` (not `window.click`) is the real, Python-reachable
-# Change source for a Checkbox (tre's own `examples/two_way_binding.py`
-# documents this precedent: a real click routes through the same real
-# method, but a synthetic `click()` dispatch alone doesn't include a
-# Checkbox's own toggle behavior).
+# Tick the first item's checkbox with a real dispatched click -- since
+# M40 it's Tesserae's MD3 checkbox, which toggles itself, and `two_way:`
+# writes the change back to the item's `done` Signal.
 first_component, first_vm = vm.repeater[1]
-first_component.node("check").set_checked(True)
+window.simulate("click", node=first_component.node("check"))
 assert first_vm.done.get() is True
 
 # Remove the second item via its own dispatched "remove" click --

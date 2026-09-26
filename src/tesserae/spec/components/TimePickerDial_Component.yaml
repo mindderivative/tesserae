@@ -1,10 +1,5 @@
-# `add_time_picker_dial`'s declarative counterpart -- `hour`/`minute`
-# map directly onto `WidgetSpec`'s own new top-level `hour`/`minute`
-# fields (`tre`'s `spec.rs`, M84 -- the one real new field either of
-# these 7 needed, every other kind reuses `checked`/`value`). No
-# `background` param -- both `face_tint`/`hand_tint` are real-theme-
-# resolved at declarative build time, the identical "no color param"
-# contract `add_time_picker_dial` itself already has.
+# MD3's time picker dial (Tesserae's `controls.TimePickerDial`, M40):
+# `hour` (0..23) and `minute` (0..59) set the hands, `size` the face.
 params: [size, hour, minute]
 id: root
 kind: TimePickerDial

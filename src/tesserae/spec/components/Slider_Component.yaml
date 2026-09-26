@@ -1,8 +1,6 @@
-# `add_slider`'s declarative counterpart -- `value`/`background` map
-# directly onto `WidgetSpec`'s own top-level `value`/`style.background`
-# fields, the identical real shape `Checkbox_Component.yaml` uses for
-# `checked`. `add_slider` also hardcodes `corner_radius=0.0` with no
-# param, confirmed directly.
+# MD3's slider (Tesserae's `controls.Slider`, M40): `value` in 0..1,
+# `background` the active track's and handle's colour, `width` the
+# track's length and `height` the touch target's. Drag or the arrow keys set it.
 params: [background, width, height, value]
 id: root
 kind: Slider

@@ -1,14 +1,5 @@
-# `add_radio_button`'s declarative counterpart -- `selected` maps onto
-# `WidgetSpec`'s own top-level `checked` field (confirmed directly
-# against `tre`'s `build.rs`, M84: `RadioButtonState::new(spec.checked)`).
-# No `background` param, unlike `Checkbox`/`Slider` -- `RadioButton`'s
-# entire real visual lives in 2 internal tint fields (`unselected_tint`/
-# `selected_tint`), both real-theme-resolved at declarative build time
-# (falls back to the real MD3 baseline when no theme is set), the
-# identical "no color param, theme-resolved internally" contract
-# `add_radio_button` itself already has -- a real improvement over
-# `Checkbox_Component.yaml`'s own honest gap (its `mark_tint` is never
-# theme-resolved declaratively at all).
+# MD3's radio button (Tesserae's `controls.RadioButton`, M40): `selected`
+# is its state and `size` its touch target. A click selects it.
 params: [size, selected]
 id: root
 kind: RadioButton

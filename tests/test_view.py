@@ -190,14 +190,29 @@ def test_typing_writes_back_and_on_change_runs_only_for_user_edits():
     assert vm.name.get() == "from codex" and vm.changes == 1
 
 
-def test_a_legacy_checkbox_two_way_and_on_change_only_for_its_own_changes():
+def test_a_checkbox_two_way_and_on_change_only_for_its_own_changes():
     view = _view(_root(CHECK))
     vm = VM(view)
-    assert view.node("cb").get_checked() is True and vm.changes == 0  # the binding's initial True
+    control = view.control("cb")
+    assert control.checked.get() is True and vm.changes == 0  # the binding's initial True
     vm.agreed.set(False)
-    assert view.node("cb").get_checked() is False and vm.changes == 0
-    view.node("cb").set_checked(True)  # what a real click does
+    assert control.checked.get() is False and view.node("cb").get("checked") is False and vm.changes == 0
+    view.window.simulate("click", node=view.node("cb"))  # the user ticks it (M40: it ticks itself)
     assert vm.agreed.get() is True and vm.changes == 1
+    view.window.simulate("key_down", key="space")
+    view.window.simulate("key_up", key="space")
+    assert vm.agreed.get() is False and vm.changes == 2
+
+
+def test_controls_expose_their_signals_and_bind_disabled():
+    spec = _root(dict(CHECK, bindings={"checked": "{{ agreed.get() }}", "disabled": "{{ agreed.get() }}"}))
+    view = _view(spec)
+    vm = VM(view)
+    assert view.control("cb").disabled.get() is True and view.node("cb").get("focusable") is False
+    vm.agreed.set(False)
+    assert view.control("cb").disabled.get() is False and view.node("cb").get("focusable") is True
+    with pytest.raises(ValueError, match="isn't a control kind"):
+        view.control("root")
 
 
 def test_two_way_needs_a_plain_signal_get():
@@ -279,7 +294,7 @@ def test_set_stylesheet_and_set_theme_restyle_in_place_and_keep_state():
 
     assert a.get("fill") == tokens.color_scheme((0xB3, 0x26, 0x1E, 0xFF))["primary"]
     assert a.get("corner_radius") == 7.0  # the stylesheet stays
-    assert view.node("label").get("text") == "Hello" and view.node("cb").get_checked() is True
+    assert view.node("label").get("text") == "Hello" and view.control("cb").checked.get() is True
     assert vm.changes == 0 and vm.agreed.get() is True
 
 

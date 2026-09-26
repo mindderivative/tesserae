@@ -1,6 +1,7 @@
 """Real coverage for `tesserae.widgets`'s Date & Time Pickers category --
 `date_picker_day`/`time_picker_dial`/`period_selector`. Same
-thin-delegate parity strategy as the other widget test modules.
+thin-delegate parity strategy as the other widget test modules, except
+`time_picker_dial`, a Tesserae control since M40.
 """
 
 import pytest
@@ -25,11 +26,13 @@ def test_date_picker_day_selected_kwarg_really_flows_through():
     assert selected is not None and unselected is not None
 
 
-def test_time_picker_dial_matches_native_add_time_picker_dial():
+def test_time_picker_dial_returns_a_dial_control():
+    from tesserae import controls
+
     window = Window(width=400, height=300)
-    a = time_picker_dial(window, hour=9, minute=30)
-    b = window.add_time_picker_dial(hour=9, minute=30)
-    assert a.get("corner_radius") == b.get("corner_radius")
+    dial = time_picker_dial(window, hour=9, minute=30, size=200)
+    assert isinstance(dial, controls.TimePickerDial) and (dial.hour.get(), dial.minute.get()) == (9, 30)
+    assert dial.node.get("width") == 200.0 and dial.node.parent() == window.root
 
 
 def test_period_selector_matches_native_add_period_selector():

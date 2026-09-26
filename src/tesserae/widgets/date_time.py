@@ -7,7 +7,7 @@ avoid shadowing the standard library module.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from tre import Node, Window
@@ -44,9 +44,14 @@ def time_picker_dial(
     size: float = 256.0,
     x: float | None = None,
     y: float | None = None,
-) -> "Node":
-    """The analog clock-face dial."""
-    return window.add_time_picker_dial(hour=hour, minute=minute, size=size, x=x, y=y)
+    **kwargs: Any,
+) -> "controls.TimePickerDial":
+    """MD3's time picker dial (a Tesserae control since M40): `.hour`,
+    `.minute` and `.mode` are `Signal`s."""
+    from tesserae import controls
+    from tesserae.widgets._controls import place
+
+    return place(window, controls.TimePickerDial(window, hour=hour, minute=minute, size=size, **kwargs), x, y)
 
 
 def period_selector(

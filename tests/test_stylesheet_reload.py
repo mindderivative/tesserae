@@ -245,5 +245,5 @@ def test_a_restyle_keeps_bound_values_and_doesnt_fire_on_change(tmp_path: Path):
 
     app.set_stylesheet_spec(_spec(8))
 
-    assert view.node("agree").get_checked() is True  # not the YAML's `false`
+    assert view.control("agree").checked.get() is True  # not the YAML's `false`
     assert vm.calls == 0

@@ -501,3 +501,23 @@ count wraps. The generation bump on settling is equivalent: settling's
 completes.
 
 15 tests; 1157 passed.
+
+## M40 Phase 5: wiring the controls in
+
+User: "Push it and start Phase 5". Pushed `d5abfe2`.
+
+- The eight kinds compile to controls. The view's bindings, `two_way:`
+  and `on_change` go to the controls' `Signal`s and `on_change`. The
+  legacy change-slot suppression is deleted.
+- New `group:` on RadioButton.
+- The factories return controls (P6).
+
+Found:
+- A duplicate-keyword bug in the first `_patch_control`.
+- My first fragment-comment rewrite cut the LoadingIndicator's file at a
+  `params:` inside its comment; I restored it from git and redid it,
+  anchored on the real line.
+- A dial test expected 10 after 11 + up; 11 + up is 12 AM, which is 0.
+
+Mutants: 10 of 11 caught; the trial's own dispatcher is equivalent.
+1179 passed.

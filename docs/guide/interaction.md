@@ -120,13 +120,14 @@ isn't one of them: `tre` 0.3.4 doesn't route it through `a11y_action`.
 `ROLES`, `LIVE` and `ACTIONS` are `tre`'s lists.
 
 `tre`'s `disabled` is announced only: a disabled node still takes focus
-and clicks. Tesserae's controls make disabled behave, from M40.
+and clicks. Tesserae's controls (M40) make it behave: a disabled control
+can't be focused or used, and draws in MD3's disabled colours.
 
 ## Not yet covered
 
-- Only `Rect` and `Container` get the state layer, ripple and focus
-  ring. The built-in MD3 controls (checkbox, switch and so on) are still
-  `tre`'s until M40.
+- Among plain YAML nodes, only `Rect` and `Container` get the state
+  layer, ripple and focus ring. The MD3 controls (checkbox, switch and
+  so on) have their own, from M40.
 - `a11y:` values are fixed in the YAML; binding a label to a `Signal`
   isn't supported yet.
 - The ring is placed when focus arrives. A node that resizes while it

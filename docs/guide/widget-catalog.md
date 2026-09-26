@@ -10,8 +10,33 @@ from tesserae.widgets import button
 save = button(window, "Save", width=120, height=40, variant="filled")
 ```
 
-Every function here is a **thin, faithful delegate** straight to the
-matching `Window.add_*` factory in `tre` itself -- same parameter
+**The stateful ones return Tesserae controls (M40).** `checkbox`,
+`radio_button`, `switch`, `slider`, `spin_box`, `circular_progress`,
+`linear_progress`, `loading_indicator` and `time_picker_dial` build
+Tesserae's own MD3 controls (`tesserae.controls`) and return the control,
+not a `tre.Node`:
+
+```python
+from tesserae.widgets import checkbox
+
+agree = checkbox(window, (0x67, 0x50, 0xA4, 0xFF), 48, 48, theme=app.theme, label="I agree")
+agree.checked.get()        # its state is a Signal
+agree.on_change(print)     # the user's changes
+agree.node                 # the tre node, attached to the window's root
+```
+
+**Migrating:** where you read `node.get_checked()` or `get_selected()`,
+read `control.checked.get()` or `control.selected.get()`. Where you called
+`set_checked(...)`, call `control.checked.set(...)`, and use the control's
+`.node` where you used the node. A checkbox, switch or radio button now
+toggles itself when clicked, so an `on_click` that toggled it by hand
+should go. `spin_box` returns one `SpinBox` rather than
+`(field, minus, plus)`. These controls use the `theme=` you pass
+(MD3's baseline colours without one), not the window's. See
+[Interaction & Accessibility](interaction.md) and the API index.
+
+Every other function here is a **thin, faithful delegate** straight to
+the matching `Window.add_*` factory in `tre` itself -- same parameter
 names, order, and defaults. This is deliberate, not a placeholder:
 `tre`'s own factories already resolve MD3 color/shape/elevation
 correctly against the live theme, and some widgets
@@ -73,14 +98,15 @@ names now raise `TypeError`:
 
 | Function | Before | Now |
 | --- | --- | --- |
-| `switch` | `on=` | `selected=` (read back with `node.get_selected()`) |
+| `switch` | `on=` | `selected=` (read back with `control.selected.get()` since M40) |
 | `divider` | `vertical=True` | `orientation="vertical"` |
 | `link` | `text` | `content` |
 | `dialog` | `text` | `supporting_text` |
 | `toolbar` | `tone="vibrant"` | `vibrant=True` |
 
-`slider`'s position is read back as `node.get("value")` (was
-`"thumb_position"`). `icon` and `loading_indicator` keep `foreground=`.
+`slider`'s position is `control.value.get()` since M40 (it was
+`node.get("value")`, and `"thumb_position"` before that). `icon` and
+`loading_indicator` keep `foreground=`.
 
 One function isn't a pure delegate: `image(window, path, ...)` decodes
 the file itself (with Pillow) and calls `tre`'s

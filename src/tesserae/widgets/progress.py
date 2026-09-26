@@ -1,44 +1,52 @@
 """Tesserae's own namespace for the Progress & Status category --
-`circular_progress`, `linear_progress`, `loading_indicator`. All 3 are
-real `NodeKind` primitives in `tre`, wrapped for the same uniform-surface
-reason M9 wrapped `checkbox`/`slider`/etc.
+`circular_progress`, `linear_progress`, `loading_indicator`.
 
-`loading_indicator(foreground=)` is the spinner's glyph color (it falls
-back to the theme's primary when omitted). `tre` 0.3.3 uses the same
-name, so it passes straight through; before M32, `tre` called it
-`color=` and Tesserae translated.
+Since M40 each returns a Tesserae indicator (`tesserae.controls`), not a
+bare `tre.Node`: `.node` is attached to the window's root, and `.value`
+is a `Signal` (0.0..=1.0, or `None` for indeterminate). `foreground=`
+replaces `primary`.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
+
+from tesserae import controls
+from tesserae.widgets._controls import place
 
 if TYPE_CHECKING:
-    from tre import Node, Window
+    from tre import Window
 
 
 def circular_progress(
     window: "Window",
     size: float = 48.0,
-    value: float = 0.0,
+    value: Optional[float] = 0.0,
     x: float | None = None,
     y: float | None = None,
-) -> "Node":
-    """`value` in 0.0..=1.0; animate it directly with
-    `node.animate("value", ...)`."""
-    return window.add_circular_progress(size=size, value=value, x=x, y=y)
+    foreground: tuple[int, int, int, int] | None = None,
+    **kwargs: Any,
+) -> controls.CircularProgress:
+    """MD3's circular progress; `value=None` spins indeterminately."""
+    return place(window, controls.CircularProgress(window, size=size, value=value, color=foreground, **kwargs), x, y)
 
 
 def linear_progress(
     window: "Window",
     width: float,
     height: float = 4.0,
-    value: float = 0.0,
+    value: Optional[float] = 0.0,
     x: float | None = None,
     y: float | None = None,
-) -> "Node":
-    """Same `value` contract as `circular_progress`."""
-    return window.add_linear_progress(width, height=height, value=value, x=x, y=y)
+    foreground: tuple[int, int, int, int] | None = None,
+    **kwargs: Any,
+) -> controls.LinearProgress:
+    """MD3's linear progress; `value=None` sweeps indeterminately."""
+    bar = controls.LinearProgress(window, width=width, value=value, color=foreground, **kwargs)
+    if height != controls.LinearProgress.HEIGHT:
+        bar.node.set(height=height)
+        bar.bar.set(height=height)
+    return place(window, bar, x, y)
 
 
 def loading_indicator(
@@ -47,7 +55,7 @@ def loading_indicator(
     foreground: tuple[int, int, int, int] | None = None,
     x: float | None = None,
     y: float | None = None,
-) -> "Node":
-    """MD3's newer indeterminate spinner shape. `foreground` (its glyph
-    color) falls back to the theme's primary when omitted."""
-    return window.add_loading_indicator(size=size, foreground=foreground, x=x, y=y)
+    **kwargs: Any,
+) -> controls.LoadingIndicator:
+    """MD3's loading indicator: a shape morphing forever."""
+    return place(window, controls.LoadingIndicator(window, size=size, color=foreground, **kwargs), x, y)

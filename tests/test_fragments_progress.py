@@ -37,7 +37,8 @@ children:
     window.set_theme(THEME_SEED)
     imperative = circular_progress(window, size=48, value=0.4)
 
-    assert declarative.get("value") == imperative.get("value") == 0.4
+    assert declarative.get("value") == imperative.node.get("value") == 0.4
+    assert view.control("spinner").value.get() == imperative.value.get() == 0.4
 
 
 def test_linear_progress_matches_the_imperative_catalog():
@@ -58,7 +59,8 @@ children:
     window.set_theme(THEME_SEED)
     imperative = linear_progress(window, width=200, height=4, value=0.75)
 
-    assert declarative.get("value") == imperative.get("value") == 0.75
+    assert declarative.get("value") == imperative.node.get("value") == 0.75
+    assert view.control("bar").value.get() == imperative.value.get() == 0.75
 
 
 def test_loading_indicator_builds_with_a_real_role_name_background():
