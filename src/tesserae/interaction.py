@@ -64,15 +64,17 @@ class Interaction:
     `surface`, a child of `node`, is where the layer, ripples and ring are
     drawn and sized, when that isn't the node itself: a selection
     control's 40 px circle inside its 48 px touch target (M40). Events
-    still come from `node`. `enabled = False` shows no feedback (a
+    still come from `node`. `ring_around` is where the focus ring goes,
+    when that isn't the surface (a switch's track, not its moving handle). `enabled = False` shows no feedback (a
     disabled control). Call `refresh()` after the surface's corners
     change, and `detach()` to remove everything this added."""
 
     def __init__(self, window: Any, node: Any, tint: RGBA, listen: Listen, ring_color: RGBA,
-                 surface: Any = None) -> None:
+                 surface: Any = None, ring_around: Any = None) -> None:
         self.window = window
         self.node = node
         self.surface = node if surface is None else surface
+        self.ring_around = self.surface if ring_around is None else ring_around
         self._enabled = True
         self.tint = tint
         self.ring_color = ring_color
@@ -87,7 +89,7 @@ class Interaction:
                                   **decoration)
         self.clip.add_child(self.layer)
         self.surface.add_child(self.clip)
-        self.surface.add_child(self.ring)
+        self.ring_around.add_child(self.ring)
         self.refresh()
         _INTERACTIVE.append(node)
         self._undo = [listen(node, event, handler) for event, handler in (
@@ -156,10 +158,10 @@ class Interaction:
         # A box's stroke is drawn inside it, so the ring's box starts the
         # gap and the stroke's width outside the node.
         out = RING_OFFSET + RING_WIDTH
-        radius = self.surface.get("corner_radius") or 0.0
+        radius = self.ring_around.get("corner_radius") or 0.0
         grown = (tuple(r + out if r else 0.0 for r in radius) if isinstance(radius, (tuple, list))
                  else radius + out if radius else 0.0)
-        width, height = self.surface.get("layout_width") or 0.0, self.surface.get("layout_height") or 0.0
+        width, height = self.ring_around.get("layout_width") or 0.0, self.ring_around.get("layout_height") or 0.0
         self.ring.set(x=-out, y=-out, width=width + 2 * out, height=height + 2 * out, corner_radius=grown)
 
     def detach(self) -> None:

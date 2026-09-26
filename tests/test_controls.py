@@ -1,5 +1,6 @@
-"""M40 Phase 1: the control foundation (`tesserae.controls.Control`),
-proved on MD3's checkbox. Driven headlessly with `simulate`/`advance`.
+"""M40: Tesserae's MD3 controls (`tesserae.controls`) -- Phase 1's
+foundation, proved on the checkbox, and Phase 2's radio buttons (with
+`RadioGroup`) and switch. Driven headlessly with `simulate`/`advance`.
 """
 
 import math
@@ -240,3 +241,173 @@ def test_destroy_frees_it_and_stops_following_its_signals():
 def test_signals_are_tesserae_signals():
     cb, _, _ = _checkbox()
     assert isinstance(cb.checked, Signal) and isinstance(cb.disabled, Signal)
+
+
+# == M40 Phase 2: radio buttons and switches =========================================
+
+from tesserae.controls import DISABLED_CONTAINER, RadioButton, RadioGroup, Switch  # noqa: E402
+
+
+def _radios(n=3, **kwargs):
+    window, before = _window()
+    group = RadioGroup()
+    buttons = [_placed(RadioButton(window, group=group, label=f"Option {i}", **kwargs), window) for i in range(n)]
+    return buttons, group, window, before
+
+
+def test_a_radio_button_is_md3s_ring_and_dot():
+    (radio,), _, window, _ = _radios(1)
+    assert (radio.node.get("role"), radio.node.get("checked")) == ("radio", False)
+    assert (radio.ring.get("layout_width"), radio.ring.get("corner_radius"), radio.ring.get("stroke_width")) == (
+        20.0, 10.0, 2.0)
+    assert radio.ring.get("stroke_color") == tokens.BASELINE["on_surface_variant"]
+    assert radio.dot.get("layout_width") == 10.0 and radio.dot.get("scale") == 0.0
+
+
+def test_clicking_a_radio_selects_it_and_it_never_deselects_itself():
+    window, _ = _window()
+    radio = _placed(RadioButton(window), window)
+    seen = []
+    radio.on_change(seen.append)
+    window.simulate("click", node=radio.node)
+    _frames(window, Theme.duration("medium1") + 16)
+    assert radio.selected.get() is True and radio.node.get("checked") is True
+    assert radio.dot.get("scale") == 1.0 and radio.ring.get("stroke_color") == tokens.BASELINE["primary"]
+    window.simulate("click", node=radio.node)
+    assert radio.selected.get() is True and seen == [True]
+
+
+def test_a_group_selects_one_at_a_time():
+    buttons, group, window, _ = _radios()
+    window.simulate("click", node=buttons[0].node)
+    window.simulate("click", node=buttons[2].node)
+    assert [b.selected.get() for b in buttons] == [False, False, True] and group.selected is buttons[2]
+    buttons[1].selected.set(True)  # the app selecting one does the same
+    window.advance(16)
+    assert [b.selected.get() for b in buttons] == [False, True, False]
+
+
+def test_a_group_is_one_tab_stop_and_the_arrows_move_the_selection():
+    buttons, group, window, before = _radios()
+    assert [b.node.get("focusable") for b in buttons] == [True, False, False]  # none selected: the first
+    window.simulate("click", node=buttons[1].node)
+    assert [b.node.get("focusable") for b in buttons] == [False, True, False]  # the selected one
+    before.focus()
+    window.simulate("key_down", key="tab")
+    window.advance(16)
+    assert buttons[1].node.get("focused") is True
+    seen = []
+    buttons[2].on_change(seen.append)
+    window.simulate("key_down", key="arrow_down")
+    assert [b.selected.get() for b in buttons] == [False, False, True]
+    assert buttons[2].node.get("focused") is True and seen == [True]  # moved by the user: a change
+    window.simulate("key_down", key="arrow_right")
+    assert group.selected is buttons[0]  # wraps
+    window.simulate("key_down", key="arrow_up")
+    window.simulate("key_down", key="arrow_left")
+    assert group.selected is buttons[1]
+
+
+def test_the_arrows_skip_a_disabled_radio():
+    buttons, group, window, _ = _radios()
+    buttons[1].disabled.set(True)
+    window.simulate("click", node=buttons[0].node)
+    buttons[0].node.focus()
+    window.simulate("key_down", key="arrow_down")
+    assert group.selected is buttons[2]
+    assert buttons[1].node.get("focusable") is False
+
+
+def test_a_disabled_radio_draws_disabled_and_ignores_clicks():
+    window, _ = _window()
+    radio = _placed(RadioButton(window, selected=True, disabled=True), window)
+    off = (*tokens.BASELINE["on_surface"][:3], round(255 * DISABLED_CONTENT))
+    assert radio.ring.get("stroke_color") == off and radio.dot.get("fill") == off
+    assert radio.node.get("focusable") is False
+
+
+def test_a_radio_leaving_its_group_hands_on_the_tab_stop():
+    buttons, group, window, _ = _radios()
+    buttons[0].destroy()
+    assert group.buttons == buttons[1:] and buttons[1].node.get("focusable") is True
+
+
+def _switch(**kwargs):
+    window, before = _window()
+    return _placed(Switch(window, **kwargs), window), window, before
+
+
+def test_a_switch_is_md3s_track_and_handle():
+    sw, window, _ = _switch(label="Wi-Fi")
+    node = sw.node
+    assert (node.get("layout_width"), node.get("layout_height"), node.get("role")) == (52.0, 48.0, "switch")
+    assert (sw.track.get("layout_width"), sw.track.get("layout_height"), sw.track.get("corner_radius")) == (
+        52.0, 32.0, 16.0)
+    assert sw.track.get("fill") == tokens.BASELINE["surface_container_highest"]
+    assert sw.track.get("stroke_color") == tokens.BASELINE["outline"] and sw.track.get("stroke_width") == 2.0
+    assert sw.handle.get("fill") == tokens.BASELINE["outline"]
+    assert sw.handle.get("scale") * Switch.HANDLE == pytest.approx(16.0)
+    assert sw.handle.get("translate_x") == 0.0
+
+
+def test_switching_it_on_slides_and_grows_the_handle():
+    sw, window, _ = _switch()
+    seen = []
+    sw.on_change(seen.append)
+    window.simulate("click", node=sw.node)
+    _frames(window, 64)
+    assert 0.0 < sw.handle.get("translate_x") < Switch.TRAVEL  # sliding
+    _frames(window, Theme.duration("medium2"))
+    assert sw.selected.get() is True and sw.node.get("checked") is True and seen == [True]
+    assert sw.handle.get("translate_x") == Switch.TRAVEL and sw.surface.get("translate_x") == Switch.TRAVEL
+    assert sw.handle.get("scale") * Switch.HANDLE == pytest.approx(24.0)
+    assert sw.track.get("fill") == tokens.BASELINE["primary"] and sw.handle.get("fill") == tokens.BASELINE["on_primary"]
+
+
+def test_pressing_grows_the_handle_to_28px():
+    sw, window, _ = _switch()
+    x, y = sw.node.get("layout_x"), sw.node.get("layout_y")
+    window.simulate("pointer_down", x=x + 16, y=y + 24)
+    _frames(window, Theme.duration("short2") + 16)
+    assert sw.handle.get("scale") * Switch.HANDLE == pytest.approx(28.0)
+    window.simulate("pointer_up", x=x + 16, y=y + 24)
+    _frames(window, Theme.duration("medium2") + 16)
+    assert sw.selected.get() is True  # the press was a click
+    assert sw.handle.get("scale") * Switch.HANDLE == pytest.approx(24.0)
+
+
+def test_the_switchs_state_layer_follows_the_handle_and_its_ring_the_track():
+    sw, window, before = _switch(selected=True)
+    x = sw.node.get("layout_x")
+    assert sw.surface.get("layout_x") - x == pytest.approx(16 + Switch.TRAVEL - 20)  # centred on the handle
+    before.focus()
+    window.simulate("key_down", key="tab")
+    window.advance(16)
+    out = interaction.RING_OFFSET + interaction.RING_WIDTH
+    assert sw.interaction.ring.parent() == sw.track
+    assert sw.interaction.ring.get("layout_width") == 52 + 2 * out
+    window.simulate("key_down", key="space")
+    window.simulate("key_up", key="space")
+    assert sw.selected.get() is False
+
+
+def test_a_disabled_switch_uses_md3s_disabled_colours():
+    sw, window, _ = _switch(selected=True, disabled=True)
+    on_surface = tokens.BASELINE["on_surface"]
+    assert sw.track.get("fill") == (*on_surface[:3], round(255 * DISABLED_CONTAINER))
+    assert sw.handle.get("fill") == tokens.BASELINE["surface"]
+    assert sw.node.get("focusable") is False
+    window.simulate("click", node=sw.node)
+    assert sw.selected.get() is True
+    off, _, _ = _switch(disabled=True)
+    assert off.handle.get("fill") == (*on_surface[:3], round(255 * DISABLED_CONTENT))
+
+
+def test_switch_and_radio_follow_the_theme():
+    light, dark = Theme.resolve(theme_seed=SEED), Theme.resolve(theme_seed=SEED, dark=True)
+    sw, window, _ = _switch(selected=True, theme=light)
+    radio = _placed(RadioButton(window, selected=True, theme=light), window)
+    assert sw.track.get("fill") == light.role("primary") and radio.dot.get("fill") == light.role("primary")
+    sw.set_theme(dark)
+    radio.set_theme(dark)
+    assert sw.track.get("fill") == dark.role("primary") and radio.ring.get("stroke_color") == dark.role("primary")

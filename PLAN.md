@@ -93,4 +93,6 @@ Phase 4 done: examples labelled, a keyboard-only test of the counter, the parity
 
 **M40:** Q1–Q4 as recommended. Phase 1 done: `tesserae.controls.Control` (with `Listeners` and `tokens.BASELINE`), proved on MD3's checkbox; 1114 passed.
 
-**Up next:** M40 Phase 2 (RadioButton and Switch).
+Phase 2 done: RadioButton with RadioGroup, and Switch; 1127 passed.
+
+**Up next:** M40 Phase 3 (Slider and SpinBox).

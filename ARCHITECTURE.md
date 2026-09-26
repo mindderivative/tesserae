@@ -180,7 +180,12 @@ while the feedback draws in the circle. The state and `disabled` are
 Tesserae `Signal`s, and one `Effect` repaints when they change. `on_change`
 hears only the user's changes. `tesserae.listeners.Listeners` is the
 shared per-node dispatcher, which `View` uses too. `tokens.BASELINE` is
-MD3's published colours, for controls with no theme.
+MD3's published colours, for controls with no theme. `RadioGroup` keeps
+one radio selected and one Tab stop (a roving focus, via `_focusable()`),
+and moves the selection with the arrow keys. A `Switch` slides its handle
+and state-layer circle with `translate_x` and sizes the handle with
+`scale`, since tre won't animate layout; its focus ring goes around the
+track (`Interaction`'s `ring_around`).
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

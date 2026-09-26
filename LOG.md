@@ -451,3 +451,18 @@ Found while building:
 - The tracker generator needs each Step on one line.
 
 19 tests; 10/10 mutants caught. 1114 passed.
+
+## M40 Phase 2: radio buttons and switches
+
+User: "Push it and start Phase 2". Pushed `4c48958`.
+
+Probed: `translate_x` and `scale` animate, and `layout_x` includes the
+translation; `width` can't be animated. So the switch handle is a 28 px
+circle, scaled to 16, 24 or 28 px, and slides with `translate_x`.
+
+- `RadioGroup` behaves like HTML same-name radios: one Tab stop, the
+  arrow keys wrap and skip disabled buttons.
+- `Control.target` allows a non-square target (the switch is 52×48).
+- `Interaction(ring_around=)` puts the switch's ring around its track.
+
+13 tests; 11/11 mutants caught. 1127 passed.
