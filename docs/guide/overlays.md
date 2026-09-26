@@ -58,7 +58,6 @@ modal overlay keeps Tab inside it.
 - **`NavigationDrawer(window, labels, icons, selected=None)`:** the modal
   navigation drawer. `.drawer` is the drawer widget (`.drawer.selected`,
   `.drawer.on_change`), and choosing an item closes it.
-
 - **`SearchView(window, bar=None, width=360, max_height=336, results=None)`:**
   MD3's docked search view, the results under a `search_bar`. Given the
   `bar`, it opens below it when the field has focus or is typed in and
