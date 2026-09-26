@@ -23,6 +23,7 @@ from tesserae.component import instantiate
 from tesserae.fonts import register_font
 from tesserae.log import configure_logging
 from tesserae.reactive import Computed, Effect, Signal, ViewModel, batch, untrack
+from tesserae.theme import Theme
 from tesserae.view import Component, View
 from tesserae.repeater import Repeater
 
@@ -33,6 +34,7 @@ __all__ = [
     "Effect",
     "Repeater",
     "Signal",
+    "Theme",
     "View",
     "ViewModel",
     "batch",

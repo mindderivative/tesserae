@@ -287,3 +287,11 @@ Read `tre`'s motion curves (Emphasized is two cubic segments), its
 readable), `ThemeSpec` (`components:`/`typography:`), and the
 typography/shape lookups (overrides reach factories only, not views).
 Four phases and decisions Q1–Q4 written into the tracker.
+
+## M38 Phase 1 — Theme
+
+User: "push it and start Phase 1". Pushed `7720fe9`, `9659fdc`, `4c03c33`.
+Read `tre`'s component lookup (variant, then bare key) and
+`resolve_components`. `theme.py`, `app.theme`/`view.theme`. 110 tests,
+109 of them against `tre`'s `Window.theme`; 3/3 mutants caught. 1019
+passed.

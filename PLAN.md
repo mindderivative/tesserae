@@ -71,4 +71,6 @@ Phase 6 done: `load_view`, `instantiate`, `ViewWatcher` and the suite off `tre`'
 - Q3: `"system"` starts dark.
 - Q4: Emphasized as (0.2, 0, 0, 1).
 
-**Up next:** M38 Phase 1 (`tesserae.Theme`).
+Phase 1 done: `tesserae.Theme`, matching `tre`'s `Window.theme`; 1019 passed.
+
+**Up next:** M38 Phase 2 (theme typography in views).

@@ -177,6 +177,14 @@ class App:
             theme["custom_theme_spec"] = self._custom_theme_spec
         return theme
 
+    @property
+    def theme(self) -> Any:
+        """The app's resolved theme (`tesserae.Theme`): roles, component
+        shape and elevation, typography, and motion tokens."""
+        from tesserae.theme import Theme
+
+        return Theme.resolve(**self._view_theme())
+
     def _window_theme(self) -> dict[str, Any] | None:
         """The app's theme as `Window.set_theme` arguments, resolved the
         way a `View` resolves it -- or `None` if it names no seed at all,

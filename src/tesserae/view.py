@@ -149,6 +149,13 @@ class View:
     def spec(self) -> dict[str, Any]:
         return self._spec
 
+    @property
+    def theme(self) -> "Theme":
+        """This view's resolved theme (`tesserae.Theme`)."""
+        from tesserae.theme import Theme
+
+        return Theme.resolve(**self._theme)
+
     def node(self, widget_id: str) -> Any:
         """The node `widget_id` names (a TextField's `text_input`)."""
         try:

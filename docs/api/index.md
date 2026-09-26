@@ -12,6 +12,7 @@ Tesserae's own real, additive public surface:
 | [`tesserae.spec.ViewWatcher`](spec.md#viewwatcher) | Hot reload: watches every file a view was built from and updates it in place (`App.run(hot_reload=True)` uses it). |
 | [`tesserae.spec.load_theme` / `load_stylesheet`](spec.md#load_theme-load_stylesheet) | Read a theme or stylesheet file into the dict `tre`'s `*_spec=` arguments take. |
 | `tesserae.configure_logging(level="INFO", *, sink=sys.stderr, format=DEFAULT_FORMAT, capture_warnings=True) -> int` | Sends log messages at `level` and above to `sink` in Tesserae's format, replacing loguru's default stderr handler; shows Python warnings through loguru too. Returns the handler id. See [Logging](../guide/logging.md). |
+| `tesserae.Theme` | A resolved MD3 theme: `role`, `shape`/`elevation` (from `components:`), `typography`, and the motion tokens `easing`/`duration`. `app.theme` and `view.theme` return one. See [Themes & Fonts](../guide/themes-and-fonts.md#reading-the-theme-from-code). |
 | `tesserae.register_font(path) -> list[str]` | Reads a font file and registers it with `tre`; returns its family names. See [Themes & Fonts](../guide/themes-and-fonts.md). |
 
 Reactivity (`Signal`, `ViewModel`, `Computed`, `Effect`, `batch`,

@@ -193,6 +193,13 @@ and Tesserae doesn't yet: it raises a clear error instead.
 
 ### Theme (M38)
 
+`tesserae.Theme` (M38 Phase 1) is one resolved theme: roles,
+`components:` shape and elevation (looked up `component.variant`, then
+`component`), `typography:` overrides, and MD3's easing and duration
+tokens. It's checked against `tre`'s `Window.theme` (109 cases) and is
+what M39–M42's widgets read. `app.theme`/`view.theme` return one.
+
+
 `tre` keeps no theme (D7), so Tesserae owns all of it:
 
 - colour schemes from a seed, light and dark, with `colors:` overrides.

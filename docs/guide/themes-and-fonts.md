@@ -92,6 +92,28 @@ Since `tre` 0.3.4, two things work the way they do in CSS:
   `colors: {scrim: ...}` doesn't reach those two fragments, since a YAML
   color can't be "a theme role at 32%".
 
+## Reading the theme from code
+
+`app.theme` (and `view.theme`) is the resolved theme, a `tesserae.Theme`:
+
+```python
+theme = app.theme
+theme.role("primary")                 # (r, g, b, a), or None with no seed
+theme.shape("card", "elevated")       # components: card.elevated, then card
+theme.elevation("dialog")             # an MD3 elevation level, or None
+theme.typography("body_large")        # the type role, with typography: overrides
+theme.easing("emphasized_decelerate") # (x1, y1, x2, y2), for node.animate(easing=...)
+theme.duration("medium2")             # 300 (ms)
+```
+
+`shape` and `elevation` return `None` when the theme's `components:`
+doesn't mention the component, and the widget uses its own MD3 default.
+A custom theme's `components:` entry, or `typography:` role, replaces
+the default theme's entry for the same key. MD3's easing and duration
+tokens are all there. `emphasized` is MD3's single-curve form
+(0.2, 0, 0, 1), since one cubic bézier can't express the two-part curve
+`tre` used.
+
 ## Switching themes later
 
 In an `App`, `app.set_theme_specs(default_theme_spec, custom_theme_spec)`
