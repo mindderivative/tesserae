@@ -410,3 +410,22 @@ User: "Yes". Pushed `66d5b8a`.
   `tre`'s copy.
 - A keyboard-only test of the counter example, through `App`.
 - All three examples run cleanly. 1095 passed.
+
+## M40 scoped
+
+User: "Push and scope M40". Pushed `90bc4dc`.
+
+Read `tre`'s `legacy-behavior.md` (0.3.5) for the controls. Read
+`tre`'s tracker: M98 is complete on 0.3.5, and M99 waits on Tesserae's
+M40–M42.
+
+Probes:
+- In Tesserae, clicking a YAML Checkbox or Switch leaves it unchanged,
+  and Tab skips both; the Slider is focusable.
+- The same in `tre`'s `View` and `add_checkbox`: none toggle, focus or
+  have a role.
+
+Carousel and Splitter were never in `tesserae.widgets`; Link is
+Tesserae's since M37.
+
+Q1–Q4 are in the tracker, with recommendations.

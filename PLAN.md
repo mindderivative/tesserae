@@ -89,4 +89,6 @@ Phase 3 done: the focus ring, YAML `a11y:`, `tesserae.a11y`; 1094 passed.
 
 Phase 4 done: examples labelled, a keyboard-only test of the counter, the parity differ strips Tesserae-only fields for `tre`. **M39 complete**; 1095 passed.
 
-**Up next:** M40 (Widgets I: stateful controls).
+**M40 scoped (2026-09-25):** 6 phases: a control foundation, then selection controls, slider and spin box, progress/loading/time dial, wiring (YAML kinds, bindings, fragments, factories), and tests and docs with the gate check. Found: YAML checkboxes, switches and radios never toggle and aren't Tab stops, as in `tre`. Decisions Q1–Q4 pending.
+
+**Up next:** the user's decisions on M40.

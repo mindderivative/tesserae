@@ -49,7 +49,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M37 — Declarative Engine on `tre` Primitives | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M38 — MD3 Theme in Tesserae | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M39 — Interaction: State Layer, Ripple, Focus, Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-25) |
-| M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
+| M40 — Widgets I: Stateful Controls | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M42 — Widgets III: Inputs, Date and Time, Media, Graphs, Docking | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, not started (2026-09-25) |
@@ -69,11 +69,12 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M40** (Widgets I: the 12 stateful MD3 controls `tre` M99 deletes, rebuilt from primitives on `tesserae.interaction` and `tesserae.a11y`) — approved but not yet scoped in detail; waiting on the user's go-ahead. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch); Tesserae's dry-run gate report was sent — M98 is not blocked by Tesserae's code, M99 waits on M40–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
+**Up next:** **M40** is scoped (6 phases; the stateful controls on `tesserae.interaction`/`tesserae.a11y`) — waiting on the user's decisions Q1–Q4. `tre` has its M97 Phase 2 handover done and pushed (`0.3.5` branch), and M98 is complete there; Tesserae's dry-run gate report was sent — M99 waits on M40–M42. Other named, un-scoped candidates: hot reload for `App.register()`ed screens, and conditional per-item styling for the 5 Rust-internal-state-dependent-coloring widgets (likely absorbed by M40).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 **Known gaps:**
+- **YAML checkboxes, switches and radio buttons are inert.** A click never toggles them and Tab skips them. `tre`'s own `View` was the same. M40 makes them real controls.
 - **`a11y:` isn't bindable.** A label or role in YAML is fixed; binding one to a `Signal` (a live status, say) isn't supported yet (M39 Phase 3).
 - 67 of ~68 real MD3 widgets now have a declarative `*_Component.yaml` fragment; `video`/`node_graph`/`graph_node` are the only real remaining structural blockers (see below), plus `extended_fab`'s own deliberately deferred gap.
 - `video` still has no full, faithful declarative fragment -- [`tre` issue #2](https://github.com/mindderivative/tre/issues/2) (M25's own real blocker) is now closed (`tre` v0.3.1 made `ImageSpec.src` optional, so `kind: Image` with no `src:` produces the exact synthetic blank placeholder `add_video` already builds), narrowing this to a real, smaller remaining gap: a fragment can now declare the placeholder, but real video content still needs the app to fetch the resulting `Node` and call `push_frame` imperatively afterward -- no way for a one-shot static fragment expansion to wire that up on its own.
@@ -1091,13 +1092,48 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 40 — Widgets I: Stateful Controls
 
-**Status: ⬜ Proposed — approved, not started (2026-09-25).** The 12 MD3 widget kinds `tre` M99 deletes, rebuilt from primitives.
+**Status: ⬜ Scoped — decisions Q1–Q4 pending (2026-09-25).** Rebuilds the stateful MD3 controls `tre` M99 deletes, from 0.3.4's building blocks, on M39's `tesserae.interaction` and `tesserae.a11y`. The M34 design settled the shape (P6): a stateful control is a small Tesserae object holding `.node` and its state, and a `tesserae.widgets` factory returns one instead of a bare `tre.Node` (the one written break). Scoped from `tre`'s `docs/design/legacy-behavior.md` (its `0.3.5` branch), the M34 spike `tools/spikes/checkbox_on_primitives.py`, and probes on 0.3.4.
 
-### Phase 1 — Controls ⬜
-- Step 1: `Checkbox`, `RadioButton`, `Switch`, `Slider` (pointer capture, arrow keys, `a11y_action`), `Link`, `SpinBox` — ⬜
-- Step 2: linear and circular progress (`trim_start`/`trim_end`), `LoadingIndicator` (path morphing), `TimePickerDial`, `Carousel`, `Splitter` — ⬜
-- Step 3: their fragments and `tesserae.widgets` factories on the new controls, with the widget-object return value (P6) — ⬜
-- Step 4: bindings and `two_way:` on `checked`/`selected`/`value`, moved to Tesserae-side widget state (M37 Phase 4 wires them through the legacy widgets' setters until then) — ⬜
+**What exists today:**
+- **YAML kinds:** eight YAML kinds are still `tre`'s legacy factories, moved into Tesserae's tree (`build._legacy`): `Checkbox`, `RadioButton`, `Switch`, `Slider`, `CircularProgress`, `LinearProgress`, `LoadingIndicator` and `TimePickerDial`. They're driven only through `set_checked`/`set_selected`/`set_on_change`.
+- **Fragments:** the matching fragments sit in `spec/components/`. `SpinBox_Component.yaml` is a composition with no behaviour.
+- **Factories:** `tesserae.widgets` has `checkbox`, `radio_button`, `switch`, `slider`, `spin_box`, `circular_progress`, `linear_progress`, `loading_indicator` and `time_picker_dial`, each delegating to `tre`'s `add_*`.
+- **Link:** already Tesserae's own (M37: a `text` with `role="link"`), so it needs no work here.
+- **Carousel and Splitter:** never wrapped by Tesserae at all.
+
+**Found scoping this (probed on 0.3.4):**
+- **Inert controls:** clicking a YAML `Checkbox`, `Switch` or `RadioButton` never toggles it, and Tab skips all three (not focusable, no role). `tre`'s own `View` and its `add_checkbox` behave the same: "the engine never toggles them" (`legacy-behavior.md`). So the todo_list example's checkbox can't be ticked. Only the `Slider` is focusable (`role="slider"`, arrows move it).
+- **`disabled`:** `tre`'s `disabled` is announced only; the node still focuses and clicks (M39 Phase 3).
+
+**Decisions for the user, each with a recommendation:**
+- Q1 **Behaviour.** Recommended: **controls behave as MD3 and HTML controls do.** A click, Space or Enter toggles a checkbox or switch and selects a radio. A slider drags (pointer capture) and steps with the arrow keys, Page Up/Down and Home/End, and answers `a11y_action` increment/decrement/set_value. Each fires `on_change`. `two_way:` keeps a `Signal` in step; a one-way binding sets the control whenever its `Signal` changes, so the app can overrule a user's toggle. `disabled` blocks focus and input, with MD3's disabled look. Alternative: keep `tre`'s inert controls, with the app toggling them in `on_click`.
+- Q2 **Look.** Recommended: **MD3's specification, as with M39's numbers.**
+  - Sizes and target: MD3's fixed sizes (checkbox 18 px, radio 20 px, switch 52×32 with a 16/24/28 px handle, a slider with a 4 px track and a 20 px handle), drawn centred in the node, whose box is the touch target (48 px by default).
+  - Colours: roles (`primary`, `on_primary`, `outline`, `on_surface`, `surface_container_highest`), with the fragments' `background:` kept as an override for the selected colour.
+  - Animations: MD3's motion tokens.
+  - Progress: indeterminate linear and circular progress added, since MD3 has them and `tre` didn't.
+  - Loading indicator: the handover's defined shapes (not the diamonds `tre` actually drew).
+  Alternative: `tre`'s legacy drawing, scaled to the node's box.
+- Q3 **State API.** Recommended: **each control's state is a Tesserae `Signal`** (`checkbox.checked`, `slider.value`, `dial.hour`/`dial.minute`), so Python code reads it, sets it and binds `Effect`s to it, and YAML bindings go straight to it. Alternative: plain properties with an `on_change` callback.
+- Q4 **Carousel and Splitter.** Tesserae never exposed them, so they would be new widgets, not a migration. Recommended: **move them to M42**, beside docking, where a splitter belongs. Alternative: build them here.
+
+### Phase 1 — Control Foundation ⬜
+- Step 1: `tesserae.controls`, with a `Control` base: `.node` (the touch target, focusable, with a role), the state `Signal`(s) per Q3, `on_change`, and `disabled` per Q1 (not focusable, no events, MD3's 38%/12% disabled opacities); M39's `Interaction` for the state layer, ripple and focus ring (circular for selection controls, as MD3 draws), and `tesserae.a11y` for the role, label and state; colours from `tesserae.Theme` roles, re-tinted on theme change, and motion from `Theme.easing`/`duration`. Built as the checkbox (the M34 spike's shape) to prove the base. — ⬜
+
+### Phase 2 — Selection Controls ⬜
+- Step 1: `Checkbox` (the box, an outline when unchecked, the check drawn in with a `path`'s `trim_end`), `RadioButton` (a ring and a dot) and `Switch` (the track, the handle growing 16 → 24 → 28 px pressed, sliding with MD3 motion), each keyboard-operable with its role and `checked`/`selected` state — ⬜
+
+### Phase 3 — Slider and Spin Box ⬜
+- Step 1: `Slider` (track, active track, handle; drag with `capture_pointer`; the keys and `a11y_action`s per Q1; `value_min`/`value_max`/`value_step` announced) and `SpinBox` (− and + buttons, arrow keys, typing validated into its `value`) — ⬜
+
+### Phase 4 — Progress, Loading, Time Dial ⬜
+- Step 1: `LinearProgress` and `CircularProgress`, determinate (the circle a `path` with `trim_end`, starting at 12 o'clock) and indeterminate per Q2; `LoadingIndicator`, a `path` whose `data` morphs through the handover's shapes; `TimePickerDial` (face, ticks, hands, selector; drag snaps the hour to 12 and the minute to 5; arrow keys; `role="slider"` per hand); each `role="progressbar"` or `slider` with its value — ⬜
+
+### Phase 5 — Wiring ⬜
+- Step 1: the eight YAML kinds compile to the new controls (`build._legacy` and `_LEGACY_KINDS` go). Bindings and `two_way:` on `checked`/`selected`/`value`/`hour`/`minute` go to the control's `Signal`s (the M37 legacy change-slot suppression goes too), and `disabled:` becomes a bindable field. The fragments move to the new controls. `tesserae.widgets`'s nine factories return control objects (P6), with a migration note. The todo_list example's checkbox now ticks. — ⬜
+
+### Phase 6 — Tests, Docs, Tracker, Gate ⬜
+- Step 1: tests per control with `simulate`/`advance` (pointer, keyboard, `a11y_action`, theme change, disabled, reconcile); a static check that `src/tesserae` calls none of these nine `add_*` or `get_checked`/`get_selected`/`set_on_change`; the examples under `tre`'s `TRE_FORBID_REMOVED` shim (M43's dry run); docs (a controls guide, the widget catalog, the component-fragments page); tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
 
 ---
 
