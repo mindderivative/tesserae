@@ -694,3 +694,18 @@ User: "Push it and start Phase 1". Pushed `0df3db2`.
   and adding a test for shrinking results.
 
 1233 passed.
+
+## M42 Phase 2: date and time
+
+User: "Push it and start Phase 2". Pushed `9b1cb55`.
+
+- Measured tre's period selector (52x72, 36 px halves) and time field
+  (96x72, 45 px), then used MD3's numbers where they differ.
+- `text_input` takes no `text_align`, so the time field is centred by
+  sizing the input to two digits, re-applied after a re-colour (which
+  resets a TextField's layout).
+- A test first expected a change event for typing "1" over a 1.
+- Mutants: 10 of 10 caught after pinning the width in a circular
+  centring check.
+
+1242 passed.

@@ -51,7 +51,7 @@ from tesserae.widgets.overlays import (
 from tesserae.widgets.search import search_bar, search_view
 from tesserae.widgets.progress import circular_progress, linear_progress, loading_indicator
 from tesserae.widgets.media import graph_node, icon, image, node_graph, video
-from tesserae.widgets.date_time import date_picker_day, period_selector, time_picker_dial
+from tesserae.widgets.date_time import date_picker_day, period_selector, time_input_field, time_picker_dial
 
 __all__ = [
     "accordion_header",
@@ -93,6 +93,7 @@ __all__ = [
     "status_bar",
     "switch",
     "tabs",
+    "time_input_field",
     "time_picker_dial",
     "toolbar",
     "tooltip",

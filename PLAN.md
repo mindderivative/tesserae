@@ -123,4 +123,6 @@ Phase 6 done: the gate covers M41's names; the examples and 152 widget tests are
 
 Phase 1 done: the search bar and SearchView; 1233 passed.
 
-**Up next:** M42 Phase 2 (date and time).
+Phase 2 done: the date-picker day, period selector and time input field; 1242 passed.
+
+**Up next:** M42 Phase 3 (media).

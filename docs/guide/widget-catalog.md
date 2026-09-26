@@ -101,8 +101,19 @@ leading_icon="search", trailing_icons=None)` is MD3's search bar: its
 results=[(text, fn)])` is the docked results panel, an overlay that
 opens below the bar: see [Overlays](overlays.md#each-one).
 
-**Still `tre`'s, until later in M42:** `date_picker_day`,
-`period_selector`, `video`, `node_graph`, `graph_node` and `image`. These are thin delegates to the matching
+**Date and time (M42).** `date_picker_day(window, day, selected=,
+today=, outside_month=, on_click=)` is MD3's day: a 48 px target with a
+40 px circle, filled `primary` when selected and outlined when it's
+today. `.selected`, `.today` and `.outside_month` are `Signal`s, and
+`on_click(day)` hears a click; arranging the month and choosing a day is
+up to your code. `period_selector(window, "AM")` is MD3's AM/PM toggle,
+with `.period` a `Signal`, and a click or the arrows switch it.
+`time_input_field(window, value, unit="hour")` is MD3's 96×72 time field:
+`.value` is a `Signal` shown as two digits, typing sets it when the number
+is in range, and the up and down arrows step it and wrap.
+
+**Still `tre`'s, until later in M42:** `video`, `node_graph`, `graph_node`
+and `image`. These are thin delegates to the matching
 `Window.add_*` factory in `tre`, with the same parameter names, order and
 defaults, and they return `tre` nodes themed by the window's theme. M42
 rebuilds them too.

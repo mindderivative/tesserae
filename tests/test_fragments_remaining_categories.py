@@ -119,10 +119,11 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("d")
 
-        imperative = date_picker_day(_themed_window(), 15, **kwargs)
+        imperative = date_picker_day(_themed_window(), 15, **kwargs)  # a Widget since M42
 
-        assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
-        assert declarative.get("border_width") == imperative.get("border_width"), component_name
+        # both are 48 px targets; since M42 the widget draws MD3's 40 px circle inside (the fragment keeps tre's)
+        assert declarative.get("width") == imperative.node.get("width") == 48.0, component_name
+        assert imperative.part("indicator").get("corner_radius") == 20.0, component_name
 
 
 def test_date_picker_day_requires_a_quoted_string_day():
@@ -161,10 +162,11 @@ children:
         am = view.node("ps.am")
         pm = view.node("ps.pm")
 
-        imperative_am, imperative_pm = period_selector(_themed_window(), selected="AM")
+        imperative = period_selector(_themed_window(), selected="AM")  # a Widget since M42
 
-        assert am.get("corner_radius") == imperative_am.get("corner_radius"), component_name
-        assert pm.get("corner_radius") == imperative_pm.get("corner_radius"), component_name
+        # the fragment keeps tre's rounded halves; the widget is MD3's, square halves in an outlined 8 px frame
+        assert am.get("corner_radius") == pm.get("corner_radius") == 8.0, component_name
+        assert imperative.node.get("corner_radius") == 8.0 and imperative.part("am").get("corner_radius") == 0.0
 
 
 def test_time_picker_dial_matches_the_imperative_catalog():
