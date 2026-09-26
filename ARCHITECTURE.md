@@ -158,6 +158,18 @@ Link; not text inputs), carried on the cascade's prepared layers.
 window's `color_scheme` event; `set_dark` fixes or releases it. `App`
 still calls `Window.set_theme` for `tre`'s legacy widgets until M41.
 
+**Interaction, M39:** a clickable YAML node is a focusable
+`role="button"` Tab stop (the compiler sets it, as `tre`'s
+`set_on_click` did). `tesserae.interaction.Interaction` draws MD3's
+state layer and ripple from building blocks. It adds an absolute layer
+child after the content, plus one circle child per press, and clips the
+node. A `View` keeps one per `Rect` or `Container` whose spec wants it
+(`interaction_tint`). `_sync_interactions` adds, removes and re-tints
+them after every build, reconcile, re-theme and re-style. The extra
+children stay after the spec's children, so the reconciler's indices
+still hold. Their listeners go through the same per-node dispatcher as
+the ViewModel's (`View._listen`), but they aren't unwired with it.
+
 `App.load` is the enforced-naming-convention path (`*_View.yaml`/
 `*_ViewModel.py`, checked via `inspect.getfile` against the
 `ViewModel` class's own defining file -- `tre.View` has no `path`

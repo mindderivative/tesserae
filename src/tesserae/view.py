@@ -47,7 +47,8 @@ import tre
 
 from tesserae import reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
-from tesserae.spec.build import Built, _LEGACY_KINDS, build_with, patch, prepare_layers
+from tesserae.interaction import Interaction
+from tesserae.spec.build import Built, _LEGACY_KINDS, build_with, interaction_tint, patch, prepare_layers
 from tesserae.spec.cascade import check_stylesheet, check_theme
 
 __all__ = ["Component", "View"]
@@ -139,6 +140,8 @@ class View:
         self._viewmodel: Any = None
         self._wiring: list[Callable[[], None]] = []  # undo steps
         self._listeners: dict[tuple[int, str], list[Any]] = {}
+        self._interactions: dict[str, Interaction] = {}
+        self._sync_interactions()
 
     # -- lookup ---------------------------------------------------------------
 
@@ -164,6 +167,12 @@ class View:
             return self._built.nodes[widget_id]
         except KeyError:
             raise ValueError(f"no widget with id {widget_id!r} in this view") from None
+
+    def interaction(self, widget_id: str) -> Optional[Interaction]:
+        """The state layer and ripple on `widget_id`'s node (M39), or `None`
+        when it has none."""
+        self.node(widget_id)
+        return self._interactions.get(widget_id)
 
     def click(self, node: Any) -> None:
         """A synthetic click on `node`, for tests: `window.simulate`."""
@@ -193,6 +202,7 @@ class View:
         else:
             self._reconcile_node(old, spec)
         self._spec = spec
+        self._sync_interactions()
         self._rewire()
 
     def set_theme(
@@ -246,6 +256,7 @@ class View:
         if window is self.window:
             return
         self._unwire()
+        self._drop_interactions()
         old_root, old_window = self._built.root, self.window
         self.window = window
         self._built = Built(root=None)
@@ -254,6 +265,7 @@ class View:
         old_root.destroy()
         self._owns_window = False
         del old_window
+        self._sync_interactions()
         if self._viewmodel is not None:
             self._wire(self._spec)
 
@@ -261,6 +273,33 @@ class View:
         for node_id, node_spec in self._built.specs.items():
             patch(self.window, node_spec, self._built.outer[node_id], self._built.nodes[node_id],
                   scheme=scheme, layers=layers, frames=self._frames, state=False)
+        self._sync_interactions(scheme)
+
+    def _sync_interactions(self, scheme: Any = None) -> None:
+        """Gives every node that should have a state layer and ripple one,
+        in its current tint, and removes the rest (M39)."""
+        scheme = self._scheme if scheme is None else scheme
+        wanted: dict[str, Any] = {}
+        for node_id, node_spec in self._built.specs.items():
+            tint = interaction_tint(node_spec, scheme)
+            if tint is not None:
+                wanted[node_id] = tint
+        for node_id, current in list(self._interactions.items()):
+            if node_id not in wanted or current.node is not self._built.outer.get(node_id):
+                current.detach()
+                del self._interactions[node_id]
+        for node_id, tint in wanted.items():
+            current = self._interactions.get(node_id)
+            if current is None:
+                self._interactions[node_id] = Interaction(self.window, self._built.outer[node_id], tint,
+                                                          self._listen)
+            elif current.tint != tint:
+                current.retint(tint)
+
+    def _drop_interactions(self) -> None:
+        for current in self._interactions.values():
+            current.detach()
+        self._interactions = {}
 
     def _reconcile_node(self, old: dict[str, Any], new: dict[str, Any]) -> None:
         node_id = new["id"]
@@ -362,8 +401,12 @@ class View:
         self._add_listener(node, tre_event, call)
 
     def _add_listener(self, node: Any, event: str, fn: Callable[[Any], None]) -> None:
+        """A ViewModel's listener: removed when the view is unwired."""
+        self._wiring.append(self._listen(node, event, fn))
+
+    def _listen(self, node: Any, event: str, fn: Callable[[Any], None]) -> Callable[[], None]:
         """`node.on` keeps one listener per event, so every callback for a
-        node and event shares one dispatcher."""
+        node and event shares one dispatcher. Returns the undo."""
         key = (id(node), event)
         slot = self._listeners.get(key)
         if slot is None:
@@ -377,7 +420,7 @@ class View:
             if not slot and self._listeners.get(key) is slot:
                 del self._listeners[key]
                 node.off(event)
-        self._wiring.append(undo)
+        return undo
 
     def _add_legacy_change(self, node: Any, fn: Callable[[], None]) -> None:
         """A legacy MD3 widget has one change slot (`set_on_change`), and it
@@ -481,6 +524,7 @@ class Component(View):
         for component in list(self._components):
             component.remove()
         self._unwire()
+        self._drop_interactions()
         self._viewmodel = None
         if self in self._host._components:
             self._host._components.remove(self)

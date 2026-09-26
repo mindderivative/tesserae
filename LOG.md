@@ -345,3 +345,28 @@ commit.)
 M39 Phase 1: on_click nodes are focusable buttons. `role=None` isn't
 settable, so removal uses `role="none"`. The reconciler patches on
 handler changes. 5 tests; 3/3 mutants caught; 1048 passed.
+
+## M39 Phase 2: state layer and ripple
+
+User: "Push and start 39 phase 2". Pushed `96a7ae3`.
+
+Probes on 0.3.4:
+- Hovering a child box gives the parent no `pointer_leave`.
+- `pointer_down` bubbles, with `target`; `x`/`y` are local to `current`.
+- A keyboard click has `x=None`.
+- `focus_visible` is True from Tab and False from a press.
+- `layout_width`/`layout_height` give the laid-out size.
+- A single `advance(1000)` is one tick, so a fade chained from a timer's
+  `on_complete` needs one more frame. The tests step in 16 ms frames.
+
+Design choices:
+- The layer and ripples paint after the content (Material Web, Compose),
+  which also keeps the reconciler's child indices valid.
+- Focus shows the 10% layer only for `focus_visible`, or every clicked
+  button would stay tinted.
+- Material Web's ripple timing, including the 225 ms minimum press; a
+  `stroke_width` animation serves as the timer.
+- Rect and Container only; Text, Link, Image and Icon can't hold children.
+
+16 tests; 8/8 mutants caught (one needed a stronger assertion on layer
+order with content). 1064 passed.

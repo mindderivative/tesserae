@@ -29,7 +29,8 @@ Tesserae builds this view itself on `tre`'s building blocks.
 names a method on that `ViewModel` to call on a click. A node with
 `on_click` is also a button for the keyboard and for assistive
 technology: Tab reaches it, Enter or Space clicks it, and it has
-`role="button"`.
+`role="button"`. It also gets MD3's hover tint and press ripple (see
+[Interaction Feedback](guide/interaction.md)).
 
 ## The ViewModel
 

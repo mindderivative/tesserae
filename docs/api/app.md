@@ -23,7 +23,7 @@ The theme is app-wide rather than per screen because in `tre` a theme
 belongs to the window. Building a view never themes the window, and
 switching screens never changes it, so `show()` gives the window the
 app's theme the first time it opens. Widgets created with
-`tesserae.widgets` and hover/press tints use it.
+`tesserae.widgets`, and `tre`'s hover and press tints on them, use it.
 
 ## `set_theme_specs`
 

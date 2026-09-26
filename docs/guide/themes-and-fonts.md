@@ -22,8 +22,10 @@ app.load("Settings_View.yaml", SettingsViewModel, stylesheet="styles/Settings.ya
 ```
 
 The theme is app-wide because in `tre` a theme belongs to the window.
-The window's theme is what widgets from `tesserae.widgets` and
-hover/press tints use, and switching screens never changes it.
+The window's theme is what widgets from `tesserae.widgets` (and `tre`'s
+hover and press tints on them) use, and switching screens never changes
+it. A YAML node's own state layer and ripple use the view's theme
+([Interaction Feedback](interaction.md)).
 `app.show()` gives the window the same theme as the screens: the same
 seed (`theme_seed=` first, then the custom theme's `seed:`, then the
 default theme's) and both themes' `colors:`. An app with no seed

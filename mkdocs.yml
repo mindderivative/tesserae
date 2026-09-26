@@ -57,6 +57,7 @@ nav:
       - Hot Reload: guide/hot-reload.md
       - Logging: guide/logging.md
       - Themes & Fonts: guide/themes-and-fonts.md
+      - Interaction Feedback: guide/interaction.md
       - Repeater (Lists): guide/repeater.md
       - Reactivity: guide/reactivity.md
       - Binding Expressions: guide/bindings.md

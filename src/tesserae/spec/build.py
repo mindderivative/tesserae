@@ -30,7 +30,10 @@ from tesserae import tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
-__all__ = ["Built", "Layers", "SpecBuildError", "build", "patch", "prepare_layers", "shipped_default_theme"]
+__all__ = [
+    "Built", "Layers", "SpecBuildError", "build", "interaction_tint", "patch", "prepare_layers",
+    "shipped_default_theme",
+]
 
 RGBA = tuple[int, int, int, int]
 _TRANSPARENT: RGBA = (0, 0, 0, 0)
@@ -40,6 +43,7 @@ _TEXT_FIELD_GLYPH: RGBA = (0x1C, 0x1B, 0x1F, 0xFF)
 _BASELINE = {
     "primary": (0x67, 0x50, 0xA4, 0xFF), "on_primary": (0xFF, 0xFF, 0xFF, 0xFF),
     "outline": (0x79, 0x74, 0x7E, 0xFF), "surface_container_highest": (0xE6, 0xE0, 0xE9, 0xFF),
+    "on_surface": (0x1D, 0x1B, 0x20, 0xFF),
 }
 _LEGACY_KINDS = frozenset({
     "Checkbox", "RadioButton", "Switch", "Slider", "CircularProgress", "LinearProgress",
@@ -48,7 +52,7 @@ _LEGACY_KINDS = frozenset({
 _KINDS = _LEGACY_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "bindings", "handlers", "two_way", "children",
+    "image", "icon", "bindings", "handlers", "two_way", "interaction", "children",
 })
 
 
@@ -167,6 +171,7 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     if unknown:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown field(s) {sorted(unknown)}")
     style = resolve_style(node, ctx.layers)
+    _check_interaction(node)
     unknown_style = set(style) - STYLE_FIELDS
     if unknown_style:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}")
@@ -377,6 +382,37 @@ _OWN_ROLE = frozenset({"Link", "TextField"}) | _LEGACY_KINDS
 
 def _clickable(node: dict[str, Any]) -> bool:
     return "on_click" in (node.get("handlers") or {}) and node["kind"] not in _OWN_ROLE
+
+
+#: Kinds whose node can hold the state layer and ripple (a `box`).
+_INTERACTIVE_KINDS = frozenset({"Rect", "Container"})
+
+
+def _check_interaction(node: dict[str, Any]) -> None:
+    value = node.get("interaction")
+    if value is None or isinstance(value, bool):
+        return
+    if not isinstance(value, dict) or set(value) - {"color"}:
+        raise SpecBuildError(f"widget {_q(node['id'])}: `interaction:` takes true, false or {{color: ...}}, "
+                             f"got {value!r}")
+    if node["kind"] not in _INTERACTIVE_KINDS:
+        raise SpecBuildError(f"widget {_q(node['id'])}: `interaction:` needs a Rect or Container, "
+                             f"not a {node['kind']}")
+
+
+def interaction_tint(node: dict[str, Any], scheme: Optional[dict[str, RGBA]]) -> Optional[RGBA]:
+    """The state layer and ripple's tint for `node` (M39), or `None` for no
+    interaction feedback. A clickable Rect or Container gets it in the
+    theme's `on_surface` unless it says `interaction: false`;
+    `interaction: {color: ...}` picks the colour (a theme role or a hex),
+    and `interaction: true` turns it on without `on_click`."""
+    value = node.get("interaction")
+    if node["kind"] not in _INTERACTIVE_KINDS or value is False or (value is None and not _clickable(node)):
+        return None
+    ctx = _Context(None, (), scheme, {})
+    if isinstance(value, dict) and "color" in value:
+        return _color(ctx, node["id"], "interaction.color", value["color"])
+    return _role(ctx, "on_surface")
 
 
 def _create(ctx, node, style):
