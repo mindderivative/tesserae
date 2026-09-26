@@ -84,8 +84,8 @@ class View:
     dark flag, and the three `*_spec` dicts.
 
     `window` is the `tre.Window` to build into. Without one, the view
-    makes its own, mounts its root there, and themes it (`tre`'s own
-    widgets, from `tesserae.widgets`, read the window's theme until M41)."""
+    makes its own and mounts its root there. It doesn't theme that window:
+    everything a view builds takes the view's theme (M40)."""
 
     def __init__(
         self,
@@ -126,9 +126,7 @@ class View:
         if window is None:
             window = tre.Window(width=DEFAULT_SIZE[0], height=DEFAULT_SIZE[1])
             window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
-            seed = theme_seed or _seed_from(custom_theme_spec) or _seed_from(default_theme_spec)
-            if seed is not None:
-                window.set_theme(seed, dark=dark)
+            # no `Window.set_theme` (removed in tre 0.3.5): since M40 nothing a view builds reads the window's theme
         self.window = window
         self._spec = spec
         self._built = Built(root=None)
@@ -565,11 +563,6 @@ def _child_index(parent: Any, child: Any) -> int:
 
 def _quoted(raw: str) -> str:
     return '"' + raw.replace("\\", "\\\\").replace('"', '\\"') + '"'
-
-
-def _seed_from(theme: Optional[dict[str, Any]]) -> Optional[tuple[int, int, int, int]]:
-    raw = (theme or {}).get("seed")
-    return tokens.parse_color(raw) if isinstance(raw, str) else None
 
 
 def _arity_adapter(method: Callable[..., Any]) -> Callable[[Any], Any]:

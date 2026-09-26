@@ -521,3 +521,20 @@ Found:
 
 Mutants: 10 of 11 caught; the trial's own dispatcher is equivalent.
 1179 passed.
+
+## M40 Phase 6: the gate; M40 complete
+
+User: "Push it and start Phase 6". Pushed `ec8272a`.
+
+- tre's `_removed.py` (0.3.5), run from the scratchpad: the counter,
+  multi_screen and todo_list examples are clean. todo_list got past
+  `add_checkbox`.
+- Under the shim, a standalone `View` still called `Window.set_theme`;
+  removed, since nothing reads the window's theme now.
+- New: `tests/test_no_tre_controls.py` (an AST scan of `src/tesserae`)
+  and `docs/guide/controls.md`.
+- Found: `mkdocs build --strict -q` exits 0 on a missing nav page, since
+  `-q` stops warnings being counted. Rerun without it, the docs are
+  clean. Recorded in memory; the check now runs without `-q`.
+
+1183 passed.

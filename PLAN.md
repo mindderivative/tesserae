@@ -101,4 +101,6 @@ Phase 4 done: progress (linear and circular, indeterminate too), the loading ind
 
 Phase 5 done: the YAML control kinds and the stateful factories are Tesserae's controls; the todo_list checkbox ticks; 1179 passed.
 
-**Up next:** M40 Phase 6 (gate check, controls guide, close M40).
+Phase 6 done: the static gate, the examples clean under tre's removal shim, the controls guide. **M40 complete**; 1183 passed.
+
+**Up next:** M41 (composed catalog and overlays), to scope.

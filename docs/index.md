@@ -43,6 +43,10 @@ end to end by three real vertical-slice examples. See
 - **Themes, stylesheets and custom fonts** -- loaded from files, with a
   warning when a font would silently fall back. See
   [Themes & Fonts](guide/themes-and-fonts.md).
+- **MD3 controls** -- checkboxes, radio buttons, switches, sliders, spin
+  boxes, progress and loading indicators and the time picker dial, drawn
+  by Tesserae and working with the pointer, keyboard and screen readers.
+  See [Controls](guide/controls.md).
 - **Interaction and accessibility** -- a node with `on_click` is a
   keyboard-reachable button with MD3's hover tint, press ripple and
   focus ring, and `a11y:` labels it for screen readers. See

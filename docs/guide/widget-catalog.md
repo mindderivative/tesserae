@@ -33,7 +33,7 @@ toggles itself when clicked, so an `on_click` that toggled it by hand
 should go. `spin_box` returns one `SpinBox` rather than
 `(field, minus, plus)`. These controls use the `theme=` you pass
 (MD3's baseline colours without one), not the window's. See
-[Interaction & Accessibility](interaction.md) and the API index.
+[Controls](controls.md).
 
 Every other function here is a **thin, faithful delegate** straight to
 the matching `Window.add_*` factory in `tre` itself -- same parameter

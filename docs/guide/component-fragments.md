@@ -232,7 +232,8 @@ with the same `group:` name exclude each other and are one Tab stop:
 - {id: large, kind: RadioButton, selected: false, group: size, style: {}}
 ```
 
-`view.control("small")` returns a control, whose `Signal`s are its state.
+`view.control("small")` returns a control, whose `Signal`s are its state
+(see [Controls](controls.md)).
 The `SpinBox` fragment is still a composition, with no behaviour of its
 own; `tesserae.widgets.spin_box` gives a working one.
 
