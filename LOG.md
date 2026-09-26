@@ -569,3 +569,19 @@ Found while auditing the button fragment:
 
 Mutants: 8 of 8 caught after a test for building after a re-colour.
 1198 passed.
+
+## M41 Phase 2: buttons and actions
+
+User: "Push it and start Phase 2". Pushed `4b476cd`.
+
+- The five factories are built from fragments; the button group is
+  assembled from button fragments.
+- Audit: the fragments now centre their content; the standard and
+  outlined icon buttons use `on_surface_variant`.
+- Probed: an ancestor gets `pointer_enter` when the pointer lands on a
+  child; `pointer_leave` fires while a press is held (a test that pressed
+  without moving in first never entered the node).
+- Mutants: 11 of 12 caught after redoing one break and tightening the
+  split test; `release()` before a press is equivalent.
+
+1205 passed.

@@ -19,28 +19,48 @@ from tesserae import a11y, tokens
 from tesserae.spec.expand import expand_components_to_spec
 from tesserae.theme import Theme
 
-__all__ = ["Widget"]
+__all__ = ["Widget", "fragment"]
+
+
+def fragment(name: str, params: dict[str, Any], node_id: str) -> dict[str, Any]:
+    """The spec `name`'s fragment expands to with `params`, its root `node_id`
+    (its parts `node_id.part`): for widgets built from several fragments."""
+    return expand_components_to_spec(yaml.safe_dump({"id": node_id, "component": name, "with": params},
+                                                    sort_keys=False))
+
+
+def content_role(spec: dict[str, Any]) -> Optional[str]:
+    """The colour role of a node's content (its first Text or Icon child's
+    foreground): MD3 colours a part's state layer with it."""
+    for child in spec.get("children") or []:
+        if child.get("kind") in ("Text", "Icon", "Link"):
+            return (child.get("style") or {}).get("foreground")
+    return None
 
 
 class Widget:
-    """A composed MD3 widget: its fragment, expanded with `params` and
-    built into `window`. `interactive` maps a part (`None` for the root)
-    to the colour role of its feedback. `edit(spec)`, when given, adjusts
-    the expanded spec before it's built (a factory's extra arguments)."""
+    """A composed MD3 widget: its fragment, expanded with `params` (or a
+    `spec` a factory built from several), built into `window`.
+    `interactive` maps a part (`None` for the root) to the colour role of
+    its feedback, `None` meaning its content's colour. `edit(spec)`, when
+    given, adjusts the spec before it's built (a factory's extra arguments)."""
 
-    def __init__(self, window: Any, fragment: str, params: dict[str, Any], *, theme: Optional[Theme] = None,
+    def __init__(self, window: Any, fragment_name: Optional[str] = None, params: Optional[dict[str, Any]] = None, *,
+                 spec: Optional[dict[str, Any]] = None, theme: Optional[Theme] = None,
                  label: Optional[str] = None, x: Optional[float] = None, y: Optional[float] = None,
-                 interactive: Optional[dict[Optional[str], str]] = None,
+                 interactive: Optional[dict[Optional[str], Optional[str]]] = None,
                  edit: Optional[Callable[[dict[str, Any]], None]] = None, name: str = "widget") -> None:
         from tesserae.view import View
 
         self.window = window
         self.theme = theme if theme is not None else Theme.resolve()
         self.name = name
-        spec = expand_components_to_spec(yaml.safe_dump({"id": name, "component": fragment, "with": params},
-                                                        sort_keys=False))
+        if spec is None:
+            spec = fragment(fragment_name, params or {}, name)
         for part, role in (interactive or {}).items():
-            self._spec_of(spec, part)["interaction"] = {"color": role}
+            node_spec = self._spec_of(spec, part)
+            role = role or content_role(node_spec) or "on_surface"
+            node_spec["interaction"] = {"color": role}
         if edit is not None:
             edit(spec)
         self.spec = spec

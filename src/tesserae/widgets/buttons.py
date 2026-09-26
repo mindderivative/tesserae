@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable
 
-from tesserae.widgets._composed import Widget
+from tesserae.widgets._composed import Widget, fragment
 
 if TYPE_CHECKING:
     from tesserae.theme import Theme
@@ -80,6 +80,32 @@ def button(
     return widget
 
 
+def _borders(parts: list[str | None], border_color, border_width) -> Callable[[dict[str, Any]], None] | None:
+    """An `edit` giving `parts` of a widget's spec the caller's border."""
+    if border_color is None and border_width is None:
+        return None
+
+    def edit(spec: dict[str, Any]) -> None:
+        for part in parts:
+            node = spec if part is None else next(c for c in spec["children"] if c["id"].endswith("." + part))
+            style = node.setdefault("style", {})
+            if border_color is not None:
+                style["border_color"] = _hex(border_color)
+            if border_width is not None:
+                style["border_width"] = float(border_width)
+    return edit
+
+
+def _variant(kind: str, variant: str, table: dict[str, str]) -> str:
+    if variant not in table:
+        raise ValueError(f"unknown {kind} variant {variant!r}; expected one of {sorted(table)}")
+    return table[variant]
+
+
+_ICON_BUTTONS = {"standard": "IconButtonStandard", "filled": "IconButtonFilled",
+                 "filled_tonal": "IconButtonFilledTonal", "outlined": "IconButtonOutlined"}
+
+
 def icon_button(
     window: "Window",
     icon: str,
@@ -89,17 +115,26 @@ def icon_button(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """A real MD3 icon button. `variant`: standard/filled/filled_tonal/outlined."""
-    return window.add_icon_button(
-        icon,
-        size=size,
-        variant=variant,
-        x=x,
-        y=y,
-        border_color=border_color,
-        border_width=border_width,
-    )
+    *,
+    label: str | None = None,
+    theme: "Theme | None" = None,
+    on_click: Callable[[], Any] | None = None,
+) -> Widget:
+    """MD3's icon button (M41: built from its fragment). `variant`:
+    standard, filled, filled_tonal or outlined. A circle `size` across.
+    Give `label=` so a screen reader can name it."""
+    widget = Widget(window, _variant("icon button", variant, _ICON_BUTTONS),
+                    {"icon": icon, "size": size, "corner_radius": float(size) / 2}, theme=theme, label=label,
+                    x=x, y=y, interactive={None: None}, edit=_borders([None], border_color, border_width),
+                    name="icon_button")
+    if on_click is not None:
+        widget.on_click(on_click)
+    return widget
+
+
+_FABS = {"surface": "FabSurface", "primary": "FabPrimary", "secondary": "FabSecondary", "tertiary": "FabTertiary"}
+#: MD3's FAB sizes: container, corner radius, icon.
+_FAB_SIZES = {"small": (40.0, 12.0, 24.0), "default": (56.0, 16.0, 24.0), "large": (96.0, 28.0, 36.0)}
 
 
 def fab(
@@ -111,18 +146,33 @@ def fab(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """A real MD3 floating action button. `size`: small/default/large.
-    `variant`: surface/primary/secondary/tertiary."""
-    return window.add_fab(
-        icon,
-        size=size,
-        variant=variant,
-        x=x,
-        y=y,
-        border_color=border_color,
-        border_width=border_width,
-    )
+    *,
+    label: str | None = None,
+    theme: "Theme | None" = None,
+    on_click: Callable[[], Any] | None = None,
+) -> Widget:
+    """MD3's floating action button (M41: built from its fragment).
+    `size`: small (40), default (56) or large (96, with a 36 px icon).
+    `variant`: surface, primary, secondary or tertiary."""
+    if size not in _FAB_SIZES:
+        raise ValueError(f"unknown FAB size {size!r}; expected one of {sorted(_FAB_SIZES)}")
+    box, radius, glyph = _FAB_SIZES[size]
+    border = _borders([None], border_color, border_width)
+
+    def edit(spec: dict[str, Any]) -> None:
+        spec["children"][0]["style"].update(width=glyph, height=glyph)
+        if border is not None:
+            border(spec)
+
+    widget = Widget(window, _variant("FAB", variant, _FABS), {"icon": icon, "size": box, "corner_radius": radius},
+                    theme=theme, label=label, x=x, y=y, interactive={None: None}, edit=edit, name="fab")
+    if on_click is not None:
+        widget.on_click(on_click)
+    return widget
+
+
+_EXTENDED_FABS = {"surface": "ExtendedFabSurface", "primary": "ExtendedFabPrimary",
+                  "secondary": "ExtendedFabSecondary", "tertiary": "ExtendedFabTertiary"}
 
 
 def extended_fab(
@@ -135,18 +185,35 @@ def extended_fab(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> "Node":
-    """A real MD3 extended FAB, an optional leading icon plus a label."""
-    return window.add_extended_fab(
-        label,
-        width,
-        icon=icon,
-        variant=variant,
-        x=x,
-        y=y,
-        border_color=border_color,
-        border_width=border_width,
-    )
+    *,
+    theme: "Theme | None" = None,
+    on_click: Callable[[], Any] | None = None,
+) -> Widget:
+    """MD3's extended FAB (M41: built from its fragment): an optional
+    leading icon and a label, 56 px tall."""
+    border = _borders([None], border_color, border_width)
+
+    def edit(spec: dict[str, Any]) -> None:
+        if icon is None:  # MD3's icon-less extended FAB: the label alone, 20 px either side
+            spec["children"] = [c for c in spec["children"] if not c["id"].endswith(".icon")]
+            spec["style"].update(padding={"left": 20, "right": 20, "top": 0, "bottom": 0}, justify_content="center")
+        if border is not None:
+            border(spec)
+
+    widget = Widget(window, _variant("extended FAB", variant, _EXTENDED_FABS),
+                    {"label": label, "icon": icon or "add", "width": width}, theme=theme, x=x, y=y,
+                    interactive={None: None}, edit=edit, name="extended_fab")
+    if on_click is not None:
+        widget.on_click(on_click)
+    return widget
+
+
+_SPLIT_BUTTONS = {"elevated": "SplitButtonElevated", "filled": "SplitButtonFilled",
+                  "filled_tonal": "SplitButtonFilledTonal", "outlined": "SplitButtonOutlined",
+                  "text": "SplitButtonText"}
+#: `tre`'s split button: the facing corners tighten to this on hover, over 100 ms.
+SPLIT_TIGHTENED = 8.0
+MORPH_MS = 100
 
 
 def split_button(
@@ -159,22 +226,49 @@ def split_button(
     y: float | None = None,
     border_color: tuple[int, int, int, int] | None = None,
     border_width: float | None = None,
-) -> tuple["Node", "Node", "Node"]:
-    """A real MD3 split button (leading action + trailing chevron).
-    Returns `(leading, trailing, container)`, matching `tre`'s own
-    `add_split_button`. Delegates directly to the native factory, so the
-    real hover/press shape-tightening animation is fully live -- unlike a
-    from-scratch Python port, which has no public API to reach it."""
-    return window.add_split_button(
-        label,
-        width,
-        height,
-        variant=variant,
-        x=x,
-        y=y,
-        border_color=border_color,
-        border_width=border_width,
-    )
+    *,
+    theme: "Theme | None" = None,
+    on_click: Callable[[], Any] | None = None,
+    on_menu: Callable[[], Any] | None = None,
+) -> Widget:
+    """MD3's split button (M41: built from its fragment): a `leading`
+    action and a `trailing` chevron, parts of the returned `Widget`. While
+    it's hovered, the corners where the two meet tighten, as `tre`'s did.
+    `on_click` is the action, `on_menu` the chevron."""
+    rest = float(height) / 2
+    widget = Widget(window, _variant("split button", variant, _SPLIT_BUTTONS),
+                    {"label": label, "width": width, "height": height, "corner_radius": rest}, theme=theme,
+                    x=x, y=y, interactive={"leading": None, "trailing": None},
+                    edit=_borders(["leading", "trailing"], border_color, border_width), name="split_button")
+    tight = (widget.theme.shape("split_button", "tightened") if widget.theme.is_set else None) or SPLIT_TIGHTENED
+    corners = {  # (top_left, top_right, bottom_right, bottom_left)
+        "leading": ((rest,) * 4, (rest, tight, tight, rest)),
+        "trailing": ((rest,) * 4, (tight, rest, rest, tight)),
+    }
+
+    def morph(hovered: bool) -> None:
+        for part, (resting, tightened) in corners.items():
+            radius = tightened if hovered else resting
+            for node in (widget.part(part), widget.interaction(part).clip):
+                node.animate("corner_radius", radius, MORPH_MS)
+
+    widget._undo.append(widget.view._listen(widget.node, "pointer_enter", lambda e: morph(True)))
+    widget._undo.append(widget.view._listen(widget.node, "pointer_leave", lambda e: morph(False)))
+    if on_click is not None:
+        widget.on_click(on_click, part="leading")
+    if on_menu is not None:
+        widget.on_click(on_menu, part="trailing")
+    return widget
+
+
+#: The pressed child's corners in a button group, by its height (`tre`'s):
+#: 8 up to 38 px, 12 up to 44, else 16.
+def _group_tightened(height: float) -> float:
+    return 8.0 if height <= 38 else 12.0 if height <= 44 else 16.0
+
+
+#: How much wider a pressed group child grows; its neighbours share the loss.
+GROUP_GROWTH = 12.0
 
 
 def button_group(
@@ -185,17 +279,56 @@ def button_group(
     variant: str = "filled",
     x: float | None = None,
     y: float | None = None,
-) -> tuple["Node", list["Node"]]:
-    """A real MD3 connected button group. Returns `(container, buttons)`,
-    matching `tre`'s own `add_button_group`. Delegates directly to the
-    native factory, so the real hover reflow/regroup animation is fully
-    live -- unlike a from-scratch Python port, which has no public API to
-    reach it."""
-    return window.add_button_group(
-        labels,
-        width,
-        height,
-        variant=variant,
-        x=x,
-        y=y,
-    )
+    *,
+    theme: "Theme | None" = None,
+    on_click: Callable[[int], Any] | None = None,
+) -> Widget:
+    """MD3's button group (M41): one button per label, `width`x`height`,
+    8 px apart; parts `b0`, `b1`, ... While one is pressed, its corners
+    tighten and it grows 12 px, its neighbours sharing the loss, and it
+    all comes back on release -- the intent of `tre`'s, whose reflow
+    compounded and never restored. `on_click(index)` hears each."""
+    fragment_name, _ = _BUTTONS[variant] if variant in _BUTTONS else (None, None)
+    if fragment_name is None:
+        raise ValueError(f"unknown button group variant {variant!r}; expected one of {sorted(_BUTTONS)}")
+    rest = float(height) / 2
+    name = "button_group"
+    children = [fragment(fragment_name, {"label": text, "width": width, "height": height, "corner_radius": rest},
+                         f"{name}.b{i}") for i, text in enumerate(labels)]
+    spec = {"id": name, "kind": "Container", "style": {"flex_direction": "horizontal", "gap": 8},
+            "children": children}
+    widget = Widget(window, spec=spec, theme=theme, x=x, y=y, interactive={f"b{i}": None for i in range(len(labels))},
+                    name=name)
+    tight = (widget.theme.shape("button_group", "tightened") if widget.theme.is_set else None) or _group_tightened(
+        float(height))
+    count = len(labels)
+    pressed: list[int] = []
+
+    def press(index: int) -> None:
+        release()
+        pressed.append(index)
+        neighbours = [n for n in (index - 1, index + 1) if 0 <= n < count]
+        widths = {index: float(width) + GROUP_GROWTH}
+        for n in neighbours:
+            widths[n] = max(0.0, float(width) - GROUP_GROWTH / len(neighbours))
+        for i, w in widths.items():
+            widget.part(f"b{i}").set(width=w)
+        for node in (widget.part(f"b{index}"), widget.interaction(f"b{index}").clip):
+            node.animate("corner_radius", tight, MORPH_MS)
+
+    def release() -> None:
+        while pressed:
+            index = pressed.pop()
+            for i in range(count):
+                widget.part(f"b{i}").set(width=float(width))
+            for node in (widget.part(f"b{index}"), widget.interaction(f"b{index}").clip):
+                node.animate("corner_radius", rest, MORPH_MS)
+
+    for i in range(count):
+        part = widget.part(f"b{i}")
+        widget._undo.append(widget.view._listen(part, "pointer_down", lambda e, i=i: press(i)))
+        widget._undo.append(widget.view._listen(part, "pointer_up", lambda e: release()))
+        widget._undo.append(widget.view._listen(part, "pointer_leave", lambda e: release()))
+        if on_click is not None:
+            widget.on_click(lambda i=i: on_click(i), part=f"b{i}")
+    return widget

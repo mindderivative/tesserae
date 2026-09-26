@@ -220,6 +220,12 @@ baseline seed with the published baseline values over it. The compiler
 sizes a `Text`/`Link` with no width or height to its content
 (`build.natural_size`, via `window.measure_text`; `tre`'s `line_height`
 is a multiple of the font size), and a bound `text` is measured again.
+A widget built from several fragments (the button group) passes `Widget`
+a spec made with `_composed.fragment`. A part's feedback takes its
+content's colour (`content_role`). The split button's hover and the
+button group's press morph animate `corner_radius` on the part and on
+its feedback's clip together. Widths don't animate in tre, so the group's
+reflow is set at once, from the resting width, which can't compound.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

@@ -152,3 +152,133 @@ def test_without_a_theme_every_role_has_a_colour():
     scheme = tokens.baseline_scheme()
     assert set(tokens.ROLES) <= set(scheme)
     assert scheme["primary"] == tokens.BASELINE["primary"] and scheme["on_surface"] == (0x1D, 0x1B, 0x20, 0xFF)
+
+
+# == M41 Phase 2: icon buttons, FABs, split buttons, button groups ==========================
+
+from tesserae.widgets import button_group, extended_fab, fab, icon_button, split_button  # noqa: E402
+from tesserae.widgets.buttons import GROUP_GROWTH, SPLIT_TIGHTENED  # noqa: E402
+
+
+def _frames(window, ms):
+    for _ in range(math.ceil(ms / 16)):
+        window.advance(16)
+
+
+def _offset(node, parent):
+    return node.get("layout_x") - parent.get("layout_x"), node.get("layout_y") - parent.get("layout_y")
+
+
+@pytest.mark.parametrize("variant, fill, ink", [
+    ("standard", None, "on_surface_variant"),
+    ("filled", "primary", "on_primary"),
+    ("filled_tonal", "secondary_container", "on_secondary_container"),
+    ("outlined", None, "on_surface_variant"),
+])
+def test_icon_buttons_are_md3s(variant, fill, ink):
+    window = _window()
+    ib = icon_button(window, "close", variant=variant, label="Close")
+    window.advance(16)
+    assert (ib.node.get("layout_width"), ib.node.get("corner_radius"), ib.node.get("label")) == (40.0, 20.0, "Close")
+    assert ib.node.get("fill") == (BASE[fill] if fill else (0, 0, 0, 0))
+    assert ib.part("icon").get("fill") == BASE[ink] and ib.interaction().layer.get("fill") == BASE[ink]
+    assert _offset(ib.part("icon"), ib.node) == (8.0, 8.0)  # centred
+
+
+@pytest.mark.parametrize("size, box, radius, glyph", [("small", 40, 12, 24), ("default", 56, 16, 24),
+                                                      ("large", 96, 28, 36)])
+def test_fab_sizes_are_md3s(size, box, radius, glyph):
+    window = _window()
+    f = fab(window, "add", size=size, variant="primary")
+    window.advance(16)
+    assert (f.node.get("layout_width"), f.node.get("corner_radius")) == (box, radius)
+    assert f.part("icon").get("layout_width") == glyph
+    assert _offset(f.part("icon"), f.node) == ((box - glyph) / 2, (box - glyph) / 2)
+    assert f.node.get("fill") == BASE["primary_container"] and f.part("icon").get("fill") == BASE["on_primary_container"]
+
+
+def test_fab_rejects_an_unknown_size_or_variant():
+    window = _window()
+    with pytest.raises(ValueError, match="unknown FAB size 'huge'"):
+        fab(window, "add", size="huge")
+    with pytest.raises(ValueError, match="unknown FAB variant 'pink'"):
+        fab(window, "add", variant="pink")
+
+
+def test_an_extended_fab_with_and_without_an_icon():
+    window = _window()
+    with_icon = extended_fab(window, "Compose", 160, icon="add")
+    without = extended_fab(window, "Go", 100)
+    window.advance(16)
+    assert with_icon.part("icon").get("layout_width") == 24.0 and with_icon.node.get("layout_height") == 56.0
+    with pytest.raises(ValueError):
+        without.part("icon")
+    label = without.part("label")
+    assert _offset(label, without.node)[0] == pytest.approx((100 - label.get("width")) / 2, abs=1.0)  # centred
+
+
+def test_a_split_buttons_facing_corners_tighten_while_hovered():
+    window = _window()
+    actions = []
+    sb = split_button(window, "Send", 100, 40, on_click=lambda: actions.append("send"),
+                      on_menu=lambda: actions.append("menu"))
+    window.advance(16)
+    leading, trailing = sb.part("leading"), sb.part("trailing")
+    x, y = leading.get("layout_x"), leading.get("layout_y")
+    window.simulate("pointer_move", x=x + 10, y=y + 10)
+    _frames(window, 150)
+    tight = SPLIT_TIGHTENED
+    assert tuple(leading.get("corner_radius")) == (20.0, tight, tight, 20.0)
+    assert tuple(trailing.get("corner_radius")) == (tight, 20.0, 20.0, tight)
+    assert tuple(sb.interaction("leading").clip.get("corner_radius")) == (20.0, tight, tight, 20.0)  # feedback follows
+    window.simulate("pointer_move", x=490, y=290)
+    _frames(window, 150)
+    assert tuple(leading.get("corner_radius")) == (20.0,) * 4
+    window.simulate("click", node=leading)
+    assert actions == ["send"]
+    window.simulate("click", node=trailing)
+    assert actions == ["send", "menu"]
+
+
+def test_a_button_group_reshapes_and_reflows_the_pressed_button_and_restores_it():
+    window = _window()
+    heard = []
+    bg = button_group(window, ["A", "B", "C"], 60, 40, on_click=heard.append)
+    window.advance(16)
+    b1 = bg.part("b1")
+    x, y = b1.get("layout_x"), b1.get("layout_y")
+    window.simulate("pointer_down", x=x + 5, y=y + 5)
+    _frames(window, 150)
+    widths = [bg.part(f"b{i}").get("width") for i in range(3)]
+    assert widths == [60 - GROUP_GROWTH / 2, 60 + GROUP_GROWTH, 60 - GROUP_GROWTH / 2] and sum(widths) == 180
+    assert b1.get("corner_radius") == 12.0  # tightened, for a 40 px button
+    window.simulate("pointer_up", x=x + 5, y=y + 5)
+    _frames(window, 150)
+    assert [bg.part(f"b{i}").get("width") for i in range(3)] == [60.0] * 3 and b1.get("corner_radius") == 20.0
+    assert heard == [1]
+
+
+def test_pressing_an_end_button_takes_from_its_one_neighbour():
+    window = _window()
+    bg = button_group(window, ["A", "B", "C"], 60, 32)
+    window.advance(16)
+    b0 = bg.part("b0")
+    window.simulate("pointer_move", x=b0.get("layout_x") + 5, y=b0.get("layout_y") + 5)  # the pointer arrives first
+    window.simulate("pointer_down", x=b0.get("layout_x") + 5, y=b0.get("layout_y") + 5)
+    _frames(window, 150)
+    assert [bg.part(f"b{i}").get("width") for i in range(3)] == [72.0, 48.0, 60.0]
+    assert b0.get("corner_radius") == 8.0  # up to 38 px: 8
+    window.simulate("pointer_move", x=490, y=290)  # dragged away: released
+    assert [bg.part(f"b{i}").get("width") for i in range(3)] == [60.0] * 3
+
+
+def test_repeated_presses_dont_compound():
+    """`tre`'s reflow compounded on every layout pass; this one doesn't."""
+    window = _window()
+    bg = button_group(window, ["A", "B"], 60, 40)
+    window.advance(16)
+    b0 = bg.part("b0")
+    for _ in range(3):
+        window.simulate("pointer_down", x=b0.get("layout_x") + 5, y=b0.get("layout_y") + 5)
+        _frames(window, 50)
+    assert bg.part("b0").get("width") == 72.0

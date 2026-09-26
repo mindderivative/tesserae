@@ -16,6 +16,8 @@ children:
     style:
       width: "{{ width }}"
       height: "{{ height }}"
+      align_items: center
+      justify_content: center
       background: surface_container_low
       corner_radius: "{{ corner_radius }}"
       elevation: level_1
@@ -29,6 +31,8 @@ children:
     style:
       width: "{{ height }}"
       height: "{{ height }}"
+      align_items: center
+      justify_content: center
       background: surface_container_low
       corner_radius: "{{ corner_radius }}"
       elevation: level_1

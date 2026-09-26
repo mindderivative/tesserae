@@ -58,7 +58,7 @@ children:
         declarative = view.node("b")
 
         window = _themed_window(200, 200)
-        imperative = icon_button(window, "settings", size=40, variant=variant)
+        imperative = icon_button(window, "settings", size=40, variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert declarative.get("border_width") == imperative.get("border_width"), component_name
@@ -80,7 +80,7 @@ children:
         declarative = view.node("b")
 
         window = _themed_window(200, 200)
-        imperative = fab(window, "add", size="default", variant=variant)
+        imperative = fab(window, "add", size="default", variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert elevation(declarative) == elevation(imperative), component_name
@@ -102,7 +102,7 @@ children:
         declarative = view.node("b")
 
         window = _themed_window(300, 100)
-        imperative = extended_fab(window, "Compose", 160, icon="add", variant=variant)
+        imperative = extended_fab(window, "Compose", 160, icon="add", variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert elevation(declarative) == elevation(imperative), component_name

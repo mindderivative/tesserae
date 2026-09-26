@@ -14,6 +14,8 @@ children:
     style:
       width: "{{ width }}"
       height: "{{ height }}"
+      align_items: center
+      justify_content: center
       background: secondary_container
       corner_radius: "{{ corner_radius }}"
     children:
@@ -26,6 +28,8 @@ children:
     style:
       width: "{{ height }}"
       height: "{{ height }}"
+      align_items: center
+      justify_content: center
       background: secondary_container
       corner_radius: "{{ corner_radius }}"
     children:

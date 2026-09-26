@@ -15,6 +15,8 @@ kind: Rect
 style:
   width: "{{ size }}"
   height: "{{ size }}"
+  align_items: center
+  justify_content: center
   background: surface_container_high
   corner_radius: "{{ corner_radius }}"
   elevation: level_3

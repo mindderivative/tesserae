@@ -40,9 +40,8 @@ children:
 
         window = Window(width=300, height=200)
         window.set_theme(THEME_SEED)
-        imp_leading, imp_trailing, imp_container = split_button(
-            window, "Send", 100, 40, variant=variant
-        )
+        widget = split_button(window, "Send", 100, 40, variant=variant)  # a Widget since M41
+        imp_leading, imp_trailing = widget.part("leading"), widget.part("trailing")
 
         assert leading.get("corner_radius") == imp_leading.get("corner_radius"), component_name
         assert elevation(leading) == elevation(imp_leading), component_name

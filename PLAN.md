@@ -107,4 +107,6 @@ Phase 6 done: the static gate, the examples clean under tre's removal shim, the 
 
 **M41:** Q1–Q4 as recommended. Phase 1 done: the `Widget` base (built from fragments) and `button`; content-sized text; an M37 patch bug fixed; 1198 passed.
 
-**Up next:** M41 Phase 2 (icon buttons, FABs, split button, button group).
+Phase 2 done: icon buttons, FABs, extended FABs, the split button and the button group; 1205 passed.
+
+**Up next:** M41 Phase 3 (containment and lists).
