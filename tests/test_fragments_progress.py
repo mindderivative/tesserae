@@ -11,7 +11,7 @@ these 3 at all; `tre`'s own `engine-spec` unit tests already cover
 tint resolution directly at the Rust level.
 """
 
-from tre import Node, View, Window
+from tre import Node, Window
 
 from tesserae.spec import expand_components
 from tesserae.widgets import circular_progress, linear_progress, loading_indicator
