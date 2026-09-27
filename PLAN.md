@@ -197,4 +197,6 @@ Phase 2 done: `tesserae.follow`; widgets and controls with no `theme=` follow th
 
 Phase 3 done: views, the shell and dock, and overlays follow; a following shell leaves the widgets it was given alone; the example drops `theme=`; 1381 passed.
 
-**Up next:** M50 Phase 4; decisions for M51–M52.
+Phase 4 done, and M50 with it: the docs pass; the gap moved to "Fixed gaps".
+
+**Up next:** decisions for M51–M52.

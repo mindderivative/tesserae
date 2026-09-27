@@ -92,8 +92,6 @@ MD3's motion tokens.
 
 - The `SpinBox` fragment is a composition with no behaviour; use
   `tesserae.widgets.spin_box` or `controls.SpinBox` for a working one.
-- Controls made from Python don't follow the app's theme on their own:
-  call `set_theme` when it changes. Controls in views do.
 - Checkbox's indeterminate state, error colours, and the switch's icons
   aren't built. The linear indicator's indeterminate sweep is one bar,
   not MD3's two.

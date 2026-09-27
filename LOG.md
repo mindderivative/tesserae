@@ -1184,3 +1184,10 @@ User: "Start phase 3".
 - 7 tests; 12/12 mutants caught.
 
 1381 passed; all four examples clean.
+
+## M50 Phase 4: docs -- M50 complete
+
+User: "Start phase 4". Added the widget catalog's opening note and the
+themes guide's light and dark line. Removed the controls guide's stale
+note that Python controls don't follow. The known gap moved to "Fixed
+gaps". 1381 passed; all four examples clean.

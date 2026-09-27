@@ -11,6 +11,11 @@ from tesserae.widgets import button
 save = button(window, "Save", width=120, height=40, variant="filled")
 ```
 
+On an `App`'s window (`app.window`), a widget made without `theme=` takes
+the app's theme and follows it, light and dark included; `theme=` pins
+it to a theme. On a window no `App` owns, it uses MD3's baseline colours
+(M50).
+
 **The stateful ones return Tesserae controls (M40).** `checkbox`,
 `radio_button`, `switch`, `slider`, `spin_box`, `circular_progress`,
 `linear_progress`, `loading_indicator` and `time_picker_dial` build
