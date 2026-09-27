@@ -130,7 +130,7 @@ def period_selector(
     widget.period = Signal(selected)
     changes: list[Any] = []
     widget.on_change = lambda fn: (changes.append(fn), lambda: changes.remove(fn) if fn in changes else None)[1]
-    a11y.describe(widget.node, role="group", label="Period")
+    a11y.describe(widget.node, role="tablist", label="Period")  # its halves are tabs
 
     def choose(period: str) -> None:
         if widget.period.get() != period:

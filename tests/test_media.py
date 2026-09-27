@@ -186,7 +186,29 @@ def test_the_graph_follows_the_theme():
     window, g, a, b = _graph()
     path = g.edge(a, b)
     dark = Theme.resolve(theme_seed=SEED, dark=True)
-    g.set_theme(dark)
-    a.set_theme(dark)
+    g.set_theme(dark)  # its nodes follow it (found in review: they didn't)
     assert path.get("stroke_color") == dark.role("outline")
     assert a.node.get("fill") == dark.role("surface_container_high") and a.node.get("layout_x") == 20.0
+
+
+def test_a_graph_node_shows_a_focus_ring_and_the_dragged_state():
+    """Found in review: a node took keyboard focus with no ring, and was
+    clipped, so a ring couldn't show."""
+    from tesserae import interaction
+
+    window, g, a, b = _graph()
+    assert a.node.get("clip_children") is False
+    assert tuple(a.part("title").get("corner_radius")) == (12.0, 12.0, 0.0, 0.0)
+    before = window.create("box", width=4, height=4, focusable=True)
+    window.root.insert_child(0, before)
+    before.focus()
+    window.simulate("key_down", key="tab")
+    window.advance(16)
+    assert a.node.get("focused") and a.interaction().ring_visible
+    x, y = a.node.get("layout_x"), a.node.get("layout_y")
+    window.simulate("pointer_down", x=x + 10, y=y + 10)
+    for _ in range(3):
+        window.advance(16)
+    assert a.interaction().dragged and a.interaction().layer.get("opacity") == pytest.approx(interaction.DRAGGED)
+    window.simulate("pointer_up", x=x + 10, y=y + 10)
+    assert not a.interaction().dragged

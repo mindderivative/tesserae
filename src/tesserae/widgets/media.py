@@ -242,6 +242,7 @@ def node_graph(
     widget.edge = edge
     widget._reroute = reroute
     widget.after_theme(lambda: [p.set(stroke_color=widget.color("outline")) for _, _, p in widget.edges])
+    widget.after_theme(lambda: [n.set_theme(widget.theme) for n in widget.graph_nodes])  # its nodes follow
     return widget
 
 
@@ -285,9 +286,17 @@ def graph_node(
                 {"id": f"{name}.body", "kind": "Container", "style": {"flex_grow": 1}},
             ]}
     widget = Widget(window, spec=spec, theme=theme if theme is not None else graph.theme, name=name, attach=False,
-                    edit=_borders([None], border_color, border_width))
+                    edit=_borders([None], border_color, border_width), interactive={None: "on_surface"})
     node = widget.node
-    node.set(position="absolute", clip_children=True, focusable=True, cursor="grab")
+    # not clipped, so the focus ring can show outside it: the title bar rounds its own top corners
+    node.set(position="absolute", focusable=True, cursor="grab")
+    title = widget.part("title")
+
+    def round_title() -> None:
+        title.set(corner_radius=(12.0, 12.0, 0.0, 0.0))
+
+    round_title()
+    widget.after_theme(round_title)
     a11y.describe(node, role="group", label=label)
     graph.content.add_child(node)
     graph.graph_nodes.append(widget)
@@ -319,6 +328,7 @@ def graph_node(
         drag.update(start=(event.window_x, event.window_y), position=widget.position.get())
         node.capture_pointer()
         node.set(cursor="grabbing")
+        widget.interaction().set_dragged(True)  # MD3's dragged state layer
 
     def move(event: Any) -> None:
         if drag and event.window_x is not None:
@@ -331,6 +341,7 @@ def graph_node(
             drag.clear()
             node.release_pointer()
             node.set(cursor="grab")
+            widget.interaction().set_dragged(False)
 
     def key(event: Any) -> None:
         step = {"arrow_left": (-8, 0), "arrow_right": (8, 0), "arrow_up": (0, -8), "arrow_down": (0, 8)}.get(event.key)

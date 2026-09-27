@@ -67,7 +67,7 @@ def test_the_period_selector_is_md3s():
     assert ps.part("am").get("fill") == BASE["tertiary_container"]
     assert ps.part("am_label").get("fill") == BASE["on_tertiary_container"]
     assert ps.part("pm").get("fill") == CLEAR and ps.part("pm_label").get("fill") == BASE["on_surface_variant"]
-    assert ps.node.get("role") == "group" and ps.part("am").get("selected") is True
+    assert ps.node.get("role") == "tablist" and ps.part("am").get("selected") is True
 
 
 def test_the_period_switches_by_click_and_arrows():

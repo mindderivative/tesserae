@@ -736,3 +736,19 @@ User: "Push it and start Phase 4". Pushed `24f3add`.
 - With this phase, no `tesserae.widgets` function delegates to tre.
 
 1251 passed.
+
+## Review of M42 Phases 2–4 (after the move to Nobara)
+
+User: "Yes, review them then continue with M42". The three commits
+(`40d1bfb`, `24f3add`, `f50dfd0`) were made on the other machine and
+pushed there; `origin/main` matched.
+
+Found and fixed:
+- `node_graph.set_theme` didn't re-theme its nodes; the test had
+  re-themed each node itself.
+- A graph node took keyboard focus with no ring, and clipped its
+  children, so a ring couldn't show. It now has MD3 feedback, including
+  the dragged state layer, and its title bar rounds its own corners.
+- The period selector's tabs were in a `group`, not a `tablist`.
+
+Each fix is covered: undoing it fails a test. 1252 passed.
