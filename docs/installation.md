@@ -70,6 +70,12 @@ A real window should open with a `Count: 0` label and a button --
 clicking it increments the count through a genuine dispatched click and
 render loop.
 
+The parity tests (bindings, trees, the cascade, theme tokens) compare
+Tesserae with `tre`'s answers recorded in `tests/reference/`, so they
+need no `tre` reference at runtime. If you change what one asks `tre`,
+record again on `tre` 0.3.4 with `python tools/record_tre_reference.py`;
+it writes the files only if every test passes.
+
 ## Keeping `tre` up to date
 
 `tre` ships real releases (tags/GitHub Releases) roughly one per

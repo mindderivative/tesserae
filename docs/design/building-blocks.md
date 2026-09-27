@@ -267,6 +267,18 @@ graph and docking (P7).
   three examples run clean, `src/tesserae` uses no removed name, and the
   only failing tests are the ones that compare against `tre`'s own
   `View`, `Signal` or window theme on purpose (419), which M43 retires.
+- **Keeping the proof** (M43 Phase 3): those comparisons now replay
+  `tre`'s answers, recorded once on 0.3.4 by
+  `tools/record_tre_reference.py` into `tests/reference/*.json` --
+  binding parity (176 expressions), tree parity (127 views: each spec, its
+  frames and every property `tre` read back), the cascade and error
+  messages, every colour role, shape, elevation and type token, and the
+  theme object -- so they run with no `tre` reference at all. Breaking
+  Tesserae's evaluator, colour science, cascade or compiler still fails
+  them, and so does a changed or missing answer. The tests of `tre`'s own
+  behaviour went (`test_reactive`'s `tre` half), and the GC guard for
+  `tre` issue #10 frees a `Window` and a node instead of a `View`. With
+  the switch on, the whole suite passes.
 
 ## Measured so far
 

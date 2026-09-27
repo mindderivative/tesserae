@@ -3,7 +3,7 @@ Tesserae's compiler, reconciled in place, with bindings, handlers and
 `two_way:` wired by Tesserae.
 
 Where `tre`'s `View` does the same thing, its behaviour and messages are
-the reference (compared directly while 0.3.4 still has it). Two
+the reference (its answers recorded on 0.3.4, M43, `tests/reference.py`). Two
 deliberate differences: `on_change` fires only for the user's own edits
 (`tre` issue #12), and a reconcile puts children in the new spec's order.
 """
@@ -11,6 +11,7 @@ deliberate differences: `on_change` fires only for the user's own edits
 import pytest
 import tre
 
+import reference
 import tesserae
 from tesserae.spec import ViewWatcher
 from tesserae.view import View
@@ -133,7 +134,7 @@ BAD_BINDINGS = {
 def test_binding_errors_read_as_tres_do(name):
     spec = _root(_text(binding=BAD_BINDINGS[name]))
     with pytest.raises(ValueError) as theirs:
-        VM(tre.View(spec=spec, theme_seed=SEED))
+        reference.tre(lambda: (VM(tre.View(spec=spec, theme_seed=SEED)), None)[1])
     with pytest.raises(ValueError) as ours:
         VM(_view(spec))
     assert str(ours.value) == str(theirs.value)
@@ -156,7 +157,7 @@ def test_handlers_are_wired_with_or_without_the_event():
 def test_handler_errors_read_as_tres_do(method):
     spec = _root(_rect("a", handlers={"on_click": method}))
     with pytest.raises(ValueError) as theirs:
-        VM(tre.View(spec=spec, theme_seed=SEED))
+        reference.tre(lambda: (VM(tre.View(spec=spec, theme_seed=SEED)), None)[1])
     with pytest.raises(ValueError) as ours:
         VM(_view(spec))
     assert str(ours.value) == str(theirs.value)
@@ -218,7 +219,7 @@ def test_controls_expose_their_signals_and_bind_disabled():
 def test_two_way_needs_a_plain_signal_get():
     bad = dict(FIELD, bindings={"text": "{{ name.get() + '!' }}"})
     with pytest.raises(ValueError) as theirs:
-        VM(tre.View(spec=_root(bad), theme_seed=SEED))
+        reference.tre(lambda: (VM(tre.View(spec=_root(bad), theme_seed=SEED)), None)[1])
     with pytest.raises(ValueError) as ours:
         VM(_view(_root(bad)))
     assert str(ours.value) == str(theirs.value)

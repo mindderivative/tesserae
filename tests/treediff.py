@@ -1,6 +1,7 @@
 """M37 Phase 3: the tree differ. Builds one expanded view spec with
 `tre`'s `View` and with Tesserae's compiler, lays both out in same-sized
-windows, and compares them node by node through 0.3.4's `get()`.
+windows, and compares them node by node through 0.3.4's `get()`. Since
+M43 `tre`'s side is a plain-data dump (`tre_dump`), recorded on 0.3.4.
 
 Used by `tests/test_tree_parity.py`; kept importable for poking at a
 single view by hand.
@@ -64,7 +65,10 @@ def _text_sizes(built, spec):
     return sizes
 
 
-def build_both(spec, frames=None, stylesheet=None):
+def tre_dump(spec, frames=None, stylesheet=None):
+    """`tre`'s side, as plain data: for each node the differ compares, every
+    property `tre` can read back (and its `elevation`). Recorded by
+    `tests/test_tree_parity.py` on 0.3.4, since 0.3.5 has no `View`."""
     probe = tre.Window(width=SIZE[0], height=SIZE[1])
     sizes = _text_sizes(build(probe, spec, scheme=tokens.color_scheme(SEED), stylesheet=stylesheet, frames=frames),
                         spec)
@@ -74,45 +78,60 @@ def build_both(spec, frames=None, stylesheet=None):
             view.node(node_id).push_frame(rgba, w, h)
     tre_window = tre.Window.from_view(view, width=SIZE[0], height=SIZE[1], title="tre")
     tre_window.advance(16)
+    dump = {}
+    for node_id, node_spec in ids(spec):
+        kind = node_spec.get("kind")
+        if kind in CONTROLS:
+            continue  # MD3's controls, deliberately not tre's legacy drawing (M40 Q2)
+        theirs = view.node(node_id)
+        props = LAYOUT + PAINT + (TEXT if kind in ("Text", "Link", "TextField") else ())
+        values = {}
+        for prop in props + ("elevation",):
+            value = _get(theirs, prop)
+            if isinstance(value, tuple) and value[:1] == ("n/a",):
+                if prop == "text" and hasattr(theirs, "get_text"):
+                    value = theirs.get_text()  # tre's legacy getter where get() doesn't reach
+                else:
+                    continue  # not readable on tre's side: nothing to compare
+            values[prop] = value
+        dump[node_id] = values
+    return dump
 
+
+def build_ours(spec, frames=None, stylesheet=None):
     window = tre.Window(width=SIZE[0], height=SIZE[1])
-    window.set_theme(SEED)
     # like a `Window.from_view` root: no padding, and an unsized root sized to its content
     window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
     built = build(window, spec, scheme=tokens.color_scheme(SEED), stylesheet=stylesheet, frames=frames)
     window.root.add_child(built.root)
     window.advance(16)
-    return view, built
+    return built
 
 
-def diff(spec, frames=None, stylesheet=None):
-    """Every difference, as `(node_id, property, tre's value, Tesserae's)`."""
-    view, built = build_both(spec, frames, stylesheet)
+def diff(spec, frames=None, stylesheet=None, theirs=None):
+    """Every difference, as `(node_id, property, tre's value, Tesserae's)`,
+    against `theirs` (a `tre_dump`, recorded), or a live `tre` on 0.3.4."""
+    if theirs is None:
+        theirs = tre_dump(spec, frames, stylesheet)
+    built = build_ours(spec, frames, stylesheet)
     out = []
     for node_id, node_spec in ids(spec):
-        theirs, outer, inner = view.node(node_id), built.outer[node_id], built.nodes[node_id]
         kind = node_spec.get("kind")
-        if kind in CONTROLS:
-            continue  # MD3's controls, deliberately not tre's legacy drawing (M40 Q2)
-        props = LAYOUT + PAINT
-        if kind in ("Text", "Link", "TextField"):
-            props = props + TEXT
-        for prop in props:
+        if node_id not in theirs:
+            continue
+        outer, inner = built.outer[node_id], built.nodes[node_id]
+        for prop, a in theirs[node_id].items():
+            if prop == "elevation":
+                if isinstance(a, (int, float)):
+                    expected = tokens.elevation_shadows(a)
+                    if _get(outer, "shadows") != expected:
+                        out.append((node_id, "shadows", expected, _get(outer, "shadows")))
+                continue
             # On a TextField, tre's `fill` reads back its text colour, which
             # Tesserae's inner `text_input` carries; its background can't be read.
             # a Link is a box holding its text since M41; its text props are the text's
             ours_node = inner if (kind in ("TextField", "Link") and (prop in TEXT or prop == "fill")) else outer
-            a, b = _get(theirs, prop), _get(ours_node, prop)
-            if isinstance(a, tuple) and a[:1] == ("n/a",):
-                if prop == "text" and hasattr(theirs, "get_text"):
-                    a = theirs.get_text()  # tre's legacy getter where get() doesn't reach
-                else:
-                    continue  # not readable on tre's side: nothing to compare
+            b = _get(ours_node, prop)
             if a != b:
                 out.append((node_id, prop, a, b))
-        elevation = _get(theirs, "elevation")
-        if isinstance(elevation, (int, float)):
-            expected = tokens.elevation_shadows(elevation)
-            if _get(outer, "shadows") != expected:
-                out.append((node_id, "shadows", expected, _get(outer, "shadows")))
     return out

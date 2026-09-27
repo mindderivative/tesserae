@@ -141,8 +141,8 @@ def test_a_view_built_on_its_own_is_moved_into_the_apps_window(tmp_path):
     assert view.node("label").get("text") == "still wired"
 
 
-def test_register_rejects_a_tre_view(tmp_path):
+def test_register_rejects_anything_but_a_tesserae_view(tmp_path):
+    """Once a `tre` `View` (M43: 0.3.5 has none); any other object now."""
     app = App()
-    tre_view = tre.View(spec={"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": "#000000"}})
     with pytest.raises(TypeError, match="must be a tesserae View"):
-        app.register("x", tre_view, None)
+        app.register("x", object(), None)

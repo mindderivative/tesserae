@@ -143,4 +143,6 @@ Phase 8 done, and M42 with it: the gate extended to M42's names and the window's
 
 **M43 decisions:** Q1–Q3 as recommended — record `tre`'s answers as data; vendor `_removed.py` for CI; the move to 0.3.5 is the new M46 (after `tre`'s release), with M45 after it.
 
-**Up next:** M43 Phase 3 (reference tests as recorded data).
+Phase 3 done: the parity tests replay `tre`'s answers recorded on 0.3.4; the whole suite passes under `tre`'s switch; 1288 passed.
+
+**Up next:** M43 Phase 4 (the switch in CI).

@@ -1,20 +1,20 @@
 """M35: Tesserae's reactivity (`tesserae.reactive`) behaves exactly like
 `tre`'s, which it replaces (`tre` D5).
 
-Every behavioral test runs against both implementations while `tre`
-0.3.4 still has its own, so a difference shows up as one side failing.
+Every behavioural test ran against both implementations while `tre`
+0.3.4 had its own, so a difference showed as one side failing; all passed
+on both. M43 retired `tre`'s half, since 0.3.5 removes it (M43 Q1).
 (M35's bridge, which fed `tre`'s own `View` bindings from Tesserae's
 signals, was removed in M37 Phase 6; bindings on Tesserae views are
 covered by `test_view.py`.)
 """
 
 import pytest
-import tre
 
 import tesserae
 import tesserae.reactive
 
-IMPLS = {"tre": tre, "tesserae": tesserae.reactive}
+IMPLS = {"tesserae": tesserae.reactive}
 
 
 @pytest.fixture(params=sorted(IMPLS))
@@ -192,10 +192,10 @@ def test_writing_a_signal_while_it_notifies_raises(rx):
         s.set(1)
 
 
-# -- only Tesserae: the public names and the bridge to tre's bindings -------
+# -- only Tesserae: the public names -------------------------------------------
 
 
 def test_tesserae_exports_its_own_reactivity():
     for name in ("Signal", "Computed", "Effect", "ViewModel", "batch", "untrack"):
         assert getattr(tesserae, name) is getattr(tesserae.reactive, name)
-        assert getattr(tesserae, name) is not getattr(tre, name)
+        assert getattr(tesserae, name).__module__ == "tesserae.reactive"  # not tre's (0.3.5 has none)

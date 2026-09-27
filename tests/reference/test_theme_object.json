@@ -1,0 +1,696 @@
+{
+ "test_a_custom_theme_entry_replaces_the_defaults_for_the_same_key#1": {
+  "__tuple__": [
+   null,
+   500.0
+  ]
+ },
+ "test_an_unknown_component_token_is_an_error_worded_as_tres#1": {
+  "__raises__": [
+   "ValueError",
+   "components: \"card\" has an unknown corner_radius token: TokenRef(\"huge\")"
+  ]
+ },
+ "test_roles_and_is_set#1": {
+  "__tuple__": [
+   101,
+   85,
+   143,
+   255
+  ]
+ },
+ "test_shape_and_elevation_match_tre[badge.dot-shipped default]#1": {
+  "__tuple__": [
+   3.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[badge.dot-with a custom theme]#1": {
+  "__tuple__": [
+   3.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[badge.labeled-shipped default]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[badge.labeled-with a custom theme]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.None-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.None-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.elevated0-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.elevated0-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.elevated1-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.elevated1-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.nope-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.nope-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.outlined-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[card.outlined-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   2.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[chip.None-shipped default]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[chip.None-with a custom theme]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[date_picker_day.None-shipped default]#1": {
+  "__tuple__": [
+   24.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[date_picker_day.None-with a custom theme]#1": {
+  "__tuple__": [
+   24.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[dialog.None-shipped default]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[dialog.None-with a custom theme]#1": {
+  "__tuple__": [
+   20.0,
+   5.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[extended_fab.None-shipped default]#1": {
+  "__tuple__": [
+   16.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[extended_fab.None-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.None0-shipped default]#1": {
+  "__tuple__": [
+   null,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.None0-with a custom theme]#1": {
+  "__tuple__": [
+   null,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.None1-shipped default]#1": {
+  "__tuple__": [
+   null,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.None1-with a custom theme]#1": {
+  "__tuple__": [
+   null,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.default-shipped default]#1": {
+  "__tuple__": [
+   16.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.default-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.large0-shipped default]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.large0-with a custom theme]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.large1-shipped default]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.large1-with a custom theme]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.small-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[fab.small-with a custom theme]#1": {
+  "__tuple__": [
+   4.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[graph_node.None-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[graph_node.None-with a custom theme]#1": {
+  "__tuple__": [
+   12.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_drawer.None-shipped default]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_drawer.None-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_drawer.indicator-shipped default]#1": {
+  "__tuple__": [
+   28.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_drawer.indicator-with a custom theme]#1": {
+  "__tuple__": [
+   28.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_drawer.modal-shipped default]#1": {
+  "__tuple__": [
+   16.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_drawer.modal-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_rail.indicator-shipped default]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[navigation_rail.indicator-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[nothing.None-shipped default]#1": {
+  "__tuple__": [
+   null,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[nothing.None-with a custom theme]#1": {
+  "__tuple__": [
+   null,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[pagination.None-shipped default]#1": {
+  "__tuple__": [
+   20.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[pagination.None-with a custom theme]#1": {
+  "__tuple__": [
+   20.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[period_selector.None-shipped default]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[period_selector.None-with a custom theme]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[popover.None-shipped default]#1": {
+  "__tuple__": [
+   12.0,
+   2.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[popover.None-with a custom theme]#1": {
+  "__tuple__": [
+   12.0,
+   2.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[search_bar.None-shipped default]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[search_bar.None-with a custom theme]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[search_view.None-shipped default]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[search_view.None-with a custom theme]#1": {
+  "__tuple__": [
+   28.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[side_sheet.None-shipped default]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[side_sheet.None-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[side_sheet.modal-shipped default]#1": {
+  "__tuple__": [
+   16.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[side_sheet.modal-with a custom theme]#1": {
+  "__tuple__": [
+   16.0,
+   1.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[snackbar.None-shipped default]#1": {
+  "__tuple__": [
+   4.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[snackbar.None-with a custom theme]#1": {
+  "__tuple__": [
+   4.0,
+   3.0
+  ]
+ },
+ "test_shape_and_elevation_match_tre[spin_box.None-shipped default]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[spin_box.None-with a custom theme]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[split_button.tightened-shipped default]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[split_button.tightened-with a custom theme]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[tabs.indicator-shipped default]#1": {
+  "__tuple__": [
+   3.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[tabs.indicator-with a custom theme]#1": {
+  "__tuple__": [
+   3.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[time_input_field.None-shipped default]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[time_input_field.None-with a custom theme]#1": {
+  "__tuple__": [
+   8.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[tooltip.None-shipped default]#1": {
+  "__tuple__": [
+   4.0,
+   null
+  ]
+ },
+ "test_shape_and_elevation_match_tre[tooltip.None-with a custom theme]#1": {
+  "__tuple__": [
+   4.0,
+   null
+  ]
+ },
+ "test_typography_matches_tre[body_large-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   16.0,
+   1.5
+  ]
+ },
+ "test_typography_matches_tre[body_large-with a custom theme]#1": {
+  "__tuple__": [
+   "Inter",
+   400.0,
+   18.0,
+   1.5
+  ]
+ },
+ "test_typography_matches_tre[body_medium-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   14.0,
+   1.4299999475479126
+  ]
+ },
+ "test_typography_matches_tre[body_medium-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   14.0,
+   1.4299999475479126
+  ]
+ },
+ "test_typography_matches_tre[body_small-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   12.0,
+   1.3300000429153442
+  ]
+ },
+ "test_typography_matches_tre[body_small-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   12.0,
+   1.3300000429153442
+  ]
+ },
+ "test_typography_matches_tre[display_large-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   57.0,
+   1.1200000047683716
+  ]
+ },
+ "test_typography_matches_tre[display_large-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   57.0,
+   1.1200000047683716
+  ]
+ },
+ "test_typography_matches_tre[display_medium-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   45.0,
+   1.159999966621399
+  ]
+ },
+ "test_typography_matches_tre[display_medium-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   45.0,
+   1.159999966621399
+  ]
+ },
+ "test_typography_matches_tre[display_small-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   36.0,
+   1.2200000286102295
+  ]
+ },
+ "test_typography_matches_tre[display_small-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   36.0,
+   1.2200000286102295
+  ]
+ },
+ "test_typography_matches_tre[headline_large-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   32.0,
+   1.25
+  ]
+ },
+ "test_typography_matches_tre[headline_large-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   32.0,
+   1.25
+  ]
+ },
+ "test_typography_matches_tre[headline_medium-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   28.0,
+   1.2899999618530273
+  ]
+ },
+ "test_typography_matches_tre[headline_medium-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   28.0,
+   1.2899999618530273
+  ]
+ },
+ "test_typography_matches_tre[headline_small-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   24.0,
+   1.3300000429153442
+  ]
+ },
+ "test_typography_matches_tre[headline_small-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   24.0,
+   1.3300000429153442
+  ]
+ },
+ "test_typography_matches_tre[label_large-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   14.0,
+   1.4299999475479126
+  ]
+ },
+ "test_typography_matches_tre[label_large-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   14.0,
+   1.4299999475479126
+  ]
+ },
+ "test_typography_matches_tre[label_medium-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   12.0,
+   1.3300000429153442
+  ]
+ },
+ "test_typography_matches_tre[label_medium-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   12.0,
+   1.3300000429153442
+  ]
+ },
+ "test_typography_matches_tre[label_small-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   11.0,
+   1.4500000476837158
+  ]
+ },
+ "test_typography_matches_tre[label_small-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   11.0,
+   1.4500000476837158
+  ]
+ },
+ "test_typography_matches_tre[nope-shipped default]#1": null,
+ "test_typography_matches_tre[nope-with a custom theme]#1": null,
+ "test_typography_matches_tre[title_large-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   22.0,
+   1.2699999809265137
+  ]
+ },
+ "test_typography_matches_tre[title_large-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   400.0,
+   22.0,
+   1.2699999809265137
+  ]
+ },
+ "test_typography_matches_tre[title_medium-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   16.0,
+   1.5
+  ]
+ },
+ "test_typography_matches_tre[title_medium-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   16.0,
+   1.5
+  ]
+ },
+ "test_typography_matches_tre[title_small-shipped default]#1": {
+  "__tuple__": [
+   "Roboto",
+   500.0,
+   14.0,
+   1.4299999475479126
+  ]
+ },
+ "test_typography_matches_tre[title_small-with a custom theme]#1": {
+  "__tuple__": [
+   "Roboto",
+   700.0,
+   14.0,
+   1.4299999475479126
+  ]
+ }
+}

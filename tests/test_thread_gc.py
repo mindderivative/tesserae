@@ -9,6 +9,9 @@ and a `RuntimeError` ("View is unsendable, but is being dropped on
 another thread") and leaked the `View`; CI saw it as unraisable-exception
 warnings in `test_watch_thread.py`. 0.3.4 makes objects `ThreadBound`,
 so the drop is safe.
+
+M43: 0.3.5 has no `View`, but every `tre` object is `ThreadBound`, so the
+guard now frees a `Window` and a node the same way.
 """
 
 import gc
@@ -19,17 +22,18 @@ import tre
 
 
 def _make_cyclic_garbage() -> None:
-    view = tre.View(spec={"id": "root", "kind": "Rect", "style": {"width": 10, "height": 10, "background": "#112233"}})
+    window = tre.Window(width=10, height=10)
+    node = window.create("box", width=10, height=10)
 
     class Holder:
         pass
 
     holder = Holder()
-    holder.view = view  # the only reference to the View...
-    holder.me = holder  # ...kept alive by a plain cycle, so only the cyclic GC frees it
+    holder.window, holder.node = window, node  # the only references...
+    holder.me = holder  # ...kept alive by a plain cycle, so only the cyclic GC frees them
 
 
-def test_a_background_thread_gc_can_free_a_main_thread_view(monkeypatch):
+def test_a_background_thread_gc_can_free_main_thread_tre_objects(monkeypatch):
     unraisable = []
     monkeypatch.setattr(sys, "unraisablehook", unraisable.append)
     was_enabled = gc.isenabled()

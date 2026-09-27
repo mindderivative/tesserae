@@ -7,6 +7,10 @@ reports a string result as the node's text, and anything else in its
 error ("expects a string binding, got Int(3)"), which is the same form
 `tesserae.binding.value_debug` prints. An evaluation error is compared by
 its message.
+
+M43: `tre`'s answers, and the corpus itself, are recorded on 0.3.4
+(`tests/reference.py`), since 0.3.5 has no `View`; an expression added to
+the repo later isn't in the recorded corpus.
 """
 
 import re
@@ -17,6 +21,7 @@ from pathlib import Path
 import pytest
 import tre
 
+import reference
 import tesserae
 from tesserae.binding import BindingError, evaluate_value, parse_binding, value_debug
 
@@ -160,17 +165,18 @@ def _repo_bindings():
     return sorted(found)
 
 
-REPO = _repo_bindings()
+CORPUS = reference.answer("corpus", lambda: {"designed": DESIGNED, "repo": _repo_bindings()}, __name__)
 
 
 def test_the_corpus_is_broad():
+    assert CORPUS["designed"] == DESIGNED  # recorded as it is now
     assert len(DESIGNED) >= 120
-    assert len(REPO) >= 20  # every {{ }} expression used in the repo
+    assert len(CORPUS["repo"]) >= 20  # every {{ }} expression used in the repo when recorded
 
 
-@pytest.mark.parametrize("expr", DESIGNED + REPO)
+@pytest.mark.parametrize("expr", CORPUS["designed"] + CORPUS["repo"])
 def test_tesserae_evaluates_exactly_as_tre_does(expr):
-    assert _tesserae(expr) == _tre(expr)
+    assert _tesserae(expr) == reference.tre(lambda: _tre(expr))
 
 
 def test_not_wrapped_is_an_error_naming_the_raw_text():

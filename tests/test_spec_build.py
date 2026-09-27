@@ -4,11 +4,15 @@ cascade (`tesserae.spec.cascade`).
 The cascade and the compiler's errors are checked against `tre` 0.3.4's
 own builder, a `tre` `View`, on the same spec. Whole-tree comparison of
 every fragment and example view is M37 Phase 3's tree differ.
+
+M43: `tre`'s answers are recorded on 0.3.4 (`tests/reference.py`), since
+0.3.5 has no `View`.
 """
 
 import pytest
 import tre
 
+import reference
 from tesserae import tokens
 from tesserae.spec.build import SpecBuildError, build
 
@@ -17,9 +21,7 @@ SCHEME = tokens.color_scheme(SEED)
 
 
 def _window():
-    window = tre.Window(width=400, height=300)
-    window.set_theme(SEED)
-    return window
+    return tre.Window(width=400, height=300)
 
 
 def _rect(node_id="r", classes=(), **style):
@@ -27,16 +29,28 @@ def _rect(node_id="r", classes=(), **style):
             "style": {"width": 10, "height": 10, "background": "#112233", **style}}
 
 
-def _both(spec, **sheets):
-    """`(tre's View, Tesserae's Built)` for the same spec and sheets."""
-    view = tre.View(spec=spec, theme_seed=SEED, **{f"{k}_spec": v for k, v in sheets.items() if v is not None})
-    built = build(_window(), spec, scheme=SCHEME, **{k: v for k, v in sheets.items() if v is not None})
-    return view, built
+def _tre(spec, reads, **sheets):
+    """`tre`'s answer: each `(node_id, property)` of `reads`, read from a
+    `tre` `View` of `spec` (shown in a window, so fills resolve), recorded."""
+    def ask():
+        view = tre.View(spec=spec, theme_seed=SEED, **{f"{k}_spec": v for k, v in sheets.items() if v is not None})
+        tre.Window.from_view(view, width=10, height=10, title="t")
+        return [view.node(node_id).get(prop) for node_id, prop in reads]
+    return reference.tre(ask)
+
+
+def _ours(spec, **sheets):
+    return build(_window(), spec, scheme=SCHEME, **{k: v for k, v in sheets.items() if v is not None})
+
+
+def _tre_rejects(spec):
+    """`tre`'s builder rejecting `spec`, recorded: raises its `ValueError`."""
+    reference.tre(lambda: (tre.View(spec=spec, theme_seed=SEED), None)[1])
 
 
 def _radius_both(spec, node_id="r", **sheets):
-    view, built = _both(spec, **sheets)
-    return view.node(node_id).get("corner_radius"), built.nodes[node_id].get("corner_radius")
+    [theirs] = _tre(spec, [(node_id, "corner_radius")], **sheets)
+    return theirs, _ours(spec, **sheets).nodes[node_id].get("corner_radius")
 
 
 def _rule(style, **selector):
@@ -79,8 +93,8 @@ def test_the_shipped_default_theme_applies_when_none_is_given():
     """`tre`'s default theme gives a Checkbox corner radius 2 -- Tesserae's
     copy of it does too."""
     spec = {"id": "c", "kind": "Container", "children": [_rect()]}
-    view, built = _both(spec)
-    assert built.nodes["r"].get("corner_radius") == view.node("r").get("corner_radius") == 0.0
+    theirs, ours = _radius_both(spec)
+    assert ours == theirs == 0.0
 
 
 def test_fills_resolve_theme_roles_and_colours_as_tre_does():
@@ -89,10 +103,10 @@ def test_fills_resolve_theme_roles_and_colours_as_tre_does():
         {"id": "t", "kind": "Text", "text": {"content": "x", "font_family": "Roboto", "font_size": 14},
          "style": {"foreground": "on_surface", "width": 10, "height": 10}},
     ]}
-    view, built = _both(spec)
-    tre.Window.from_view(view, width=10, height=10, title="t")
-    for node_id in ("c", "a", "b", "t"):
-        assert built.nodes[node_id].get("fill") == view.node(node_id).get("fill"), node_id
+    ids = ("c", "a", "b", "t")
+    theirs = _tre(spec, [(node_id, "fill") for node_id in ids])
+    built = _ours(spec)
+    assert [built.nodes[node_id].get("fill") for node_id in ids] == theirs
 
 
 def test_elevation_becomes_shadows_and_opacity_carries_over():
@@ -197,7 +211,7 @@ ERROR_CASES = {
 def test_errors_read_as_tres_do(name):
     spec = ERROR_CASES[name]
     with pytest.raises(ValueError) as theirs:
-        tre.View(spec=spec, theme_seed=SEED)
+        _tre_rejects(spec)
     with pytest.raises(SpecBuildError) as ours:
         build(_window(), spec, scheme=SCHEME)
     assert str(ours.value) == str(theirs.value)
@@ -206,7 +220,7 @@ def test_errors_read_as_tres_do(name):
 def test_a_bad_colour_names_the_widget_and_field_as_tre_does():
     spec = {"id": "x", "kind": "Rect", "style": {"background": "notacolor"}}
     with pytest.raises(ValueError) as theirs:
-        tre.View(spec=spec, theme_seed=SEED)
+        _tre_rejects(spec)
     with pytest.raises(SpecBuildError) as ours:
         build(_window(), spec, scheme=SCHEME)
     prefix = 'widget "x": invalid style.background "notacolor": '
@@ -221,15 +235,14 @@ def test_a_background_from_a_stylesheet_rule_doesnt_break_text():
         {"id": "t", "kind": "Text", "text": {"content": "x", "font_family": "Roboto", "font_size": 14},
          "style": {"foreground": "#000000", "width": 10, "height": 10}}]}
     sheet = {"styles": [_rule({"background": "surface"})]}
-    view, built = _both(spec, stylesheet=sheet)
-    tre.Window.from_view(view, width=10, height=10, title="t")
-    assert built.nodes["t"].get("fill") == view.node("t").get("fill") == (0, 0, 0, 255)
+    [theirs] = _tre(spec, [("t", "fill")], stylesheet=sheet)
+    assert _ours(spec, stylesheet=sheet).nodes["t"].get("fill") == theirs == (0, 0, 0, 255)
 
 
 def test_text_content_must_be_a_string_as_in_tre():
     spec = {"id": "x", "kind": "Text", "text": {"content": 5, "font_family": "Roboto", "font_size": 14},
             "style": {"foreground": "#000000"}}
     with pytest.raises(ValueError):
-        tre.View(spec=spec, theme_seed=SEED)
+        _tre_rejects(spec)
     with pytest.raises(SpecBuildError, match="text.content must be a string, got int 5"):
         build(_window(), spec, scheme=SCHEME)

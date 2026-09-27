@@ -1,0 +1,38 @@
+{
+ "test_binding_errors_read_as_tres_do[doesn't parse]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"label\" binding on \"text\" (\"{{ -1 }}\"): failed to parse binding expression: unexpected token Some(Minus)"
+  ]
+ },
+ "test_binding_errors_read_as_tres_do[not a string for text]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget property \"text\" expects a string binding, got Int(50)"
+  ]
+ },
+ "test_binding_errors_read_as_tres_do[unknown attribute]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"label\" binding on \"text\" (\"{{ missing.get() }}\"): AttributeError: 'VM' object has no attribute 'missing'"
+  ]
+ },
+ "test_handler_errors_read_as_tres_do[missing_method]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"a\": handler \"on_click\" names \"missing_method\", which has no matching attribute on the ViewModel"
+  ]
+ },
+ "test_handler_errors_read_as_tres_do[not_callable]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"a\": handler \"on_click\" names \"not_callable\", which is not callable"
+  ]
+ },
+ "test_two_way_needs_a_plain_signal_get#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"name\": two_way binding on \"text\" (\"{{ name.get() + '!' }}\") must be a plain Signal's own .get() call (e.g. \"{{ username.get() }}\"), not a computed expression -- there's no way to reverse it back into a Signal"
+  ]
+ }
+}

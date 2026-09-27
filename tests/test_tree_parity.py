@@ -15,9 +15,15 @@ The corpus:
 **Not comparable, because `tre` can't read them back:** a Link's text and
 font properties, and a TextField's background (`tre` reports its text
 colour as `fill`). Everything else `get()` reaches is compared.
+
+M43: each case is recorded on 0.3.4 (`tests/reference.py`) -- the expanded
+spec as `tre` was given it, any image frames, and `tre`'s side
+(`treediff.tre_dump`) -- and Tesserae's compiler is compared with the
+recording, since 0.3.5 has no `View`. The corpus is the recorded one.
 """
 
 import ast
+import base64
 import re
 from pathlib import Path
 
@@ -26,6 +32,7 @@ import tre
 import yaml
 from PIL import Image
 
+import reference
 import treediff
 from tesserae.spec.expand import expand_components_to_spec
 from tesserae.spec.load import build_view_spec
@@ -85,35 +92,39 @@ def _accepted(key, text):
     return spec
 
 
-CORPUS = {}
-for _key, _text in [*_fragment_calls(), *_inline_test_views(), *_doc_views()]:
-    if _key.startswith("fragment:Image"):
-        CORPUS[_key] = ("image", _text)
-        continue
-    _spec = _accepted(_key, _text)
-    if _spec is not None:
-        CORPUS[_key] = ("spec", _spec)
-for _view in sorted((ROOT / "examples").glob("*/*_View.yaml")):
-    CORPUS[f"example:{_view.parent.name}/{_view.name}"] = ("file", _view)
+def _corpus():
+    """Built with `tre` (it decides which views it accepts): recording only."""
+    corpus = {}
+    for key, text in [*_fragment_calls(), *_inline_test_views(), *_doc_views()]:
+        if key.startswith("fragment:Image"):
+            corpus[key] = ("image", text)
+            continue
+        spec = _accepted(key, text)
+        if spec is not None:
+            corpus[key] = ("spec", spec)
+    for view in sorted((ROOT / "examples").glob("*/*_View.yaml")):
+        corpus[f"example:{view.parent.name}/{view.name}"] = ("file", view)
+    return corpus
+
+
+CORPUS = _corpus() if reference.RECORDING else {}
+KEYS = reference.answer("corpus", lambda: sorted(CORPUS), __name__)
 
 
 def test_the_corpus_is_broad():
-    fragments = [k for k in CORPUS if k.startswith("fragment:")]
-    assert len(fragments) == len(list(COMPONENTS.glob("*_Component.yaml"))) == 67
-    assert sum(k.startswith("example:") for k in CORPUS) == 5
-    assert sum(k.startswith("test_") for k in CORPUS) >= 30
-    assert sum(k.startswith(("docs/", "README")) for k in CORPUS) >= 2
+    fragments = [k for k in KEYS if k.startswith("fragment:")]
+    assert len(fragments) == 67  # every fragment when recorded
+    assert sum(k.startswith("example:") for k in KEYS) == 5
+    assert sum(k.startswith("test_") for k in KEYS) >= 30
+    assert sum(k.startswith(("docs/", "README")) for k in KEYS) >= 2
 
 
-def _frames_dict(frames):
-    return {node_id: (rgba, w, h) for node_id, rgba, w, h in frames}
-
-
-@pytest.mark.parametrize("key", sorted(CORPUS))
-def test_tesserae_builds_the_same_tree_as_tre(key, tmp_path):
+def _case(key, tmp_path):
+    """One recorded case: the spec, its frames (base64), and `tre`'s side."""
     how, source = CORPUS[key]
+    frames = None
     if how == "spec":
-        differences = treediff.diff(source)
+        spec = source
     else:
         if how == "image":
             Image.new("RGBA", (3, 2), (200, 30, 60, 255)).save(tmp_path / "pixel.png")
@@ -121,6 +132,14 @@ def test_tesserae_builds_the_same_tree_as_tre(key, tmp_path):
             view_file.write_text(source)
         else:
             view_file = source
-        spec, frames, _ = build_view_spec(view_file)
-        differences = treediff.diff(spec, frames=_frames_dict(frames))
-    assert differences == []
+        spec, raw, _ = build_view_spec(view_file)
+        frames = {node_id: (rgba, w, h) for node_id, rgba, w, h in raw}
+    return {"spec": spec, "tre": treediff.tre_dump(spec, frames=frames),
+            "frames": {k: (base64.b64encode(rgba).decode(), w, h) for k, (rgba, w, h) in (frames or {}).items()}}
+
+
+@pytest.mark.parametrize("key", KEYS)
+def test_tesserae_builds_the_same_tree_as_tre(key, tmp_path):
+    case = reference.tre(lambda: _case(key, tmp_path))
+    frames = {k: (base64.b64decode(b64), w, h) for k, (b64, w, h) in case["frames"].items()} or None
+    assert treediff.diff(case["spec"], frames=frames, theirs=case["tre"]) == []

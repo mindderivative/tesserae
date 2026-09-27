@@ -1,0 +1,175 @@
+{
+ "test_a_background_from_a_stylesheet_rule_doesnt_break_text#1": [
+  {
+   "__tuple__": [
+    0,
+    0,
+    0,
+    255
+   ]
+  }
+ ],
+ "test_a_bad_colour_names_the_widget_and_field_as_tre_does#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": invalid style.background \"notacolor\": unknown color identifier"
+  ]
+ },
+ "test_errors_read_as_tres_do[Checkbox with selected]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Checkbox takes `checked:`, not `selected:`"
+  ]
+ },
+ "test_errors_read_as_tres_do[Rect without background]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Rect requires style.background, none given"
+  ]
+ },
+ "test_errors_read_as_tres_do[Switch with checked]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Switch takes `selected:`, not `checked:`"
+  ]
+ },
+ "test_errors_read_as_tres_do[Text with background]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Text has no fill, so style.background doesn't apply -- its glyph/text color is style.foreground"
+  ]
+ },
+ "test_errors_read_as_tres_do[Text without a font]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Text requires text.font_family (or text.typography_role), none given"
+  ]
+ },
+ "test_errors_read_as_tres_do[Text without a size]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Text requires text.font_size (or text.typography_role), none given"
+  ]
+ },
+ "test_errors_read_as_tres_do[Text without foreground]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Text requires style.foreground, none given"
+  ]
+ },
+ "test_errors_read_as_tres_do[Text without text]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": Text requires text, none given"
+  ]
+ },
+ "test_errors_read_as_tres_do[unknown elevation token]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": unknown style.elevation token \"level_9\""
+  ]
+ },
+ "test_errors_read_as_tres_do[unknown icon]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": unknown icon \"nope\""
+  ]
+ },
+ "test_errors_read_as_tres_do[unknown shape token]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": unknown style.corner_radius token \"full\""
+  ]
+ },
+ "test_errors_read_as_tres_do[unknown typography role]#1": {
+  "__raises__": [
+   "ValueError",
+   "widget \"x\": unknown text.typography_role \"huge\""
+  ]
+ },
+ "test_fills_resolve_theme_roles_and_colours_as_tre_does#1": [
+  {
+   "__tuple__": [
+    253,
+    247,
+    255,
+    255
+   ]
+  },
+  {
+   "__tuple__": [
+    101,
+    85,
+    143,
+    255
+   ]
+  },
+  {
+   "__tuple__": [
+    128,
+    255,
+    0,
+    0
+   ]
+  },
+  {
+   "__tuple__": [
+    29,
+    27,
+    32,
+    255
+   ]
+  }
+ ],
+ "test_layers_stack_default_then_custom_then_stylesheet#1": [
+  3.0
+ ],
+ "test_layers_stack_default_then_custom_then_stylesheet#2": [
+  2.0
+ ],
+ "test_layers_stack_default_then_custom_then_stylesheet#3": [
+  1.0
+ ],
+ "test_text_content_must_be_a_string_as_in_tre#1": {
+  "__raises__": [
+   "ValueError",
+   "spec=: unexpected type: 'int' object is not an instance of 'str'"
+  ]
+ },
+ "test_the_cascade_matches_tres[a class rule needs every class]#1": [
+  0.0
+ ],
+ "test_the_cascade_matches_tres[a kind rule for another kind]#1": [
+  0.0
+ ],
+ "test_the_cascade_matches_tres[classes beat kind]#1": [
+  6.0
+ ],
+ "test_the_cascade_matches_tres[id beats classes]#1": [
+  2.0
+ ],
+ "test_the_cascade_matches_tres[id+kind rule applies at the id tier]#1": [
+  5.0
+ ],
+ "test_the_cascade_matches_tres[inline beats every rule]#1": [
+  9.0
+ ],
+ "test_the_cascade_matches_tres[kind beats baseline]#1": [
+  8.0
+ ],
+ "test_the_cascade_matches_tres[kind+classes rule applies at the kind tier alone]#1": [
+  4.0
+ ],
+ "test_the_cascade_matches_tres[more classes beat fewer]#1": [
+  5.0
+ ],
+ "test_the_cascade_matches_tres[same tier: later wins]#1": [
+  3.0
+ ],
+ "test_the_cascade_matches_tres[tokens resolve through the cascade]#1": [
+  16.0
+ ],
+ "test_the_shipped_default_theme_applies_when_none_is_given#1": [
+  0.0
+ ]
+}

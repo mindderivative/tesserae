@@ -287,6 +287,18 @@ level path for a `ViewModel` that needs a live `app` reference at
 construction time (to call `app.show(...)` from its own handler --
 `examples/multi_screen/`'s own real reason for using it instead).
 
+**Staying off `tre`'s removed API, M40–M43:** `tests/test_no_tre_controls.py`
+scans `src/tesserae`'s code (not its prose) for every name `tre` 0.3.5
+removes, taken from `tre`'s own `_removed.py`, and for `set_theme`/`theme`
+on a window. The parity tests, which once compared Tesserae with a live
+`tre` `View`, `Signal` or window theme, replay `tre`'s answers recorded on
+0.3.4 (`tests/reference.py`, `tests/reference/*.json`, re-recorded with
+`tools/record_tre_reference.py`): a test wraps each question in
+`reference.tre(fn)`, keyed by the test and the order it asks, and the
+answer (or the exception, re-raised with its type and message) comes back
+from the recording. So the whole suite passes with `tre`'s
+`TRE_FORBID_REMOVED` switch on.
+
 ## Components
 
 ```python

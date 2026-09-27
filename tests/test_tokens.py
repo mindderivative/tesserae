@@ -1,12 +1,13 @@
 """M37 Phase 1: Tesserae's MD3 tokens (`tesserae.tokens`) match `tre`'s,
-checked against `tre` 0.3.4 while it still has them (0.3.5 removes them,
-`tre` D7)."""
+checked against `tre` 0.3.4's answers, recorded (M43, `tests/reference.py`)
+since 0.3.5 removes them (`tre` D7)."""
 
 import struct
 
 import pytest
 import tre
 
+import reference
 from tesserae import tokens
 
 SEEDS = [(0x67, 0x50, 0xA4), (0xB3, 0x26, 0x1E), (0x00, 0x6A, 0x60), (0xFF, 0xB0, 0x00),
@@ -14,9 +15,21 @@ SEEDS = [(0x67, 0x50, 0xA4), (0xB3, 0x26, 0x1E), (0x00, 0x6A, 0x60), (0xFF, 0xB0
 
 
 def _tre_roles(seed, dark, custom=None):
-    window = tre.Window(width=10, height=10)
-    window.set_theme((*seed, 0xFF), dark=dark, custom_theme_spec=custom)
-    return {role: window.theme.role(role) for role in tokens.ROLES}
+    def ask():
+        window = tre.Window(width=10, height=10)
+        window.set_theme((*seed, 0xFF), dark=dark, custom_theme_spec=custom)
+        return {role: window.theme.role(role) for role in tokens.ROLES}
+    return reference.tre(ask)
+
+
+def _tre_read(spec, prop, show=False, **kwargs):
+    """A `tre` `View` of `spec`'s node `r`'s `prop`, recorded."""
+    def ask():
+        view = tre.View(spec=spec, **kwargs)
+        if show:
+            tre.Window.from_view(view, width=10, height=10, title="t")
+        return view.node("r").get(prop)
+    return reference.tre(ask)
 
 
 @pytest.mark.parametrize("dark", [False, True], ids=["light", "dark"])
@@ -45,9 +58,8 @@ def test_seed_precedence_matches_tre_views():
         ({"theme_seed": purple, "custom_theme_spec": red}, tokens.color_scheme(purple)),
         ({"custom_theme_spec": red, "default_theme_spec": blue}, tokens.color_scheme((255, 0, 0, 255))),
     ]:
-        view = tre.View(spec={"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": "primary"}}, **kwargs)
-        tre.Window.from_view(view, width=10, height=10, title="t")
-        assert view.node("r").get("fill") == ours["primary"]
+        spec = {"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": "primary"}}
+        assert _tre_read(spec, "fill", show=True, **kwargs) == ours["primary"]
 
 
 def test_an_unknown_role_in_colors_is_an_error():
@@ -57,14 +69,14 @@ def test_an_unknown_role_in_colors_is_an_error():
 
 @pytest.mark.parametrize("name", sorted(tokens.SHAPES))
 def test_shape_tokens_match_tre(name):
-    view = tre.View(spec={"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": "#000000", "corner_radius": name}})
-    assert view.node("r").get("corner_radius") == tokens.shape(name)
+    spec = {"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": "#000000", "corner_radius": name}}
+    assert _tre_read(spec, "corner_radius") == tokens.shape(name)
 
 
 @pytest.mark.parametrize("name", sorted(tokens.ELEVATION_LEVELS))
 def test_elevation_levels_match_tre(name):
-    view = tre.View(spec={"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": "#000000", "elevation": name}})
-    assert view.node("r").get("elevation") == tokens.elevation(name)
+    spec = {"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": "#000000", "elevation": name}}
+    assert _tre_read(spec, "elevation") == tokens.elevation(name)
 
 
 def test_unknown_tokens_are_none_as_in_tre():
@@ -73,11 +85,13 @@ def test_unknown_tokens_are_none_as_in_tre():
 
 @pytest.mark.parametrize("role", sorted(tokens.TYPE_SCALE))
 def test_type_roles_match_tre(role):
-    window = tre.Window(width=10, height=10)
-    window.set_theme((0x67, 0x50, 0xA4, 0xFF))
+    def ask():
+        window = tre.Window(width=10, height=10)
+        window.set_theme((0x67, 0x50, 0xA4, 0xFF))
+        return window.theme.typography(role)
     style = tokens.type_style(role)
     f32 = lambda x: struct.unpack("f", struct.pack("f", x))[0]  # tre stores these as f32
-    assert window.theme.typography(role) == (style.font_family, style.font_weight, style.font_size, f32(style.line_height))
+    assert reference.tre(ask) == (style.font_family, style.font_weight, style.font_size, f32(style.line_height))
 
 
 def test_elevation_shadows_reproduce_tres_geometry():
@@ -103,9 +117,8 @@ COLORS = ["#6750A4", "#6750a4", "#abc", "#abcd", "#6750A480", "rebeccapurple", "
 
 @pytest.mark.parametrize("raw", COLORS)
 def test_colour_strings_parse_as_tre_parses_them(raw):
-    view = tre.View(spec={"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": raw}})
-    tre.Window.from_view(view, width=10, height=10, title="t")
-    assert tokens.parse_color(raw) == view.node("r").get("fill")
+    spec = {"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": raw}}
+    assert tokens.parse_color(raw) == _tre_read(spec, "fill", show=True)
 
 
 @pytest.mark.parametrize("raw, message", [

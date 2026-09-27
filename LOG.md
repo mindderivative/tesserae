@@ -849,3 +849,24 @@ User: "Push it and go with your recommendations for M43". Pushed
   with the switch.
 - Q3: M43 ends at the confirmation; new M46 moves to 0.3.5 after `tre`'s
   release; M45 follows M46.
+
+## M43 Phase 3: reference tests off tre's removed API
+
+User: "Push it and start Phase 3". Pushed `1a525da`.
+
+- `tests/reference.py`: `reference.tre(fn)` replays a recorded answer
+  (or re-raises a recorded exception); `TESSERAE_RECORD_TRE=1` records.
+  Tagged JSON keeps tuples, non-string keys and exceptions exact.
+- `tools/record_tre_reference.py` records the seven parity modules on
+  0.3.4 (refuses without `View`/`Signal`/`Window.set_theme`); saved only
+  when every test passes. ~370 KB under `tests/reference/`.
+- Converted binding parity, tree parity (spec + frames + `tre_dump` per
+  case), spec build, tokens, the theme object, view and clickable error
+  parity. Retired `test_reactive`'s `tre` half; `register()` now rejects
+  any non-Tesserae object; the GC guard frees a `Window` and a node.
+- With the switch on (no live `tre`), breaking the evaluator, colours,
+  cascade or compiler fails the replayed tests, as do a tampered or a
+  missing answer.
+- Under `TRE_FORBID_REMOVED`: the whole suite passes; examples clean.
+
+1288 passed.

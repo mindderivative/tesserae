@@ -8,6 +8,7 @@ this: `node.on("click")` alone doesn't make a node focusable.
 import pytest
 import tre
 
+import reference
 import tesserae
 from tesserae import View
 
@@ -43,9 +44,10 @@ def _keyboard(view, window, node_id):
 
 def test_a_clickable_node_is_reachable_by_keyboard_as_in_tre():
     spec = _spec(_rect("btn", handlers={"on_click": "go"}))
-    tre_view = tre.View(spec=spec)
-    tre_window = tre.Window.from_view(tre_view, width=200, height=100, title="t")
-    theirs = _keyboard(tre_view, tre_window, "btn")
+    def ask():  # tre's answer, recorded on 0.3.4 (M43)
+        tre_view = tre.View(spec=spec)
+        return _keyboard(tre_view, tre.Window.from_view(tre_view, width=200, height=100, title="t"), "btn")
+    theirs = reference.tre(ask)
     view = View(spec)
     ours = _keyboard(view, view.window, "btn")
     assert theirs[0] is True and ours[0] is True  # Tab reaches it in both
