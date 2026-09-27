@@ -1100,3 +1100,15 @@ User: "Push it and start Phase 3". Pushed `00e2f2a`.
 - 11 tests; 16 mutants, all caught.
 
 1349 passed.
+
+## M45 Phase 4: center tabs, example, guide -- M45 complete
+
+User: "Push it and start Phase 4 with center=True". Pushed `c04c51f`.
+
+- `AppShell(center=True)`: the middle is the dock's center zone;
+  `App.show` goes through `shell.show_screen` and screens are its tabs.
+  3 tests, mutation-checked.
+- `examples/app_shell/` (self-checking, in CI) and the "App Shell &
+  Docking" guide page.
+
+1356 passed. M45 complete.

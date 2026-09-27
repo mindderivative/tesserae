@@ -13,6 +13,12 @@ handle between it and the content (MD3's drag handle, as M42's splitter
 draws it): drag it, or focus it and use the arrow keys (16 px), Home and
 End. `layout()` returns where every panel is and how big each zone is, as
 plain data an app can save; `restore(layout)` puts it back (M45 Q4).
+
+`center=True` makes the middle a dock zone too, as an IDE's editor area
+is: `App.use_shell` then shows each screen as a tab there, titled by its
+name -- `show(name)` docks it the first time and brings its tab forward
+after -- so screens stay open side by side, and can be dragged out to an
+edge zone like any panel. Without it, `content` shows one screen at a time.
 """
 
 from __future__ import annotations
@@ -105,11 +111,12 @@ class AppShell:
     """An app's frame: `top_bar`, `navigation` and `status_bar` (widgets or
     nodes, placed as they are), a `Dock` (`dock=`, or a new one) whose
     zones -- `zones={side: size}`, from left, right, top and bottom --
-    sit around `content`, where `App.use_shell` shows screens. `size`,
-    `set_size`, `layout`, `restore`, `set_theme`."""
+    sit around `content`, where `App.use_shell` shows screens; with
+    `center=True`, `content` is the dock's center zone and screens are its
+    tabs. `size`, `set_size`, `layout`, `restore`, `set_theme`."""
 
     def __init__(self, window: Any, *, top_bar: Any = None, navigation: Any = None, status_bar: Any = None,
-                 zones: Optional[dict[str, float]] = None, dock: Optional[Dock] = None,
+                 zones: Optional[dict[str, float]] = None, dock: Optional[Dock] = None, center: bool = False,
                  theme: Optional[Theme] = None) -> None:
         zones = dict(zones or {})
         unknown = sorted(set(zones) - set(_EDGE))
@@ -126,7 +133,11 @@ class AppShell:
         self.node = create("box", width="100%", height="100%", flex_direction="vertical")
         self.middle = create("box", flex_grow=1.0, flex_direction="horizontal", align_items="stretch")
         self.centre = create("box", flex_grow=1.0, flex_direction="vertical", align_items="stretch")
-        self.content = create("box", flex_grow=1.0, clip_children=True, align_items="flex_start")
+        self.center = center
+        if center:  # the middle is a dock zone: screens and panels are its tabs
+            self.content = self.dock.add_zone("center", 0.0)
+        else:
+            self.content = create("box", flex_grow=1.0, clip_children=True, align_items="flex_start")
         self.top_bar, self.navigation, self.status_bar = top_bar, navigation, status_bar
         if top_bar is not None:
             self.node.add_child(_take(top_bar))
@@ -182,11 +193,29 @@ class AppShell:
 
     # -- layouts -------------------------------------------------------------
 
+    def _sides(self) -> list[str]:
+        return [*self._zone_nodes, *(["center"] if self.center else [])]
+
+    def show_screen(self, root: Any, title: str, previous: Any = None) -> None:
+        """Shows a screen's root (`App.show` calls this): in `content`,
+        replacing `previous`; or, with `center=True`, as a center tab,
+        docked the first time and brought forward after."""
+        if self.center:
+            if self.dock.side_of(root) is None:
+                self.dock.add_panel("center", root, title)
+            else:
+                self.dock.show(root)
+            return
+        if previous is not None and previous.parent() is not None:
+            previous.remove()  # detached, kept alive with its state
+        if root.parent() is None:
+            self.content.add_child(root)
+
     def layout(self) -> dict[str, Any]:
         """Where each panel is (by title), which is shown, and each zone's
-        size, as plain data."""
+        size (`None` for the center, which takes what's left), as plain data."""
         return {"zones": {side: {"panels": self.dock.titles(side), "shown": self.dock.shown_title(side),
-                                 "size": self._sizes[side]} for side in self._zone_nodes}}
+                                 "size": self._sizes.get(side)} for side in self._sides()}}
 
     def restore(self, layout: dict[str, Any]) -> None:
         """Puts back a `layout()`: moves each titled panel into its zone,
@@ -194,19 +223,19 @@ class AppShell:
         has, and zones this shell hasn't, are skipped."""
         zones = (layout or {}).get("zones") or {}
         for side, saved in zones.items():
-            if side not in self._zone_nodes:
+            if side not in self._sides():
                 continue
             for title in saved.get("panels") or []:
                 panel = self.dock.panel(title)
                 if panel is not None and self.dock.side_of(panel) != side:
                     self.dock.move(panel, side)
         for side, saved in zones.items():  # shown and sized once every panel is in place
-            if side not in self._zone_nodes:
+            if side not in self._sides():
                 continue
             shown = self.dock.panel(saved.get("shown")) if saved.get("shown") is not None else None
             if shown is not None and self.dock.side_of(shown) == side:
                 self.dock.show(shown)
-            if saved.get("size") is not None:
+            if saved.get("size") is not None and side in self._sizes:
                 self.set_size(side, saved["size"])
 
     # -- theme ---------------------------------------------------------------

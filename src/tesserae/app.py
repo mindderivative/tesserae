@@ -397,12 +397,15 @@ class App:
         registered = self._registered.get(name)
         if registered is None:
             raise KeyError(f"no view registered under {name!r} -- call register() first")
-        if self._current is not None and self._current != name:
-            self._registered[self._current].view.root.remove()  # detached, kept alive with its state
+        previous = self._registered[self._current].view.root if self._current not in (None, name) else None
         root = registered.view.root
-        if root.parent() is None:
-            host = self._shell.content if self._shell is not None else self._window.root
-            host.add_child(root)
+        if self._shell is not None:  # M45: the shell places it (in its content, or as a center tab)
+            self._shell.show_screen(root, name, previous)
+        else:
+            if previous is not None:
+                previous.remove()  # detached, kept alive with its state
+            if root.parent() is None:
+                self._window.root.add_child(root)
         self._current = name
         logger.debug("showing {!r}", name)
         return self._window
@@ -424,7 +427,7 @@ class App:
             root = self._registered[self._current].view.root
             if root.parent() is not None:
                 root.remove()
-            shell.content.add_child(root)
+            shell.show_screen(root, self._current)
 
     @property
     def current(self) -> str | None:

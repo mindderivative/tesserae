@@ -82,3 +82,7 @@ jobs:
       - name: Run the todo-list example
         working-directory: tesserae
         run: python examples/todo_list/app.py
+
+      - name: Run the app-shell example
+        working-directory: tesserae
+        run: python examples/app_shell/app.py

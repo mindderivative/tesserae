@@ -212,7 +212,7 @@ column (top zone, `content`, bottom zone) and the right zone -- and the
 status bar. Zones keep a pixel size and the content flexes, so the
 handles set a zone's size (clamped between 120 px and 70% of its area)
 rather than sharing a proportion as M42's `splitter` does. `App.show`
-mounts screens in `shell.content` once `use_shell` is called.
+mounts screens through `shell.show_screen` once `use_shell` is called: in `content`, one at a time, or -- with `center=True`, where `content` is the dock's center zone -- as center tabs, docked on first show and brought forward after.
 `layout()` records panels by title, the shown one and each size;
 `restore()` moves panels first, then shows and sizes.
 

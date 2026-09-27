@@ -52,6 +52,9 @@ end to end by three real vertical-slice examples. See
   focus ring, and `a11y:` labels it for screen readers -- a label can
   follow the ViewModel, like any binding. See
   [Interaction & Accessibility](guide/interaction.md).
+- **An app shell with docking** -- a top bar, navigation and status bar
+  around docked panels the user drags between zones and resizes, with
+  screens as tabs if you like. See [App Shell & Docking](guide/app-shell.md).
 - **A full reactivity layer** -- `Signal`, `Computed`, `Effect`,
   `batch`, `untrack` and `ViewModel`, Tesserae's own since M35. See
   [Reactivity](guide/reactivity.md).

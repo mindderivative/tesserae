@@ -146,3 +146,54 @@ def test_a_shell_re_colours_itself_its_dock_and_its_widgets():
 def test_a_shell_rejects_an_unknown_zone():
     with pytest.raises(ValueError, match="zones are left, right, top and bottom"):
         AppShell(App().window, zones={"centre": 100})
+
+
+# -- center=True: the middle is a dock zone, screens are its tabs ---------------
+
+
+def _center_app():
+    app = App(width=1000, height=600)
+    shell = AppShell(app.window, zones={"left": 200, "bottom": 150}, center=True)
+    shell.dock.add_panel("left", app.window.create("box", width=10, height=10), "Files")
+    home, settings = _screen(app, "Home"), _screen(app, "Settings")
+    app.use_shell(shell)
+    return app, shell, home, settings
+
+
+def test_with_center_the_content_is_a_dock_zone_and_screens_are_its_tabs():
+    app, shell, home, settings = _center_app()
+    assert shell.content == shell.dock._zones["center"].node  # a tab strip over the center
+    app.show("Home")
+    app.show("Settings")
+    app.window.advance(16)
+    assert shell.dock.titles("center") == ["Home", "Settings"] and shell.dock.shown_title("center") == "Settings"
+    app.show("Home")  # its tab comes forward; Settings stays docked, alive
+    assert shell.dock.shown_title("center") == "Home" and shell.dock.side_of(settings.root) == "center"
+    assert _box(shell.content)[2] == 1000 - 200 - 16  # the center takes what the left zone leaves
+
+
+def test_a_center_screen_or_panel_moves_like_any_panel_and_layouts_include_the_center():
+    app, shell, home, settings = _center_app()
+    app.show("Home")
+    app.show("Settings")
+    shell.dock.move(shell.dock.panel("Files"), "center")  # a panel can join the screens
+    shell.dock.move(settings.root, "bottom")  # and a screen can be docked at an edge
+    app.window.advance(16)
+    saved = shell.layout()
+    assert saved["zones"]["center"] == {"panels": ["Home", "Files"], "shown": "Files", "size": None}
+    assert saved["zones"]["bottom"]["panels"] == ["Settings"]
+    fresh_app, fresh, _, _ = _center_app()
+    fresh_app.show("Home")
+    fresh_app.show("Settings")
+    fresh.restore(saved)
+    assert fresh.dock.titles("center") == ["Home", "Files"] and fresh.dock.titles("bottom") == ["Settings"]
+    assert fresh.dock.shown_title("center") == "Files"
+
+
+def test_use_shell_with_center_docks_a_screen_already_showing():
+    app = App(width=800, height=500)
+    home = _screen(app, "Home")
+    app.show("Home")
+    shell = AppShell(app.window, center=True)
+    app.use_shell(shell)
+    assert shell.dock.titles("center") == ["Home"] and shell.dock.shown(("center")) == home.root

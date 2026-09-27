@@ -177,4 +177,6 @@ Phase 2 done: `tesserae.docking.Dock`; 1337 passed.
 
 Phase 3 done: `AppShell`, `App.use_shell`, layouts; 1349 passed.
 
-**Up next:** M45 Phase 4 (example, guide).
+Phase 4 done, and M45 with it: `center=True`, `examples/app_shell/`, the "App Shell & Docking" guide; 1356 passed.
+
+**Up next:** nothing scoped.
