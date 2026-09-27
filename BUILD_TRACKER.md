@@ -1408,29 +1408,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 - Step 1: the user took all four recommendations. Q1: the innermost handler takes the click, since each activation listener Tesserae adds calls `event.stop()`. Q2: a disabled control still takes the click. Q3: `secondary_click` follows the same rule. Q4: there's no way for an ancestor to hear it anyway, and that's named as later work — ✅
 
 ### Phase 2 — Innermost Clicks ✅
-- Step 1: `tesserae.listeners.handled(fn)` calls `fn(event)`, then `event.stop()`, even if `fn` raises. It wraps every activation listener Tesserae adds, 10 sites in all:
-  - YAML `on_click` (`View._wire_handler`, for `click` only)
-  - `Widget.on_click`
-  - `Control`'s click (so a disabled control stops it too, by Q2)
-  - the `SpinBox` buttons
-  - `Menu` items
-  - `Menu.attach_context` (`secondary_click`)
-  - the `Popover` anchor
-  - `SearchView` rows
-  - the `Dock` tabs' click and `secondary_click`
-
-  `Interaction`'s own `click` listener is feedback and isn't wrapped. M39's nested-press test now expects one click, not two. `tests/test_innermost_click.py` has 9 tests:
-  - A pointer click reaches the inner Rect alone, and the outer one when clicked outside it.
-  - Keyboard Enter and a simulated click behave the same.
-  - A handler-less Text or Rect inside a clickable still passes the click up.
-  - A checkbox in a clickable card toggles without opening the card, and disabled, it does nothing and the card still doesn't open.
-  - `Widget.on_click`, the `SpinBox` and menu items take their clicks (a menu is on an overlay layer, so the test listens on its surface, not the root).
-  - A right click opens only the innermost context menu.
-  - The `Popover` anchor and a search result take their clicks.
-  - The `Dock` tabs take clicks and right clicks.
-  - `handled` stops even when the handler raises.
-
-  Mutation-checked: removing the wrapper at each of the 10 sites, and each of `handled`'s two guarantees, fails a test (12/12 caught). The mutation script runs without bytecode caching: two same-size mutants of one file written within a second had reused a stale `.pyc` and faked a catch. 1356 → 1365 (1364 passed, 1 skipped); all four examples clean. Docs: the interaction guide ("only the innermost one responds", including labels, disabled controls, keyboard and right clicks, and the change since M39) and `ARCHITECTURE.md` (`handled`); `mkdocs build --strict` clean — ✅
+- Step 1: `tesserae.listeners.handled(fn)` calls `fn(event)`, then `event.stop()`, even if `fn` raises. It wraps all 10 activation listeners Tesserae adds: YAML `on_click` (`View._wire_handler`, for `click` only), `Widget.on_click`, `Control`'s click (so a disabled control stops it too, by Q2), the `SpinBox` buttons, `Menu` items, `Menu.attach_context` (`secondary_click`), the `Popover` anchor, `SearchView` rows, and the `Dock` tabs' click and `secondary_click`. `Interaction`'s own `click` listener is feedback and isn't wrapped. M39's nested-press test now expects one click, not two. `tests/test_innermost_click.py` (9): a pointer click reaches the inner Rect alone, and the outer one when clicked outside it; keyboard Enter and a simulated click behave the same; a Text or Rect with no handler inside a clickable still passes the click up; a checkbox in a clickable card toggles without opening the card, and when disabled does nothing and still doesn't open it; `Widget.on_click`, the `SpinBox` and menu items take their clicks (a menu is on an overlay layer, so the test listens on its surface, not the root); a right click opens only the innermost context menu; the `Popover` anchor and a search result take their clicks; the `Dock` tabs take clicks and right clicks; and `handled` stops even when the handler raises. Mutation-checked: removing the wrapper at each of the 10 sites, and each of `handled`'s two guarantees, fails a test (12/12 caught). The mutation script runs without bytecode caching, because two same-size mutants of one file written within a second had reused a stale `.pyc` and faked a catch. 1356 → 1365 (1364 passed, 1 skipped); all four examples clean. Docs: the interaction guide (only the innermost one responds, including labels, disabled controls, keyboard and right clicks, and the change since M39) and `ARCHITECTURE.md` (`handled`); `mkdocs build --strict` clean — ✅
 
 ### Phase 3 — Docs, Examples, Tracker ⬜
 - Step 1: the interaction guide ("the click itself still bubbles" becomes innermost-only), the controls and widget pages, and `ARCHITECTURE.md`. The change is written up as a behaviour change. All examples run clean, `mkdocs build --strict` is clean, and the known gap moves to "Fixed gaps" — ⬜
