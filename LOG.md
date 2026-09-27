@@ -837,3 +837,15 @@ User: "Push it and scope M43". Pushed `9f52fc1`.
 - Phases: the dry run (done), decisions, reference tests off `tre`, the
   switch in CI, confirm to `tre`. Q1 recorded reference data, Q2 a
   vendored `_removed.py`, Q3 the move to 0.3.5 as a new M46.
+
+## M43 decisions
+
+User: "Push it and go with your recommendations for M43". Pushed
+`96e0129`.
+
+- Q1: record `tre`'s answers once on 0.3.4 (`tools/record_tre_reference.py`
+  -> `tests/reference/`); retire the tests of `tre`'s own behaviour.
+- Q2: vendor `_removed.py` as `tests/tre_removed.py`; CI runs plain and
+  with the switch.
+- Q3: M43 ends at the confirmation; new M46 moves to 0.3.5 after `tre`'s
+  release; M45 follows M46.
