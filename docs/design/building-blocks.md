@@ -291,6 +291,12 @@ graph and docking (P7).
   display), and all three examples clean. Reported to `tre` as its M97
   Phase 2 Step 6; `tre` checked it against this repo and closed its M97,
   so its M99 can start. Moving onto the 0.3.5 release is M46.
+- **On 0.3.5** (M46, 2026-09-27): `.venv` and CI pinned to the `v0.3.5`
+  release, where the names are simply gone, so the vendored switch, its
+  runner and CI's second run were removed; a test checks the names are
+  absent. The one fix the move needed was in a test helper (`get` on a
+  removed property now raises `ValueError`). The recorded answers stay:
+  re-recording needs a 0.3.4 environment.
 
 ## Measured so far
 

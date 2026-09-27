@@ -6,8 +6,8 @@ name: CI
 # matrix yet (no consumers to ship to). `tre` isn't published to PyPI
 # yet, so this checks it out as a sibling and installs it editable, the
 # same `pip install -e /path/to/tre` this repo's README documents for
-# local development. Everything runs twice: plain, and with tre's
-# removed API switched off (M43's gate).
+# local development. Since tre 0.3.5 (M46) the names M43's gate forbade
+# are gone from tre itself, so one run is the gate.
 
 on:
   push:
@@ -23,16 +23,15 @@ jobs:
         with:
           path: tesserae
 
-      # Pinned to `tre`'s v0.3.4 release tag (29800f3), not a branch, so
-      # CI stays reproducible until it's deliberately bumped -- the same
-      # release the local `.venv` is pinned to (M33). v0.3.4 adds the
-      # building-block API (M93-M96), renders a color's own alpha and makes
-      # `opacity` group opacity (Tesserae's YAML updated in M33), and fixes
-      # `tre` issue #10 (background-thread GC freeing a View).
+      # Pinned to `tre`'s v0.3.5 release tag (M46), not a branch, so CI
+      # stays reproducible until it's deliberately bumped -- the same release
+      # the local `.venv` is pinned to. 0.3.5 removes the declarative layer,
+      # reactivity, the MD3 widgets and theming (tre M98-M100), all of which
+      # Tesserae now owns; M43's gate proved it used none of them.
       - uses: actions/checkout@v4
         with:
           repository: mindderivative/tre
-          ref: v0.3.4
+          ref: v0.3.5
           path: tre
 
       # No explicit Rust-toolchain-install action needed -- matches
@@ -82,24 +81,3 @@ jobs:
       - name: Run the todo-list example
         working-directory: tesserae
         run: python examples/todo_list/app.py
-
-      # M43: the migration gate. The same suite and examples again, with
-      # every name tre 0.3.5 removes or renames made to raise -- tre's
-      # `TRE_FORBID_REMOVED` switch, from the copy vendored in
-      # `tests/tre_removed.py` (v0.3.4 doesn't ship it). The parity tests
-      # replay tre's recorded answers (`tests/reference/`), so they need
-      # no removed name either.
-      - name: Run tests with tre's removed API switched off
-        working-directory: tesserae
-        env:
-          TRE_FORBID_REMOVED: "1"
-        run: pytest tests/
-
-      - name: Run the examples with tre's removed API switched off
-        working-directory: tesserae
-        env:
-          TRE_FORBID_REMOVED: "1"
-        run: |
-          python tools/forbid_removed.py examples/counter/app.py
-          python tools/forbid_removed.py examples/multi_screen/app.py
-          python tools/forbid_removed.py examples/todo_list/app.py

@@ -30,8 +30,8 @@ def main() -> int:
 
     missing = [name for name in ("View", "Signal") if not hasattr(tre, name)]
     if missing or not hasattr(tre.Window, "set_theme"):
-        print(f"tre has no {', '.join(missing) or 'Window.set_theme'}: record on tre 0.3.4, without "
-              "TRE_FORBID_REMOVED", file=sys.stderr)
+        print(f"tre has no {', '.join(missing) or 'Window.set_theme'}: record in an environment with tre 0.3.4 "
+              "(0.3.5 has no View, Signal or window theme to ask)", file=sys.stderr)
         return 2
     env = {**os.environ, "TESSERAE_RECORD_TRE": "1"}
     args = [sys.executable, "-m", "pytest", "-q", *(f"tests/{m}.py" for m in MODULES), *sys.argv[1:]]

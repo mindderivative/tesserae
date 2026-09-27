@@ -23,8 +23,8 @@ def elevation(node) -> float:
     if not shadows:
         try:  # a legacy node's own level, while `tre` 0.3.4 has one
             return node.get("elevation")
-        except AttributeError:  # `tre` 0.3.5 (or its removal shim): no `elevation`, and no shadows is level 0
-            return 0.0
+        except (AttributeError, ValueError):  # 0.3.5 has no `elevation` (its shim raised AttributeError,
+            return 0.0                         # the release ValueError); no shadows is level 0
     for level in range(6):
         if shadows == tokens.elevation_shadows(level):
             return float(level)

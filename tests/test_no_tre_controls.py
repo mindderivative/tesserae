@@ -11,10 +11,7 @@ The names are `tre`'s own removal list (`python/tre/_removed.py`, 0.3.5).
 """
 
 import ast
-import os
 from pathlib import Path
-
-import pytest
 
 REMOVED = frozenset({
     "add_checkbox", "add_radio_button", "add_switch", "add_slider", "add_spin_box", "add_circular_progress",
@@ -84,10 +81,9 @@ def test_the_check_sees_m42s_names_and_a_themed_window_but_not_tesseraes_own_set
     assert [n.attr for n in _found(tree)] == ["add_node_graph", "set_theme", "theme"]
 
 
-@pytest.mark.skipif(os.environ.get("TRE_FORBID_REMOVED") != "1", reason="only with tre's switch on")
-def test_the_switch_is_on_when_asked():
-    """M43 Phase 4: with `TRE_FORBID_REMOVED=1` (CI's second run), `tre`'s
-    removed names really are gone, so a green run means something."""
+def test_tesserae_runs_on_a_tre_without_the_removed_api():
+    """M46: on `tre` 0.3.5 the names M43's switch forbade are gone for
+    good, so a green suite means Tesserae needs none of them."""
     import tre
 
     assert not hasattr(tre, "View") and not hasattr(tre, "Signal")

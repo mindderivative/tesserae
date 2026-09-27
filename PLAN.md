@@ -167,4 +167,6 @@ Phase 2 done: every file-built screen watched, `register()`ed ones too; runtime 
 
 Phase 3 done, and M48 with it; the gap moved to "Fixed gaps".
 
-**Up next:** M46 (move to `tre` 0.3.5) starts when `tre` reports the release -- the user's standing go-ahead is to do it and push it, then start M45. M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.
+**M46 done (2026-09-27):** on `tre` v0.3.5 (`.venv` and CI); the switch retired; 1322 passed. Click bubbling raised as a design question (a known gap).
+
+**Up next:** M45 (docking and the app shell).

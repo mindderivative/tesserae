@@ -1016,3 +1016,22 @@ User: "Push it and start Phase 3". Pushed `786a1ba`.
   example's notes too. The gap moved to "Fixed gaps".
 
 M48 complete.
+
+## M46: move to tre 0.3.5
+
+`tre`'s session reported v0.3.5 released; the user's standing go-ahead:
+"Once you receive the message from tre about the release, start M46 and
+push it, then start on M45."
+
+- Checked the release on GitHub first: published, 24 assets, tag on
+  `2e4ed35`.
+- `.venv`: the release's cp314 wheel. 9 failures, one cause:
+  `helpers.elevation` caught only `AttributeError`; 0.3.5's `get` raises
+  `ValueError`. Fixed.
+- Retired the vendored switch, its runner, conftest's switch and CI's
+  second run; CI builds `tre` at `v0.3.5`.
+- Reviewed `tre`'s behaviour changes. Click bubbling: pointer clicks
+  already bubbled on 0.3.4 (M39's test); innermost-only was tried and
+  reverted as a design change -- now a known gap to decide.
+
+1322 passed.
