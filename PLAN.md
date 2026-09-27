@@ -145,4 +145,6 @@ Phase 8 done, and M42 with it: the gate extended to M42's names and the window's
 
 Phase 3 done: the parity tests replay `tre`'s answers recorded on 0.3.4; the whole suite passes under `tre`'s switch; 1288 passed.
 
-**Up next:** M43 Phase 4 (the switch in CI).
+Phase 4 done: `tre`'s switch vendored and in CI (the suite and examples run plain and switched); locally 1288 / 1289 passed.
+
+**Up next:** M43 Phase 5 (CI green both ways, confirm to `tre`).

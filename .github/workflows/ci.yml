@@ -4,10 +4,10 @@ name: CI
 # scoping precedent (`tre/.github/workflows/ci.yml`'s own header
 # comment) -- check + test + lint, not the full cross-platform wheels
 # matrix yet (no consumers to ship to). `tre` isn't published to PyPI
-# yet (M42's own real `Window.show_view`/`from_view` capability just
-# landed), so this checks it out as a sibling and installs it editable,
-# the same real `pip install -e /path/to/tre` this repo's own README.md
-# documents for local development.
+# yet, so this checks it out as a sibling and installs it editable, the
+# same `pip install -e /path/to/tre` this repo's README documents for
+# local development. Everything runs twice: plain, and with tre's
+# removed API switched off (M43's gate).
 
 on:
   push:
@@ -82,3 +82,24 @@ jobs:
       - name: Run the todo-list example
         working-directory: tesserae
         run: python examples/todo_list/app.py
+
+      # M43: the migration gate. The same suite and examples again, with
+      # every name tre 0.3.5 removes or renames made to raise -- tre's
+      # `TRE_FORBID_REMOVED` switch, from the copy vendored in
+      # `tests/tre_removed.py` (v0.3.4 doesn't ship it). The parity tests
+      # replay tre's recorded answers (`tests/reference/`), so they need
+      # no removed name either.
+      - name: Run tests with tre's removed API switched off
+        working-directory: tesserae
+        env:
+          TRE_FORBID_REMOVED: "1"
+        run: pytest tests/
+
+      - name: Run the examples with tre's removed API switched off
+        working-directory: tesserae
+        env:
+          TRE_FORBID_REMOVED: "1"
+        run: |
+          python tools/forbid_removed.py examples/counter/app.py
+          python tools/forbid_removed.py examples/multi_screen/app.py
+          python tools/forbid_removed.py examples/todo_list/app.py

@@ -1,7 +1,21 @@
 """Shared fixtures."""
 
+import os
+import sys
 import threading
 import time
+
+# M43 Phase 4: `TRE_FORBID_REMOVED=1` makes every name `tre` 0.3.5 removes
+# raise, before any test imports `tre`. The pinned 0.3.4 doesn't have the
+# switch, so the vendored copy (`tre_removed.py`) installs it; a `tre`
+# that has its own (`tre._removed`) has installed it already.
+if os.environ.get("TRE_FORBID_REMOVED") == "1":
+    import tre  # noqa: E402
+
+    if "tre._removed" not in sys.modules:
+        import tre_removed  # noqa: E402
+
+        tre_removed.install()
 
 import pytest
 from loguru import logger

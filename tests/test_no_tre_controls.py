@@ -11,7 +11,10 @@ The names are `tre`'s own removal list (`python/tre/_removed.py`, 0.3.5).
 """
 
 import ast
+import os
 from pathlib import Path
+
+import pytest
 
 REMOVED = frozenset({
     "add_checkbox", "add_radio_button", "add_switch", "add_slider", "add_spin_box", "add_circular_progress",
@@ -79,3 +82,13 @@ def test_the_check_sees_m42s_names_and_a_themed_window_but_not_tesseraes_own_set
     tree = ast.parse("window.add_node_graph(1, 2)\nself._window.set_theme(seed)\nwindow.theme.role('primary')\n"
                      "view.set_theme(theme)\nwidget.theme.role('primary')")
     assert [n.attr for n in _found(tree)] == ["add_node_graph", "set_theme", "theme"]
+
+
+@pytest.mark.skipif(os.environ.get("TRE_FORBID_REMOVED") != "1", reason="only with tre's switch on")
+def test_the_switch_is_on_when_asked():
+    """M43 Phase 4: with `TRE_FORBID_REMOVED=1` (CI's second run), `tre`'s
+    removed names really are gone, so a green run means something."""
+    import tre
+
+    assert not hasattr(tre, "View") and not hasattr(tre, "Signal")
+    assert not hasattr(tre.Window, "set_theme") and not hasattr(tre.Window, "add_checkbox")

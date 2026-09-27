@@ -279,6 +279,12 @@ graph and docking (P7).
   behaviour went (`test_reactive`'s `tre` half), and the GC guard for
   `tre` issue #10 frees a `Window` and a node instead of a `View`. With
   the switch on, the whole suite passes.
+- **In CI** (M43 Phase 4): the suite and the examples run twice, plain and
+  with `TRE_FORBID_REMOVED=1`, the switch coming from a copy of `tre`'s
+  `_removed.py` vendored in `tests/tre_removed.py` (0.3.4 doesn't ship
+  it), installed by `tests/conftest.py` and, for the examples,
+  `tools/forbid_removed.py`. A test that runs only with the switch on
+  checks the removed names really are gone.
 
 ## Measured so far
 

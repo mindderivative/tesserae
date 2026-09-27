@@ -870,3 +870,16 @@ User: "Push it and start Phase 3". Pushed `1a525da`.
 - Under `TRE_FORBID_REMOVED`: the whole suite passes; examples clean.
 
 1288 passed.
+
+## M43 Phase 4: the switch in CI
+
+User: "Push it and start Phase 4". Pushed `0f90c46`.
+
+- `tests/tre_removed.py`: `tre`'s `_removed.py` at `279e640`, unchanged
+  below a source header.
+- `tests/conftest.py` installs it with `TRE_FORBID_REMOVED=1`;
+  `tools/forbid_removed.py` runs a script with it; a switched-only test
+  checks the names are gone. A script using `Window.set_theme` exits 1
+  under the runner.
+- `ci.yml`: the suite and examples again with the switch on.
+- Locally: plain 1288 (+1 skipped), switched 1289; examples clean.

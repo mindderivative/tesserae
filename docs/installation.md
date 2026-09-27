@@ -76,6 +76,16 @@ need no `tre` reference at runtime. If you change what one asks `tre`,
 record again on `tre` 0.3.4 with `python tools/record_tre_reference.py`;
 it writes the files only if every test passes.
 
+To check that nothing uses what `tre` 0.3.5 removes, run the suite and an
+example with `tre`'s switch on, as CI does:
+
+```bash
+TRE_FORBID_REMOVED=1 pytest tests/
+TRE_FORBID_REMOVED=1 python tools/forbid_removed.py examples/counter/app.py
+```
+
+Any removed name then raises, naming its replacement.
+
 ## Keeping `tre` up to date
 
 `tre` ships real releases (tags/GitHub Releases) roughly one per

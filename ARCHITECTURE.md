@@ -297,7 +297,9 @@ on a window. The parity tests, which once compared Tesserae with a live
 `reference.tre(fn)`, keyed by the test and the order it asks, and the
 answer (or the exception, re-raised with its type and message) comes back
 from the recording. So the whole suite passes with `tre`'s
-`TRE_FORBID_REMOVED` switch on.
+`TRE_FORBID_REMOVED` switch on, and CI runs it that way as well as plain
+(the switch vendored in `tests/tre_removed.py`, installed by
+`tests/conftest.py`; `tools/forbid_removed.py` for the examples).
 
 ## Components
 
