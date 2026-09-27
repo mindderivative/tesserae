@@ -752,3 +752,24 @@ Found and fixed:
 - The period selector's tabs were in a `group`, not a `tablist`.
 
 Each fix is covered: undoing it fails a test. 1252 passed.
+
+## M42 Phase 5: segmented button, pagination, popover
+
+Per Q1, three widgets tre had and Tesserae never wrapped, checked
+against tre's dumps in `legacy-widgets.md` (0.3.5).
+
+- `segmented_button`: one 1 px outlined pill, padded 1 px so a selected
+  fill doesn't cover the outline; per-corner ends on the segment and its
+  feedback clip. Single-select is a radio group (one Tab stop, arrows
+  select); `multi=True` is checkboxes (arrows move focus).
+- `pagination`: previous, pages, next; the ends disabled at the bounds.
+  Previous is `chevron_right` turned 180°, since there's no
+  `chevron_left` among the 12 icons.
+- `Popover`: MD3's rich tooltip, persistent until dismissed; the text's
+  height is measured wrapped, since the compiler measures one line.
+- Mutants: 15 of 16 caught; the 16th showed re-turning the arrow after a
+  re-colour was dead code, so it was removed.
+- Docs: widget catalog (a stale "thin delegates" sentence removed),
+  overlays guide, API index, `ARCHITECTURE.md`.
+
+1273 passed.

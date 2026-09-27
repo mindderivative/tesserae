@@ -84,7 +84,7 @@ and the arrow keys move the selection (left and right for tabs, up and
 down for the rail and drawer). The tabs' indicator slides to the new tab.
 `navigation_drawer(modal=True)` has the modal drawer's look; to open one
 as an overlay, use `tesserae.overlays.NavigationDrawer`. `dialog`,
-`snackbar`, `side_sheet(modal=True)`, `menu` and `tooltip` return
+`snackbar`, `side_sheet(modal=True)`, `menu`, `tooltip` and `popover` return
 overlays with `open()` and `close()`; see [Overlays](overlays.md). A `toolbar` holds your
 action icon buttons (add them to `.node`). The `top_app_bar`'s icons are
 buttons: `bar.on_click(fn, part="leading")`, `part="trailing0"`, and so
@@ -121,11 +121,21 @@ Drag it (or focus it and use the arrow keys) to move it; `.position` is a
 `Signal`, and `.on_move(fn)` hears the user's moves. `graph.edge(a, b)`
 draws a curve from `a`'s right side to `b`'s left that follows them.
 
+**Segmented buttons and pagination (M42).** `segmented_button(window,
+labels, selected=None, multi=False)` is MD3's outlined segmented button:
+equal segments in one pill, fitted to the widest label unless you give
+`width`, and a selected segment filled `secondary_container` with a check.
+Single-select, a click selects and the group is one Tab stop whose left
+and right arrows move the selection; with `multi=True`, a click toggles
+and the arrows move focus. `.selected` is a `Signal` (an index or `None`,
+or a `frozenset` with `multi`), and `.on_change(fn)` hears the user's
+changes. `pagination(window, page_count, current=0)` is previous, a
+button per page and next; `.current` is a `Signal` (0-based) with
+`.on_change(fn)`, and previous and next are disabled at the ends. For a
+rich tooltip (`tre`'s popover), see `popover` in [Overlays](overlays.md#each-one).
+
 Every function in `tesserae.widgets` is now built by Tesserae; none
-delegates to `tre`. These are thin delegates to the matching
-`Window.add_*` factory in `tre`, with the same parameter names, order and
-defaults, and they return `tre` nodes themed by the window's theme. M42
-rebuilds them too.
+delegates to `tre`.
 
 ## When to use this vs. a declarative fragment
 
@@ -146,15 +156,15 @@ constructs) or when it's one of the 3 fragment gaps below.
 
 | Category | Functions |
 | --- | --- |
-| Buttons & Actions | `button`, `icon_button`, `fab`, `extended_fab`, `split_button`, `button_group` |
+| Buttons & Actions | `button`, `icon_button`, `fab`, `extended_fab`, `split_button`, `button_group`, `segmented_button` |
 | Selection & Input | `checkbox`, `radio_button`, `switch`, `slider`, `spin_box` |
 | Cards/Lists/Chips/Structural | `card`, `list_`, `list_item`, `chip`, `badge`, `divider`, `link`, `accordion_header`, `tree_node` |
-| Navigation & Shell | `tabs`, `toolbar`, `top_app_bar`, `status_bar`, `navigation_rail`, `navigation_drawer` |
-| Overlays | `dialog`, `snackbar`, `tooltip`, `menu`, `menu_item`, `side_sheet` |
+| Navigation & Shell | `tabs`, `toolbar`, `top_app_bar`, `status_bar`, `navigation_rail`, `navigation_drawer`, `pagination` |
+| Overlays | `dialog`, `snackbar`, `tooltip`, `popover`, `menu`, `menu_item`, `side_sheet` |
 | Search | `search_bar`, `search_view` |
 | Progress & Status | `circular_progress`, `linear_progress`, `loading_indicator` |
 | Media & Graphics | `image`, `video`, `node_graph`, `graph_node`, `icon` |
-| Date & Time | `date_picker_day`, `period_selector`, `time_picker_dial` |
+| Date & Time | `date_picker_day`, `period_selector`, `time_input_field`, `time_picker_dial` |
 
 Every function's own docstring (in `src/tesserae/widgets/`) states its
 real parameter list -- one module per category (`buttons.py`,

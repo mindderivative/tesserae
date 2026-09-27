@@ -1,6 +1,7 @@
 """MD3's overlays on `tre` 0.3.4's layers (M41): `Dialog`, `Menu` (and a
 context menu), `Snackbar`, `Tooltip`, the modal `SideSheet` and the modal
-`NavigationDrawer`, since `tre` 0.3.5 removes its `open_*`/`close_*`.
+`NavigationDrawer`, since `tre` 0.3.5 removes its `open_*`/`close_*`;
+then `SearchView` and `Popover` (M42).
 
 Each is built from its fragment (`tesserae.widgets._composed.Widget`) and
 shown with `window.show_layer`: `open()` shows it, `close()` hides it (and
@@ -14,6 +15,7 @@ closes itself on the dismissals `tre`'s legacy overlays allowed:
 | `SideSheet`, `NavigationDrawer` | at the window's end / start, over a scrim | -- | closes | yes |
 | `Snackbar` | 24 px in, 72 px from the bottom | no | no | no |
 | `Tooltip` | below its anchor | closes | closes | no |
+| `Popover` | below its anchor | closes | closes | no |
 | `SearchView` | below its search bar | closes | closes | no |
 
 A modal overlay's scrim fills the window (sized when it opens), so an
@@ -30,7 +32,8 @@ from tesserae import a11y
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget, fragment
 
-__all__ = ["Dialog", "Menu", "NavigationDrawer", "Overlay", "SearchView", "SideSheet", "Snackbar", "Tooltip"]
+__all__ = ["Dialog", "Menu", "NavigationDrawer", "Overlay", "Popover", "SearchView", "SideSheet", "Snackbar",
+           "Tooltip"]
 
 #: MD3's scrim: black at 32%, as the fragments' own.
 SCRIM = "#00000052"
@@ -332,6 +335,80 @@ class Tooltip(Overlay):
     def _hide(self) -> None:
         self._timer.cancel()
         self.close()
+
+
+class Popover(Overlay):
+    """MD3's rich tooltip (M42), `tre`'s popover: a `surface_container`
+    panel, 12 px corners, elevation 2, padded 16, with an optional
+    `title_small` `subhead`, `body_medium` supporting text (both in
+    `on_surface_variant`, the text wrapped to the width) and optional
+    text-button `actions` (`(label, fn)`, in `primary`, each closing it
+    after calling `fn`). It opens below its anchor and stays until an
+    outside press, Escape or an action closes it; with actions, focus moves
+    to the first. `attach(anchor)` opens and closes it on the anchor's
+    click. `role="dialog"`, named by its subhead (else its text)."""
+
+    PADDING = 16.0
+
+    def __init__(self, window: Any, supporting_text: str, *, subhead: Optional[str] = None,
+                 width: float = 312.0, actions: Optional[list[tuple[str, Optional[Callable[[], Any]]]]] = None,
+                 theme: Optional[Theme] = None) -> None:
+        self.actions = list(actions or [])
+        self.text = supporting_text
+        name = "popover"
+        inner = float(width) - 2 * self.PADDING
+        children: list[dict[str, Any]] = []
+        if subhead is not None:
+            children.append({"id": f"{name}.subhead", "kind": "Text",
+                             "text": {"content": subhead, "typography_role": "title_small"},
+                             "style": {"foreground": "on_surface_variant"}})
+        children.append({"id": f"{name}.text", "kind": "Text",
+                         "text": {"content": supporting_text, "typography_role": "body_medium"},
+                         "style": {"width": inner, "foreground": "on_surface_variant"}})
+        if self.actions:
+            buttons = [fragment("ButtonText", {"label": label, "width": 72, "height": 40, "corner_radius": 20},
+                                f"{name}.action{i}") for i, (label, _) in enumerate(self.actions)]
+            children.append({"id": f"{name}.actions", "kind": "Container",
+                             "style": {"flex_direction": "horizontal", "gap": 8,
+                                       "margin": {"left": 0, "right": 0, "top": 8, "bottom": 0}},
+                             "children": buttons})
+        spec = {"id": name, "kind": "Rect",
+                "style": {"width": float(width), "background": "surface_container", "corner_radius": "medium",
+                          "elevation": "level_2", "flex_direction": "vertical", "gap": 4, "padding": self.PADDING},
+                "children": children}
+        widget = Widget(window, spec=spec, theme=theme, name=name, attach=False,
+                        interactive={f"action{i}": None for i in range(len(self.actions))})
+        super().__init__(window, widget)
+        a11y.describe(self.node, role="dialog", label=subhead if subhead is not None else supporting_text)
+        for i, (_, fn) in enumerate(self.actions):
+            widget.on_click(lambda fn=fn: self._act(fn), part=f"action{i}")
+        self._fit_text(inner)
+        widget.after_theme(lambda: self._fit_text(inner))
+
+    def _fit_text(self, width: float) -> None:
+        """Gives the text its height wrapped to `width`: the compiler sizes
+        a Text with no height to one line."""
+        text = self.widget.part("text")
+        _, height = self.window.measure_text(self.text, font_family=text.get("font_family"),
+                                             font_size=text.get("font_size"), font_weight=text.get("font_weight"),
+                                             line_height=text.get("line_height"), max_width=width)
+        text.set(height=float(height))
+
+    def _act(self, fn: Optional[Callable[[], Any]]) -> None:
+        if fn is not None:
+            fn()
+        self.close()
+
+    def _after_open(self) -> None:
+        if self.actions:
+            self.widget.part("action0").focus()
+
+    def attach(self, anchor: Any) -> Callable[[], None]:
+        """Opens it below `anchor` when the anchor is clicked (or activated
+        with Enter or Space), and closes it on the next. Returns the
+        function that detaches it."""
+        return self.widget.view._listen(anchor, "click",
+                                        lambda e: self.close() if self.is_open else self.open(anchor))
 
 
 class _EdgeSheet(Overlay):

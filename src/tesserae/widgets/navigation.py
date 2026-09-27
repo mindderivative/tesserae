@@ -275,6 +275,93 @@ def navigation_drawer(
     return widget
 
 
+#: A disabled control's content: `on_surface` at 38% (MD3).
+DISABLED_ALPHA = round(0.38 * 255)
+
+
+def pagination(
+    window: "Window",
+    page_count: int,
+    current: int = 0,
+    x: float | None = None,
+    y: float | None = None,
+    *,
+    theme: "Theme | None" = None,
+) -> Widget:
+    """Previous, a numbered button per page, and next (M42): 40 px circles
+    4 px apart, `label_large` numbers in `on_surface_variant`, the current
+    page `primary` with an `on_primary` number. `.current` is a `Signal`
+    (0-based) and `.on_change(fn)` hears the user's moves. Previous and
+    next are disabled at the first and last page (`on_surface` at 38%, not
+    focusable, announced disabled). Parts `previous`, `page0`, ...,
+    `next`."""
+    if page_count < 1:
+        raise ValueError(f"pagination needs at least one page, got {page_count}")
+    if not 0 <= current < page_count:
+        raise ValueError(f"current={current} is out of range for {page_count} pages")
+    name = "pagination"
+
+    def circle(part: str, child: dict[str, Any]) -> dict[str, Any]:
+        return {"id": f"{name}.{part}", "kind": "Rect",
+                "style": {"width": 40, "height": 40, "corner_radius": 20, "background": "transparent",
+                          "align_items": "center", "justify_content": "center"},
+                "children": [child]}
+
+    def arrow(part: str) -> dict[str, Any]:  # `chevron_right`, turned for previous
+        return circle(part, {"id": f"{name}.{part}.icon", "kind": "Icon", "icon": {"name": "chevron_right"},
+                             "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}})
+
+    pages = [circle(f"page{i}", {"id": f"{name}.page{i}.label", "kind": "Text",
+                                 "text": {"content": str(i + 1), "typography_role": "label_large"},
+                                 "style": {"foreground": "on_surface_variant"}}) for i in range(page_count)]
+    spec = {"id": name, "kind": "Container",
+            "style": {"flex_direction": "horizontal", "align_items": "center", "gap": 4},
+            "children": [arrow("previous"), *pages, arrow("next")]}
+    parts = ["previous", *(f"page{i}" for i in range(page_count)), "next"]
+    widget = Widget(window, spec=spec, theme=theme, x=x, y=y,
+                    interactive={p: "on_surface_variant" for p in parts}, name=name)
+    a11y.describe(widget.node, role="group", label="Pagination")
+    widget.current = Signal(current)
+    changes: list[Callable[[int], Any]] = []
+    widget.on_change = lambda fn: (changes.append(fn), lambda: changes.remove(fn) if fn in changes else None)[1]
+
+    def go(page: int) -> None:
+        if not 0 <= page < page_count or page == widget.current.get():
+            return
+        widget.current.set(page)
+        for fn in list(changes):
+            fn(page)
+
+    def draw() -> None:
+        now = widget.current.get()
+        for i in range(page_count):
+            on = i == now
+            widget.part(f"page{i}").set(fill=widget.color("primary") if on else (0, 0, 0, 0), selected=on)
+            widget.part(f"page{i}.label").set(fill=widget.color("on_primary" if on else "on_surface_variant"))
+        for part, enabled in (("previous", now > 0), ("next", now < page_count - 1)):
+            ink = widget.color("on_surface_variant")
+            if not enabled:
+                r, g, b, _ = widget.color("on_surface")
+                ink = (r, g, b, DISABLED_ALPHA)
+            widget.part(part).set(focusable=enabled, disabled=not enabled,
+                                  cursor="pointer" if enabled else "default")
+            widget.part(f"{part}.icon").set(fill=ink)
+            widget.interaction(part).enabled = enabled
+
+    widget.on_click(lambda: go(widget.current.get() - 1), part="previous")
+    widget.on_click(lambda: go(widget.current.get() + 1), part="next")
+    a11y.describe(widget.part("previous"), label="Previous page")
+    a11y.describe(widget.part("next"), label="Next page")
+    for i in range(page_count):
+        widget.on_click(lambda i=i: go(i), part=f"page{i}")
+        a11y.describe(widget.part(f"page{i}"), label=f"Page {i + 1}")
+    effect = Effect(draw)  # after `on_click`, which makes previous and next focusable
+    widget._undo.append(effect.dispose)
+    widget.part("previous.icon").set(rotation_deg=180.0)  # not a style property, so a re-colour keeps it
+    widget.after_theme(draw)
+    return widget
+
+
 def toolbar(
     window: "Window",
     variant: str = "docked",

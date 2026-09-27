@@ -255,7 +255,15 @@ graph's content is a 0×0 box, which scales about its own origin, so a
 graph point `p` shows at `offset + p × zoom` and zooming about the
 pointer is arithmetic. `tre` hit-tests through the transform. Edges are
 `path`s spanning a fixed coordinate space around the origin, re-routed
-when a node moves.
+when a node moves. The segmented button (M42 Phase 5) is a 1 px-outlined
+pill padded 1 px, so a selected segment's fill never covers the outline;
+its end segments and their feedback clips take per-corner radii, set
+again after a re-colour, since a style holds one radius. Pagination's
+previous arrow is `chevron_right` turned 180° (`rotation_deg` isn't a
+style property, so a re-colour keeps it). `Popover` sizes its text's
+height with `measure_text(max_width=)` after building, and again after a
+re-colour, because the compiler measures a Text with no height as one
+line.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

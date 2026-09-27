@@ -9,8 +9,10 @@ import pytest
 import tre
 
 from tesserae import Theme, tokens
-from tesserae.overlays import Dialog, Menu, NavigationDrawer, SideSheet, Snackbar, Tooltip
-from tesserae.widgets import dialog, menu, menu_item, side_sheet, snackbar, tooltip
+from tesserae.overlays import Dialog, Menu, NavigationDrawer, Popover, SideSheet, Snackbar, Tooltip
+from tesserae.widgets import dialog, menu, menu_item, popover, side_sheet, snackbar, tooltip
+
+from helpers import elevation
 
 BASE = tokens.baseline_scheme()
 SEED = (0x67, 0x50, 0xA4, 0xFF)
@@ -305,3 +307,86 @@ def test_overlays_follow_the_theme():
     sheet = SideSheet(window, theme=light)
     sheet.set_theme(dark)
     assert tuple(sheet.panel.get("corner_radius")) == (16.0, 0.0, 0.0, 16.0)
+
+
+# -- Popover (M42 Phase 5) ------------------------------------------------------------
+
+LONG = "Rich tooltips bring attention to a particular element or feature that warrants the user's focus."
+
+
+def test_a_popover_is_md3s_rich_tooltip_below_its_anchor():
+    window, anchor = _window()
+    p = Popover(window, LONG, subhead="Rich tooltip")
+    p.open(anchor)
+    window.advance(16)
+    node = p.node
+    assert p.is_open and node.parent() is None  # a layer
+    assert (node.get("layout_x"), node.get("layout_y"), node.get("layout_width")) == (0.0, 40.0, 312.0)
+    assert node.get("fill") == BASE["surface_container"] and node.get("corner_radius") == 12.0
+    assert elevation(node) == 2.0 and node.get("padding_left") == 16.0
+    assert (node.get("role"), node.get("label")) == ("dialog", "Rich tooltip")
+    subhead, text = p.widget.part("subhead"), p.widget.part("text")
+    assert (subhead.get("font_size"), subhead.get("font_weight")) == (14.0, 500.0)  # title_small
+    assert subhead.get("fill") == text.get("fill") == BASE["on_surface_variant"]
+    assert text.get("font_size") == 14.0 and text.get("layout_width") == 280.0  # body_medium, inside the padding
+    one_line = window.measure_text("x", font_size=14.0, line_height=text.get("line_height"))[1]
+    assert text.get("layout_height") >= 2 * one_line  # wrapped, not cut to one line
+    assert node.get("layout_height") >= 16 + subhead.get("layout_height") + 4 + text.get("layout_height") + 16
+
+
+def test_a_popover_stays_open_until_an_outside_press_or_escape():
+    window, anchor = _window()
+    p = Popover(window, "Details")
+    assert p.node.get("label") == "Details"  # no subhead: named by its text
+    p.open(anchor)
+    _frames(window, 5000)  # persistent: no timer
+    assert p.is_open
+    _outside(window)
+    assert not p.is_open
+    p.open(anchor)
+    window.simulate("key_down", key="escape")
+    window.advance(16)
+    assert not p.is_open
+
+
+def test_a_popovers_actions_take_focus_and_close_it():
+    window, anchor = _window()
+    chosen = []
+    p = Popover(window, LONG, subhead="Tip", actions=[("Learn more", lambda: chosen.append("learn")), ("Got it", None)])
+    p.open(anchor)
+    window.advance(16)
+    first = p.widget.part("action0")
+    assert first.get("focused") and first.get("role") == "button"
+    assert p.widget.part("action0.label").get("fill") == BASE["primary"]
+    assert p.widget.part("action1").get("layout_y") == first.get("layout_y")  # in a row
+    p.widget.view.click(first)
+    assert chosen == ["learn"] and not p.is_open
+
+
+def test_attach_opens_and_closes_a_popover_on_its_anchors_click():
+    window, anchor = _window()
+    p = popover(window, "Details", subhead="Tip", anchor=anchor)
+    window.simulate("pointer_down", x=50, y=20)
+    window.simulate("pointer_up", x=50, y=20)
+    window.advance(16)
+    assert p.is_open
+    window.simulate("pointer_down", x=50, y=20)
+    window.simulate("pointer_up", x=50, y=20)
+    window.advance(16)
+    assert not p.is_open
+    anchor.focus()
+    window.simulate("key_down", key="enter")
+    window.advance(16)
+    assert p.is_open
+
+
+def test_a_popover_re_coloured_keeps_its_wrapped_text():
+    window, anchor = _window()
+    p = Popover(window, LONG, subhead="Tip")
+    height = p.widget.part("text").get("height")
+    dark = Theme.resolve(theme_seed=SEED, dark=True)
+    p.set_theme(dark)
+    window.advance(16)
+    assert p.node.get("fill") == dark.role("surface_container")
+    assert p.widget.part("text").get("fill") == dark.role("on_surface_variant")
+    assert p.widget.part("text").get("height") == height

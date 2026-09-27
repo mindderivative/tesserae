@@ -129,4 +129,8 @@ Phase 3 done: `image` and `video` on Tesserae's own image nodes; 1244 passed.
 
 Phase 4 done: the node graph (pan, zoom, drag, edges); no widget delegates to tre now; 1251 passed.
 
-**Up next:** M42 Phase 5 (segmented button, pagination, popover).
+Reviewed Phases 2–4 after the move to Nobara: three fixes (graph theming, the graph node's focus ring, the period selector's tablist); 1252 passed.
+
+Phase 5 done: the segmented button, pagination and the `Popover` overlay; 1273 passed.
+
+**Up next:** M42 Phase 6 (carousel and splitter).

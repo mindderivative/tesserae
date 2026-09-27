@@ -12,6 +12,7 @@ from tesserae.widgets.buttons import (
     extended_fab,
     fab,
     icon_button,
+    segmented_button,
     split_button,
 )
 from tesserae.widgets.selection import (
@@ -35,6 +36,7 @@ from tesserae.widgets.structural import (
 from tesserae.widgets.navigation import (
     navigation_drawer,
     navigation_rail,
+    pagination,
     status_bar,
     tabs,
     toolbar,
@@ -44,6 +46,7 @@ from tesserae.widgets.overlays import (
     dialog,
     menu,
     menu_item,
+    popover,
     side_sheet,
     snackbar,
     tooltip,
@@ -81,10 +84,13 @@ __all__ = [
     "navigation_drawer",
     "navigation_rail",
     "node_graph",
+    "pagination",
     "period_selector",
+    "popover",
     "radio_button",
     "search_bar",
     "search_view",
+    "segmented_button",
     "side_sheet",
     "slider",
     "snackbar",

@@ -1,15 +1,9 @@
 """Tesserae's own namespace for the Overlays category -- `dialog`,
-`snackbar`, `side_sheet`, `menu`, `menu_item`, `tooltip`.
+`snackbar`, `side_sheet`, `menu`, `menu_item`, `tooltip`, `popover`.
 
-Same thin-delegate shape as `buttons.py`/`selection.py`/`structural.py`/
-`navigation.py`. None of these 6 expose an ambiguous color kwarg (only
-the already-clear `border_color`), so no naming translation applies
-here. Deliberately does NOT wrap `Window.open_*`/`close_*` (e.g.
-`open_dialog`/`close_dialog`) -- those are already plain, minimal
-`Window` methods with no naming ambiguity or construction-time logic to
-delegate around, so a `tesserae.widgets` wrapper would add indirection
-with no real value. `menu` delegates to `tre`'s own `build_menu` (not
-`add_menu`, matching the real factory name)."""
+Each (but `menu_item`, and a standard `side_sheet`) returns one of
+`tesserae.overlays`' overlays (M41; `popover` M42), built by Tesserae on
+`tre`'s layers: `open()` shows it and `close()` hides it."""
 
 from __future__ import annotations
 
@@ -158,3 +152,22 @@ def tooltip(
     if anchor is not None:
         t.attach(getattr(anchor, "node", anchor))
     return t
+
+
+def popover(
+    window: "Window",
+    supporting_text: str,
+    subhead: str | None = None,
+    width: float = 312.0,
+    *,
+    actions: list[tuple[str, Optional[Callable[[], Any]]]] | None = None,
+    anchor: Any = None,
+    theme: "Theme | None" = None,
+) -> overlays.Popover:
+    """MD3's rich tooltip, `tre`'s popover (M42: `tesserae.overlays.Popover`).
+    `open(anchor)` it, or `attach(anchor)` (or `anchor=`) to open and close
+    it on the anchor's click; an outside press, Escape or an action closes it."""
+    p = overlays.Popover(window, supporting_text, subhead=subhead, width=width, actions=actions, theme=theme)
+    if anchor is not None:
+        p.attach(getattr(anchor, "node", anchor))
+    return p
