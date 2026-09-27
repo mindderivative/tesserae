@@ -20,7 +20,7 @@ not a `tre.Node`:
 ```python
 from tesserae.widgets import checkbox
 
-agree = checkbox(window, (0x67, 0x50, 0xA4, 0xFF), 48, 48, theme=app.theme, label="I agree")
+agree = checkbox(app.window, (0x67, 0x50, 0xA4, 0xFF), 48, 48, label="I agree")
 agree.checked.get()        # its state is a Signal
 agree.on_change(print)     # the user's changes
 agree.node                 # the tre node, attached to the window's root
@@ -32,8 +32,8 @@ read `control.checked.get()` or `control.selected.get()`. Where you called
 `.node` where you used the node. A checkbox, switch or radio button now
 toggles itself when clicked, so an `on_click` that toggled it by hand
 should go. `spin_box` returns one `SpinBox` rather than
-`(field, minus, plus)`. These controls use the `theme=` you pass
-(MD3's baseline colours without one), not the window's. See
+`(field, minus, plus)`. These controls use the app's theme and follow
+it (M50), or the `theme=` you pass, not the window's. See
 [Controls](controls.md).
 
 **The composed ones are built from their fragments (M41).**
@@ -49,7 +49,7 @@ so the Python and YAML paths are one definition. It returns a `Widget`:
 ```python
 from tesserae.widgets import button
 
-save = button(window, "Save", 120, 40, variant="filled", theme=app.theme, on_click=viewmodel.save)
+save = button(app.window, "Save", 120, 40, variant="filled", on_click=viewmodel.save)  # follows the app's theme
 save.node              # the root, attached to the window's root
 save.part("label")     # a named piece
 save.on_click(fn)      # a focusable button: Enter and Space activate it

@@ -1153,3 +1153,20 @@ User: "Start phase 3 with recommendations". The controls guide and the
 widget catalog now say that a control or button inside a clickable
 takes its own click. The known gap moved to "Fixed gaps". 1364 passed;
 all four examples clean.
+
+## M50 Phases 1-2: widgets and controls follow the app's theme
+
+User: "Start 50 with recommendations" (Q1-Q3 as recommended).
+
+- `tesserae.follow`: an app is found by its window. A widget or control
+  with no `theme=` takes `app.theme` and follows it; `theme=` pins it.
+- Followers are held strongly, not weakly as scoped, so a widget no one
+  kept still follows. They're pruned on `destroy`, or when their node is
+  found gone. `set_dark`, the OS switch and `set_theme_specs` re-theme
+  views and followers with one rollback.
+- The docs no longer pass `theme=app.theme` in snippets, since that
+  would now pin the widget.
+- 10 tests. 14/15 mutants caught; the survivor was a dead guard, now
+  removed.
+
+1374 passed; all four examples clean.

@@ -42,8 +42,8 @@ In a `*_View.yaml`, the eight control kinds are controls:
 ```python
 from tesserae import controls
 
-cb = controls.Checkbox(window, checked=True, label="Remember me", theme=app.theme)
-window.root.add_child(cb.node)
+cb = controls.Checkbox(app.window, checked=True, label="Remember me")  # follows the app's theme
+app.window.root.add_child(cb.node)
 cb.checked.set(False)            # its state is a Signal
 stop = cb.on_change(print)       # the user's changes
 cb.disabled.set(True)
@@ -51,9 +51,12 @@ cb.disabled.set(True)
 
 Every control has `.node` (a `tre` node to put in a tree), its state as
 `Signal`s, `.disabled`, `on_change(fn)` (which returns a function that
-stops it), `set_theme(theme)` and `destroy()`. Give `theme=` a
-`tesserae.Theme` (`app.theme`, `view.theme`); without one, the control
-uses MD3's baseline colours. `tesserae.widgets`' `checkbox`, `slider` and
+stops it), `set_theme(theme)` and `destroy()`. On an `App`'s window, a
+control made without `theme=` takes the app's theme and follows it
+through `set_dark`, the OS switching light and dark, and
+`set_theme_specs` (M50). Give `theme=` a `tesserae.Theme` to pin it to
+that theme instead. On a window no `App` owns, a control without one uses
+MD3's baseline colours. `tesserae.widgets`' `checkbox`, `slider` and
 so on build these too, attached to the window's root.
 
 | Control | State | Input |

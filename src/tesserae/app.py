@@ -25,6 +25,7 @@ from loguru import logger
 from tre import App as _TreApp
 from tre import Window
 
+from tesserae.follow import alive, register_app
 from tesserae.naming import check_naming_convention
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
@@ -159,6 +160,11 @@ class App:
         self._current: str | None = None
         self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
         self._tre_app: _TreApp | None = None
+        #: The widgets made on this window with no `theme=`, which follow
+        #: the app's theme (M50), in the order they were made (a dict as an
+        #: ordered set, so a failed re-theme's rollback is predictable).
+        self._followers: dict[Any, None] = {}
+        register_app(self)
         self._window.on("color_scheme", self._on_color_scheme)
 
     # -- light and dark (M38) ---------------------------------------------------
@@ -196,15 +202,27 @@ class App:
         self._dark = dark
         new_theme = self._view_theme()
         try:
-            _apply_all(
-                [b.view for b in self._built],
-                lambda view: view.set_theme(**new_theme),
-                lambda view: view.set_theme(**old_theme),
-            )
+            self._retheme(old_theme, new_theme)
         except Exception:
             self._dark = not dark
             raise
         logger.info("switched to the {} scheme", "dark" if dark else "light")
+
+    def _retheme(self, old: dict[str, Any], new: dict[str, Any]) -> None:
+        """Re-themes every view `build_view()` made, then every widget
+        following the app (M50), from the `old` theme arguments to `new`;
+        if one fails, the ones done go back to `old` and it re-raises."""
+        from tesserae.theme import Theme
+
+        old_theme, new_theme = Theme.resolve(**old), Theme.resolve(**new)
+        for f in [f for f in self._followers if not alive(f)]:
+            del self._followers[f]  # its node was destroyed under it
+        steps: list[tuple[Any, Any]] = [
+            (lambda view=b.view: view.set_theme(**new), lambda view=b.view: view.set_theme(**old)) for b in self._built
+        ]
+        steps += [(lambda f=f: f.set_theme(new_theme), lambda f=f: f.set_theme(old_theme))
+                  for f in list(self._followers)]
+        _apply_all(steps, lambda step: step[0](), lambda step: step[1]())
 
     def _view_theme(self) -> dict[str, Any]:
         """The app's theme as `View(...)`/`View.set_theme` arguments."""
@@ -246,12 +264,7 @@ class App:
         previous = (self._default_theme_spec, self._custom_theme_spec)
         self._default_theme_spec, self._custom_theme_spec = default_theme_spec, custom_theme_spec
         try:
-            new_theme = self._view_theme()
-            _apply_all(
-                [b.view for b in self._built],
-                lambda view: view.set_theme(**new_theme),
-                lambda view: view.set_theme(**old_theme),
-            )
+            self._retheme(old_theme, self._view_theme())
         except Exception:
             self._default_theme_spec, self._custom_theme_spec = previous
             raise

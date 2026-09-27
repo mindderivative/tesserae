@@ -158,6 +158,22 @@ Link; not text inputs), carried on the cascade's prepared layers.
 window's `color_scheme` event; `set_dark` fixes or releases it. `App`
 no longer themes the window (M42 Phase 7).
 
+**Following the app's theme, M50:** `follow.py` finds an app by its
+window: `App.__init__` calls `register_app`, which keeps a weak
+reference keyed by `id(window)`. `tre`'s `Window` can't be weakly
+referenced, and a live app keeps its window alive, so the id can't be
+reused. A `Widget`, `Control`, `SpinBox` or `Indicator` made with no
+`theme=` asks `initial_theme(window, None, self)`: on an app's window it
+gets `app.theme` and joins `app._followers`, an insertion-ordered dict
+held strongly so a widget no one kept still follows. An explicit theme
+pins it, and a bare window gives MD3's baseline. `App._retheme` re-colours
+the `build_view` views, then the followers, as one `_apply_all` with
+rollback, used by `set_dark`, the `color_scheme` event and
+`set_theme_specs`. `destroy`/`dispose` call `unfollow`, and a follower
+whose node was destroyed under it is dropped at the next re-theme
+(`alive`). YAML controls inside views are built with an explicit theme,
+so their view re-colours them, as before.
+
 **Interaction, M39:** a clickable YAML node is a focusable
 `role="button"` Tab stop (the compiler sets it, as `tre`'s
 `set_on_click` did). `tesserae.interaction.Interaction` draws MD3's

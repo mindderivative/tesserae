@@ -16,6 +16,7 @@ from typing import Any, Callable, Optional
 import yaml
 
 from tesserae import a11y, tokens
+from tesserae.follow import initial_theme, unfollow
 from tesserae.listeners import handled
 from tesserae.spec.expand import expand_components_to_spec
 from tesserae.theme import Theme
@@ -55,7 +56,7 @@ class Widget:
         from tesserae.view import View
 
         self.window = window
-        self.theme = theme if theme is not None else Theme.resolve()
+        self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
         self.name = name
         if spec is None:
             spec = fragment(fragment_name, params or {}, name)
@@ -142,6 +143,7 @@ class Widget:
         return self.theme.roles if self.theme.roles is not None else tokens.baseline_scheme()
 
     def destroy(self) -> None:
+        unfollow(self.window, self)
         for undo in self._undo:
             undo()
         self._undo = []

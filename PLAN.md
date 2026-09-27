@@ -191,4 +191,8 @@ Phase 2 done: `listeners.handled` at every activation site; a click goes to the 
 
 Phase 3 done, and M49 with it: the controls guide and widget catalog; the gap moved to "Fixed gaps".
 
-**Up next:** decisions for M50–M52.
+**M50 decisions:** Q1–Q3 as recommended.
+
+Phase 2 done: `tesserae.follow`; widgets and controls with no `theme=` follow the app, held strongly and pruned when their node is gone; 1374 passed.
+
+**Up next:** M50 Phases 3–4; decisions for M51–M52.

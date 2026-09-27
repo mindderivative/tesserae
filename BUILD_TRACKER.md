@@ -59,7 +59,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M47 — Bindable Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M48 — Hot Reload for `register()`ed Screens | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
 | M49 — A Click Goes to the Innermost Clickable Only | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
-| M50 — `tesserae.widgets` Follow the App's Theme | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
+| M50 — `tesserae.widgets` Follow the App's Theme | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
 | M51 — Hot Reload for Components Added at Run Time | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
 | M52 — A Declarative App Shell | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
 
@@ -77,7 +77,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M50–M52, each scoped with decisions pending: M50, `tesserae.widgets` follow the app's theme (Q1–Q3); M51, hot reload for components added at run time (Q1–Q3); M52, a declarative app shell, a `*_Shell.yaml` (Q1–Q4), best after M50.
+**Up next:** M50 Phase 3 (the shell and dock, overlays, and views on the app's window follow; the app-shell example drops its `theme=` arguments), then Phase 4. M51 (Q1–Q3) and M52 (Q1–Q4) are scoped, with decisions pending.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1417,7 +1417,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 50 — `tesserae.widgets` Follow the App's Theme
 
-**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones" (the four named candidates). This closes the known gap from M40 Phase 5. The stateful controls and composed widgets in `tesserae.widgets` take `theme=` (MD3's baseline without one) and don't hear `App.set_dark`, the OS switching light and dark, or `App.set_theme_specs`. YAML controls in a view do. M45's shell and dock don't either.
+**Status: 🚧 In progress — Phase 2 of 4 done (2026-09-27).** User: "Start 50 with recommendations" (Q1–Q3 as recommended), after "Scope all as separate Milestones" (the four named candidates). This closes the known gap from M40 Phase 5. The stateful controls and composed widgets in `tesserae.widgets` take `theme=` (MD3's baseline without one) and don't hear `App.set_dark`, the OS switching light and dark, or `App.set_theme_specs`. YAML controls in a view do. M45's shell and dock don't either.
 
 **What the source says:**
 - `App` keeps a theme's inputs and resolves a fresh `Theme` on each `app.theme`. `Theme` is a frozen dataclass, so following means swapping the object.
@@ -1432,11 +1432,11 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 - Q2 **An explicit `theme=`.** Recommended: **it pins the widget.** A widget given a theme keeps it and doesn't follow, so an app can have a fixed-colour region. Alternative: `theme=` is only the starting theme, and the widget still follows.
 - Q3 **What else follows.** Recommended: **the shell and its dock** (`use_shell`), **overlays**, and **views made with `tesserae.View(..., window=app.window)`**, besides `build_view`'s. All of them go through the same rollback walk. Followers are held weakly (a `WeakSet` of wrappers), and a destroyed widget leaves at once. Alternative: widgets and controls only.
 
-### Phase 1 — Decisions ⬜
-- Step 1: the user's answers to Q1–Q3 — ⬜
+### Phase 1 — Decisions ✅
+- Step 1: the user took all three recommendations. Q1: a widget finds its app by its window, and one made with no `theme=` on an app's window takes the app's theme and follows it, while a bare window keeps the baseline. Q2: an explicit `theme=` pins a widget. Q3: the shell and its dock, overlays, and views on the app's window follow too — ✅
 
-### Phase 2 — Widgets and Controls Follow ⬜
-- Step 1: the app's registry, by Q1–Q2. `Widget`, `Control`, `SpinBox` and `Indicator` follow when they get no `theme=`. `set_dark`, the `color_scheme` event and `set_theme_specs` re-colour them within `_apply_all`'s rollback, and `destroy` removes them. Tests cover a widget, a control and a pinned widget across `set_dark`, a destroyed widget, and a bare window keeping the baseline. Mutation-checked — ⬜
+### Phase 2 — Widgets and Controls Follow ✅
+- Step 1: `tesserae.follow`: `App.__init__` calls `register_app`, which keeps a weak reference keyed by `id(window)` (`tre`'s `Window` can't be weakly referenced, and a live app keeps its window alive, so the id can't be reused). `initial_theme(window, theme, owner)` pins a given theme (Q2); with none, on an app's window, it returns `app.theme` and adds the owner to `app._followers`, and on a bare window it returns the baseline. `Widget`, `Control`, `SpinBox` and `Indicator` start from it, and their `destroy`/`dispose` call `unfollow`. **Held strongly, not weakly** (changed from the scoping's `WeakSet`): a widget no one kept a variable for, such as a divider, would otherwise stop following while its nodes stayed on screen. So a follower whose node was destroyed under it is dropped at the next re-theme (`alive`). Followers are an insertion-ordered dict, so a failed re-theme's rollback is predictable. `App._retheme` re-colours the `build_view` views, then the followers, as one `_apply_all` with rollback, used by `set_dark`, the `color_scheme` event and `set_theme_specs`. A seedless app's theme has no roles, so its widgets keep the baseline as before and no existing test changed. `tests/test_theme_following.py` (10): a button follows `set_dark` both ways; a checkbox, spin box and progress bar follow; the OS switch and `set_theme_specs` reach followers; an explicit theme pins; a bare window keeps the baseline; each kind stops following on `destroy`; a node destroyed under its widget is dropped; a widget no one kept still follows after `gc.collect()`; a failing follower rolls back the other widgets and the app's `dark`; each app is found by its own window. Mutation-checked, 14/15 caught; the survivor, `app_of`'s `app.window is window` guard, was dead code (the id can't be reused while the app lives) and was removed. 1364 → 1374 passed; all four examples clean. Docs: the controls guide, widget catalog, themes guide and `api/app.md` (the widgets follow, `theme=` pins, and the snippets no longer pass `theme=app.theme`, which would now pin), and `ARCHITECTURE.md` (`follow.py`); `mkdocs build --strict` clean — ✅
 
 ### Phase 3 — Shell, Dock, Overlays, Views ⬜
 - Step 1: by Q3, `use_shell`'s shell (and its dock), the overlays, and views built on the app's window follow. `examples/app_shell/` drops its `theme=` plumbing, and its panels follow `set_dark` (checked in the example) — ⬜

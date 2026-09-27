@@ -25,8 +25,10 @@ The theme is app-wide: every screen gets it, switching screens never
 changes it, and `app.theme` is it resolved (the seed: `theme_seed=`
 first, then the custom theme's `seed:`, then the default theme's; both
 themes' `colors:`). A YAML node's state layer and ripple use it too
-([Interaction & Accessibility](interaction.md)). Widgets you create with
-`tesserae.widgets` take their own `theme=` (pass `app.theme`). Since
+([Interaction & Accessibility](interaction.md)). Widgets and controls you
+create with `tesserae.widgets` on the app's window take the app's theme
+and follow it, light and dark included, with no `theme=` (M50). An
+explicit `theme=` pins a widget to that theme. Since
 M42, `tre`'s window has no theme of its own: nothing `tre` draws for
 Tesserae reads one. A stylesheet belongs
 to a single view, so it can differ per screen. For a screen you pass to `App.register()`, build its view with

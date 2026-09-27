@@ -20,8 +20,12 @@ loads), and `tre` is given only the parsed data. Passing a file and its `*_spec=
 `ValueError`. See [Themes & Fonts](../guide/themes-and-fonts.md).
 
 The theme is app-wide rather than per screen: every screen gets it, and
-`app.theme` is it resolved (a `tesserae.Theme`), which widgets created
-with `tesserae.widgets` take as `theme=`. Since M42 the window itself has
+`app.theme` is it resolved (a `tesserae.Theme`). Widgets and controls
+made with `tesserae.widgets` on `app.window` with no `theme=` take it and
+follow it: `set_dark`, the OS's light and dark, and `set_theme_specs`
+re-colour them with the screens, and roll them back with the screens if
+one fails (M50). An explicit `theme=` pins a widget; a widget's
+`destroy()` stops it following. Since M42 the window itself has
 no theme: nothing `tre` draws reads one.
 
 ## `set_theme_specs`

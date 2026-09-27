@@ -24,6 +24,7 @@ import math
 from typing import Any, Callable, Optional
 
 from tesserae import a11y, tokens
+from tesserae.follow import initial_theme, unfollow
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
@@ -65,7 +66,7 @@ class Control:
                  disabled: bool = False, listen: Optional[Listen] = None, size: Optional[float] = None,
                  width: Optional[float] = None, height: Optional[float] = None) -> None:
         self.window = window
-        self.theme = theme if theme is not None else Theme.resolve()
+        self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
         self.disabled = Signal(bool(disabled))
         self._listen: Listen = listen if listen is not None else Listeners().listen
         self._changes: list[Callable[[Any], None]] = []
@@ -110,6 +111,7 @@ class Control:
     def dispose(self) -> None:
         """Stops the control (its repainting and listeners) but leaves its
         node, for a caller about to free the tree it sits in."""
+        unfollow(self.window, self)
         self._effect.dispose()
         for undo in self._undo:
             undo()
@@ -628,7 +630,7 @@ class SpinBox:
         if min is not None and max is not None and max < min:
             raise ValueError(f"a spin box needs max >= min, got min={min!r}, max={max!r}")
         self.window = window
-        self.theme = theme if theme is not None else Theme.resolve()
+        self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
         self.min, self.max, self.step = min, max, step
         self.value = Signal(self._fit(value))
         self.disabled = Signal(bool(disabled))
@@ -670,6 +672,7 @@ class SpinBox:
         untrack(self._paint)
 
     def destroy(self) -> None:
+        unfollow(self.window, self)
         self._effect.dispose()
         for undo in self._undo:
             undo()
@@ -782,7 +785,7 @@ class Indicator:
     def __init__(self, window: Any, *, value: Optional[float] = None, theme: Optional[Theme] = None,
                  label: Optional[str] = None, color: Optional[RGBA] = None) -> None:
         self.window = window
-        self.theme = theme if theme is not None else Theme.resolve()
+        self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
         self.value = Signal(value)
         self._color = color
         self._painted = False
@@ -806,6 +809,7 @@ class Indicator:
 
     def dispose(self) -> None:
         """Stops the indicator's repainting and loop but leaves its node."""
+        unfollow(self.window, self)
         self._effect.dispose()
         self._generation += 1
 
