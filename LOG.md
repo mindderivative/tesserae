@@ -1006,3 +1006,13 @@ User: "Push it and start Phase 2". Pushed `512b546`.
   known gap.
 
 1321 passed.
+
+## M48 Phase 3: docs, example -- M48 complete
+
+User: "Push it and start Phase 3". Pushed `786a1ba`.
+
+- `guide/apps-and-screens.md`, `api/app.md` and `register()`'s docstring
+  say a file-built registered screen is hot-reloaded; the multi-screen
+  example's notes too. The gap moved to "Fixed gaps".
+
+M48 complete.

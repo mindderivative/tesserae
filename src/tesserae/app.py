@@ -324,7 +324,9 @@ class App:
         The caller builds `view`, so the caller themes it: build it with
         `app.build_view("Foo_View.yaml")` to give it this app's theme and
         stylesheet (M30). A view built any other way keeps whatever theme
-        it was built with.
+        it was built with. A view built from a file keeps it (`view.path`),
+        so `run(hot_reload=True)` watches it as it does a `load()`ed one
+        (M48).
         """
         if name in self._registered:
             raise ValueError(f"a view named {name!r} is already registered")

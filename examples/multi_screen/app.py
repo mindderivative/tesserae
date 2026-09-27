@@ -21,7 +21,9 @@ needs to reach back into `App`.
 Each view is built with `app.build_view`, not `tesserae.View(path)`: Tesserae
 reads the file (and anything it includes) and hands `tre` only the
 finished spec (M29), using the app's theme and stylesheet (M30) -- the
-way to theme a screen given to `register()`.
+way to theme a screen given to `register()`. Built from a file, each
+screen is also hot-reloaded by `app.run(hot_reload=True)`, as a `load()`ed
+one is (M48).
 """
 
 from pathlib import Path

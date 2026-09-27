@@ -165,4 +165,6 @@ Phase 4 done, and M47 with it: the counter example's button name follows its cou
 
 Phase 2 done: every file-built screen watched, `register()`ed ones too; runtime components found unwatched (known gap); 1321 passed.
 
-**Up next:** M48 Phase 3. M46 (move to `tre` 0.3.5) starts when `tre` reports the release -- the user's standing go-ahead is to do it and push it, then start M45. M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.
+Phase 3 done, and M48 with it; the gap moved to "Fixed gaps".
+
+**Up next:** M46 (move to `tre` 0.3.5) starts when `tre` reports the release -- the user's standing go-ahead is to do it and push it, then start M45. M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.

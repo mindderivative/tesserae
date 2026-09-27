@@ -56,6 +56,10 @@ home_vm = HomeViewModel(app, home_view)
 app.register("Home", home_view, home_vm)
 ```
 
+A screen built from a file this way is hot-reloaded like a `load()`ed
+one: `app.run(hot_reload=True)` watches its file and reloads it in place,
+keeping its ViewModel (see [Hot Reload](hot-reload.md)).
+
 Switching screens from inside a handler works even *reentrantly* --
 from the very handler `App.show` itself is dispatching into (see
 `examples/multi_screen/` in the repository).

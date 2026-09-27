@@ -82,7 +82,8 @@ Registers an already-loaded `view` and its already-`_attach`ed
 isn't a `tesserae.View`. Build the view with
 [`build_view`](#build_view) to give it the app's theme and stylesheet; a
 view built on its own (`tesserae.View(path)`) is rebuilt in the app's
-window, keeping its ViewModel and its own theme.
+window, keeping its ViewModel and its own theme. A view built from a file
+either way keeps that file, so `run(hot_reload=True)` watches it (M48).
 
 ## `load`
 
