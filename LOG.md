@@ -972,3 +972,17 @@ User: "Push it and start Phase 4". Pushed `d968339`.
 - Docs home line; the known gap moved to "Fixed gaps".
 
 1317 passed. M47 complete.
+
+## M48 scoped: hot reload for register()ed screens
+
+User: "Scope hot reload for register()ed screens as M48". Also recorded
+(memory): once `tre` reports the 0.3.5 release, start M46 and push it,
+then start M45.
+
+- `_start_watchers` watches only screens with `_Registered.path`, which
+  only `load()` sets. A `View` built from a file keeps `view.path`, and
+  `move_to` keeps it, so no `path=` is needed.
+- Phases: decisions (Q1 the file from the view; Q2 log a screen with no
+  file), watch every file-built screen with tests, docs/example.
+- Named, to check in Phase 2: whether components added by
+  `tesserae.instantiate` are watched.

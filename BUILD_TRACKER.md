@@ -57,6 +57,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, after M46 (2026-09-26) |
 | M46 — Move to `tre` 0.3.5 | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, waits on `tre`'s 0.3.5 release (2026-09-26) |
 | M47 — Bindable Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
+| M48 — Hot Reload for `register()`ed Screens | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q2 pending (2026-09-27) |
 
 **Just closed:** M47 (2026-09-27), all 4 phases — bindable accessibility: `a11y:` `label`/`hidden`/`level` take a `{{ }}` binding, `tesserae.a11y.bind` does it from Python, and the counter example's button name follows its count; two older bugs fixed on the way (a control's `a11y:` was dropped; a Link's text binding overrode its label). 1288 → 1317. Before that, M43 (the migration gate).
 
@@ -72,7 +73,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M46** (move to `tre` 0.3.5) waits on `tre`'s release (its M99–M103; the gate was rerun on its M100 list); then M45 (docking and the app shell). Nothing else is scoped; named, un-scoped candidates: hot reload for `App.register()`ed screens, and `tesserae.widgets` controls following the app's theme by themselves.
+**Up next:** **M48** (hot reload for `register()`ed screens) is scoped: the screen's view already knows its file, so the fix is small; decisions Q1–Q2 wait on the user. **M46** (move to `tre` 0.3.5) starts, and is pushed, when `tre` reports the release (the user's standing go-ahead), then M45 (docking and the app shell). Named, un-scoped candidate: `tesserae.widgets` controls following the app's theme by themselves.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -86,7 +87,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 - `graph_node` is structurally unfragmentable — needs a live node reference as its own attachment parent, which the macro layer's textual expansion cannot express (M25, reclassified from "no `NodeKindSpec`" — the real blocker is different).
 - `extended_fab`'s icon-less structural shape has no fragment yet (real, deliberately deferred — see M18).
 - `repeat:` (M28) is real but deliberately narrow: `tabs`/`navigation_rail`/`navigation_drawer`/`button_group`/`menu` still can't be expressed with full fidelity, since their own imperative construction computes real state-dependent active/inactive coloring in Rust that a static `{{ }}`-substitution template can't branch on -- a second, separate, un-scoped capability (conditional per-item styling) is the real remaining gap for these 5, not the repeat mechanism itself (`list_`/`ListItem` has no such gap and is fully covered). `repeat:` is also deliberately not reactive -- its own items are fixed at macro-expansion time; an app wanting runtime-changing content still uses the existing imperative `tesserae.Repeater`.
-- `App.run(hot_reload=True)` only watches screens registered through `App.load()` (M29 Phase 6): a screen given to `App.register()` directly -- e.g. `examples/multi_screen/`, whose `ViewModel`s need an `app` reference -- has no known file, so it isn't watched. A `path=` on `register()` would close this.
+- `App.run(hot_reload=True)` only watches screens registered through `App.load()` (M29 Phase 6): a screen given to `App.register()` directly -- e.g. `examples/multi_screen/`, whose `ViewModel`s need an `app` reference -- has no known file, so it isn't watched. A `path=` on `register()` would close this. Scoped as M48, which finds the view already knows its file.
 - A declared `on_change` on a bound node fires once per theme, stylesheet or view reload, even with the value unchanged, because `tre` re-applies bindings by setting each value again (as at first attach). Documented, and pinned by a test. Filed as [`tre` issue #12](https://github.com/mindderivative/tre/issues/12) (2026-09-25), which proposes skipping `Change` when the value didn't change.
 - The declarative cascade doesn't consult a theme's per-component `components:` override (imperative-only) — an app wanting that level of per-component customization uses `tesserae.widgets` instead of a declarative fragment.
 - No dedicated `tesserae.widgets.text` wrapper for the raw `add_text` primitive — every widget needing text uses its own clear param instead; revisit only if a real caller needs the bare primitive.
@@ -1332,3 +1333,26 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 4 — Tests, Docs, Tracker ✅
 - Step 1: `examples/counter`: the count text is a polite live region (`a11y: {live: polite}`), and the button's name is bound, `a11y: {label: "{{ button_label.get() }}"}`, a `Computed` of "Increment, count is N" (the ViewModel now keeps `count` as a `Signal` and derives both strings); `app.py` asserts the name after its three clicks, and the keyboard-only test in `test_a11y.py` checks the live region and that the name follows Enter and Space. The example runs clean plain and with `TRE_FORBID_REMOVED=1`. The docs were written with Phases 2–3 (interaction guide, bindings guide, API index, `ARCHITECTURE.md`); this pass adds a line to the docs home. The known gap moved to "Fixed gaps". 1317 passed, 1318 with the switch; `mkdocs build --strict` clean — ✅
+
+---
+
+## Milestone 48 — Hot Reload for `register()`ed Screens
+
+**Status: ⬜ Scoped — decisions Q1–Q2 pending (2026-09-27).** User: "Scope hot reload for register()ed screens as M48". Closes the known gap from M29 Phase 6: `App.run(hot_reload=True)` watches only screens `App.load()` made, so a screen given to `App.register()` -- the path for a `ViewModel` that needs the `app` (`examples/multi_screen/`) -- never reloads. Independent of `tre`'s release.
+
+**What the source says** (`app.py`, `view.py`, `spec/watch.py`): `_start_watchers` starts a `ViewWatcher(view, path)` for each registered screen whose `_Registered.path` is set, and only `load()` sets it. But the screen already knows its file: a `View` built from a path keeps it as `view.path` (`view.py`, set before `build_view_spec`), `App.build_view()` builds from a path, and `register()`'s `view.move_to(window)` keeps `path` while rebuilding in the app's window. So the gap's own suggestion -- a `path=` on `register()` -- isn't needed: the watcher can take the path from the view. A view built from a spec dict has no file and can't be watched. `ViewWatcher` already reconciles in place (the ViewModel, its `app` reference and its bindings survive, rewired), so a registered screen reloads exactly as a loaded one does. The "hot reload on: watching N screen(s)" line counts watched screens.
+
+**Decisions to settle:**
+- Q1 **How a registered screen's file is found.** Recommended: **from the view** (`view.path`), so every file-built screen -- `register()`ed or `load()`ed -- is watched with no API change, and `_Registered.path` goes. Alternative: an explicit `register(..., path=)`, as the gap first proposed; clearer at the call site, but a second, redundant way to say what the view already knows.
+- Q2 **A registered screen with no file** (built from a dict). Recommended: **say so once** when hot reload starts -- an INFO line naming the screen ("not watched: built from a spec, not a file") -- so a missing reload isn't a mystery. Alternative: skip it silently, as today.
+
+**Out of scope, named:** components added at run time with `tesserae.instantiate` (a `Repeater`'s rows, say) are built from their own files; whether `ViewWatcher` follows those is a separate question, to check (not assumed) in Phase 2 and list as a known gap if it doesn't.
+
+### Phase 1 — Decisions ⬜
+- Step 1: Q1–Q2 above — ⬜
+
+### Phase 2 — Watch Every File-Built Screen ⬜
+- Step 1: by Q1–Q2: `_start_watchers` watches each registered screen by its view's file; the "hot reload on" count includes them; a screen without one is named (Q2). Tests: a `register()`ed, `build_view()`ed screen reloads on an edit with its `ViewModel` (and that `app` reference) and bindings kept, with a fake handle as `test_watch_thread.py` does; a dict-built screen isn't watched, and is logged; a `load()`ed one still is; the live subprocess test (`test_hot_reload_live.py`) extended to a `register()`ed screen; mutation-checked. Check the instantiated-components question above — ⬜
+
+### Phase 3 — Docs, Example, Tracker ⬜
+- Step 1: `guide/hot-reload.md` (the "only `load()`ed screens" limit goes), `guide/apps-and-screens.md` and `api/app.md` (`register()`), `App`'s docstrings, `ARCHITECTURE.md`; `examples/multi_screen/app.py`'s comments; the known gap moved to "Fixed gaps"; tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
