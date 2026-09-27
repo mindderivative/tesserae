@@ -1071,3 +1071,11 @@ User: "Push it and start Phase 2". Pushed `c3fd91e`.
 - 15 tests; 14 mutants, all caught after two tests were tightened.
 
 1337 passed.
+
+## tre issue #14
+
+User: "create a tre issue about the bug with set_active_panel." Filed
+https://github.com/mindderivative/tre/issues/14 with a repro on the 0.3.5
+wheel: `dock_panel` on a docked panel leaves it in the old zone's list;
+`set_active_panel` there then makes it a child of both zones. Listed as a
+known gap; `Dock.move()` keeps its drag workaround.
