@@ -1,5 +1,5 @@
 # Vendored from tre's `python/tre/_removed.py`, branch `0.3.5`, commit
-# 279e640 (github.com/mindderivative/tre), unchanged below this header
+# 07be406 (github.com/mindderivative/tre), unchanged below this header
 # (M43 Phase 4, Q2). tre 0.3.4 -- which Tesserae is pinned to -- doesn't
 # ship it; tre wrote it to be copied into a project on 0.3.4. With
 # `TRE_FORBID_REMOVED=1`, `tests/conftest.py` (for the suite) and
@@ -159,6 +159,8 @@ REMOVED: dict[str, dict[str, str]] = {
     "Event": {
         "kind": "event.type",
         "node": "event.target",
+        "source": "event.target",
+        "position": "event.window_x and event.window_y",
     },
 }
 

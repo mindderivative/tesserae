@@ -906,3 +906,12 @@ its `_removed.py` at `279e640` below the header) and closed its M97
 starts. The request about renames is its M100 Step 3: an updated
 `_removed.py` or a note before the 0.3.5 release, so the gate can be
 rerun.
+
+## Gate rerun with tre's updated `_removed.py` (0.3.5 at 07be406)
+
+At `tre`'s request (its M100 done). The new file adds only
+`Event.source` and `Event.position` (diffed against the vendored copy,
+read through the GitHub API). `tests/tre_removed.py` updated; both names
+raise under the switch. Zero `RemovedError`s: 1289 passed switched, 1288
+plain, examples clean. `tre`'s list of behaviour changes a name switch
+can't catch went into M46's step. Reported back.
