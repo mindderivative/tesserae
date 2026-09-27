@@ -87,6 +87,44 @@ A `Dock` can be used without a shell — `Dock(window)`, `add_zone(side,
 size)` returning a zone to place yourself. A window has one `Dock`,
 since it owns the window's docking events.
 
+## From a shell file
+
+The same shell can be described in a `*_Shell.yaml` next to the app's
+views and loaded with `app.load_shell(path)` (M52), with no widgets built
+in Python:
+
+```yaml
+# Studio_Shell.yaml
+top_bar: {title: Studio, trailing_icons: [settings]}
+navigation:
+  items:
+    - {screen: Home, icon: home}
+    - {screen: Notes, icon: search}
+status_bar: {text: Ready}
+zones: {left: 220, right: 260, bottom: 160}
+center: true
+```
+
+```python
+shell = app.load_shell(directory / "Studio_Shell.yaml")  # built and used, as use_shell does
+```
+
+Every key is optional. `top_bar` takes a `title`, and optionally a
+`leading_icon` and `trailing_icons`. `navigation.items` lists screens by
+name, each with an icon, and they become the rail. `status_bar` takes
+its `text`. `zones` gives each side zone's size, and `center: true` makes
+screens center tabs. The bars stretch across the window as it resizes,
+and everything follows the app's theme.
+
+A mistake names the file and the key, for example:
+
+```text
+Studio_Shell.yaml: zones.middle: not a side (zones are left, right, top, bottom)
+```
+
+It's the same `AppShell` a Python-built one is: `app._shell`, its `dock`,
+`layout()` and `restore()` all work as above.
+
 ## Saving a layout
 
 `shell.layout()` returns where each panel is, which is shown and each
@@ -104,5 +142,7 @@ shell.restore(saved)
 
 - A layout is restored by title, so two panels with the same title can't
   be told apart.
-- There's no declarative (`*_View.yaml`) form of the shell yet; build it
-  in `app.py`.
+- In a shell file, `panels:` (which named panels go in which zone) and
+  `navigation.on_navigate` are checked but not acted on yet: choosing a
+  rail item doesn't show its screen, and panels are still added with
+  `shell.dock.add_panel`.

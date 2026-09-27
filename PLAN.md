@@ -207,4 +207,8 @@ Phase 3 done: `ComponentWatcher`, one per component file for all its live instan
 
 Phase 4 done, and M51 with it: the components guide, README and todo-list example; the gap moved to "Fixed gaps".
 
-**Up next:** decisions for M52.
+**M52 decisions:** Q1–Q4 as recommended.
+
+Phase 2 done: `tesserae.shell_file` and `app.load_shell`; the whole schema checked, named by file and key; 1429 passed.
+
+**Up next:** M52 Phases 3–5.

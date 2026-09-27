@@ -236,6 +236,17 @@ first time while hot reload runs and does nothing otherwise.
 `_stop_watchers` (run's `finally`) stops them all, mid-run ones
 included.
 
+**Shell files, M52:** `shell_file.py` reads a `*_Shell.yaml`, a small
+schema rather than a widget tree (`top_bar`, `navigation`, `status_bar`,
+`zones`, `center`, `panels`), and `parse_shell_spec` checks every key,
+raising `ShellSpecError` with `file: key: problem`. `build_shell` builds
+the existing `AppShell` and widgets from it: the bars at `width="100%"`,
+the rail from the navigation items' screen names, and no `theme=`, so
+it follows the app (M50). `App.load_shell` builds, remembers the file
+(`_shell_file`, for hot reload) and calls `use_shell`. The view pipeline
+is untouched, since it has no pluggable kinds, and its reconcile would
+fight the dock (M52 Q1).
+
 **Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
 the framework (D10). Each zone is a column -- a tab strip, a divider, and
 the body registered with `window.add_dock_zone` -- since `tre` keeps a

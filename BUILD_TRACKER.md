@@ -61,7 +61,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M49 — A Click Goes to the Innermost Clickable Only | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
 | M50 — `tesserae.widgets` Follow the App's Theme | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M51 — Hot Reload for Components Added at Run Time | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
-| M52 — A Declarative App Shell | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
+| M52 — A Declarative App Shell | `████⬜⬜⬜⬜⬜⬜` 40% | 🚧 In progress — Phase 2 of 5 done |
 
 **Just closed:** M51 (2026-09-27), all 4 phases: hot reload for components added at run time. Components keep their file; one `ComponentWatcher` per file reloads every live instance in place, including ones added mid-run; a bad edit fails once; a rebuilt row keeps its place; components a host reload destroyed are forgotten. 1382 → 1399. Before it, M50: `tesserae.widgets` follow the app's theme.
 
@@ -77,7 +77,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M52, a declarative app shell (a `*_Shell.yaml`, Q1–Q4), scoped with decisions pending. M50, which it was best after, is done.
+**Up next:** M52 Phase 3 (panels as named view files, and navigation items bound to `app.show`), then Phases 4 (hot reload of the shell file) and 5 (example, docs).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1482,7 +1482,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 52 — A Declarative App Shell
 
-**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones" (the four named candidates). M45 Q1 kept a Python API first and named a YAML form as later work. This is that form: the shell (bars, navigation, zones, panels, center tabs) described in a file, not assembled in Python.
+**Status: 🚧 In progress — Phase 2 of 5 done (2026-09-27).** User: "Start M52 use recommendations" (Q1–Q4 as recommended), after "Scope all as separate Milestones" (the four named candidates). M45 Q1 kept a Python API first and named a YAML form as later work. This is that form: the shell (bars, navigation, zones, panels, center tabs) described in a file, not assembled in Python.
 
 **What the source says:**
 - The view pipeline is closed. `spec/build.py`'s kinds and keys are fixed sets, controls come from an `if kind ==` chain, and there's no hook for a kind built by Python code.
@@ -1502,11 +1502,11 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 **Order:** best after M50, so a file-built shell follows the app's theme without `theme=` plumbing.
 
-### Phase 1 — Decisions ⬜
-- Step 1: the user's answers to Q1–Q4 — ⬜
+### Phase 1 — Decisions ✅
+- Step 1: the user took all four recommendations. Q1: a separate `*_Shell.yaml`, loaded by `app.load_shell(path)` and built through the existing `AppShell`. Q2: a panel is a view file named like a screen, placed by name. Q3: navigation items name screens, and choosing one calls `app.show`, with an optional `on_navigate:`. Q4: hot reload patches in place, and structural edits are logged as needing a restart — ✅
 
-### Phase 2 — The Shell File ⬜
-- Step 1: the schema by Q1, with a validator that names the file and key, and `app.load_shell(path)`, which builds the `AppShell` and calls `use_shell`. Tests cover each key, the errors, and parity with a Python-built shell's layout. Mutation-checked — ⬜
+### Phase 2 — The Shell File ✅
+- Step 1: `tesserae.shell_file`: `load_shell_spec(path)` checks the `*_Shell.yaml` name and reads the YAML, naming the file for broken YAML. `parse_shell_spec` checks every key of the whole schema, including `panels` and `navigation.on_navigate`, which Phase 3 acts on. A mistake raises `ShellSpecError` (a `ValueError`) as `file: key: problem`. Checked: unknown keys at each level, a top bar with no title, non-text icons, an empty or malformed item list, a status bar with no text, a zone that isn't a side, a zone size ≤ 0 or boolean, a `center` that isn't true or false, a panel side with no such zone (`center` only when `center: true`), and a panel placed twice. Every key is optional. `build_shell(app, spec)` builds the existing `AppShell`: the top app bar and status bar at the app's width, then `width="100%"`, so they follow a window resize (the Python API's fixed-width bars don't); the rail from the items' screen names and icons, with the first selected; zones; `center`. There's no `theme=`, so it follows the app (M50). `App.load_shell(path)` builds it, remembers the file (`_shell_file`, for Phase 4), calls `use_shell` and returns the shell. `tests/test_shell_file.py` (31): a file-built shell lays out box for box like the same shell built in Python, with the title, trailing icon, rail labels, status text and zone sizes; `load_shell` uses it and a showing screen moves in; `center: true` gives center tabs; an empty file is an empty shell filling the window; the bars stretch on resize; it follows `set_dark`; a misnamed file and broken YAML are named; 22 parametrized mistakes are each named by file and key; center panels are allowed with `center: true`. Mutation-checked, 23/23 caught. 1399 → 1430 (1429 passed, 1 skipped); all four examples clean. Docs: the app-shell guide ("From a shell file", and in "Not yet covered", that `panels:` and `on_navigate` are checked but not yet acted on), `api/app.md` (`load_shell`) and `ARCHITECTURE.md`; `mkdocs build --strict` clean — ✅
 
 ### Phase 3 — Panels and Navigation ⬜
 - Step 1: panels as named view files (Q2) and navigation items bound to `app.show` (Q3). `layout()` and `restore()` use names. Tests; mutation-checked — ⬜

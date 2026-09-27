@@ -124,6 +124,18 @@ Shows screens inside `shell.content` from now on (M45): an
 and a status bar around the screens. A screen already showing moves into
 it. A shell built on another window is a `ValueError`.
 
+## `load_shell`
+
+**`load_shell(path) -> AppShell`**
+
+Builds the shell a `*_Shell.yaml` describes and uses it, as `use_shell`
+does (M52): its top bar, navigation rail, status bar, docked zones and
+center tabs. The bars stretch across the window, and everything follows
+the app's theme. A file not named `*_Shell.yaml`, broken YAML, or a key
+the schema doesn't have raises `tesserae.shell_file.ShellSpecError` (a
+`ValueError`) naming the file and the key. See
+[App Shell & Docking](../guide/app-shell.md#from-a-shell-file).
+
 ## `current`
 
 **`current -> str | None`**

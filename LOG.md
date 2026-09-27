@@ -1230,3 +1230,18 @@ answer was "Phase 3, then 4".
   components in a view the app doesn't know about aren't found.
 
 1398 passed; all four examples clean.
+
+## M52 Phases 1-2: the shell file
+
+User: "Start M52 use recommendations" (Q1-Q4 as recommended).
+
+- `tesserae.shell_file` checks the whole `*_Shell.yaml` schema and
+  names each mistake by file and key.
+- `build_shell` builds the existing `AppShell`; its bars stretch with
+  the window and it follows the app's theme. `app.load_shell(path)`
+  builds and uses it.
+- `panels:` and `on_navigate` are checked but not acted on until
+  Phase 3.
+- 31 tests; 23/23 mutants caught.
+
+1429 passed; all four examples clean.

@@ -159,6 +159,7 @@ class App:
                               align_items="flex_start")
         self._current: str | None = None
         self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
+        self._shell_file: Path | None = None  # the `*_Shell.yaml` `load_shell` read (M52)
         self._tre_app: _TreApp | None = None
         #: The widgets made on this window with no `theme=`, which follow
         #: the app's theme (M50), in the order they were made (a dict as an
@@ -446,6 +447,22 @@ class App:
             if root.parent() is not None:
                 root.remove()
             shell.show_screen(root, self._current)
+
+    def load_shell(self, path: str | Path) -> Any:
+        """Builds the app shell a `*_Shell.yaml` describes -- its top bar,
+        navigation rail, status bar, docked zones and center tabs (M52) --
+        and shows screens in it, as `use_shell` does. Returns the
+        `AppShell`. Raises `tesserae.shell_file.ShellSpecError` (a
+        `ValueError`) naming the file and key for a mistake."""
+        from tesserae.shell_file import build_shell, load_shell_spec
+
+        path = Path(path)
+        spec = load_shell_spec(path)
+        shell = build_shell(self, spec)
+        self._shell_file = path
+        self.use_shell(shell)
+        logger.info("loaded the app shell from {}", path)
+        return shell
 
     @property
     def current(self) -> str | None:
