@@ -1056,3 +1056,18 @@ User: "Push it and go with your recommendations for M45". Pushed `0f49f65`.
 - Q1 a Python `Dock`/`AppShell` first, `App.use_shell`; Q2 secondary
   tabs, tab as handle, highlight, keyboard "Move to"; Q3 splitters; Q4
   `layout()`/`restore()`.
+
+## M45 Phase 2: tesserae.docking.Dock
+
+User: "Push it and start Phase 2". Pushed `c3fd91e`.
+
+- Probed 0.3.5: a drop over no zone keeps the panel; a drag can start
+  on `pointer_move`; zones keep non-panel children; drags update both
+  lists; `dock_panel` on a docked panel leaves it listed twice (worked
+  around in `move()` with a drag; worth raising with `tre`).
+- `Dock`: zones as tab strips over `tre`'s zone bodies, MD3 secondary
+  tabs, click/Enter/arrows, drag past 4 px with a highlight, "Move to"
+  menu (right click, Menu key, Shift+F10), theming, a11y.
+- 15 tests; 14 mutants, all caught after two tests were tightened.
+
+1337 passed.

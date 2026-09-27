@@ -191,6 +191,19 @@ from a file, kept by `register()`'s `move_to`), so a `build_view()`ed,
 `_Registered.path` that only `load()` set is gone. A spec-built screen is
 named in the log instead.
 
+**Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
+the framework (D10). Each zone is a column -- a tab strip, a divider, and
+the body registered with `window.add_dock_zone` -- since `tre` keeps a
+zone's body to the one shown panel (it leaves other children, which is
+where the drop highlight goes). Tabs are built with `window.create`, each
+with an `Interaction`, and rebuilt when a zone's panels change. A press
+starts `start_panel_drag` only once the pointer has moved 4 px, so a
+click still selects; `dock_target` moves the highlight and `dock_drop`
+moves the panel in the model and rebuilds both strips. `move()` runs the
+same drag with a synthetic release over the target, because `tre`'s
+`dock_panel` on a docked panel leaves it listed in the old zone too. The
+`Dock` owns the window's two docking events, so a window has one.
+
 **Controls, M40:** `tesserae.controls.Control` is the base of the
 stateful MD3 controls that replace `tre`'s. It holds `.node`, a
 focusable 48 px target with the control's role. A 40 px circle inside the

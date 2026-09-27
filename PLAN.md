@@ -173,4 +173,6 @@ Phase 3 done, and M48 with it; the gap moved to "Fixed gaps".
 
 **M45 decisions:** Q1–Q4 as recommended.
 
-**Up next:** M45 Phase 2 (`Dock`).
+Phase 2 done: `tesserae.docking.Dock`; 1337 passed.
+
+**Up next:** M45 Phase 3 (`AppShell`).
