@@ -1146,3 +1146,10 @@ User: "M49 start with recommendations" (Q1-Q4 as recommended).
   script now runs with bytecode caching off.
 
 1364 passed, all four examples clean.
+
+## M49 Phase 3: docs -- M49 complete
+
+User: "Start phase 3 with recommendations". The controls guide and the
+widget catalog now say that a control or button inside a clickable
+takes its own click. The known gap moved to "Fixed gaps". 1364 passed;
+all four examples clean.

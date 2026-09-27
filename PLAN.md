@@ -189,4 +189,6 @@ Phase 4 done, and M45 with it: `center=True`, `examples/app_shell/`, the "App Sh
 
 Phase 2 done: `listeners.handled` at every activation site; a click goes to the innermost clickable only; 1364 passed.
 
-**Up next:** M49 Phase 3; decisions for M50–M52.
+Phase 3 done, and M49 with it: the controls guide and widget catalog; the gap moved to "Fixed gaps".
+
+**Up next:** decisions for M50–M52.

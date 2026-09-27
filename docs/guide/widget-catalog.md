@@ -66,7 +66,9 @@ large (96) size. Give the icon-only ones `label=` for screen readers. A
 and the pressed button reshapes and widens while its neighbours share the
 loss.
 
-A `card` gets feedback when given `on_click`. A filter `chip` toggles
+A `card` gets feedback when given `on_click`. A button, chip or control
+inside an actionable card takes its own click, and the card's `on_click`
+runs only for a click elsewhere on the card (M49). A filter `chip` toggles
 `.selected` (a `Signal`) when clicked, and an input chip with
 `removable=True` has a close button that calls `on_remove`. A
 `list_item` has `headline`, `supporting`, `leading` and `trailing`

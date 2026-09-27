@@ -71,6 +71,11 @@ Screen readers hear each control's role, label and state, and can step a
 slider, spin box or dial (`a11y_action` increment, decrement and
 `set_value`).
 
+A control inside something clickable, such as a checkbox in a clickable
+list row or card, takes its own click: the row's handler doesn't run.
+A disabled control takes the click too, so nothing happens. See
+[nested clickables](interaction.md).
+
 ## What they look like
 
 MD3's specification: a checkbox is 18 px, a radio button 20 px, a switch
