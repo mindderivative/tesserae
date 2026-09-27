@@ -285,6 +285,12 @@ graph and docking (P7).
   it), installed by `tests/conftest.py` and, for the examples,
   `tools/forbid_removed.py`. A test that runs only with the switch on
   checks the removed names really are gone.
+- **Confirmed** (M43 Phase 5, 2026-09-26): CI run 36293860118 on
+  Tesserae `31fcc1b`, `tre` built from `v0.3.4`: 1287 passed and 2
+  skipped with the switch on (the live `App.run` tests; CI has no
+  display), and all three examples clean. Reported to `tre` as its M97
+  Phase 2 Step 6, so its M99 can start. Moving onto the 0.3.5 release is
+  M46.
 
 ## Measured so far
 

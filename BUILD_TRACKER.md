@@ -52,12 +52,12 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M40 — Widgets I: Stateful Controls | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
 | M41 — Widgets II: Composed Catalog and Overlays | `██████████` 100% | ✅ Complete — all 6 phases done (2026-09-25) |
 | M42 — Widgets III: Search, Date and Time, Media, the Node Graph, the Rest, Off the Window's Theme | `██████████` 100% | ✅ Complete — all 8 phases done (2026-09-26) |
-| M43 — Migration Gate: Off `tre`'s Removed API | `████████░░` 80% | 🚧 In progress — Phase 4 of 5 done (2026-09-26) |
+| M43 — Migration Gate: Off `tre`'s Removed API | `██████████` 100% | ✅ Complete — all 5 phases done (2026-09-26) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, after M46 (2026-09-26) |
 | M46 — Move to `tre` 0.3.5 | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, waits on `tre`'s 0.3.5 release (2026-09-26) |
 
-**Just closed:** M43 Phase 4 (2026-09-26) — `tre`'s switch vendored (`tests/tre_removed.py`), installed by `tests/conftest.py` and `tools/forbid_removed.py`, and CI running the suite and examples plain and with `TRE_FORBID_REMOVED=1`; locally green both ways (1288 / 1289). Before that, M43 Phase 3 — the parity tests replay `tre`'s recorded answers.
+**Just closed:** M43 (2026-09-26), all 5 phases — the migration gate: the parity tests replay `tre`'s answers recorded on 0.3.4, `tre`'s switch is vendored and in CI, and CI run 36293860118 is green plain and switched (1287 passed with the switch on; examples clean). Confirmed to `tre` (its M97 Phase 2 Step 6), so its M99 can start. Before that, M42 (all 8 phases).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -71,7 +71,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M43 Phase 5**: push, see CI green both ways, and confirm to `tre` (its M97 Phase 2 Step 6) so its M99 can start. Then M46 (move to `tre` 0.3.5, when it's released) and M45 (docking and the app shell).
+**Up next:** **M46** (move to `tre` 0.3.5) waits on `tre` finishing its M99–M103 and releasing 0.3.5; then M45 (docking and the app shell, on 0.3.5's API). Nothing else is scoped; named, un-scoped candidates: hot reload for `App.register()`ed screens, bindable `a11y:`, and `tesserae.widgets` controls following the app's theme by themselves.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1247,7 +1247,7 @@ Scale: `src/tesserae` is ~2,950 lines today, and nearly all of it sits on the li
 
 ## Milestone 43 — Migration Gate: Off `tre`'s Removed API
 
-**Status: 🚧 In progress — Phase 4 of 5 done (2026-09-26).** Tesserae's side of `tre` M97 Phase 2 Step 6: `tre` starts its M99 (removing the MD3 widgets, kinds and theming) only once Tesserae confirms, by running its suite and examples with `tre`'s `TRE_FORBID_REMOVED` switch on rather than on trust, that it uses nothing 0.3.5 removes. User: "Push it and scope M43", then "Push it and go with your recommendations for M43" (Q1–Q3 as recommended). Scoped from `tre`'s `0.3.5` branch (`279e640`: M97 at Step 6, M98 complete, M99–M103 not started, no 0.3.5 release yet) and M42 Phase 8's run under the switch.
+**Status: ✅ Complete — all 5 phases done (2026-09-26).** Tesserae's side of `tre` M97 Phase 2 Step 6: `tre` starts its M99 (removing the MD3 widgets, kinds and theming) only once Tesserae confirms, by running its suite and examples with `tre`'s `TRE_FORBID_REMOVED` switch on rather than on trust, that it uses nothing 0.3.5 removes. User: "Push it and scope M43", then "Push it and go with your recommendations for M43" (Q1–Q3 as recommended). Scoped from `tre`'s `0.3.5` branch (`279e640`: M97 at Step 6, M98 complete, M99–M103 not started, no 0.3.5 release yet) and M42 Phase 8's run under the switch.
 
 **Where it stands.** `src/tesserae` and the three examples already pass the switch (M42 Phase 8), and `tests/test_no_tre_controls.py` keeps it that way. What fails under the switch is 419 tests that compare Tesserae against `tre` on purpose, as the reference while 0.3.4 has one:
 - `tre.View` (250): `test_binding_parity` (every `{{ }}` expression evaluated by both), `test_tree_parity` + `treediff` (127 views built by both), `test_spec_build` (cascade and error messages), `test_view`'s error-parity checks, `test_tokens`/`test_theme_object` where they build a `View`, `test_clickable`'s "as in tre", `test_components_screens`' rejection of a `tre` view, and `test_thread_gc` (`tre` issue #10, a `tre` `View` bug).
@@ -1273,8 +1273,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 4 — The Switch in CI ✅
 - Step 1: by Q2: `tests/tre_removed.py` is `tre`'s `python/tre/_removed.py` from its `0.3.5` branch at `279e640`, unchanged below a header naming its source and saying M46 deletes it. `tests/conftest.py` installs it before any test imports `tre` when `TRE_FORBID_REMOVED=1` (and stands aside for a `tre` that has its own switch, which installs itself on import); `tools/forbid_removed.py <script>` does the same for a script, run as `__main__` with its folder on `sys.path`. A new test, run only with the switch on, checks `tre.View`, `tre.Signal`, `Window.set_theme` and `Window.add_checkbox` really are gone, so a green switched run means something. Checked: a script calling `Window.set_theme` exits 1 with `RemovedError` under the runner and runs without it. `ci.yml` runs the suite and the three examples a second time with `TRE_FORBID_REMOVED: "1"` (its header comment's stale M42-era line replaced). Locally, CI's commands: plain 1288 passed (the switched-only test skipped); switched 1289 passed; all three examples clean both ways. The CI run itself happens when this is pushed. Docs: `installation.md` (running with the switch), the design page's gate section, `ARCHITECTURE.md`; `mkdocs build --strict` clean — ✅
 
-### Phase 5 — Confirm, Docs, Tracker ⬜
-- Step 1: report to `tre` (its M97 Phase 2 Step 6) with the CI run, so M99 can start; docs (the design page's gate section, testing notes, `ARCHITECTURE.md`); tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
+### Phase 5 — Confirm, Docs, Tracker ✅
+- Step 1: pushed Phase 4 (`31fcc1b`); CI run 36293860118 green in every step, `tre` built from `v0.3.4` (`tre-0.3.4`): plain 1286 passed, 3 skipped (the two live `App.run` tests, no display on the runner, and the switched-only check); with `TRE_FORBID_REMOVED=1`, 1287 passed, 2 skipped; the three examples clean both ways. Reported to `tre`'s session (the peer "Milestone 5 (fork)", where M34's messages went) at the user's go-ahead: Tesserae uses nothing 0.3.5 removes or renames, proved with the switch; the commit, CI run and counts; what changed since the dry run (M40–M42's widgets, `App` off `Window.set_theme`, M43's recorded answers); next M46 then M45, and a request for a note or an updated `_removed.py` if M100's renames go beyond `279e640`'s list. Queued there; no reply yet. Docs: the design page records the confirmation; testing notes and `ARCHITECTURE.md` were written in Phases 3–4; `mkdocs build --strict` clean — ✅
 
 ---
 

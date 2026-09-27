@@ -147,4 +147,6 @@ Phase 3 done: the parity tests replay `tre`'s answers recorded on 0.3.4; the who
 
 Phase 4 done: `tre`'s switch vendored and in CI (the suite and examples run plain and switched); locally 1288 / 1289 passed.
 
-**Up next:** M43 Phase 5 (CI green both ways, confirm to `tre`).
+Phase 5 done, and M43 with it: CI run 36293860118 green plain and switched (1287 passed with the switch on); confirmed to `tre` (its M97 Phase 2 Step 6).
+
+**Up next:** M46 (move to `tre` 0.3.5), waiting on `tre`'s release; then M45.

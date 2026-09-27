@@ -883,3 +883,16 @@ User: "Push it and start Phase 4". Pushed `0f90c46`.
   under the runner.
 - `ci.yml`: the suite and examples again with the switch on.
 - Locally: plain 1288 (+1 skipped), switched 1289; examples clean.
+
+## M43 Phase 5: confirm to tre -- M43 complete
+
+User: "Push it and start Phase 5". Pushed `31fcc1b`.
+
+- CI run 36293860118: every step green; plain 1286 passed / 3 skipped,
+  switched 1287 passed / 2 skipped; examples clean both ways.
+- At the user's go-ahead, sent the confirmation to `tre`'s session
+  ("Milestone 5 (fork)"): commit, run, counts, changes since the dry
+  run, next steps (M46, M45), and a request to hear if M100's renames
+  go beyond `_removed.py` at `279e640`. Queued; no reply yet.
+
+M43 complete.
