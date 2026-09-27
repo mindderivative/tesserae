@@ -58,6 +58,10 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M46 — Move to `tre` 0.3.5 | `██████████` 100% | ✅ Complete (2026-09-27) |
 | M47 — Bindable Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M48 — Hot Reload for `register()`ed Screens | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
+| M49 — A Click Goes to the Innermost Clickable Only | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
+| M50 — `tesserae.widgets` Follow the App's Theme | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
+| M51 — Hot Reload for Components Added at Run Time | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
+| M52 — A Declarative App Shell | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
 
 **Just closed:** M45 (2026-09-27), all 4 phases — docking and the app shell on `tre` 0.3.5.1: `tesserae.docking.Dock` (MD3 tabs, drag between zones, keyboard "Move to"), `tesserae.shell.AppShell` (bars, navigation, resizable zones, `center=True` for screens as tabs), `App.use_shell`, saved layouts, and `examples/app_shell/`. `tre` issue #14, found here, was fixed in 0.3.5.1. 1322 → 1356.
 
@@ -73,17 +77,17 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** nothing scoped. Named, un-scoped candidates: nested clicks going to the innermost only, hot reload for runtime components (`tesserae.instantiate`), `tesserae.widgets` controls following the app's theme by themselves, and a declarative (`*_View.yaml`) form of the app shell.
+**Up next:** M49–M52 scoped (2026-09-27), decisions pending for each: M49, a click goes to the innermost clickable only (Q1–Q4); M50, `tesserae.widgets` follow the app's theme (Q1–Q3); M51, hot reload for components added at run time (Q1–Q3); M52, a declarative app shell, a `*_Shell.yaml` (Q1–Q4), best after M50.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 **Known gaps:**
 - **An overlay's scrim keeps its size if the window is resized while it's open**, since it's sized on `open()` (M41 Phase 5).
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (tre's did the same); fine for a handful of pages, crowded for dozens (M42 Phase 5).
-- **A click on a nested clickable also fires its clickable ancestors' handlers** (a YAML `on_click` Rect inside another, a control inside a clickable card): `tre`'s `click` bubbles -- a pointer click since M37 (M39's test pins it), and keyboard and simulated clicks too since 0.3.5. MD3, and frameworks like Compose and Flutter, give the click to the innermost only; `event.stop()` in Tesserae's activation listeners would do it (tried in M46, reverted as a design change for the user to decide).
-- **Components added at run time aren't hot-reloaded.** A component built with `tesserae.instantiate` (a `Repeater`'s rows, say) comes from its own `*_View.yaml`, which the host screen's `ViewWatcher` doesn't follow: editing it changes nothing until the app restarts (checked in M48 Phase 2). `component:` fragments a view expands are watched.
+- **A click on a nested clickable also fires its clickable ancestors' handlers** (a YAML `on_click` Rect inside another, a control inside a clickable card): `tre`'s `click` bubbles -- a pointer click since M37 (M39's test pins it), and keyboard and simulated clicks too since 0.3.5. MD3, and frameworks like Compose and Flutter, give the click to the innermost only; `event.stop()` in Tesserae's activation listeners would do it (tried in M46, reverted as a design change for the user to decide). Scoped as M49.
+- **Components added at run time aren't hot-reloaded.** A component built with `tesserae.instantiate` (a `Repeater`'s rows, say) comes from its own `*_View.yaml`, which the host screen's `ViewWatcher` doesn't follow: editing it changes nothing until the app restarts (checked in M48 Phase 2). `component:` fragments a view expands are watched. Scoped as M51.
 - **The `SpinBox` fragment has no behaviour.** It's a composition of Rects and a TextField, since there's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5).
-- **`tesserae.widgets`' stateful controls don't follow the app's theme by themselves.** They take `theme=` (MD3's baseline without one) and don't hear `App.set_dark`; YAML controls in a view do (M40 Phase 5).
+- **`tesserae.widgets`' stateful controls don't follow the app's theme by themselves.** They take `theme=` (MD3's baseline without one) and don't hear `App.set_dark`; YAML controls in a view do (M40 Phase 5). Scoped as M50.
 - 67 of ~68 real MD3 widgets now have a declarative `*_Component.yaml` fragment; `video`/`node_graph`/`graph_node` are the only real remaining structural blockers (see below), plus `extended_fab`'s own deliberately deferred gap.
 - `video` still has no full, faithful declarative fragment -- [`tre` issue #2](https://github.com/mindderivative/tre/issues/2) (M25's own real blocker) is now closed (`tre` v0.3.1 made `ImageSpec.src` optional, so `kind: Image` with no `src:` produces the exact synthetic blank placeholder `add_video` already builds), narrowing this to a real, smaller remaining gap: a fragment can now declare the placeholder, but real video content still needs the app to fetch the resulting `Node` and call `push_frame` imperatively afterward -- no way for a one-shot static fragment expansion to wire that up on its own.
 - `graph_node` is structurally unfragmentable — needs a live node reference as its own attachment parent, which the macro layer's textual expansion cannot express (M25, reclassified from "no `NodeKindSpec`" — the real blocker is different).
@@ -1378,3 +1382,136 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 3 — Docs, Example, Tracker ✅
 - Step 1: the hot-reload guide, `api/app.md`'s `run()`, `ARCHITECTURE.md` and `run()`'s docstring were updated in Phase 2; this pass adds `guide/apps-and-screens.md` (a registered screen is hot-reloaded), `api/app.md`'s and `register()`'s own docstring (a file-built view keeps its file), and `examples/multi_screen/app.py`'s notes. The known gap moved to "Fixed gaps"; the new one (runtime components) stays open. 1321 passed; `mkdocs build --strict` clean; the example runs clean — ✅
+
+---
+
+## Milestone 49 — A Click Goes to the Innermost Clickable Only
+
+**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones, 2 will be M49 as previously discussed" (the four named candidates, with nested clicks as M49). This closes the known gap from M46. Since `tre` 0.3.5, a `click` bubbles to every ancestor's listener. A pointer click already did from M37, as M39's test pins, and since 0.3.5 keyboard and simulated clicks do too. So a clickable inside a clickable (a YAML `on_click` Rect in another, a button in a clickable card, a checkbox in a list row) fires both handlers. MD3 gives the click to the innermost only, as do Compose and Flutter. This is a behaviour change, so the user decides it.
+
+**What the source says:** `tre`'s `Event.stop()` "ends propagation: no listener on a further ancestor runs". Every event bubbles except `pointer_enter`, `pointer_leave` and `change`. Tesserae adds its activation listeners in seven places:
+- YAML `on_click` (`View._wire_handler`, through `_EVENTS`)
+- `Widget.on_click` (`widgets/_composed.py`)
+- `Control._on_click` and the `SpinBox` buttons (`controls.py`)
+- the `Menu` items, the `Popover` anchor and the `NavigationDrawer` rows (`overlays.py`)
+- the `Dock` tabs, for `click` and `secondary_click` (`docking.py`)
+
+`Interaction` also listens for `click`, for feedback only, and it already knows the nearest interactive node (`_mine`, `_INTERACTIVE`), so a press ripples only the innermost node. All listeners for a node and event share one `Listeners` dispatcher, so a `stop()` from one of them doesn't starve the node's other listeners, only its ancestors. M46 tried a `handled(fn)` wrapper that calls `event.stop()` after an activation handler; it was reverted as a design change, and the patch is kept.
+
+**Decisions to settle:**
+- Q1 **How the click stops.** Recommended: **the innermost handler takes it.** Each activation listener Tesserae adds calls `event.stop()` after it runs, and nothing further up hears the click. This is `tre`'s own mechanism, it keys on handlers and not on feedback, and it's the same rule for YAML, Python widgets and controls. Alternative: filter by nearest clickable, as the ripple does: ancestors' handlers skip a click whose target sits under a nearer clickable. That leaves the event bubbling for any raw `node.on` listener, but it defines "clickable" by feedback (`interaction: true` with no handler would swallow clicks).
+- Q2 **A disabled control inside a clickable.** Recommended: **it still takes the click, and nothing fires.** Tapping a disabled button in a card shouldn't open the card. Android views behave this way. Alternative: a disabled control lets the click through to its ancestor.
+- Q3 **`secondary_click` too.** Recommended: **yes, by the same rule**, so a right click on a `Dock` tab inside a clickable region opens only the tab's menu. Alternative: `click` only.
+- Q4 **A way for an ancestor to hear it anyway** (analytics, "any click in this panel"). Recommended: **not now; name it.** Nothing in the repo needs it, and a `stop()` is easy to relax later with an opt-out. Alternative: a YAML `click_through: true` on the inner node.
+
+### Phase 1 — Decisions ⬜
+- Step 1: the user's answers to Q1–Q4 — ⬜
+
+### Phase 2 — Innermost Clicks ⬜
+- Step 1: the stop at every activation site (YAML handlers, `Widget.on_click`, controls, `SpinBox`, overlays, `Dock` tabs), by Q1–Q3. M39's test (`vm.clicks == 2`) flips to 1. New tests cover nested YAML Rects, a control in a clickable card, keyboard Enter, a simulated click, a disabled inner control and `secondary_click`. Mutation-checked for every site — ⬜
+
+### Phase 3 — Docs, Examples, Tracker ⬜
+- Step 1: the interaction guide ("the click itself still bubbles" becomes innermost-only), the controls and widget pages, and `ARCHITECTURE.md`. The change is written up as a behaviour change. All examples run clean, `mkdocs build --strict` is clean, and the known gap moves to "Fixed gaps" — ⬜
+
+---
+
+## Milestone 50 — `tesserae.widgets` Follow the App's Theme
+
+**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones" (the four named candidates). This closes the known gap from M40 Phase 5. The stateful controls and composed widgets in `tesserae.widgets` take `theme=` (MD3's baseline without one) and don't hear `App.set_dark`, the OS switching light and dark, or `App.set_theme_specs`. YAML controls in a view do. M45's shell and dock don't either.
+
+**What the source says:**
+- `App` keeps a theme's inputs and resolves a fresh `Theme` on each `app.theme`. `Theme` is a frozen dataclass, so following means swapping the object.
+- `set_dark`, the `color_scheme` event and `set_theme_specs` re-colour only `App._built` (views from `build_view`), through `_apply_all`, which rolls back if any view fails. The list is strong and never pruned, and it skips the shell (`use_shell`).
+- Every widget factory's result already has `set_theme`: the `Widget`s, `Control`/`SpinBox`/`Indicator`, and the overlays, which pass it to their widget. So do `Dock` and `AppShell`. `image` and `video` take no `theme=` at all.
+- Nothing links a widget to an app. There's no global or per-window registry, and `tre`'s `Window` and `Node` can't be weak-referenced. The Python wrappers (`Widget`, `Control`) can be.
+- Tests pin that a widget with no `theme=` on a bare window uses the baseline (`test_composed_widgets.py`, `test_fragments_selection.py`).
+- `examples/app_shell/` passes `theme=app.theme` everywhere and builds its panels with raw `View(..., theme_seed=)`, so they don't follow either.
+
+**Decisions to settle:**
+- Q1 **How a widget finds its app.** Recommended: **implicitly, by its window.** An `App` registers its window, keyed by `id()` and cleared when the app closes, and a factory given no `theme=` on an app's window takes the app's theme and follows it. On a bare window, a widget keeps today's baseline, so those tests still hold. Apps need no code changes, and the example drops its `theme=` arguments. Alternative: explicit `app.follow(widget)` / `app.unfollow(widget)`. It's clearer, but opt-in and easy to forget.
+- Q2 **An explicit `theme=`.** Recommended: **it pins the widget.** A widget given a theme keeps it and doesn't follow, so an app can have a fixed-colour region. Alternative: `theme=` is only the starting theme, and the widget still follows.
+- Q3 **What else follows.** Recommended: **the shell and its dock** (`use_shell`), **overlays**, and **views made with `tesserae.View(..., window=app.window)`**, besides `build_view`'s. All of them go through the same rollback walk. Followers are held weakly (a `WeakSet` of wrappers), and a destroyed widget leaves at once. Alternative: widgets and controls only.
+
+### Phase 1 — Decisions ⬜
+- Step 1: the user's answers to Q1–Q3 — ⬜
+
+### Phase 2 — Widgets and Controls Follow ⬜
+- Step 1: the app's registry, by Q1–Q2. `Widget`, `Control`, `SpinBox` and `Indicator` follow when they get no `theme=`. `set_dark`, the `color_scheme` event and `set_theme_specs` re-colour them within `_apply_all`'s rollback, and `destroy` removes them. Tests cover a widget, a control and a pinned widget across `set_dark`, a destroyed widget, and a bare window keeping the baseline. Mutation-checked — ⬜
+
+### Phase 3 — Shell, Dock, Overlays, Views ⬜
+- Step 1: by Q3, `use_shell`'s shell (and its dock), the overlays, and views built on the app's window follow. `examples/app_shell/` drops its `theme=` plumbing, and its panels follow `set_dark` (checked in the example) — ⬜
+
+### Phase 4 — Docs, Tracker ⬜
+- Step 1: the controls, widget-catalog, overlays, themes and app-shell guides and `api/app.md` (no more "pass `app.theme`"), and `ARCHITECTURE.md`. `mkdocs build --strict` is clean, and the known gap moves to "Fixed gaps" — ⬜
+
+---
+
+## Milestone 51 — Hot Reload for Components Added at Run Time
+
+**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones" (the four named candidates). This closes the known gap found in M48 Phase 2. A component made with `tesserae.instantiate` (a `Repeater`'s rows, say) comes from its own `*_View.yaml`, which no watcher follows, so an edit changes nothing until a restart.
+
+**What the source says:**
+- `tesserae.instantiate` (`component.py`) expands the file itself, dropping the dependency set, and hands `View.instantiate` a spec. So **the `Component` never keeps its path** (`component.path` is `None`).
+- A `Component` is a full `View`, kept in its host's `_components` and removed by `Component.remove()` (which a `Repeater` calls for a vanished key). That list is already a live registry of instances.
+- `App._start_watchers` runs once, at `run(hot_reload=True)`, over registered screens only, so nothing can be watched later.
+- `ViewWatcher` rebuilds per view on its own thread, so N rows of one file would mean N threads and N rebuilds.
+- `View.reconcile` would work on a `Component`: it does a trial build, patches by id and rewires against the same ViewModel. But its rebuilt-root branch re-adds the root with `add_child`, which **moves a row to the end**.
+- A host reload that rebuilds a component's `into` node leaves dead `Component`s in `_components`.
+
+**Decisions to settle:**
+- Q1 **How component files are watched.** Recommended: **one watcher per component file, shared by its live instances.** It rebuilds once per edit, and each live instance reconciles from its own copy of the spec. The instances come from the screens' `_components` trees, so there's no new registry, and it reuses `ViewWatcher`'s thread, stamps and error handling. Alternative: each host screen's watcher also watches its components' files. That needs no new watcher, but mixes host and component reloads and failures.
+- Q2 **Components added after hot reload starts.** Recommended: **watched too.** `tesserae.instantiate` tells the running app's watchers about a new file, so a `Repeater`'s later rows, or a first row of a new kind, are covered. Alternative: only files with a live instance when `run()` starts.
+- Q3 **A bad edit.** Recommended: **as for screens.** The trial build fails once, so every instance stays as it was, and the error is logged once for the file, not once per row. Alternative: none needed; noted for completeness.
+
+**Named, needed whatever Q1 says:** `instantiate` keeps the path and the dependencies (`include:`, `component:` fragments, images). A rebuilt root is re-inserted at its old index. An instance whose nodes died with its host is skipped and pruned.
+
+### Phase 1 — Decisions ⬜
+- Step 1: the user's answers to Q1–Q3 — ⬜
+
+### Phase 2 — Components Keep Their File ⬜
+- Step 1: `instantiate` keeps `path` and the dependencies, `reconcile` keeps a rebuilt root's index, and dead instances are pruned. Tests cover each, and they're mutation-checked — ⬜
+
+### Phase 3 — Watching Component Files ⬜
+- Step 1: the watcher by Q1–Q3. Tests: an edit reloads every row of a `Repeater` in place (same ViewModels, bound values kept, order kept); a row added mid-run is watched; a fragment used by a component is watched; a bad edit leaves all rows and logs once. The live `App.run(hot_reload=True)` test gains a component case. Mutation-checked — ⬜
+
+### Phase 4 — Docs, Example, Tracker ⬜
+- Step 1: the hot-reload guide's limits, `api/`, and `ARCHITECTURE.md`. The todo-list example's rows are named as hot-reloadable. `mkdocs build --strict` is clean, and the known gap moves to "Fixed gaps" — ⬜
+
+---
+
+## Milestone 52 — A Declarative App Shell
+
+**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones" (the four named candidates). M45 Q1 kept a Python API first and named a YAML form as later work. This is that form: the shell (bars, navigation, zones, panels, center tabs) described in a file, not assembled in Python.
+
+**What the source says:**
+- The view pipeline is closed. `spec/build.py`'s kinds and keys are fixed sets, controls come from an `if kind ==` chain, and there's no hook for a kind built by Python code.
+- `component:` fragments are data only and take no children or handlers.
+- Reconcile would fight a dock. It diffs by id and re-inserts children under their spec parent, which would pull a panel out of the zone `tre`'s `dock_panel` moved it to.
+- A trial build of a `Dock` kind would replace the live dock's window listeners, since there's one listener per event.
+- Zones can't be unregistered from `tre`.
+- `TopAppBar` and `StatusBar` have fixed-shape fragments. The navigation rail has none (it's a dynamic-list widget).
+- The rail's selection is wired in Python (`rail.on_change(lambda i: app.show(...))`).
+- There's no app-level manifest. `AppShell.layout()`/`restore()` are already plain data keyed by panel title and side.
+
+**Decisions to settle:**
+- Q1 **The form.** Recommended: **a separate `*_Shell.yaml`, loaded by `app.load_shell(path)`**. It's a small schema, not a widget tree: `top_bar: {title, trailing_icons}`, `navigation: {items: [{screen, icon}]}`, `status_bar: {text}`, `zones: {left: 220, bottom: 160}`, `center: true`, `panels: {left: [Files, Outline]}`. Python builds it through the existing `AppShell`, `Dock` and widgets, so there's no change to the view pipeline. Alternative: `Shell`/`Dock`/`Panel` kinds inside a `*_View.yaml`. That's one dialect, but it needs a new pluggable kind layer across build, patch, reconcile and wiring, and a reconcile that leaves docked panels alone.
+- Q2 **What a panel is.** Recommended: **a view file named like a screen.** `Files_View.yaml`, with a `Files_ViewModel.py` if there is one, is loaded as `load()` does and placed by name. Panels and center-tab screens become one concept, keyed by name (which also makes titles unique for `layout()`), and panels are hot-reloaded as screens are. Alternative: inline panel content in the shell file.
+- Q3 **Navigation.** Recommended: **the rail's items name screens**, and choosing one calls `app.show`, with no ViewModel needed. An optional `on_navigate:` names a handler for anything more. Alternative: always a shell ViewModel handler.
+- Q4 **Hot reloading the shell file.** Recommended: **patch what can change in place** (the bar title, the status text, zone sizes, nav items, panels added, removed or moved), keeping the user's drags and shown tabs where the file didn't change them. Structural edits (`center`, adding or removing a zone) are logged as needing a restart. Alternative: no hot reload for the shell file in M52.
+
+**Order:** best after M50, so a file-built shell follows the app's theme without `theme=` plumbing.
+
+### Phase 1 — Decisions ⬜
+- Step 1: the user's answers to Q1–Q4 — ⬜
+
+### Phase 2 — The Shell File ⬜
+- Step 1: the schema by Q1, with a validator that names the file and key, and `app.load_shell(path)`, which builds the `AppShell` and calls `use_shell`. Tests cover each key, the errors, and parity with a Python-built shell's layout. Mutation-checked — ⬜
+
+### Phase 3 — Panels and Navigation ⬜
+- Step 1: panels as named view files (Q2) and navigation items bound to `app.show` (Q3). `layout()` and `restore()` use names. Tests; mutation-checked — ⬜
+
+### Phase 4 — Hot Reload of the Shell File ⬜
+- Step 1: by Q4. The shell file is watched with the screens: in-place changes are patched, and structural ones logged. Panels reload as screens do. Tests, including the live `App.run(hot_reload=True)` test. Mutation-checked — ⬜
+
+### Phase 5 — Example, Docs, Tracker ⬜
+- Step 1: `examples/app_shell/` gains a file-built form (or moves to it), in CI. The app-shell guide ("Not yet covered" goes) and the `api/` pages are updated. `mkdocs build --strict` is clean, and the known gap closes — ⬜

@@ -179,4 +179,10 @@ Phase 3 done: `AppShell`, `App.use_shell`, layouts; 1349 passed.
 
 Phase 4 done, and M45 with it: `center=True`, `examples/app_shell/`, the "App Shell & Docking" guide; 1356 passed.
 
-**Up next:** nothing scoped.
+**M49–M52 scoped (2026-09-27):** the four named candidates, each its own milestone, decisions pending.
+- M49: a click goes to the innermost clickable only, 3 phases. Q1 the innermost handler calls `event.stop()`; Q2 a disabled control still takes the click; Q3 `secondary_click` too; Q4 no opt-out yet.
+- M50: `tesserae.widgets` follow the app's theme, 4 phases. Q1 implicitly, by the window; Q2 an explicit `theme=` pins; Q3 the shell, dock, overlays and views follow too.
+- M51: hot reload for runtime components, 4 phases. Q1 one watcher per component file, shared by its instances; Q2 components added mid-run are watched; Q3 a bad edit behaves as it does for screens.
+- M52: a declarative app shell, 5 phases, best after M50. Q1 a `*_Shell.yaml` via `app.load_shell`; Q2 panels are named view files; Q3 nav items name screens; Q4 the shell file is patched in place on reload.
+
+**Up next:** decisions for M49–M52.

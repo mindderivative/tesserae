@@ -1112,3 +1112,23 @@ User: "Push it and start Phase 4 with center=True". Pushed `c04c51f`.
   Docking" guide page.
 
 1356 passed. M45 complete.
+
+## M49–M52 scoped
+
+User: "Scope M49", then "Scope all as separate Milestones, 2 will be M49
+as previously discussed". Each of the four named candidates is its own
+milestone, researched from the source:
+
+- M49, innermost clicks: seven activation-listener sites; `tre`'s
+  `Event.stop()`; M46's reverted patch.
+- M50, widgets follow the app's theme: every factory's result has
+  `set_theme`, but nothing links a widget to an app, and `set_dark`
+  skips the shell.
+- M51, runtime components: `instantiate` drops the path; the watchers
+  start once; `reconcile` re-adds a rebuilt root at the end.
+- M52, declarative shell: the view pipeline has no pluggable kinds, and
+  reconcile would fight the dock, so a separate `*_Shell.yaml` is
+  recommended.
+
+Also: the tracker generator was updated from the build-tracker skill, at
+`tre`'s request (links, and a lone `~` in struck text).
