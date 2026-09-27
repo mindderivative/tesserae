@@ -35,7 +35,8 @@ That's what lets Tesserae resolve `include:` and `component:` together,
 name the right file in every error, warn when a font would silently
 fall back, and hot-reload a running app when any of those files change
 (`app.run(hot_reload=True)`) -- views, includes, fragments and images,
-and the app's theme and stylesheet files.
+components added at run time (every row of a `Repeater`, in place), and
+the app's theme and stylesheet files.
 
 Tesserae logs through [loguru](https://loguru.readthedocs.io/): hot
 reloads, failed reloads naming the file, and warnings. Call

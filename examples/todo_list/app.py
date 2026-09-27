@@ -13,6 +13,11 @@ Toggling a checkbox and the whole real render loop prove the same real
 stack this repo's earlier, pre-`Repeater` version already did --
 `Repeater` is a real, additive convenience over `tesserae.instantiate`/
 `Component.remove()` (TRE M43), not a replacement for them.
+
+Hot reload (M51): run it with `app.run(hot_reload=True)` (and no
+`max_frames`), then edit `TodoItem_View.yaml` -- every row reloads in
+place, keeping its text, its checkbox and its order, and a row added
+afterwards is watched too. Each row knows its file (`component.path`).
 """
 
 from pathlib import Path
@@ -63,6 +68,9 @@ assert item_texts() == ["Item 1", "Item 3"]
 # The list stays healthy after a real removal -- one more "Add" works.
 window.simulate("click", node=add_button)
 assert len(vm.repeater) == 3
+
+# Every row knows the file it came from, so hot reload can find it (M51).
+assert {component.path.name for _k, component, _vm in vm.repeater} == {"TodoItem_View.yaml"}
 
 logger.info(
     f"final items: "

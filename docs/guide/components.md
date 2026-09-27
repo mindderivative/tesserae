@@ -38,7 +38,9 @@ across instances.
 A component is built in its host's window with the host's theme and
 stylesheet, so the host's `styles:` rules and theme roles style it too.
 When the host is re-themed or re-styled, including by hot reload, the
-component follows.
+component follows. Its own `*_View.yaml` is hot-reloaded too: editing it
+reloads every live instance in place, including ones added while the app
+runs (M51; see [Hot Reload](hot-reload.md#components-added-at-run-time)).
 
 ## Tearing a component down
 

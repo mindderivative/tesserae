@@ -205,4 +205,6 @@ Phase 2 done: components keep their file; a rebuilt root keeps its index; compon
 
 Phase 3 done: `ComponentWatcher`, one per component file for all its live instances, mid-run ones included; 1398 passed.
 
-**Up next:** M51 Phase 4; decisions for M52.
+Phase 4 done, and M51 with it: the components guide, README and todo-list example; the gap moved to "Fixed gaps".
+
+**Up next:** decisions for M52.

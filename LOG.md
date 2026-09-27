@@ -1220,3 +1220,13 @@ answer was "Phase 3, then 4".
   tests.
 
 1398 passed; all four examples clean.
+
+## M51 Phase 4: docs and example -- M51 complete
+
+- The components guide and README now cover component hot reload.
+- `examples/todo_list/` says how to try it and checks that each row
+  knows its file.
+- The known gap moved to "Fixed gaps". A narrower one replaces it:
+  components in a view the app doesn't know about aren't found.
+
+1398 passed; all four examples clean.
