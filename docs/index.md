@@ -49,7 +49,8 @@ end to end by three real vertical-slice examples. See
   See [Controls](guide/controls.md).
 - **Interaction and accessibility** -- a node with `on_click` is a
   keyboard-reachable button with MD3's hover tint, press ripple and
-  focus ring, and `a11y:` labels it for screen readers. See
+  focus ring, and `a11y:` labels it for screen readers -- a label can
+  follow the ViewModel, like any binding. See
   [Interaction & Accessibility](guide/interaction.md).
 - **A full reactivity layer** -- `Signal`, `Computed`, `Effect`,
   `batch`, `untrack` and `ViewModel`, Tesserae's own since M35. See

@@ -157,4 +157,6 @@ Phase 2 done: bound `a11y:` in views; a control's dropped `a11y:` and a Link's o
 
 Phase 3 done: `tesserae.a11y.bind` for Python widgets; 1317 passed.
 
-**Up next:** M47 Phase 4 (example, docs, tracker). M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.
+Phase 4 done, and M47 with it: the counter example's button name follows its count; the gap moved to "Fixed gaps"; 1317 passed.
+
+**Up next:** M46 (move to `tre` 0.3.5), waiting on `tre`'s release; then M45. M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.

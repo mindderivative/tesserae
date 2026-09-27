@@ -7,9 +7,10 @@ children:
     text: {content: "Count: 0", font_family: Roboto, font_size: 20}
     style: {width: 200, height: 32, foreground: "#FFFFFF"}
     bindings: {text: "{{ label.get() }}"}
+    a11y: {live: polite}  # a screen reader announces the new count
   - id: button
     kind: Rect
     style: {width: 120, height: 40, background: "#6750A4", corner_radius: 8}
     handlers: {on_click: "increment"}
-    a11y: {label: "Increment"}
+    a11y: {label: "{{ button_label.get() }}"}  # M47: its name follows the count
     interaction: {color: "#FFFFFF"}  # a white tint on the filled purple, as MD3 does

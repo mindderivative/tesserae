@@ -962,3 +962,13 @@ User: "Push it and start Phase 3". Pushed `2d918c5`.
 - 9 tests; 7 mutants, all caught.
 
 1317 passed.
+
+## M47 Phase 4: example, docs -- M47 complete
+
+User: "Push it and start Phase 4". Pushed `d968339`.
+
+- `examples/counter`: a polite live count, and the button's name bound
+  to "Increment, count is N"; `app.py` and the keyboard test check it.
+- Docs home line; the known gap moved to "Fixed gaps".
+
+1317 passed. M47 complete.

@@ -46,6 +46,8 @@ for _ in range(3):
 
 logger.info(f"after 3 clicks: label={label.get("text")!r}")
 assert label.get("text") == "Count: 3"
+# the button's accessible name follows the count (a bound `a11y:` label, M47)
+assert button.get("label") == "Increment, count is 3"
 assert app.current == "Counter"
 
 app.run(max_frames=20)

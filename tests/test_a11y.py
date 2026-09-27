@@ -256,10 +256,13 @@ def test_the_counter_example_works_from_the_keyboard_alone():
     window.advance(16)
     _tab(window)
     button = view.node("button")
-    assert (button.get("focused"), button.get("role"), button.get("label")) == (True, "button", "Increment")
+    assert (button.get("focused"), button.get("role"), button.get("label")) == (
+        True, "button", "Increment, count is 0")
+    assert view.node("label").get("live") == "polite"
     assert view.interaction("button").ring_visible
     assert view.interaction("button").layer.get("fill") == (0xFF, 0xFF, 0xFF, 0xFF)
     window.simulate("key_down", key="enter")
     window.simulate("key_down", key="space")
     window.simulate("key_up", key="space")
     assert view.node("label").get("text") == "Count: 2"
+    assert button.get("label") == "Increment, count is 2"  # its bound name followed (M47)
