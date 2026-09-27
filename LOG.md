@@ -806,3 +806,20 @@ User: "Push it and start Phase 7". Pushed `fea5f5e`.
 - Mutation: re-theming the window fails 5 tests.
 
 1287 passed.
+
+## M42 Phase 8: tests, docs, the gate -- M42 complete
+
+User: "Push it and start Phase 8". Pushed `93ce390`.
+
+- `tests/test_no_tre_controls.py` forbids M42's names from `tre`'s
+  `_removed.py` (0.3.5, `279e640`), and `set_theme`/`theme` on a window.
+- Ran the suite and examples under `tre`'s switch (its `_removed.py`
+  installed over the 0.3.4 wheel from the scratchpad): examples clean;
+  739 passed / 419 failed, all deliberate `tre`-reference tests (`View`
+  250, `Window.set_theme` 154, `Signal` 14, and tree parity's corpus).
+- Fixed in tests: reading `window.theme` (removed outright in 0.3.5),
+  `helpers.elevation`'s fallback to `elevation`, and `border_width`.
+- Docs: the stale "thin delegate" wording in the widget docstrings,
+  diagrams and docs home; the design page records the gate result.
+
+1288 passed. M42 complete.

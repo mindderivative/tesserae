@@ -1,11 +1,7 @@
 """Tesserae's own namespace for the Navigation & Shell Composition
 category -- `tabs`, `navigation_rail`, `navigation_drawer`, `toolbar`,
-`top_app_bar`, `status_bar`.
-
-Same thin-delegate shape as `buttons.py`/`selection.py`/`structural.py`,
-with no naming translation. `toolbar(vibrant=)` matches `tre` 0.3.3's
-`add_toolbar(vibrant=)`; before M32, `tre` took a confusing
-`color="standard"|"vibrant"` and Tesserae translated its own `tone=` to it.
+`top_app_bar`, `status_bar` (M41) and `pagination` (M42), built by
+Tesserae, the fixed-shape ones from their fragments.
 """
 
 from __future__ import annotations

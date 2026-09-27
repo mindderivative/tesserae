@@ -263,6 +263,10 @@ graph and docking (P7).
   Tesserae replacement is tested for identical results against it.
 - **The gate check** (M43, `tre` M97 Phase 2 Step 2): Tesserae's full
   suite and examples pass with every removed `tre` name stubbed to raise.
+  At M42's end (2026-09-26), with `tre`'s `_removed.py` switch on: the
+  three examples run clean, `src/tesserae` uses no removed name, and the
+  only failing tests are the ones that compare against `tre`'s own
+  `View`, `Signal` or window theme on purpose (419), which M43 retires.
 
 ## Measured so far
 

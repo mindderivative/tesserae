@@ -1,6 +1,5 @@
-"""Tesserae's own namespace for the Search category -- `search_bar`,
-`search_view`. Same thin-delegate shape as the other widget modules.
-Neither exposes an ambiguous color kwarg."""
+"""Tesserae's own namespace for the Search category -- `search_bar` and
+`search_view` (an overlay), built by Tesserae (M42)."""
 
 from __future__ import annotations
 

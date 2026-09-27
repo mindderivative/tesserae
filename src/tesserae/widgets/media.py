@@ -1,13 +1,8 @@
 """Tesserae's own namespace for the Media & Graphics category --
-`image`, `video`, `icon`, `graph_node`, `node_graph`.
-
-`icon(foreground=)` is the glyph's own paint (an icon has no background
-of its own). `tre` 0.3.3 uses the same name, so it passes straight
-through; before M32, `tre` called it `color=` and Tesserae translated.
-
-`image`/`video` take no color at all (an image/video's content IS its
-own pixels -- no meaningful "behind it" fill). `graph_node`/`node_graph`
-only take the already-clear `border_color`.
+`image`, `video`, `icon`, `node_graph`, `graph_node` -- built by
+Tesserae (M41-M42): `image`/`video` over Tesserae's own `image` nodes,
+the node graph from a clipped viewport and `path` edges.
+`icon(foreground=)` is the glyph's own paint.
 """
 
 from __future__ import annotations

@@ -32,9 +32,9 @@ tesserae.spec           -- all file handling for a screen (M15-M29):
 tesserae.fonts          -- register_font(path) -> font bytes for tre;
   |                          FontFallbackWarning for unavailable families
   |
-tesserae.widgets        -- one Python function per MD3 widget, thin
-  |                          delegates to tre's Window.add_* factories
-  |                          (image() decodes in Tesserae first)
+tesserae.widgets        -- one Python function per MD3 widget, built
+  |                          by Tesserae from tre's building blocks
+  |                          (M40-M42), most from the fragments
   |
 tesserae.{Signal,ViewModel,Computed,
   |        Effect,batch,untrack}                -- tesserae.reactive: Tesserae's

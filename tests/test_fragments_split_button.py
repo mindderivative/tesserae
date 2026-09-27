@@ -44,7 +44,7 @@ children:
 
         assert leading.get("corner_radius") == imp_leading.get("corner_radius"), component_name
         assert elevation(leading) == elevation(imp_leading), component_name
-        assert leading.get("border_width") == imp_leading.get("border_width"), component_name
+        assert leading.get("stroke_width") == imp_leading.get("stroke_width"), component_name
         assert trailing.get("corner_radius") == imp_trailing.get("corner_radius"), component_name
 
 

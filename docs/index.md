@@ -32,8 +32,8 @@ end to end by three real vertical-slice examples. See
   indicators, and more), so a screen never has to hand-write a
   widget's raw `WidgetSpec` shape.
 - **A full imperative MD3 widget catalog** (`tesserae.widgets`) --
-  thin, faithful delegates to `tre`'s own `Window.add_*` factories,
-  for widgets built dynamically from Python.
+  every widget built by Tesserae from `tre`'s building blocks, for
+  widgets built dynamically from Python.
 - **`Repeater`** -- automatic keyed add/remove diffing over a list
   `Signal`, no hand-rolled bookkeeping.
 - **Hot reload** -- `app.run(hot_reload=True)` updates a running app in

@@ -1,8 +1,8 @@
-"""Tesserae's own namespace for the Date & Time Pickers category --
-`date_picker_day`, `time_picker_dial`, `period_selector`. Same
-thin-delegate shape as the other widget modules. None of these 3 expose
-an ambiguous color kwarg. Named `date_time.py` (not `datetime.py`) to
-avoid shadowing the standard library module.
+"""Tesserae's own namespace for the Date & Time category --
+`date_picker_day`, `period_selector`, `time_input_field` (M42) and
+`time_picker_dial` (a control, M40), built by Tesserae. Named
+`date_time.py` (not `datetime.py`) to avoid shadowing the standard
+library module.
 """
 
 from __future__ import annotations

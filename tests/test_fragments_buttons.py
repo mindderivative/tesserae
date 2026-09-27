@@ -59,7 +59,7 @@ children:
         imperative = icon_button(window, "settings", size=40, variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
-        assert declarative.get("border_width") == imperative.get("border_width"), component_name
+        assert declarative.get("stroke_width") == imperative.get("stroke_width"), component_name
 
 
 def test_all_fab_variants_match_the_imperative_catalog():

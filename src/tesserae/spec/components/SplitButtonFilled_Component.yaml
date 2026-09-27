@@ -12,9 +12,9 @@
 # (`PaintProperties.interactive_shape`/`corner_radii_override`) has no
 # public Python API at all -- confirmed directly in `window_factory.rs`
 # -- so this fragment is REST-STATE ONLY, matching this project's own
-# already-established scope cut for `tesserae.widgets.split_button`
-# (a thin delegate, which *does* get the animation for free by calling
-# the real Rust factory -- this declarative fragment cannot).
+# established scope cut: `tesserae.widgets.split_button` (built on this
+# fragment since M41) adds the animation in Python; a declarative
+# fragment alone cannot.
 #
 # The outer `Container` has no explicit `width`/`height` -- confirmed
 # live that both are genuinely optional and the container shrinks to

@@ -13,6 +13,7 @@ import sys
 
 import pytest
 
+from helpers import window_unthemed
 from tesserae import App, tokens
 
 SEED = (0x67, 0x50, 0xA4, 0xFF)
@@ -42,7 +43,7 @@ def _screen(view):
 
 def _app(app):
     """The app's primary role; the window itself stays unthemed."""
-    assert not app.show(next(iter(app._registered))).theme.is_set()
+    assert window_unthemed(app.show(next(iter(app._registered))))
     return app.theme.role("primary")
 
 

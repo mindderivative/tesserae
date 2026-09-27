@@ -1,21 +1,12 @@
-"""Tesserae's own namespace for the Buttons & Actions category of `tre`'s
-MD3 catalog -- `button`, `icon_button`, `fab`, `extended_fab`,
-`split_button`, `button_group`.
+"""Tesserae's own namespace for the Buttons & Actions category --
+`button`, `icon_button`, `fab`, `extended_fab`, `split_button`,
+`button_group` (M41) and `segmented_button` (M42).
 
-Each function here is a thin, faithful delegate to the matching
-`Window.add_*` factory in `tre` itself: same parameter names, order, and
-defaults, `window` as the first positional argument (matching
-`tesserae.component.instantiate`'s own established convention). This is
-deliberate, not a placeholder -- `tre`'s own factories already resolve MD3
-color/shape/elevation correctly against the live theme, and for
-`split_button`/`button_group` specifically, only the real Rust factory can
-drive their hover/press shape-tightening and reflow animations (no public
-Python API reaches `PaintProperties.button_group_reflow`/`shape`/
-`press_interactive_shape`; a from-scratch Python reimplementation could
-only ever produce a rest-state-only port). Delegating keeps full fidelity
-for all six and gives Tesserae apps one consistent `tesserae.widgets`
-surface to import from, so a widget "looks like Tesserae's own" whether or
-not `tre` happens to implement it as a composition under the hood.
+Each is built by Tesserae from its fragment (or several) with
+`tesserae.widgets._composed.Widget`, with MD3's feedback (M39) in its
+content's colour. The split button's hover and the button group's press
+morph animate `corner_radius` on the part and its feedback's clip, which
+`tre`'s own factories did in Rust with no public Python API.
 """
 
 from __future__ import annotations

@@ -1,7 +1,9 @@
-"""Tesserae's own namespace for `tre`'s MD3 widget catalog -- one Python
-function per widget, imperatively callable, delegating directly to the
-matching `Window.add_*` factory in `tre`. See `buttons.py` for why these
-are thin delegates rather than from-scratch Python ports.
+"""Tesserae's MD3 widget catalog -- one Python function per widget,
+imperatively callable, each taking the window first. Since M40-M42 every
+one is built by Tesserae from `tre`'s building blocks (most from the
+same fragments a `component:` in a view uses) and returns a Tesserae
+object -- a control, a `Widget` (`.node`, `.part(name)`) or an overlay --
+never a bare `tre` node; none delegates to `tre`'s `Window.add_*`.
 """
 
 from __future__ import annotations

@@ -137,4 +137,6 @@ Phase 6 done: the carousel and the splitter; 1287 passed.
 
 Phase 7 done: `App` off the window's theme; 1287 passed.
 
-**Up next:** M42 Phase 8 (tests, docs, the gate).
+Phase 8 done, and M42 with it: the gate extended to M42's names and the window's theme; under `tre`'s switch the examples run clean and only the `tre`-reference tests fail (419); 1288 passed.
+
+**Up next:** M43, the migration gate (waiting on the user's go-ahead).

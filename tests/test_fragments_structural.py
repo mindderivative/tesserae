@@ -50,7 +50,7 @@ children:
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert elevation(declarative) == elevation(imperative), component_name
-        assert declarative.get("border_width") == imperative.get("border_width"), component_name
+        assert declarative.get("stroke_width") == imperative.get("stroke_width"), component_name
 
 
 def test_all_chip_cases_match_the_imperative_catalog():
@@ -71,7 +71,7 @@ children:
         imperative = chip(_window(), "Tag", 100, variant=variant, selected=selected).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
-        assert declarative.get("border_width") == imperative.get("border_width"), component_name
+        assert declarative.get("stroke_width") == imperative.get("stroke_width"), component_name
 
 
 def test_list_item_constructs():

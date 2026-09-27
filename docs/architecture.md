@@ -30,9 +30,9 @@ tesserae.spec           -- every file a screen is built from, read
 tesserae.fonts          -- register_font(path): font file -> bytes for
   |                          tre, plus a warning for unavailable families
   |
-tesserae.widgets        -- one Python function per MD3 widget (~68),
-  |                          thin delegates to tre's own Window.add_*
-  |                          factories, for widgets built dynamically
+tesserae.widgets        -- one Python function per MD3 widget, built
+  |                          by Tesserae from tre's building blocks
+  |                          (M40-M42), for widgets built dynamically
   |
 tesserae.Repeater       -- one list Signal as the single source of
   |                          truth; keeps one Component+ViewModel alive
@@ -62,8 +62,10 @@ watches every file; `tre` receives only data (nodes built with `window.create`/`
 
 `tre` is moving everything a framework can build out of the engine (its
 M93–M103), and Tesserae is taking it over (M34–M43, see
-[the design page](design/building-blocks.md)). Reactivity is Tesserae's
-since M35; `View`/`Component` are still `tre`'s. Tesserae's own real,
+[the design page](design/building-blocks.md)). Reactivity (M35),
+bindings (M36), `View`/`Component` and the cascade (M37), the theme (M38),
+interaction (M39) and every widget and overlay (M40–M42) are Tesserae's
+now; M43 proves `tre`'s removed API is unused. Tesserae's own real,
 additive value is `App`, `instantiate`, `Repeater`, the declarative
 `component:`/`with:`/`repeat:` macro layer, the `tesserae.widgets`
 imperative catalog, and all file handling -- images, themes, fonts and

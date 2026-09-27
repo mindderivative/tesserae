@@ -5,13 +5,26 @@ import yaml
 from tesserae import tokens
 
 
+def window_unthemed(window) -> bool:
+    """Whether `tre`'s window has no theme of its own (M42 Phase 7).
+    `tre` 0.3.5 removes `Window.theme` altogether, which is unthemed too."""
+    try:
+        theme = window.theme
+    except AttributeError:
+        return True
+    return not theme.is_set()
+
+
 def elevation(node) -> float:
     """A node's MD3 elevation level. A Tesserae-built node carries it as
     `shadows` (0.3.4 nodes have no `elevation`); a node from one of
     `tre`'s legacy factories still has its own `elevation`."""
     shadows = node.get("shadows")
     if not shadows:
-        return node.get("elevation")
+        try:  # a legacy node's own level, while `tre` 0.3.4 has one
+            return node.get("elevation")
+        except AttributeError:  # `tre` 0.3.5 (or its removal shim): no `elevation`, and no shadows is level 0
+            return 0.0
     for level in range(6):
         if shadows == tokens.elevation_shadows(level):
             return float(level)

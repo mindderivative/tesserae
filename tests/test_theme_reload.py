@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from helpers import elevation
+from helpers import elevation, window_unthemed
 
 import tesserae.fonts as fonts
 from tesserae import App, tokens
@@ -101,7 +101,7 @@ def test_the_window_is_never_themed(tmp_path: Path):
     window = app.show("Home")
     app.set_theme_specs(None, {"colors": {"primary": "#00FF00"}})
     app.set_dark(False)
-    assert not window.theme.is_set()
+    assert window_unthemed(window)
     assert app.theme.role("primary") == (0, 255, 0, 255)
 
 

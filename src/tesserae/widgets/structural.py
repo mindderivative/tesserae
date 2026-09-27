@@ -1,15 +1,8 @@
 """Tesserae's own namespace for the Cards, Lists, Chips & Structural Rows
 category -- `card`, `list_`, `list_item`, `chip`, `badge`, `divider`,
-`link`, `accordion_header`, `tree_node`.
-
-Same thin-delegate shape as `buttons.py`/`selection.py`. None of these 9
-expose an ambiguous color kwarg -- `add_card`/`add_chip`/`add_badge`/
-`add_list_item`/`add_divider`/`add_accordion_header`/`add_tree_node` only
-take the already-clear `border_color` (verified directly against
-`window_factory.rs`), and `add_list`/`add_link` take no color at all --
-so no naming translation from `buttons.py`'s module docstring applies
-here. `list_` (trailing underscore) avoids shadowing the builtin `list`,
-matching `tre`'s own `add_list` factory name it delegates to.
+`link`, `accordion_header`, `tree_node` -- built by Tesserae from their
+fragments (M41). `list_` (trailing underscore) avoids shadowing the
+builtin `list`.
 """
 
 from __future__ import annotations
