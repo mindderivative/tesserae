@@ -289,8 +289,8 @@ graph and docking (P7).
   Tesserae `31fcc1b`, `tre` built from `v0.3.4`: 1287 passed and 2
   skipped with the switch on (the live `App.run` tests; CI has no
   display), and all three examples clean. Reported to `tre` as its M97
-  Phase 2 Step 6, so its M99 can start. Moving onto the 0.3.5 release is
-  M46.
+  Phase 2 Step 6; `tre` checked it against this repo and closed its M97,
+  so its M99 can start. Moving onto the 0.3.5 release is M46.
 
 ## Measured so far
 

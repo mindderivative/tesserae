@@ -896,3 +896,13 @@ User: "Push it and start Phase 5". Pushed `31fcc1b`.
   go beyond `_removed.py` at `279e640`. Queued; no reply yet.
 
 M43 complete.
+
+## tre's reply to the M43 confirmation
+
+`tre`'s session verified the confirmation against this repo (`31fcc1b`
+on `main`, run 36293860118 green, `tests/tre_removed.py` identical to
+its `_removed.py` at `279e640` below the header) and closed its M97
+(`c348333`). M99 is unblocked on its side; the user decides when it
+starts. The request about renames is its M100 Step 3: an updated
+`_removed.py` or a note before the 0.3.5 release, so the gate can be
+rerun.
