@@ -25,7 +25,7 @@ from loguru import logger
 from tre import App as _TreApp
 from tre import Window
 
-from tesserae.follow import alive, register_app
+from tesserae.follow import alive, register_app, retheme
 from tesserae.naming import check_naming_convention
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
@@ -220,7 +220,7 @@ class App:
         steps: list[tuple[Any, Any]] = [
             (lambda view=b.view: view.set_theme(**new), lambda view=b.view: view.set_theme(**old)) for b in self._built
         ]
-        steps += [(lambda f=f: f.set_theme(new_theme), lambda f=f: f.set_theme(old_theme))
+        steps += [(lambda f=f: retheme(f, new_theme, new), lambda f=f: retheme(f, old_theme, old))
                   for f in list(self._followers)]
         _apply_all(steps, lambda step: step[0](), lambda step: step[1]())
 

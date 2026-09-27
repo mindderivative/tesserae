@@ -15,17 +15,25 @@ from tesserae.shell import AppShell
 from tesserae.widgets import navigation_rail, status_bar, top_app_bar
 
 app = App(width=1100, height=700, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
-window, theme = app.window, app.theme
+window = app.window
 shell = AppShell(
     window,
-    top_bar=top_app_bar(window, "Studio", width=1100, theme=theme),
-    navigation=navigation_rail(window, ["Home", "Notes"], ["home", "search"], selected=0, theme=theme),
-    status_bar=status_bar(window, "Ready", width=1100, theme=theme),
+    top_bar=top_app_bar(window, "Studio", width=1100),
+    navigation=navigation_rail(window, ["Home", "Notes"], ["home", "search"], selected=0),
+    status_bar=status_bar(window, "Ready", width=1100),
     zones={"left": 220, "right": 260, "bottom": 160},
-    theme=theme,
 )
 app.use_shell(shell)  # screens now show in shell.content
 ```
+
+Everything here is made on the app's window with no `theme=`, so it takes
+the app's theme and follows it (M50): `app.set_dark(True)` re-colours the
+bars, rail, shell, dock and screens together, and so does the OS switching
+light and dark. A panel built as `tesserae.View(spec, window=app.window)`
+with no theme argument follows too. Giving any of them `theme=` (or a view
+`theme_seed=`/`dark=`) pins it to that theme. A following shell re-colours
+itself and the dock it made. A dock or widget you gave it follows the app
+itself, or keeps the theme it was pinned to.
 
 The shell fills the window and follows it as it resizes. The top bar,
 navigation and status bar are fixed; `zones=` chooses which docked zones

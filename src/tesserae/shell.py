@@ -27,6 +27,7 @@ from typing import Any, Optional
 
 from tesserae import a11y, tokens
 from tesserae.docking import Dock
+from tesserae.follow import initial_theme
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners
 from tesserae.theme import Theme
@@ -123,7 +124,8 @@ class AppShell:
         if unknown:
             raise ValueError(f"an app shell's zones are left, right, top and bottom, got {unknown}")
         self.window = window
-        self.theme = theme if theme is not None else Theme.resolve()
+        self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
+        self._own_dock = dock is None
         self.dock = dock if dock is not None else Dock(window, theme=self.theme)
         self._events = Listeners()
         self._sizes: dict[str, float] = {}
@@ -247,6 +249,15 @@ class AppShell:
         for part in (self.top_bar, self.navigation, self.status_bar):
             if part is not None and hasattr(part, "set_theme"):
                 part.set_theme(theme)
+        self._paint()
+
+    def _follow_theme(self, theme: Theme, view_theme: dict[str, Any]) -> None:
+        """Following its app (M50): the shell and the dock it made. The
+        widgets and dock it was given follow the app themselves, or keep
+        the `theme=` they were pinned to."""
+        self.theme = theme
+        if self._own_dock:
+            self.dock.set_theme(theme)
         self._paint()
 
     def _color(self, role: str) -> tuple[int, int, int, int]:

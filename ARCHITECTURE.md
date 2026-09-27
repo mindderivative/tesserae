@@ -172,7 +172,16 @@ rollback, used by `set_dark`, the `color_scheme` event and
 `set_theme_specs`. `destroy`/`dispose` call `unfollow`, and a follower
 whose node was destroyed under it is dropped at the next re-theme
 (`alive`). YAML controls inside views are built with an explicit theme,
-so their view re-colours them, as before.
+so their view re-colours them, as before. Phase 3: a `tesserae.View` on an
+app's window with no theme argument at all (`dark` now defaults to
+`None`, so `dark=False` counts as given) starts from `app._view_theme()`
+and follows. `Dock` and `AppShell` start from `initial_theme` too.
+Followers can define `_follow_theme(theme, view_theme)`, which
+`follow.retheme` prefers to `set_theme`: a view takes the app's theme
+arguments, and a shell re-colours itself and the dock it made, not the
+widgets it was given, so a pinned bar stays pinned. `_follow_alive` lets a
+view (whose `node` is a lookup method) say whether its root still exists.
+Overlays follow through their widgets.
 
 **Interaction, M39:** a clickable YAML node is a focusable
 `role="button"` Tab stop (the compiler sets it, as `tre`'s

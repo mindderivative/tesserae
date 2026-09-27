@@ -10,6 +10,9 @@ center where its screens are tabs.
   context menu (right click, the Menu key, Shift+F10) to "Move to" one.
   Drag a zone's handle (or focus it and use the arrow keys) to resize it.
 - The rail switches screens; a panel moving zone updates the status bar.
+- Nothing is given `theme=`: the bars, rail, shell, dock and panels are
+  made on `app.window`, so they take the app's theme and follow it (M50)
+  -- `app.set_dark(True)` re-colours them all with the screens.
 
 It checks itself, then renders 20 frames (omit `max_frames` for a real,
 interactive run).
@@ -33,14 +36,13 @@ SCREENS = ["Home", "Notes"]
 SEED = (0x67, 0x50, 0xA4, 0xFF)
 
 app = App(width=1100, height=700, title="Tesserae App Shell", theme_seed=SEED, dark=False)
-window = app.window
-theme = app.theme  # one theme for the screens, the widgets and the shell
+window = app.window  # everything made on it follows the app's theme (M50)
 
-bar = top_app_bar(window, "Tesserae Studio", trailing_icons=["settings"], width=1100, theme=theme)
-rail = navigation_rail(window, SCREENS, ["home", "search"], selected=0, theme=theme)
-status = status_bar(window, "Ready", width=1100, theme=theme)
+bar = top_app_bar(window, "Tesserae Studio", trailing_icons=["settings"], width=1100)
+rail = navigation_rail(window, SCREENS, ["home", "search"], selected=0)
+status = status_bar(window, "Ready", width=1100)
 shell = AppShell(window, top_bar=bar, navigation=rail, status_bar=status,
-                 zones={"left": 220, "right": 260, "bottom": 160}, center=True, theme=theme)
+                 zones={"left": 220, "right": 260, "bottom": 160}, center=True)
 
 
 def panel(lines: list[str]) -> View:
@@ -48,11 +50,12 @@ def panel(lines: list[str]) -> View:
     return View({"id": "root", "kind": "Container", "style": {"flex_direction": "vertical", "gap": 8, "padding": 16},
                  "children": [{"id": f"line{i}", "kind": "Text", "text": {"content": line, "typography_role": "body_medium"},
                                "style": {"foreground": "on_surface"}} for i, line in enumerate(lines)]},
-                window=window, theme_seed=SEED, dark=False)
+                window=window)
 
 
 dock = shell.dock
-dock.add_panel("left", panel(["app.py", "Home_View.yaml", "Notes_View.yaml"]).root, "Files")
+files = panel(["app.py", "Home_View.yaml", "Notes_View.yaml"])
+dock.add_panel("left", files.root, "Files")
 dock.add_panel("left", panel(["Home", "Notes"]).root, "Outline")
 dock.add_panel("right", panel(["Width: 1100", "Height: 700"]).root, "Properties")
 dock.add_panel("bottom", panel(["tesserae: app shell started"]).root, "Console")
@@ -94,6 +97,13 @@ layout = shell.layout()
 logger.info("layout: {}", layout)
 assert layout["zones"]["left"] == {"panels": ["Files"], "shown": "Files", "size": 260.0}
 assert layout["zones"]["center"]["panels"] == ["Home", "Notes"]
+
+app.set_dark(True)  # everything follows: the screens, bars, rail, shell, dock and panels
+dark = app.theme
+assert shell.node.get("fill") == dark.role("surface") and bar.node.get("fill") == dark.role("surface")
+assert dock._zones["left"].node.get("fill") == dark.role("surface_container_low")
+assert files.node("line0").get("fill") == dark.role("on_surface")
+app.set_dark(False)
 
 app.run(max_frames=20)
 logger.info("examples/app_shell/app.py: exited cleanly after a real 20-frame render loop")

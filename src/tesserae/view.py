@@ -48,6 +48,7 @@ import tre
 
 from tesserae import a11y, reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
+from tesserae.follow import app_of
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.spec.build import (
@@ -87,7 +88,9 @@ class View:
 
     `window` is the `tre.Window` to build into. Without one, the view
     makes its own and mounts its root there. It doesn't theme that window:
-    everything a view builds takes the view's theme (M40)."""
+    everything a view builds takes the view's theme (M40). Built on an
+    `App`'s window with no theme argument at all, it takes the app's theme
+    and follows it (M50); any theme argument pins it."""
 
     def __init__(
         self,
@@ -96,12 +99,20 @@ class View:
         window: Any = None,
         frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
         theme_seed: Optional[tuple[int, int, int, int]] = None,
-        dark: bool = False,
+        dark: Optional[bool] = None,
         default_theme_spec: Optional[dict[str, Any]] = None,
         custom_theme_spec: Optional[dict[str, Any]] = None,
         stylesheet_spec: Optional[dict[str, Any]] = None,
     ) -> None:
         self.path: Optional[Path] = None
+        app = None
+        if window is not None and all(arg is None for arg in (theme_seed, dark, default_theme_spec, custom_theme_spec)):
+            app = app_of(window)  # no theme given: the app's, followed (M50)
+            if app is not None:
+                given = app._view_theme()
+                theme_seed, dark = given.get("theme_seed"), given["dark"]
+                default_theme_spec, custom_theme_spec = given.get("default_theme_spec"), given.get("custom_theme_spec")
+        dark = bool(dark)
         if isinstance(source, (str, Path)):
             from tesserae.spec.load import build_view_spec
 
@@ -146,6 +157,19 @@ class View:
         self._wiring: list[Callable[[], None]] = []  # undo steps
         self._interactions: dict[str, Interaction] = {}
         self._sync_interactions()
+        if app is not None:
+            app._followers[self] = None
+
+    def _follow_theme(self, theme: Any, view_theme: dict[str, Any]) -> None:
+        """Following its app (M50): re-themed with the app's arguments."""
+        self.set_theme(**view_theme)
+
+    def _follow_alive(self) -> bool:
+        try:
+            self.root.get("visible")
+        except ValueError:
+            return False
+        return True
 
     # -- lookup ---------------------------------------------------------------
 

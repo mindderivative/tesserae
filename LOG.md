@@ -1170,3 +1170,17 @@ User: "Start 50 with recommendations" (Q1-Q3 as recommended).
   removed.
 
 1374 passed; all four examples clean.
+
+## M50 Phase 3: views, the shell and dock, overlays
+
+User: "Start phase 3".
+
+- A `View` on an app's window with no theme argument follows the app.
+  `dark` now defaults to `None`, so `dark=False` pins it.
+- `Dock` and `AppShell` follow. `_follow_theme` lets a following shell
+  re-colour only itself and the dock it made, so a pinned bar stays
+  pinned. Overlays follow through their widgets.
+- `examples/app_shell/` has no `theme=` left, and checks `set_dark`.
+- 7 tests; 12/12 mutants caught.
+
+1381 passed; all four examples clean.

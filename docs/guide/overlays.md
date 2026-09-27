@@ -8,11 +8,15 @@ since `tre` 0.3.5 removes its own `open_dialog`, `open_menu` and so on.
 ```python
 from tesserae.overlays import Dialog, Menu, Snackbar, Tooltip
 
-confirm = Dialog(window, "Discard draft?", "It won't be saved.",
-                 actions=[("Cancel", None), ("Discard", viewmodel.discard)], theme=app.theme)
+confirm = Dialog(app.window, "Discard draft?", "It won't be saved.",
+                 actions=[("Cancel", None), ("Discard", viewmodel.discard)])
 confirm.open()                      # modal: focus moves into it
 confirm.on_close(lambda: print("closed"))
 ```
+
+Made on the app's window with no `theme=`, an overlay takes the app's
+theme and follows it, light and dark included (M50). Give `theme=` to pin
+it to a theme instead.
 
 Every overlay has `open()`, `close()`, `is_open`, `on_close(fn)` and
 `set_theme(theme)`. When it closes, focus goes back to where it was.

@@ -195,4 +195,6 @@ Phase 3 done, and M49 with it: the controls guide and widget catalog; the gap mo
 
 Phase 2 done: `tesserae.follow`; widgets and controls with no `theme=` follow the app, held strongly and pruned when their node is gone; 1374 passed.
 
-**Up next:** M50 Phases 3–4; decisions for M51–M52.
+Phase 3 done: views, the shell and dock, and overlays follow; a following shell leaves the widgets it was given alone; the example drops `theme=`; 1381 passed.
+
+**Up next:** M50 Phase 4; decisions for M51–M52.

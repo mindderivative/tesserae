@@ -22,7 +22,7 @@ from typing import Any, Optional
 
 from tesserae.theme import Theme
 
-__all__ = ["alive", "app_of", "initial_theme", "register_app", "unfollow"]
+__all__ = ["alive", "app_of", "initial_theme", "register_app", "retheme", "unfollow"]
 
 _APPS: dict[int, "weakref.ReferenceType[Any]"] = {}
 
@@ -53,6 +53,17 @@ def initial_theme(window: Any, theme: Optional[Theme], owner: Any) -> Theme:
     return app.theme
 
 
+def retheme(owner: Any, theme: Theme, view_theme: dict[str, Any]) -> None:
+    """Re-themes a follower: its own `_follow_theme(theme, view_theme)` if
+    it has one (a view, which takes the app's theme arguments; a shell,
+    which leaves the widgets it was given alone), else `set_theme(theme)`."""
+    follow = getattr(owner, "_follow_theme", None)
+    if follow is not None:
+        follow(theme, view_theme)
+    else:
+        owner.set_theme(theme)
+
+
 def unfollow(window: Any, owner: Any) -> None:
     """`owner` stops following its app's theme (it's being destroyed)."""
     app = app_of(window)
@@ -62,9 +73,17 @@ def unfollow(window: Any, owner: Any) -> None:
 
 def alive(owner: Any) -> bool:
     """Whether a follower's node still exists: a node destroyed without
-    the widget's own `destroy` raises `ValueError` when read."""
+    the widget's own `destroy` raises `ValueError` when read. A follower
+    with its own `_follow_alive` (a view) answers for itself; one with no
+    node (a `Dock`) lives as long as its window."""
+    check = getattr(owner, "_follow_alive", None)
+    if check is not None:
+        return check()
+    node = getattr(owner, "node", None)
+    if node is None:
+        return True
     try:
-        owner.node.get("visible")
+        node.get("visible")
     except ValueError:
         return False
     return True

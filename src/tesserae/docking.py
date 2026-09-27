@@ -28,6 +28,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
 from tesserae import a11y, tokens
+from tesserae.follow import initial_theme
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.theme import Theme
@@ -84,7 +85,7 @@ class Dock:
 
     def __init__(self, window: Any, *, theme: Optional[Theme] = None) -> None:
         self.window = window
-        self.theme = theme if theme is not None else Theme.resolve()
+        self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
         self._events = Listeners()
         self._zones: dict[str, _Zone] = {}
         self._moves: list[Callable[[Any, str], Any]] = []
