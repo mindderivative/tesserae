@@ -181,7 +181,8 @@ widget's accessibility (a Link's box, a TextField's input, a control's
 target) -- so every reconcile, re-theme and re-style, which rewire, set
 it again. A Link's text binding no longer renames a Link that `a11y:`
 names, and a control's fixed `a11y:` fields now reach it at build and
-patch (before, they were checked and dropped).
+patch (before, they were checked and dropped). From Python,
+`tesserae.a11y.bind` does the same with one `Effect` per field.
 
 **Controls, M40:** `tesserae.controls.Control` is the base of the
 stateful MD3 controls that replace `tre`'s. It holds `.node`, a

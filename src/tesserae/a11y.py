@@ -11,13 +11,16 @@ one of them in 0.3.4.
 
 `tre`'s `disabled` is only what's announced: a disabled node still takes
 focus and clicks. Tesserae's widgets (M40) make it behave.
+
+`bind` (M47) keeps a node's `label`, `hidden` or `level` following a
+`Signal`, a `Computed` or a function, as a YAML `a11y:` binding does.
 """
 
 from __future__ import annotations
 
 from typing import Any, Callable
 
-__all__ = ["ACTIONS", "LIVE", "ROLES", "check", "describe", "on_action"]
+__all__ = ["ACTIONS", "BINDABLE", "LIVE", "ROLES", "bind", "check", "describe", "on_action"]
 
 #: The roles `tre` accepts (`none` for a node that's only structure).
 ROLES = frozenset({
@@ -94,3 +97,52 @@ def on_action(node: Any, handlers: dict[str, Callable[[Any], Any]],
         return listen(node, "a11y_action", route)
     node.on("a11y_action", route)
     return lambda: node.off("a11y_action")
+
+
+#: The fields `bind` can keep up to date (M47 Q2): values that change as
+#: the app runs. `role` and `live` say what a node is and how it's
+#: announced, so they're set once, with `describe`.
+BINDABLE = ("label", "hidden", "level")
+
+
+def bind(node: Any, **fields: Any) -> Callable[[], None]:
+    """Keeps `node`'s `label`, `hidden` or `level` up to date (M47): each
+    is a `Signal` or `Computed` (anything with `.get()`), a function of no
+    arguments, or a plain value, and it's set now and again whenever what
+    it read changes, checked as `describe` checks it (a wrong value raises,
+    naming the field). `node` is a node, or a widget or control (its
+    `.node`). Returns the function that stops it.
+
+        stop = a11y.bind(button.node, label=Computed(lambda: f"{count.get()} unread"))
+    """
+    from tesserae.reactive import Effect
+
+    unknown = sorted(set(fields) - set(BINDABLE))
+    if unknown:
+        raise ValueError(f"a11y.bind: {unknown[0]!r} can't be bound -- only {', '.join(BINDABLE)} "
+                         f"(set role and live with describe)")
+    target = node if hasattr(node, "set") else node.node
+    effects = []
+
+    def follow(name: str, source: Any) -> None:
+        read = source.get if hasattr(source, "get") else source if callable(source) else (lambda: source)
+
+        def apply() -> None:
+            props = check({name: read()}, "a11y.bind")
+            if any(target.get(k) != v for k, v in props.items()):
+                target.set(**props)
+        effects.append(Effect(apply))
+
+    try:
+        for name, source in fields.items():
+            follow(name, source)
+    except Exception:
+        for effect in effects:
+            effect.dispose()
+        raise
+
+    def stop() -> None:
+        for effect in effects:
+            effect.dispose()
+        effects.clear()
+    return stop

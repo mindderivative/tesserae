@@ -950,3 +950,15 @@ User: "Push it and start Phase 2". Pushed `a1c28ed`.
 - 18 tests; mutants 10 of 11 caught, 1 equivalent.
 
 1308 passed.
+
+## M47 Phase 3: tesserae.a11y.bind
+
+User: "Push it and start Phase 3". Pushed `2d918c5`.
+
+- `a11y.bind(node, label=, hidden=, level=)`: a `Signal`/`Computed`, a
+  function or a value per field, one `Effect` each, checked as
+  `describe` checks, returning a stopper; `role`/`live` refused; a failed
+  bind disposes what it set up.
+- 9 tests; 7 mutants, all caught.
+
+1317 passed.

@@ -184,3 +184,78 @@ def test_a_binding_passes_through_a_fragment_while_its_params_substitute(tmp_pat
     view, vm = _view(spec)
     vm.unread.set(2)
     assert view.node("s").get("label") == "2 unread" and view.node("s").get("font_size") == 14.0
+
+
+# -- Phase 3: tesserae.a11y.bind, for widgets made in Python ------------------
+
+import tre  # noqa: E402
+
+from tesserae import Computed, Signal, a11y  # noqa: E402
+from tesserae.widgets import button, checkbox  # noqa: E402
+
+
+def _window():
+    return tre.Window(width=300, height=200)
+
+
+def test_bind_follows_a_signal_a_computed_and_a_function():
+    count, collapsed = Signal(3), Signal(False)
+    b = button(_window(), "Inbox", 120, 40)
+    a11y.bind(b, label=Computed(lambda: f"{count.get()} unread"), hidden=collapsed,
+              level=lambda: 1 + count.get() // 10)
+    node = b.node
+    assert (node.get("label"), node.get("a11y_hidden"), node.get("level")) == ("3 unread", False, 1)
+    count.set(12)
+    collapsed.set(True)
+    assert (node.get("label"), node.get("a11y_hidden"), node.get("level")) == ("12 unread", True, 2)
+
+
+def test_bind_takes_a_node_or_a_plain_value_and_stops():
+    node = _window().create("box", width=10, height=10)
+    title = Signal("One")
+    stop = a11y.bind(node, label=title, level=2)
+    assert (node.get("label"), node.get("level")) == ("One", 2)
+    stop()
+    title.set("Two")
+    assert node.get("label") == "One"
+
+
+def test_a_controls_bound_label_survives_its_own_repaints_and_a_re_theme():
+    from tesserae import Theme
+
+    cb = checkbox(_window(), (0x67, 0x50, 0xA4, 0xFF), 18, 18, checked=False)
+    terms = Signal("Agree to the terms")
+    a11y.bind(cb, label=terms)
+    cb.checked.set(True)  # the control repaints
+    cb.set_theme(Theme.resolve(theme_seed=(0x00, 0x66, 0x88, 0xFF)))
+    assert cb.node.get("label") == "Agree to the terms" and cb.node.get("role") == "checkbox"
+    terms.set("Accept")
+    assert cb.node.get("label") == "Accept"
+
+
+@pytest.mark.parametrize("fields, message", [
+    ({"role": Signal("button")}, "'role' can't be bound -- only label, hidden, level"),
+    ({"live": "polite"}, "'live' can't be bound"),
+    ({"label": Signal(5)}, "a11y.bind: a11y label must be a string, got 5"),
+    ({"level": lambda: 0}, "a11y level must be a positive whole number, got 0"),
+])
+def test_bind_rejects_what_it_cant_set(fields, message):
+    with pytest.raises(ValueError, match=re.escape(message)):
+        a11y.bind(_window().create("box"), **fields)
+
+
+def test_a_failed_bind_undoes_the_fields_it_had_set_up():
+    node = _window().create("box")
+    title = Signal("One")
+    with pytest.raises(ValueError):
+        a11y.bind(node, label=title, hidden=Signal("not a bool"))
+    title.set("Two")
+    assert node.get("label") == "One"  # the label's effect was disposed
+
+
+def test_a_bad_value_later_raises_naming_the_field():
+    node = _window().create("box")
+    level = Signal(1)
+    a11y.bind(node, level=level)
+    with pytest.raises(ValueError, match="a11y level must be a positive whole number, got -1"):
+        level.set(-1)

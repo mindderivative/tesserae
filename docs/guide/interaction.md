@@ -149,12 +149,25 @@ isn't one of them: `tre` 0.3.4 doesn't route it through `a11y_action`.
 and clicks. Tesserae's controls (M40) make it behave: a disabled control
 can't be focused or used, and draws in MD3's disabled colours.
 
+`bind` keeps a widget's `label`, `hidden` or `level` up to date, as a
+bound YAML field does (M47). Each is a `Signal`, a `Computed`, a
+function of no arguments or a plain value:
+
+```python
+from tesserae import Computed, a11y
+
+stop = a11y.bind(inbox_button, label=Computed(lambda: f"{unread.get()} unread"),
+                 hidden=collapsed)
+```
+
+It takes a node, or a widget or control (their `.node`), checks each
+value as `describe` does, and returns the function that stops it. `role`
+and `live` aren't bindable: set them once with `describe`.
+
 ## Not yet covered
 
 - Among plain YAML nodes, only `Rect` and `Container` get the state
   layer, ripple and focus ring. The MD3 controls (checkbox, switch and
   so on) have their own, from M40.
-- From Python, a widget's label is fixed (`label=`) until
-  `tesserae.a11y.bind` (M47 Phase 3).
 - The ring is placed when focus arrives. A node that resizes while it
   has focus keeps its old ring until focus moves.
