@@ -986,3 +986,10 @@ then start M45.
   file), watch every file-built screen with tests, docs/example.
 - Named, to check in Phase 2: whether components added by
   `tesserae.instantiate` are watched.
+
+## M48 decisions
+
+User: "Push it and go with your recommendations for M48". Pushed `81742fe`.
+
+- Q1: a registered screen's file comes from `view.path`; no `path=`.
+- Q2: a screen with no file is logged once when hot reload starts.

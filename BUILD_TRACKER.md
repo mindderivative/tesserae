@@ -57,7 +57,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, after M46 (2026-09-26) |
 | M46 — Move to `tre` 0.3.5 | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, waits on `tre`'s 0.3.5 release (2026-09-26) |
 | M47 — Bindable Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
-| M48 — Hot Reload for `register()`ed Screens | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q2 pending (2026-09-27) |
+| M48 — Hot Reload for `register()`ed Screens | `███░░░░░░░` 33% | 🚧 In progress — Phase 1 of 3 done (2026-09-27) |
 
 **Just closed:** M47 (2026-09-27), all 4 phases — bindable accessibility: `a11y:` `label`/`hidden`/`level` take a `{{ }}` binding, `tesserae.a11y.bind` does it from Python, and the counter example's button name follows its count; two older bugs fixed on the way (a control's `a11y:` was dropped; a Link's text binding overrode its label). 1288 → 1317. Before that, M43 (the migration gate).
 
@@ -73,7 +73,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M48** (hot reload for `register()`ed screens) is scoped: the screen's view already knows its file, so the fix is small; decisions Q1–Q2 wait on the user. **M46** (move to `tre` 0.3.5) starts, and is pushed, when `tre` reports the release (the user's standing go-ahead), then M45 (docking and the app shell). Named, un-scoped candidate: `tesserae.widgets` controls following the app's theme by themselves.
+**Up next:** **M48 Phase 2** (watch every file-built screen), then Phase 3 (docs, example); decisions Q1–Q2 taken as recommended. **M46** (move to `tre` 0.3.5) starts, and is pushed, when `tre` reports the release (the user's standing go-ahead), then M45 (docking and the app shell).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1338,7 +1338,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 48 — Hot Reload for `register()`ed Screens
 
-**Status: ⬜ Scoped — decisions Q1–Q2 pending (2026-09-27).** User: "Scope hot reload for register()ed screens as M48". Closes the known gap from M29 Phase 6: `App.run(hot_reload=True)` watches only screens `App.load()` made, so a screen given to `App.register()` -- the path for a `ViewModel` that needs the `app` (`examples/multi_screen/`) -- never reloads. Independent of `tre`'s release.
+**Status: 🚧 In progress — Phase 1 of 3 done (2026-09-27).** User: "Scope hot reload for register()ed screens as M48", then "Push it and go with your recommendations for M48" (Q1–Q2 as recommended). Closes the known gap from M29 Phase 6: `App.run(hot_reload=True)` watches only screens `App.load()` made, so a screen given to `App.register()` -- the path for a `ViewModel` that needs the `app` (`examples/multi_screen/`) -- never reloads. Independent of `tre`'s release.
 
 **What the source says** (`app.py`, `view.py`, `spec/watch.py`): `_start_watchers` starts a `ViewWatcher(view, path)` for each registered screen whose `_Registered.path` is set, and only `load()` sets it. But the screen already knows its file: a `View` built from a path keeps it as `view.path` (`view.py`, set before `build_view_spec`), `App.build_view()` builds from a path, and `register()`'s `view.move_to(window)` keeps `path` while rebuilding in the app's window. So the gap's own suggestion -- a `path=` on `register()` -- isn't needed: the watcher can take the path from the view. A view built from a spec dict has no file and can't be watched. `ViewWatcher` already reconciles in place (the ViewModel, its `app` reference and its bindings survive, rewired), so a registered screen reloads exactly as a loaded one does. The "hot reload on: watching N screen(s)" line counts watched screens.
 
@@ -1348,8 +1348,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 **Out of scope, named:** components added at run time with `tesserae.instantiate` (a `Repeater`'s rows, say) are built from their own files; whether `ViewWatcher` follows those is a separate question, to check (not assumed) in Phase 2 and list as a known gap if it doesn't.
 
-### Phase 1 — Decisions ⬜
-- Step 1: Q1–Q2 above — ⬜
+### Phase 1 — Decisions ✅
+- Step 1: the user took both recommendations: Q1, a registered screen's file comes from its view (`view.path`), with no API change, and `_Registered.path` goes; Q2, a registered screen with no file is named once, at INFO, when hot reload starts — ✅
 
 ### Phase 2 — Watch Every File-Built Screen ⬜
 - Step 1: by Q1–Q2: `_start_watchers` watches each registered screen by its view's file; the "hot reload on" count includes them; a screen without one is named (Q2). Tests: a `register()`ed, `build_view()`ed screen reloads on an edit with its `ViewModel` (and that `app` reference) and bindings kept, with a fake handle as `test_watch_thread.py` does; a dict-built screen isn't watched, and is logged; a `load()`ed one still is; the live subprocess test (`test_hot_reload_live.py`) extended to a `register()`ed screen; mutation-checked. Check the instantiated-components question above — ⬜

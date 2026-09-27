@@ -161,4 +161,6 @@ Phase 4 done, and M47 with it: the counter example's button name follows its cou
 
 **M48 scoped (2026-09-27):** hot reload for `register()`ed screens, 3 phases. A `View` built from a file keeps `view.path` (and `register()`'s `move_to` keeps it), so the watcher can take the file from the view. Decisions Q1–Q2 pending: find the file from the view (no `path=`); log a screen with no file once.
 
-**Up next:** M48 decisions. M46 (move to `tre` 0.3.5) starts when `tre` reports the release -- the user's standing go-ahead is to do it and push it, then start M45. M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.
+**M48 decisions:** Q1–Q2 as recommended -- the file from the view, no `path=`; a screen with no file logged once.
+
+**Up next:** M48 Phase 2. M46 (move to `tre` 0.3.5) starts when `tre` reports the release -- the user's standing go-ahead is to do it and push it, then start M45. M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.
