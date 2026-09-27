@@ -22,5 +22,11 @@ Instantiates the component at `path` into `into` (a `Node`, e.g. from
 Raises `ValueError` immediately on a naming-convention mismatch,
 before any real embedding happens.
 
+The component keeps its file as `component.path` (M51), as a view built
+from a file does. When its host reloads, a component whose nodes the
+reload destroyed (its `into` node was removed, say) is forgotten and
+unwired, and `remove()` on it afterwards is harmless. A component whose
+root is rebuilt stays where it was among its siblings.
+
 See [Components & Embedding](../guide/components.md) for a full
 worked example.

@@ -199,4 +199,8 @@ Phase 3 done: views, the shell and dock, and overlays follow; a following shell 
 
 Phase 4 done, and M50 with it: the docs pass; the gap moved to "Fixed gaps".
 
-**Up next:** decisions for M51–M52.
+**M51 decisions:** Q1–Q3 as recommended.
+
+Phase 2 done: components keep their file; a rebuilt root keeps its index; components a host reload destroyed are forgotten; 1385 passed.
+
+**Up next:** M51 Phases 3–4; decisions for M52.

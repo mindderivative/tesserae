@@ -1191,3 +1191,17 @@ User: "Start phase 4". Added the widget catalog's opening note and the
 themes guide's light and dark line. Removed the controls guide's stale
 note that Python controls don't follow. The known gap moved to "Fixed
 gaps". 1381 passed; all four examples clean.
+
+## M51 Phases 1-2: components keep their file
+
+User: "Start M51 with recommendations" (Q1-Q3 as recommended).
+
+- `View.instantiate` records `component.path`.
+- `reconcile` re-inserts a rebuilt root at its old index.
+- Components whose nodes a host reload destroyed are forgotten and
+  unwired.
+- `tre`'s `off` on a destroyed node doesn't raise (checked), so the
+  guard I first wrote was dead code and was removed.
+- 4 tests; 7/7 mutants caught.
+
+1385 passed; all four examples clean.

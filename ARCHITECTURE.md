@@ -71,7 +71,12 @@ enforced-naming discipline, applied to embedded components), and
 `Repeater` (automatic keyed add/remove diffing over `instantiate`, built
 entirely in Python on top of it -- no new `engine-spec`/`engine-core`
 work needed; see its own module doc comment for why a YAML-level
-`for_each:` keyword was considered and set aside).
+`for_each:` keyword was considered and set aside). M51: `View.instantiate`
+sets a component's `path` when given a spec and a file, `reconcile`
+re-inserts a rebuilt root at its old index (`insert_child`), and
+`_prune_components` forgets components whose root a reload destroyed
+(`_follow_alive`, then `_forget_dead`, which unwires them; `tre`'s `off`
+on a destroyed node is harmless).
 
 ## Files and data (M29)
 

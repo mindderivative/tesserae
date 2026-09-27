@@ -235,17 +235,30 @@ class View:
         old = self._spec
         if spec.get("id") != old.get("id") or not self._same_shape(old, spec):
             parent = self._built.root.parent()
+            # where it was, so a rebuilt component stays in place among its siblings (M51)
+            index = parent.children().index(self._built.root) if parent is not None else None
             self._forget(old)
             self._built.root.destroy()
             self._built.root = build_with(self.window, spec, scheme=self._scheme, layers=self._layers,
                                           frames=self._frames, into=self._built, listen=self._events.listen)
             if parent is not None:
-                parent.add_child(self._built.root)
+                parent.insert_child(index, self._built.root)
         else:
             self._reconcile_node(old, spec)
         self._spec = spec
         self._sync_interactions()
         self._rewire()
+        self._prune_components()
+
+    def _prune_components(self) -> None:
+        """Forgets the components whose nodes a reload destroyed (their
+        `into` node, say): unwired, so their bindings stop (M51)."""
+        for component in list(self._components):
+            if not component._follow_alive():
+                component._forget_dead()
+                self._components.remove(component)
+            else:
+                component._prune_components()
 
     def set_theme(
         self,
@@ -286,6 +299,8 @@ class View:
         `spec` is the expanded spec; without it, `path` is read (the same
         call shape as `tre`'s `View.instantiate`)."""
         component = Component(self, spec if spec is not None else path, frames=frames)
+        if spec is not None and path:
+            component.path = Path(path)  # the file it came from, for hot reload (M51)
         into.add_child(component.root)
         self._components.append(component)
         return component
@@ -623,9 +638,25 @@ class Component(View):
         for component in list(self._components):
             component._host_restyled(self)
 
+    def _forget_dead(self) -> None:
+        """Unwires a component whose nodes are already gone (M51), and the
+        components inside it; its `Signal`s stop reaching it. (`tre`'s
+        `off` on a destroyed node is harmless, so unwiring is safe.)"""
+        for component in list(self._components):
+            component._forget_dead()
+        self._components = []
+        self._unwire()
+        self._viewmodel = None
+
     def remove(self) -> None:
         """Unwires this component (its `Signal`s stop reaching it) and frees
-        its nodes, and any components inside it."""
+        its nodes, and any components inside it. A component a host's
+        reload already destroyed (M51) is simply forgotten."""
+        if not self._follow_alive():
+            self._forget_dead()
+            if self in self._host._components:
+                self._host._components.remove(self)
+            return
         for component in list(self._components):
             component.remove()
         self._unwire()

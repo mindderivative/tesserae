@@ -60,7 +60,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M48 — Hot Reload for `register()`ed Screens | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
 | M49 — A Click Goes to the Innermost Clickable Only | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
 | M50 — `tesserae.widgets` Follow the App's Theme | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
-| M51 — Hot Reload for Components Added at Run Time | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
+| M51 — Hot Reload for Components Added at Run Time | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
 | M52 — A Declarative App Shell | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
 
 **Just closed:** M50 (2026-09-27), all 4 phases: `tesserae.widgets` follow the app's theme. `tesserae.follow` finds an app by its window, and widgets, controls, overlays, `Dock`, `AppShell` and `tesserae.View`s made on it with no theme take the app's and follow `set_dark`, the OS switch and `set_theme_specs`, with one rollback; `theme=` pins. `examples/app_shell/` has no `theme=` left. 1365 → 1382. Before it, M49: a click goes to the innermost clickable only.
@@ -77,7 +77,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M51, hot reload for components added at run time (Q1–Q3), and M52, a declarative app shell, a `*_Shell.yaml` (Q1–Q4). Both are scoped, with decisions pending. M52 was best after M50, which is now done.
+**Up next:** M51 Phase 3 (watching component files: one watcher per file, shared by its live instances, which includes components added mid-run), then Phase 4. M52, a declarative app shell (Q1–Q4), is scoped with decisions pending.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1448,7 +1448,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 51 — Hot Reload for Components Added at Run Time
 
-**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones" (the four named candidates). This closes the known gap found in M48 Phase 2. A component made with `tesserae.instantiate` (a `Repeater`'s rows, say) comes from its own `*_View.yaml`, which no watcher follows, so an edit changes nothing until a restart.
+**Status: 🚧 In progress — Phase 2 of 4 done (2026-09-27).** User: "Start M51 with recommendations" (Q1–Q3 as recommended), after "Scope all as separate Milestones" (the four named candidates). This closes the known gap found in M48 Phase 2. A component made with `tesserae.instantiate` (a `Repeater`'s rows, say) comes from its own `*_View.yaml`, which no watcher follows, so an edit changes nothing until a restart.
 
 **What the source says:**
 - `tesserae.instantiate` (`component.py`) expands the file itself, dropping the dependency set, and hands `View.instantiate` a spec. So **the `Component` never keeps its path** (`component.path` is `None`).
@@ -1465,11 +1465,11 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 **Named, needed whatever Q1 says:** `instantiate` keeps the path and the dependencies (`include:`, `component:` fragments, images). A rebuilt root is re-inserted at its old index. An instance whose nodes died with its host is skipped and pruned.
 
-### Phase 1 — Decisions ⬜
-- Step 1: the user's answers to Q1–Q3 — ⬜
+### Phase 1 — Decisions ✅
+- Step 1: the user took all three recommendations. Q1: one watcher per component file, shared by its live instances, which come from the screens' `_components` trees. Q2: components added after hot reload starts are watched too. Q3: a bad edit behaves as for screens: every instance stays as it was, and the error is logged once for the file — ✅
 
-### Phase 2 — Components Keep Their File ⬜
-- Step 1: `instantiate` keeps `path` and the dependencies, `reconcile` keeps a rebuilt root's index, and dead instances are pruned. Tests cover each, and they're mutation-checked — ⬜
+### Phase 2 — Components Keep Their File ✅
+- Step 1: `View.instantiate` sets `component.path` when it's given a spec and a file, which is how `tesserae.instantiate` calls it (a spec-only call keeps `None`). The dependencies aren't stored: the Phase 3 watcher recomputes them from the path, as `ViewWatcher` does. `reconcile`'s rebuilt-root branch re-inserts the new root at the old one's index (`insert_child`), not at the end, so a rebuilt `Repeater` row keeps its order. `_prune_components`, run after each reconcile, forgets a component whose root the reload destroyed: `_forget_dead` unwires it and the components inside it, so its `Signal`s stop reaching dead nodes, and `Component.remove()` on it afterwards is harmless. **Checked, not assumed:** `tre`'s `off` on a destroyed node doesn't raise, so unwiring a dead component needs no guard; a first version's `try`/`except ValueError` was dead code (the one mutation survivor) and was removed. `tests/test_component_files.py` (4): `instantiate` keeps the file, and a spec-only component has none; a rebuilt middle row stays at index 1 of 3 and is rewired to its own ViewModel; a host reload that removes the `into` node (a new id) forgets the row, its bindings stop, and `remove()` is harmless; a live row survives its host's reload. Mutation-checked, 7/7 caught. 1381 → 1385 passed; all four examples clean. Docs: `api/instantiate.md` and `ARCHITECTURE.md`; `mkdocs build --strict` clean — ✅
 
 ### Phase 3 — Watching Component Files ⬜
 - Step 1: the watcher by Q1–Q3. Tests: an edit reloads every row of a `Repeater` in place (same ViewModels, bound values kept, order kept); a row added mid-run is watched; a fragment used by a component is watched; a bad edit leaves all rows and logs once. The live `App.run(hot_reload=True)` test gains a component case. Mutation-checked — ⬜
