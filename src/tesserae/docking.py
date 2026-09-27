@@ -29,7 +29,7 @@ from typing import Any, Callable, Optional
 
 from tesserae import a11y, tokens
 from tesserae.interaction import Interaction
-from tesserae.listeners import Listeners
+from tesserae.listeners import Listeners, handled
 from tesserae.theme import Theme
 
 __all__ = ["DRAG_THRESHOLD", "SIDES", "TAB_HEIGHT", "Dock"]
@@ -232,12 +232,12 @@ class Dock:
         tab = _Tab(node, label, indicator, interaction)
         listen = self._events.listen
         tab.undo = [
-            listen(node, "click", lambda e: self.show(entry.node)),
+            listen(node, "click", handled(lambda e: self.show(entry.node))),
             listen(node, "key_down", lambda e: self._key(e, zone, entry)),
             listen(node, "pointer_down", lambda e: self._down(e, entry, tab)),
             listen(node, "pointer_move", lambda e: self._drag_past_threshold(e)),
             listen(node, "pointer_up", lambda e: self._up()),
-            listen(node, "secondary_click", lambda e: self._open_menu(entry, at=(e.window_x, e.window_y))),
+            listen(node, "secondary_click", handled(lambda e: self._open_menu(entry, at=(e.window_x, e.window_y)))),
         ]
         return tab
 

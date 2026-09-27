@@ -58,7 +58,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M46 — Move to `tre` 0.3.5 | `██████████` 100% | ✅ Complete (2026-09-27) |
 | M47 — Bindable Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M48 — Hot Reload for `register()`ed Screens | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
-| M49 — A Click Goes to the Innermost Clickable Only | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
+| M49 — A Click Goes to the Innermost Clickable Only | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 | M50 — `tesserae.widgets` Follow the App's Theme | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
 | M51 — Hot Reload for Components Added at Run Time | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
 | M52 — A Declarative App Shell | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — decisions pending |
@@ -77,7 +77,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M49–M52 scoped (2026-09-27), decisions pending for each: M49, a click goes to the innermost clickable only (Q1–Q4); M50, `tesserae.widgets` follow the app's theme (Q1–Q3); M51, hot reload for components added at run time (Q1–Q3); M52, a declarative app shell, a `*_Shell.yaml` (Q1–Q4), best after M50.
+**Up next:** M49 Phase 3 (the remaining docs, and the known gap moves to "Fixed gaps"). Then M50–M52, each scoped with decisions pending: M50, `tesserae.widgets` follow the app's theme (Q1–Q3); M51, hot reload for components added at run time (Q1–Q3); M52, a declarative app shell, a `*_Shell.yaml` (Q1–Q4), best after M50.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1387,7 +1387,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 49 — A Click Goes to the Innermost Clickable Only
 
-**Status: ⬜ Scoped — decisions pending (2026-09-27).** User: "Scope all as separate Milestones, 2 will be M49 as previously discussed" (the four named candidates, with nested clicks as M49). This closes the known gap from M46. Since `tre` 0.3.5, a `click` bubbles to every ancestor's listener. A pointer click already did from M37, as M39's test pins, and since 0.3.5 keyboard and simulated clicks do too. So a clickable inside a clickable (a YAML `on_click` Rect in another, a button in a clickable card, a checkbox in a list row) fires both handlers. MD3 gives the click to the innermost only, as do Compose and Flutter. This is a behaviour change, so the user decides it.
+**Status: 🚧 In progress — Phase 2 of 3 done (2026-09-27).** User: "M49 start with recommendations" (Q1–Q4 as recommended), after "Scope all as separate Milestones, 2 will be M49 as previously discussed" (the four named candidates, with nested clicks as M49). This closes the known gap from M46. Since `tre` 0.3.5, a `click` bubbles to every ancestor's listener. A pointer click already did from M37, as M39's test pins, and since 0.3.5 keyboard and simulated clicks do too. So a clickable inside a clickable (a YAML `on_click` Rect in another, a button in a clickable card, a checkbox in a list row) fires both handlers. MD3 gives the click to the innermost only, as do Compose and Flutter. This is a behaviour change, so the user decides it.
 
 **What the source says:** `tre`'s `Event.stop()` "ends propagation: no listener on a further ancestor runs". Every event bubbles except `pointer_enter`, `pointer_leave` and `change`. Tesserae adds its activation listeners in seven places:
 - YAML `on_click` (`View._wire_handler`, through `_EVENTS`)
@@ -1404,11 +1404,33 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 - Q3 **`secondary_click` too.** Recommended: **yes, by the same rule**, so a right click on a `Dock` tab inside a clickable region opens only the tab's menu. Alternative: `click` only.
 - Q4 **A way for an ancestor to hear it anyway** (analytics, "any click in this panel"). Recommended: **not now; name it.** Nothing in the repo needs it, and a `stop()` is easy to relax later with an opt-out. Alternative: a YAML `click_through: true` on the inner node.
 
-### Phase 1 — Decisions ⬜
-- Step 1: the user's answers to Q1–Q4 — ⬜
+### Phase 1 — Decisions ✅
+- Step 1: the user took all four recommendations. Q1: the innermost handler takes the click, since each activation listener Tesserae adds calls `event.stop()`. Q2: a disabled control still takes the click. Q3: `secondary_click` follows the same rule. Q4: there's no way for an ancestor to hear it anyway, and that's named as later work — ✅
 
-### Phase 2 — Innermost Clicks ⬜
-- Step 1: the stop at every activation site (YAML handlers, `Widget.on_click`, controls, `SpinBox`, overlays, `Dock` tabs), by Q1–Q3. M39's test (`vm.clicks == 2`) flips to 1. New tests cover nested YAML Rects, a control in a clickable card, keyboard Enter, a simulated click, a disabled inner control and `secondary_click`. Mutation-checked for every site — ⬜
+### Phase 2 — Innermost Clicks ✅
+- Step 1: `tesserae.listeners.handled(fn)` calls `fn(event)`, then `event.stop()`, even if `fn` raises. It wraps every activation listener Tesserae adds, 10 sites in all:
+  - YAML `on_click` (`View._wire_handler`, for `click` only)
+  - `Widget.on_click`
+  - `Control`'s click (so a disabled control stops it too, by Q2)
+  - the `SpinBox` buttons
+  - `Menu` items
+  - `Menu.attach_context` (`secondary_click`)
+  - the `Popover` anchor
+  - `SearchView` rows
+  - the `Dock` tabs' click and `secondary_click`
+
+  `Interaction`'s own `click` listener is feedback and isn't wrapped. M39's nested-press test now expects one click, not two. `tests/test_innermost_click.py` has 9 tests:
+  - A pointer click reaches the inner Rect alone, and the outer one when clicked outside it.
+  - Keyboard Enter and a simulated click behave the same.
+  - A handler-less Text or Rect inside a clickable still passes the click up.
+  - A checkbox in a clickable card toggles without opening the card, and disabled, it does nothing and the card still doesn't open.
+  - `Widget.on_click`, the `SpinBox` and menu items take their clicks (a menu is on an overlay layer, so the test listens on its surface, not the root).
+  - A right click opens only the innermost context menu.
+  - The `Popover` anchor and a search result take their clicks.
+  - The `Dock` tabs take clicks and right clicks.
+  - `handled` stops even when the handler raises.
+
+  Mutation-checked: removing the wrapper at each of the 10 sites, and each of `handled`'s two guarantees, fails a test (12/12 caught). The mutation script runs without bytecode caching: two same-size mutants of one file written within a second had reused a stale `.pyc` and faked a catch. 1356 → 1365 (1364 passed, 1 skipped); all four examples clean. Docs: the interaction guide ("only the innermost one responds", including labels, disabled controls, keyboard and right clicks, and the change since M39) and `ARCHITECTURE.md` (`handled`); `mkdocs build --strict` clean — ✅
 
 ### Phase 3 — Docs, Examples, Tracker ⬜
 - Step 1: the interaction guide ("the click itself still bubbles" becomes innermost-only), the controls and widget pages, and `ARCHITECTURE.md`. The change is written up as a behaviour change. All examples run clean, `mkdocs build --strict` is clean, and the known gap moves to "Fixed gaps" — ⬜

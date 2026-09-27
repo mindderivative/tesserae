@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-__all__ = ["Listeners"]
+__all__ = ["Listeners", "handled"]
 
 
 class Listeners:
@@ -37,3 +37,21 @@ class Listeners:
                 del self._slots[key]
                 node.off(event)
         return undo
+
+
+def handled(fn: Callable[[Any], Any]) -> Callable[[Any], None]:
+    """`fn(event)`, then stop the event going on to the node's ancestors
+    (M49). `tre`'s `click` and `secondary_click` bubble to every
+    ancestor's listener; a clickable inside a clickable -- a button in a
+    card, a checkbox in a list row -- takes its click alone, as MD3 (and
+    Compose and Flutter) expect. Wraps every activation listener Tesserae
+    adds; it stops the event even if `fn` raises, or ignores the click (a
+    disabled control still takes it)."""
+    def handle(event: Any) -> None:
+        try:
+            fn(event)
+        finally:
+            stop = getattr(event, "stop", None)
+            if stop is not None:
+                stop()
+    return handle

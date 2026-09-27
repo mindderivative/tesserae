@@ -223,7 +223,13 @@ target is the `Interaction`'s `surface`, so events come from the target
 while the feedback draws in the circle. The state and `disabled` are
 Tesserae `Signal`s, and one `Effect` repaints when they change. `on_change`
 hears only the user's changes. `tesserae.listeners.Listeners` is the
-shared per-node dispatcher, which `View` uses too. `tokens.BASELINE` is
+shared per-node dispatcher, which `View` uses too. `listeners.handled(fn)`
+wraps every activation listener Tesserae adds (YAML `on_click`,
+`Widget.on_click`, controls, `SpinBox`, overlay items, context menus,
+`Dock` tabs). It calls `event.stop()` after `fn`, even if `fn` raises or
+ignores the click (a disabled control), so `tre`'s bubbling `click` and
+`secondary_click` reach only the innermost clickable (M49). `Interaction`'s
+own `click` listener is feedback only and isn't wrapped. `tokens.BASELINE` is
 MD3's published colours, for controls with no theme. `RadioGroup` keeps
 one radio selected and one Tab stop (a roving focus, via `_focusable()`),
 and moves the selection with the arrow keys. A `Switch` slides its handle

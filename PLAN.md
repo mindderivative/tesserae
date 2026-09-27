@@ -185,4 +185,8 @@ Phase 4 done, and M45 with it: `center=True`, `examples/app_shell/`, the "App Sh
 - M51: hot reload for runtime components, 4 phases. Q1 one watcher per component file, shared by its instances; Q2 components added mid-run are watched; Q3 a bad edit behaves as it does for screens.
 - M52: a declarative app shell, 5 phases, best after M50. Q1 a `*_Shell.yaml` via `app.load_shell`; Q2 panels are named view files; Q3 nav items name screens; Q4 the shell file is patched in place on reload.
 
-**Up next:** decisions for M49–M52.
+**M49 decisions:** Q1–Q4 as recommended.
+
+Phase 2 done: `listeners.handled` at every activation site; a click goes to the innermost clickable only; 1364 passed.
+
+**Up next:** M49 Phase 3; decisions for M50–M52.

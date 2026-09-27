@@ -16,6 +16,7 @@ from typing import Any, Callable, Optional
 import yaml
 
 from tesserae import a11y, tokens
+from tesserae.listeners import handled
 from tesserae.spec.expand import expand_components_to_spec
 from tesserae.theme import Theme
 
@@ -110,7 +111,7 @@ class Widget:
         self.interactive(part)
         node = self.part(part)
         node.set(focusable=True, role=role, cursor="pointer")
-        undo = self.view._listen(node, "click", lambda event: fn())
+        undo = self.view._listen(node, "click", handled(lambda event: fn()))  # the innermost part takes it (M49)
         self._undo.append(undo)
         return undo
 

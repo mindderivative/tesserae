@@ -29,6 +29,7 @@ from __future__ import annotations
 from typing import Any, Callable, Optional
 
 from tesserae import a11y
+from tesserae.listeners import handled
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget, fragment
 
@@ -211,7 +212,7 @@ class Menu(Overlay):
             else:
                 fn = labels[i][1]
             self.items.append(slot)
-            widget._undo.append(listen(slot, "click", lambda e, fn=fn: self._choose(fn)))
+            widget._undo.append(listen(slot, "click", handled(lambda e, fn=fn: self._choose(fn))))
             slot.set(focusable=True, role="menuitem", cursor="pointer")
             widget._undo.append(listen(slot, "key_down", lambda e, i=i: self._key(e, i)))
 
@@ -236,7 +237,7 @@ class Menu(Overlay):
     def attach_context(self, node: Any) -> Callable[[], None]:
         """Makes this `node`'s context menu: a right-click opens it at the pointer."""
         return self.widget.view._listen(node, "secondary_click",
-                                        lambda e: self.open_at(e.window_x or 0.0, e.window_y or 0.0))
+                                        handled(lambda e: self.open_at(e.window_x or 0.0, e.window_y or 0.0)))
 
 
 class Snackbar(Overlay):
@@ -408,7 +409,7 @@ class Popover(Overlay):
         with Enter or Space), and closes it on the next. Returns the
         function that detaches it."""
         return self.widget.view._listen(anchor, "click",
-                                        lambda e: self.close() if self.is_open else self.open(anchor))
+                                        handled(lambda e: self.close() if self.is_open else self.open(anchor)))
 
 
 class _EdgeSheet(Overlay):
@@ -529,7 +530,7 @@ class SearchView(Overlay):
         self._count = 0
         for i, row in enumerate(self.rows):
             row.set(focusable=True, role="menuitem", cursor="pointer")
-            widget._undo.append(widget.view._listen(row, "click", lambda e, i=i: self._choose(i)))
+            widget._undo.append(widget.view._listen(row, "click", handled(lambda e, i=i: self._choose(i))))
             widget._undo.append(widget.view._listen(row, "key_down", lambda e, i=i: self._key(e, i)))
             row.remove()
         self.set_results(results or [])

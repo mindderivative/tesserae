@@ -183,7 +183,7 @@ def test_a_press_on_a_nested_clickable_ripples_only_the_nearest():
     assert len(view.interaction("inner").ripples) == 1
     assert view.interaction("outer").ripples == []
     window.simulate("pointer_up", x=10, y=10)
-    assert vm.clicks == 2  # the click itself still bubbles, as before
+    assert vm.clicks == 1  # and only the nearest takes the click (M49)
 
 
 def test_the_tint_is_the_themes_on_surface_or_the_nodes_colour_and_follows_the_theme():

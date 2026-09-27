@@ -38,9 +38,18 @@ changes, including light and dark. The feedback paints over the node's
 content, clipped to its rounded corners. The node itself isn't clipped,
 so its children can still overflow it.
 
-When clickable nodes are nested, a press ripples only the innermost
-one. The click itself still bubbles to every `on_click` handler, as
-before.
+When clickable nodes are nested, only the innermost one responds. A
+press ripples only that node, and its `on_click` handler is the only one
+that runs, as MD3 expects: a button in a clickable card, or a checkbox
+in a clickable list row, doesn't open the card or row as well. The
+innermost handler stops the click from going further up the tree. This
+applies to pointer, keyboard (Enter and Space) and simulated clicks, and
+to right clicks, which open only the innermost context menu. Before
+M49, the click also ran every clickable ancestor's handler.
+
+A child with no handler, such as a label or an icon inside a clickable
+card, doesn't stop the click, so it still reaches the card. A disabled
+control does stop the click: nothing fires, and the card doesn't open.
 
 ### Choosing the colour, or turning it off
 

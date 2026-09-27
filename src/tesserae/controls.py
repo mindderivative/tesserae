@@ -26,7 +26,7 @@ from typing import Any, Callable, Optional
 from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.interaction import Interaction
-from tesserae.listeners import Listeners
+from tesserae.listeners import Listeners, handled
 from tesserae.reactive import Effect, Signal, untrack
 from tesserae.theme import Theme
 
@@ -86,7 +86,7 @@ class Control:
         self._build()
         self.interaction = Interaction(window, self.node, self._tint(), self._listen, self.color("secondary"),
                                        surface=self.surface, ring_around=self._ring_around())
-        self._undo.append(self._listen(self.node, "click", self._on_click))
+        self._undo.append(self._listen(self.node, "click", handled(self._on_click)))  # its click alone, even disabled (M49)
         self._effect = Effect(self._render)
 
     # -- for app code -------------------------------------------------------------
@@ -688,7 +688,7 @@ class SpinBox:
                                    hit_testable=False, a11y_hidden=True)
         button.add_child(glyph)
         it = Interaction(self.window, button, self.color("on_surface_variant"), self._listen, self.color("secondary"))
-        self._undo.append(self._listen(button, "click", lambda e: self._bump(direction)))
+        self._undo.append(self._listen(button, "click", handled(lambda e: self._bump(direction))))
         return button, glyph, it
 
     def _fit(self, value: float) -> float:

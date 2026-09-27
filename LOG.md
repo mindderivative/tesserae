@@ -1132,3 +1132,17 @@ milestone, researched from the source:
 
 Also: the tracker generator was updated from the build-tracker skill, at
 `tre`'s request (links, and a lone `~` in struck text).
+
+## M49 Phases 1-2: the innermost clickable takes the click
+
+User: "M49 start with recommendations" (Q1-Q4 as recommended).
+
+- `listeners.handled(fn)`, from M46's saved patch, now wraps all 10
+  activation sites, including the context menu attach and `Dock` tabs,
+  for `click` and `secondary_click`. It stops the event even if `fn`
+  raises, and even for a disabled control.
+- M39's test now expects one click. 9 new tests; 12/12 mutants caught.
+  A first mutation run faked a catch through a stale `.pyc`, so the
+  script now runs with bytecode caching off.
+
+1364 passed, all four examples clean.

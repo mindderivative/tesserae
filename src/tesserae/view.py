@@ -49,7 +49,7 @@ import tre
 from tesserae import a11y, reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
 from tesserae.interaction import Interaction
-from tesserae.listeners import Listeners
+from tesserae.listeners import Listeners, handled
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, a11y_bindings, build_with, control_shape, focus_ring_color,
     interaction_tint, natural_size, patch, prepare_layers,
@@ -451,6 +451,9 @@ class View:
         if tre_event == "change" and control is not None:
             if hasattr(control, "on_change"):
                 self._wiring.append(control.on_change(lambda value: call(None)))
+            return
+        if tre_event == "click":  # the innermost clickable takes the click (tre bubbles it, M49)
+            self._add_listener(node, tre_event, handled(call))
             return
         self._add_listener(node, tre_event, call)
 
