@@ -171,4 +171,6 @@ Phase 3 done, and M48 with it; the gap moved to "Fixed gaps".
 
 **M45 scoped (2026-09-27):** docking and the app shell on 0.3.5, 4 phases. Decisions Q1–Q4 pending: a Python `Dock` and `AppShell` first, with `App.use_shell`; MD3 secondary tabs per zone, the tab as drag handle, a `primary` drop highlight and a keyboard "Move to" menu; splitters between zones and content; `dock.layout()`/`restore()`.
 
-**Up next:** M45 decisions.
+**M45 decisions:** Q1–Q4 as recommended.
+
+**Up next:** M45 Phase 2 (`Dock`).

@@ -1048,3 +1048,11 @@ M46 only). Reported M46 to `tre` (queued).
 - Phases: decisions, `Dock`, `AppShell`, example/docs. Q1 a Python API
   first; Q2 secondary tabs, tab as handle, highlight, keyboard "Move
   to"; Q3 splitters; Q4 `layout()`/`restore()`.
+
+## M45 decisions
+
+User: "Push it and go with your recommendations for M45". Pushed `0f49f65`.
+
+- Q1 a Python `Dock`/`AppShell` first, `App.use_shell`; Q2 secondary
+  tabs, tab as handle, highlight, keyboard "Move to"; Q3 splitters; Q4
+  `layout()`/`restore()`.
