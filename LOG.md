@@ -929,3 +929,10 @@ User: "Scope the a11y bindable gap as M47".
 - Phases: decisions, bound `a11y:` in views, `tesserae.a11y.bind` for
   Python, tests/docs. Q1 inside `a11y:`, Q2 `label`/`hidden`/`level`
   (not `role`/`live`), Q3 the Python helper.
+
+## M47 decisions
+
+User: "Push it and go with your recommendations for M47". Pushed `132416c`.
+
+- Q1: bindings written inside `a11y:`. Q2: `label`, `hidden`, `level`
+  bindable; `role`/`live` fixed. Q3: `tesserae.a11y.bind` for Python.
