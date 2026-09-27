@@ -75,6 +75,26 @@ Then either:
 `watcher.files` lists every file being watched. It's recomputed on every
 reload, so a newly added include, fragment or image is picked up.
 
+## Components added at run time
+
+A component built with `tesserae.instantiate` (a `Repeater`'s rows, say)
+comes from its own `*_View.yaml`, and that file is watched too (M51).
+Editing it reloads every live instance in place. Each keeps its nodes,
+its own ViewModel and its bound values, and a list of rows keeps its
+order. One watcher per file serves all its instances, so ten rows cost
+one rebuild, not ten. Files a component `include:`s, and `component:`
+fragments it uses, are watched with it.
+
+A component added while the app runs is watched as well, including the
+first one of a new file. A row removed before the edit is left alone. A
+broken edit leaves every instance as it was and is logged once for the
+file:
+
+```text
+hot reload: watching component TodoItem_View.yaml (3 instance(s))
+reloaded /path/to/TodoItem_View.yaml (3 instance(s))
+```
+
 ## Theme and stylesheet files
 
 `App.run(hot_reload=True)` also watches the theme files given to
@@ -111,11 +131,10 @@ it or append to a list. This is [`tre` issue #12](https://github.com/mindderivat
 
 ## Limits
 
-- **Components added at run time aren't watched.** A component built
-  with `tesserae.instantiate` (a `Repeater`'s rows, say) comes from its
-  own file, which the screen's watcher doesn't follow: editing it
-  changes nothing until the app restarts. `component:` fragments a view
-  expands are watched.
+- **Only components in the app's screens and views are found.** A
+  component instantiated into a view the app doesn't know about (not a
+  screen, not `build_view()`'s, and not a view following the app's
+  theme) isn't reloaded.
 - **Don't use `tre`'s own `View.poll_reload()`.** Tesserae gives `tre`
   the finished view as data, never a file, so `tre` has nothing to
   watch.

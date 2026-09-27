@@ -203,4 +203,6 @@ Phase 4 done, and M50 with it: the docs pass; the gap moved to "Fixed gaps".
 
 Phase 2 done: components keep their file; a rebuilt root keeps its index; components a host reload destroyed are forgotten; 1385 passed.
 
-**Up next:** M51 Phases 3–4; decisions for M52.
+Phase 3 done: `ComponentWatcher`, one per component file for all its live instances, mid-run ones included; 1398 passed.
+
+**Up next:** M51 Phase 4; decisions for M52.

@@ -149,7 +149,10 @@ names it). The theme files given to `App(...)` are watched too, and an
 edit re-themes the running app (see
 [Hot Reload](../guide/hot-reload.md#theme-and-stylesheet-files)). So are
 stylesheet files: the default from `App(stylesheet=)`, and each screen's
-own `load(stylesheet=)` file.
+own `load(stylesheet=)` file. Components built with `tesserae.instantiate`
+are watched by their file, one watcher per file for all its live
+instances, including ones added while the app runs (M51; see
+[Hot Reload](../guide/hot-reload.md#components-added-at-run-time)).
 
 ## `thread_handle`
 

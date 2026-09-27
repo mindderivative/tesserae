@@ -23,6 +23,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from tesserae.follow import app_of
 from tesserae.naming import check_naming_convention
 from tesserae.spec import expand_components_to_spec
 from tesserae.spec.images import extract_images
@@ -62,4 +63,7 @@ def instantiate(
     except ValueError as exc:
         raise ValueError(f"{path}: {exc}") from exc
     viewmodel = viewmodel_cls(component, *args, **kwargs)
+    app = app_of(getattr(component, "window", None))
+    if app is not None:
+        app.watch_component(path)  # hot reload, if it's on (M51)
     return component, viewmodel

@@ -29,7 +29,7 @@ from tesserae.follow import alive, register_app, retheme
 from tesserae.naming import check_naming_convention
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
-from tesserae.spec.watch import FileWatcher
+from tesserae.spec.watch import ComponentWatcher, FileWatcher
 
 @dataclass
 class _Registered:
@@ -165,6 +165,11 @@ class App:
         #: ordered set, so a failed re-theme's rollback is predictable).
         self._followers: dict[Any, None] = {}
         register_app(self)
+        #: While `run(hot_reload=True)` runs: the loop's handle, every
+        #: watcher started, and each component file's watcher (M51).
+        self._hot_handle: Any = None
+        self._watchers: list[Any] = []
+        self._component_watchers: dict[Path, Any] = {}
         self._window.on("color_scheme", self._on_color_scheme)
 
     # -- light and dark (M38) ---------------------------------------------------
@@ -510,13 +515,61 @@ class App:
             )
         for watcher in watchers:
             watcher.start(handle)
-        views = sum(isinstance(w, ViewWatcher) for w in watchers)
+        self._hot_handle, self._watchers = handle, watchers
+        for path in sorted({c.path.resolve() for c in self._live_components()}):
+            self.watch_component(path)
+        views = sum(isinstance(w, ViewWatcher) and not isinstance(w, ComponentWatcher) for w in watchers)
         logger.info(
             "hot reload on: watching {} screen(s) and {} theme/stylesheet file(s)",
             views,
             sum(len(w.files) for w in watchers if not isinstance(w, ViewWatcher)),
         )
         return watchers
+
+    def _stop_watchers(self) -> None:
+        """Stops every hot-reload watcher, including component watchers
+        started while the app ran; a later `instantiate` watches nothing."""
+        for watcher in self._watchers:
+            watcher.stop()
+        self._hot_handle, self._watchers, self._component_watchers = None, [], {}
+
+    def _live_components(self, path: Path | None = None) -> list[Any]:
+        """Every live component built from a file (`tesserae.instantiate`)
+        in the app's screens and views, nested ones included -- or only
+        those built from `path` (M51)."""
+        views = [r.view for r in self._registered.values()] + [b.view for b in self._built]
+        views += [f for f in self._followers if isinstance(f, TesseraeView)]
+        found: list[Any] = []
+        seen: set[int] = set()
+        stack = list(views)
+        while stack:
+            view = stack.pop()
+            view._prune_components()
+            for component in view._components:
+                if id(component) in seen:
+                    continue
+                seen.add(id(component))
+                stack.append(component)
+                if component.path is not None and (path is None or component.path.resolve() == path):
+                    found.append(component)
+        return found
+
+    def watch_component(self, path: str | Path) -> None:
+        """While `run(hot_reload=True)` runs, watches a component file and
+        reloads every live instance of it on change (M51);
+        `tesserae.instantiate` calls it, so a component first added while
+        the app runs is watched too. Once per file; outside hot reload,
+        nothing happens."""
+        if self._hot_handle is None:
+            return
+        path = Path(path).resolve()
+        if path in self._component_watchers:
+            return
+        watcher = ComponentWatcher(path, lambda path=path: self._live_components(path))
+        watcher.start(self._hot_handle)
+        self._component_watchers[path] = watcher
+        self._watchers.append(watcher)
+        logger.info("hot reload: watching component {} ({} instance(s))", path.name, len(self._live_components(path)))
 
     def _apply_theme_files(self, specs: tuple[Any, Any]) -> None:
         self.set_theme_specs(*specs)
@@ -538,7 +591,10 @@ class App:
         which hands its reloads to the event loop through `tre`'s
         thread-safe `App.thread_handle()` (tre M87). A failed reload is
         logged (M44); the app keeps running. A screen built from a spec
-        dict has no file, so it isn't watched, and the log says so.
+        dict has no file, so it isn't watched, and the log says so. A
+        component built with `tesserae.instantiate` is watched by its file
+        too, one watcher for all its live instances, including ones added
+        while the app runs (M51).
 
         M31: the theme files given to `App(default_theme=, custom_theme=)`
         are watched too. An edit re-reads them on the watcher thread and
@@ -554,14 +610,12 @@ class App:
             self._tre_app = _TreApp()
         tre_app = self._tre_app
         tre_app.add_window(self._window)
-        watchers: list[Any] = []
         try:
             if hot_reload:
-                watchers = self._start_watchers(tre_app.thread_handle())
+                self._start_watchers(tre_app.thread_handle())
             tre_app.run(max_frames=max_frames)
         finally:
-            for watcher in watchers:
-                watcher.stop()
+            self._stop_watchers()
             # A later run() starts from a fresh tre App, as before
             # thread_handle() existed; a handle from this run is spent.
             self._tre_app = None

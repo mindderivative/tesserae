@@ -34,10 +34,19 @@ raises instead, since the app's own loop called it.
 M31: `FileWatcher` is the same background-thread pattern for a fixed set
 of files with no dependencies of their own -- `App.run(hot_reload=True)`
 uses it for theme and stylesheet files.
+
+M51: `ComponentWatcher` is a `ViewWatcher` for a component file
+(`tesserae.instantiate`'s `*_View.yaml`), shared by every live instance
+of it -- a `Repeater`'s rows, say. It rebuilds the spec once per edit
+and reconciles each instance from its own copy, in place, with its own
+ViewModel. A bad edit fails the trial build of the first instance,
+before any has changed, so every instance stays as it was and the error
+is logged once.
 """
 
 from __future__ import annotations
 
+import copy
 import threading
 from pathlib import Path
 from typing import Any, Callable, Optional, Tuple
@@ -48,7 +57,7 @@ from loguru import logger
 from tesserae.spec.images import Frame
 from tesserae.spec.load import build_view_spec
 
-__all__ = ["FileWatcher", "ViewWatcher"]
+__all__ = ["ComponentWatcher", "FileWatcher", "ViewWatcher"]
 
 #: `(st_mtime_ns, st_size)`, or `None` for a file that doesn't exist.
 _Stamp = Optional[Tuple[int, int]]
@@ -206,6 +215,30 @@ class ViewWatcher:
                         break  # a dependency moved to a new directory: re-watch
         except Exception as exc:  # the watcher itself failed; report it, don't die silently
             logger.opt(exception=exc).error("the hot-reload watcher for {} stopped", self._path)
+
+
+class ComponentWatcher(ViewWatcher):
+    """Watches a component file and everything it was built from, and
+    reloads every live instance of it on change (M51). `instances()`
+    returns them at reload time, so rows added or removed since are
+    counted as they are then.
+    """
+
+    def __init__(self, path: str | Path, instances: Callable[[], list[Any]], *,
+                 component_dirs: list[Path] | None = None) -> None:
+        self._instances = instances
+        super().__init__(None, path, component_dirs=component_dirs)
+
+    def _apply(self, spec: Any, frames: list[Frame]) -> None:
+        images = {node_id: (rgba, w, h) for node_id, rgba, w, h in frames}
+        live = self._instances()
+        for component in live:
+            try:
+                # each its own copy: a view keeps the spec it was given
+                component.reconcile(copy.deepcopy(spec), frames=dict(images))
+            except ValueError as exc:
+                raise ValueError(f"{self._path}: {exc}") from exc
+        logger.info("reloaded {} ({} instance(s))", self._path, len(live))
 
 
 class FileWatcher:

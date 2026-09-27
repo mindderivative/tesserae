@@ -158,3 +158,75 @@ def test_app_run_hot_reload_restyles_on_theme_and_stylesheet_edits(tmp_path: Pat
     if frames == "0":
         pytest.skip("no display reachable -- App.run() rendered no frames")
     assert seen == "restyled", result.stdout + result.stderr
+
+
+COMPONENT_SCRIPT = textwrap.dedent(
+    '''
+    import sys, time
+    from pathlib import Path
+
+    work = Path(sys.argv[1])
+    sys.path.insert(0, str(work))
+    from Home_ViewModel import HomeViewModel
+    from Row_ViewModel import RowViewModel
+    from tesserae import App, instantiate
+
+    def row_text(content):
+        return ("id: row\\nkind: Text\\ntext: {content: " + content + ", font_family: Roboto, font_size: 16}\\n"
+                'style: {width: 100, height: 20, foreground: "#000000"}\\n')
+
+    row_path = work / "Row_View.yaml"
+    row_path.write_text(row_text("Hello"))
+    view_path = work / "Home_View.yaml"
+    view_path.write_text("id: root\\nkind: Container\\nstyle: {flex_direction: vertical}\\n")
+
+    app = App(width=200, height=80, title="component_reload_live")
+    view, _ = app.load(view_path, HomeViewModel)
+    rows = [instantiate(view, row_path, RowViewModel, view.root)[0]]
+    app.show("Home")
+    handle = app.thread_handle()
+    state = {"frames": 0, "seen": None}
+    deadline = time.monotonic() + 10
+
+    def check():
+        state["frames"] += 1
+        if state["frames"] == 2:  # a row added while the app runs
+            rows.append(instantiate(view, row_path, RowViewModel, view.root)[0])
+        texts = [row.root.get("text") for row in rows]
+        if len(rows) == 2 and texts == ["Goodbye", "Goodbye"]:
+            state["seen"] = "Goodbye"
+            return
+        if time.monotonic() < deadline:
+            if state["frames"] > 2:
+                row_path.write_text(row_text("Goodbye"))  # the "editor save"
+            time.sleep(0.02)
+            handle.call_soon(check)
+        else:
+            state["seen"] = "stuck:" + ",".join(map(str, texts))
+
+    handle.call_soon(check)
+    app.run(max_frames=2000, hot_reload=True)
+    stopped = not app._watchers and not app._component_watchers  # run() stopped them, the mid-run one too
+    print("FRAMES", state["frames"], "SEEN", state["seen"], "STOPPED", stopped)
+    '''
+)
+
+
+def test_app_run_hot_reload_updates_components_added_before_and_during_the_run(tmp_path: Path):
+    """M51: a component file is watched, and every live row reloads --
+    one added before `run()` and one added while it runs."""
+    (tmp_path / "Home_ViewModel.py").write_text(
+        "from tesserae import ViewModel\n\n\nclass HomeViewModel(ViewModel):\n    pass\n"
+    )
+    (tmp_path / "Row_ViewModel.py").write_text(
+        "from tesserae import ViewModel\n\n\nclass RowViewModel(ViewModel):\n    pass\n"
+    )
+    script = tmp_path / "run_app.py"
+    script.write_text(COMPONENT_SCRIPT)
+    result = subprocess.run([sys.executable, str(script), str(tmp_path)], capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stderr
+    words = result.stdout.split()
+    frames, seen, stopped = words[1], words[3], words[5]
+    if frames == "0":
+        pytest.skip("no display reachable -- App.run() rendered no frames")
+    assert seen == "Goodbye" and stopped == "True", result.stdout + result.stderr

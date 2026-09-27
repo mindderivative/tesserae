@@ -221,6 +221,21 @@ from a file, kept by `register()`'s `move_to`), so a `build_view()`ed,
 `_Registered.path` that only `load()` set is gone. A spec-built screen is
 named in the log instead.
 
+**Hot reload for components, M51:** `ComponentWatcher` (`spec/watch.py`)
+is a `ViewWatcher` with no view of its own. `instances()` returns the
+live components built from its file at reload time, and each reconciles
+from a deep copy of the one rebuilt spec (a view keeps the spec it's
+given). A trial build fails on the first instance before any has
+changed, so a bad edit raises once. `App._live_components(path)` walks
+the screens', `build_view()`'s and following views' `_components`,
+nested ones included, pruning dead ones as it goes. `_start_watchers`
+records the loop handle and starts one watcher per file found.
+`tesserae.instantiate` calls `app.watch_component(path)` through
+`follow.app_of(window)`, which starts a watcher for a file used for the
+first time while hot reload runs and does nothing otherwise.
+`_stop_watchers` (run's `finally`) stops them all, mid-run ones
+included.
+
 **Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
 the framework (D10). Each zone is a column -- a tab strip, a divider, and
 the body registered with `window.add_dock_zone` -- since `tre` keeps a

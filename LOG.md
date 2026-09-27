@@ -1205,3 +1205,18 @@ User: "Start M51 with recommendations" (Q1-Q3 as recommended).
 - 4 tests; 7/7 mutants caught.
 
 1385 passed; all four examples clean.
+
+## M51 Phase 3: watching component files
+
+User: "Start phase 4". Phase 3 hadn't been done, so I asked, and the
+answer was "Phase 3, then 4".
+
+- `ComponentWatcher`: one per component file. It rebuilds the spec once
+  and reconciles each live instance from its own copy; a bad edit fails
+  once. `App.watch_component` is called by `instantiate`, so mid-run
+  components are watched too.
+- `_stop_watchers` stops them all at the end of `run()`.
+- 12 tests, plus a live case; 14/14 mutants caught after 5 survivors got
+  tests.
+
+1398 passed; all four examples clean.
