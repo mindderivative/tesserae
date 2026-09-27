@@ -175,4 +175,6 @@ Phase 3 done, and M48 with it; the gap moved to "Fixed gaps".
 
 Phase 2 done: `tesserae.docking.Dock`; 1337 passed.
 
-**Up next:** M45 Phase 3 (`AppShell`).
+Phase 3 done: `AppShell`, `App.use_shell`, layouts; 1349 passed.
+
+**Up next:** M45 Phase 4 (example, guide).

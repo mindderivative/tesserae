@@ -157,6 +157,7 @@ class App:
         self._window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0,
                               align_items="flex_start")
         self._current: str | None = None
+        self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
         self._tre_app: _TreApp | None = None
         self._window.on("color_scheme", self._on_color_scheme)
 
@@ -400,10 +401,30 @@ class App:
             self._registered[self._current].view.root.remove()  # detached, kept alive with its state
         root = registered.view.root
         if root.parent() is None:
-            self._window.root.add_child(root)
+            host = self._shell.content if self._shell is not None else self._window.root
+            host.add_child(root)
         self._current = name
         logger.debug("showing {!r}", name)
         return self._window
+
+    @property
+    def window(self) -> Window:
+        """The app's one window (it exists from the start, M37)."""
+        return self._window
+
+    def use_shell(self, shell: Any) -> None:
+        """Shows screens inside `shell.content` from now on (M45): an
+        `AppShell` built on this app's window -- a top app bar, navigation,
+        docked panels and a status bar around the screens. A screen already
+        showing moves into it."""
+        if getattr(shell, "window", None) is not self._window:
+            raise ValueError("App.use_shell: build the shell on this app's window (AppShell(app.window, ...))")
+        self._shell = shell
+        if self._current is not None:
+            root = self._registered[self._current].view.root
+            if root.parent() is not None:
+                root.remove()
+            shell.content.add_child(root)
 
     @property
     def current(self) -> str | None:

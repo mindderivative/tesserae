@@ -205,6 +205,17 @@ moves the panel in the model and rebuilds both strips. `move()` calls
 the model itself, since `dock_panel` fires no `dock_drop`. The `Dock` owns
 the window's two docking events, so a window has one.
 
+**The app shell, M45:** `tesserae.shell.AppShell` is a vertical box at
+100% of the window (so it follows resizes with no listener): the top
+bar, a middle row -- navigation, the left zone and its handle, a centre
+column (top zone, `content`, bottom zone) and the right zone -- and the
+status bar. Zones keep a pixel size and the content flexes, so the
+handles set a zone's size (clamped between 120 px and 70% of its area)
+rather than sharing a proportion as M42's `splitter` does. `App.show`
+mounts screens in `shell.content` once `use_shell` is called.
+`layout()` records panels by title, the shown one and each size;
+`restore()` moves panels first, then shows and sizes.
+
 **Controls, M40:** `tesserae.controls.Control` is the base of the
 stateful MD3 controls that replace `tre`'s. It holds `.node`, a
 focusable 48 px target with the control's role. A 40 px circle inside the

@@ -1087,3 +1087,16 @@ assets, issue #14 closed); the repro now behaves. `.venv` and CI pin
 `v0.3.5.1`; `Dock.move()` calls `dock_panel` and updates the model
 itself (no `dock_drop` fires); a test pins that `move` sends no pointer
 event. The known gap moved to "Fixed gaps".
+
+## M45 Phase 3: the app shell
+
+User: "Push it and start Phase 3". Pushed `00e2f2a`.
+
+- `AppShell`: bars, navigation, the dock's zones around `content`, at
+  100% of the window. Resize handles (splitter-styled) instead of M42's
+  proportional splitter, since zones keep pixel sizes as the window
+  resizes -- Q3's intent kept.
+- `App.window`, `App.use_shell`; `layout()`/`restore()` on the shell.
+- 11 tests; 16 mutants, all caught.
+
+1349 passed.

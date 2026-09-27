@@ -99,9 +99,26 @@ constructed `(view, viewmodel)` pair.
 
 **`show(name) -> Window`**
 
-Shows the view registered under `name` in the app's window, detaching
-the one shown before, which stays alive with its state. Returns the
-window, the same one every time.
+Shows the view registered under `name` in the app's window -- or in
+its shell's content, after `use_shell` -- detaching the one shown
+before, which stays alive with its state. Returns the window, the same
+one every time.
+
+## `window`
+
+**`window -> Window`**
+
+The app's one window, which exists from the start: build widgets, a
+`Dock` or an `AppShell` on it.
+
+## `use_shell`
+
+**`use_shell(shell) -> None`**
+
+Shows screens inside `shell.content` from now on (M45): an
+`AppShell(app.window, ...)` -- a top app bar, navigation, docked panels
+and a status bar around the screens. A screen already showing moves into
+it. A shell built on another window is a `ValueError`.
 
 ## `current`
 

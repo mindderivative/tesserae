@@ -78,7 +78,8 @@ class Dock:
     """The docking of one window (see the module doc). `add_zone(side,
     size)` returns the zone's node to place in the layout (an `AppShell`
     places them); `add_panel(side, node, title)` docks a panel; `show`,
-    `move`, `side_of`, `panels`, `shown`; `on_move(fn)` hears a panel
+    `move`, `side_of`, `panels`, `shown`, `titles`, `shown_title`,
+    `panel(title)`; `on_move(fn)` hears a panel
     moving, `fn(node, side)`; `set_theme(theme)` re-colours it."""
 
     def __init__(self, window: Any, *, theme: Optional[Theme] = None) -> None:
@@ -147,6 +148,19 @@ class Dock:
         """The panel `side`'s zone is showing, or `None` if it has none."""
         zone = self._zone(side)
         return next((p.node for p in zone.panels if p.node.parent() == zone.body), None)
+
+    def titles(self, side: str) -> list[str]:
+        """`side`'s panel titles, in their tabs' order."""
+        return [p.title for p in self._zone(side).panels]
+
+    def shown_title(self, side: str) -> Optional[str]:
+        shown = self.shown(side)
+        entry = self._find(shown) if shown is not None else None
+        return entry.title if entry else None
+
+    def panel(self, title: str) -> Optional[Any]:
+        """The docked panel titled `title`, or `None` (for `AppShell.restore`)."""
+        return next((p.node for z in self._zones.values() for p in z.panels if p.title == title), None)
 
     def side_of(self, panel: Any) -> Optional[str]:
         entry = self._find(getattr(panel, "node", panel))
