@@ -1035,3 +1035,16 @@ push it, then start on M45."
   reverted as a design change -- now a known gap to decide.
 
 1322 passed.
+
+## M45 scoped: docking and the app shell
+
+Started after M46 by the user's standing go-ahead (which covered pushing
+M46 only). Reported M46 to `tre` (queued).
+
+- Read 0.3.5's docking stubs and `docs/guide/docking.md` at `v0.3.5`,
+  and 0.3.4's `build_shell`; probed the wheel: a zone shows one panel by
+  keeping only it as a child; `dock_target`/`dock_drop` report a
+  headless drag; `window.on` keeps one listener per event.
+- Phases: decisions, `Dock`, `AppShell`, example/docs. Q1 a Python API
+  first; Q2 secondary tabs, tab as handle, highlight, keyboard "Move
+  to"; Q3 splitters; Q4 `layout()`/`restore()`.

@@ -169,4 +169,6 @@ Phase 3 done, and M48 with it; the gap moved to "Fixed gaps".
 
 **M46 done (2026-09-27):** on `tre` v0.3.5 (`.venv` and CI); the switch retired; 1322 passed. Click bubbling raised as a design question (a known gap).
 
-**Up next:** M45 (docking and the app shell).
+**M45 scoped (2026-09-27):** docking and the app shell on 0.3.5, 4 phases. Decisions Q1–Q4 pending: a Python `Dock` and `AppShell` first, with `App.use_shell`; MD3 secondary tabs per zone, the tab as drag handle, a `primary` drop highlight and a keyboard "Move to" menu; splitters between zones and content; `dock.layout()`/`restore()`.
+
+**Up next:** M45 decisions.

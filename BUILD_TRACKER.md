@@ -54,7 +54,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M42 — Widgets III: Search, Date and Time, Media, the Node Graph, the Rest, Off the Window's Theme | `██████████` 100% | ✅ Complete — all 8 phases done (2026-09-26) |
 | M43 — Migration Gate: Off `tre`'s Removed API | `██████████` 100% | ✅ Complete — all 5 phases done (2026-09-26) |
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
-| M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, after M46 (2026-09-26) |
+| M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q4 pending (2026-09-27) |
 | M46 — Move to `tre` 0.3.5 | `██████████` 100% | ✅ Complete (2026-09-27) |
 | M47 — Bindable Accessibility | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M48 — Hot Reload for `register()`ed Screens | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-27) |
@@ -73,7 +73,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M45** (docking and the app shell, on 0.3.5's docking API), started by the user's standing go-ahead. Named, un-scoped candidates: nested clicks going to the innermost only, hot reload for runtime components (`tesserae.instantiate`), and `tesserae.widgets` controls following the app's theme by themselves.
+**Up next:** **M45** (docking and the app shell) is scoped, 4 phases, on 0.3.5's docking API; decisions Q1–Q4 wait on the user. Named, un-scoped candidates: nested clicks going to the innermost only, hot reload for runtime components (`tesserae.instantiate`), and `tesserae.widgets` controls following the app's theme by themselves.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1297,10 +1297,27 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 - Step 2: docs: new `guide/logging.md` (in the nav) — setup, what's logged at each level, failed reloads, warnings, turning messages off; `guide/hot-reload.md` and `api/spec.md` say failures are logged; `api/index.md` lists `configure_logging`; `README.md`; `ARCHITECTURE.md` gained a logging note and lost a stale M31-era line saying theme and stylesheet files weren't watched. `mkdocs build --strict` clean — ✅
 ## Milestone 45 — Docking and the App Shell
 
-**Status: ⬜ Proposed — approved, after M46 (2026-09-26).** Moved out of M42 by its Q2 (user: as recommended); after M46 since M43's Q3 moved the move to 0.3.5 there. `tre` keeps docking as a bare mechanism (D10) and moves its presentation and `build_shell` to the framework. The framework-side API is 0.3.5's (`dock_target`/`dock_drop` window events, `set_active_panel`), not 0.3.4's, so this waits until Tesserae is on 0.3.5 (M43).
+**Status: ⬜ Scoped — decisions Q1–Q4 pending (2026-09-27).** Moved out of M42 by its Q2 (user: as recommended); after M46. Started by the user's standing go-ahead ("start M46 and push it, then start on M45"), which covered pushing M46, not M45. `tre` 0.3.5 keeps docking as a bare mechanism (D10) and leaves its presentation and `build_shell` to the framework. Scoped from 0.3.5's stubs and `docs/guide/docking.md` (read at `v0.3.5`), 0.3.4's `build_shell`/docking source for what it did, and a probe on the 0.3.5 wheel.
 
-### Phase 1 — Docking and the Shell ⬜
-- Step 1: docking presentation on 0.3.5's bare-bones docking: tab strips for zones (`set_active_panel`), drag handles, and drop highlights drawn from `dock_target`, committed on `dock_drop`; an app shell composing a top app bar, navigation, docked panels and a status bar (what `build_shell` did) — ⬜
+**What 0.3.5 gives** (probed): `window.add_dock_zone(side, container, size)` registers a node the app builds as `left`/`right`/`top`/`bottom`/`center`'s zone; `dock_panel(side, panel)` docks a panel there and shows it; a zone shows one panel at a time by keeping only that panel as its child, and `set_active_panel(side, index)` swaps it; `start_panel_drag(panel)`, called from the framework's own handle's `pointer_down`, runs a drag whose `dock_target` window event reports the zone under the pointer (`event.side`, or `None`) and whose release docks the panel there and reports `dock_drop` (`event.panel`, `event.side`); a headless test drives it with `simulate`. `window.on` keeps one listener per event, so one docking manager must own `dock_target`/`dock_drop` for a window. **What 0.3.4 did that's gone:** `build_shell(menu_bar, toolbar, status_bar)` put those regions in a column around a `flex_grow` content container and returned it; `set_dock_handle`/`set_drop_zone_highlight` drew the handle and a highlight, with no tab strip for a zone's panels. MD3 has no docking component; its closest guidance is panes and tabs.
+
+**Decisions to settle:**
+- Q1 **The API.** Recommended: **a Python API first** -- `tesserae.docking.Dock(window)` (zones, panels with a title and optional icon, the drag, the highlight; it owns the window's docking events) and `tesserae.shell.AppShell(window, top_app_bar=, navigation=, status_bar=, dock=)` returning the content region; `App` gains `app.use_shell(shell)` so `show()` mounts screens in the shell's content instead of the window's root. A YAML form of the shell waits until the Python one has been used. Alternative: a declarative shell (a `*_Shell.yaml`) from the start.
+- Q2 **How a zone looks and is used.** Recommended: **MD3's secondary tabs** as each zone's strip of panel titles (a click or Enter shows a panel; the arrows move between tabs), the **tab itself as the drag handle** (a press starts `start_panel_drag`), and a **`primary` highlight** over the target zone while dragging (12% fill, a 2 px outline, MD3's dragged state layer on the tab). Since `tre`'s drag is pointer-only, **each tab's context menu offers "Move to left/right/bottom"** (M41's `Menu.attach_context`, and Shift+F10 / the Menu key when focused), so keyboard and screen-reader users can move panels. Alternative: a plain drag handle bar per panel, pointer only.
+- Q3 **Resizing zones.** Recommended: **yes, with M42's `splitter`** between each side zone and the content, the zone's `size` its starting share, so a user can widen the inspector. Alternative: fixed sizes (as `add_dock_zone`'s `size` gives), resizing later.
+- Q4 **Remembering a layout.** Recommended: **`dock.layout()` / `dock.restore(layout)`** -- which panel is in which zone, which is shown, and the splitters' positions, as plain data an app can save -- but no automatic saving. Alternative: leave it out for now.
+
+### Phase 1 — Decisions ⬜
+- Step 1: Q1–Q4 above — ⬜
+
+### Phase 2 — Docking ⬜
+- Step 1: by Q1–Q2: `tesserae.docking.Dock` -- zones registered with `add_dock_zone`, panels with titles, each zone's tab strip (`set_active_panel`), the tab as drag handle (`start_panel_drag`), the `dock_target` highlight and `dock_drop` re-drawing both zones' strips, the keyboard "Move to" menu, MD3 theming and re-theming, a11y (`tablist`/`tab`, the panel as `tabpanel`). Headless tests with `simulate`, mutation-checked — ⬜
+
+### Phase 3 — The App Shell ⬜
+- Step 1: by Q1, Q3–Q4: `tesserae.shell.AppShell` composing a top app bar or toolbar, navigation (rail or drawer), the dock's zones with splitters, the content region and a status bar, sized to the window and following resizes; `App.use_shell` mounting screens in the content (switching screens there, hot reload unchanged); `dock.layout()`/`restore()`. Tests, mutation-checked — ⬜
+
+### Phase 4 — Example, Docs, Tracker ⬜
+- Step 1: a new `examples/app_shell/` (a navigation rail, two screens, docked panels you can drag, retab and resize, a status bar), run in CI; a new guide page, "App Shell & Docking", and the API index; `ARCHITECTURE.md`; tracker, artifact, `PLAN.md`/`LOG.md` — ⬜
 
 ---
 
