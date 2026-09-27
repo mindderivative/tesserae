@@ -56,6 +56,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M44 — Logging with loguru | `██████████` 100% | ✅ Complete (2026-09-25) |
 | M45 — Docking and the App Shell | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, after M46 (2026-09-26) |
 | M46 — Move to `tre` 0.3.5 | `░░░░░░░░░░` 0% | ⬜ Proposed — approved, waits on `tre`'s 0.3.5 release (2026-09-26) |
+| M47 — Bindable Accessibility | `░░░░░░░░░░` 0% | ⬜ Scoped — decisions Q1–Q3 pending (2026-09-27) |
 
 **Just closed:** M43 (2026-09-26), all 5 phases — the migration gate: the parity tests replay `tre`'s answers recorded on 0.3.4, `tre`'s switch is vendored and in CI, and CI run 36293860118 is green plain and switched (1287 passed with the switch on; examples clean). Confirmed to `tre` (its M97 Phase 2 Step 6); `tre` verified it and closed its M97 (`c348333`), so its M99 can start when the user says. Before that, M42 (all 8 phases).
 
@@ -71,7 +72,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** **M46** (move to `tre` 0.3.5) waits on `tre` finishing its M99–M103 and releasing 0.3.5 (its M100 Step 3 sends an updated `_removed.py` first if its renames go further, to rerun the gate); then M45 (docking and the app shell, on 0.3.5's API). Nothing else is scoped; named, un-scoped candidates: hot reload for `App.register()`ed screens, bindable `a11y:`, and `tesserae.widgets` controls following the app's theme by themselves.
+**Up next:** **M47** (bindable accessibility) is scoped: `a11y:` fields that follow a `Signal`; decisions Q1–Q3 wait on the user. **M46** (move to `tre` 0.3.5) waits on `tre`'s release (an updated `_removed.py` comes first if its renames go further); then M45 (docking and the app shell). Named, un-scoped candidates: hot reload for `App.register()`ed screens, and `tesserae.widgets` controls following the app's theme by themselves.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -80,7 +81,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (tre's did the same); fine for a handful of pages, crowded for dozens (M42 Phase 5).
 - **The `SpinBox` fragment has no behaviour.** It's a composition of Rects and a TextField, since there's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5).
 - **`tesserae.widgets`' stateful controls don't follow the app's theme by themselves.** They take `theme=` (MD3's baseline without one) and don't hear `App.set_dark`; YAML controls in a view do (M40 Phase 5).
-- **`a11y:` isn't bindable.** A label or role in YAML is fixed; binding one to a `Signal` (a live status, say) isn't supported yet (M39 Phase 3).
+- **`a11y:` isn't bindable.** A label or role in YAML is fixed; binding one to a `Signal` (a live status, say) isn't supported yet (M39 Phase 3). Scoped as M47.
 - 67 of ~68 real MD3 widgets now have a declarative `*_Component.yaml` fragment; `video`/`node_graph`/`graph_node` are the only real remaining structural blockers (see below), plus `extended_fab`'s own deliberately deferred gap.
 - `video` still has no full, faithful declarative fragment -- [`tre` issue #2](https://github.com/mindderivative/tre/issues/2) (M25's own real blocker) is now closed (`tre` v0.3.1 made `ImageSpec.src` optional, so `kind: Image` with no `src:` produces the exact synthetic blank placeholder `add_video` already builds), narrowing this to a real, smaller remaining gap: a fragment can now declare the placeholder, but real video content still needs the app to fetch the resulting `Node` and call `push_frame` imperatively afterward -- no way for a one-shot static fragment expansion to wire that up on its own.
 - `graph_node` is structurally unfragmentable — needs a live node reference as its own attachment parent, which the macro layer's textual expansion cannot express (M25, reclassified from "no `NodeKindSpec`" — the real blocker is different).
@@ -1306,3 +1307,28 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 1 — The Move ⬜
 - Step 1: pin `.venv` and CI to the `tre` 0.3.5 release; drop the vendored `tests/tre_removed.py` and the second CI run, since the names are simply gone; retire the reference recorder's 0.3.4-only paths; fix whatever 0.3.5's renames (its M100) still reach; check the behaviour changes a name switch can't catch, per `tre`'s `docs/migrating-0.3.5.md`: `on("click")` bubbles and no longer makes a node focusable (Tesserae sets `focusable=True` itself), `set(text=...)` fires no change event, a canvas draws when created, a virtual list builds its own rows (its `materialize` returns a node), a negative wheel `delta_y` over a terminal scrolls into its history, Ctrl+A selects all in a text input, and the clipboard keeps what the app wrote; the suite and examples green on 0.3.5; docs (installation, README), tracker — ⬜
+
+---
+
+## Milestone 47 — Bindable Accessibility
+
+**Status: ⬜ Scoped — decisions Q1–Q3 pending (2026-09-27).** User: "Scope the a11y bindable gap as M47". Closes the known gap from M39 Phase 3: a YAML node's `a11y:` fields are fixed when the view is built, so a live status, a count in a label ("3 unread messages") or a panel hidden from screen readers while collapsed can't follow a `Signal`. Runs on 0.3.4 and is independent of `tre`'s release, so it needn't wait for M46.
+
+**How it works today** (read from the source): `spec/build.py` checks `a11y:` (`_a11y_fields`: `label`, `role`, `hidden`, `live`, `level`, through `tesserae.a11y.check`) and sets it once, at build and on each patch (`_a11y_props`, which also makes a clickable node a focusable `button` and resets dropped fields). Bindings are separate: `bindings: {prop: "{{ expr }}"}`, evaluated with dependency tracking by `View._wire_binding` and applied by `view._apply`, which knows text, sizes, colours, elevation and the controls' state -- nothing accessible. The macro layer substitutes only a bare `{{ name }}` in fragments, so `{{ status.get() }}` passes through expansion untouched, as `bindings:` already do. `tre` 0.3.4 can't report what a screen reader announces, so tests check the node's properties (`label`, `a11y_hidden`, `level`), not the speech.
+
+**Decisions to settle:**
+- Q1 **Where a binding is written.** Recommended: **inside `a11y:` itself** -- `a11y: {label: "{{ unread.get() }} unread messages", live: polite}` -- so an accessible field reads the same bound or not, in the one expression language views already use; a value that contains `{{ }}` is a binding, anything else stays fixed and checked at build as now. Alternative: dotted keys in `bindings:` (`bindings: {"a11y.label": "{{ ... }}"}`), which keeps every binding in one place but splits a node's accessibility across two fields.
+- Q2 **Which fields can be bound.** Recommended: **`label`, `hidden` and `level`** -- values that change as the app runs. `role` and `live` stay fixed and a binding on them is an error naming the field: a role decides what the node is (and, for a clickable node, its focus and `button` role), and `live` is how changes are announced, a design choice rather than state. Alternative: all five.
+- Q3 **Python widgets.** `tesserae.widgets`' factories and `tesserae.controls` take `label=` as a string. Recommended: **also add `tesserae.a11y.bind(node, label=..., hidden=..., level=...)`**, taking a `Signal`, `Computed` or zero-argument function per field and returning the function that stops it, so an imperative widget's label can follow state as a YAML one can. Alternative: YAML only.
+
+### Phase 1 — Decisions ⬜
+- Step 1: Q1–Q3 above — ⬜
+
+### Phase 2 — Bound `a11y:` in Views ⬜
+- Step 1: by Q1–Q2: the compiler leaves a bound field for the view to set (a fixed one is checked and set as now); `View` wires each bound field like `bindings:` (dependency-tracked, re-evaluated, unchanged values not set again) onto the node that carries accessibility (a TextField's `text_input`, a Link's box), type-checked with `tesserae.a11y`'s rules and errors naming the widget and field; the value survives a patch, reconcile, re-theme and re-style (the patch mustn't reset a bound field to its default); a Link bound label still wins over its text; errors for a bound `role`/`live`; components and fragments too. Tests, mutation-checked — ⬜
+
+### Phase 3 — Python: `tesserae.a11y.bind` ⬜
+- Step 1: by Q3: `a11y.bind(node, **fields)` with `Effect`s, validated as `describe` is, returning a stopper; usable on any widget's `.node` or part and a control's target. Tests, mutation-checked — ⬜
+
+### Phase 4 — Tests, Docs, Tracker ⬜
+- Step 1: an example screen with a live, bound status label (`counter`'s, say); docs: the interaction guide's `a11y:` section and its "Not yet covered" bullet, the bindings guide, `ARCHITECTURE.md`; the known gap moved to "Fixed gaps"; tracker, artifact, `PLAN.md`/`LOG.md` — ⬜

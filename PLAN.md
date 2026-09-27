@@ -149,4 +149,6 @@ Phase 4 done: `tre`'s switch vendored and in CI (the suite and examples run plai
 
 Phase 5 done, and M43 with it: CI run 36293860118 green plain and switched (1287 passed with the switch on); confirmed to `tre` (its M97 Phase 2 Step 6).
 
-**Up next:** M46 (move to `tre` 0.3.5), waiting on `tre`'s release; then M45.
+**M47 scoped (2026-09-27):** bindable accessibility, 4 phases -- `a11y:` fields that follow a `Signal`, in YAML and (Q3) from Python. Decisions Q1–Q3 pending: bindings written inside `a11y:`; `label`/`hidden`/`level` bindable, `role`/`live` fixed; a Python `tesserae.a11y.bind`.
+
+**Up next:** M47 decisions. M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.

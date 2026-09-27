@@ -915,3 +915,17 @@ read through the GitHub API). `tests/tre_removed.py` updated; both names
 raise under the switch. Zero `RemovedError`s: 1289 passed switched, 1288
 plain, examples clean. `tre`'s list of behaviour changes a name switch
 can't catch went into M46's step. Reported back.
+
+## M47 scoped: bindable accessibility
+
+User: "Scope the a11y bindable gap as M47".
+
+- Read `spec/build.py` (`_a11y_fields`, `_a11y_props`) and `view.py`
+  (`_wire_binding`, `_apply`): `a11y:` is set once per build or patch;
+  bindings know nothing accessible.
+- The macro layer substitutes only a bare `{{ name }}`, so binding
+  expressions pass through fragments. `tre` 0.3.4 can't report speech,
+  so tests read `label`/`a11y_hidden`/`level`.
+- Phases: decisions, bound `a11y:` in views, `tesserae.a11y.bind` for
+  Python, tests/docs. Q1 inside `a11y:`, Q2 `label`/`hidden`/`level`
+  (not `role`/`live`), Q3 the Python helper.
