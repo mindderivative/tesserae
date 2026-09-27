@@ -161,17 +161,15 @@ class Dock:
 
     def move(self, panel: Any, side: str) -> None:
         """Moves `panel` to `side`'s zone and shows it there, as a drag
-        would. `tre` 0.3.5 moves a docked panel only by a drag (its
-        `dock_panel` on a docked panel leaves it listed in the old zone
-        too), so this runs one: `start_panel_drag`, released over the
-        target zone."""
+        would (`tre` 0.3.5.1's `dock_panel` moves a docked panel; 0.3.5's
+        left it listed in its old zone, `tre` issue #14)."""
         entry = self._require(panel)
-        target = self._zone(side)
+        self._zone(side)
         if entry.side == side:
             self.show(panel)
             return
-        self.window.start_panel_drag(entry.node)
-        self.window.simulate("pointer_up", node=target.body)
+        self.window.dock_panel(side, entry.node)
+        self._moved(entry, side)
 
     def on_move(self, fn: Callable[[Any, str], Any]) -> Callable[[], None]:
         """Calls `fn(node, side)` when a panel moves zone. Returns the stopper."""
@@ -286,15 +284,19 @@ class Dock:
         entry = self._find(event.panel) if event.panel is not None else None
         if entry is None or event.side is None or event.side == entry.side or event.side not in self._zones:
             return
-        old, new = self._zones[entry.side], self._zones[event.side]
+        self._moved(entry, event.side)
+
+    def _moved(self, entry: _Panel, side: str) -> None:
+        """`tre` has moved `entry` to `side` (a drop, or `move`): follow it."""
+        old, new = self._zones[entry.side], self._zones[side]
         old.panels.remove(entry)
-        entry.side = event.side
+        entry.side = side
         new.panels.append(entry)
         self._rebuild(old)
         self._rebuild(new)
         new.tabs[new.panels.index(entry)].node.focus()
         for fn in list(self._moves):
-            fn(entry.node, event.side)
+            fn(entry.node, side)
 
     # -- the "Move to" menu --------------------------------------------------
 

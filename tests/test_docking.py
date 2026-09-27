@@ -150,6 +150,22 @@ def test_move_and_the_keyboard_menu_move_a_panel_without_a_pointer():
     assert dock.side_of(panels["Files"]) == "center" and dock.panels("center") == [panels["Files"]]
 
 
+def test_move_uses_tres_dock_panel_not_a_simulated_drag():
+    """`tre` 0.3.5.1 fixed `dock_panel` for a docked panel (`tre` issue
+    #14), so `move` sends no pointer events and hears no `dock_drop`."""
+    window, dock, panels = _dock()
+    pointer = []
+    target = dock._zones["right"].body
+    target.on("pointer_up", lambda e: pointer.append("up"))
+    moves = []
+    dock.on_move(lambda node, side: moves.append(side))
+    dock.move(panels["Files"], "right")
+    assert pointer == [] and moves == ["right"]
+    assert dock.panels("left") == [panels["Search"]] and dock.shown("right") == panels["Files"]
+    dock.show(panels["Search"])  # the old zone's list is right: index 0 is Search
+    assert dock.shown("left") == panels["Search"]
+
+
 def test_a_right_click_opens_the_menu_at_the_pointer():
     window, dock, _ = _dock()
     tab = _tabs(dock, "left")[0]

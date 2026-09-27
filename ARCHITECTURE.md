@@ -199,10 +199,11 @@ where the drop highlight goes). Tabs are built with `window.create`, each
 with an `Interaction`, and rebuilt when a zone's panels change. A press
 starts `start_panel_drag` only once the pointer has moved 4 px, so a
 click still selects; `dock_target` moves the highlight and `dock_drop`
-moves the panel in the model and rebuilds both strips. `move()` runs the
-same drag with a synthetic release over the target, because `tre`'s
-`dock_panel` on a docked panel leaves it listed in the old zone too. The
-`Dock` owns the window's two docking events, so a window has one.
+moves the panel in the model and rebuilds both strips. `move()` calls
+`dock_panel`, which moves a docked panel since `tre` 0.3.5.1 (`tre` issue
+#14; on 0.3.5 it ran a drag with a synthetic release instead), and updates
+the model itself, since `dock_panel` fires no `dock_drop`. The `Dock` owns
+the window's two docking events, so a window has one.
 
 **Controls, M40:** `tesserae.controls.Control` is the base of the
 stateful MD3 controls that replace `tre`'s. It holds `.node`, a

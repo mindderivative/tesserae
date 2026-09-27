@@ -44,13 +44,13 @@ reloads, failed reloads naming the file, and warnings. Call
 
 ## Install (development)
 
-Tesserae targets **`tre` v0.3.5** (the release its CI pins). Install that
+Tesserae targets **`tre` v0.3.5.1** (the release its CI pins). Install that
 `tre` first -- the wheel for your platform from the
-[v0.3.5 release](https://github.com/mindderivative/tre/releases/tag/v0.3.5),
+[v0.3.5.1 release](https://github.com/mindderivative/tre/releases/tag/v0.3.5.1),
 or built from the tag -- then Tesserae itself:
 
 ```bash
-pip install /path/to/tre-0.3.5-<your-platform>.whl
+pip install /path/to/tre-0.3.5.1-<your-platform>.whl
 pip install -e ".[dev]"
 ```
 

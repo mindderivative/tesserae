@@ -1079,3 +1079,11 @@ https://github.com/mindderivative/tre/issues/14 with a repro on the 0.3.5
 wheel: `dock_panel` on a docked panel leaves it in the old zone's list;
 `set_active_panel` there then makes it a child of both zones. Listed as a
 known gap; `Dock.move()` keeps its drag workaround.
+
+## tre 0.3.5.1: issue #14 fixed
+
+`tre`'s session reported v0.3.5.1. Checked on GitHub (published, 24
+assets, issue #14 closed); the repro now behaves. `.venv` and CI pin
+`v0.3.5.1`; `Dock.move()` calls `dock_panel` and updates the model
+itself (no `dock_drop` fires); a test pins that `move` sends no pointer
+event. The known gap moved to "Fixed gaps".
