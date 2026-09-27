@@ -21,15 +21,14 @@ app.load("Home_View.yaml", HomeViewModel)
 app.load("Settings_View.yaml", SettingsViewModel, stylesheet="styles/Settings.yaml")
 ```
 
-The theme is app-wide because in `tre` a theme belongs to the window.
-The window's theme is what widgets from `tesserae.widgets` (and `tre`'s
-hover and press tints on them) use, and switching screens never changes
-it. A YAML node's own state layer and ripple use the view's theme
-([Interaction & Accessibility](interaction.md)).
-`app.show()` gives the window the same theme as the screens: the same
-seed (`theme_seed=` first, then the custom theme's `seed:`, then the
-default theme's) and both themes' `colors:`. An app with no seed
-anywhere leaves the window unthemed, as `tre` does. A stylesheet belongs
+The theme is app-wide: every screen gets it, switching screens never
+changes it, and `app.theme` is it resolved (the seed: `theme_seed=`
+first, then the custom theme's `seed:`, then the default theme's; both
+themes' `colors:`). A YAML node's state layer and ripple use it too
+([Interaction & Accessibility](interaction.md)). Widgets you create with
+`tesserae.widgets` take their own `theme=` (pass `app.theme`). Since
+M42, `tre`'s window has no theme of its own: nothing `tre` draws for
+Tesserae reads one. A stylesheet belongs
 to a single view, so it can differ per screen. For a screen you pass to `App.register()`, build its view with
 `app.build_view("Foo_View.yaml")` so it gets the same theme and
 stylesheet.
@@ -162,19 +161,15 @@ a theme file does this for you ([Hot Reload](hot-reload.md#theme-and-stylesheet-
 `app.set_stylesheet_spec(stylesheet_spec)` does the same for the app's
 default stylesheet, re-styling every screen that uses it.
 
-For a single view or window, `load_theme` and `load_stylesheet` read a
-file into the dict `tre` takes, for `View.set_theme` and
-`Window.set_theme`:
+For a single view, `load_theme` and `load_stylesheet` read a file into
+the dict the `*_spec=` arguments take, for `View.set_theme` and
+`App.set_theme_specs`:
 
 ```python
 from tesserae.spec import load_theme
 
 view.set_theme(theme_seed=seed, custom_theme_spec=load_theme("themes/Dark.yaml"))
-window.set_theme(seed, custom_theme_spec=load_theme("themes/Dark.yaml"))
 ```
-
-Use the `*_spec=` arguments with these, not `tre`'s path arguments, so
-`tre` is never handed a file.
 
 ## Custom fonts
 

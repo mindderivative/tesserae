@@ -36,10 +36,8 @@ EXTENDED_FAB_VARIANTS = [
 THEME_SEED = (0x67, 0x50, 0xA4, 0xFF)
 
 
-def _themed_window(width=300, height=300):
-    window = Window(width=width, height=height)
-    window.set_theme(THEME_SEED)
-    return window
+def _window(width=300, height=300):
+    return Window(width=width, height=height)
 
 
 def test_all_icon_button_variants_match_the_imperative_catalog():
@@ -57,7 +55,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("b")
 
-        window = _themed_window(200, 200)
+        window = _window(200, 200)
         imperative = icon_button(window, "settings", size=40, variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
@@ -79,7 +77,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("b")
 
-        window = _themed_window(200, 200)
+        window = _window(200, 200)
         imperative = fab(window, "add", size="default", variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
@@ -101,7 +99,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("b")
 
-        window = _themed_window(300, 100)
+        window = _window(300, 100)
         imperative = extended_fab(window, "Compose", 160, icon="add", variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name

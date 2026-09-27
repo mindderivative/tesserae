@@ -27,10 +27,8 @@ CHIP_CASES = [
 ]
 
 
-def _themed_window(width=300, height=200):
-    window = Window(width=width, height=height)
-    window.set_theme(THEME_SEED)
-    return window
+def _window(width=300, height=200):
+    return Window(width=width, height=height)
 
 
 def test_all_card_variants_match_the_imperative_catalog():
@@ -48,7 +46,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("c")
 
-        imperative = card(_themed_window(), 200, 100, variant=variant).node  # a Widget since M41
+        imperative = card(_window(), 200, 100, variant=variant).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert elevation(declarative) == elevation(imperative), component_name
@@ -70,7 +68,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("c")
 
-        imperative = chip(_themed_window(), "Tag", 100, variant=variant, selected=selected).node  # a Widget since M41
+        imperative = chip(_window(), "Tag", 100, variant=variant, selected=selected).node  # a Widget since M41
 
         assert declarative.get("corner_radius") == imperative.get("corner_radius"), component_name
         assert declarative.get("border_width") == imperative.get("border_width"), component_name
@@ -104,7 +102,7 @@ children:
     expanded = expand_components(yaml_text)
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("d")
-    imperative = badge(_themed_window()).node  # a Widget since M41
+    imperative = badge(_window()).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -121,7 +119,7 @@ children:
     expanded = expand_components(yaml_text)
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("p")
-    imperative = badge(_themed_window(), label="3", width=20).node  # a Widget since M41
+    imperative = badge(_window(), label="3", width=20).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -138,7 +136,7 @@ children:
     expanded = expand_components(yaml_text)
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("d")
-    imperative = divider(_themed_window(), 200).node  # a Widget since M41
+    imperative = divider(_window(), 200).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -208,7 +206,6 @@ children:
     declarative = view.node("docs")
 
     window = Window(width=200, height=100)
-    window.set_theme(THEME_SEED)
     imperative = link(window, "Docs", width=60)  # a Widget since M41
 
     # a Link is a box (role, focus, events) holding its text since M41

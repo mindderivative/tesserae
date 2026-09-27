@@ -135,4 +135,6 @@ Phase 5 done: the segmented button, pagination and the `Popover` overlay; 1273 p
 
 Phase 6 done: the carousel and the splitter; 1287 passed.
 
-**Up next:** M42 Phase 7 (off the window's theme).
+Phase 7 done: `App` off the window's theme; 1287 passed.
+
+**Up next:** M42 Phase 8 (tests, docs, the gate).

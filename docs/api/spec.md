@@ -102,9 +102,9 @@ used while `start()`'s thread is running. See [Hot Reload](../guide/hot-reload.m
 
 **`load_theme(path) -> dict`** · **`load_stylesheet(path) -> dict`**
 
-Read a theme or stylesheet YAML file into the dict `tre`'s `*_spec=`
+Read a theme or stylesheet YAML file into the dict the `*_spec=`
 arguments take -- for `View.set_theme(custom_theme_spec=...)` or
-`Window.set_theme(seed, custom_theme_spec=...)`. An empty file is an
+`App.set_theme_specs(...)`. An empty file is an
 empty dict; a file that isn't a mapping, or isn't valid YAML, raises
 `ValueError` naming it. `load_theme` also issues a
 `FontFallbackWarning` for any `typography:` font family that isn't

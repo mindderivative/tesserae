@@ -17,10 +17,8 @@ from tesserae.widgets import node_graph
 THEME_SEED = (0x67, 0x50, 0xA4, 0xFF)
 
 
-def _themed_window(width=400, height=300):
-    window = Window(width=width, height=height)
-    window.set_theme(THEME_SEED)
-    return window
+def _window(width=400, height=300):
+    return Window(width=width, height=height)
 
 
 def test_node_graph_matches_the_imperative_catalog():
@@ -37,7 +35,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("ng")
 
-    imperative = node_graph(_themed_window(), 360, 200).node  # a Widget since M42
+    imperative = node_graph(_window(), 360, 200).node  # a Widget since M42
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)

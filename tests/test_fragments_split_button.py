@@ -39,7 +39,6 @@ children:
         trailing = view.node("b.trailing")
 
         window = Window(width=300, height=200)
-        window.set_theme(THEME_SEED)
         widget = split_button(window, "Send", 100, 40, variant=variant)  # a Widget since M41
         imp_leading, imp_trailing = widget.part("leading"), widget.part("trailing")
 

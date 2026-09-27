@@ -76,7 +76,7 @@ reload, so a newly added include, fragment or image is picked up.
 `App.run(hot_reload=True)` also watches the theme files given to
 `App(default_theme=..., custom_theme=...)`. When you save one, Tesserae
 re-reads both on the watcher thread, then re-themes every screen built
-by `app.load()` or `app.build_view()`, and the window, through
+by `app.load()` or `app.build_view()` through
 `app.set_theme_specs(...)`. Bound values stay live. A theme given as a
 `*_spec=` dict has no file, so it isn't watched. A broken edit is logged
 at `ERROR` like a failed view reload, and the app keeps its previous theme.

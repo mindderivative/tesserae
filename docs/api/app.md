@@ -19,18 +19,17 @@ created (a screen's own stylesheet file is read when that screen
 loads), and `tre` is given only the parsed data. Passing a file and its `*_spec=` twin together raises
 `ValueError`. See [Themes & Fonts](../guide/themes-and-fonts.md).
 
-The theme is app-wide rather than per screen because in `tre` a theme
-belongs to the window. Building a view never themes the window, and
-switching screens never changes it, so `show()` gives the window the
-app's theme the first time it opens. Widgets created with
-`tesserae.widgets`, and `tre`'s hover and press tints on them, use it.
+The theme is app-wide rather than per screen: every screen gets it, and
+`app.theme` is it resolved (a `tesserae.Theme`), which widgets created
+with `tesserae.widgets` take as `theme=`. Since M42 the window itself has
+no theme: nothing `tre` draws reads one.
 
 ## `set_theme_specs`
 
 **`set_theme_specs(default_theme_spec, custom_theme_spec) -> None`**
 
 Re-themes the running app in place: every view `load()` or
-`build_view()` made, and the window. Views built later use the new
+`build_view()` made. Views built later use the new
 theme too. Both dicts are the complete new selection (`None` for none).
 The seed and the light/dark appearance stay as they are. Bound values stay live.
 If `tre` rejects the theme, it raises, and the app keeps its old theme.
@@ -40,7 +39,7 @@ theme file changes.
 ## Light and dark
 
 `dark="system"` (the default) follows the OS: when it switches between
-light and dark, every screen and the window are re-themed in place, with
+light and dark, every screen is re-themed in place, with
 bound values kept. It **starts dark**, because `tre` 0.3.4 can't read the
 OS's appearance until the first switch. `dark=True` or `dark=False` fixes
 the appearance, whatever the OS does.

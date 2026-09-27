@@ -107,7 +107,7 @@ STYLE_SCRIPT = textwrap.dedent(
     app = App(width=200, height=80, title="style_reload_live",
               theme_seed=(0x67, 0x50, 0xA4, 0xFF), custom_theme=theme, stylesheet=sheet)
     view, _ = app.load(view_path, HomeViewModel)
-    window = app.show("Home")
+    app.show("Home")
     handle = app.thread_handle()
     state = {"frames": 0, "seen": None}
     deadline = time.monotonic() + 10
@@ -116,7 +116,7 @@ STYLE_SCRIPT = textwrap.dedent(
     def check():
         state["frames"] += 1
         box = view.node("box")
-        got = (box.get("shadows"), box.get("corner_radius"), window.theme.role("primary"))
+        got = (box.get("shadows"), box.get("corner_radius"), app.theme.role("primary"))
         if got == (elevation_shadows(5), 9.0, (0, 0, 255, 255)):
             state["seen"] = "restyled"
             return
@@ -137,7 +137,7 @@ STYLE_SCRIPT = textwrap.dedent(
 
 def test_app_run_hot_reload_restyles_on_theme_and_stylesheet_edits(tmp_path: Path):
     """M31: editing the theme file and the default stylesheet file while
-    the app runs re-styles the live screen and re-themes the window."""
+    the app runs re-styles the live screen and re-themes the app."""
     (tmp_path / "Home_ViewModel.py").write_text(
         "from tesserae import ViewModel\n\n\nclass HomeViewModel(ViewModel):\n    pass\n"
     )

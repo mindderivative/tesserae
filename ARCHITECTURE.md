@@ -135,12 +135,12 @@ theme and stylesheet, and follow them.
 
 **Themes (M30):** one theme per `App` -- `App(theme_seed=, dark=,
 default_theme=, custom_theme=)` -- because in `tre` a theme belongs to
-the window (`Window.show_view` never switches it). M31: `tre` keeps a
-view's theme (its YAML nodes) apart from the window's (imperative
-widgets, interaction tints), and building a `View` never sets the
-window's, so `App.show()` calls `Window.set_theme` with the app's theme,
-resolved the way a `View` resolves it. `App.set_theme_specs()` re-themes
-every built screen and the window; `run(hot_reload=True)` calls it when a
+the window (`Window.show_view` never switches it). M31 had `App.show()`
+call `Window.set_theme` too, for `tre`'s imperative widgets and tints;
+M42 Phase 7 removed that, since nothing `tre` draws reads the window's
+theme any more (and `tre` 0.3.5 removes `Window.set_theme`).
+`App.set_theme_specs()` re-themes every built screen;
+`run(hot_reload=True)` calls it when a
 theme file changes (a `FileWatcher` thread). Stylesheet files are
 watched too: `App.set_stylesheet_spec()` re-applies the default to every
 screen using it, and a screen's own file re-styles the screens built with
@@ -156,8 +156,7 @@ tokens -- replacing `tre`'s `Window.theme` for Tesserae's own widgets
 Link; not text inputs), carried on the cascade's prepared layers.
 `App(dark="system")` is the default: it starts dark and follows the
 window's `color_scheme` event; `set_dark` fixes or releases it. `App`
-still calls `Window.set_theme` for `tre`'s own widgets (`tesserae.widgets`'
-composed ones) until M41.
+no longer themes the window (M42 Phase 7).
 
 **Interaction, M39:** a clickable YAML node is a focusable
 `role="button"` Tab stop (the compiler sets it, as `tre`'s

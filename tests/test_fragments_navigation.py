@@ -16,10 +16,8 @@ from tesserae.widgets import status_bar, toolbar, top_app_bar
 THEME_SEED = (0x67, 0x50, 0xA4, 0xFF)
 
 
-def _themed_window(width=300, height=200):
-    window = Window(width=width, height=height)
-    window.set_theme(THEME_SEED)
-    return window
+def _window(width=300, height=200):
+    return Window(width=width, height=height)
 
 
 def test_toolbar_docked_matches_the_imperative_catalog():
@@ -36,7 +34,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("t")
 
-    imperative = toolbar(_themed_window(), variant="docked", vibrant=False, width=280).node  # a Widget since M41
+    imperative = toolbar(_window(), variant="docked", vibrant=False, width=280).node  # a Widget since M41
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
@@ -57,7 +55,7 @@ children:
     declarative = view.node("t")
 
     imperative = toolbar(
-        _themed_window(), variant="floating", vibrant=True, width=200, height=64
+        _window(), variant="floating", vibrant=True, width=200, height=64
     ).node  # a Widget since M41
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
@@ -79,7 +77,7 @@ children:
     declarative = view.node("tab")
     assert view.node("tab.title") is not None
 
-    imperative = top_app_bar(_themed_window(), "Home", width=300).node  # a Widget since M41
+    imperative = top_app_bar(_window(), "Home", width=300).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
 
 
@@ -98,5 +96,5 @@ children:
     declarative = view.node("sb")
     assert view.node("sb.text") is not None
 
-    imperative = status_bar(_themed_window(), "Ready", width=300).node  # a Widget since M41
+    imperative = status_bar(_window(), "Ready", width=300).node  # a Widget since M41
     assert declarative.get("corner_radius") == imperative.get("corner_radius")

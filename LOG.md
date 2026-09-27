@@ -791,3 +791,18 @@ User: "Push it and start Phase 6". Pushed `7842c23`.
 - Mutants: 16 of 17 caught (two after tightening tests); 1 equivalent.
 
 1287 passed.
+
+## M42 Phase 7: off the window's theme
+
+User: "Push it and start Phase 7". Pushed `fea5f5e`.
+
+- `App` no longer calls `Window.set_theme` (`_set_window_theme`,
+  `_window_theme`, `_OVERRIDDEN_SEED` removed), nor re-asserts the
+  window's theme after an OS switch.
+- Tests that read the window's theme now read `app.theme`, and a new
+  test pins that the window stays unthemed. The fragment tests' window
+  helpers stop theming windows, which nothing read. The tre-reference
+  tests keep `Window.set_theme` until M43.
+- Mutation: re-theming the window fails 5 tests.
+
+1287 passed.

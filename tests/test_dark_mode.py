@@ -1,10 +1,10 @@
 """M38 Phase 3: light and dark.
 
 `App(dark="system")` (the default, M38 Q2) follows the OS: the window's
-`color_scheme` event re-themes every screen and the window. It starts
+`color_scheme` event re-themes every screen and `app.theme`. It starts
 dark (Q3): 0.3.4 can't read the OS's appearance before its first event.
-With `dark=True`/`False` the app keeps its choice, and puts the window's
-own theme back when `tre` flips it on an OS switch. OS switches are
+With `dark=True`/`False` the app keeps its choice. Since M42 Phase 7 the
+window's own `tre` theme is never set: nothing reads it. OS switches are
 simulated with `window.simulate("color_scheme", dark=...)`.
 """
 
@@ -40,8 +40,10 @@ def _screen(view):
     return view.node("box").get("fill")
 
 
-def _window(app):
-    return app.show(next(iter(app._registered))).theme.role("primary")
+def _app(app):
+    """The app's primary role; the window itself stays unthemed."""
+    assert not app.show(next(iter(app._registered))).theme.is_set()
+    return app.theme.role("primary")
 
 
 def _os(app, dark):
@@ -52,27 +54,27 @@ def test_the_default_follows_the_system_and_starts_dark(tmp_path):
     app = App(theme_seed=SEED)
     view = _load(app, tmp_path)
     assert app.dark_mode == "system" and app.dark is True
-    assert _screen(view) == DARK and _window(app) == DARK
+    assert _screen(view) == DARK and _app(app) == DARK
 
 
-def test_following_the_os_re_themes_screens_and_the_window(tmp_path):
+def test_following_the_os_re_themes_screens_and_the_app_theme(tmp_path):
     app = App(theme_seed=SEED)
     home, settings = _load(app, tmp_path, "Home"), _load(app, tmp_path, "Settings")
     _os(app, False)
-    assert app.dark is False and _screen(home) == _screen(settings) == LIGHT and _window(app) == LIGHT
+    assert app.dark is False and _screen(home) == _screen(settings) == LIGHT and _app(app) == LIGHT
     assert home.node("label").get("text") == "live"  # bound values stay
     _os(app, True)
-    assert _screen(home) == DARK and _window(app) == DARK
+    assert _screen(home) == DARK and _app(app) == DARK
 
 
 @pytest.mark.parametrize("fixed", [True, False])
-def test_a_fixed_choice_ignores_the_os_and_keeps_the_window_with_it(tmp_path, fixed):
+def test_a_fixed_choice_ignores_the_os(tmp_path, fixed):
     app = App(theme_seed=SEED, dark=fixed)
     view = _load(app, tmp_path)
     expected = DARK if fixed else LIGHT
     _os(app, not fixed)
     assert app.dark is fixed and _screen(view) == expected
-    assert _window(app) == expected  # tre flipped the window's own theme; the app put it back
+    assert _app(app) == expected
 
 
 def test_set_dark_switches_in_place_and_system_resumes_following(tmp_path):

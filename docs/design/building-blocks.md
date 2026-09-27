@@ -207,10 +207,9 @@ A theme's `typography:` styles display text in views (Phase 2): Text and
 Link resolve `typography_role` through it, text inputs don't (the user's
 M38 Q1). Light and dark (Phase 3): `App(dark="system")`, the default,
 starts dark (the OS's appearance can't be read before its first
-`color_scheme` event) and follows the OS; `True`/`False` fix it and are
-re-asserted when `tre` flips the window's own theme on an OS switch.
-`App` keeps calling `Window.set_theme` for `tre`'s legacy widgets until
-M41 replaces them.
+`color_scheme` event) and follows the OS; `True`/`False` fix it. `App`
+called `Window.set_theme` for `tre`'s legacy widgets until M42 Phase 7,
+when the last of them had gone; the window has no theme since.
 
 
 `tre` keeps no theme (D7), so Tesserae owns all of it:

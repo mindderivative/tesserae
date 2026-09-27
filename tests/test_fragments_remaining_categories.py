@@ -24,10 +24,8 @@ FIXTURES_VIEW_PATH = str(Path(__file__).parent / "View.yaml")
 THEME_SEED = (0x67, 0x50, 0xA4, 0xFF)
 
 
-def _themed_window(width=400, height=300):
-    window = Window(width=width, height=height)
-    window.set_theme(THEME_SEED)
-    return window
+def _window(width=400, height=300):
+    return Window(width=width, height=height)
 
 
 def test_search_bar_matches_the_imperative_catalog():
@@ -45,7 +43,7 @@ children:
     declarative = view.node("sb")
     assert view.node("sb.field") is not None
 
-    imperative = search_bar(_themed_window(), "Search...", 360).node  # a Widget since M42
+    imperative = search_bar(_window(), "Search...", 360).node  # a Widget since M42
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
@@ -65,7 +63,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("sv")
 
-    imperative = search_view(_themed_window(), 360, 200).node  # an overlay since M42
+    imperative = search_view(_window(), 360, 200).node  # an overlay since M42
 
     assert declarative.get("corner_radius") == imperative.get("corner_radius")
     assert elevation(declarative) == elevation(imperative)
@@ -119,7 +117,7 @@ children:
         view = view_from(expanded, theme_seed=THEME_SEED)
         declarative = view.node("d")
 
-        imperative = date_picker_day(_themed_window(), 15, **kwargs)  # a Widget since M42
+        imperative = date_picker_day(_window(), 15, **kwargs)  # a Widget since M42
 
         # both are 48 px targets; since M42 the widget draws MD3's 40 px circle inside (the fragment keeps tre's)
         assert declarative.get("width") == imperative.node.get("width") == 48.0, component_name
@@ -162,7 +160,7 @@ children:
         am = view.node("ps.am")
         pm = view.node("ps.pm")
 
-        imperative = period_selector(_themed_window(), selected="AM")  # a Widget since M42
+        imperative = period_selector(_window(), selected="AM")  # a Widget since M42
 
         # the fragment keeps tre's rounded halves; the widget is MD3's, square halves in an outlined 8 px frame
         assert am.get("corner_radius") == pm.get("corner_radius") == 8.0, component_name
@@ -183,7 +181,7 @@ children:
     view = view_from(expanded, theme_seed=THEME_SEED)
     declarative = view.node("dial")
 
-    imperative = time_picker_dial(_themed_window(300, 300), hour=13, minute=45, size=256)
+    imperative = time_picker_dial(_window(300, 300), hour=13, minute=45, size=256)
 
     dial = view.control("dial")
     assert (dial.hour.get(), dial.minute.get()) == (imperative.hour.get(), imperative.minute.get()) == (13, 45)

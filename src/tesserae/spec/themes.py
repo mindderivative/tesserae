@@ -1,11 +1,11 @@
 """M29 Phase 4: themes and stylesheets as data. Tesserae reads theme and
-stylesheet YAML files itself and hands `tre` plain dicts via tre M86's
-`*_spec=` arguments -- `stylesheet_spec=`/`default_theme_spec=`/
-`custom_theme_spec=` on `View(...)`, and the theme two on
-`View.set_theme`/`Window.set_theme`. `tre` validates the dict exactly as
-it would the file (same schema: `seed`, `dark`, `colors`, `styles`,
-`components`, `typography`), so this module only reads, parses, and
-checks fonts.
+stylesheet YAML files itself and hands the dicts to the `*_spec=`
+arguments -- `stylesheet_spec=`/`default_theme_spec=`/
+`custom_theme_spec=` on `View(...)` and `App(...)`, and the theme two on
+`View.set_theme`/`App.set_theme_specs`. Since M37-M38 Tesserae's own
+cascade and `tesserae.Theme` validate them (the schema `tre`'s had:
+`seed`, `dark`, `colors`, `styles`, `components`, `typography`), so this
+module only reads, parses, and checks fonts.
 """
 
 from __future__ import annotations

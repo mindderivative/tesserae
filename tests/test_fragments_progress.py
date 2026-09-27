@@ -34,7 +34,6 @@ children:
     declarative = view.node("spinner")
 
     window = Window(width=100, height=100)
-    window.set_theme(THEME_SEED)
     imperative = circular_progress(window, size=48, value=0.4)
 
     assert declarative.get("value") == imperative.node.get("value") == 0.4
@@ -56,7 +55,6 @@ children:
     declarative = view.node("bar")
 
     window = Window(width=200, height=50)
-    window.set_theme(THEME_SEED)
     imperative = linear_progress(window, width=200, height=4, value=0.75)
 
     assert declarative.get("value") == imperative.node.get("value") == 0.75

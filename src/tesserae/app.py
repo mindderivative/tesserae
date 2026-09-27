@@ -30,11 +30,6 @@ from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
 from tesserae.spec.watch import FileWatcher
 
-#: `Window.set_theme` requires a seed even when the custom theme's own
-#: `seed:` overrides it; `_window_theme` passes this one then.
-_OVERRIDDEN_SEED = (0, 0, 0, 0xFF)
-
-
 @dataclass
 class _Registered:
     view: Any
@@ -106,13 +101,10 @@ class App:
 
     M30: the theme is app-wide -- `theme_seed=`, `dark=`,
     `default_theme=`/`custom_theme=` (file paths) or their `*_spec=`
-    dict forms apply to every screen `build_view()`/`load()` builds, and
-    (M31) to the window itself. `tre` keeps the two apart: a `View`'s
-    theme restyles its YAML nodes, while the window's theme -- set only by
-    `Window.set_theme`, never by building a `View` -- is what imperative
-    `tesserae.widgets` and interaction tints use. `Window.show_view` never
-    switches it, so the theme is one per app, not per screen: `show()`
-    gives the window the same theme the screens have.
+    dict forms apply to every screen `build_view()`/`load()` builds. The
+    theme is Tesserae's (`tesserae.Theme`, `app.theme`); since M42 the
+    window's own `tre` theme is never set or read, as nothing `tre` draws
+    uses it any more.
 
     `stylesheet=`/`stylesheet_spec=` here is the default stylesheet for
     every screen; `load(stylesheet=...)` replaces it for one screen (a
@@ -170,7 +162,6 @@ class App:
                               align_items="flex_start")
         self._current: str | None = None
         self._tre_app: _TreApp | None = None
-        self._set_window_theme()  # tesserae.widgets' composed widgets read the window's theme until M41
         self._window.on("color_scheme", self._on_color_scheme)
 
     # -- light and dark (M38) ---------------------------------------------------
@@ -187,7 +178,7 @@ class App:
 
     def set_dark(self, dark: bool | str) -> None:
         """`True`/`False` fixes the app dark or light, re-theming every
-        screen and the window in place; `"system"` goes back to following
+        screen in place; `"system"` goes back to following
         the OS from its next switch."""
         if dark not in (True, False, "system"):
             raise ValueError(f'App.set_dark: dark must be True, False or "system", got {dark!r}')
@@ -196,18 +187,13 @@ class App:
             self._apply_dark(bool(dark))
 
     def _on_color_scheme(self, event: Any) -> None:
-        """The OS switched between light and dark. `tre` has already flipped
-        the window's own theme (the legacy widgets and hover tints read it):
-        following the OS, the whole app follows; with a fixed choice, the
-        window is put back to it."""
+        """The OS switched between light and dark: following the OS, the
+        whole app follows; with a fixed choice, nothing changes."""
         if self._dark_mode == "system":
             self._apply_dark(bool(event.dark))
-        else:
-            self._set_window_theme()
 
     def _apply_dark(self, dark: bool) -> None:
         if dark == self._dark:
-            self._set_window_theme()
             return
         old_theme = self._view_theme()
         self._dark = dark
@@ -221,7 +207,6 @@ class App:
         except Exception:
             self._dark = not dark
             raise
-        self._set_window_theme()
         logger.info("switched to the {} scheme", "dark" if dark else "light")
 
     def _view_theme(self) -> dict[str, Any]:
@@ -243,45 +228,6 @@ class App:
 
         return Theme.resolve(**self._view_theme())
 
-    def _window_theme(self) -> dict[str, Any] | None:
-        """The app's theme as `Window.set_theme` arguments, resolved the
-        way a `View` resolves it -- or `None` if it names no seed at all,
-        leaving the window unthemed as before.
-
-        `tre`'s two theme entry points differ (M31): a `View` takes its
-        seed from `theme_seed`, else the custom theme's `seed:`, else the
-        default theme's, and applies both themes' `colors:`; `Window.
-        set_theme` lets the custom theme's `seed:` beat its `seed`
-        argument and ignores the default theme's `seed:` and `colors:`.
-        So the custom theme handed to the window is rewritten to say what
-        the view would use. `tre` still does all the parsing.
-        """
-        default = self._default_theme_spec or {}
-        custom = dict(self._custom_theme_spec or {})
-        if self._theme_seed is not None:
-            custom.pop("seed", None)
-            seed = self._theme_seed
-        else:
-            seed = _OVERRIDDEN_SEED
-            if "seed" not in custom:
-                if "seed" not in default:
-                    return None
-                custom["seed"] = default["seed"]
-        colors = {**(default.get("colors") or {}), **(custom.get("colors") or {})}
-        if colors:
-            custom["colors"] = colors
-        theme: dict[str, Any] = {"seed": seed, "dark": self._dark}
-        if self._default_theme_spec is not None:
-            theme["default_theme_spec"] = self._default_theme_spec
-        if custom:
-            theme["custom_theme_spec"] = custom
-        return theme
-
-    def _set_window_theme(self) -> None:
-        theme = self._window_theme()
-        if self._window is not None and theme is not None:
-            self._window.set_theme(**theme)
-
     def _read_theme_files(self) -> tuple[Any, Any]:
         """Re-reads the theme files (a watcher-thread job, M31); a theme
         given as a `*_spec=` dict is kept as it is."""
@@ -292,7 +238,7 @@ class App:
 
     def set_theme_specs(self, default_theme_spec: Any, custom_theme_spec: Any) -> None:
         """Re-themes the running app in place (M31): every view
-        `build_view()`/`load()` made, and the window. Both theme dicts
+        `build_view()`/`load()` made. Both theme dicts
         are the complete new selection (`None` for none), as in `tre`,
         where each `set_theme` call is a fresh choice, not a patch; the
         seed and light/dark stay as they are. Bound values stay
@@ -309,7 +255,6 @@ class App:
                 lambda view: view.set_theme(**new_theme),
                 lambda view: view.set_theme(**old_theme),
             )
-            self._set_window_theme()
         except Exception:
             self._default_theme_spec, self._custom_theme_spec = previous
             raise
