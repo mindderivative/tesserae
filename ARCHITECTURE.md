@@ -263,7 +263,15 @@ previous arrow is `chevron_right` turned 180° (`rotation_deg` isn't a
 style property, so a re-colour keeps it). `Popover` sizes its text's
 height with `measure_text(max_width=)` after building, and again after a
 re-colour, because the compiler measures a Text with no height as one
-line.
+line. The carousel (Phase 6) needs its item widths to change every frame
+while it moves, but `tre` animates no `width` and has no frame callback.
+So its fractional position is the `stroke_width` of a private node in no
+tree, animated with the standard easing (`get` reads it mid-animation),
+and `containment._Ticker`, a one-frame animation chained from its own
+`on_complete`, re-lays the items out from it each frame until it
+arrives. Its layout (`carousel_layout`) is a pure function of the
+position, blending the snapped layouts either side of it. The splitter
+is three flex children; a drag sets the panes' sizes at once.
 
 `tesserae.a11y` checks accessibility fields against `tre`'s lists
 (`describe`) and routes `a11y_action` (`on_action`). The YAML `a11y:`

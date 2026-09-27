@@ -773,3 +773,21 @@ against tre's dumps in `legacy-widgets.md` (0.3.5).
   overlays guide, API index, `ARCHITECTURE.md`.
 
 1273 passed.
+
+## M42 Phase 6: carousel and splitter
+
+User: "Push it and start Phase 6". Pushed `7842c23`.
+
+- Read tre's `legacy-behavior.md` (0.3.5) for both, and 0.3.4's docs:
+  no frame callback, and `width` doesn't animate, but `get` reads a
+  property mid-animation.
+- `carousel`: the position is an eased animation on a private node;
+  `_Ticker` re-lays the items out each frame from it. The layout is a
+  pure function (`carousel_layout`) blending the snapped layouts either
+  side of the position.
+- `splitter`: two panes and a 16 px handle; a drag puts the handle's
+  middle under the pointer.
+- Found by a test: an unsized node's `width` reads `"auto"`.
+- Mutants: 16 of 17 caught (two after tightening tests); 1 equivalent.
+
+1287 passed.

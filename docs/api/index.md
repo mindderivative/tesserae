@@ -8,7 +8,7 @@ Tesserae's own real, additive public surface:
 | [`instantiate`](instantiate.md) | Embeds a reusable, independently-stateful `Component`. |
 | [`Repeater`](repeater.md) | Automatic keyed add/remove diffing over a list `Signal`. |
 | [`tesserae.spec` (`load_view`/`expand_components`)](spec.md) | Declarative `component:`/`with:`/`repeat:` macro expansion -- see the [Component Fragments](../guide/component-fragments.md) guide. |
-| [`tesserae.widgets`](../guide/widget-catalog.md) | Imperative, thin-delegate access to all ~68 real MD3 widgets. |
+| [`tesserae.widgets`](../guide/widget-catalog.md) | One Python function per MD3 widget, each built by Tesserae from `tre`'s building blocks (M40–M42), returning a widget with `.node` and its parts. |
 | [`tesserae.spec.ViewWatcher`](spec.md#viewwatcher) | Hot reload: watches every file a view was built from and updates it in place (`App.run(hot_reload=True)` uses it). |
 | [`tesserae.spec.load_theme` / `load_stylesheet`](spec.md#load_theme-load_stylesheet) | Read a theme or stylesheet file into the dict `tre`'s `*_spec=` arguments take. |
 | `tesserae.configure_logging(level="INFO", *, sink=sys.stderr, format=DEFAULT_FORMAT, capture_warnings=True) -> int` | Sends log messages at `level` and above to `sink` in Tesserae's format, replacing loguru's default stderr handler; shows Python warnings through loguru too. Returns the handler id. See [Logging](../guide/logging.md). |

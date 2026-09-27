@@ -54,6 +54,7 @@ from tesserae.widgets.overlays import (
 from tesserae.widgets.search import search_bar, search_view
 from tesserae.widgets.progress import circular_progress, linear_progress, loading_indicator
 from tesserae.widgets.media import graph_node, icon, image, node_graph, video
+from tesserae.widgets.containment import carousel, splitter
 from tesserae.widgets.date_time import date_picker_day, period_selector, time_input_field, time_picker_dial
 
 __all__ = [
@@ -62,6 +63,7 @@ __all__ = [
     "button",
     "button_group",
     "card",
+    "carousel",
     "checkbox",
     "chip",
     "circular_progress",
@@ -95,6 +97,7 @@ __all__ = [
     "slider",
     "snackbar",
     "spin_box",
+    "splitter",
     "split_button",
     "status_bar",
     "switch",

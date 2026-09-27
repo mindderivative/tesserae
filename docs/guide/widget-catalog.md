@@ -134,6 +134,18 @@ button per page and next; `.current` is a `Signal` (0-based) with
 `.on_change(fn)`, and previous and next are disabled at the ends. For a
 rich tooltip (`tre`'s popover), see `popover` in [Overlays](overlays.md#each-one).
 
+**Carousel and splitter (M42).** `carousel(window, width, height,
+layout="multi_browse", items=[...])` is MD3's carousel: items (nodes or
+widgets; `.add(item)` adds more) masked to 28 px corners. `multi_browse`
+and `hero` snap through large, medium and small slots, and moving blends
+the widths over 300 ms; `.index` is a `Signal`, and the wheel, a drag
+(one item per 60 px) and the left and right arrows move it.
+`uncontained` keeps each item's own width and scrolls by pixel through
+`.scroll`. `splitter(window, first, second, width, height,
+orientation="horizontal", position=0.5)` puts two panes either side of a
+drag handle: `.position` (a `Signal`, 0 to 1) is the first pane's share,
+and dragging the handle, the arrow keys (5%) and Home and End move it.
+
 Every function in `tesserae.widgets` is now built by Tesserae; none
 delegates to `tre`.
 
@@ -158,7 +170,7 @@ constructs) or when it's one of the 3 fragment gaps below.
 | --- | --- |
 | Buttons & Actions | `button`, `icon_button`, `fab`, `extended_fab`, `split_button`, `button_group`, `segmented_button` |
 | Selection & Input | `checkbox`, `radio_button`, `switch`, `slider`, `spin_box` |
-| Cards/Lists/Chips/Structural | `card`, `list_`, `list_item`, `chip`, `badge`, `divider`, `link`, `accordion_header`, `tree_node` |
+| Cards/Lists/Chips/Structural | `card`, `list_`, `list_item`, `chip`, `badge`, `divider`, `link`, `accordion_header`, `tree_node`, `carousel`, `splitter` |
 | Navigation & Shell | `tabs`, `toolbar`, `top_app_bar`, `status_bar`, `navigation_rail`, `navigation_drawer`, `pagination` |
 | Overlays | `dialog`, `snackbar`, `tooltip`, `popover`, `menu`, `menu_item`, `side_sheet` |
 | Search | `search_bar`, `search_view` |

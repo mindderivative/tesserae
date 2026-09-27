@@ -133,4 +133,6 @@ Reviewed Phases 2–4 after the move to Nobara: three fixes (graph theming, the 
 
 Phase 5 done: the segmented button, pagination and the `Popover` overlay; 1273 passed.
 
-**Up next:** M42 Phase 6 (carousel and splitter).
+Phase 6 done: the carousel and the splitter; 1287 passed.
+
+**Up next:** M42 Phase 7 (off the window's theme).
