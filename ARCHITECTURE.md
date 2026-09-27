@@ -172,6 +172,17 @@ them after every build, reconcile, re-theme and re-style. The extra
 children stay after the spec's children, so the reconciler's indices
 still hold. Their listeners go through the same per-node dispatcher as
 the ViewModel's (`View._listen`), but they aren't unwired with it.
+**Bound accessibility, M47:** an `a11y:` value that is a `{{ }}` binding
+is left out of the compiler's fixed fields (`build._a11y_fields`, which
+rejects a bound `role` or `live`) and out of a patch's resets, and
+`View._wire_a11y` evaluates it like `bindings:` -- dependency-tracked,
+checked with `tesserae.a11y`'s rules, set on the node that carries the
+widget's accessibility (a Link's box, a TextField's input, a control's
+target) -- so every reconcile, re-theme and re-style, which rewire, set
+it again. A Link's text binding no longer renames a Link that `a11y:`
+names, and a control's fixed `a11y:` fields now reach it at build and
+patch (before, they were checked and dropped).
+
 **Controls, M40:** `tesserae.controls.Control` is the base of the
 stateful MD3 controls that replace `tre`'s. It holds `.node`, a
 focusable 48 px target with the control's role. A 40 px circle inside the

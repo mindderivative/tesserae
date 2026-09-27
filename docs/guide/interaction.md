@@ -92,10 +92,36 @@ A node's `a11y:` field sets what assistive technology hears:
 | `live` | `polite` or `assertive`, so changes to the node's content are announced. |
 | `level` | A heading's level, from 1. |
 
-On a TextField, the fields apply to its input. A field you remove is
+On a TextField, the fields apply to its input; on a control (a
+checkbox, a switch and so on), to the control. A field you remove is
 reset when the view reloads. Anything else is an error that names the
 widget. Widget states such as `checked` belong to Tesserae's own
 controls (M40).
+
+### Bound fields
+
+`label`, `hidden` and `level` can follow the ViewModel (M47): give the
+field a `{{ }}` binding, as in `bindings:`, and it's kept up to date:
+
+```yaml
+- id: inbox_status
+  kind: Text
+  text: {content: "Inbox", font_family: Roboto, font_size: 14}
+  style: {foreground: on_surface}
+  a11y: {label: "{{ unread_summary.get() }}", live: polite}
+- id: details
+  kind: Container
+  a11y: {hidden: "{{ collapsed.get() }}"}
+```
+
+The whole value is the binding. To mix text with a value, build the
+string in the ViewModel (a `Computed`, say:
+`self.unread_summary = Computed(lambda: f"{self.unread.get()} unread")`).
+A label must come out a string, `hidden` true or false, and `level` a
+whole number from 1; `None` clears a label or level. A wrong value is an
+error naming the widget and field. `role` and `live` can't be bound: a
+role is what the node is, and `live` is how its changes are announced.
+A bound label on a Link is its name, whatever its text says.
 
 ## For widgets: `tesserae.a11y`
 
@@ -128,7 +154,7 @@ can't be focused or used, and draws in MD3's disabled colours.
 - Among plain YAML nodes, only `Rect` and `Container` get the state
   layer, ripple and focus ring. The MD3 controls (checkbox, switch and
   so on) have their own, from M40.
-- `a11y:` values are fixed in the YAML; binding a label to a `Signal`
-  isn't supported yet.
+- From Python, a widget's label is fixed (`label=`) until
+  `tesserae.a11y.bind` (M47 Phase 3).
 - The ring is placed when focus arrives. A node that resizes while it
   has focus keeps its old ring until focus moves.

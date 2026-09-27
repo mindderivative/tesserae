@@ -46,13 +46,13 @@ from typing import Any, Callable, Optional
 
 import tre
 
-from tesserae import reactive, tokens
+from tesserae import a11y, reactive, tokens
 from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding, value_debug
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners
 from tesserae.spec.build import (
-    Built, _CONTROL_KINDS, build_with, control_shape, focus_ring_color, interaction_tint, natural_size, patch,
-    prepare_layers,
+    A11Y_BINDABLE, Built, _CONTROL_KINDS, a11y_bindings, build_with, control_shape, focus_ring_color,
+    interaction_tint, natural_size, patch, prepare_layers,
 )
 from tesserae.spec.cascade import resolve_style
 from tesserae.spec.cascade import check_stylesheet, check_theme
@@ -416,6 +416,8 @@ class View:
             bindings = node_spec.get("bindings") or {}
             for prop, raw in bindings.items():
                 self._wire_binding(node_spec, prop, raw)
+            for field_name, raw in a11y_bindings(node_spec).items():
+                self._wire_a11y(node_spec, field_name, raw)
             two_way = node_spec.get("two_way")
             if two_way is not None:
                 self._wire_two_way(node_spec, two_way, bindings.get(two_way))
@@ -495,8 +497,46 @@ class View:
                 _apply(node, kind, prop, value)
                 if measured:
                     _remeasure(self.window, node, style)
-                if kind == "Link" and prop == "text":
-                    self._built.outer[node_id].set(label=value)  # its name is its text
+                if kind == "Link" and prop == "text" and "label" not in (node_spec.get("a11y") or {}):
+                    self._built.outer[node_id].set(label=value)  # its name is its text, unless `a11y:` names it
+
+        run()
+
+        def undo() -> None:
+            for dependency in subscribed:
+                dependency._unsubscribe(run)
+            subscribed.clear()
+        self._wiring.append(undo)
+
+    def _wire_a11y(self, node_spec: dict[str, Any], field_name: str, raw: str) -> None:
+        """A bound `a11y:` field (M47): `label`, `hidden` or `level`, set on
+        the node that carries the widget's accessibility (a Link's box, a
+        TextField's input, a control's target) and kept up to date."""
+        node_id = node_spec["id"]
+        where = f'widget "{node_id}" a11y binding on "{field_name}" ({_quoted(raw)})'
+        try:
+            expr = parse_binding(raw)
+        except BindingError as exc:
+            raise ValueError(f"{where}: {exc}") from None
+        node = self._built.outer[node_id] if node_spec.get("kind") == "Link" else self._built.nodes[node_id]
+        prop = A11Y_BINDABLE[field_name]
+        subscribed: list[Any] = []
+
+        def run() -> None:
+            for dependency in subscribed:
+                dependency._unsubscribe(run)
+            reactive._begin_recording()
+            try:
+                value = evaluate_value(expr, self._viewmodel)
+            except BindingError as exc:
+                raise ValueError(f"{where}: {exc}") from None
+            finally:
+                subscribed[:] = reactive._end_recording()
+            for dependency in subscribed:
+                dependency._subscribe(run)
+            value = _a11y_value(field_name, value, where)
+            if node.get(prop) != value:
+                node.set(**{prop: value})
 
         run()
 
@@ -581,6 +621,20 @@ def _child_index(parent: Any, child: Any) -> int:
         if node == child:
             return index
     return -1
+
+
+def _a11y_value(field_name: str, value: Any, where: str) -> Any:
+    """A bound `a11y:` value, checked by `tesserae.a11y`'s rules: a label is
+    a string (or `None`, no label), `hidden` true or false, `level` a
+    positive whole number (or `None`)."""
+    if isinstance(value, Handle):
+        if value.obj is not None:  # the evaluator hands `None` back as a handle: it clears the field
+            raise ValueError(f"{where}: a11y {field_name} can't be {value_debug(value)}")
+        value = None
+    try:
+        return a11y.check({field_name: value})[A11Y_BINDABLE[field_name]]
+    except ValueError as exc:
+        raise ValueError(f"{where}: {exc}") from None
 
 
 def _quoted(raw: str) -> str:

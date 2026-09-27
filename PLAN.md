@@ -153,4 +153,6 @@ Phase 5 done, and M43 with it: CI run 36293860118 green plain and switched (1287
 
 **M47 decisions:** Q1–Q3 as recommended -- bindings inside `a11y:`; `label`/`hidden`/`level` bindable, `role`/`live` fixed; `tesserae.a11y.bind` for Python.
 
-**Up next:** M47 Phase 2 (bound `a11y:` in views). M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.
+Phase 2 done: bound `a11y:` in views; a control's dropped `a11y:` and a Link's overridden label fixed; 1308 passed.
+
+**Up next:** M47 Phase 3 (`tesserae.a11y.bind`). M46 (move to `tre` 0.3.5) waits on `tre`'s release; then M45.

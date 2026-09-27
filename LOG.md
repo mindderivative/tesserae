@@ -936,3 +936,17 @@ User: "Push it and go with your recommendations for M47". Pushed `132416c`.
 
 - Q1: bindings written inside `a11y:`. Q2: `label`, `hidden`, `level`
   bindable; `role`/`live` fixed. Q3: `tesserae.a11y.bind` for Python.
+
+## M47 Phase 2: bound `a11y:` in views
+
+User: "Push it and start Phase 2". Pushed `a1c28ed`.
+
+- Compiler: bound fields left to the view, not reset on patch; a bound
+  `role`/`live` is an error. View: `_wire_a11y`, dependency-tracked,
+  checked with `tesserae.a11y`, on the accessible node.
+- Found: bindings are whole values (no interpolation; use a `Computed`);
+  a Link's text binding overrode its `a11y:` label; a control's `a11y:`
+  was dropped since M40. Both bugs fixed.
+- 18 tests; mutants 10 of 11 caught, 1 equivalent.
+
+1308 passed.

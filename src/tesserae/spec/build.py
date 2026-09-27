@@ -31,8 +31,8 @@ from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
 __all__ = [
-    "Built", "Layers", "SpecBuildError", "build", "control_shape", "focus_ring_color", "interaction_tint", "natural_size",
-    "patch",
+    "A11Y_BINDABLE", "Built", "Layers", "SpecBuildError", "a11y_bindings", "build", "control_shape", "focus_ring_color",
+    "interaction_tint", "is_binding", "natural_size", "patch",
     "prepare_layers",
     "shipped_default_theme",
 ]
@@ -415,7 +415,7 @@ _PRIMITIVE = {
 def _a11y_for(node: dict[str, Any], kind: str, *, patching: bool) -> dict[str, Any]:
     props = _a11y_props(node, patching=patching)
     if kind == "Link" and props.get("label") is None:
-        props.pop("label", None)  # a Link without an `a11y:` label is named by its text
+        props.pop("label", None)  # a Link without a fixed `a11y:` label is named by its text (or its binding)
     return props
 
 
@@ -458,10 +458,25 @@ def focus_ring_color(scheme: Optional[dict[str, RGBA]]) -> RGBA:
 _A11Y_YAML = ("label", "role", "hidden", "live", "level")
 #: What each `a11y:` field resets to when a patch drops it.
 _A11Y_RESET = {"label": None, "a11y_hidden": False, "live": None, "level": None}
+#: The `a11y:` fields a `{{ }}` binding may set (M47 Q2), and the
+#: property each is; `role` and `live` stay fixed.
+A11Y_BINDABLE = {"label": "label", "hidden": "a11y_hidden", "level": "level"}
+
+
+def is_binding(value: Any) -> bool:
+    """Whether an `a11y:` value is a `{{ }}` binding (M47 Q1)."""
+    return isinstance(value, str) and "{{" in value
+
+
+def a11y_bindings(node: dict[str, Any]) -> dict[str, str]:
+    """The node's bound `a11y:` fields, `{field: "{{ expr }}"}` (the view wires them)."""
+    value = node.get("a11y")
+    return {k: v for k, v in value.items() if is_binding(v)} if isinstance(value, dict) else {}
 
 
 def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
-    """The node's `a11y:` field, checked, as `tre` properties."""
+    """The node's fixed `a11y:` fields, checked, as `tre` properties. A
+    bound one (M47) is left to the view, and only its field is checked."""
     value = node.get("a11y")
     if value is None:
         return {}
@@ -473,8 +488,13 @@ def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
         raise SpecBuildError(f"{where}: unknown a11y field(s) {sorted(unknown)} (known: {', '.join(_A11Y_YAML)})")
     if "role" in value and node["kind"] in _OWN_ROLE:
         raise SpecBuildError(f"{where}: a {node['kind']} has its own role; `a11y:` can't set `role`")
+    bound = [k for k, v in value.items() if is_binding(v)]
+    fixed_only = [k for k in bound if k not in A11Y_BINDABLE]
+    if fixed_only:
+        raise SpecBuildError(f"{where}: a11y {fixed_only[0]} can't be bound -- only "
+                             f"{', '.join(A11Y_BINDABLE)} can follow a binding")
     try:
-        return a11y.check(value, where)
+        return a11y.check({k: v for k, v in value.items() if k not in bound}, where)
     except ValueError as exc:
         raise SpecBuildError(str(exc)) from None
 
@@ -485,7 +505,9 @@ def _a11y_props(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:
     a clickable node's focus and role (M39). On a patch, dropped fields
     reset."""
     fields = _a11y_fields(node)
-    props = {**_A11Y_RESET, **{k: v for k, v in fields.items() if k != "role"}} if patching else {
+    bound = {A11Y_BINDABLE[k] for k in a11y_bindings(node)}  # the view sets these; a patch leaves them
+    reset = {k: v for k, v in _A11Y_RESET.items() if k not in bound}
+    props = {**reset, **{k: v for k, v in fields.items() if k != "role"}} if patching else {
         k: v for k, v in fields.items() if k != "role"}
     if node["kind"] not in _OWN_ROLE:
         if _clickable(node):
@@ -517,6 +539,9 @@ def _create(ctx, node, style, built):
     if kind in _CONTROL_KINDS:
         control = _control(ctx, node, style, built)
         built.controls[node["id"]] = control
+        a11y_props = _a11y_props(node, patching=False)  # its label, hidden, live, level (M47: they were dropped)
+        if a11y_props:
+            control.node.set(**a11y_props)
         return control.node, control.node
     tre_kind, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
@@ -561,6 +586,7 @@ def patch(
     if kind in _CONTROL_KINDS:
         if control is not None:
             _patch_control(ctx, node, style, control, state)
+            control.node.set(**_a11y_props(node, patching=True))
         return
     _, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)

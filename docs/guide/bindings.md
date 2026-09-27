@@ -33,6 +33,9 @@ file can run arbitrary code.
 A call is only allowed as a method on something: `info.described()`
 works, a bare `described()` doesn't. A method can't take arguments.
 
+An `a11y:` field can be bound the same way (`label`, `hidden` and
+`level`): see [Interaction & Accessibility](interaction.md#bound-fields).
+
 ## Rules that differ from Python
 
 Arithmetic and comparison between plain values (numbers, strings,
