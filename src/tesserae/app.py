@@ -34,10 +34,6 @@ from tesserae.spec.watch import FileWatcher
 class _Registered:
     view: Any
     viewmodel: Any
-    #: The `*_View.yaml` it was loaded from -- set by `load()`, so
-    #: `run(hot_reload=True)` knows what to watch. `None` for a pair
-    #: given to `register()` directly.
-    path: Path | None = None
 
 
 @dataclass
@@ -386,7 +382,6 @@ class App:
         view = self.build_view(view_path, stylesheet=stylesheet, stylesheet_spec=stylesheet_spec)
         viewmodel = viewmodel_cls(view)
         self.register(name or prefix, view, viewmodel)
-        self._registered[name or prefix].path = view_path
         logger.debug("loaded {!r} from {}", name or prefix, view_path)
         return view, viewmodel
 
@@ -433,9 +428,14 @@ class App:
         """Every hot-reload watcher `run(hot_reload=True)` needs, started
         on `handle`."""
         watchers: list[Any] = []
-        for registered in self._registered.values():
-            if registered.path is not None:
-                watchers.append(ViewWatcher(registered.view, registered.path))
+        for name, registered in self._registered.items():
+            # M48: a screen built from a file -- by `load()` or `build_view()`,
+            # then `register()` -- keeps that file as `view.path`
+            path = getattr(registered.view, "path", None)
+            if path is not None:
+                watchers.append(ViewWatcher(registered.view, path))
+            else:
+                logger.info("hot reload: screen {!r} isn't watched -- it was built from a spec, not a file", name)
         if self._stylesheet_file is not None:
             path = Path(self._stylesheet_file).resolve()
             watchers.append(
@@ -491,20 +491,20 @@ class App:
         already use (TRE v1 finding #261) -- omit it for a real,
         interactive run that exits only when the window closes.
 
-        `hot_reload=True` (M29) watches every screen registered through
-        `load()` -- its view file and everything it was built from -- and
-        reloads it in place while the app runs. Each screen gets a
-        `ViewWatcher` on a background thread (`watchfiles`), which hands
-        its reloads to the event loop through `tre`'s thread-safe
-        `App.thread_handle()` (tre M87). A failed reload is logged by
-        `tre` like a handler's exception; the app keeps running. Screens
-        given to `register()` directly have no known file and aren't
-        watched.
+        `hot_reload=True` (M29) watches every screen built from a file --
+        by `load()`, or by `build_view()` and given to `register()` (M48)
+        -- its view file and everything it was built from, and reloads it
+        in place while the app runs, its ViewModel and bindings kept. Each
+        screen gets a `ViewWatcher` on a background thread (`watchfiles`),
+        which hands its reloads to the event loop through `tre`'s
+        thread-safe `App.thread_handle()` (tre M87). A failed reload is
+        logged (M44); the app keeps running. A screen built from a spec
+        dict has no file, so it isn't watched, and the log says so.
 
         M31: the theme files given to `App(default_theme=, custom_theme=)`
         are watched too. An edit re-reads them on the watcher thread and
-        re-themes every screen `build_view()`/`load()` made, and the
-        window, with `set_theme_specs`. So are stylesheet files: the
+        re-themes every screen `build_view()`/`load()` made with
+        `set_theme_specs`. So are stylesheet files: the
         default from `App(stylesheet=)` (re-applied, with
         `set_stylesheet_spec`, to every screen using it) and each screen's
         own `stylesheet=` file (re-applied to the screens built with it).

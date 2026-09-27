@@ -993,3 +993,16 @@ User: "Push it and go with your recommendations for M48". Pushed `81742fe`.
 
 - Q1: a registered screen's file comes from `view.path`; no `path=`.
 - Q2: a screen with no file is logged once when hot reload starts.
+
+## M48 Phase 2: watch every file-built screen
+
+User: "Push it and start Phase 2". Pushed `512b546`.
+
+- `_start_watchers` reads `view.path`; `_Registered.path` removed; a
+  spec-built screen is logged once.
+- `tests/test_register_reload.py` (3); the live test runs for `load` and
+  `register`. Mutants: the old rule fails 5 tests; no log line fails 1.
+- Probe: a `tesserae.instantiate` component's file isn't watched -- new
+  known gap.
+
+1321 passed.

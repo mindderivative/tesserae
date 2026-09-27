@@ -17,8 +17,12 @@ app.show("Home")
 app.run(hot_reload=True)
 ```
 
-Every screen registered with `App.load()` is watched while the app runs.
-Save a change and it appears in the window straight away.
+Every screen built from a file is watched while the app runs: one
+`App.load()` made, and one built with `app.build_view(...)` and given to
+`App.register()` (M48; the view keeps the file it came from). Save a
+change and it appears in the window straight away, the screen's
+ViewModel and bindings kept. A screen built from a spec dict has no file,
+so it isn't watched; the log says so when hot reload starts.
 
 Behind the scenes each screen gets a `ViewWatcher` on a background
 thread. It listens for file-change events (using
@@ -107,6 +111,11 @@ it or append to a list. This is [`tre` issue #12](https://github.com/mindderivat
 
 ## Limits
 
+- **Components added at run time aren't watched.** A component built
+  with `tesserae.instantiate` (a `Repeater`'s rows, say) comes from its
+  own file, which the screen's watcher doesn't follow: editing it
+  changes nothing until the app restarts. `component:` fragments a view
+  expands are watched.
 - **Don't use `tre`'s own `View.poll_reload()`.** Tesserae gives `tre`
   the finished view as data, never a file, so `tre` has nothing to
   watch.

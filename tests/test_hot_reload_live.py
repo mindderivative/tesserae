@@ -43,7 +43,11 @@ SCRIPT = textwrap.dedent(
     view_path.write_text(view_text("Hello"))
 
     app = App(width=200, height=80, title="hot_reload_live")
-    view, _ = app.load(view_path, HomeViewModel)
+    if sys.argv[2] == "register":  # M48: built with build_view() and register()ed
+        view = app.build_view(view_path)
+        app.register("Home", view, HomeViewModel(view))
+    else:
+        view, _ = app.load(view_path, HomeViewModel)
     app.show("Home")
     handle = app.thread_handle()
     state = {"frames": 0, "seen": None}
@@ -66,7 +70,9 @@ SCRIPT = textwrap.dedent(
 )
 
 
-def test_app_run_hot_reload_updates_the_live_view(tmp_path: Path):
+@pytest.mark.parametrize("how", ["load", "register"])
+def test_app_run_hot_reload_updates_the_live_view(tmp_path: Path, how):
+    """M48: a screen given to `register()` reloads too, not just `load()`'s."""
     (tmp_path / "Home_ViewModel.py").write_text(
         "from tesserae import ViewModel\n\n\nclass HomeViewModel(ViewModel):\n    pass\n"
     )
@@ -74,7 +80,7 @@ def test_app_run_hot_reload_updates_the_live_view(tmp_path: Path):
     script.write_text(SCRIPT)
 
     result = subprocess.run(
-        [sys.executable, str(script), str(tmp_path)], capture_output=True, text=True, timeout=60
+        [sys.executable, str(script), str(tmp_path), how], capture_output=True, text=True, timeout=60
     )
     assert result.returncode == 0, result.stderr
     frames, seen = result.stdout.split()[1], result.stdout.split()[3]

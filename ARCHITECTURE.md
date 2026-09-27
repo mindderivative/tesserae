@@ -184,6 +184,13 @@ names, and a control's fixed `a11y:` fields now reach it at build and
 patch (before, they were checked and dropped). From Python,
 `tesserae.a11y.bind` does the same with one `Effect` per field.
 
+**Hot reload for registered screens, M48:** `App._start_watchers` takes
+each screen's file from its view (`view.path`, set when a `View` is built
+from a file, kept by `register()`'s `move_to`), so a `build_view()`ed,
+`register()`ed screen is watched as a `load()`ed one is; the separate
+`_Registered.path` that only `load()` set is gone. A spec-built screen is
+named in the log instead.
+
 **Controls, M40:** `tesserae.controls.Control` is the base of the
 stateful MD3 controls that replace `tre`'s. It holds `.node`, a
 focusable 48 px target with the control's role. A 40 px circle inside the

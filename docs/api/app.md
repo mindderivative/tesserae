@@ -118,11 +118,12 @@ and runs `tre`'s own real render loop. `max_frames` caps it (headless/
 CI-safe); omit it for a real, interactive run. Raises `RuntimeError`
 if called before `show()`.
 
-`hot_reload=True` reloads every screen registered with `load()` while
-the app runs, whenever its view file -- or anything it was built from --
-changes on disk. See [Hot Reload](../guide/hot-reload.md). Screens given
-to `register()` directly aren't watched, since Tesserae doesn't know
-their file. The theme files given to `App(...)` are watched too, and an
+`hot_reload=True` reloads every screen built from a file while the app
+runs -- one `load()` made, or one built with `build_view()` and given to
+`register()` (M48) -- whenever its view file, or anything it was built
+from, changes on disk. See [Hot Reload](../guide/hot-reload.md). A
+screen built from a spec dict has no file, so it isn't watched (the log
+names it). The theme files given to `App(...)` are watched too, and an
 edit re-themes the running app (see
 [Hot Reload](../guide/hot-reload.md#theme-and-stylesheet-files)). So are
 stylesheet files: the default from `App(stylesheet=)`, and each screen's
