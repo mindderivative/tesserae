@@ -823,3 +823,17 @@ User: "Push it and start Phase 8". Pushed `93ce390`.
   diagrams and docs home; the design page records the gate result.
 
 1288 passed. M42 complete.
+
+## M43 scoped
+
+User: "Push it and scope M43". Pushed `9f52fc1`.
+
+- `tre`'s `0.3.5` branch (`279e640`): M97 waits on Tesserae's
+  confirmation (Step 6); M98 is complete; M99–M103 not started; no
+  0.3.5 release.
+- Under the switch, Tesserae's code and examples are clean; 419 tests
+  fail, all comparing with `tre` on purpose (`View` 250,
+  `Window.set_theme`/`theme` 154, `Signal` 14).
+- Phases: the dry run (done), decisions, reference tests off `tre`, the
+  switch in CI, confirm to `tre`. Q1 recorded reference data, Q2 a
+  vendored `_removed.py`, Q3 the move to 0.3.5 as a new M46.

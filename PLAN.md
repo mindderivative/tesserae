@@ -139,4 +139,6 @@ Phase 7 done: `App` off the window's theme; 1287 passed.
 
 Phase 8 done, and M42 with it: the gate extended to M42's names and the window's theme; under `tre`'s switch the examples run clean and only the `tre`-reference tests fail (419); 1288 passed.
 
-**Up next:** M43, the migration gate (waiting on the user's go-ahead).
+**M43 scoped (2026-09-26):** 5 phases; the dry run (Phase 1) is done. Keep the `tre` reference proof (binding parity, tree parity, theme tokens, error messages) as data recorded on 0.3.4, run the suite and examples under `tre`'s switch in CI, and confirm to `tre` (its M97 Step 6) so M99 can start. Decisions Q1–Q3 pending: recorded reference data; a vendored copy of `_removed.py` for CI; the move to 0.3.5 as a new M46 after `tre`'s release.
+
+**Up next:** M43 decisions.
