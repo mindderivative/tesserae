@@ -1,0 +1,20 @@
+id: root
+kind: Container
+style: {flex_direction: vertical, width: 420, gap: 12, padding: 24}
+children:
+  - id: title
+    kind: Text
+    text: {content: "Notes", typography_role: headline_small}
+    style: {foreground: on_surface}
+  - id: note
+    kind: TextField
+    text: {content: "", typography_role: body_large}
+    style: {width: 360, height: 48, background: surface_container_highest, corner_radius: 4}
+    bindings: {text: "{{ note.get() }}"}
+    two_way: text
+    a11y: {label: "Note"}
+  - id: echo
+    kind: Text
+    text: {content: "", typography_role: body_medium}
+    style: {foreground: on_surface_variant}
+    bindings: {text: "{{ echo.get() }}"}

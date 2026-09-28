@@ -5,7 +5,9 @@ navigation rail or drawer, a status bar, and panels docked around the
 content — a file tree on the left, an inspector on the right, a console
 at the bottom — that the user can drag between zones and resize. `tre`
 provides the docking mechanism; Tesserae draws it and composes the shell.
-`examples/app_shell/` in the repository puts it all together.
+`examples/app_shell/` in the repository builds it in Python, and
+`examples/app_shell_file/` declares the same studio in a `*_Shell.yaml`
+([From a shell file](#from-a-shell-file)).
 
 ## The shell
 
@@ -131,6 +133,8 @@ It's loaded and registered under its name, so:
 
 A panel whose ViewModel needs more than the view (the `app`, say) is
 registered in Python first, before `load_shell`, and the file places it.
+`app.screen("Console")` returns a panel's `(view, viewmodel)`, including
+a ViewModel the app built from a file.
 
 **Navigation shows screens.** Choosing a rail item calls
 `app.show(screen)`, and `app.show` from anywhere else moves the rail's

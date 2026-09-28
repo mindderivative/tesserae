@@ -210,3 +210,12 @@ def test_a_viewmodel_module_the_app_already_imported_is_reused(studio):
     spec.loader.exec_module(module)
     app, _ = _app(studio)
     assert type(app._registered["Files"].viewmodel) is module.FilesViewModel
+
+
+def test_app_screen_gives_a_panels_view_and_the_viewmodel_the_app_built(studio):
+    app, _ = _app(studio)
+    view, viewmodel = app.screen("Files")
+    assert view.root == _root(app, "Files") and viewmodel.title.get() == "3 files"
+    assert app.screen("Outline")[1] is None
+    with pytest.raises(KeyError, match="no view registered under 'Nowhere'"):
+        app.screen("Nowhere")

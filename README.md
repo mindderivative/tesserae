@@ -10,13 +10,15 @@ GLFW/wgpu-py stack instead): app authors write **YAML views**, not Python
 widget-class trees, paired with a Python `ViewModel` per view -- a plain
 `Signal`-driven MVVM layer, not a whole-tree reconcile.
 
-**Status: pre-alpha, three vertical slices.** `App`/`Signal`/`View`/
+**Status: pre-alpha, five vertical slices.** `App`/`Signal`/`View`/
 `ViewModel`/`Component`/`Repeater` exist and are exercised end to end by
 `examples/counter/` (a single screen), `examples/multi_screen/` (two
 screens, switched via `App.show()` from inside a real dispatched
-handler), and `examples/todo_list/` (a real dynamic list, one list
+handler), `examples/todo_list/` (a real dynamic list, one list
 `Signal` as the single source of truth, `Repeater` keeping components in
-sync automatically). `Signal`/`Computed`/`Effect`/`batch`/`untrack`/
+sync automatically), and `examples/app_shell/` and
+`examples/app_shell_file/` (an app shell with docked panels, built in
+Python and from a `*_Shell.yaml`). `Signal`/`Computed`/`Effect`/`batch`/`untrack`/
 `ViewModel` are Tesserae's own (M35) -- see Reactivity below. The MD3 widget catalog
 is real too: 67 declarative `component:` fragments for `*_View.yaml`
 files, plus `tesserae.widgets` for building widgets from Python. See the
@@ -65,6 +67,8 @@ for building `tre` from source, and for testing against an unreleased
 python examples/counter/app.py
 python examples/multi_screen/app.py
 python examples/todo_list/app.py
+python examples/app_shell/app.py
+python examples/app_shell_file/app.py
 ```
 
 `counter/`: a real `Signal`-bound counter -- a `Counter_View.yaml` +
@@ -88,6 +92,16 @@ instance lifecycle: add, toggle a two-way-bound checkbox, remove
 (mutating the shared `items` `Signal` from *inside* the item's own
 dispatched handler), add again, all through real dispatched clicks and
 one live window.
+
+`app_shell/`: an app framed by a top app bar, a navigation rail and a
+status bar, with tool panels docked left, right and bottom and screens as
+center tabs (M45), all built in Python with `tesserae.shell.AppShell`
+and `tesserae.docking.Dock`.
+
+`app_shell_file/`: the same studio declared in `Studio_Shell.yaml` and
+built by `app.load_shell()` (M52). Its panels are views named like
+screens, found next to the shell file; its rail shows screens; and the
+shell file itself is hot-reloaded.
 
 ## Components
 

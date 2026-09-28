@@ -1,0 +1,15 @@
+# The app shell, declared (M52): loaded by app.py with app.load_shell().
+# Edit it while the app runs with hot_reload=True -- the title, the status
+# text, zone sizes, the rail and panels change in place.
+top_bar: {title: Tesserae Studio, trailing_icons: [settings]}
+navigation:
+  items:
+    - {screen: Home, icon: home}
+    - {screen: Notes, icon: search}
+status_bar: {text: Ready}
+zones: {left: 220, right: 260, bottom: 160}
+center: true
+panels:
+  left: [Files, Outline]
+  right: [Properties]
+  bottom: [Console]

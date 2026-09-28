@@ -215,4 +215,6 @@ Phase 3 done: panels as named view files, navigation bound to `app.show` (or `on
 
 Phase 4 done: the shell file is hot-reloaded, patched in place where it can be; structural edits logged as needing a restart; 1458 passed.
 
-**Up next:** M52 Phase 5.
+Phase 5 done, and M52 with it: `examples/app_shell_file/` (in CI), `App.screen`, the README's examples; 1473 passed.
+
+**Up next:** nothing scoped; M49–M52 done.

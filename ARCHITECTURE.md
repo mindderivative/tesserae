@@ -270,6 +270,10 @@ the file added or moved go through `place_panels`. What can't be done
 in place is returned and logged as needing a restart. A panel removal
 is one of those: `tre` has no undock, and a detached panel stays in its
 zone's list, so `set_active_panel` would reattach it (probed).
+Phase 5: `App.screen(name)` returns a registered screen's `(view,
+viewmodel)`, the public way to reach a panel's ViewModel that the app
+built from a file. `examples/app_shell_file/` (in CI) declares the
+studio in `Studio_Shell.yaml`, with no widgets made in Python.
 
 **Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
 the framework (D10). Each zone is a column -- a tab strip, a divider, and

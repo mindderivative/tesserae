@@ -14,7 +14,7 @@ MVVM layer, not a whole-tree reconcile.
 
 **Status: pre-alpha.** `App`/`Signal`/`View`/`ViewModel`/`Component`/
 `Repeater`/`Computed`/`Effect`/`batch`/`untrack` are real, exercised
-end to end by three real vertical-slice examples. See
+end to end by five real vertical-slice examples. See
 [Getting Started](getting-started.md) to build your first screen.
 
 ## What's built

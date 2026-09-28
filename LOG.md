@@ -1282,3 +1282,17 @@ https://github.com/mindderivative/tre/issues/16. It proposes
 a detached docked panel stays in its zone's list, and
 `set_active_panel` attaches it again. The known gap and the hot-reload
 guide link to it.
+
+## M52 Phase 5: the file-built example -- M52 complete
+
+User: "Start phase 5".
+
+- `examples/app_shell_file/` declares the studio in `Studio_Shell.yaml`,
+  with no widgets made in Python. It's self-checking and runs with hot
+  reload on; CI runs it next to `examples/app_shell/`.
+- `App.screen(name)` gives a panel's view and the ViewModel the app
+  built from a file, replacing the example's `app._registered` access.
+- The README now lists all five examples; it had missed `app_shell/`
+  since M45.
+
+1473 passed; all five examples clean. M49-M52 are all done.

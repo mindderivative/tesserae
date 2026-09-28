@@ -86,3 +86,7 @@ jobs:
       - name: Run the app-shell example
         working-directory: tesserae
         run: python examples/app_shell/app.py
+
+      - name: Run the app-shell file example
+        working-directory: tesserae
+        run: python examples/app_shell_file/app.py

@@ -478,6 +478,15 @@ class App:
         logger.info("loaded the app shell from {}", path)
         return shell
 
+    def screen(self, name: str) -> tuple[Any, Any]:
+        """The `(view, viewmodel)` registered under `name` -- by `register`,
+        `load`, or a shell file's panels (M52), whose ViewModels the app
+        builds; `viewmodel` is `None` for a view with none."""
+        registered = self._registered.get(name)
+        if registered is None:
+            raise KeyError(f"no view registered under {name!r} -- call register() first")
+        return registered.view, registered.viewmodel
+
     @property
     def current(self) -> str | None:
         """The name last passed to `show()`, or `None` before the first

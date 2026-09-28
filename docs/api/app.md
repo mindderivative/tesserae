@@ -141,6 +141,15 @@ the schema doesn't have raises `tesserae.shell_file.ShellSpecError` (a
 `ValueError`) naming the file and the key. See
 [App Shell & Docking](../guide/app-shell.md#from-a-shell-file).
 
+## `screen`
+
+**`screen(name) -> (view, viewmodel)`**
+
+The view and ViewModel registered under `name`: by `register`, by
+`load`, or by a shell file's panels (M52), whose ViewModels the app
+builds. `viewmodel` is `None` for a view with none. An unknown name is a
+`KeyError`, as for `show`.
+
 ## `current`
 
 **`current -> str | None`**
