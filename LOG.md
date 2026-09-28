@@ -1273,3 +1273,12 @@ User: "push and start phase 4". Pushed `a28acb4..8eea926` first; CI run
 - 11 tests, plus a live case; 21/21 mutants caught.
 
 1458 passed; all four examples clean.
+
+## tre issue #16
+
+User: "File a tre issue asking for an undock call". Filed
+https://github.com/mindderivative/tre/issues/16. It proposes
+`Window.undock_panel(panel)`, with the Phase 4 probe as the repro:
+a detached docked panel stays in its zone's list, and
+`set_active_panel` attaches it again. The known gap and the hot-reload
+guide link to it.

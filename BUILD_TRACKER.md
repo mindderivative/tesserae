@@ -84,7 +84,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 **Known gaps:**
 - **An overlay's scrim keeps its size if the window is resized while it's open**, since it's sized on `open()` (M41 Phase 5).
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (tre's did the same); fine for a handful of pages, crowded for dozens (M42 Phase 5).
-- **Removing a panel from a shell file needs a restart** (M52 Phase 4): `tre` has no way to undock a panel. A detached one stays in its zone's list, so `set_active_panel` would attach it again (probed). An undock call in `tre` would let hot reload remove it.
+- **Removing a panel from a shell file needs a restart** (M52 Phase 4): `tre` has no way to undock a panel. A detached one stays in its zone's list, so `set_active_panel` would attach it again (probed). Requested as [`tre` issue #16](https://github.com/mindderivative/tre/issues/16) (a `Window.undock_panel`), which would let hot reload remove it.
 - **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51). The watcher finds instances through those views' components.
 - **The `SpinBox` fragment has no behaviour.** It's a composition of Rects and a TextField, since there's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5).
 - 67 of ~68 real MD3 widgets now have a declarative `*_Component.yaml` fragment; `video`/`node_graph`/`graph_node` are the only real remaining structural blockers (see below), plus `extended_fab`'s own deliberately deferred gap.
