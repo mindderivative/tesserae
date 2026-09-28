@@ -1362,3 +1362,26 @@ publisher is up" (`tesserae-ui`, `mindderivative/tesserae`,
   `twine check --strict`.
 - Issue #15 has a progress comment. What's left is the
   `tesserae-engine` dependency, then a release.
+
+## tre 0.3.5.2: tesserae-engine on PyPI
+
+tre's session reported v0.3.5.2, which fixes tre #16 (undock), #18
+(read the OS appearance) and #19 (PyPI, as `tesserae-engine`).
+
+- **Verified first:** the release (24 assets); `tesserae-engine` 0.3.5.2
+  on PyPI (22 wheels, no sdist yet); #16, #18 and #19 closed.
+- **`.venv`:** `pip uninstall tre` first, as tre warned, then
+  `tesserae-engine==0.3.5.2`. `undock_panel` exists, and
+  `window.get("dark")` is `True` before `run()` here.
+- **`pyproject.toml`:** now depends on `tesserae-engine>=0.3.5.2`, so
+  `release.yml`'s guard passes.
+- **CI:** installs it from PyPI: no tre checkout build, no Rust, no
+  maturin. A font-only tre checkout at v0.3.5.2 with `TRE_SOURCE_DIR`
+  keeps the real-font test running, in `release.yml` too.
+- **Docs:** the README and installation page install from PyPI (with the
+  uninstall-`tre`-first warning), and the "starts dark" notes point at
+  #17.
+- **Tracker and issues:** the three known gaps waiting on tre are
+  unblocked. Comments on #3, #15 and #17.
+
+1473 passed, 1 skipped; all five examples clean.

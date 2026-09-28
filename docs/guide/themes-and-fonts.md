@@ -100,10 +100,10 @@ Since `tre` 0.3.4, two things work the way they do in CSS:
 An `App` follows the OS by default (`dark="system"`): when the OS
 switches between light and dark, every screen and the window switch
 with it, in place, as do the widgets, controls, overlays, shell and
-views made on the app's window without a theme of their own (M50). It starts dark, since the OS's appearance can't be
-read until it first switches (`tre` can't report it yet:
-[`tre` #18](https://github.com/mindderivative/tre/issues/18),
-[Tesserae #17](https://github.com/mindderivative/tesserae/issues/17)). To fix the appearance instead, pass
+views made on the app's window without a theme of their own (M50). It starts dark until the OS first switches. `tre` 0.3.5.2
+can now report the OS's appearance at start-up
+([`tre` #18](https://github.com/mindderivative/tre/issues/18)), and using
+it is [Tesserae #17](https://github.com/mindderivative/tesserae/issues/17). To fix the appearance instead, pass
 `dark=True` or `dark=False`, or call `app.set_dark(...)` at any time;
 `app.set_dark("system")` goes back to following the OS.
 

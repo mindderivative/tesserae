@@ -1,13 +1,9 @@
 name: CI
 
-# Deliberately small for a first commit, matching `tre`'s own real
-# scoping precedent (`tre/.github/workflows/ci.yml`'s own header
-# comment) -- check + test + lint, not the full cross-platform wheels
-# matrix yet (no consumers to ship to). `tre` isn't published to PyPI
-# yet, so this checks it out as a sibling and installs it editable, the
-# same `pip install -e /path/to/tre` this repo's README documents for
-# local development. Since tre 0.3.5 (M46) the names M43's gate forbade
-# are gone from tre itself, so one run is the gate.
+# check + test + the examples, on Linux. Since tre 0.3.5.2 the engine is
+# on PyPI as `tesserae-engine` (still `import tre`), so installing
+# Tesserae installs it as a user's `pip install` would: no tre checkout, no
+# Rust toolchain, no maturin build.
 
 on:
   push:
@@ -23,29 +19,6 @@ jobs:
         with:
           path: tesserae
 
-      # Pinned to `tre`'s v0.3.5.1 release tag (M46; 0.3.5.1 fixes tre#14, which
-      # `tesserae.docking.Dock.move` relies on), not a branch, so CI
-      # stays reproducible until it's deliberately bumped -- the same release
-      # the local `.venv` is pinned to. 0.3.5 removes the declarative layer,
-      # reactivity, the MD3 widgets and theming (tre M98-M100), all of which
-      # Tesserae now owns; M43's gate proved it used none of them.
-      - uses: actions/checkout@v4
-        with:
-          repository: mindderivative/tre
-          ref: v0.3.5.1
-          path: tre
-
-      # No explicit Rust-toolchain-install action needed -- matches
-      # `tre`'s own real ci.yml precedent: `ubuntu-latest` runners ship
-      # a working stable rustup toolchain already (confirmed by this
-      # workflow's own first real run, `actions-rs/toolchain@v1`'s
-      # `stable` install succeeding trivially). Deliberately not using
-      # `actions-rs/toolchain@v1` here -- confirmed unmaintained (forced
-      # onto an old Node.js runtime by GitHub's own deprecation notice
-      # on this workflow's first real run) and unnecessary.
-      - name: Confirm a real Rust toolchain is present
-        run: rustc --version && cargo --version
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -56,19 +29,24 @@ jobs:
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libfontconfig1-dev
 
-      - name: Install maturin
-        run: pip install maturin
+      # tre's source at the release pyproject's floor names, checked out only
+      # for a real font file (tests/test_themes.py reads Roboto through
+      # TRE_SOURCE_DIR); the wheel ships no .ttf files. Nothing is built from it.
+      - uses: actions/checkout@v4
+        with:
+          repository: mindderivative/tre
+          ref: v0.3.5.2
+          path: tre
 
-      - name: Install tre (editable, from the sibling checkout)
-        working-directory: tre
-        run: pip install -e .
-
+      # Pulls `tesserae-engine` (tre) from PyPI, per pyproject's `>=` floor.
       - name: Install tesserae (editable, dev extras)
         working-directory: tesserae
         run: pip install -e ".[dev]"
 
       - name: Run tests
         working-directory: tesserae
+        env:
+          TRE_SOURCE_DIR: ${{ github.workspace }}/tre
         run: pytest tests/
 
       - name: Run the counter example

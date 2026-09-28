@@ -4,21 +4,21 @@ Tesserae is pre-alpha and not yet published to PyPI -- install it as a
 local editable checkout. It will be published as **`tesserae-ui`**
 (`tesserae` on PyPI is an unrelated project), and it's still imported as
 `tesserae` ([#15](https://github.com/mindderivative/tesserae/issues/15)).
-`tre` will be published as **`tesserae-engine`**, still imported as `tre`
-([`tre` #19](https://github.com/mindderivative/tre/issues/19)). It targets one specific `tre` release, the same
-one its CI pins: **`tre` v0.3.5.1**.
+It needs **`tre` 0.3.5.2 or newer**, which is on PyPI as
+[`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (still
+imported as `tre`), so installing Tesserae installs it.
 
 ## Requirements
 
 - Python 3.9 or newer
 - Linux, macOS, or Windows -- whatever `tre` itself supports (see
-  [`tre`'s own installation guide](https://mindderivative.github.io/tre/installation/))
-- A Rust toolchain, only if you build `tre` from source (`rustup`'s
-  default stable toolchain works)
+  [`tre`'s own installation guide](https://mindderivative.github.io/tre/installation/)).
+  `tesserae-engine` 0.3.5.2 has wheels for CPython 3.9–3.15 on Linux
+  x86_64, macOS arm64 and Windows, and PyPy 3.11 on Linux. It has no
+  sdist yet, so other platforms (Linux aarch64, Intel macOS) can't build
+  it from PyPI until `tre`'s next release.
 
-## Install `tre` v0.3.5.1
-
-Create a virtual environment in your Tesserae checkout:
+## Get the checkout
 
 ```bash
 git clone https://github.com/mindderivative/tesserae.git
@@ -27,24 +27,14 @@ python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 ```
 
-Then install `tre` v0.3.5.1, either from the wheel for your platform on the
-[v0.3.5.1 release page](https://github.com/mindderivative/tre/releases/tag/v0.3.5.1)
-(CPython 3.9–3.15 on Linux, macOS arm64 and Windows):
+!!! warning "Coming from a GitHub `tre` wheel"
+    If this environment has a `tre-...` wheel from a GitHub release (Tesserae
+    used them before 0.3.5.2), run `pip uninstall tre` **first**. pip treats
+    `tesserae-engine` as a different project and leaves the old `tre`
+    distribution installed; both then own the `tre` package, and a later
+    `pip uninstall tre` would delete files `tesserae-engine` needs.
 
-```bash
-pip install /path/to/downloaded/tre-0.3.5.1-<your-platform>.whl
-```
-
-or by building that tag from source:
-
-```bash
-git clone --branch v0.3.5.1 https://github.com/mindderivative/tre.git ../tre-v0.3.5.1
-pip install maturin
-python -m maturin build --release --manifest-path ../tre-v0.3.5.1/crates/engine-py/Cargo.toml --out dist
-pip install dist/tre-0.3.5.1-*.whl
-```
-
-0.3.5 (and its 0.3.5.1 fix) has only `tre`'s building blocks: its declarative views,
+0.3.5 and later have only `tre`'s building blocks: its declarative views,
 reactivity, MD3 widgets and theming are gone, and Tesserae provides them
 (see `tre`'s [migration page](https://github.com/mindderivative/tre/blob/v0.3.5/docs/migrating-0.3.5.md)
 if you also use `tre` directly).
@@ -54,9 +44,11 @@ if you also use `tre` directly).
     it editable instead: `python -m maturin develop --release
     --manifest-path /path/to/tre/crates/engine-py/Cargo.toml` with
     Tesserae's `.venv` active. From then on your local results follow
-    that checkout -- every rebuild changes them -- so switch back to the
-    v0.3.5.1 wheel (`pip install --force-reinstall ...`) before trusting a
-    test run.
+    that checkout -- every rebuild changes them -- so go back to the
+    released one (`pip install --force-reinstall "tesserae-engine>=0.3.5.2"`)
+    before trusting a test run. A real-font test reads a font file from
+    `tre`'s source tree: set `TRE_SOURCE_DIR` to a `tre` checkout to run
+    it (CI does).
 
 Then install Tesserae itself, editable, with dev extras:
 
@@ -64,7 +56,8 @@ Then install Tesserae itself, editable, with dev extras:
 pip install -e ".[dev]"
 ```
 
-This also installs Tesserae's own dependencies from PyPI: PyYAML, for
+This also installs Tesserae's dependencies from PyPI: `tesserae-engine`
+(`tre`); PyYAML, for
 reading view files; Pillow, for decoding images; and watchfiles, for
 hot reload. Tesserae reads, decodes and watches every file itself and
 hands `tre` only the data.

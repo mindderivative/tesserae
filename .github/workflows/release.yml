@@ -62,8 +62,17 @@ jobs:
       - name: Install the built wheel
         run: pip install tesserae/dist/*.whl pytest
 
+      # tre's source, only for the real font file tests/test_themes.py reads.
+      - uses: actions/checkout@v4
+        with:
+          repository: mindderivative/tre
+          ref: v0.3.5.2
+          path: tre
+
       - name: Test the built wheel
         working-directory: tesserae
+        env:
+          TRE_SOURCE_DIR: ${{ github.workspace }}/tre
         run: |
           python -c "import tesserae; assert 'site-packages' in tesserae.__file__, tesserae.__file__; print(tesserae.__file__)"
           pytest tests/

@@ -47,19 +47,18 @@ reloads, failed reloads naming the file, and warnings. Call
 
 ## Install (development)
 
-Tesserae targets **`tre` v0.3.5.1** (the release its CI pins). Install that
-`tre` first -- the wheel for your platform from the
-[v0.3.5.1 release](https://github.com/mindderivative/tre/releases/tag/v0.3.5.1),
-or built from the tag -- then Tesserae itself:
+Tesserae needs **`tre` 0.3.5.2 or newer**, which is on PyPI as
+[`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (still
+`import tre`). Installing Tesserae installs it:
 
 ```bash
-pip install /path/to/tre-0.3.5.1-<your-platform>.whl
 pip install -e ".[dev]"
 ```
 
-See the [installation guide](https://mindderivative.github.io/tesserae/installation/)
-for building `tre` from source, and for testing against an unreleased
-`tre` checkout.
+Coming from a GitHub `tre-...` wheel, run `pip uninstall tre` first: pip
+treats `tesserae-engine` as a different project, and both would own the
+`tre` package. See the [installation guide](https://mindderivative.github.io/tesserae/installation/)
+for testing against an unreleased `tre` checkout.
 
 ## The real vertical slices
 
