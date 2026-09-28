@@ -182,5 +182,7 @@ shell.restore(saved)
 
 - A layout is restored by title, so two panels with the same title can't
   be told apart.
-- A shell file isn't hot-reloaded yet: editing it needs a restart. Its
-  panels' own view files are hot-reloaded, as screens are.
+- Hot reload of a shell file can't add or remove a zone or bar, change
+  `center`, or remove a panel (`tre` can't undock one); those edits are
+  logged as needing a restart. See
+  [Hot Reload](hot-reload.md#the-shell-file).

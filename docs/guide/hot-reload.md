@@ -95,6 +95,33 @@ hot reload: watching component TodoItem_View.yaml (3 instance(s))
 reloaded /path/to/TodoItem_View.yaml (3 instance(s))
 ```
 
+## The shell file
+
+A shell loaded with `app.load_shell` from a `*_Shell.yaml` is watched
+too (M52). An edit is applied in place where it can be:
+
+| Edit | What happens |
+| --- | --- |
+| the top bar's title or icons | the bar is rebuilt where it is |
+| the status bar's text | set on the same bar |
+| a zone's size | set, and a zone the file didn't change keeps the size the user dragged it to |
+| navigation items or `on_navigate` | the rail is rebuilt, the current screen still selected |
+| a panel added, or moved to another zone | docked there; a panel the file didn't move stays where the user dragged it |
+
+A structural edit is logged at WARNING as needing a restart, and the
+rest of the edit still applies. Structural edits are a bar or the rail
+added or removed, a zone added or removed, `center`, and a panel
+removed. `tre` has no way to undock a panel, so a removed one stays
+until the app restarts:
+
+```text
+the shell file Studio_Shell.yaml changed (zones right added): restart the app to see it
+```
+
+An edit naming a panel or `on_navigate` method that can't be found is
+logged as an error and changes nothing. The panels' own view files are
+screens, so they're reloaded as screens are.
+
 ## Theme and stylesheet files
 
 `App.run(hot_reload=True)` also watches the theme files given to

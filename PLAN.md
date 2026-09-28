@@ -213,4 +213,6 @@ Phase 2 done: `tesserae.shell_file` and `app.load_shell`; the whole schema check
 
 Phase 3 done: panels as named view files, navigation bound to `app.show` (or `on_navigate`); `show` leaves docked panels docked; 1445 passed.
 
-**Up next:** M52 Phases 4–5.
+Phase 4 done: the shell file is hot-reloaded, patched in place where it can be; structural edits logged as needing a restart; 1458 passed.
+
+**Up next:** M52 Phase 5.

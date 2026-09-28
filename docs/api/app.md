@@ -169,7 +169,10 @@ stylesheet files: the default from `App(stylesheet=)`, and each screen's
 own `load(stylesheet=)` file. Components built with `tesserae.instantiate`
 are watched by their file, one watcher per file for all its live
 instances, including ones added while the app runs (M51; see
-[Hot Reload](../guide/hot-reload.md#components-added-at-run-time)).
+[Hot Reload](../guide/hot-reload.md#components-added-at-run-time)). A
+shell file from `load_shell` is watched too, and an edit is applied in
+place where it can be; a structural one is logged as needing a restart
+(M52; see [Hot Reload](../guide/hot-reload.md#the-shell-file)).
 
 ## `thread_handle`
 

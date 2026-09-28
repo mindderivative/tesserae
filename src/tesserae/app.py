@@ -29,6 +29,7 @@ from tesserae.follow import alive, register_app, retheme
 from tesserae.naming import check_naming_convention
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
+from tesserae.shell_file import load_shell_spec
 from tesserae.spec.watch import ComponentWatcher, FileWatcher
 
 @dataclass
@@ -160,6 +161,8 @@ class App:
         self._current: str | None = None
         self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
         self._shell_file: Path | None = None  # the `*_Shell.yaml` `load_shell` read (M52)
+        self._shell_spec: Any = None  # ...its spec as last applied, and the viewmodel it was given
+        self._shell_viewmodel: Any = None
         self._navigation: Any = None  # (the shell file's rail, its screens), for `show` to select (M52)
         self._tre_app: _TreApp | None = None
         #: The widgets made on this window with no `theme=`, which follow
@@ -468,7 +471,7 @@ class App:
         spec = load_shell_spec(path)
         check_references(self, spec, path, viewmodel)  # before anything is built
         shell = build_shell(self, spec)
-        self._shell_file = path
+        self._shell_file, self._shell_spec, self._shell_viewmodel = path, spec, viewmodel
         self.use_shell(shell)
         place_panels(self, shell, spec, path)
         bind_navigation(self, shell, spec, path, viewmodel)
@@ -541,16 +544,24 @@ class App:
                     name="theme",
                 )
             )
+        shell_watcher = None
+        if self._shell_file is not None:  # M52: the shell file, patched in place
+            path = self._shell_file.resolve()
+            shell_watcher = FileWatcher(
+                [path], lambda path=path: load_shell_spec(path), self._reload_shell, name="shell")
+            watchers.append(shell_watcher)
         for watcher in watchers:
             watcher.start(handle)
         self._hot_handle, self._watchers = handle, watchers
+        if shell_watcher is not None:
+            logger.info("hot reload: watching the shell file {}", self._shell_file.name)
         for path in sorted({c.path.resolve() for c in self._live_components()}):
             self.watch_component(path)
         views = sum(isinstance(w, ViewWatcher) and not isinstance(w, ComponentWatcher) for w in watchers)
         logger.info(
             "hot reload on: watching {} screen(s) and {} theme/stylesheet file(s)",
             views,
-            sum(len(w.files) for w in watchers if not isinstance(w, ViewWatcher)),
+            sum(len(w.files) for w in watchers if not isinstance(w, ViewWatcher) and w is not shell_watcher),
         )
         return watchers
 
@@ -599,6 +610,21 @@ class App:
         self._watchers.append(watcher)
         logger.info("hot reload: watching component {} ({} instance(s))", path.name, len(self._live_components(path)))
 
+    def _reload_shell(self, spec: dict[str, Any]) -> None:
+        """Applies an edited shell file (M52 Q4): what can change in place
+        is patched; a structural change is logged as needing a restart.
+        A panel or `on_navigate` it can't find fails before anything
+        changes."""
+        from tesserae.shell_file import check_references, reload_shell
+
+        path = self._shell_file
+        check_references(self, spec, path, self._shell_viewmodel)
+        needs = reload_shell(self, self._shell, self._shell_spec, spec, path, self._shell_viewmodel)
+        self._shell_spec = spec
+        logger.info("reloaded the shell from {}", path)
+        for change in needs:
+            logger.warning("the shell file {} changed ({}): restart the app to see it", path.name, change)
+
     def _apply_theme_files(self, specs: tuple[Any, Any]) -> None:
         self.set_theme_specs(*specs)
         files = ", ".join(str(f) for f in self._theme_files.values() if f is not None)
@@ -622,7 +648,9 @@ class App:
         dict has no file, so it isn't watched, and the log says so. A
         component built with `tesserae.instantiate` is watched by its file
         too, one watcher for all its live instances, including ones added
-        while the app runs (M51).
+        while the app runs (M51). So is a shell file from `load_shell`:
+        an edit is patched in place, and a structural one is logged as
+        needing a restart (M52).
 
         M31: the theme files given to `App(default_theme=, custom_theme=)`
         are watched too. An edit re-reads them on the watcher thread and

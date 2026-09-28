@@ -40,7 +40,7 @@ import yaml
 from tesserae.naming import check_naming_convention
 
 __all__ = ["SHELL_SUFFIX", "ShellSpecError", "bind_navigation", "build_shell", "check_references", "load_shell_spec",
-           "parse_shell_spec", "place_panels"]
+           "parse_shell_spec", "place_panels", "reload_shell"]
 
 SHELL_SUFFIX = "_Shell.yaml"
 _KEYS = {"top_bar", "navigation", "status_bar", "zones", "center", "panels"}
@@ -157,19 +157,15 @@ def build_shell(app: Any, spec: dict[str, Any]) -> Any:
     across the window, its rail lists the navigation items' screens, and
     it takes the app's theme and follows it (M50)."""
     from tesserae.shell import AppShell
-    from tesserae.widgets import navigation_rail, status_bar, top_app_bar
+    from tesserae.widgets import status_bar
 
     window = app.window
     width = float(app._width)
     bar = rail = status = None
     if spec["top_bar"] is not None:
-        top = spec["top_bar"]
-        bar = top_app_bar(window, top["title"], leading_icon=top.get("leading_icon"),
-                          trailing_icons=top["trailing_icons"], width=width)
-        bar.node.set(width="100%")  # across the window as it resizes
+        bar = _top_bar(app, spec["top_bar"])
     if spec["navigation"] is not None:
-        items = spec["navigation"]["items"]
-        rail = navigation_rail(window, [i["screen"] for i in items], [i["icon"] for i in items], selected=0)
+        rail = _rail(app, spec["navigation"], 0)
     if spec["status_bar"] is not None:
         status = status_bar(window, spec["status_bar"]["text"], width=width)
         status.node.set(width="100%")
@@ -255,3 +251,79 @@ def bind_navigation(app: Any, shell: Any, spec: dict[str, Any], path: Path, view
     handler = getattr(viewmodel, method) if method is not None else app.show  # `check_references` checked it
     shell.navigation.on_change(lambda index: handler(screens[index]))
     app._navigation = (shell.navigation, screens)
+
+
+def reload_shell(app: Any, shell: Any, old: dict[str, Any], new: dict[str, Any], path: Path,
+                 viewmodel: Any = None) -> list[str]:
+    """Applies an edited shell file in place (M52 Q4) and returns what it
+    couldn't: the structural changes that need a restart. The bars, the
+    rail, the zones and `center` are compared with the live shell; panels
+    with the file as it was, so a panel the user dragged stays where it is
+    unless the file moved it."""
+    needs: list[str] = []
+    for key, live in (("top_bar", shell.top_bar), ("navigation", shell.navigation),
+                      ("status_bar", shell.status_bar)):
+        if (live is None) != (new[key] is None):
+            needs.append(f"{key} {'added' if new[key] is not None else 'removed'}")
+    added, dropped = sorted(set(new["zones"]) - set(shell._zone_nodes)), sorted(set(shell._zone_nodes) - set(new["zones"]))
+    if added or dropped:
+        needs.append("zones " + ", ".join([*(f"{s} added" for s in added), *(f"{s} removed" for s in dropped)]))
+    if new["center"] != shell.center:
+        needs.append(f"center changed to {str(new['center']).lower()}")
+    before, after = _placed(old), _placed(new)
+    removed = sorted(set(before) - set(after))
+    if removed:
+        # `tre` can't undock a panel: a detached one stays in its zone's list
+        needs.append(f"panels removed ({', '.join(removed)})")
+
+    if shell.top_bar is not None and new["top_bar"] is not None and new["top_bar"] != old["top_bar"]:
+        top = new["top_bar"]
+        bar = _swap(shell.top_bar, lambda: _top_bar(app, top))
+        shell.top_bar = bar
+    if shell.status_bar is not None and new["status_bar"] is not None and new["status_bar"] != old["status_bar"]:
+        shell.status_bar.part("text").set(text=new["status_bar"]["text"])
+    for side, size in new["zones"].items():
+        if side in shell._zone_nodes and size != old["zones"].get(side):
+            shell.set_size(side, size)
+    if shell.navigation is not None and new["navigation"] is not None and new["navigation"] != old["navigation"]:
+        screens = [item["screen"] for item in new["navigation"]["items"]]
+        selected = screens.index(app.current) if app.current in screens else 0
+        shell.navigation = _swap(shell.navigation, lambda: _rail(app, new["navigation"], selected))
+        bind_navigation(app, shell, new, path, viewmodel)
+    sides = {*shell._zone_nodes, *(["center"] if shell.center else [])}
+    moved_or_new = {name: side for name, side in after.items() if before.get(name) != side and side in sides}
+    grouped: dict[str, list[str]] = {}
+    for name, side in moved_or_new.items():
+        grouped.setdefault(side, []).append(name)
+    place_panels(app, shell, {"panels": grouped}, path)
+    return needs
+
+
+def _placed(spec: dict[str, Any]) -> dict[str, str]:
+    return {name: side for side, names in spec["panels"].items() for name in names}
+
+
+def _top_bar(app: Any, top: dict[str, Any]) -> Any:
+    from tesserae.widgets import top_app_bar
+
+    bar = top_app_bar(app.window, top["title"], leading_icon=top.get("leading_icon"),
+                      trailing_icons=top["trailing_icons"], width=float(app._width))
+    bar.node.set(width="100%")  # across the window as it resizes
+    return bar
+
+
+def _rail(app: Any, navigation: dict[str, Any], selected: int) -> Any:
+    from tesserae.widgets import navigation_rail
+
+    items = navigation["items"]
+    return navigation_rail(app.window, [i["screen"] for i in items], [i["icon"] for i in items], selected=selected)
+
+
+def _swap(old: Any, make: Any) -> Any:
+    """A new widget where `old`'s node is, and `old` destroyed."""
+    parent = old.node.parent()
+    index = parent.children().index(old.node)
+    new = make()
+    parent.insert_child(index, new.node)
+    old.destroy()
+    return new

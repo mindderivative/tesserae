@@ -258,6 +258,18 @@ forward (a panel is a screen) and tracks the screen in `content` itself
 (`_in_content`), removing it only while it's still there, so a screen
 docked as a panel is never pulled back out. `tre`'s `dock_panel` takes a
 node from wherever it's attached.
+Phase 4: `_start_watchers` adds a `FileWatcher` for the shell file
+(logged on its own, not counted with theme and stylesheet files), and
+`App._reload_shell` runs `check_references`, then
+`shell_file.reload_shell(old, new)`, then stores the spec. Bars, rail,
+zones and `center` are compared with the live shell, and panels with the
+last spec applied, so user drags survive. A changed top bar or rail is
+rebuilt in its slot (`_swap`: `insert_child` at the old index, then
+`destroy`) and rebound. The status text and zone sizes are set. Panels
+the file added or moved go through `place_panels`. What can't be done
+in place is returned and logged as needing a restart. A panel removal
+is one of those: `tre` has no undock, and a detached panel stays in its
+zone's list, so `set_active_panel` would reattach it (probed).
 
 **Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
 the framework (D10). Each zone is a column -- a tab strip, a divider, and

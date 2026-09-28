@@ -1259,3 +1259,16 @@ User: "continue to the next phase".
 - 14 tests; 18/18 mutants caught.
 
 1445 passed; all four examples clean.
+
+## M52 Phase 4: hot reload of the shell file
+
+User: "push and start phase 4". Pushed `a28acb4..8eea926` first.
+
+- The shell file is watched. An edit patches the bars, the status text,
+  zone sizes, the rail, and panels added or moved, keeping the user's
+  drags and sizes. Structural edits are logged as needing a restart.
+- `tre` can't undock a panel (probed), so removing a panel is a restart
+  and a new known gap.
+- 11 tests, plus a live case; 21/21 mutants caught.
+
+1458 passed; all four examples clean.
