@@ -1,0 +1,93 @@
+name: Release
+
+# Publishes Tesserae to PyPI as `tesserae-ui` (issue #15) when a GitHub
+# Release is published. Trusted publishing (OIDC): PyPI's publisher for
+# `tesserae-ui` names this repository, this file (`release.yml`) and the
+# `pypi` environment, so no API token is stored anywhere. The `pypi`
+# environment is where a required reviewer can hold each upload.
+#
+# The build job checks everything before anything leaves: the release tag
+# matches `pyproject.toml`'s version, no dependency is PyPI's unrelated
+# `tre` (the engine publishes as `tesserae-engine`, tre#19), and the built
+# wheel passes the suite and runs the examples.
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: tesserae
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the tag and the dependencies
+        working-directory: tesserae
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python - <<'EOF'
+          import os, re, sys, tomllib
+
+          project = tomllib.load(open("pyproject.toml", "rb"))["project"]
+          tag = os.environ["TAG"].removeprefix("v")
+          if tag != project["version"]:
+              sys.exit(f"the release tag {os.environ['TAG']!r} doesn't match pyproject's version {project['version']!r}")
+          names = [re.split(r"[\s<>=!~;\[(]", d, maxsplit=1)[0].lower().replace("_", "-") for d in project["dependencies"]]
+          if "tre" in names:
+              sys.exit("pyproject still depends on 'tre': on PyPI that's an unrelated regex library. "
+                       "Depend on 'tesserae-engine' (tre#19) before publishing.")
+          print(f"releasing {project['name']} {project['version']}; dependencies {names}")
+          EOF
+
+      - name: Build the sdist and wheel
+        working-directory: tesserae
+        run: |
+          pip install build twine
+          python -m build
+          twine check --strict dist/*
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libfontconfig1-dev
+
+      # From PyPI: the wheel's dependencies, `tesserae-engine` included, as a
+      # user's `pip install tesserae-ui` would get them. The installed wheel
+      # is tested, not the checkout.
+      - name: Install the built wheel
+        run: pip install tesserae/dist/*.whl pytest
+
+      - name: Test the built wheel
+        working-directory: tesserae
+        run: |
+          python -c "import tesserae; assert 'site-packages' in tesserae.__file__, tesserae.__file__; print(tesserae.__file__)"
+          pytest tests/
+          for example in counter multi_screen todo_list app_shell app_shell_file; do
+            python examples/$example/app.py
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: tesserae/dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/tesserae-ui
+    permissions:
+      id-token: write  # trusted publishing: PyPI accepts this job's OIDC token instead of an API token
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

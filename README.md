@@ -230,6 +230,10 @@ work once this foundation is proven further:
   named `tesserae-ui` in `pyproject.toml`, and the import name stays
   `tesserae`. `tre` must be published first, as **`tesserae-engine`**
   (`tre` there is an unrelated regex library; [`tre` #19](https://github.com/mindderivative/tre/issues/19),
-  in progress), and Tesserae's dependency then switches to it.
+  in progress), and Tesserae's dependency then switches to it. Publishing
+  is `.github/workflows/release.yml`: publishing a GitHub Release builds,
+  tests the built wheel and uploads it with PyPI trusted publishing (the
+  `pypi` environment). It refuses to run while the dependency is still the
+  bare `tre`, or when the tag doesn't match the version.
 
 Every known gap has a scoped issue: [Tesserae's issues](https://github.com/mindderivative/tesserae/issues).

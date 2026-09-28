@@ -1343,3 +1343,22 @@ User: "tre will be tesserae-engine which tre is working on right now".
   gap. tre #19 is left to tre's session.
 - `pyproject.toml` keeps `"tre"`, with a comment, until `tesserae-engine`
   is published; switching now would break `pip install -e .` in CI.
+
+## The release workflow
+
+User: "already setup the github pypi env for you and the pending
+publisher is up" (`tesserae-ui`, `mindderivative/tesserae`,
+`release.yml`, `pypi`).
+
+- `.github/workflows/release.yml`, run on a published GitHub Release:
+  - checks the tag matches the version;
+  - refuses while a dependency is the bare `tre` (PyPI's `tre` is an
+    unrelated regex library);
+  - builds, runs `twine check --strict`, and runs the suite and the five
+    examples against the installed wheel;
+  - publishes through trusted publishing in the `pypi` environment.
+- Checked locally: the YAML parses, the guard blocks today's
+  `pyproject.toml`, and `tesserae_ui-0.1.0` builds and passes
+  `twine check --strict`.
+- Issue #15 has a progress comment. What's left is the
+  `tesserae-engine` dependency, then a release.
