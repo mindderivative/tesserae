@@ -1262,7 +1262,8 @@ User: "continue to the next phase".
 
 ## M52 Phase 4: hot reload of the shell file
 
-User: "push and start phase 4". Pushed `a28acb4..8eea926` first.
+User: "push and start phase 4". Pushed `a28acb4..8eea926` first; CI run
+36386574658 passed (1444 passed, 4 skipped; the four examples clean).
 
 - The shell file is watched. An edit patches the bars, the status text,
   zone sizes, the rail, and panels added or moved, keeping the user's
