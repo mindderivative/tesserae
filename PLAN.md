@@ -218,3 +218,7 @@ Phase 4 done: the shell file is hot-reloaded, patched in place where it can be; 
 Phase 5 done, and M52 with it: `examples/app_shell_file/` (in CI), `App.screen`, the README's examples; 1473 passed.
 
 **Up next:** nothing scoped; M49–M52 done.
+
+**Known gaps scoped and filed (2026-09-28):** every gap re-checked against the source and `tre` 0.3.5.1, then scoped in its own issue: Tesserae #1–#17, and `tre` #18 (read the OS appearance) and #19 (PyPI; the name `tre` is taken), alongside #16 (undock). One gap was stale (`on_change` on reload, `tre` #12, closed; Tesserae fires `on_change` only for user edits since M37) and moved to "Fixed gaps".
+
+**Up next:** nothing scoped as a milestone; the issues are the backlog.

@@ -221,8 +221,12 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 Named for the record, not designed in detail yet -- each is real, future
 work once this foundation is proven further:
 
-- App-level state stores shared across screens, routing beyond a plain
-  named `App.show(name)` (history/back-stack, URL-style deep links), a
-  `tesserae new` CLI scaffolding tool.
-- Publishing to PyPI (not relevant until there's a real, wider vertical
-  slice worth shipping).
+- App-level state stores shared across screens ([#13](https://github.com/mindderivative/tesserae/issues/13)),
+  routing beyond a plain named `App.show(name)` (history/back-stack,
+  URL-style deep links; [#12](https://github.com/mindderivative/tesserae/issues/12)),
+  a `tesserae new` CLI scaffolding tool ([#14](https://github.com/mindderivative/tesserae/issues/14)).
+- Publishing to PyPI ([#15](https://github.com/mindderivative/tesserae/issues/15)).
+  Both `tesserae` and `tre` are names taken there by unrelated projects,
+  and `tre` must be published first ([`tre` #19](https://github.com/mindderivative/tre/issues/19)).
+
+Every known gap has a scoped issue: [Tesserae's issues](https://github.com/mindderivative/tesserae/issues).

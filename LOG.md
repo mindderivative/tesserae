@@ -1296,3 +1296,27 @@ User: "Start phase 5".
   since M45.
 
 1473 passed; all five examples clean. M49-M52 are all done.
+
+## Known gaps: scoped and filed as issues
+
+User: "scope out all known gaps that are for Tesserae to fix, and any
+that are for tre, then submit an issue on each of them".
+
+Each gap was re-checked against the source and `tre` 0.3.5.1 first.
+
+- **Stale:** the `on_change` on reload gap. `tre` #12 is closed (0.3.5
+  removed the cause), and Tesserae has fired `on_change` only for user
+  edits since M37. It moved to "Fixed gaps", with no issue.
+- **Found:** both `tre` and `tesserae` are names already taken on PyPI.
+- **Tesserae:** #1-#17 (mindderivative/tesserae; the repo's first
+  issues). Scrim resize (a bug), pagination ellipsis, shell panel
+  removal (after tre#16), components in unknown views, a SpinBox kind,
+  declarative video, declarative graph_node, extended_fab without an
+  icon, per-item styling for `repeat:`, the cascade and `components:`, a
+  text wrapper (low priority), routing, a state store, `tesserae new`,
+  PyPI (after tre#19), wide-gamut colours, and `dark="system"` at start
+  (after tre#18).
+- **`tre`:** #18 (`window.get("dark")`) and #19 (PyPI, and a
+  distribution name), next to #16 (undock).
+- The Known gaps list now links each gap to its issue: 13 bullets, with
+  the three widget-fragment gaps folded into their summary line.

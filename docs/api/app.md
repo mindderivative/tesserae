@@ -44,8 +44,9 @@ theme file changes.
 
 `dark="system"` (the default) follows the OS: when it switches between
 light and dark, every screen is re-themed in place, with
-bound values kept. It **starts dark**, because `tre` 0.3.4 can't read the
-OS's appearance until the first switch. `dark=True` or `dark=False` fixes
+bound values kept. It **starts dark**, because `tre` (0.3.5.1 too) can't
+read the OS's appearance until the first switch
+([`tre` #18](https://github.com/mindderivative/tre/issues/18)). `dark=True` or `dark=False` fixes
 the appearance, whatever the OS does.
 
 **`set_dark(dark) -> None`** -- `True`/`False` switches to that
