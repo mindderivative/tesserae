@@ -228,7 +228,8 @@ work once this foundation is proven further:
 - Publishing to PyPI as **`tesserae-ui`** ([#15](https://github.com/mindderivative/tesserae/issues/15));
   `tesserae` there is an unrelated project. The distribution is already
   named `tesserae-ui` in `pyproject.toml`, and the import name stays
-  `tesserae`. `tre` must be published first, under a name of its own
-  since `tre` is taken too ([`tre` #19](https://github.com/mindderivative/tre/issues/19)).
+  `tesserae`. `tre` must be published first, as **`tesserae-engine`**
+  (`tre` there is an unrelated regex library; [`tre` #19](https://github.com/mindderivative/tre/issues/19),
+  in progress), and Tesserae's dependency then switches to it.
 
 Every known gap has a scoped issue: [Tesserae's issues](https://github.com/mindderivative/tesserae/issues).

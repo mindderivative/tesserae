@@ -3,7 +3,9 @@
 Tesserae is pre-alpha and not yet published to PyPI -- install it as a
 local editable checkout. It will be published as **`tesserae-ui`**
 (`tesserae` on PyPI is an unrelated project), and it's still imported as
-`tesserae` ([#15](https://github.com/mindderivative/tesserae/issues/15)). It targets one specific `tre` release, the same
+`tesserae` ([#15](https://github.com/mindderivative/tesserae/issues/15)).
+`tre` will be published as **`tesserae-engine`**, still imported as `tre`
+([`tre` #19](https://github.com/mindderivative/tre/issues/19)). It targets one specific `tre` release, the same
 one its CI pins: **`tre` v0.3.5.1**.
 
 ## Requirements

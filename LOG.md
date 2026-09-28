@@ -1333,3 +1333,13 @@ User: "pypi for tesserae should be named tesserae-ui".
   one was removed. 1473 passed.
 - Issue #15 was updated and commented. The README, the installation page
   and the known gap name it.
+
+## tre's PyPI name: tesserae-engine
+
+User: "tre will be tesserae-engine which tre is working on right now".
+
+- The name was free on PyPI. Recorded on Tesserae's side: issue #15
+  (body and a comment), the README, the installation page and the known
+  gap. tre #19 is left to tre's session.
+- `pyproject.toml` keeps `"tre"`, with a comment, until `tesserae-engine`
+  is published; switching now would break `pip install -e .` in CI.

@@ -24,7 +24,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "tre",
+    "tre",  # `tesserae-engine` on PyPI once tre is published there (tre#19); a local wheel until then
     "pyyaml>=6.0",
     "Pillow>=10.0",
     "watchfiles>=1.0",
