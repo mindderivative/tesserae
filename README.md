@@ -225,8 +225,10 @@ work once this foundation is proven further:
   routing beyond a plain named `App.show(name)` (history/back-stack,
   URL-style deep links; [#12](https://github.com/mindderivative/tesserae/issues/12)),
   a `tesserae new` CLI scaffolding tool ([#14](https://github.com/mindderivative/tesserae/issues/14)).
-- Publishing to PyPI ([#15](https://github.com/mindderivative/tesserae/issues/15)).
-  Both `tesserae` and `tre` are names taken there by unrelated projects,
-  and `tre` must be published first ([`tre` #19](https://github.com/mindderivative/tre/issues/19)).
+- Publishing to PyPI as **`tesserae-ui`** ([#15](https://github.com/mindderivative/tesserae/issues/15));
+  `tesserae` there is an unrelated project. The distribution is already
+  named `tesserae-ui` in `pyproject.toml`, and the import name stays
+  `tesserae`. `tre` must be published first, under a name of its own
+  since `tre` is taken too ([`tre` #19](https://github.com/mindderivative/tre/issues/19)).
 
 Every known gap has a scoped issue: [Tesserae's issues](https://github.com/mindderivative/tesserae/issues).

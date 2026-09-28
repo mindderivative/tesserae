@@ -1,7 +1,9 @@
 # Installation
 
 Tesserae is pre-alpha and not yet published to PyPI -- install it as a
-local editable checkout. It targets one specific `tre` release, the same
+local editable checkout. It will be published as **`tesserae-ui`**
+(`tesserae` on PyPI is an unrelated project), and it's still imported as
+`tesserae` ([#15](https://github.com/mindderivative/tesserae/issues/15)). It targets one specific `tre` release, the same
 one its CI pins: **`tre` v0.3.5.1**.
 
 ## Requirements

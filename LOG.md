@@ -1320,3 +1320,16 @@ Each gap was re-checked against the source and `tre` 0.3.5.1 first.
   distribution name), next to #16 (undock).
 - The Known gaps list now links each gap to its issue: 13 bullets, with
   the three widget-fragment gaps folded into their summary line.
+
+## PyPI name: tesserae-ui
+
+User: "pypi for tesserae should be named tesserae-ui".
+
+- `tesserae-ui` was free on PyPI. It's now `pyproject.toml`'s
+  `[project] name`, and a wheel builds as `tesserae_ui-0.1.0`. The import
+  name stays `tesserae`, since hatchling's package path was already
+  explicit (`packages = ["src/tesserae"]`).
+- `.venv`'s editable install is now `tesserae-ui`; the old `tesserae`
+  one was removed. 1473 passed.
+- Issue #15 was updated and commented. The README, the installation page
+  and the known gap name it.
