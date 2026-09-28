@@ -211,4 +211,6 @@ Phase 4 done, and M51 with it: the components guide, README and todo-list exampl
 
 Phase 2 done: `tesserae.shell_file` and `app.load_shell`; the whole schema checked, named by file and key; 1429 passed.
 
-**Up next:** M52 Phases 3–5.
+Phase 3 done: panels as named view files, navigation bound to `app.show` (or `on_navigate`); `show` leaves docked panels docked; 1445 passed.
+
+**Up next:** M52 Phases 4–5.

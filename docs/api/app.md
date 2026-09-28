@@ -126,11 +126,16 @@ it. A shell built on another window is a `ValueError`.
 
 ## `load_shell`
 
-**`load_shell(path) -> AppShell`**
+**`load_shell(path, viewmodel=None) -> AppShell`**
 
 Builds the shell a `*_Shell.yaml` describes and uses it, as `use_shell`
-does (M52): its top bar, navigation rail, status bar, docked zones and
-center tabs. The bars stretch across the window, and everything follows
+does (M52): its top bar, navigation rail, status bar, docked zones,
+center tabs and panels. A panel is the screen registered under its name,
+or else `<Name>_View.yaml` (and `<Name>_ViewModel.py`) next to the shell
+file, loaded and registered under it. Choosing a rail item calls
+`show(screen)`, or the `on_navigate` method of `viewmodel`, and `show`
+moves the rail's selection. `show` on a docked panel brings its tab
+forward. The bars stretch across the window, and everything follows
 the app's theme. A file not named `*_Shell.yaml`, broken YAML, or a key
 the schema doesn't have raises `tesserae.shell_file.ShellSpecError` (a
 `ValueError`) naming the file and the key. See

@@ -103,6 +103,7 @@ navigation:
 status_bar: {text: Ready}
 zones: {left: 220, right: 260, bottom: 160}
 center: true
+panels: {left: [Files, Outline], right: [Properties], bottom: [Console]}
 ```
 
 ```python
@@ -115,6 +116,45 @@ name, each with an icon, and they become the rail. `status_bar` takes
 its `text`. `zones` gives each side zone's size, and `center: true` makes
 screens center tabs. The bars stretch across the window as it resizes,
 and everything follows the app's theme.
+
+**Panels are named like screens.** `panels:` lists each zone's panels by
+name. A name is the screen already registered under it, or else
+`<Name>_View.yaml` next to the shell file, with `<Name>_ViewModel.py`'s
+`<Name>ViewModel` if that file exists (constructed with just the view).
+It's loaded and registered under its name, so:
+
+- its tab's title is its name, and `layout()` and `restore()` use it;
+- it's hot-reloaded like any screen;
+- `app.show("Files")` brings its tab forward where it's docked, rather
+  than moving it into the content. A screen that's showing when the file
+  names it as a panel moves into its zone.
+
+A panel whose ViewModel needs more than the view (the `app`, say) is
+registered in Python first, before `load_shell`, and the file places it.
+
+**Navigation shows screens.** Choosing a rail item calls
+`app.show(screen)`, and `app.show` from anywhere else moves the rail's
+selection to match, without calling it back. To decide for yourself,
+name a method with `on_navigate:`. The rail then calls it on the
+`viewmodel` passed to `load_shell`, with the screen's name, instead:
+
+```yaml
+navigation:
+  on_navigate: navigate
+  items: [{screen: Home, icon: home}, {screen: Notes, icon: search}]
+```
+
+```python
+class ShellViewModel:
+    def navigate(self, screen):
+        if not self.unsaved_changes():
+            app.show(screen)
+
+app.load_shell(directory / "Studio_Shell.yaml", viewmodel=ShellViewModel())
+```
+
+A panel with no screen or file, or an `on_navigate` with no such method,
+is an error before anything is built, so the app is left as it was.
 
 A mistake names the file and the key, for example:
 
@@ -142,7 +182,5 @@ shell.restore(saved)
 
 - A layout is restored by title, so two panels with the same title can't
   be told apart.
-- In a shell file, `panels:` (which named panels go in which zone) and
-  `navigation.on_navigate` are checked but not acted on yet: choosing a
-  rail item doesn't show its screen, and panels are still added with
-  `shell.dock.add_panel`.
+- A shell file isn't hot-reloaded yet: editing it needs a restart. Its
+  panels' own view files are hot-reloaded, as screens are.

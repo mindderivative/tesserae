@@ -17,6 +17,17 @@ It's a small schema, not a widget tree: Python builds it through the
 existing `AppShell`, `Dock` and `tesserae.widgets`, so the view pipeline
 is untouched. Every key is optional. A mistake raises `ShellSpecError`
 (a `ValueError`) naming the file and the key.
+
+A panel is a view named like a screen (M52 Q2): `Files` is the screen
+already registered as `Files`, or else `Files_View.yaml` next to the
+shell file, with `Files_ViewModel.py`'s `FilesViewModel` if there is one.
+It's registered under its name, so it's hot-reloaded as screens are, its
+title is its name, and `app.show("Files")` brings its tab forward.
+
+The rail's items name screens (Q3): choosing one calls `app.show(screen)`,
+and `app.show` from anywhere moves the rail's selection to match. With
+`on_navigate: method`, choosing one calls that method of the `viewmodel`
+given to `load_shell` with the screen's name instead, and it decides.
 """
 
 from __future__ import annotations
@@ -26,7 +37,10 @@ from typing import Any, Optional
 
 import yaml
 
-__all__ = ["SHELL_SUFFIX", "ShellSpecError", "build_shell", "load_shell_spec", "parse_shell_spec"]
+from tesserae.naming import check_naming_convention
+
+__all__ = ["SHELL_SUFFIX", "ShellSpecError", "bind_navigation", "build_shell", "check_references", "load_shell_spec",
+           "parse_shell_spec", "place_panels"]
 
 SHELL_SUFFIX = "_Shell.yaml"
 _KEYS = {"top_bar", "navigation", "status_bar", "zones", "center", "panels"}
@@ -161,3 +175,83 @@ def build_shell(app: Any, spec: dict[str, Any]) -> Any:
         status.node.set(width="100%")
     return AppShell(window, top_bar=bar, navigation=rail, status_bar=status, zones=spec["zones"],
                     center=spec["center"])
+
+
+def check_references(app: Any, spec: dict[str, Any], path: Path, viewmodel: Any = None) -> None:
+    """Checks what the file names outside itself -- each panel's screen or
+    view file, and `on_navigate`'s method -- before anything is built, so
+    a mistake leaves the app as it was."""
+    for side, names in spec["panels"].items():
+        for name in names:
+            if name not in app._registered and not (path.parent / f"{name}_View.yaml").exists():
+                raise ShellSpecError(f"{path}: panels.{side}: no screen is registered as {name!r}, "
+                                     f"and there's no {name}_View.yaml next to the shell file")
+    navigation = spec["navigation"]
+    method = navigation.get("on_navigate") if navigation is not None else None
+    if method is not None:
+        if viewmodel is None:
+            raise ShellSpecError(f"{path}: navigation.on_navigate: names {method!r}, "
+                                 "but load_shell was given no viewmodel")
+        if not callable(getattr(viewmodel, method, None)):
+            raise ShellSpecError(f"{path}: navigation.on_navigate: {type(viewmodel).__name__} "
+                                 f"has no method {method!r}")
+
+
+def place_panels(app: Any, shell: Any, spec: dict[str, Any], path: Path) -> None:
+    """Docks each named panel in its zone (Q2): the screen registered under
+    that name, or else the `<Name>_View.yaml` next to the shell file (with
+    its `<Name>_ViewModel.py`, if any), loaded and registered under it."""
+    for side, names in spec["panels"].items():
+        for name in names:
+            registered = app._registered.get(name)
+            view = registered.view if registered is not None else _load_panel(app, name, side, path)
+            root = view.root
+            if shell.dock.side_of(root) is not None:
+                if shell.dock.side_of(root) != side:
+                    shell.dock.move(root, side)
+                continue
+            shell.dock.add_panel(side, root, name)  # `dock_panel` takes it from wherever it is
+
+
+def _load_panel(app: Any, name: str, side: str, path: Path) -> Any:
+    view_file = path.parent / f"{name}_View.yaml"  # there: `check_references` saw it
+    view = app.build_view(view_file)
+    viewmodel = None
+    vm_file = path.parent / f"{name}_ViewModel.py"
+    if vm_file.exists():
+        cls = getattr(_import(vm_file), f"{name}ViewModel", None)
+        if cls is None:
+            raise ShellSpecError(f"{path}: panels.{side}: {vm_file.name} has no class {name}ViewModel")
+        check_naming_convention(view_file, cls)
+        viewmodel = cls(view)
+    app.register(name, view, viewmodel)
+    return view
+
+
+def _import(file: Path) -> Any:
+    """`file`'s module, imported once under its own name (the naming check
+    finds a class's file through `sys.modules`)."""
+    import importlib.util
+    import sys
+
+    module = sys.modules.get(file.stem)
+    if module is not None and Path(getattr(module, "__file__", "") or "").resolve() == file.resolve():
+        return module
+    module_spec = importlib.util.spec_from_file_location(file.stem, file)
+    module = importlib.util.module_from_spec(module_spec)
+    sys.modules[file.stem] = module
+    module_spec.loader.exec_module(module)
+    return module
+
+
+def bind_navigation(app: Any, shell: Any, spec: dict[str, Any], path: Path, viewmodel: Any = None) -> None:
+    """Choosing a rail item shows its screen, or calls the `on_navigate`
+    method of `viewmodel` with the screen's name (Q3)."""
+    navigation = spec["navigation"]
+    if navigation is None:
+        return
+    screens = [item["screen"] for item in navigation["items"]]
+    method = navigation.get("on_navigate")
+    handler = getattr(viewmodel, method) if method is not None else app.show  # `check_references` checked it
+    shell.navigation.on_change(lambda index: handler(screens[index]))
+    app._navigation = (shell.navigation, screens)

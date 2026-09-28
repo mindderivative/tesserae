@@ -160,6 +160,7 @@ class App:
         self._current: str | None = None
         self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
         self._shell_file: Path | None = None  # the `*_Shell.yaml` `load_shell` read (M52)
+        self._navigation: Any = None  # (the shell file's rail, its screens), for `show` to select (M52)
         self._tre_app: _TreApp | None = None
         #: The widgets made on this window with no `theme=`, which follow
         #: the app's theme (M50), in the order they were made (a dict as an
@@ -426,6 +427,9 @@ class App:
             if root.parent() is None:
                 self._window.root.add_child(root)
         self._current = name
+        if self._navigation is not None and name in self._navigation[1]:
+            rail, screens = self._navigation
+            rail.selected.set(screens.index(name))  # the rail follows, without calling its handler (M52)
         logger.debug("showing {!r}", name)
         return self._window
 
@@ -448,19 +452,26 @@ class App:
                 root.remove()
             shell.show_screen(root, self._current)
 
-    def load_shell(self, path: str | Path) -> Any:
+    def load_shell(self, path: str | Path, viewmodel: Any = None) -> Any:
         """Builds the app shell a `*_Shell.yaml` describes -- its top bar,
-        navigation rail, status bar, docked zones and center tabs (M52) --
-        and shows screens in it, as `use_shell` does. Returns the
-        `AppShell`. Raises `tesserae.shell_file.ShellSpecError` (a
-        `ValueError`) naming the file and key for a mistake."""
-        from tesserae.shell_file import build_shell, load_shell_spec
+        navigation rail, status bar, docked zones, center tabs and panels
+        (M52) -- and shows screens in it, as `use_shell` does. A panel is
+        the screen registered under its name, or else `<Name>_View.yaml`
+        (and `<Name>_ViewModel.py`) next to the shell file, registered under
+        it. Choosing a rail item shows its screen, or calls `viewmodel`'s
+        `on_navigate` method. Returns the `AppShell`. Raises
+        `tesserae.shell_file.ShellSpecError` (a `ValueError`) naming the
+        file and key for a mistake."""
+        from tesserae.shell_file import bind_navigation, build_shell, check_references, load_shell_spec, place_panels
 
         path = Path(path)
         spec = load_shell_spec(path)
+        check_references(self, spec, path, viewmodel)  # before anything is built
         shell = build_shell(self, spec)
         self._shell_file = path
         self.use_shell(shell)
+        place_panels(self, shell, spec, path)
+        bind_navigation(self, shell, spec, path, viewmodel)
         logger.info("loaded the app shell from {}", path)
         return shell
 

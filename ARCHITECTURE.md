@@ -246,6 +246,18 @@ it follows the app (M50). `App.load_shell` builds, remembers the file
 (`_shell_file`, for hot reload) and calls `use_shell`. The view pipeline
 is untouched, since it has no pluggable kinds, and its reconcile would
 fight the dock (M52 Q1).
+Phase 3: `check_references` checks each panel (registered, or its
+`<Name>_View.yaml` exists) and `on_navigate` before anything is built.
+`place_panels` docks each by name, loading and registering a file one
+(its ViewModel class `<Name>ViewModel`, imported once under the module's
+own name so an app's earlier import is reused). `bind_navigation` wires
+the rail to `app.show` or the method, and `app._navigation` lets `show`
+move the rail's selection (`selected.set`, which doesn't fire
+`on_change`). `AppShell.show_screen` now brings a docked root's tab
+forward (a panel is a screen) and tracks the screen in `content` itself
+(`_in_content`), removing it only while it's still there, so a screen
+docked as a panel is never pulled back out. `tre`'s `dock_panel` takes a
+node from wherever it's attached.
 
 **Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
 the framework (D10). Each zone is a column -- a tab strip, a divider, and

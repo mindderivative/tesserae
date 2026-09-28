@@ -130,6 +130,7 @@ class AppShell:
         self._events = Listeners()
         self._sizes: dict[str, float] = {}
         self._zone_nodes: dict[str, Any] = {}
+        self._in_content: Any = None  # the screen `content` shows, without `center`
         self._handles: dict[str, _Handle] = {}
         create = window.create
         self.node = create("box", width="100%", height="100%", flex_direction="vertical")
@@ -200,18 +201,22 @@ class AppShell:
 
     def show_screen(self, root: Any, title: str, previous: Any = None) -> None:
         """Shows a screen's root (`App.show` calls this): in `content`,
-        replacing `previous`; or, with `center=True`, as a center tab,
-        docked the first time and brought forward after."""
-        if self.center:
-            if self.dock.side_of(root) is None:
-                self.dock.add_panel("center", root, title)
-            else:
-                self.dock.show(root)
+        replacing the screen there; or, with `center=True`, as a center tab,
+        docked the first time and brought forward after. A root already
+        docked -- a panel registered as a screen (M52) -- has its tab
+        brought forward where it is, and `content` is left alone."""
+        if self.dock.side_of(root) is not None:
+            self.dock.show(root)
             return
-        if previous is not None and previous.parent() is not None:
-            previous.remove()  # detached, kept alive with its state
+        if self.center:
+            self.dock.add_panel("center", root, title)
+            return
+        shown = self._in_content
+        if shown is not None and shown != root and shown.parent() == self.content:
+            shown.remove()  # detached, kept alive with its state
         if root.parent() is None:
             self.content.add_child(root)
+        self._in_content = root
 
     def layout(self) -> dict[str, Any]:
         """Where each panel is (by title), which is shown, and each zone's

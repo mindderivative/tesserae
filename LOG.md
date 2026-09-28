@@ -1245,3 +1245,17 @@ User: "Start M52 use recommendations" (Q1-Q4 as recommended).
 - 31 tests; 23/23 mutants caught.
 
 1429 passed; all four examples clean.
+
+## M52 Phase 3: panels and navigation
+
+User: "continue to the next phase".
+
+- A panel is a registered screen, or `<Name>_View.yaml` (plus its
+  ViewModel) next to the shell file, registered under its name.
+- Rail items call `app.show`, or `on_navigate`; `app.show` moves the
+  rail's selection. References are checked before anything is built.
+- `show_screen` brings a docked root's tab forward and tracks its
+  content screen, so panels are never pulled out of their zones.
+- 14 tests; 18/18 mutants caught.
+
+1445 passed; all four examples clean.
