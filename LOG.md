@@ -1385,3 +1385,9 @@ tre's session reported v0.3.5.2, which fixes tre #16 (undock), #18
   unblocked. Comments on #3, #15 and #17.
 
 1473 passed, 1 skipped; all five examples clean.
+
+Pushed `8eea926..bec0cba` (user: "push"). CI run 36435128346 passed,
+the first to install `tesserae-engine` from PyPI: 1469 passed and 5
+skipped (the five live `App.run` tests, with no display on the runner),
+with the real-font test running from the font-only checkout. All five
+examples ran clean.
