@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-__all__ = ["Listeners", "handled"]
+__all__ = ["Listeners", "handled", "listen_window"]
 
 
 class Listeners:
@@ -55,3 +55,25 @@ def handled(fn: Callable[[Any], Any]) -> Callable[[Any], None]:
             if stop is not None:
                 stop()
     return handle
+
+
+#: One dispatcher per window for window events (M54): `tre`'s
+#: `window.on(event, ...)` keeps a single listener, so every Tesserae
+#: listener for a window's event shares one. The window is held while
+#: anything listens, so its `id()` can't be reused meanwhile.
+_WINDOWS: dict[int, tuple[Any, Listeners]] = {}
+
+
+def listen_window(window: Any, event: str, fn: Callable[[Any], None]) -> Callable[[], None]:
+    """Adds `fn` for the window's `event` (`resize`, ...) alongside every
+    other Tesserae listener for it; returns the function that removes it."""
+    entry = _WINDOWS.get(id(window))
+    if entry is None:  # an entry holds its window, so a live entry's id is that window's
+        entry = _WINDOWS[id(window)] = (window, Listeners())
+    remove = entry[1].listen(window, event, fn)
+
+    def undo() -> None:
+        remove()
+        if not entry[1]._slots and _WINDOWS.get(id(window)) is entry:
+            del _WINDOWS[id(window)]
+    return undo

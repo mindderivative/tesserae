@@ -34,7 +34,9 @@ Every overlay has `open()`, `close()`, `is_open`, `on_close(fn)` and
 | `Popover` | below its anchor | closes | closes | no |
 | `SearchView` | below its search bar | closes | closes | no |
 
-A modal overlay's scrim (black at 32%) fills the window, so a press
+A modal overlay's scrim (black at 32%) fills the window, even as the
+window resizes while it's open, and edge sheets and snackbars keep to
+their edge (M54). A press
 outside the panel lands on the scrim, and Escape is what closes it. A
 modal overlay keeps Tab inside it.
 

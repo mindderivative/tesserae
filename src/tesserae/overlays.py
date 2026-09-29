@@ -18,7 +18,8 @@ closes itself on the dismissals `tre`'s legacy overlays allowed:
 | `Popover` | below its anchor | closes | closes | no |
 | `SearchView` | below its search bar | closes | closes | no |
 
-A modal overlay's scrim fills the window (sized when it opens), so an
+A modal overlay's scrim fills the window, and keeps filling it as the
+window resizes while it's open (M54), so an
 outside press lands on the scrim. MD3's timing, which `tre` never had: a
 snackbar hides itself after 4 s (`duration=None` keeps it), and a tooltip
 opens 500 ms after its anchor is hovered, or at once on keyboard focus.
@@ -29,7 +30,7 @@ from __future__ import annotations
 from typing import Any, Callable, Optional
 
 from tesserae import a11y
-from tesserae.listeners import handled
+from tesserae.listeners import handled, listen_window
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget, fragment
 
@@ -88,15 +89,19 @@ class Overlay:
     def open(self, anchor: Any = None, placement: str = "below") -> None:
         if self._open:
             return
+        self._fit(*self._window_size())
         self._before_open()
         self.window.show_layer(self.node, anchor=anchor, placement=placement, modal=self.modal,
                                dismissible=self.dismissible)
         self._open = True
+        # while open, it follows the window's size (M54, #1)
+        self._unresize = listen_window(self.window, "resize", self._on_resize)
         self._after_open()
 
     def close(self) -> None:
         if not self._open:
             return
+        self._unresize()
         self._before_close()
         self.window.hide_layer(self.node)
         self._open = False
@@ -110,8 +115,15 @@ class Overlay:
         root = self.window.root
         return root.get("layout_width") or 0.0, root.get("layout_height") or 0.0
 
+    def _on_resize(self, event: Any) -> None:
+        self._fit(*self._window_size())  # `tre` has laid the root out at the new size by now
+
+    def _fit(self, width: float, height: float) -> None:
+        """Size or place it for a `width` x `height` window: on opening, and
+        again whenever the window resizes while it's open (M54)."""
+
     def _before_open(self) -> None:
-        """Size or place it for the window as it is now."""
+        """Anything else to do before it shows (after `_fit`)."""
 
     def _after_open(self) -> None:
         pass
@@ -159,9 +171,8 @@ class Dialog(Overlay):
             fn()
         self.close()
 
-    def _before_open(self) -> None:
-        width, height = self._window_size()
-        self.node.set(width=width, height=height)
+    def _fit(self, width: float, height: float) -> None:
+        self.node.set(width=width, height=height)  # the scrim covers the window
 
 
 class Menu(Overlay):
@@ -285,8 +296,7 @@ class Snackbar(Overlay):
             a11y.describe(widget.part("close"), label="Close")
             widget.on_click(self.close, part="close")
 
-    def _before_open(self) -> None:
-        _, height = self._window_size()
+    def _fit(self, width: float, height: float) -> None:
         self.node.set(position="absolute", x=24.0, y=max(0.0, height - 72.0))
 
     def _after_open(self) -> None:
@@ -424,10 +434,11 @@ class _EdgeSheet(Overlay):
         self.panel = panel
         self.end = end
 
-    def _before_open(self) -> None:
-        width, height = self._window_size()
-        self.node.set(width=width, height=height)
+    def _fit(self, width: float, height: float) -> None:
+        self.node.set(width=width, height=height)  # the scrim covers the window
         self.panel.set(height=height)
+
+    def _before_open(self) -> None:
         travel = self.panel.get("width") or 0.0
         self.panel.stop_animation("translate_x")
         self.panel.set(translate_x=travel if self.end else -travel)

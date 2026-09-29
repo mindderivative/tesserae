@@ -1445,3 +1445,17 @@ User: "start phase 4". Pushed `76ca67f..9ba1881`. CI run 36503537261
 passed: 1483 passed and 6 skipped (the live tests, with no display),
 and five examples clean. Closed #3 and #17 with summaries, and their
 known gaps moved to "Fixed gaps" (12 -> 10).
+
+## M54 Phases 1-2: an open overlay follows a window resize (#1)
+
+User: "Start addressing all of the backlog. Begin with bugs and then
+gaps that would resolve or help other gaps."
+
+- **The backlog order:** #1 (the bug); then enablers (#8's `when:`, #9,
+  #10, #5, #6, #7); then independent fixes (#4, #2, #16, #11); then the
+  app-level features (#13, #12, #14).
+- **The fix:** `listen_window` gives a window one shared dispatcher for
+  its events. Overlays `_fit` on open and on every `resize` while open.
+- 6 tests; 8/8 mutants caught (two dead branches removed after probing).
+
+1494 passed; all five examples clean.

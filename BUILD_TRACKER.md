@@ -63,6 +63,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M51 — Hot Reload for Components Added at Run Time | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M52 — A Declarative App Shell | `██████████` 100% | ✅ Complete — all 5 phases done (2026-09-28) |
 | M53 — Undocking Panels and the OS's Appearance, on `tre` 0.3.5.2 | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-28) |
+| M54 — An Open Overlay Follows a Window Resize (#1) | `████████⬜⬜` 75% | 🚧 In progress — Phase 2 of 3 done |
 
 **Just closed:** M53 (2026-09-28), all 4 phases, on `tre` 0.3.5.2: a panel a shell-file edit drops is undocked while the app runs (`Dock.remove_panel`, #3), and `App(dark="system")` starts in the OS's appearance (#17). 1474 → 1489. Before it, Tesserae 0.1.0 was published to PyPI as `tesserae-ui`, and M52 added a declarative app shell.
 
@@ -78,7 +79,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** nothing scoped. The open issues (Tesserae #1, #2, #4–#14 and #16) are the backlog; each is scoped in its issue.
+**Up next:** M54 Phase 3 (push, close #1). Then the rest of the backlog in M54's order: #8 with a `when:` expander, #9, #10, #5, #6, #7, #4, #2, #16, #11, #13, #12, #14.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1550,4 +1551,29 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 4 — Push, Close, Tracker ✅
 - Step 1: the docs were written with each phase: the app-shell, hot-reload and themes guides, `api/app.md` and `ARCHITECTURE.md`. This phase pushed `76ca67f..9ba1881`; CI run 36503537261 passed, with 1483 passed and 6 skipped (the six live `App.run` tests, the new first-frame one included, with no display on the runner) and all five examples clean. It closed [#3](https://github.com/mindderivative/tesserae/issues/3) and [#17](https://github.com/mindderivative/tesserae/issues/17) with summaries, and moved both known gaps to "Fixed gaps" (12 → 10 known) — ✅
+
+---
+
+## Milestone 54 — An Open Overlay Follows a Window Resize (#1)
+
+**Status: 🚧 In progress — Phase 2 of 3 done (2026-09-28).** User: "Start addressing all of the backlog. Begin with bugs and then gaps that would resolve or help other gaps." [#1](https://github.com/mindderivative/tesserae/issues/1) is the backlog's only bug. The recommendations are taken, as the user asked for the whole backlog to be worked through.
+
+**The backlog order** (set at M54's start):
+1. The bug, #1.
+2. Gaps that unlock others: #8's conditional `when:` in the expander, which #9's per-item styling builds on, then #9; #10 (a theme's `components:` in the cascade); then the new YAML kinds, in increasing difficulty: #5 SpinBox, #6 video, #7 graph_node.
+3. Independent fixes: #4, #2, #16, #11.
+4. App-level features: #13 (a state store), then #12 (routing, which can carry state through it), then #14 (the `tesserae new` CLI) last, so its templates use everything above.
+
+**What the source said:** a modal overlay's scrim (and an edge sheet's panel height, and a snackbar's `y`) was sized from the root's layout in `_before_open`, once. `tre`'s window keeps one listener per event, so several open overlays couldn't each `window.on("resize")`. Probed: `tre` lays the root out at the new size before `resize` arrives, and `window.resize()` fires no event (`simulate("resize", ...)` does).
+
+**Decisions** (recommended, taken): Q1, one shared dispatcher per window for window events (`listeners.listen_window`), holding the window while anything listens; Q2, a `_fit(width, height)` hook each overlay implements, called on open and on every `resize` while open, and dropped on close; Q3, the scrim overlays (`Dialog`, `SideSheet`, `NavigationDrawer`) and the snackbar refit, while menus, tooltips and popovers, which `tre` anchors, are left as they are.
+
+### Phase 1 — Scope and Decisions ✅
+- Step 1: the backlog order and Q1–Q3, above — ✅
+
+### Phase 2 — Overlays Follow the Window ✅
+- Step 1: `listeners.listen_window(window, event, fn)` gives each window one dispatcher, held (with the window) while anything listens and dropped when the last listener goes. `Overlay.open()` calls `_fit(*_window_size())`, then `_before_open`, and listens for `resize` while open; `close()` stops listening. `_fit` sizes the `Dialog` scrim, the `_EdgeSheet` scrim and panel height (the slide-in start stays in `_before_open`), and the `Snackbar`'s bottom offset. `tests/test_overlay_resize.py` (6): a dialog's scrim after growing and shrinking, still centred; a side sheet and a drawer open together keep their scrims and edges; the event alone refits; a snackbar stays near the bottom; a closed overlay stops listening, releases the window, and fits the new size when it opens again; `listen_window` shares one dispatcher per window. Mutation-checked, 8/8 caught. The first run had two survivors, both dead code: a sizing-from-the-event branch (`tre` has laid the root out by then, which the first probe had misread) and a stale-id guard in `listen_window` (a live entry holds its window). Both were removed. 1489 → 1495 (1494 passed, 1 skipped); all five examples clean. Docs: the overlays guide and module docstring, and `ARCHITECTURE.md` — ✅
+
+### Phase 3 — Push and Close ⬜
+- Step 1: push; close #1 once CI passes; move its known gap to "Fixed gaps" — ⬜
 

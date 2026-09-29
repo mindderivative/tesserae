@@ -328,7 +328,11 @@ wraps every activation listener Tesserae adds (YAML `on_click`,
 `Dock` tabs). It calls `event.stop()` after `fn`, even if `fn` raises or
 ignores the click (a disabled control), so `tre`'s bubbling `click` and
 `secondary_click` reach only the innermost clickable (M49). `Interaction`'s
-own `click` listener is feedback only and isn't wrapped. `tokens.BASELINE` is
+own `click` listener is feedback only and isn't wrapped. `listeners.listen_window(window,
+event, fn)` (M54) does the same for window events, one dispatcher per
+window, held while anything listens: an open overlay refits through
+`Overlay._fit(width, height)` on `resize` (`tre` lays the root out
+before the event arrives) and stops listening when it closes. `tokens.BASELINE` is
 MD3's published colours, for controls with no theme. `RadioGroup` keeps
 one radio selected and one Tab stop (a roving focus, via `_focusable()`),
 and moves the selection with the arrow keys. A `Switch` slides its handle
