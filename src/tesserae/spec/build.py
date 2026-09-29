@@ -47,12 +47,15 @@ _CONTROL_KINDS = frozenset({
     "Checkbox", "RadioButton", "Switch", "Slider", "SpinBox", "CircularProgress", "LinearProgress",
     "LoadingIndicator", "TimePickerDial",
 })
-_KINDS = _CONTROL_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
+#: Kinds built with a `tesserae.widgets` widget (M60): a node graph and its nodes.
+_WIDGET_KINDS = frozenset({"NodeGraph", "GraphNode"})
+_KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
     "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "min", "max", "step",  # a SpinBox's (M58)
+    "label", "x", "y", "edges",  # a GraphNode's title and place, a NodeGraph's edges (M60)
 })
 
 
@@ -84,6 +87,8 @@ class _Context:
     frames: dict[str, tuple[bytes, int, int]]
     #: The shared listener registrar controls use (a View's; otherwise their own).
     listen: Optional[Callable[..., Any]] = None
+    #: The NodeGraph widget whose GraphNodes are being built (M60).
+    graph: Any = None
 
 
 def build(
@@ -151,11 +156,13 @@ def build_with(
     frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
     into: Optional[Built] = None,
     listen: Optional[Callable[..., Any]] = None,
+    graph: Any = None,
 ) -> Any:
     """Builds `spec` with already-prepared layers, recording its nodes in
     `into` (a new `Built` if none); returns the subtree's outer root.
-    `listen` is the listener registrar the controls share with the view."""
-    ctx = _Context(window, layers, scheme, frames or {}, listen)
+    `listen` is the listener registrar the controls share with the view;
+    `graph`, the NodeGraph widget a GraphNode `spec` belongs to (M60)."""
+    ctx = _Context(window, layers, scheme, frames or {}, listen, graph)
     built = into if into is not None else Built(root=None)
     return _build(ctx, spec, built)
 
@@ -195,8 +202,21 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     built.nodes[node_id] = inner
     built.outer[node_id] = outer
     built.specs[node_id] = node
+    if kind == "NodeGraph":  # its GraphNodes place themselves in the graph's content (M60)
+        graph, ctx.graph = ctx.graph, built.controls[node_id]
+        try:
+            for child in node.get("children") or []:
+                if child.get("kind") != "GraphNode":
+                    raise SpecBuildError(f"widget {_q(node_id)}: a NodeGraph's children are GraphNodes, "
+                                         f"got {child.get('kind')!r} ({child.get('id')!r})")
+                _build(ctx, child, built)
+        finally:
+            ctx.graph = graph
+        connect_edges(built.controls[node_id], node, built)
+        return outer
+    parent = inner if kind == "GraphNode" else outer  # a GraphNode's content goes in its body
     for child in node.get("children") or []:
-        outer.add_child(_build(ctx, child, built))
+        parent.add_child(_build(ctx, child, built))
     return outer
 
 
@@ -544,6 +564,13 @@ def interaction_tint(node: dict[str, Any], scheme: Optional[dict[str, RGBA]]) ->
 
 def _create(ctx, node, style, built):
     kind = node["kind"]
+    if kind in _WIDGET_KINDS:  # M60
+        widget = _graph_widget(ctx, node, style)
+        built.controls[node["id"]] = widget
+        a11y_props = _a11y_props(node, patching=False)
+        if a11y_props:
+            widget.node.set(**a11y_props)
+        return widget.node, (widget.part("body") if kind == "GraphNode" else widget.node)
     if kind in _CONTROL_KINDS:
         control = _control(ctx, node, style, built)
         built.controls[node["id"]] = control
@@ -591,6 +618,10 @@ def patch(
     ctx = _Context(window, layers, scheme, frames or {})
     style = resolve_style(node, layers)
     kind = node["kind"]
+    if kind in _WIDGET_KINDS:
+        if control is not None:
+            _patch_graph_widget(ctx, node, control, state)
+        return
     if kind in _CONTROL_KINDS:
         if control is not None:
             _patch_control(ctx, node, style, control, state)
@@ -700,6 +731,56 @@ def _spin_number(value: Any, step: Any) -> Any:
     if isinstance(number, float) and number.is_integer() and isinstance(step, int):
         number = int(number)
     return number
+
+
+def _graph_widget(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) -> Any:
+    """A NodeGraph's `node_graph` widget, or a GraphNode's `graph_node` in
+    the NodeGraph being built (M60). Both take their size from `style`."""
+    from tesserae.widgets.media import graph_node, node_graph
+
+    node_id, kind = node["id"], node["kind"]
+    size = [style.get("width"), style.get("height")]
+    if any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in size):
+        raise SpecBuildError(f"widget {_q(node_id)}: a {kind} needs a numeric style width and height, got {size}")
+    width, height = float(size[0]), float(size[1])
+    if kind == "NodeGraph":
+        return node_graph(ctx.window, width, height, theme=_theme(ctx))  # `add_child` moves it into the view
+    if ctx.graph is None:
+        raise SpecBuildError(f"widget {_q(node_id)}: a GraphNode belongs inside a NodeGraph")
+    x, y = float(node.get("x") or 0.0), float(node.get("y") or 0.0)
+    widget = graph_node(ctx.window, ctx.graph, str(node.get("label") or ""), x, y, width, height, theme=_theme(ctx))
+    widget.declared = (x, y)  # where the file puts it: a reload moves it only if this changes
+    widget.on_change = widget.on_move  # `on_change` hears the user's moves
+    return widget
+
+
+def connect_edges(graph: Any, node: dict[str, Any], built: Built) -> None:
+    """(Re)draws a NodeGraph's `edges:` (`[{from: id, to: id}, ...]`, its
+    GraphNodes' ids), replacing any it had (M60)."""
+    for _, _, path in graph.edges:
+        path.destroy()
+    graph.edges.clear()
+    ids = {child["id"] for child in node.get("children") or []}
+    for index, edge in enumerate(node.get("edges") or []):
+        if not isinstance(edge, dict) or set(edge) != {"from", "to"}:
+            raise SpecBuildError(f"widget {_q(node['id'])}: edges[{index}] is {{from: id, to: id}}, got {edge!r}")
+        missing = [end for end in (edge["from"], edge["to"]) if end not in ids]
+        if missing:
+            raise SpecBuildError(f"widget {_q(node['id'])}: edges[{index}] names no GraphNode {missing[0]!r} here")
+        graph.edge(built.controls[edge["from"]], built.controls[edge["to"]])
+
+
+def _patch_graph_widget(ctx: _Context, node: dict[str, Any], widget: Any, state: bool) -> None:
+    widget.set_theme(_theme(ctx))
+    if node["kind"] != "GraphNode":
+        return
+    label = str(node.get("label") or "")
+    widget.part("label").set(text=label)
+    widget.node.set(label=label)
+    declared = (float(node.get("x") or 0.0), float(node.get("y") or 0.0))
+    if state and declared != widget.declared:  # the file moved it; otherwise the user's place stays
+        widget.declared = declared
+        widget.position.set(declared)
 
 
 def _a11y_target(control: Any) -> Any:

@@ -144,11 +144,17 @@ class Widget:
     def _scheme(self) -> dict[str, Any]:
         return self.theme.roles if self.theme.roles is not None else tokens.baseline_scheme()
 
-    def destroy(self) -> None:
+    def dispose(self) -> None:
+        """Stops the widget (its listeners, feedback and controls) but
+        leaves its nodes, for a caller about to free the tree it sits in --
+        as a view does with the widgets behind its NodeGraph kinds (M60)."""
         unfollow(self.window, self)
         for undo in self._undo:
             undo()
         self._undo = []
         self.view._drop_interactions()
         self.view._dispose_controls()
+
+    def destroy(self) -> None:
+        self.dispose()
         self.node.destroy()

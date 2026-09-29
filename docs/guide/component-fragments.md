@@ -304,9 +304,10 @@ real `tre` factory it matches and any real MD3 token it hardcodes.
 
 ### What has no fragment yet, and why
 
-- **`graph_node`** -- structurally unfragmentable: it needs a live node
-  reference as its own attachment parent, which textual expansion can't
-  express.
+- **`graph_node`** -- a fragment can't express it (a node attaches to
+  its graph's live node), so it's a YAML kind instead: `NodeGraph` and
+  `GraphNode` (M60, see the
+  [Widget Catalog](widget-catalog.md#node-graphs-and-video-in-yaml)).
 
 ## Loading a view that uses `component:`
 

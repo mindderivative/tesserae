@@ -171,6 +171,18 @@ macOS and Windows answer, and it re-themes through `_apply_dark`, as a
 `conftest.os_appearance` (default `None`), so they don't depend on the
 desktop running them.
 
+**Node graphs, M60:** `NodeGraph` and `GraphNode` are "widget kinds"
+(`_WIDGET_KINDS`), built with `node_graph` and `graph_node` and kept in
+`Built.controls` like the controls. `_build` builds a NodeGraph's
+children with `ctx.graph` set, so a GraphNode adds itself to the graph's
+content, then draws `edges:` (`connect_edges`). A GraphNode's children go
+in its body. Patching re-themes, relabels, and moves a node only if its
+declared `x`/`y` changed (`widget.declared`). The reconciler matches a
+graph's nodes by id (`View._reconcile_graph`): kept ones are patched,
+new ones built into the graph, gone ones removed from it, and the edges
+redrawn. `Widget.dispose()` (new) is what `_forget` calls. `_props_equal`
+now also compares the fields M57, M58 and M60 added.
+
 **Video frames, M59:** a `frame` binding on an `Image` goes through
 `View._show_frame`, which checks the bytes (`spec.images.check_frame`),
 sets `rgba`/`pixel_width`/`pixel_height`, and keeps the frame in the

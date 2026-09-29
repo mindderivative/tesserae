@@ -232,10 +232,36 @@ already fully expressible as a plain `Container` with N children, so
 `repeat:` only needed to add the "don't hand-duplicate N blocks" part,
 not a new list primitive.
 
-## `graph_node`: a real, structural fragment gap
+## Node graphs and video in YAML
 
-`graph_node` (and `node_graph`, which composes `graph_node`s) isn't
-available as a declarative fragment yet -- see
-[Component Fragments](component-fragments.md#what-has-no-fragment-yet-and-why)
-for why. `video` is, since M59: the `Video` fragment, or an `Image` with
-a `frame` binding (see [Binding Expressions](bindings.md#video-frames)).
+Every widget here can now be declared in a view. Video is an `Image`
+with a `frame` binding, or the `Video` fragment, since M59 (see
+[Binding Expressions](bindings.md#video-frames)). A node graph is
+the `NodeGraph` and `GraphNode` kinds, since M60:
+
+```yaml
+- id: graph
+  kind: NodeGraph
+  style: {width: 800, height: 500}
+  edges: [{from: source, to: sink}]
+  children:
+    - {id: source, kind: GraphNode, label: Source, x: 40, y: 60, style: {width: 160, height: 100}}
+    - id: sink
+      kind: GraphNode
+      label: Sink
+      x: 320
+      y: 120
+      style: {width: 160, height: 100}
+      handlers: {on_change: node_moved}
+      children:  # its content, in its body under the title bar
+        - {id: level, kind: Slider, value: 0.5, style: {width: 120}}
+```
+
+They're built with `node_graph` and `graph_node`, so they pan, zoom and
+drag as those do. A `GraphNode` takes `label`, `x` and `y`, and its
+children go in its body. `edges:` names GraphNodes by id, and
+`on_change` hears the user moving a node. `view.control("sink")` is the
+`graph_node` widget, with its `.position` `Signal`. On a hot reload,
+nodes are matched by id: a node the user dragged stays where they put
+it unless the file moves it; nodes added or removed come and go; and
+the edges are drawn again.

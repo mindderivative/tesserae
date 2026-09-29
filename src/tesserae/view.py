@@ -53,7 +53,8 @@ from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.spec.images import check_frame
 from tesserae.spec.build import (
-    A11Y_BINDABLE, Built, _CONTROL_KINDS, a11y_bindings, build_with, control_shape, focus_ring_color,
+    A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
+    focus_ring_color,
     interaction_tint, natural_size, patch, prepare_layers,
 )
 from tesserae.spec.cascade import resolve_style
@@ -76,7 +77,7 @@ def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     """`tre`'s `node_props_equal`, plus the state fields Tesserae builds from."""
     # `handlers` and `a11y` too: they change focus, role and label (M39)
     keys = ("kind", "classes", "style", "text", "image", "icon", "checked", "selected", "value", "hour", "minute",
-            "handlers", "a11y")
+            "handlers", "a11y", "component_of", "min", "max", "step", "label", "x", "y")  # M57, M58, M60
     return all(a.get(k) == b.get(k) for k in keys)
 
 
@@ -378,6 +379,11 @@ class View:
             patch(self.window, new, outer, self._built.nodes[node_id], scheme=self._scheme, layers=self._layers,
                   frames=self._frames, control=self._built.controls.get(node_id))
         self._built.specs[node_id] = new
+        if new.get("kind") == "NodeGraph":
+            self._reconcile_graph(old, new)
+            return
+        if new.get("kind") == "GraphNode":
+            outer = self._built.nodes[node_id]  # its content lives in its body
         old_children = {c["id"]: c for c in old.get("children") or []}
         kept: set[str] = set()
         for index, child in enumerate(new.get("children") or []):
@@ -403,12 +409,48 @@ class View:
                 if node is not None:
                     node.destroy()
 
+    def _reconcile_graph(self, old: dict[str, Any], new: dict[str, Any]) -> None:
+        """A NodeGraph's GraphNodes, matched by id (M60): a kept one is
+        patched in place (so a place the user dragged it to stays, unless
+        the file moves it), a new one is built into the graph, a gone one
+        is removed; then the edges are drawn again."""
+        graph = self._built.controls[new["id"]]
+        old_children = {c["id"]: c for c in old.get("children") or []}
+        kept: set[str] = set()
+        for child in new.get("children") or []:
+            previous = old_children.get(child["id"])
+            if previous is not None and self._same_shape(previous, child):
+                kept.add(child["id"])
+                self._reconcile_node(previous, child)
+                continue
+            if previous is not None:
+                kept.add(child["id"])
+                self._forget_graph_node(graph, previous)
+            if child.get("kind") != "GraphNode":
+                raise ValueError(f'widget "{new["id"]}": a NodeGraph\'s children are GraphNodes, '
+                                 f"got {child.get('kind')!r} ({child.get('id')!r})")
+            build_with(self.window, child, scheme=self._scheme, layers=self._layers, frames=self._frames,
+                       into=self._built, listen=self._events.listen, graph=graph)
+        for child_id, child in old_children.items():
+            if child_id not in kept:
+                self._forget_graph_node(graph, child)
+        connect_edges(graph, new, self._built)
+
+    def _forget_graph_node(self, graph: Any, spec: dict[str, Any]) -> None:
+        widget = self._built.controls.get(spec["id"])
+        self._forget(spec)
+        if widget is not None:
+            if widget in graph.graph_nodes:
+                graph.graph_nodes.remove(widget)
+            widget.node.destroy()
+
     def _same_shape(self, old: dict[str, Any], new: dict[str, Any]) -> bool:
         """Whether `old`'s node can be patched into `new` rather than
-        rebuilt: the same kind, and for a control, the same size."""
+        rebuilt: the same kind, and for a control or a graph's widget, the
+        same size."""
         if old.get("kind") != new.get("kind"):
             return False
-        if new.get("kind") in _CONTROL_KINDS:
+        if new.get("kind") in _CONTROL_KINDS or new.get("kind") in _WIDGET_KINDS:
             return control_shape(old, self._layers) == control_shape(new, self._layers)
         return True
 

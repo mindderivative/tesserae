@@ -1541,3 +1541,19 @@ User: "Start M59".
 - 5 tests; 8/8 mutants caught.
 
 1594 passed; all five examples clean.
+
+## M60: a declarative node graph (#7)
+
+User: "push and start M60". Pushed `9092b53..392d8d8` (CI run
+36510904115 passed), and closed #9, #10, #5 and #6.
+
+- `NodeGraph` and `GraphNode` are YAML kinds built with the widgets,
+  with `edges:` and content in a node's body.
+- A reload matches nodes by id and keeps user drags unless the file
+  moves the node.
+- **Found:** `_props_equal` missed the keys M57, M58 and M60 added.
+  Fixed.
+- 12 tests; 18/18 mutants caught.
+
+1608 passed; all five examples clean. Every MD3 widget can now be
+declared.
