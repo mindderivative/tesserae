@@ -680,7 +680,9 @@ class App:
         already built and runs `tre`'s own real render loop. `max_frames`
         is the identical headless-CI-safe convention `tre`'s own examples
         already use (TRE v1 finding #261) -- omit it for a real,
-        interactive run that exits only when the window closes.
+        interactive run that exits only when the window closes. With no
+        display it returns at once; a window whose GPU can't be set up
+        raises `RuntimeError` (`tre` 0.4.0).
 
         `hot_reload=True` (M29) watches every screen built from a file --
         by `load()`, or by `build_view()` and given to `register()` (M48)

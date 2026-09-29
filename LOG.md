@@ -1599,3 +1599,21 @@ User: "push and start M63". Pushed M62 as `234a67b..f49dd36` (CI run
   `test_tree_parity` since M56 (a known gap now).
 
 2358 passed.
+
+## tre 0.4.0 (2026-09-29)
+
+`tre`'s session reported 0.4.0. Verified: the v0.4.0 GitHub release (24
+assets), and `tesserae-engine` 0.4.0 on PyPI (22 wheels and an sdist;
+PyPI's project index lagged, but the version's own page listed them).
+
+- `.venv` on 0.4.0; the floor is `tesserae-engine>=0.4.0`. CI's and
+  `release.yml`'s `tre` checkout (for the real-font test) moved to v0.4.0.
+- Nothing broke: 2360 passed (+2 over M63 from the docs checks on the
+  guide's new YAML example), and all five examples ran clean.
+- Checked 0.4.0's behaviour changes against Tesserae. `App.run` passes
+  on `tre`'s new `RuntimeError` for a GPU that can't be set up.
+  Tesserae makes no zero-size windows. No test matched `window.get()`'s
+  old error text. Partial redraw is on by default.
+- Docs: the dependency floor, 0.4.0's wheels and sdist (Rust 1.90+),
+  `run()`'s headless and GPU behaviour, and partial redraw. Also, the
+  themes guide's new example no longer gives text a translucent colour.

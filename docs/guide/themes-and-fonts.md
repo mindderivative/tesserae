@@ -94,7 +94,7 @@ Anywhere a view, stylesheet or theme takes a colour, it takes a string:
 ```yaml
 style:
   background: "oklch(62.8% 0.2577 29.23)"   # sRGB red
-  foreground: "color(display-p3 0.3 0.6 0.2 / 0.8)"
+  foreground: "color(display-p3 0.2 0.3 0.1)"
 ```
 
 Tesserae renders in sRGB, so a colour outside it is clipped channel by

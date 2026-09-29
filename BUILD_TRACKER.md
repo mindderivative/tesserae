@@ -78,7 +78,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
-**Just closed:** M63 (2026-09-28), done locally: `parse_color` accepts CSS's wide-gamut functions (`oklch()`, `color(display-p3 …)`, …), converted exactly as `tre` 0.3.4 did (#16). Before it, M62 (pushed, #2 closed) windows `pagination` with an ellipsis. 2358 passed.
+**Just closed:** Tesserae moved onto `tre` 0.4.0 (`tesserae-engine>=0.4.0`, 2026-09-29), reported by `tre`'s session and verified (the GitHub release, and 22 wheels plus an sdist on PyPI): 2360 passed and all five examples clean, with nothing broken. Before it, M63 (done locally): `parse_color` accepts CSS's wide-gamut functions, converted exactly as `tre` 0.3.4 did (#16).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 

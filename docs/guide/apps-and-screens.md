@@ -75,5 +75,12 @@ render loop. `max_frames` caps the loop -- useful for headless/CI runs
 that need a real exit condition with no interactive close; omit it for
 a real, interactive run that exits only when the window closes.
 
+With no display reachable, `run()` returns without opening anything. If
+the window's GPU can't be set up (no adapter, device or supported
+surface), it raises `RuntimeError` (since `tre` 0.4.0; before, the
+process exited with status 0). Each window repaints only what changed
+(`tre` 0.4.0's partial redraw, pixel-identical to a full redraw);
+`app.window.set(partial_redraw=False)` turns it off.
+
 `app.current` (a property) returns the name last passed to `show()`,
 or `None` before the first real call.
