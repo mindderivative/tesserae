@@ -71,7 +71,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M59 — A Declarative Video (#6) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M60 — A Declarative Node Graph (#7) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M62 — Pagination with an Ellipsis (#2) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
+| M62 — Pagination with an Ellipsis (#2) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 | M63 — CSS Wide-Gamut Colours (#16) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
@@ -1735,7 +1735,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 62 — Pagination with an Ellipsis (#2)
 
-**Status: 🚧 In progress — Phase 1 of 3 done.** User: "Push and start M62" (M61 pushed as `d78b5bc..234a67b`). From the backlog order M54 set: [#2](https://github.com/mindderivative/tesserae/issues/2). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 3 done.** User: "Push and start M62" (M61 pushed as `d78b5bc..234a67b`). From the backlog order M54 set: [#2](https://github.com/mindderivative/tesserae/issues/2). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** `pagination` draws a button for every page, which is crowded for dozens of pages.
 
@@ -1744,8 +1744,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read `widgets/navigation.py`'s `pagination` and its tests; settled Q1-Q5 above — ✅
 
-### Phase 2 — The Windowing ⬜
-- Step 1: `max_visible=`, the slot windowing and the inert ellipsis in `widgets/navigation.py`; tests for the start, middle and end, short runs, focus, a11y and re-theming; mutation-checked — ⬜
+### Phase 2 — The Windowing ✅
+- Step 1: `pagination(max_visible=7)` and `_pages_shown` in `widgets/navigation.py`: over `max_visible` pages, `slot0`, ... redrawn by the page `Effect` (text, label, focusable, `a11y_hidden`, cursor, hover); an ellipsis click is a no-op; focus on a slot follows the current page to its new slot. New `tests/test_pagination_ellipsis.py` (20): the window at the start, middle and end, an even middle run, a sweep of counts and sizes (the current page always shows, no ellipsis stands for one page), short runs unchanged, the inert ellipsis (checked on stderr too, since `tre` logs a handler's error rather than raising), moving, focus, `.current.set`, a re-theme, and `max_visible`'s check. Mutation-checked, 14/14 caught (the first run's survivors pinned the even run and the quiet ellipsis click, and showed a `bool` check was dead, so it went). 1614 → 1634 passed (1 skipped); no example uses `pagination` — ✅
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: the widget catalog; the known gap closed — ⬜

@@ -282,6 +282,7 @@ def pagination(
     x: float | None = None,
     y: float | None = None,
     *,
+    max_visible: int = 7,
     theme: "Theme | None" = None,
 ) -> Widget:
     """Previous, a numbered button per page, and next (M42): 40 px circles
@@ -290,12 +291,23 @@ def pagination(
     (0-based) and `.on_change(fn)` hears the user's moves. Previous and
     next are disabled at the first and last page (`on_surface` at 38%, not
     focusable, announced disabled). Parts `previous`, `page0`, ...,
-    `next`."""
+    `next`.
+
+    More than `max_visible` pages (at least 5) are windowed (M62): that
+    many slots, `slot0`, ..., show the first and last pages, the current
+    one amid its neighbours, and an inert `…` for each run left out
+    (`1 … 6 7 [8] 9 10 … 42`), redrawn as the page moves. `.shown` is
+    each slot's page, `None` for an ellipsis."""
     if page_count < 1:
         raise ValueError(f"pagination needs at least one page, got {page_count}")
     if not 0 <= current < page_count:
         raise ValueError(f"current={current} is out of range for {page_count} pages")
+    if not isinstance(max_visible, int) or max_visible < 5:
+        raise ValueError(f"max_visible is a whole number of at least 5, got {max_visible!r}")
     name = "pagination"
+    windowed = page_count > max_visible
+    slots = max_visible if windowed else page_count
+    slot = "slot" if windowed else "page"
 
     def circle(part: str, child: dict[str, Any]) -> dict[str, Any]:
         return {"id": f"{name}.{part}", "kind": "Rect",
@@ -307,13 +319,13 @@ def pagination(
         return circle(part, {"id": f"{name}.{part}.icon", "kind": "Icon", "icon": {"name": "chevron_right"},
                              "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}})
 
-    pages = [circle(f"page{i}", {"id": f"{name}.page{i}.label", "kind": "Text",
-                                 "text": {"content": str(i + 1), "typography_role": "label_large"},
-                                 "style": {"foreground": "on_surface_variant"}}) for i in range(page_count)]
+    pages = [circle(f"{slot}{i}", {"id": f"{name}.{slot}{i}.label", "kind": "Text",
+                                   "text": {"content": str(i + 1), "typography_role": "label_large"},
+                                   "style": {"foreground": "on_surface_variant"}}) for i in range(slots)]
     spec = {"id": name, "kind": "Container",
             "style": {"flex_direction": "horizontal", "align_items": "center", "gap": 4},
             "children": [arrow("previous"), *pages, arrow("next")]}
-    parts = ["previous", *(f"page{i}" for i in range(page_count)), "next"]
+    parts = ["previous", *(f"{slot}{i}" for i in range(slots)), "next"]
     widget = Widget(window, spec=spec, theme=theme, x=x, y=y,
                     interactive={p: "on_surface_variant" for p in parts}, name=name)
     a11y.describe(widget.node, role="group", label="Pagination")
@@ -321,19 +333,30 @@ def pagination(
     changes: list[Callable[[int], Any]] = []
     widget.on_change = lambda fn: (changes.append(fn), lambda: changes.remove(fn) if fn in changes else None)[1]
 
-    def go(page: int) -> None:
-        if not 0 <= page < page_count or page == widget.current.get():
+    def go(page: int | None) -> None:
+        if page is None or not 0 <= page < page_count or page == widget.current.get():
             return
+        focused = any(widget.part(f"{slot}{k}").get("focused") for k in range(slots))
         widget.current.set(page)
+        if focused:  # the page may have moved to another slot: focus follows it
+            widget.part(f"{slot}{widget.shown.index(page)}").focus()
         for fn in list(changes):
             fn(page)
 
     def draw() -> None:
         now = widget.current.get()
-        for i in range(page_count):
-            on = i == now
-            widget.part(f"page{i}").set(fill=widget.color("primary") if on else (0, 0, 0, 0), selected=on)
-            widget.part(f"page{i}.label").set(fill=widget.color("on_primary" if on else "on_surface_variant"))
+        widget.shown = _pages_shown(page_count, now, slots)
+        for k, page in enumerate(widget.shown):
+            on = page == now
+            node = widget.part(f"{slot}{k}")
+            node.set(fill=widget.color("primary") if on else (0, 0, 0, 0), selected=on)
+            widget.part(f"{slot}{k}.label").set(fill=widget.color("on_primary" if on else "on_surface_variant"))
+            if windowed:  # a slot's page changes as the current page moves; an ellipsis is inert
+                gap = page is None
+                widget.part(f"{slot}{k}.label").set(text="…" if gap else str(page + 1))
+                node.set(focusable=not gap, a11y_hidden=gap, cursor="default" if gap else "pointer",
+                         label="" if gap else f"Page {page + 1}")
+                widget.interaction(f"{slot}{k}").enabled = not gap
         for part, enabled in (("previous", now > 0), ("next", now < page_count - 1)):
             ink = widget.color("on_surface_variant")
             if not enabled:
@@ -348,14 +371,31 @@ def pagination(
     widget.on_click(lambda: go(widget.current.get() + 1), part="next")
     a11y.describe(widget.part("previous"), label="Previous page")
     a11y.describe(widget.part("next"), label="Next page")
-    for i in range(page_count):
-        widget.on_click(lambda i=i: go(i), part=f"page{i}")
-        a11y.describe(widget.part(f"page{i}"), label=f"Page {i + 1}")
+    for k in range(slots):
+        widget.on_click(lambda k=k: go(widget.shown[k]), part=f"{slot}{k}")
+        a11y.describe(widget.part(f"{slot}{k}"), label=f"Page {k + 1}")
     effect = Effect(draw)  # after `on_click`, which makes previous and next focusable
     widget._undo.append(effect.dispose)
     widget.part("previous.icon").set(rotation_deg=180.0)  # not a style property, so a re-colour keeps it
     widget.after_theme(draw)
     return widget
+
+
+def _pages_shown(page_count: int, current: int, slots: int) -> list[int | None]:
+    """Each of `slots` slots' page, `None` for an ellipsis (M62): every page
+    if they fit; else the first and last, the current page centred in a
+    run of `slots - 4`, and an ellipsis for each run left out. At either
+    end the run joins the first or last page instead, so an ellipsis never
+    stands for a single page."""
+    if page_count <= slots:
+        return list(range(page_count))
+    run = slots - 4
+    start = current - (run - 1) // 2
+    if start <= 2:  # near the start: 1 2 3 4 5 … 42
+        return [*range(slots - 2), None, page_count - 1]
+    if start + run - 1 >= page_count - 3:  # near the end: 1 … 38 39 40 41 42
+        return [0, None, *range(page_count - (slots - 2), page_count)]
+    return [0, None, *range(start, start + run), None, page_count - 1]
 
 
 def toolbar(
