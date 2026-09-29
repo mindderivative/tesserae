@@ -80,6 +80,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M69 — Handlers on a Component Call (#18) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M70 — Binding `disabled` on Any Clickable Node (#19) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
 **Just closed:** M67 (2026-09-29), done locally: a `tesserae` command, `tesserae new <name> [--shell]` and `tesserae add screen <Name>` (#14). With it the backlog M54 ordered is done: M64 `widgets.text` (#11), M65 shared state (#13), M66 routing (#12), done locally, and M68 the move onto `tre` 0.4.0 (pushed). 2422 passed.
 
@@ -95,13 +96,14 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M69 (#18, handlers on a component call), then M70 (#19, binding `disabled` on any clickable node), both scoped as drafts. The mouse's side buttons (#20) wait on `tre` #21.
+**Up next:** M69 (#18, handlers on a component call), M70 (#19, binding `disabled` on any clickable node) and M71 (#21, the rest of flexbox and a ScrollView in YAML), all scoped as drafts; M71 doesn't depend on `tre` 0.4.1. Waiting on `tre`: the mouse's side buttons (#20, `tre` #21) and grids (`tre` #23).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
+- **YAML layouts are part of flexbox, with no scrolling and no grid:** a style refuses `flex_wrap`, `align_self`, `min_`/`max_width`/`height`, `aspect_ratio`, `position`/`x`/`y`, `z_index` and `clip_children`, which `tre` 0.4.0 lays out, and `tre`'s `scroll_view` has no `kind:`: [#21](https://github.com/mindderivative/tesserae/issues/21) (M71). A grid needs `tre` first: it exposes only flexbox, though its Taffy implements CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23)).
 - **The mouse's side buttons don't go back and forward** (M66): `tre`'s pointer events report only `primary`, `secondary` and `middle`. Blocked on `tre` [#21](https://github.com/mindderivative/tre/issues/21); Tesserae's side is [#20](https://github.com/mindderivative/tesserae/issues/20), small once it ships (not a milestone until then).
 - **A fragment call can't take `handlers:`:** a `component:` node takes only `id:`, `with:` and `repeat:`, so a `component: ButtonFilled` in a view can't have an `on_click`. A clickable button in YAML is a `Rect` with `handlers:` and a `Text` child, as the interaction guide shows (found in M67): [#18](https://github.com/mindderivative/tesserae/issues/18) (M69).
 - **A button's `disabled` can't be bound in YAML:** `disabled` binds only on the control kinds (M40: `Checkbox`, `Switch`, `SpinBox`, ...); a button is a `Rect` fragment, so `bindings: {disabled: ...}` on it is refused. A back button can't show `app.can_go_back` from YAML; and a node's own `disabled` only tells assistive technology (it still takes clicks and focus), so greying one out is Python's job for now (found in M66): [#19](https://github.com/mindderivative/tesserae/issues/19) (M70).
@@ -1937,3 +1939,32 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: the interaction guide and the routing section's back-button advice; the known gap closed — ⬜
+
+
+---
+
+## Milestone 71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** User: "Scope M71 and file the tre grid issue" (2026-09-29), after asking what layouts Tesserae has: [#21](https://github.com/mindderivative/tesserae/issues/21). Independent of `tre` 0.4.1; grids themselves wait on `tre` [#23](https://github.com/mindderivative/tre/issues/23) (filed with this scope).
+
+**The gap:** A view's style takes `flex_direction`, `gap`, `padding`, `margin`, `flex_grow`/`flex_shrink`/`flex_basis`, `align_items`, `justify_content` and sizes (numbers, `"auto"`, percentages). It refuses, as "unknown style field(s)", seven things `tre` 0.4.0 lays out (each tried): `flex_wrap`, `align_self`, `min_width`/`max_width`/`min_height`/`max_height`, `aspect_ratio`, `position` with `x`/`y`, `z_index` and `clip_children`. `tre`'s `scroll_view` (wheel-scrolled, one vertical `scroll_offset`, `scrollbar_fill`/`scrollbar_width`) has no `kind:`. And `tre` has no grid: its node properties are flexbox only, though it lays out with Taffy 0.14, which implements CSS Grid.
+
+**Draft approach:** The seven keys through the compiler's `_layout` (so a patch resets them too, as the others are), validated as `tre` validates them; `kind: ScrollView`, a vertical scrolling container with `scroll_offset` bindable and its scrollbar in the theme's colours; a "Layout" guide page (stacks, flexible sizing, wrapping, absolute placement, scrolling, and a grid-like layout today with `flex_wrap` and a fixed `flex_basis`). A `Grid` follows `tre` #23, as its own milestone.
+
+**Decisions to settle at the start** (provisional):
+- Q1 all seven keys (recommended), or the layout ones first and `z_index`/`clip_children` later
+- Q2 `position`'s values (`relative`/`absolute`, recommended) and how `x`/`y` relate to `margin`
+- Q3 `ScrollView`: vertical only, as `tre`'s is (recommended), a keyboard (Page Up/Down, arrows when focused) and a11y (`scroll_into_view`), and whether `scroll_offset` is two-way
+- Q4 whether a `Repeater` inside a `ScrollView` should use `tre`'s `virtual_list` for long lists (recommended: later, its own milestone)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: read `_layout`, the style validation, patching and `tre`'s `scroll_view`; Q1-Q4 — ⬜
+
+### Phase 2 — The Flexbox Keys ⬜
+- Step 1: the seven keys in the compiler and patching; tests comparing laid-out boxes with `tre`'s own for each; mutation-checked — ⬜
+
+### Phase 3 — ScrollView ⬜
+- Step 1: the kind, its binding, keyboard and a11y, reconcile and hot reload; tests; mutation-checked — ⬜
+
+### Phase 4 — Docs, Tracker ⬜
+- Step 1: a Layout guide page, the widget catalog's pointers; the known gap narrowed to grids (`tre` #23) — ⬜
