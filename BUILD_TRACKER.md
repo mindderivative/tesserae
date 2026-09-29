@@ -78,7 +78,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M66 — Routing: a Back Stack and Deep Links (#12) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
-| M69 — Handlers on a Component Call (#18) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
+| M69 — Handlers on a Component Call (#18) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 | M70 — Binding `disabled` on Any Clickable Node (#19) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
@@ -1897,7 +1897,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 69 — Handlers on a Component Call (#18)
 
-**Status: 🚧 In progress — Phase 1 of 3 done.** User: "Scope these two, yaml button binding disabled, component taking handlers, ..." (2026-09-29), then "push and start M69" (M71 and M72 pushed as `ba04848..80ef0e9`): [#18](https://github.com/mindderivative/tesserae/issues/18). First of the two, since a fragment button with a bound `disabled` (M70) needs a call to take `bindings:` too. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 3 done.** User: "Scope these two, yaml button binding disabled, component taking handlers, ..." (2026-09-29), then "push and start M69" (M71 and M72 pushed as `ba04848..80ef0e9`): [#18](https://github.com/mindderivative/tesserae/issues/18). First of the two, since a fragment button with a bound `disabled` (M70) needs a call to take `bindings:` too. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** A `component:` node takes only `id:`, `with:` and `repeat:` (`spec/expand.py`'s `ComponentError`), so `component: ButtonFilled` in a view can't have an `on_click`; a YAML button is a `Rect` with `handlers:` and a `Text` child instead, or a fragment wrapped in a clickable Container (found in M67).
 
@@ -1910,8 +1910,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read `_expand_component` (the key check, `repeat:`, namespacing, `component_of`), `_substitute` (a fragment's params vs. the view's `{{ }}`) and `test_clickable`'s wrapped-fragment test; settled Q1-Q4 above — ✅
 
-### Phase 2 — The Keys on a Call ⬜
-- Step 1: `expand.py`; tests for each key, with `repeat:`, the call site winning, and through reload; mutation-checked — ⬜
+### Phase 2 — The Keys on a Call ✅
+- Step 1: `expand.py`: `_CALL_KEYS`, `_call_keys` (checked before expanding) and `_apply_call_keys` (on each expanded root, after namespacing and `component_of`); the refusal now lists what a call takes. New `tests/test_component_call_keys.py` (13): `component: ButtonFilled` clicked and activated by Enter, as a button with a state layer; `bindings:` from the ViewModel and `classes:` on the root, and a call's `{{ }}` left the view's; merging with a fragment's own keys (the call's winning, classes added after the root's without repeats); `interaction:`'s colour; `two_way:` on a TextField-rooted fragment; every `repeat:` item; a call inside a fragment; a reconcile rewiring a changed handler; and each bad key named. `test_clickable`'s wrapped-fragment test kept, its docstring updated. Mutation-checked, 11/11 (the first run pinned `interaction:` and the class order). 2536 → 2549 passed — ✅
 
 ### Phase 3 — Docs, Templates, Tracker ⬜
 - Step 1: the fragments guide and widget catalog; the `tesserae new` templates use `component: ButtonFilled`; the known gap closed — ⬜

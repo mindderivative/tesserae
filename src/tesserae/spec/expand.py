@@ -350,12 +350,14 @@ def _expand_component(
     if not isinstance(with_supplied, dict):
         raise ComponentError(f"{_chain_text((*chain, name))}: `with:` must be a mapping")
 
-    extra = set(node) - {_COMPONENT_KEY, _WITH_KEY, _ID_KEY, _REPEAT_KEY}
+    extra = set(node) - {_COMPONENT_KEY, _WITH_KEY, _ID_KEY, _REPEAT_KEY} - set(_CALL_KEYS)
     if extra:
         raise ComponentError(
-            f"{_chain_text((*chain, name))}: a `component:` node takes only `id:`, `with:`, "
-            f"and `repeat:`; got {sorted(extra)}. Pass configuration as parameters."
+            f"{_chain_text((*chain, name))}: a `component:` node takes `id:`, `with:`, `repeat:`, and "
+            f"{', '.join(f'`{k}:`' for k in _CALL_KEYS)} for its root; got {sorted(extra)}. "
+            "Pass configuration as parameters."
         )
+    call_keys = _call_keys(node, (*chain, name))
 
     # M28: `repeat:` -- one iteration per entry, each a mapping of
     # per-item values merged on top of the shared `with:` values. A
@@ -420,9 +422,43 @@ def _expand_component(
         if isinstance(fragment, dict):
             # its theme `components:` entry (M57): the fragment's own, if it names one
             fragment.setdefault("component_of", name)
+            _apply_call_keys(fragment, call_keys)
         results.append(fragment)
 
     return results
+
+
+#: What a `component:` call puts on the fragment's root (M69): the view's
+#: own wiring and naming, not the fragment's look (that's its params).
+_CALL_KEYS = ("handlers", "bindings", "two_way", "a11y", "interaction", "classes")
+_CALL_MAPPINGS = ("handlers", "bindings", "a11y", "interaction")
+
+
+def _call_keys(node: dict[str, Any], chain: tuple[str, ...]) -> dict[str, Any]:
+    """The call's root keys, checked. They're the view's: their `{{ }}` are
+    its bindings, so they aren't substituted with the fragment's params."""
+    keys = {k: node[k] for k in _CALL_KEYS if k in node}
+    for key in _CALL_MAPPINGS:
+        if key in keys and not isinstance(keys[key], dict):
+            raise ComponentError(f"{_chain_text(chain)}: `{key}:` on a `component:` node must be a mapping")
+    if "two_way" in keys and not isinstance(keys["two_way"], str):
+        raise ComponentError(f"{_chain_text(chain)}: `two_way:` on a `component:` node must be a property name")
+    classes = keys.get("classes")
+    if classes is not None and not (isinstance(classes, list) and all(isinstance(c, str) for c in classes)):
+        raise ComponentError(f"{_chain_text(chain)}: `classes:` on a `component:` node must be a list of names")
+    return keys
+
+
+def _apply_call_keys(root: dict[str, Any], keys: dict[str, Any]) -> None:
+    """Puts a call's keys on the fragment's root: mappings merged key by key
+    (the call's win), `two_way:` replaced, `classes:` added."""
+    for key, value in keys.items():
+        if key in _CALL_MAPPINGS:
+            root[key] = {**(root.get(key) or {}), **value}
+        elif key == "classes":
+            root[key] = [*(root.get(key) or []), *(c for c in value if c not in (root.get(key) or []))]
+        else:
+            root[key] = value
 
 
 def _expand_list_item(item: Any, component_dirs: list[Path], chain: tuple[str, ...], deps: set[Path]) -> list[Any]:

@@ -89,8 +89,9 @@ def test_adding_or_removing_on_click_by_reconcile_updates_it():
 
 
 def test_a_button_fragment_wrapped_as_a_clickable_is_reachable():
-    """A `component:` call takes no `handlers:`, so an app makes a fragment
-    clickable by wrapping it; the wrapper is the button."""
+    """A fragment wrapped in a clickable container: the wrapper is the
+    button. (Since M69 a call can take `handlers:` itself, which puts them
+    on the fragment's root; wrapping still works.)"""
     from tesserae.spec import expand_components_to_spec
 
     spec = expand_components_to_spec(
