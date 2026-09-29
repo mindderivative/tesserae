@@ -1,12 +1,17 @@
 # Installation
 
-Tesserae is pre-alpha and not yet published to PyPI -- install it as a
-local editable checkout. It will be published as **`tesserae-ui`**
-(`tesserae` on PyPI is an unrelated project), and it's still imported as
-`tesserae` ([#15](https://github.com/mindderivative/tesserae/issues/15)).
-It needs **`tre` 0.3.5.2 or newer**, which is on PyPI as
-[`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (still
-imported as `tre`), so installing Tesserae installs it.
+Tesserae is pre-alpha, and on PyPI as
+[**`tesserae-ui`**](https://pypi.org/project/tesserae-ui/) (imported as
+`tesserae`; `tesserae` on PyPI is an unrelated project):
+
+```bash
+pip install tesserae-ui
+```
+
+That also installs **`tre` 0.3.5.2 or newer**, which is on PyPI as
+[`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (imported
+as `tre`). The rest of this page is for working on Tesserae itself, from
+a local editable checkout.
 
 ## Requirements
 

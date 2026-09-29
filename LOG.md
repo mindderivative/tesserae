@@ -1391,3 +1391,18 @@ the first to install `tesserae-engine` from PyPI: 1469 passed and 5
 skipped (the five live `App.run` tests, with no display on the runner),
 with the real-font test running from the font-only checkout. All five
 examples ran clean.
+
+## Tesserae 0.1.0 on PyPI
+
+User: "push and publish". Pushed `bec0cba..76ca67f`, then published
+the v0.1.0 GitHub release (pre-release; `--target main`, since GitHub
+rejected a short SHA).
+
+- `release.yml` (run 36501339807) built `tesserae_ui-0.1.0` (the wheel
+  and the sdist), passed the checks and `twine check`, and ran the suite
+  (1469 passed, 5 skipped) and five examples against the installed
+  wheel. It uploaded after the user approved the `pypi` environment.
+- **Checked:** in a fresh venv, `pip install tesserae-ui` pulls
+  `tesserae-engine` 0.3.5.2, and the counter example runs.
+- #15 closed. The README and installation page lead with
+  `pip install tesserae-ui`. The known gap moved to "Fixed gaps".

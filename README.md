@@ -45,6 +45,15 @@ reloads, failed reloads naming the file, and warnings. Call
 `tesserae.configure_logging()` in `app.py` for its console format, or
 `logger.disable("tesserae")` to silence it.
 
+## Install
+
+Tesserae is on PyPI as [`tesserae-ui`](https://pypi.org/project/tesserae-ui/)
+(imported as `tesserae`; `tesserae` on PyPI is an unrelated project):
+
+```bash
+pip install tesserae-ui
+```
+
 ## Install (development)
 
 Tesserae needs **`tre` 0.3.5.2 or newer**, which is on PyPI as
@@ -224,15 +233,10 @@ work once this foundation is proven further:
   routing beyond a plain named `App.show(name)` (history/back-stack,
   URL-style deep links; [#12](https://github.com/mindderivative/tesserae/issues/12)),
   a `tesserae new` CLI scaffolding tool ([#14](https://github.com/mindderivative/tesserae/issues/14)).
-- Publishing to PyPI as **`tesserae-ui`** ([#15](https://github.com/mindderivative/tesserae/issues/15));
-  `tesserae` there is an unrelated project. The distribution is already
-  named `tesserae-ui` in `pyproject.toml`, and the import name stays
-  `tesserae`. `tre` must be published first, as **`tesserae-engine`**
-  (`tre` there is an unrelated regex library; [`tre` #19](https://github.com/mindderivative/tre/issues/19),
-  in progress), and Tesserae's dependency then switches to it. Publishing
-  is `.github/workflows/release.yml`: publishing a GitHub Release builds,
-  tests the built wheel and uploads it with PyPI trusted publishing (the
-  `pypi` environment). It refuses to run while the dependency is still the
-  bare `tre`, or when the tag doesn't match the version.
+
+**Releasing:** publishing a GitHub Release runs `.github/workflows/release.yml`.
+It checks that the tag matches the version and that no dependency is PyPI's
+unrelated `tre`, tests the built wheel, and uploads it with trusted
+publishing once the `pypi` environment's reviewer approves (0.1.0, 2026-09-28).
 
 Every known gap has a scoped issue: [Tesserae's issues](https://github.com/mindderivative/tesserae/issues).
