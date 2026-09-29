@@ -73,10 +73,11 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M64 — A `tesserae.widgets.text` Wrapper (#11) | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 1 of 2 done |
 | M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
 **Just closed:** Tesserae moved onto `tre` 0.4.0 (`tesserae-engine>=0.4.0`, 2026-09-29), reported by `tre`'s session and verified (the GitHub release, and 22 wheels plus an sdist on PyPI): 2360 passed and all five examples clean, with nothing broken. Before it, M63 (done locally): `parse_color` accepts CSS's wide-gamut functions, converted exactly as `tre` 0.3.4 did (#16).
 
@@ -92,7 +93,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M64 (#11, a `tesserae.widgets.text` wrapper), then M65–M67 as scoped. M63 (#16) is done locally, and #16 closes when it's pushed.
+**Up next:** M64 (#11, a `tesserae.widgets.text` wrapper) is in progress, then M65 (#13, a state store), M66 (#12, routing) and M67 (#14, a scaffolding CLI).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1777,20 +1778,17 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 64 — A `tesserae.widgets.text` Wrapper (#11)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#11](https://github.com/mindderivative/tesserae/issues/11). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: 🚧 In progress — Phase 1 of 2 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0" (pushed as `f49dd36..f9f1147`). From the backlog order M54 set: [#11](https://github.com/mindderivative/tesserae/issues/11). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
-**The gap:** There's no `text(window, content, role=...)`: a bare themed text node from Python means `window.create("text", ...)` with the theme resolved by hand. Low priority.
+**The gap:** There's no `text(window, content, ...)`: a bare themed text node from Python means `window.create("text", ...)` with the type role and colour resolved by hand, and no re-theming.
 
-**Draft approach:** `text(window, content, role="body_medium", color="on_surface", x=, y=)`: a one-node `Widget` from a small `Text_Component.yaml`, so it gets the theme's type role and colour, follows the app's theme (M50), and has `set_text`.
+**Decisions** (recommended, taken): Q1, build it: `tesserae.widgets` has buttons, switches and chips but nothing to label them with, so a code-first app is the real caller (the two internal `create("text")` uses, the time dial's numbers and the dock's tab labels, sit inside those widgets' own trees and stay as they are). Q2, `text(window, content, typography_role="body_medium", color="on_surface", width=None, x=None, y=None, *, theme=None)`, from a `Text` fragment (`kind: Text`); `typography_role`, not the issue's `role`, since `role` is the accessibility role everywhere else. Q3, `.content` is a `Signal`, as the other widgets' state is; setting it re-measures the node from the font it resolved (so a theme's typography override carries over), keeping a given `width`. `color` is a colour role or any colour string.
 
-**Decisions to settle at the start** (provisional):
-- Q1 build it (recommended if kept small), or close #11 as not needed
-
-### Phase 1 — Scope and Decision ⬜
-- Step 1: Q1 — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: looked for callers (`create("text")` in `controls.py` and `docking.py`, none suited); read `Widget`, the `Link` fragment and the compiler's text sizing (`natural_size`); settled Q1-Q3 above — ✅
 
 ### Phase 2 — The Wrapper ⬜
-- Step 1: the widget and its fragment; tests; mutation-checked; the widget catalog — ⬜
+- Step 1: the widget and its fragment; tests; mutation-checked; the widget catalog; the known gap closed — ⬜
 
 
 ---
@@ -1867,3 +1865,17 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: a getting-started update; the known gap closed — ⬜
 
+
+---
+
+## Milestone 68 — Moving onto `tre` 0.4.0
+
+**Status: ✅ Complete — all 2 phases done (2026-09-29).** `tre`'s session reported 0.4.0 released (PyPI `tesserae-engine` 0.4.0, still `import tre`), and Tesserae moved onto it as `f9f1147`, pushed as `f49dd36..f9f1147`. The user asked for it as its own milestone ("Add M68 as a move to tre 0.4.0"); this section was written after the move, from its commit and log.
+
+**What 0.4.0 changes for Tesserae:** partial redraw is on by default (each window repaints only what changed, pixel-identical; `window.set(partial_redraw=False)` turns it off, and `get("partial_redraw_active")` is `None` until `run()`). `App.run()` raises `RuntimeError` when a window's GPU can't be set up, where it used to exit with status 0. A zero-size `Window` and an `rgba=` image over 8192 px raise `ValueError`. `window.get()`'s unknown-name error lists the seven window properties. 0.4.0 ships an sdist (building needs Rust 1.90+).
+
+### Phase 1 — Verify and Move ✅
+- Step 1: verified the v0.4.0 GitHub release (24 assets) and PyPI's 0.4.0 page (22 wheels and an sdist; the project index lagged behind it). `.venv` on 0.4.0; the dependency floor is `tesserae-engine>=0.4.0`; CI's and `release.yml`'s `tre` checkout (only for the real-font test's Roboto, still at the same path at v0.4.0) moved to `v0.4.0`. Each behaviour change checked against Tesserae: `App.run` lets the new `RuntimeError` through; Tesserae makes no zero-size window; no test matched the old error text. Checked on 0.4.0 itself: `partial_redraw` on by default and off by `set`, `partial_redraw_active` `None` before `run()`, and the zero-size and unknown-name errors. Nothing broke: 2360 passed (2 more than M63's, from the docs checks on the themes guide's new example), and all five examples ran clean — ✅
+
+### Phase 2 — Docs, Tracker ✅
+- Step 1: README and `docs/installation.md` (the floor, 0.4.0's wheels and sdist); `docs/guide/apps-and-screens.md` and `App.run`'s docstring (the headless return, the GPU `RuntimeError`, partial redraw); the themes guide's example no longer gives text a translucent colour. `LOG.md`; reported to `tre`'s session (counts, nothing broken, no `tre` bugs); `mkdocs build --strict` clean — ✅
