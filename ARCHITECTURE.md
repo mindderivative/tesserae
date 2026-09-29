@@ -270,6 +270,13 @@ the file added or moved go through `place_panels`. What can't be done
 in place is returned and logged as needing a restart. A panel removal
 is one of those: `tre` has no undock, and a detached panel stays in its
 zone's list, so `set_active_panel` would reattach it (probed).
+M53, on `tre` 0.3.5.2's `undock_panel` (`tre` #16): `Dock.remove_panel`
+undocks a panel, clears its drag state if it was being dragged (`tre`
+cancels the drag), and redraws the zone's strip, so the zone's tabs
+match `tre`'s list again. `reload_shell` undocks each panel the file
+dropped that is still docked, keeping its screen registered; one the
+file placed in a zone the live shell hasn't (a restart) was never
+docked, and is skipped.
 Phase 5: `App.screen(name)` returns a registered screen's `(view,
 viewmodel)`, the public way to reach a panel's ViewModel that the app
 built from a file. `examples/app_shell_file/` (in CI) declares the

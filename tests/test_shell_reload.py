@@ -149,12 +149,40 @@ def test_structural_edits_are_logged_as_needing_a_restart_and_the_rest_applies(s
         "the shell file Studio_Shell.yaml changed (top_bar removed): restart the app to see it",
         "the shell file Studio_Shell.yaml changed (zones right added, bottom removed): restart the app to see it",
         "the shell file Studio_Shell.yaml changed (center changed to true): restart the app to see it",
-        "the shell file Studio_Shell.yaml changed (panels removed (Console, Outline)): restart the app to see it",
     ]
     assert shell.top_bar is not None and set(shell._zone_nodes) == {"left", "bottom"} and not shell.center
-    assert shell.dock.titles("bottom") == ["Console"]  # a removed panel stays until a restart
+    assert shell.dock.titles("bottom") == [] and shell.dock.titles("left") == ["Files"]  # removed panels undocked (M53)
     assert shell.status_bar.part("text").get("text") == "Saved"  # what could change did
     assert ("INFO", f"reloaded the shell from {path}") in logs
+
+
+def test_a_panel_the_file_drops_is_undocked_and_its_screen_kept(studio):
+    """M53 (#3), on `tre` 0.3.5.2's `undock_panel`: the tab goes, the zone
+    shows another panel, and the screen stays registered."""
+    app, shell, path = studio
+    outline = app.screen("Outline")[0].root
+    shell.dock.show(outline)
+    _edit(app, path, SHELL.replace("[Files, Outline]", "[Files]"))
+    assert shell.dock.titles("left") == ["Files"] and shell.dock.side_of(outline) is None
+    assert outline.parent() is None and shell.dock.shown("left") == app.screen("Files")[0].root
+    assert [t.label.get("text") for t in shell.dock._zones["left"].tabs] == ["Files"]
+    shell.dock.show(shell.dock.panel("Files"))  # indexes still match tre's list
+    assert shell.dock.shown("left") == app.screen("Files")[0].root
+    _edit(app, path, SHELL)  # and the file can bring it back
+    assert shell.dock.titles("left") == ["Files", "Outline"] and shell.dock.side_of(outline) == "left"
+
+
+def test_dropping_a_panel_that_was_never_docked_is_harmless(studio):
+    """An edit adds a right zone (a restart) with the registered Settings
+    screen in it, so Settings isn't docked; a later edit dropping it has
+    nothing to undock."""
+    app, shell, path = studio
+    with_right = SHELL.replace("zones: {left: 220, bottom: 160}", "zones: {left: 220, bottom: 160, right: 200}").replace(
+        "bottom: [Console]}", "bottom: [Console], right: [Settings]}")
+    _edit(app, path, with_right)
+    assert "right" not in shell._zone_nodes and shell.dock.side_of(app.screen("Settings")[0].root) is None
+    _edit(app, path, SHELL)  # Settings dropped again: nothing raises
+    assert shell.dock.titles("left") == ["Files", "Outline"]
 
 
 def test_an_edit_naming_a_missing_panel_changes_nothing(studio):

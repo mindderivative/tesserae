@@ -1406,3 +1406,21 @@ rejected a short SHA).
   `tesserae-engine` 0.3.5.2, and the counter example runs.
 - #15 closed. The README and installation page lead with
   `pip install tesserae-ui`. The known gap moved to "Fixed gaps".
+
+## M53 Phases 1-2: undocking on shell reload (#3)
+
+User: "Start the next milestone". Nothing was scoped, so I scoped M53
+from the issues `tre` 0.3.5.2 unblocked (#3 and #17), with Q1-Q3 as
+recommended:
+- a removed panel is undocked, and its screen kept;
+- macOS and Windows adopt the OS appearance on the first frame;
+- a test seam keeps the start-up appearance deterministic.
+
+Phase 2:
+- `Dock.remove_panel` (via `tre`'s `undock_panel`), which also ends a
+  drag of the removed panel.
+- `reload_shell` undocks the panels a file edit drops; "panels removed"
+  is no longer a restart.
+- 5 tests; 8/8 mutants caught.
+
+1478 passed; all five examples clean.

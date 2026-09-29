@@ -81,6 +81,9 @@ time.
   was). Without a pointer, open the tab's menu — right click, the Menu
   key or Shift+F10 — and choose "Move to …". From code,
   `dock.move(panel, "right")`.
+- **Remove a panel:** `dock.remove_panel(panel)` undocks it (M53). Its
+  tab goes, and if it was shown the zone shows the next panel, else the
+  previous. The node is kept, so `dock.add_panel` can dock it again.
 - `dock.show(panel)`, `dock.panels(side)`, `dock.titles(side)`,
   `dock.shown(side)`, `dock.side_of(panel)`, and `dock.on_move(fn)`,
   which hears `fn(panel, side)` when a panel changes zone.
@@ -186,7 +189,6 @@ shell.restore(saved)
 
 - A layout is restored by title, so two panels with the same title can't
   be told apart.
-- Hot reload of a shell file can't add or remove a zone or bar, change
-  `center`, or remove a panel (`tre` can't undock one); those edits are
-  logged as needing a restart. See
+- Hot reload of a shell file can't add or remove a zone or bar, or
+  change `center`; those edits are logged as needing a restart. See
   [Hot Reload](hot-reload.md#the-shell-file).

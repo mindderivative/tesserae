@@ -259,7 +259,8 @@ def reload_shell(app: Any, shell: Any, old: dict[str, Any], new: dict[str, Any],
     couldn't: the structural changes that need a restart. The bars, the
     rail, the zones and `center` are compared with the live shell; panels
     with the file as it was, so a panel the user dragged stays where it is
-    unless the file moved it."""
+    unless the file moved it. A panel the file dropped is undocked, and its
+    screen stays registered (M53, on `tre` 0.3.5.2's `undock_panel`)."""
     needs: list[str] = []
     for key, live in (("top_bar", shell.top_bar), ("navigation", shell.navigation),
                       ("status_bar", shell.status_bar)):
@@ -271,10 +272,6 @@ def reload_shell(app: Any, shell: Any, old: dict[str, Any], new: dict[str, Any],
     if new["center"] != shell.center:
         needs.append(f"center changed to {str(new['center']).lower()}")
     before, after = _placed(old), _placed(new)
-    removed = sorted(set(before) - set(after))
-    if removed:
-        # `tre` can't undock a panel: a detached one stays in its zone's list
-        needs.append(f"panels removed ({', '.join(removed)})")
 
     if shell.top_bar is not None and new["top_bar"] is not None and new["top_bar"] != old["top_bar"]:
         top = new["top_bar"]
@@ -296,6 +293,10 @@ def reload_shell(app: Any, shell: Any, old: dict[str, Any], new: dict[str, Any],
     for name, side in moved_or_new.items():
         grouped.setdefault(side, []).append(name)
     place_panels(app, shell, {"panels": grouped}, path)
+    for name in sorted(set(before) - set(after)):  # undocked (M53); the screen stays registered
+        registered = app._registered.get(name)
+        if registered is not None and shell.dock.side_of(registered.view.root) is not None:
+            shell.dock.remove_panel(registered.view.root)
     return needs
 
 

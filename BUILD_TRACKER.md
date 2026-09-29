@@ -62,6 +62,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M50 — `tesserae.widgets` Follow the App's Theme | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M51 — Hot Reload for Components Added at Run Time | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M52 — A Declarative App Shell | `██████████` 100% | ✅ Complete — all 5 phases done (2026-09-28) |
+| M53 — Undocking Panels and the OS's Appearance, on `tre` 0.3.5.2 | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
 
 **Just closed:** M52 (2026-09-28), all 5 phases: a declarative app shell. A `*_Shell.yaml` loaded by `app.load_shell()` builds the `AppShell`, with every key checked and named by file and key. Panels are views named like screens; the rail shows screens (or calls `on_navigate`); the shell file is hot-reloaded in place, with structural edits logged as needing a restart. `App.screen`, and `examples/app_shell_file/` in CI. Removing a panel needs a restart until `tre` can undock one (`tre` issue #16). 1399 → 1474. M49–M52 are all done.
 
@@ -77,7 +78,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** nothing scoped as a milestone. Tesserae 0.1.0 is on PyPI as `tesserae-ui` (2026-09-28). #3 (removing a panel on a shell-file reload) and #17 (`dark="system"` starting right) are unblocked by `tre` 0.3.5.2. The other issues are the backlog.
+**Up next:** M53 (Phases 2–4): undocking a panel on a shell-file reload (#3), then `dark="system"` starting with the OS's appearance (#17).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1516,3 +1517,37 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 5 — Example, Docs, Tracker ✅
 - Step 1: **`examples/app_shell_file/`** declares the same studio as `examples/app_shell/` in `Studio_Shell.yaml`, with no widgets made in Python. Its panels `Files`, `Outline` and `Properties` are plain `*_View.yaml` files, and `Console` has a `Console_ViewModel.py`. Home, whose ViewModel needs the app, is registered in Python; Notes is `load()`ed. It checks itself: the file's title and zones; the rail opening Notes as a center tab; the rail following a screen's own button; `app.show("Files")` bringing a panel's tab forward; a move updating Home's summary, the status bar and the Console panel's ViewModel; `set_dark` reaching the file-built frame; the layout. Then it runs 20 frames with `hot_reload=True`, watching 6 screens and the shell file. `examples/app_shell/` stays as the Python form. CI runs both (a new "Run the app-shell file example" step). **`App.screen(name) -> (view, viewmodel)`** is new: the example reached a panel's file-built ViewModel through `app._registered`, so the public way in became part of this phase (a test, mutation-checked 2/2). The paint checks over every example's YAML now cover the new example's 7 files (+14 cases). Docs: the README (five vertical slices, both shell examples, which it had missed since M45), the docs index, the app-shell guide (both examples, `app.screen`), `api/app.md` (`screen`) and `ARCHITECTURE.md`. 1459 → 1474 (1473 passed, 1 skipped); all five examples clean; `mkdocs build --strict` clean — ✅
+
+---
+
+## Milestone 53 — Undocking Panels and the OS's Appearance, on `tre` 0.3.5.2
+
+**Status: 🚧 In progress — Phase 2 of 4 done (2026-09-28).** User: "Start the next milestone". Nothing was scoped, so this takes the two issues `tre` 0.3.5.2 unblocked: [#3](https://github.com/mindderivative/tesserae/issues/3) (a shell-file edit that removes a panel needs a restart) and [#17](https://github.com/mindderivative/tesserae/issues/17) (`App(dark="system")` starts dark). The user said "start" without choosing, so Q1–Q3 take the recommendations.
+
+**What `tre` 0.3.5.2 gives** (on PyPI as `tesserae-engine`):
+- `Window.undock_panel(panel)` takes a docked panel out of its zone's list, where later indexes shift down, and off the tree. If it was shown, the zone shows the next panel, else the previous. A drag of it is cancelled, and it can be docked again. It raises `ValueError` if the panel isn't docked (`tre` #16).
+- `window.get("dark")` returns `True`, `False` or `None`. On Linux it reads the XDG settings portal even before `App.run()`; on macOS and Windows it answers once the window is open (`None` before); it's `None` when headless. `color_scheme` now fires on Linux too (`tre` #18).
+
+**What the source says:**
+- `Dock` keeps each zone's panels and tabs (`_Zone.panels`, `.tabs`); `_rebuild` redraws a zone's strip.
+- `shell_file.reload_shell` lists a removed panel in `needs` ("restart the app to see it").
+- `App.__init__` starts `"system"` dark (`self._dark = True`), and `_on_color_scheme` follows the OS's switches.
+- Tests assume `App()` starts dark, so reading the real OS would make them depend on the desktop running them.
+
+**Decisions** (the recommendations, taken on "start"):
+- Q1 **A panel a shell-file edit removes** is undocked (`Dock.remove_panel`, public) and its screen stays registered, so `app.show(name)` can still show it (in `content`, or as a center tab). Alternative: destroy it.
+- Q2 **Where the OS can't answer before the window opens** (macOS, Windows), `run()` asks again on the first frame and re-themes then (views and followers together), as a `color_scheme` event would. Alternative: stay dark until the first switch there.
+- Q3 **Tests stay deterministic:** `App` reads the appearance through one function (`tesserae.app._os_dark(window)`). An autouse fixture in `tests/conftest.py` makes it answer `None` (unknown, so dark, as today) unless a test sets it.
+
+### Phase 1 — Scope and Decisions ✅
+- Step 1: scoped from `tre`'s 0.3.5.2 stubs and release note, `docking.py`, `shell_file.py` and `app.py`. Q1–Q3 were taken as recommended on the user's "start" — ✅
+
+### Phase 2 — Undocking (#3) ✅
+- Step 1: `Dock.remove_panel(panel)` calls `tre`'s `undock_panel`, which shows the next panel, else the previous, if this one was shown. It clears `Dock`'s own drag state and the drop highlight if the panel was being pressed or dragged, since `tre` cancels the drag. It drops the entry and redraws the zone's strip, so the tabs match `tre`'s list, and returns the node, which `add_panel` can dock again. `reload_shell` undocks each panel the file dropped that is still docked, and its screen stays registered (Q1). A panel the file had placed in a zone the live shell hasn't (a restart) was never docked, so it's skipped. "Panels removed" is no longer a restart. Tests: `test_docking.py` +3 (undock showing the next, then the previous, with the tabs and indexes in step and re-docking; undocking an undocked panel raises; undocking the dragged panel ends the drag); `test_shell_reload.py` +2 (a dropped panel is undocked with its screen kept, and the file can bring it back; dropping a never-docked panel is harmless), and the structural-edit test now expects the removals applied. Mutation-checked, 8/8 caught; the first run's survivor, the never-docked guard, got the second test. 1474 → 1479 (1478 passed, 1 skipped); all five examples clean. Docs: the app-shell guide (`remove_panel`, and a limit gone), the hot-reload guide (a table row, no longer a restart) and `ARCHITECTURE.md`; `mkdocs build --strict` clean. #3 closes once this is pushed (Phase 4) — ✅
+
+### Phase 3 — The OS's Appearance (#17) ⬜
+- Step 1: `App(dark="system")` starts with `window.get("dark")`, falling back to dark for `None`, and `run()` asks again on the first frame (Q2). The test seam (Q3). Tests: light, dark and unknown at start, the first-frame adoption, and a fixed `dark=` ignoring the OS. Mutation-checked — ⬜
+
+### Phase 4 — Docs, Tracker ⬜
+- Step 1: the app-shell, hot-reload and themes guides, `api/app.md`, and `ARCHITECTURE.md`. Close #3 and #17, and move their known gaps to "Fixed gaps" — ⬜
+

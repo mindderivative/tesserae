@@ -209,3 +209,40 @@ def test_a_dock_rejects_what_it_cant_do(call, message):
     window, dock, _ = _dock()
     with pytest.raises(ValueError, match=message):
         call(dock, window)
+
+
+# -- M53: remove_panel, on tre 0.3.5.2's undock_panel (#3) --------------------
+
+
+def test_remove_panel_undocks_it_and_shows_the_next_or_previous():
+    window, dock, panels = _dock()
+    dock.add_panel("left", window.create("box", width=10, height=10), "Outline")
+    dock.show(panels["Search"])
+    assert dock.remove_panel(panels["Search"]) == panels["Search"]
+    assert dock.titles("left") == ["Files", "Outline"] and dock.side_of(panels["Search"]) is None
+    assert panels["Search"].parent() is None
+    assert dock.shown("left") == dock.panel("Outline")  # the next one
+    assert [t.label.get("text") for t in dock._zones["left"].tabs] == ["Files", "Outline"]
+    dock.remove_panel(dock.panel("Outline"))
+    assert dock.shown("left") == panels["Files"]  # the previous one, with no next
+    dock.show(panels["Files"])  # the indexes still match tre's list
+    assert dock.shown("left") == panels["Files"]
+    dock.add_panel("left", panels["Search"], "Search")  # it can be docked again
+    assert dock.titles("left") == ["Files", "Search"] and dock.shown("left") == panels["Search"]
+
+
+def test_removing_a_panel_that_isnt_docked_raises():
+    window, dock, panels = _dock()
+    dock.remove_panel(panels["Files"])
+    with pytest.raises(ValueError, match="isn't docked"):
+        dock.remove_panel(panels["Files"])
+
+
+def test_removing_the_panel_being_dragged_ends_the_drag():
+    window, dock, panels = _dock()
+    tab = _tabs(dock, "left")[0]
+    _drag(window, tab, dock._zones["right"].body, release=False)
+    assert dock._dragging is not None and dock.highlight.parent() is not None
+    dock.remove_panel(panels["Files"])
+    assert dock._dragging is None and dock._press is None and dock.highlight.parent() is None
+    assert dock.titles("left") == ["Search"]

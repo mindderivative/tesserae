@@ -186,6 +186,23 @@ class Dock:
         self.window.dock_panel(side, entry.node)
         self._moved(entry, side)
 
+    def remove_panel(self, panel: Any) -> Any:
+        """Undocks `panel` (M53): its tab goes, and if it was shown the zone
+        shows the next panel, else the previous (`tre` 0.3.5.2's
+        `undock_panel`, `tre` issue #16). The node is kept, off the tree, so
+        `add_panel` can dock it again. A drag of it is cancelled. Returns
+        the node."""
+        entry = self._require(panel)
+        zone = self._zones[entry.side]
+        self.window.undock_panel(entry.node)
+        if (self._dragging is entry) or (self._press is not None and self._press["entry"] is entry):
+            if self.highlight.parent() is not None:
+                self.highlight.remove()
+            self._press, self._dragging = None, None
+        zone.panels.remove(entry)
+        self._rebuild(zone)
+        return entry.node
+
     def on_move(self, fn: Callable[[Any, str], Any]) -> Callable[[], None]:
         """Calls `fn(node, side)` when a panel moves zone. Returns the stopper."""
         self._moves.append(fn)
