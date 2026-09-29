@@ -28,6 +28,7 @@ from tre import Window
 
 from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.naming import check_naming_convention
+from tesserae.reactive import Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
 from tesserae.shell_file import load_shell_spec
@@ -170,6 +171,14 @@ class App:
         #: Each screen's own stylesheet file -> the dict `tre` last accepted.
         self._own_sheets: dict[Path, Any] = {}
         self._registered: dict[str, _Registered] = {}
+        #: The navigation history (M66): each entry a screen's name and its
+        #: params, and the index of the one showing (-1 before the first).
+        self._history: list[tuple[str, dict[str, Any]]] = []
+        self._at = -1
+        #: Whether `back()`/`forward()` would move -- for a back button's
+        #: `disabled` binding.
+        self.can_go_back = Signal(False)
+        self.can_go_forward = Signal(False)
         # M37: the app's one window exists from the start, so screens are built
         # straight into it. Like a `Window.from_view` root: no padding, and a
         # screen root with no size of its own is sized to its content.
@@ -450,7 +459,70 @@ class App:
         root is attached, and the previously shown screen's detached (kept
         alive, with its state and bindings). Returns the window, the same one
         every time.
+
+        A jump, not a step in the history (M66): it pushes nothing and calls
+        no `on_navigated`, and it replaces the current history entry, so
+        `back()` leaves it for the entry before. `navigate` records a step.
         """
+        window = self._show(name)
+        if self._at < 0:
+            self._history, self._at = [(name, {})], 0
+        else:
+            self._history[self._at] = (name, {})
+        self._sync_history()
+        return window
+
+    def navigate(self, name: str, **params: Any) -> Window:
+        """Shows the screen registered under `name` as a step in the history
+        (M66): `back()` returns from it. Its ViewModel's `on_navigated(params)`,
+        if it has one, is called first with `params` (a dict). Forward
+        entries are dropped, as a browser does; navigating to the entry
+        already showing (the same screen and params) does nothing."""
+        entry = (name, params)
+        if 0 <= self._at and self._history[self._at] == entry:
+            return self._window
+        window = self._arrive(entry)
+        del self._history[self._at + 1:]
+        self._history.append(entry)
+        self._at = len(self._history) - 1
+        self._sync_history()
+        return window
+
+    def back(self) -> bool:
+        """Shows the history's previous entry, calling its ViewModel's
+        `on_navigated` with that entry's params. Returns whether it moved."""
+        return self._step(-1)
+
+    def forward(self) -> bool:
+        """Shows the entry `back()` left, if any. Returns whether it moved."""
+        return self._step(1)
+
+    def _step(self, by: int) -> bool:
+        to = self._at + by
+        if not 0 <= to < len(self._history):
+            return False
+        self._arrive(self._history[to])
+        self._at = to
+        self._sync_history()
+        return True
+
+    def _arrive(self, entry: tuple[str, dict[str, Any]]) -> Window:
+        name, params = entry
+        registered = self._registered.get(name)
+        if registered is None:
+            raise KeyError(f"no view registered under {name!r} -- call register() first")
+        hook = getattr(registered.viewmodel, "on_navigated", None)
+        if hook is not None:
+            hook(dict(params))  # a copy: the history's entry stays as it was
+        return self._show(name)
+
+    def _sync_history(self) -> None:
+        def sync() -> None:  # together, so a follower never sees one updated and not the other
+            self.can_go_back.set(self._at > 0)
+            self.can_go_forward.set(self._at < len(self._history) - 1)
+        batch(sync)
+
+    def _show(self, name: str) -> Window:
         registered = self._registered.get(name)
         if registered is None:
             raise KeyError(f"no view registered under {name!r} -- call register() first")

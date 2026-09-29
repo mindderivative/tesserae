@@ -75,7 +75,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M65 — An App-Level State Store (#13) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
-| M66 — Routing: a Back Stack and Deep Links (#12) | `██⬜⬜⬜⬜⬜⬜⬜⬜` 25% | 🚧 In progress — Phase 1 of 4 done |
+| M66 — Routing: a Back Stack and Deep Links (#12) | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
@@ -100,6 +100,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
+- **A button's `disabled` can't be bound in YAML:** `disabled` binds only on the control kinds (M40: `Checkbox`, `Switch`, `SpinBox`, ...); a button is a `Rect` fragment, so `bindings: {disabled: ...}` on it is refused. A back button bound to `app.can_go_back` has to be driven from Python for now (found in M66).
 - **`tools/record_tre_reference.py` can't re-record every module:** `test_tree_parity` builds its corpus from every fragment, and fragments added after M46 (M56's `items` parameter) have no sample value, so collection fails on `tre` 0.3.4. Single modules record fine with `TESSERAE_RECORD_TRE=1 pytest tests/<module>.py` (found in M63).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 
@@ -1818,7 +1819,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 66 — Routing: a Back Stack and Deep Links (#12)
 
-**Status: 🚧 In progress — Phase 1 of 4 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 4 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** Navigation is `App.show(name)` only: no history, no parameters for a screen, and no URL-style deep links.
 
@@ -1834,8 +1835,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read `App.show`, the shell's `bind_navigation`, and `tre`'s key and pointer events (key presses bubble to the window's root, focused or not; `node.get("kind")` names a text input; no pointer button beyond `middle`); wrote the design and settled Q1-Q5 above — ✅
 
-### Phase 2 — History and Params ⬜
-- Step 1: `navigate`, `back`, `forward`, `can_go_back`/`can_go_forward`, `on_navigated`, and `show` replacing the current entry; tests; mutation-checked — ⬜
+### Phase 2 — History and Params ✅
+- Step 1: `App.navigate`, `back`, `forward` (via `_step`), `_arrive` (the hook, then `_show`), `can_go_back`/`can_go_forward` (set together in a `batch`: set one after the other, a follower saw a state that never existed, which a test caught), and `show` split into `_show` (the display) and `show` (it, then replacing the current entry). A failing `on_navigated` leaves the screen and the history as they were, on `navigate` and on `back`. New `tests/test_routing.py` (11): pushing and moving with params re-delivered, dropping forward entries, not re-pushing the current entry, `show` as a replacing jump, `navigate` before any `show`, a screen with no hook, the hook's copy and its timing, failing hooks on `navigate` and `back`, an unknown screen, and the two signals. Mutation-checked, 15/15 caught (the first run pinned a failing hook on `back`, and showed `navigate`'s `dict(params)` copied an already-fresh dict, so it went). Found: a YAML button's `disabled` can't be bound (only control kinds' can), so `can_go_back` is followed from Python for now; added to the known gaps. 2383 → 2394 passed — ✅
 
 ### Phase 3 — Routes, the Rail and the Keys ⬜
 - Step 1: `route`, `navigate_to`, `location`; the rail navigating; Alt+Left/Right; a `tre` issue for the mouse buttons; tests; mutation-checked — ⬜
