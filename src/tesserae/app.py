@@ -238,10 +238,12 @@ class App:
         #: ordered set, so a failed re-theme's rollback is predictable).
         self._followers: dict[Any, None] = {}
         register_app(self)
-        #: Alt+Left and Alt+Right go back and forward (M66). Key presses
-        #: bubble to the window's root whether or not anything has focus.
+        #: Alt+Left and Alt+Right go back and forward (M66), and so do the
+        #: mouse's side buttons (M72, on `tre` 0.4.1). Key presses and pointer
+        #: events bubble to the window's root, wherever they happen.
         self._keys = Listeners()
         self._keys.listen(self._window.root, "key_down", self._history_key)
+        self._keys.listen(self._window.root, "pointer_down", self._history_button)
         #: While `run(hot_reload=True)` runs: the loop's handle, every
         #: watcher started, and each component file's watcher (M51).
         self._hot_handle: Any = None
@@ -616,6 +618,12 @@ class App:
         if event.key == "arrow_left":
             self.back()
         else:
+            self.forward()
+
+    def _history_button(self, event: Any) -> None:
+        if event.button == "back":
+            self.back()
+        elif event.button == "forward":
             self.forward()
 
     def _sync_history(self) -> None:

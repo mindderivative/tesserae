@@ -299,3 +299,24 @@ def test_the_keys_work_from_a_focused_node_but_not_a_text_input():
     assert app.current == "Form"
     _key(app, "arrow_left", node=form.node("box"), alt=True)
     assert app.current == "Other"
+
+
+def test_the_mouses_side_buttons_go_back_and_forward():  # M72, on tre 0.4.1
+    app, log = _app("Home", "Notes")
+    app.show("Home")
+    app.navigate("Notes")
+    label = app._registered["Notes"].view.node("label")
+    app.window.simulate("pointer_down", node=label, button="back")  # over a node
+    assert app.current == "Home"
+    app.window.simulate("pointer_down", x=250.0, y=150.0, button="forward")  # over nothing: the root hears it
+    assert app.current == "Notes" and log[-1] == ("Notes", {})
+    for button in ("primary", "secondary", "middle"):
+        app.window.simulate("pointer_down", node=label, button=button)
+    assert app.current == "Notes" and app.can_go_back.get()  # the other buttons don't move
+    app.back()
+    for button in ("primary", "secondary", "middle"):  # nor forward, with somewhere to go
+        app.window.simulate("pointer_down", x=250.0, y=150.0, button=button)
+    assert app.current == "Home" and app.can_go_forward.get()
+    app.forward()
+    app.window.simulate("pointer_up", node=label, button="back")
+    assert app.current == "Notes"  # the press moves, not the release

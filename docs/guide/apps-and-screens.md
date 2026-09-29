@@ -94,8 +94,9 @@ class NoteViewModel(ViewModel):
   -- it still takes clicks -- so follow the signal from Python to change
   how the button looks.
 - **Alt+Left** and **Alt+Right** go back and forward, except in a text
-  input, where Option+Left moves by word on macOS. The mouse's side
-  buttons wait on `tre` ([tre#21](https://github.com/mindderivative/tre/issues/21)).
+  input, where Option+Left moves by word on macOS. So do the mouse's
+  **back and forward side buttons**, wherever the pointer is (M72, on
+  `tre` 0.4.1); the other buttons don't.
 - A shell file's navigation rail navigates, so `back()` returns from a
   rail choice, and the rail follows `back()` and `forward()`.
 

@@ -1703,3 +1703,18 @@ identical, key by key in all eight files: +27 tree cases (8 example
 views, 9 fragments, 10 inline views) and +33 binding expressions.
 `Tabs` stays out: its `width: "100%"` divider is beyond 0.3.4's `View`.
 The main suite on 0.4.0 has 2482 passed.
+
+## M72: tre 0.4.1 and the mouse's side buttons (#20)
+
+`tre`'s session reported 0.4.1, which closes tre#21. Verified: the
+release (24 assets), PyPI's 0.4.1 (22 wheels and an sdist), and tre#21
+closed.
+
+- `.venv` on 0.4.1; the floor is `tesserae-engine>=0.4.1`; CI's `tre`
+  checkout moved to v0.4.1. Nothing broke (2502 passed, examples clean).
+- `App._history_button`: the mouse's back and forward side buttons call
+  `back()`/`forward()` from a `pointer_down` listener on the window's
+  root. 5/5 mutants caught.
+
+Taken between M71's Phases 2 and 3 (M71 Phase 2 was committed first).
+2503 passed.
