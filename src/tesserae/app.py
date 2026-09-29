@@ -17,6 +17,7 @@ life of the `App`.
 
 from __future__ import annotations
 
+import weakref
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -191,6 +192,9 @@ class App:
         self._hot_handle: Any = None
         self._watchers: list[Any] = []
         self._component_watchers: dict[Path, Any] = {}
+        #: Every component `tesserae.instantiate` made on this window, in any
+        #: view (M61); weakly held, so removed ones drop out.
+        self._instances: weakref.WeakSet[Any] = weakref.WeakSet()
         self._window.on("color_scheme", self._on_color_scheme)
 
     # -- light and dark (M38) ---------------------------------------------------
@@ -609,7 +613,8 @@ class App:
     def _live_components(self, path: Path | None = None) -> list[Any]:
         """Every live component built from a file (`tesserae.instantiate`)
         in the app's screens and views, nested ones included -- or only
-        those built from `path` (M51)."""
+        those built from `path` (M51) -- and, since M61, in any other view
+        on the app's window, as `instantiate` registered them."""
         views = [r.view for r in self._registered.values()] + [b.view for b in self._built]
         views += [f for f in self._followers if isinstance(f, TesseraeView)]
         found: list[Any] = []
@@ -625,6 +630,12 @@ class App:
                 stack.append(component)
                 if component.path is not None and (path is None or component.path.resolve() == path):
                     found.append(component)
+        for component in list(self._instances):  # M61: in a view the app doesn't otherwise know
+            if id(component) in seen or not component._follow_alive():
+                continue
+            seen.add(id(component))
+            if component.path is not None and (path is None or component.path.resolve() == path):
+                found.append(component)
         return found
 
     def watch_component(self, path: str | Path) -> None:

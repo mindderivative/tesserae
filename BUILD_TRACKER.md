@@ -70,7 +70,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M58 — A `SpinBox` YAML Control Kind (#5) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M59 — A Declarative Video (#6) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M60 — A Declarative Node Graph (#7) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M61 — Hot Reload for Components in Any View (#4) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M62 — Pagination with an Ellipsis (#2) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M63 — CSS Wide-Gamut Colours (#16) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
@@ -92,7 +92,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M61 (#4, hot reload for components in any view), then M62–M67 as scoped. M60 (#7) is done locally, and #7 closes when it's pushed.
+**Up next:** M62 (#2, pagination with an ellipsis), then M63–M67 as scoped. M61 (#4) is done locally, and #4 closes when it's pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -100,13 +100,13 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 
 **Known gaps:**
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2) (M62).
-- **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4) (M61).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
-- ~~**`graph_node` had no declarative form**: a node attaches to its graph's live node, which textual expansion can't express (M25).~~ **Fixed (M60).** `NodeGraph` and `GraphNode` are YAML kinds built with the widgets, with `edges:`, content in a node's body, and reloads that keep user drags. Every MD3 widget can now be declared. [#7](https://github.com/mindderivative/tesserae/issues/7), closes once pushed.
+- ~~**A component instantiated into a view the app didn't know about wasn't hot-reloaded** (M51).~~ **Fixed (M61).** `tesserae.instantiate` registers each component with its app (weakly), and the watcher finds it in any view on the app's window. [#4](https://github.com/mindderivative/tesserae/issues/4), closes once pushed.
+- ~~**`graph_node` had no declarative form**: a node attaches to its graph's live node, which textual expansion can't express (M25).~~ **Fixed (M60).** `NodeGraph` and `GraphNode` are YAML kinds built with the widgets, with `edges:`, content in a node's body, and reloads that keep user drags. Every MD3 widget can now be declared. [#7](https://github.com/mindderivative/tesserae/issues/7) closed (pushed `392d8d8..d78b5bc`, CI run 36522987253).
 - ~~**`video` had no faithful declarative form**: frames had to be pushed from Python (M25).~~ **Fixed (M59).** An `Image` takes a `frame` binding, `(rgba, width, height)` from a ViewModel `Signal`, and the `Video` fragment wraps it. [#6](https://github.com/mindderivative/tesserae/issues/6) closed (pushed `9092b53..392d8d8`, CI run 36510904115).
 - ~~**The `SpinBox` fragment had no behaviour**, and there was no `SpinBox` YAML kind (M40 Phase 5).~~ **Fixed (M58).** `SpinBox` is a ninth YAML control kind (`value`, `min`, `max`, `step`; bindable, two-way, clamped), and the fragment is that kind. [#5](https://github.com/mindderivative/tesserae/issues/5) closed (pushed `9092b53..392d8d8`, CI run 36510904115).
 - ~~**The declarative cascade didn't consult a theme's `components:` overrides.**~~ **Fixed (M57).** Widgets didn't either, beyond three special tokens. Now every fragment root, in views and widgets alike, takes its `components:` entry's corner radius and elevation (variant, then component), and a FAB's entry follows its size. [#10](https://github.com/mindderivative/tesserae/issues/10) closed (pushed `9092b53..392d8d8`, CI run 36510904115).
@@ -1695,7 +1695,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 60 — A Declarative Node Graph (#7)
 
-**Status: ✅ Complete — all 3 phases done (2026-09-28).** User: "push and start M60". From the backlog order M54 set: [#7](https://github.com/mindderivative/tesserae/issues/7) (closes once pushed). It was scoped up front as a draft and refined when it started. The recommendations are taken.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** User: "push and start M60". From the backlog order M54 set: [#7](https://github.com/mindderivative/tesserae/issues/7) (closed after the push, CI run 36522987253). It was scoped up front as a draft and refined when it started. The recommendations are taken.
 
 **The gap:** `graph_node` had no fragment: a node attaches to its graph's live node, which textual expansion can't express (M25).
 
@@ -1716,25 +1716,20 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 61 — Hot Reload for Components in Any View (#4)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#4](https://github.com/mindderivative/tesserae/issues/4). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** User: "Push and start M61" (M60 pushed as `392d8d8..d78b5bc`, CI run 36522987253 passed, and #7 closed). From the backlog order M54 set: [#4](https://github.com/mindderivative/tesserae/issues/4) (closes once pushed). It was scoped up front as a draft and refined when it started. The recommendations are taken.
 
-**The gap:** M51 finds a component's live instances through the app's views (screens, `build_view()`'s, following views). One instantiated into any other view isn't reloaded.
+**The gap:** M51 found a component's live instances by walking the app's views (screens, `build_view()`'s, following views), so one instantiated into any other view wasn't reloaded.
 
-**Draft approach:** Track instances where they're made: `tesserae.instantiate` already tells the running app about a new file, and it can register the instance too (a set pruned when its nodes are gone, as M50's followers are). The watcher's `instances()` reads that set.
+**Decisions** (recommended, taken): Q1, register instances where they're made: `tesserae.instantiate` adds each to its app's registry, which the watcher reads alongside the walk. Q2, the registry is a `WeakSet`, because a strong one would grow with every `Repeater` row made and removed while hot reload is off: a removed instance drops out once collected, and one whose nodes are gone is skipped. The draft's "log a component on a window no app owns" fell away: with no app there's no hot reload, so nothing to say.
 
-**Decisions to settle at the start** (provisional):
-- Q1 register instances at `instantiate` (recommended), or register every view built on an app's window
-- Q2 an instance on a window no app owns stays unwatched, logged once
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `App._live_components`, `watch_component` and `tesserae.instantiate`. Refined as above — ✅
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q2 — ⬜
+### Phase 2 — The Instance Registry ✅
+- Step 1: `App._instances` (`weakref.WeakSet`); `tesserae.instantiate` adds each component made on an app's window. `_live_components` adds the registered live ones (`_follow_alive`) the walk didn't find, filtered by file. Tests, added to `tests/test_component_reload.py` (+4): a pinned-theme view on the app's window, never registered, is found and reloaded by the real watcher; a removed and a destroyed instance aren't reloaded, and the removed one is let go once collected; a component on a window no app owns is made as before; only the edited file's instances are found. Mutation-checked, 5/5 caught (the first run's survivor, the file filter, got the last test). 1609 → 1615 (1614 passed, 1 skipped); all five examples clean — ✅
 
-### Phase 2 — The Instance Registry ⬜
-- Step 1: `instantiate`, `App._live_components`; tests with a pinned-theme host view; mutation-checked — ⬜
-
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the hot-reload guide's limits; the known gap closed — ⬜
-
+### Phase 3 — Docs, Tracker ✅
+- Step 1: the hot-reload guide (its limit gone; components are found in any view on the app's window) and `ARCHITECTURE.md`. The known gap moved to "Fixed gaps"; `mkdocs build --strict` clean — ✅
 
 ---
 

@@ -260,3 +260,61 @@ def test_nested_components_are_found_and_ones_a_reload_destroyed_are_not(app_wit
     assert app._live_components(path.resolve()) == [outer]
     host.reconcile(host.spec | {"children": [host.spec["children"][0] | {"id": "rows2"}]})  # `rows` destroyed
     assert app._live_components(path.resolve()) == [] and app._live_components(badge_path.resolve()) == []
+
+
+# -- M61 (#4): components in a view the app doesn't otherwise know --------------
+
+
+def test_a_component_in_a_view_the_app_doesnt_know_is_found_and_reloaded(tmp_path):
+    """A pinned-theme view on the app's window, never registered and not
+    following the app: its components are found through `instantiate`."""
+    app = App()
+    path, vm_cls = _component(tmp_path)
+    host = View(_host_file(tmp_path), window=app.window, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
+    rows = _rows(host, path, vm_cls, 2)
+    assert host not in app._followers and not app._registered  # a view the app doesn't know
+    assert set(app._live_components(path.resolve())) == {c for c, _ in rows}
+    handle = FakeHandle()
+    try:
+        app._start_watchers(handle)
+        assert list(app._component_watchers) == [path.resolve()]
+        reload = _edit_until_queued(handle, path, ROW.format(width=250))
+        reload()
+        assert _widths(rows) == [250.0, 250.0]
+    finally:
+        app._stop_watchers()
+
+
+def test_a_removed_or_destroyed_instance_isnt_reloaded_and_a_dropped_one_is_let_go(tmp_path):
+    import gc
+
+    app = App()
+    path, vm_cls = _component(tmp_path)
+    host = View(_host_file(tmp_path), window=app.window, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
+    rows = _rows(host, path, vm_cls, 3)
+    removed, _ = rows.pop(0)
+    removed.remove()
+    destroyed, _ = rows.pop(0)
+    destroyed.root.destroy()  # its nodes gone some other way
+    assert app._live_components(path.resolve()) == [rows[0][0]]
+    del removed, destroyed
+    gc.collect()
+    assert len(app._instances) == 2  # the removed one was let go; the destroyed one is still referenced by its host
+
+
+def test_a_component_on_a_window_no_app_owns_is_left_alone(tmp_path):
+    path, vm_cls = _component(tmp_path)
+    host = View(_host_file(tmp_path))  # its own window
+    component, _ = instantiate(host, path, vm_cls, host.node("rows"))
+    assert component.path == path  # made as before; nothing to register it with
+
+
+def test_only_the_edited_files_instances_are_found_in_an_unknown_view(tmp_path):
+    app = App()
+    row, row_vm = _component(tmp_path)
+    badge, badge_vm = _component(tmp_path, "Badge", width=40)
+    host = View(_host_file(tmp_path), window=app.window, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
+    rows = _rows(host, row, row_vm, 2)
+    badge_component, _ = instantiate(host, badge, badge_vm, host.node("rows"))
+    assert set(app._live_components(row.resolve())) == {c for c, _ in rows}
+    assert app._live_components(badge.resolve()) == [badge_component]

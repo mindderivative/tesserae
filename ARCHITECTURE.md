@@ -171,6 +171,13 @@ macOS and Windows answer, and it re-themes through `_apply_dark`, as a
 `conftest.os_appearance` (default `None`), so they don't depend on the
 desktop running them.
 
+**Components in any view, M61:** `tesserae.instantiate` adds each
+component to its app's `_instances`, a `WeakSet`, so a removed one drops
+out once it's collected, and a `Repeater`'s churn can't grow it.
+`App._live_components` reads it after walking the app's views, skipping
+ones whose nodes are gone (`_follow_alive`), so a component in a view the
+app never registered is reloaded too.
+
 **Node graphs, M60:** `NodeGraph` and `GraphNode` are "widget kinds"
 (`_WIDGET_KINDS`), built with `node_graph` and `graph_node` and kept in
 `Built.controls` like the controls. `_build` builds a NodeGraph's

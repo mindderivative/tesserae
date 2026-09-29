@@ -65,5 +65,6 @@ def instantiate(
     viewmodel = viewmodel_cls(component, *args, **kwargs)
     app = app_of(getattr(component, "window", None))
     if app is not None:
+        app._instances.add(component)  # found for hot reload in any view (M61)
         app.watch_component(path)  # hot reload, if it's on (M51)
     return component, viewmodel

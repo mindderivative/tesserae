@@ -86,7 +86,9 @@ one rebuild, not ten. Files a component `include:`s, and `component:`
 fragments it uses, are watched with it.
 
 A component added while the app runs is watched as well, including the
-first one of a new file. A row removed before the edit is left alone. A
+first one of a new file. It's found in any view on the app's window,
+even one the app doesn't otherwise know (M61), since `instantiate`
+registers it with the app. A row removed before the edit is left alone. A
 broken edit leaves every instance as it was and is logged once for the
 file:
 
@@ -157,10 +159,6 @@ it or append to a list. This is [`tre` issue #12](https://github.com/mindderivat
 
 ## Limits
 
-- **Only components in the app's screens and views are found.** A
-  component instantiated into a view the app doesn't know about (not a
-  screen, not `build_view()`'s, and not a view following the app's
-  theme) isn't reloaded.
 - **Don't use `tre`'s own `View.poll_reload()`.** Tesserae gives `tre`
   the finished view as data, never a file, so `tre` has nothing to
   watch.

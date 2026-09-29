@@ -1557,3 +1557,14 @@ User: "push and start M60". Pushed `9092b53..392d8d8` (CI run
 
 1608 passed; all five examples clean. Every MD3 widget can now be
 declared.
+
+## M61: hot reload for components in any view (#4)
+
+User: "Push and start M61". Pushed `392d8d8..d78b5bc` (CI run 36522987253
+passed), and closed #7.
+
+- `tesserae.instantiate` registers each component with its app, in a
+  `WeakSet`. The watcher finds instances in any view on the app's window.
+- 4 tests; 5/5 mutants caught.
+
+1614 passed; all five examples clean.
