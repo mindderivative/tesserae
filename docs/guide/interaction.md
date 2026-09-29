@@ -11,6 +11,10 @@ draws the feedback itself, since `tre` 0.3.5 doesn't.
   handlers: {on_click: "save"}
 ```
 
+A button fragment works the same way: give its `component:` call the
+handler, `component: ButtonFilled` with `handlers: {on_click: "save"}`
+(M69; see [Handlers, bindings and names on a call](component-fragments.md#handlers-bindings-and-names-on-a-call)).
+
 ## The keyboard and assistive technology
 
 A clickable node is focusable. Tab reaches it, and Enter or Space clicks

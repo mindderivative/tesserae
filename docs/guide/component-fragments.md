@@ -69,6 +69,37 @@ children:
 color -- see any file under `src/tesserae/spec/components/` for the
 genuine shape.)
 
+## Handlers, bindings and names on a call
+
+A call also takes the keys that wire and name the fragment's root
+(M69): `handlers:`, `bindings:`, `two_way:`, `a11y:`, `interaction:` and
+`classes:`. So a button fragment is a button:
+
+```yaml
+id: root
+kind: Container
+style: {flex_direction: horizontal, gap: 8}
+children:
+  - id: save
+    component: ButtonFilled
+    with: {label: "Save", width: 120, height: 40, corner_radius: 20}
+    handlers: {on_click: "save"}
+    a11y: {label: "Save the note"}
+```
+
+- They go on the fragment's **root** (for a button, its `Rect`), after
+  it's expanded. A root that has its own keeps them: the call's are
+  merged in key by key, and win; `two_way:` replaces the root's, and
+  `classes:` adds to them.
+- They're the view's, not the fragment's: a `{{ }}` in them is one of
+  the ViewModel's bindings (`bindings: {opacity: "{{ fade.get() }}"}`),
+  never one of the fragment's params.
+- With `repeat:`, every item gets them.
+- `style:` isn't one of them: a fragment's look is its `with:` params.
+- A clickable root is a button for the keyboard and assistive
+  technology too, with the state layer and ripple (see
+  [Interaction](interaction.md)).
+
 ## Authoring a fragment
 
 A `*_Component.yaml` fragment is a plain `WidgetSpec` tree with one

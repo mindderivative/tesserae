@@ -1742,3 +1742,22 @@ start M71" (pushed `d1e87a1..ba04848`, CI green).
 
 M72 (tre 0.4.1, the side buttons) was taken between Phases 2 and 3.
 2536 passed.
+
+## M69: handlers on a component call (#18)
+
+User: "push and start M69" (pushed `ba04848..80ef0e9`, CI green; #21
+and #20 closed).
+
+- A `component:` call also takes `handlers:`, `bindings:`, `two_way:`,
+  `a11y:`, `interaction:` and `classes:`, put on the fragment's root.
+  Mappings merge key by key (the call's win), `two_way:` replaces, and
+  `classes:` adds. Their `{{ }}` stay the view's bindings. `style:` is
+  still refused.
+- The `tesserae new` templates use `component: ButtonFilled` and
+  `ButtonFilledTonal`, each with an `a11y:` label (a fragment button has
+  the role but no name of its own).
+- 13 tests; 11/11 mutants caught.
+- A slip, fixed: the first Phase 2 commit went in with one test failing
+  (an older test pinned the refusal's wording). The chained command's
+  `tail` hid pytest's exit code, so commits now check it. The fix is
+  the next commit.

@@ -29,6 +29,7 @@ RUNNER = textwrap.dedent('''
         report["location"] = app.location
         home = app._registered["Home"].view
         report["greeting"] = home.node("greeting").get("text")
+        report["button"] = [home.node("button").get(k) for k in ("role", "label")]
         if app.current == "Home":
             app.window.simulate("click", node=home.node("button"))
             report["count"] = home.node("count").get("text")
@@ -67,6 +68,7 @@ def test_new_makes_a_runnable_app(tmp_path):
     report = _run(project)
     assert report["start"] == "Home" and report["location"] == "" and report["ran"]
     assert report["greeting"] == "Hello from My Notes" and report["count"] == "Clicked 1 times"
+    assert report["button"] == ["button", "Click me"]  # a ButtonFilled fragment, named (M69)
     assert report["screens"] == ["Home"] and not report["shell"] and report["size"] == [480, 320]
 
 

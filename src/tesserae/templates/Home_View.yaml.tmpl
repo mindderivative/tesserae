@@ -16,12 +16,7 @@ children:
     bindings: {text: "{{ label.get() }}"}
     a11y: {live: polite}
   - id: button
-    kind: Rect
-    style: {width: 120, height: 40, background: primary, corner_radius: 20, align_items: center, justify_content: center}
+    component: ButtonFilled  # MD3's filled button; the call's handlers go on it
+    with: {label: "Click me", width: 120, height: 40, corner_radius: 20}
     handlers: {on_click: "increment"}
-    a11y: {label: "Click me"}
-    children:
-      - id: button_label
-        kind: Text
-        text: {content: "Click me", typography_role: label_large}
-        style: {foreground: on_primary}
+    a11y: {label: "Click me"}  # announced by name

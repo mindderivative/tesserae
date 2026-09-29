@@ -9,12 +9,7 @@ children:
     style: {foreground: on_surface}
     a11y: {role: heading, level: 1}
   - id: back
-    kind: Rect
-    style: {width: 96, height: 40, background: secondary_container, corner_radius: 20, align_items: center, justify_content: center}
+    component: ButtonFilledTonal
+    with: {label: "Back", width: 96, height: 40, corner_radius: 20}
     handlers: {on_click: "go_back"}
     a11y: {label: "Back"}
-    children:
-      - id: back_label
-        kind: Text
-        text: {content: "Back", typography_role: label_large}
-        style: {foreground: on_secondary_container}
