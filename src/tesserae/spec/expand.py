@@ -71,6 +71,8 @@ _ID_KEY = "id"
 _CHILDREN_KEY = "children"
 _REPEAT_KEY = "repeat"
 _INCLUDE_KEY = "include"
+_WHEN_KEY = "when"
+_IF_KEYS = {"if", "then", "else"}
 
 #: Matches `tre`'s own `MAX_INCLUDE_DEPTH` (`engine-spec/src/include.rs`),
 #: so a view that loaded under `tre`'s own `include:` still loads here.
@@ -118,6 +120,71 @@ def _substitute(node: Any, values: dict[str, Any]) -> Any:
     if isinstance(node, list):
         return [_substitute(v, values) for v in node]
     return node
+
+
+def _truthy(value: Any) -> bool:
+    """A condition after substitution (M55): `None`, `""`, `false`, `0`,
+    an empty list or mapping, and the strings "false"/"no"/"null"/"none"
+    (any case) are false; everything else is true."""
+    if isinstance(value, str):
+        return value.strip().lower() not in ("", "false", "no", "null", "none", "0")
+    return bool(value)
+
+
+def _resolve_conditionals(node: Any, where: str) -> Any:
+    """M55: a fragment's expansion-time conditionals, once its params are
+    substituted. A value `{if: c, then: a, else: b}` becomes `a` when `c`
+    is truthy, else `b` (or is left out, with no `else:`); a `children:`
+    entry with `when: c` is kept only when `c` is truthy, and loses the
+    `when:` key."""
+    if isinstance(node, list):
+        out = []
+        for item in node:
+            if isinstance(item, dict) and _WHEN_KEY in item:
+                keep = _truthy(item[_WHEN_KEY])
+                item = {k: v for k, v in item.items() if k != _WHEN_KEY}
+                if not keep:
+                    continue
+            out.append(_resolve_conditionals(item, where))
+        return [v for v in out if v is not _DROP]
+    if isinstance(node, dict):
+        if "if" in node:
+            extra = set(node) - _IF_KEYS
+            if extra or "then" not in node:
+                raise ComponentError(f"{where}: a conditional value is {{if: ..., then: ..., else: ...}} "
+                                     f"(`else:` optional); got keys {sorted(node)}")
+            chosen = node["then"] if _truthy(node["if"]) else node.get("else", _DROP)
+            return _DROP if chosen is _DROP else _resolve_conditionals(chosen, where)
+        out_map = {}
+        for key, value in node.items():
+            resolved = _resolve_conditionals(value, where)
+            if resolved is not _DROP:
+                out_map[key] = resolved
+        return out_map
+    return node
+
+
+#: A conditional with no `else:` that isn't taken: its key is left out.
+_DROP = object()
+
+
+def _declared_params(declared: Any, path: Path) -> tuple[list[str], dict[str, Any]]:
+    """`params:` as names and defaults (M55): each entry is a name (a
+    required param) or a one-key mapping `{name: default}` (optional)."""
+    if not isinstance(declared, list):
+        raise ComponentError(f"{path}: `params:` must be a list of names")
+    names: list[str] = []
+    defaults: dict[str, Any] = {}
+    for entry in declared:
+        if isinstance(entry, str):
+            names.append(entry)
+        elif isinstance(entry, dict) and len(entry) == 1 and isinstance(next(iter(entry)), str):
+            name, default = next(iter(entry.items()))
+            names.append(name)
+            defaults[name] = default
+        else:
+            raise ComponentError(f"{path}: a `params:` entry is a name or {{name: default}}, got {entry!r}")
+    return names, defaults
 
 
 def _namespace_ids(node: Any, prefix: str) -> Any:
@@ -277,9 +344,7 @@ def _expand_component(
     path = _find_component_file(name, component_dirs)
     deps.add(path.resolve())
     fragment_template = _load_fragment(path)
-    declared = fragment_template.pop(_PARAMS_KEY, []) or []
-    if not isinstance(declared, list):
-        raise ComponentError(f"{path}: `params:` must be a list of names")
+    declared, defaults = _declared_params(fragment_template.pop(_PARAMS_KEY, []) or [], path)
 
     with_supplied = node.get(_WITH_KEY) or {}
     if not isinstance(with_supplied, dict):
@@ -325,6 +390,7 @@ def _expand_component(
 
     results = []
     for local_call_id, supplied in iterations:
+        supplied = {**defaults, **supplied}
         missing = [p for p in declared if p not in supplied]
         if missing:
             raise ComponentError(
@@ -338,7 +404,7 @@ def _expand_component(
                 f"{local_call_id!r}; {name} declares {declared or '[]'}"
             )
 
-        fragment = _substitute(fragment_template, supplied)
+        fragment = _resolve_conditionals(_substitute(fragment_template, supplied), f"{path.name} ({local_call_id!r})")
 
         # Resolve any `component:` usage inside the fragment itself
         # before namespacing -- a nested fragment's own ids get

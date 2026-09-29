@@ -1,16 +1,13 @@
-# `add_extended_fab(variant="surface", icon=<given>)`'s declarative
-# counterpart -- the leading-icon shape only (real, deliberate scope
-# boundary: `icon` is optional imperatively, changing both the leading
-# padding AND whether an Icon child exists at all -- a genuine
-# structural difference `{{ }}` substitution can't conditionally
-# express; the icon-less shape is a real, separate, deferred fragment,
-# not silently dropped). `corner_radius: large` and `elevation: level_3`
-# are real, fixed MD3 tokens here (unlike plain FAB, Extended FAB has
+# `extended_fab(variant="surface")`'s declarative counterpart, with or
+# without its icon: `icon` is optional (M55, #8). With none, the Icon child
+# is left out (`when:`) and the padding and alignment change to MD3's
+# text-only shape (`{if:, then:, else:}`). `corner_radius: large` and
+# `elevation: level_3` are real, fixed MD3 tokens here (Extended FAB has
 # no size variants at all in real MD3, confirmed directly against
 # `EXTENDED_FAB_CORNER_RADIUS=16.0` == `engine_md3::shape::SHAPE_LARGE`
 # and `FAB_REST_ELEVATION_LEVEL=3.0` == `ELEVATION_LEVEL_3`). Colors
 # match `resolve_fab_colors`'s "surface" exactly.
-params: [label, icon, width]
+params: [label, width, {icon: null}]  # no icon: MD3's text-only shape (M55, #8)
 id: root
 kind: Container
 style:
@@ -21,10 +18,13 @@ style:
   corner_radius: large
   elevation: level_3
   align_items: center
-  padding: {left: 16, right: 20, top: 0, bottom: 0}
+  # with an icon: 16 before it, 20 after the label; text only: 20 either side, centred (M55)
+  padding: {if: "{{ icon }}", then: {left: 16, right: 20, top: 0, bottom: 0}, else: {left: 20, right: 20, top: 0, bottom: 0}}
+  justify_content: {if: "{{ icon }}", then: flex_start, else: center}
   gap: 8
 children:
   - id: icon
+    when: "{{ icon }}"  # left out when there's no icon (M55)
     kind: Icon
     icon: {name: "{{ icon }}"}
     style: {width: 24, height: 24, foreground: primary}

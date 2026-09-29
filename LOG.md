@@ -1459,3 +1459,14 @@ gaps that would resolve or help other gaps."
 - 6 tests; 8/8 mutants caught (two dead branches removed after probing).
 
 1494 passed; all five examples clean.
+
+## M55: fragment conditionals and the text-only extended FAB (#8)
+
+- Fragment params can have defaults. `when:` drops a child, and
+  `{if:, then:, else:}` picks a value, both at expansion time and per
+  item in `repeat:`.
+- The `ExtendedFab*` fragments take an optional `icon`, and
+  `extended_fab(icon=None)` uses the fragment's text-only shape.
+- 23 tests; 13/13 mutants caught.
+
+1517 passed; all five examples clean.

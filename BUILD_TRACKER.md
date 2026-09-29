@@ -64,6 +64,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M52 — A Declarative App Shell | `██████████` 100% | ✅ Complete — all 5 phases done (2026-09-28) |
 | M53 — Undocking Panels and the OS's Appearance, on `tre` 0.3.5.2 | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-28) |
 | M54 — An Open Overlay Follows a Window Resize (#1) | `████████⬜⬜` 75% | 🚧 In progress — Phase 2 of 3 done |
+| M55 — Fragment Conditionals and the Text-Only Extended FAB (#8) | `██████████` 100% | ✅ Complete (2026-09-28) |
 
 **Just closed:** M53 (2026-09-28), all 4 phases, on `tre` 0.3.5.2: a panel a shell-file edit drops is undocked while the app runs (`Dock.remove_panel`, #3), and `App(dark="system")` starts in the OS's appearance (#17). 1474 → 1489. Before it, Tesserae 0.1.0 was published to PyPI as `tesserae-ui`, and M52 added a declarative app shell.
 
@@ -79,7 +80,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M54 Phase 3 (push, close #1). Then the rest of the backlog in M54's order: #8 with a `when:` expander, #9, #10, #5, #6, #7, #4, #2, #16, #11, #13, #12, #14.
+**Up next:** push, then close #1 (M54 Phase 3) and #8. Then #9, per-item styling for `repeat:` on M55's conditionals. After that, M54's order: #10, #5, #6, #7, #4, #2, #16, #11, #13, #12, #14.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -90,7 +91,7 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2).
 - **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4).
 - **The `SpinBox` fragment has no behaviour.** There's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5): [#5](https://github.com/mindderivative/tesserae/issues/5).
-- **Declarative fragments cover 67 of ~68 MD3 widgets.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7)); `extended_fab`'s icon-less shape has no fragment ([#8](https://github.com/mindderivative/tesserae/issues/8)).
+- **Declarative fragments cover 67 of ~68 MD3 widgets, and since M55 `extended_fab`'s text-only shape too.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7)).
 - **`repeat:` can't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` can't be declared with full fidelity (M28): [#9](https://github.com/mindderivative/tesserae/issues/9). `repeat:` is also deliberately not reactive; `tesserae.Repeater` covers runtime-changing lists.
 - **The declarative cascade doesn't consult a theme's `components:` overrides**, which only `tesserae.widgets` use: [#10](https://github.com/mindderivative/tesserae/issues/10).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11).
@@ -98,6 +99,7 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16).
 
 **Fixed gaps:**
+- ~~**`extended_fab`'s icon-less shape had no fragment** (deferred in M18).~~ **Fixed (M55).** Fragment params can have defaults, and fragments can use expansion-time `when:` and `{if:, then:, else:}`. The `ExtendedFab*` fragments take an optional `icon`, and `extended_fab(icon=None)` uses the fragment's text-only shape. [#8](https://github.com/mindderivative/tesserae/issues/8), closed once pushed.
 - ~~**Removing a panel from a shell file needed a restart** (M52 Phase 4): `tre` couldn't undock a panel.~~ **Fixed (M53 Phase 2).** `Dock.remove_panel` undocks through `tre` 0.3.5.2's `undock_panel` ([`tre` #16](https://github.com/mindderivative/tre/issues/16)), and a shell-file edit that drops a panel undocks it while the app runs, keeping its screen registered. [#3](https://github.com/mindderivative/tesserae/issues/3) closed.
 - ~~**`App(dark="system")` started dark**, learning the OS's appearance only at its first switch (M38 Q3).~~ **Fixed (M53 Phase 3).** It starts with `tre` 0.3.5.2's `window.get("dark")` ([`tre` #18](https://github.com/mindderivative/tre/issues/18)): at once on Linux, and on the first frame on macOS and Windows. Dark stays the fallback when the OS can't say. [#17](https://github.com/mindderivative/tesserae/issues/17) closed.
 - ~~**Not on PyPI.** `tre` and `tesserae` were both names taken there by unrelated projects.~~ **Fixed (2026-09-28).** Tesserae 0.1.0 is on PyPI as [`tesserae-ui`](https://pypi.org/project/tesserae-ui/) (the wheel and the sdist), depending on `tesserae-engine>=0.3.5.2`, which is `tre` on PyPI ([`tre` #19](https://github.com/mindderivative/tre/issues/19)). It was published by `release.yml` through trusted publishing from the [v0.1.0 release](https://github.com/mindderivative/tesserae/releases/tag/v0.1.0), in run 36501339807: the build, checks, tests (1469 passed) and examples, then the upload after the user approved the `pypi` environment. Checked afterwards: `pip install tesserae-ui` in a fresh venv installed `tesserae-engine` 0.3.5.2, and the counter example ran on it. [#15](https://github.com/mindderivative/tesserae/issues/15) closed.
@@ -1576,4 +1578,17 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 3 — Push and Close ⬜
 - Step 1: push; close #1 once CI passes; move its known gap to "Fixed gaps" — ⬜
+
+---
+
+## Milestone 55 — Fragment Conditionals and the Text-Only Extended FAB (#8)
+
+**Status: ✅ Complete (2026-09-28).** Second in the backlog order M54 set: [#8](https://github.com/mindderivative/tesserae/issues/8), and the expansion-time conditionals #9 builds on. The recommendations are taken, under the user's "address all of the backlog". #8 closes once this is pushed.
+
+**What the source said:** the imperative `extended_fab(icon=None)` removed the icon child and changed the padding and alignment with a Python `edit`, which no fragment could express. The expander's `params:` were all required.
+
+**Decisions** (recommended, taken): Q1, params can have defaults as `{name: default}`; Q2, two expansion-time conditionals, `when:` on a `children:` entry and `{if:, then:, else:}` as any value, both resolved right after substitution, so they work per item in `repeat:`; Q3, false is `null`, `false`, `0`, empty, or the strings `false`/`no`/`null`/`none`/`0`; Q4, conditionals are for fragments (resolved in the expander) and aren't live: runtime state stays with bindings.
+
+### Phase 1 — Conditionals, and the Text-Only FAB ✅
+- Step 1: `spec/expand.py`: `_declared_params` reads defaults; `_resolve_conditionals` runs after `_substitute` in each fragment expansion (a missing or extra key in an `{if:}` is a `ComponentError` naming the fragment and call id); `_truthy`. The four `ExtendedFab*` fragments take `{icon: null}`: the Icon child has `when: "{{ icon }}"`, the padding is `{if:}` (16/20 with an icon, 20/20 without), and `justify_content` centres the text-only shape. `extended_fab` passes `icon` straight through and drops its own edit. `tests/test_fragment_conditionals.py` (23): defaults; `when:` and `{if:}` with and without `else:`; 11 truthiness cases; per item in `repeat:`; malformed conditionals and params named; each of the four variants against the widget, with and without an icon (the children, padding, label position, and the text-only label centred). Mutation-checked, 13/13 caught. 1495 → 1518 (1517 passed, 1 skipped); all five examples clean. Docs: the fragments guide ("Optional params and conditionals", and the extended FAB gone from "What has no fragment yet"). The known gap moved to "Fixed gaps" — ✅
 

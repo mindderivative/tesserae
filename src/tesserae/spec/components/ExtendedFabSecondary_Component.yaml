@@ -2,7 +2,7 @@
 # counterpart -- see `ExtendedFabSurface_Component.yaml` for the shared
 # real design/scope boundary. Colors match `resolve_fab_colors`'s
 # "secondary" exactly.
-params: [label, icon, width]
+params: [label, width, {icon: null}]  # no icon: MD3's text-only shape (M55, #8)
 id: root
 kind: Container
 style:
@@ -13,10 +13,13 @@ style:
   corner_radius: large
   elevation: level_3
   align_items: center
-  padding: {left: 16, right: 20, top: 0, bottom: 0}
+  # with an icon: 16 before it, 20 after the label; text only: 20 either side, centred (M55)
+  padding: {if: "{{ icon }}", then: {left: 16, right: 20, top: 0, bottom: 0}, else: {left: 20, right: 20, top: 0, bottom: 0}}
+  justify_content: {if: "{{ icon }}", then: flex_start, else: center}
   gap: 8
 children:
   - id: icon
+    when: "{{ icon }}"  # left out when there's no icon (M55)
     kind: Icon
     icon: {name: "{{ icon }}"}
     style: {width: 24, height: 24, foreground: on_secondary_container}

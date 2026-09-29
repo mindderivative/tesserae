@@ -183,18 +183,11 @@ def extended_fab(
 ) -> Widget:
     """MD3's extended FAB (M41: built from its fragment): an optional
     leading icon and a label, 56 px tall."""
-    border = _borders([None], border_color, border_width)
-
-    def edit(spec: dict[str, Any]) -> None:
-        if icon is None:  # MD3's icon-less extended FAB: the label alone, 20 px either side
-            spec["children"] = [c for c in spec["children"] if not c["id"].endswith(".icon")]
-            spec["style"].update(padding={"left": 20, "right": 20, "top": 0, "bottom": 0}, justify_content="center")
-        if border is not None:
-            border(spec)
-
+    # icon=None is the fragment's own text-only shape (M55, #8)
     widget = Widget(window, _variant("extended FAB", variant, _EXTENDED_FABS),
-                    {"label": label, "icon": icon or "add", "width": width}, theme=theme, x=x, y=y,
-                    interactive={None: None}, edit=edit, name="extended_fab")
+                    {"label": label, "icon": icon, "width": width}, theme=theme, x=x, y=y,
+                    interactive={None: None}, edit=_borders([None], border_color, border_width),
+                    name="extended_fab")
     if on_click is not None:
         widget.on_click(on_click)
     return widget

@@ -133,6 +133,40 @@ names its parameter `selected` rather than `on` -- prefer a name that
 isn't a YAML 1.1 boolean keyword (`on`/`off`/`yes`/`no`/`true`/`false`)
 for any boolean-ish param.
 
+## Optional params and conditionals
+
+A `params:` entry can carry a default, as a one-key mapping: the param
+is then optional (M55).
+
+```yaml
+params: [label, width, {icon: null}]
+```
+
+Two expansion-time conditionals then shape a fragment around the values
+it was given. Both are resolved once the params are substituted, before
+the view is built:
+
+- **`when:` on a child:** the child is kept only when the value is true,
+  and `when:` itself is removed.
+- **`{if: c, then: a, else: b}` as a value:** it becomes `a` when `c` is
+  true, else `b`. With no `else:`, the key is left out.
+
+```yaml
+style:
+  padding: {if: "{{ icon }}", then: {left: 16, right: 20}, else: {left: 20, right: 20}}
+children:
+  - id: icon
+    when: "{{ icon }}"
+    kind: Icon
+    icon: {name: "{{ icon }}"}
+```
+
+False values are `null`, `false`, `0`, an empty string, list or
+mapping, and the strings `"false"`, `"no"`, `"null"`, `"none"` and `"0"`,
+in any case. Everything else is true. The `ExtendedFab*` fragments use
+both for MD3's text-only extended FAB. Both work per item in `repeat:`,
+since each item's values are substituted separately.
+
 ## Nesting
 
 A fragment can itself use `component:` -- the nested fragment's own
@@ -259,8 +293,6 @@ real `tre` factory it matches and any real MD3 token it hardcodes.
 - **`graph_node`** -- structurally unfragmentable: it needs a live node
   reference as its own attachment parent, which textual expansion can't
   express.
-- **`extended_fab`'s icon-less structural shape** -- deliberately
-  deferred (see `BUILD_TRACKER.md` M18).
 
 ## Loading a view that uses `component:`
 
