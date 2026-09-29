@@ -51,6 +51,7 @@ from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding
 from tesserae.follow import app_of
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
+from tesserae.scrolling import Scroller
 from tesserae.spec.images import check_frame
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
@@ -158,6 +159,7 @@ class View:
         self._viewmodel: Any = None
         self._wiring: list[Callable[[], None]] = []  # undo steps
         self._interactions: dict[str, Interaction] = {}
+        self._scrollers: dict[str, Scroller] = {}  # each ScrollView's keys, reveals and write-back (M71)
         self._sync_interactions()
         if app is not None:
             app._followers[self] = None
@@ -367,11 +369,28 @@ class View:
             if (current.tint, current.ring_color) != (tint, ring):
                 current.retint(tint, ring)
             current.refresh()
+        self._sync_scrolls()
+
+    def _sync_scrolls(self) -> None:
+        """Gives every ScrollView its `Scroller` (M71), and stops those whose
+        node is gone or was rebuilt."""
+        for node_id, current in list(self._scrollers.items()):
+            spec = self._built.specs.get(node_id) or {}
+            if spec.get("kind") != "ScrollView" or current.node != self._built.outer.get(node_id):
+                current.detach()
+                del self._scrollers[node_id]
+        for node_id, spec in self._built.specs.items():
+            if spec.get("kind") == "ScrollView" and node_id not in self._scrollers:
+                self._scrollers[node_id] = Scroller(self._built.outer[node_id], self._built.nodes[node_id],
+                                                    self._listen)
 
     def _drop_interactions(self) -> None:
         for current in self._interactions.values():
             current.detach()
         self._interactions = {}
+        for scroller in self._scrollers.values():
+            scroller.detach()
+        self._scrollers = {}
 
     def _reconcile_node(self, old: dict[str, Any], new: dict[str, Any]) -> None:
         node_id = new["id"]
@@ -385,8 +404,8 @@ class View:
         if new.get("kind") == "NodeGraph":
             self._reconcile_graph(old, new)
             return
-        if new.get("kind") == "GraphNode":
-            outer = self._built.nodes[node_id]  # its content lives in its body
+        if new.get("kind") in ("GraphNode", "ScrollView"):
+            outer = self._built.nodes[node_id]  # its children live in its body, or its content box (M71)
         old_children = {c["id"]: c for c in old.get("children") or []}
         kept: set[str] = set()
         for index, child in enumerate(new.get("children") or []):
@@ -509,6 +528,8 @@ class View:
 
     def _node_for(self, node_spec: dict[str, Any], prop: str) -> Any:
         node_id = node_spec["id"]
+        if node_spec.get("kind") == "ScrollView":  # its content box takes how its children lay out (M71)
+            return self._built.nodes[node_id] if prop in ("padding", "gap") else self._built.outer[node_id]
         if node_spec.get("kind") == "Link" and prop in ("width", "height", "padding", "gap", "opacity"):
             return self._built.outer[node_id]
         if node_spec.get("kind") == "TextField" and prop in ("width", "height", "padding", "gap", "background",
@@ -668,6 +689,11 @@ class View:
             raise ValueError(f'widget "{node_id}": two_way binding names "{name}", which has no matching attribute '
                              "on the ViewModel")
         node = self._node_for(node_spec, prop)
+        if node_spec.get("kind") == "ScrollView":  # `tre` sends no event when it scrolls; its Scroller does (M71)
+            if prop != "scroll_offset":
+                raise ValueError(f'widget "{node_id}": a ScrollView\'s only user-editable property is "scroll_offset"')
+            self._wiring.append(self._scrollers[node_id].on_scroll(signal.set))
+            return
         control = self._built.controls.get(node_id)
         if control is not None:
             state = getattr(control, prop, None)

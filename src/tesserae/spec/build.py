@@ -49,7 +49,8 @@ _CONTROL_KINDS = frozenset({
 })
 #: Kinds built with a `tesserae.widgets` widget (M60): a node graph and its nodes.
 _WIDGET_KINDS = frozenset({"NodeGraph", "GraphNode"})
-_KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
+_KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon",
+                                           "ScrollView"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
     "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
@@ -222,7 +223,8 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
             ctx.graph = graph
         connect_edges(built.controls[node_id], node, built)
         return outer
-    parent = inner if kind == "GraphNode" else outer  # a GraphNode's content goes in its body
+    # a GraphNode's content goes in its body, a ScrollView's in its content box (M71)
+    parent = inner if kind in ("GraphNode", "ScrollView") else outer
     for child in node.get("children") or []:
         parent.add_child(_build(ctx, child, built))
     return outer
@@ -388,6 +390,28 @@ def _box_props(ctx, node, style):
     return {**_layout(style), **_paint(ctx, node["id"], style), "fill": fill}, None
 
 
+#: What a ScrollView's content box takes from its style (M71): how its
+#: children are laid out. Its size, placement and paint are the scroll view's.
+_CONTENT = frozenset({"flex_direction", "gap", "padding_top", "padding_right", "padding_bottom", "padding_left",
+                      "align_items", "justify_content", "flex_wrap"})
+
+
+def _scroll_props(ctx, node, style):
+    """A ScrollView (M71) is `tre`'s `scroll_view` holding one content box,
+    which is where its children go: several children straight in a
+    `scroll_view` shrink to fit it, and nothing scrolls (it lays its one
+    child out unshrunk, and ignores its own padding). The content is
+    vertical unless the style says otherwise, and the full width. The scroll view is a Tab stop (its keys are Tesserae's,
+    `tesserae.scrolling`), and its scrollbar is the theme's `outline`."""
+    outer, _ = _box_props(ctx, node, style)
+    content = {k: v for k, v in outer.items() if k in _CONTENT}
+    outer = {k: v for k, v in outer.items() if k not in _CONTENT}
+    outer.update(scrollbar_fill=_role(ctx, "outline"), focusable=True)
+    content.update(flex_direction=style.get("flex_direction", "vertical"), width="100%",
+                   **{k: style.get(k, _ALIGNMENT_DEFAULTS[k]) for k in _ALIGNMENT_DEFAULTS})
+    return outer, content
+
+
 def natural_size(window: Any, props: dict[str, Any], style: dict[str, Any]) -> dict[str, float]:
     """A Text or Link's measured `width`/`height` for whichever its style
     leaves out (M41): `tre` 0.3.4's text has no intrinsic size, so text
@@ -463,7 +487,7 @@ def _icon_props(ctx, node, style):
 _PRIMITIVE = {
     "Rect": ("box", _box_props), "Container": ("box", _box_props), "Text": ("text", _text_props),
     "Link": ("box", _link_props), "TextField": ("box", _text_field_props), "Image": ("image", _image_props),
-    "Icon": ("path", _icon_props),
+    "Icon": ("path", _icon_props), "ScrollView": ("scroll_view", _scroll_props),
 }
 
 
@@ -475,7 +499,7 @@ def _a11y_for(node: dict[str, Any], kind: str, *, patching: bool) -> dict[str, A
 
 
 #: The node inside a two-node kind's box: what it's drawn with.
-_INNER = {"TextField": "text_input", "Link": "text"}
+_INNER = {"TextField": "text_input", "Link": "text", "ScrollView": "box"}
 
 
 #: Kinds with their own role and focus (a Link, a TextField's input, and
@@ -665,8 +689,9 @@ def patch(
         _, props_of = _PRIMITIVE[kind]
         outer_props, inner_props = props_of(ctx, node, style)
         (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=True))
-        for key, value in resets.items():  # where `_layout` would have put it (a Link's text keeps its own)
-            (inner_props if kind == "Link" and key not in _PLACED else outer_props)[key] = value
+        for key, value in resets.items():  # where `_layout` would have put it (a Link's text, a ScrollView's content)
+            on_inner = (kind == "Link" and key not in _PLACED) or (kind == "ScrollView" and key in _CONTENT)
+            (inner_props if on_inner else outer_props)[key] = value
         outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins
         if inner_props is not None:
             inner.set(**inner_props)
