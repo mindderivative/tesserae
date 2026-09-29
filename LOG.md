@@ -1438,3 +1438,10 @@ User: "start phase 3".
   caught.
 
 1488 passed; all five examples clean.
+
+## M53 Phase 4: pushed and closed -- M53 complete
+
+User: "start phase 4". Pushed `76ca67f..9ba1881`. CI run 36503537261
+passed: 1483 passed and 6 skipped (the live tests, with no display),
+and five examples clean. Closed #3 and #17 with summaries, and their
+known gaps moved to "Fixed gaps" (12 -> 10).

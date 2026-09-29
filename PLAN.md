@@ -222,3 +222,7 @@ Phase 5 done, and M52 with it: `examples/app_shell_file/` (in CI), `App.screen`,
 **Known gaps scoped and filed (2026-09-28):** every gap re-checked against the source and `tre` 0.3.5.1, then scoped in its own issue: Tesserae #1–#17, and `tre` #18 (read the OS appearance) and #19 (PyPI; the name `tre` is taken), alongside #16 (undock). One gap was stale (`on_change` on reload, `tre` #12, closed; Tesserae fires `on_change` only for user edits since M37) and moved to "Fixed gaps".
 
 **Up next:** nothing scoped as a milestone; the issues are the backlog.
+
+**M53 (2026-09-28):** on `tre` 0.3.5.2, `Dock.remove_panel` and undocking on a shell-file reload (#3), and `dark="system"` starting in the OS's appearance (#17). Pushed; CI passed; #3 and #17 closed.
+
+**Up next:** nothing scoped; the open issues are the backlog.
