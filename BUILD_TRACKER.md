@@ -75,7 +75,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M65 — An App-Level State Store (#13) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
-| M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M66 — Routing: a Back Stack and Deep Links (#12) | `██⬜⬜⬜⬜⬜⬜⬜⬜` 25% | 🚧 In progress — Phase 1 of 4 done |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
@@ -93,7 +93,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M66 (#12, routing), then M67 (#14, a scaffolding CLI). M64 (#11) and M65 (#13) are done locally, and their issues close when they're pushed.
+**Up next:** M66 (#12, routing) is in progress, then M67 (#14, a scaffolding CLI). M64 (#11) and M65 (#13) are done locally, and their issues close when they're pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1818,27 +1818,30 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 66 — Routing: a Back Stack and Deep Links (#12)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: 🚧 In progress — Phase 1 of 4 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** Navigation is `App.show(name)` only: no history, no parameters for a screen, and no URL-style deep links.
 
-**Draft approach:** `app.navigate(name, **params)` pushes onto a history, and `app.back()`/`app.forward()` move through it; `show(name)` stays a jump with no history. A ViewModel takes params through an optional `on_navigated(params)`. Routes as strings (`"notes/42"`) map to names and params, for deep links and saving the last screen. The shell's rail and Alt+Left drive `back()`. Params can live in the state store (M65).
+**Design** (the note Phase 1 asked for): the app keeps a history of entries, each a screen name and its params, and an index into it. `navigate` pushes, `back`/`forward` move the index, and each shows the entry's screen after handing its params to the screen's ViewModel. Routes are a table from string patterns to screen names, read in both directions, for deep links and for saving where the user was.
 
-**Decisions to settle at the start** (provisional):
-- Q1 what a route is (a name and params, or a string pattern)
-- Q2 how params reach a ViewModel (`on_navigated`, recommended)
+**Decisions** (recommended, taken):
+- Q1, `app.navigate(name, **params)` pushes an entry (dropping any forward entries, as a browser does); navigating to the entry already current pushes nothing. `app.back()`/`app.forward()` return whether they moved. `app.can_go_back`/`app.can_go_forward` are `Signal`s, for binding a back button's `disabled`.
+- Q2, params reach a ViewModel through an optional `on_navigated(params)` (a dict), called on the target screen's ViewModel before its screen shows, on `navigate`, `back` and `forward` (each with its entry's params).
+- Q3, `show(name)` stays a jump with no history: it pushes nothing and calls no hook, and it replaces the current entry, so the history always ends at what's showing and `back()` leaves it for the entry before.
+- Q4, routes: `app.route("notes/{id}", "Note")` adds a pattern; `{id:int}` converts a segment to an `int`, otherwise params are strings. `app.navigate_to("notes/42")` resolves a route and navigates (a `KeyError` names an unmatched one); `app.location` is the current entry as a route string, from the first pattern of its screen whose params match, or `None`.
+- Q5, the shell's rail navigates (with history) instead of jumping, unless the shell file names its own `on_navigate`. Alt+Left and Alt+Right go back and forward, from a listener on the window's root, except when the key press comes from a text input or a terminal (Option+Left moves by word on macOS). The mouse's back and forward buttons wait on `tre`: its pointer events report only `primary`, `secondary` and `middle` (a `tre` issue is filed).
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: a design note on routes and params; Q1-Q2 — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `App.show`, the shell's `bind_navigation`, and `tre`'s key and pointer events (key presses bubble to the window's root, focused or not; `node.get("kind")` names a text input; no pointer button beyond `middle`); wrote the design and settled Q1-Q5 above — ✅
 
 ### Phase 2 — History and Params ⬜
-- Step 1: `navigate`, `back`, `forward`, `on_navigated`; tests; mutation-checked — ⬜
+- Step 1: `navigate`, `back`, `forward`, `can_go_back`/`can_go_forward`, `on_navigated`, and `show` replacing the current entry; tests; mutation-checked — ⬜
 
-### Phase 3 — Routes and Deep Links ⬜
-- Step 1: the route table; the shell's rail and keyboard; tests — ⬜
+### Phase 3 — Routes, the Rail and the Keys ⬜
+- Step 1: `route`, `navigate_to`, `location`; the rail navigating; Alt+Left/Right; a `tre` issue for the mouse buttons; tests; mutation-checked — ⬜
 
 ### Phase 4 — Docs, Example, Tracker ⬜
-- Step 1: a guide page and an example; the known gap narrowed — ⬜
+- Step 1: a guide section and an example; the known gap closed — ⬜
 
 
 ---
