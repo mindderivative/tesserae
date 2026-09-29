@@ -165,3 +165,137 @@ def test_can_go_back_and_forward_are_signals_to_follow():
     app.navigate("Notes")
     app.back()
     assert seen == [(False, False), (True, False), (False, True)]
+
+
+# -- routes ------------------------------------------------------------------------------
+
+def _routed():
+    app, log = _app("Home", "Notes", "Note", "Tagged")
+    app.route("", "Home")
+    app.route("notes", "Notes")
+    app.route("notes/{id:int}", "Note")
+    app.route("notes/tag/{tag}", "Tagged")
+    return app, log
+
+
+def test_a_route_navigates_with_its_params():
+    app, log = _routed()
+    app.navigate_to("notes/42")
+    assert app.current == "Note" and log[-1] == ("Note", {"id": 42}) and app.location == "notes/42"
+    app.navigate_to("/notes/tag/work/")  # slashes at the ends don't matter
+    assert log[-1] == ("Tagged", {"tag": "work"}) and app.location == "notes/tag/work"
+    app.navigate_to("")
+    assert app.current == "Home" and app.location == ""
+    app.navigate("Notes")  # {} would read back from "" too, but that route is Home's
+    assert app.location == "notes"
+    app.back()
+    assert app.back() and app.location == "notes/tag/work"  # a route's entry is an ordinary step
+
+
+@pytest.mark.parametrize("route", ["notes/abc", "notes/42/more", "people", "notes/tag"])
+def test_an_unmatched_route_is_named(route):
+    app, _ = _routed()
+    with pytest.raises(KeyError, match="no route matches"):
+        app.navigate_to(route)
+
+
+def test_an_int_segment_takes_negative_numbers_and_routes_are_tried_in_order():
+    app, log = _app("Note", "Any")
+    app.route("n/{id:int}", "Note")
+    app.route("n/{name}", "Any")
+    app.navigate_to("n/-3")
+    assert log[-1] == ("Note", {"id": -3})
+    app.navigate_to("n/three")
+    assert log[-1] == ("Any", {"name": "three"})  # a param called `name`: `navigate`'s own is positional-only
+    app.navigate("Any", name="four")
+    assert log[-1] == ("Any", {"name": "four"})
+
+
+def test_location_is_none_without_a_route_that_reads_it_back():
+    app, _ = _routed()
+    assert app.location is None  # nothing showing yet
+    app.navigate("Note", id="x")  # not an int: "notes/x" wouldn't read back as this entry
+    assert app.location is None
+    app.navigate("Note", id=7, extra=1)  # a param the route doesn't carry
+    assert app.location is None
+    app.navigate("Note", id=7)
+    assert app.location == "notes/7"
+
+
+def test_location_takes_the_first_route_of_its_screen_that_fits():
+    app, _ = _app("Note")
+    app.route("n/{slug}", "Note")
+    app.route("notes/{id:int}", "Note")
+    app.navigate("Note", id=5)
+    assert app.location == "notes/5"  # "n/{slug}" would read back {"slug": ...}, not this
+
+
+@pytest.mark.parametrize("pattern, message", [
+    ("notes/{1d}", "isn't {name} or {name:int}"), ("notes/{id:float}", "isn't {name} or {name:int}"),
+    ("a/{id}/{id}", "'id' appears twice"), ("a//b", "'' isn't a segment"), ("a/x{id}", "'x{id}' isn't a segment"),
+])
+def test_a_bad_pattern_is_named(pattern, message):
+    app, _ = _app("Home")
+    with pytest.raises(ValueError, match=message.replace("{", r"\{").replace("}", r"\}")):
+        app.route(pattern, "Home")
+
+
+# -- the rail and the keys --------------------------------------------------------------
+
+def test_the_shell_rail_navigates_with_history(tmp_path):
+    shell_file = tmp_path / "Studio_Shell.yaml"
+    shell_file.write_text("navigation:\n  items:\n    - {screen: Home, icon: home}\n    - {screen: Notes, icon: search}\n")
+    app, log = _app("Home", "Notes")
+    shell = app.load_shell(shell_file)
+    app.show("Home")
+    app.window.simulate("click", node=shell.navigation.part("item1"))
+    assert app.current == "Notes" and log == [("Notes", {})] and app.can_go_back.get()
+    app.back()
+    assert app.current == "Home" and shell.navigation.selected.get() == 0  # the rail follows
+
+
+def _key(app, key, node=None, **mods):
+    if node is not None:
+        node.focus()
+    app.window.simulate("key_down", key=key, **mods)
+
+
+def test_alt_left_and_right_go_back_and_forward():
+    app, _ = _app("Home", "Notes")
+    app.show("Home")
+    app.navigate("Notes")
+    _key(app, "arrow_left", alt=True)
+    assert app.current == "Home"
+    _key(app, "arrow_right", alt=True)
+    assert app.current == "Notes"
+    for mods in ({}, {"alt": True, "shift": True}, {"alt": True, "ctrl": True}, {"alt": True, "meta": True}):
+        _key(app, "arrow_left", **mods)  # plain, or with another modifier: not a history key
+        assert app.current == "Notes"
+    app.back()  # somewhere to go forward to
+    _key(app, "arrow_up", alt=True)
+    _key(app, "arrow_down", alt=True)
+    assert app.current == "Home" and app.can_go_forward.get()  # only left and right move
+
+
+def test_the_keys_work_from_a_focused_node_but_not_a_text_input():
+    app = App(width=300, height=200)
+    spec = {"id": "root", "kind": "Container", "style": {"width": 200, "height": 100},
+            "children": [{"id": "box", "kind": "Rect", "style": {"width": 40, "height": 40, "background": "#6750A4"},
+                          "handlers": {"on_click": "noop"}},
+                         {"id": "field", "kind": "TextField", "text": {"content": "", "font_family": "Roboto", "font_size": 14},
+                          "style": {"width": 120, "height": 32, "foreground": "#000000", "background": "#FFFFFF"}}]}
+
+    class Form(ViewModel):
+        def noop(self):
+            pass
+
+    form = View(spec, window=app.window)
+    app.register("Form", form, Form(form))
+    other = View(_screen("Other"), window=app.window)
+    app.register("Other", other, ViewModel(other))
+    app.show("Other")
+    app.navigate("Form")
+    _key(app, "arrow_left", node=form.node("field"), alt=True)  # Option+Left moves by word there
+    assert app.current == "Form"
+    _key(app, "arrow_left", node=form.node("box"), alt=True)
+    assert app.current == "Other"

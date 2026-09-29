@@ -27,12 +27,48 @@ from tre import App as _TreApp
 from tre import Window
 
 from tesserae.follow import alive, app_of, register_app, retheme
+from tesserae.listeners import Listeners
 from tesserae.naming import check_naming_convention
 from tesserae.reactive import Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
 from tesserae.shell_file import load_shell_spec
 from tesserae.spec.watch import ComponentWatcher, FileWatcher
+
+@dataclass
+class _Route:
+    """A route (M66): its pattern, the screen it names, and its segments,
+    each a literal or a `(param, converter)`."""
+
+    pattern: str
+    name: str
+    segments: list[Any]
+
+    def match(self, parts: list[str]) -> dict[str, Any] | None:
+        if len(parts) != len(self.segments):
+            return None
+        params: dict[str, Any] = {}
+        for part, segment in zip(parts, self.segments):
+            if isinstance(segment, str):
+                if part != segment:
+                    return None
+                continue
+            param, converter = segment
+            if converter == "int":
+                if not part.lstrip("-").isdigit():
+                    return None
+                params[param] = int(part)
+            else:
+                params[param] = part
+        return params
+
+
+def _route_parts(route: str) -> list[str]:
+    """A route's segments: `"notes/42"` is `["notes", "42"]`, and `""` or
+    `"/"` (the app's root) has none."""
+    route = route.strip("/")
+    return route.split("/") if route else []
+
 
 @dataclass
 class _Registered:
@@ -179,6 +215,7 @@ class App:
         #: `disabled` binding.
         self.can_go_back = Signal(False)
         self.can_go_forward = Signal(False)
+        self._routes: list[_Route] = []
         # M37: the app's one window exists from the start, so screens are built
         # straight into it. Like a `Window.from_view` root: no padding, and a
         # screen root with no size of its own is sized to its content.
@@ -201,6 +238,10 @@ class App:
         #: ordered set, so a failed re-theme's rollback is predictable).
         self._followers: dict[Any, None] = {}
         register_app(self)
+        #: Alt+Left and Alt+Right go back and forward (M66). Key presses
+        #: bubble to the window's root whether or not anything has focus.
+        self._keys = Listeners()
+        self._keys.listen(self._window.root, "key_down", self._history_key)
         #: While `run(hot_reload=True)` runs: the loop's handle, every
         #: watcher started, and each component file's watcher (M51).
         self._hot_handle: Any = None
@@ -472,12 +513,13 @@ class App:
         self._sync_history()
         return window
 
-    def navigate(self, name: str, **params: Any) -> Window:
+    def navigate(self, name: str, /, **params: Any) -> Window:
         """Shows the screen registered under `name` as a step in the history
         (M66): `back()` returns from it. Its ViewModel's `on_navigated(params)`,
         if it has one, is called first with `params` (a dict). Forward
         entries are dropped, as a browser does; navigating to the entry
-        already showing (the same screen and params) does nothing."""
+        already showing (the same screen and params) does nothing. `name`
+        is positional-only, so a param can be called `name` too."""
         entry = (name, params)
         if 0 <= self._at and self._history[self._at] == entry:
             return self._window
@@ -487,6 +529,55 @@ class App:
         self._at = len(self._history) - 1
         self._sync_history()
         return window
+
+    def route(self, pattern: str, name: str) -> None:
+        """Adds a route (M66): a pattern like `"notes/{id}"` for the screen
+        registered (now or later) under `name`. A `{param}` segment is a
+        string param, `{param:int}` an `int`; the others must match
+        exactly. Routes are tried in the order they were added."""
+        segments: list[Any] = []
+        seen: set[str] = set()
+        for part in _route_parts(pattern):
+            if part.startswith("{") and part.endswith("}"):
+                param, _, converter = part[1:-1].partition(":")
+                if not param.isidentifier() or converter not in ("", "int"):
+                    raise ValueError(f"route {pattern!r}: {part!r} isn't {{name}} or {{name:int}}")
+                if param in seen:
+                    raise ValueError(f"route {pattern!r}: {param!r} appears twice")
+                seen.add(param)
+                segments.append((param, converter or None))
+            elif not part or "{" in part or "}" in part:
+                raise ValueError(f"route {pattern!r}: {part!r} isn't a segment")
+            else:
+                segments.append(part)
+        self._routes.append(_Route(pattern, name, segments))
+
+    def navigate_to(self, route: str) -> Window:
+        """Navigates to the screen the first matching route names, with the
+        params it reads from `route` (a deep link, say `"notes/42"`).
+        Raises `KeyError` when no route matches."""
+        parts = _route_parts(route)
+        for candidate in self._routes:
+            params = candidate.match(parts)
+            if params is not None:
+                return self.navigate(candidate.name, **params)
+        raise KeyError(f"no route matches {route!r}")
+
+    @property
+    def location(self) -> str | None:
+        """The screen showing, as a route string (for saving where the
+        user was): from the first route of its screen that reads its
+        params back exactly, or `None` if none does."""
+        if self._at < 0:
+            return None
+        name, params = self._history[self._at]
+        for candidate in self._routes:
+            if candidate.name != name:
+                continue
+            text = "/".join(seg if isinstance(seg, str) else str(params.get(seg[0], "")) for seg in candidate.segments)
+            if candidate.match(_route_parts(text)) == params:
+                return text
+        return None
 
     def back(self) -> bool:
         """Shows the history's previous entry, calling its ViewModel's
@@ -515,6 +606,17 @@ class App:
         if hook is not None:
             hook(dict(params))  # a copy: the history's entry stays as it was
         return self._show(name)
+
+    def _history_key(self, event: Any) -> None:
+        if not event.alt or event.ctrl or event.meta or event.shift or event.key not in ("arrow_left", "arrow_right"):
+            return
+        target = event.target
+        if target is not None and target.get("kind") in ("text_input", "terminal"):
+            return  # there Option+Left moves by word (macOS)
+        if event.key == "arrow_left":
+            self.back()
+        else:
+            self.forward()
 
     def _sync_history(self) -> None:
         def sync() -> None:  # together, so a follower never sees one updated and not the other

@@ -75,7 +75,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M65 — An App-Level State Store (#13) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
-| M66 — Routing: a Back Stack and Deep Links (#12) | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
+| M66 — Routing: a Back Stack and Deep Links (#12) | `███████⬜⬜⬜` 75% | 🚧 In progress — Phase 3 of 4 done |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
@@ -1819,7 +1819,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 66 — Routing: a Back Stack and Deep Links (#12)
 
-**Status: 🚧 In progress — Phase 2 of 4 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 3 of 4 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** Navigation is `App.show(name)` only: no history, no parameters for a screen, and no URL-style deep links.
 
@@ -1838,8 +1838,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 2 — History and Params ✅
 - Step 1: `App.navigate`, `back`, `forward` (via `_step`), `_arrive` (the hook, then `_show`), `can_go_back`/`can_go_forward` (set together in a `batch`: set one after the other, a follower saw a state that never existed, which a test caught), and `show` split into `_show` (the display) and `show` (it, then replacing the current entry). A failing `on_navigated` leaves the screen and the history as they were, on `navigate` and on `back`. New `tests/test_routing.py` (11): pushing and moving with params re-delivered, dropping forward entries, not re-pushing the current entry, `show` as a replacing jump, `navigate` before any `show`, a screen with no hook, the hook's copy and its timing, failing hooks on `navigate` and `back`, an unknown screen, and the two signals. Mutation-checked, 15/15 caught (the first run pinned a failing hook on `back`, and showed `navigate`'s `dict(params)` copied an already-fresh dict, so it went). Found: a YAML button's `disabled` can't be bound (only control kinds' can), so `can_go_back` is followed from Python for now; added to the known gaps. 2383 → 2394 passed — ✅
 
-### Phase 3 — Routes, the Rail and the Keys ⬜
-- Step 1: `route`, `navigate_to`, `location`; the rail navigating; Alt+Left/Right; a `tre` issue for the mouse buttons; tests; mutation-checked — ⬜
+### Phase 3 — Routes, the Rail and the Keys ✅
+- Step 1: `App.route(pattern, name)` (`_Route`, validated: `{name}` or `{name:int}` segments, no repeats, no empty or mixed segments; `""` is the root), `navigate_to(route)` (the first match, else a `KeyError`), and `location` (the first route of the showing screen that reads its params back exactly). The shell's rail calls `app.navigate` (`shell_file.bind_navigation`). Alt+Left/Right from a `Listeners` on the window's root (`App._history_key`), not with another modifier, and not from a text input or terminal. **A bug found by a test:** a param called `name` collided with `navigate`'s own argument, so `name` is now positional-only. `tre` [#21](https://github.com/mindderivative/tre/issues/21) filed for the mouse's back and forward buttons. `tests/test_routing.py` +16 (27): routes with params and slashes, unmatched routes, negative ints and route order, `location`'s `None` cases and first fitting route, bad patterns, the rail with history and the rail following `back`, the keys and their modifiers, and a text input keeping Alt+Left. Mutation-checked, 23/23 (the first run pinned `location`'s screen check and a non-arrow key with somewhere to go), and Phase 2's 15/15 again. 2394 → 2410 passed — ✅
 
 ### Phase 4 — Docs, Example, Tracker ⬜
 - Step 1: a guide section and an example; the known gap closed — ⬜

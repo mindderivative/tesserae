@@ -24,7 +24,7 @@ shell file, with `Files_ViewModel.py`'s `FilesViewModel` if there is one.
 It's registered under its name, so it's hot-reloaded as screens are, its
 title is its name, and `app.show("Files")` brings its tab forward.
 
-The rail's items name screens (Q3): choosing one calls `app.show(screen)`,
+The rail's items name screens (Q3): choosing one calls `app.navigate(screen)` (M66),
 and `app.show` from anywhere moves the rail's selection to match. With
 `on_navigate: method`, choosing one calls that method of the `viewmodel`
 given to `load_shell` with the screen's name instead, and it decides.
@@ -241,14 +241,15 @@ def _import(file: Path) -> Any:
 
 
 def bind_navigation(app: Any, shell: Any, spec: dict[str, Any], path: Path, viewmodel: Any = None) -> None:
-    """Choosing a rail item shows its screen, or calls the `on_navigate`
-    method of `viewmodel` with the screen's name (Q3)."""
+    """Choosing a rail item navigates to its screen, a step `back()`
+    returns from (M66), or calls the `on_navigate` method of `viewmodel`
+    with the screen's name (Q3)."""
     navigation = spec["navigation"]
     if navigation is None:
         return
     screens = [item["screen"] for item in navigation["items"]]
     method = navigation.get("on_navigate")
-    handler = getattr(viewmodel, method) if method is not None else app.show  # `check_references` checked it
+    handler = getattr(viewmodel, method) if method is not None else app.navigate  # `check_references` checked it
     shell.navigation.on_change(lambda index: handler(screens[index]))
     app._navigation = (shell.navigation, screens)
 
