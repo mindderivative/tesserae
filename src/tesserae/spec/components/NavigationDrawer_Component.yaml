@@ -1,0 +1,14 @@
+# MD3's (standard) navigation drawer (M56, #9): `tesserae.widgets.navigation_drawer`'s
+# declarative counterpart. `items` is a list of `{label, icon, selected?}`,
+# one `NavigationDrawerItem` each (`repeat:`), `width - 24` wide inside the
+# drawer's 12 px padding. The selected destination is static here: for
+# live selection, or the modal drawer, use `tesserae.widgets.navigation_drawer`.
+params: [items, width, item_width]
+id: root
+kind: Container
+style: {width: "{{ width }}", flex_direction: vertical, padding: 12, background: surface_container_low}
+children:
+  - id: item
+    component: NavigationDrawerItem
+    with: {width: "{{ item_width }}"}
+    repeat: "{{ items }}"

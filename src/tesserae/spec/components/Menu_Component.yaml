@@ -1,0 +1,20 @@
+# MD3's menu panel (M56, #9): `tesserae.overlays.Menu`'s panel, declared.
+# `items` is a list of `{label}`, one `MenuItem` each (`repeat:`), `width`
+# wide: `surface_container`, 4 px corners, elevation 2, 8 px top and bottom.
+# It's the panel only: to open it as a menu (anchored, dismissed by an
+# outside press or Escape), use `tesserae.overlays.Menu`.
+params: [items, width]
+id: root
+kind: Container
+style:
+  width: "{{ width }}"
+  flex_direction: vertical
+  background: surface_container
+  corner_radius: extra_small
+  elevation: level_2
+  padding: {left: 0, right: 0, top: 8, bottom: 8}
+children:
+  - id: item
+    component: MenuItem
+    with: {width: "{{ width }}", height: 48, padding: {left: 12, right: 12, top: 0, bottom: 0}}
+    repeat: "{{ items }}"

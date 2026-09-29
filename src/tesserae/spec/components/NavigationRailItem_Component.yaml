@@ -1,0 +1,28 @@
+# One navigation rail destination (M56, #9): `tesserae.widgets.navigation_rail`'s
+# item, its selected state declared per item. A 24 px icon in a 56x32 pill
+# over a `label_medium` label; selected, the pill is `secondary_container`,
+# the icon `on_secondary_container` and the label `on_surface`; otherwise
+# the pill is clear and both are `on_surface_variant`.
+params: [label, icon, {selected: false}]
+id: root
+kind: Container
+style: {width: 80, height: 56, flex_direction: vertical, align_items: center, gap: 4}
+children:
+  - id: pill
+    kind: Rect
+    style:
+      width: 56
+      height: 32
+      corner_radius: 16
+      background: {if: "{{ selected }}", then: secondary_container, else: transparent}
+      align_items: center
+      justify_content: center
+    children:
+      - id: icon
+        kind: Icon
+        icon: {name: "{{ icon }}"}
+        style: {width: 24, height: 24, foreground: {if: "{{ selected }}", then: on_secondary_container, else: on_surface_variant}}
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", typography_role: label_medium}
+    style: {foreground: {if: "{{ selected }}", then: on_surface, else: on_surface_variant}}

@@ -221,18 +221,36 @@ own list-typed parameter can be forwarded straight into an inner
 `repeat:`, since the existing substitution pass runs before expansion
 ever descends into a nested `component:` node.
 
-### Known, deliberate scope limit
+### Selected items, and repeating inside a fragment
 
-`repeat:` gives full fidelity for `ListItem` (and any other fragment
-that's pure layout composition). It does **not** yet give full
-fidelity for the widgets whose real imperative construction computes
-state-dependent active/inactive coloring internally in Rust --
-`tabs`/`button_group`/`navigation_rail`/`navigation_drawer`/`menu`.
-Repeating a fragment call for these produces a static snapshot, not the
-real per-item selected/unselected styling; that needs a second,
-separate, not-yet-designed capability (conditional per-item styling),
-tracked in [`BUILD_TRACKER.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER.md)'s
-known-gaps list.
+A fragment can forward a list param to `repeat:` (`repeat: "{{ items }}"`),
+so a container fragment takes its items as one list. Each item can carry
+per-item values, a `selected: true` say, which the item fragment turns
+into its look with `{if:}` (M56). That's how the five widgets whose
+selected item looks different are declared:
+
+```yaml
+- id: tabs
+  component: Tabs
+  with:
+    item_width: 90
+    items:
+      - {label: Inbox}
+      - {label: Sent, selected: true}
+```
+
+| Fragment | Its items | Item fields |
+| --- | --- | --- |
+| `Tabs` (`item_width`) | `TabsItem` | `label`, `icon`, `selected` |
+| `NavigationRail` | `NavigationRailItem` | `label`, `icon`, `selected` |
+| `NavigationDrawer` (`width`, `item_width`) | `NavigationDrawerItem` | `label`, `icon`, `selected` |
+| `Menu` (`width`) | `MenuItem` (48 px, as a menu's) | `label` |
+| `ButtonGroup` (`width`, `height`, `corner_radius`, `button`) | any `Button*` (`ButtonFilled` by default) | `label` |
+
+These are static: the selected item is whatever the file says. For
+selection that changes as the user clicks or presses the arrows, a
+menu that opens and closes, or a button group's press morph, use the
+widgets (`tesserae.widgets.tabs`, `tesserae.overlays.Menu` and so on).
 
 ## The built-in fragment catalog
 
@@ -241,11 +259,11 @@ covering every MD3 category:
 
 | Category | Fragments |
 | --- | --- |
-| Buttons & Actions | `ButtonElevated`/`ButtonFilled`/`ButtonFilledTonal`/`ButtonOutlined`/`ButtonText`, `IconButtonStandard`/`IconButtonFilled`/`IconButtonFilledTonal`/`IconButtonOutlined`, `Fab{Primary,Secondary,Tertiary,Surface}`, `ExtendedFab{Primary,Secondary,Tertiary,Surface}`, `SplitButton{Elevated,Filled,FilledTonal,Outlined,Text}` |
+| Buttons & Actions | `ButtonGroup` (M56), `ButtonElevated`/`ButtonFilled`/`ButtonFilledTonal`/`ButtonOutlined`/`ButtonText`, `IconButtonStandard`/`IconButtonFilled`/`IconButtonFilledTonal`/`IconButtonOutlined`, `Fab{Primary,Secondary,Tertiary,Surface}`, `ExtendedFab{Primary,Secondary,Tertiary,Surface}`, `SplitButton{Elevated,Filled,FilledTonal,Outlined,Text}` |
 | Selection & Input | `Checkbox`, `RadioButton`, `Switch`, `Slider`, `SpinBox` |
 | Cards/Lists/Chips/Structural | `CardElevated`/`CardFilled`/`CardOutlined`, `ListItem`, `Chip{Assist,Filter,FilterSelected,Input,Suggestion}`, `Badge{Dot,Labeled}`, `Divider`, `Link`, `AccordionHeader`, `TreeNode{Branch,Leaf}` |
-| Navigation & Shell | `Toolbar{Docked,Floating}`, `TopAppBar`, `StatusBar` (fixed-shape members; see `BUILD_TRACKER.md` M22) |
-| Overlays | `Dialog`, `Snackbar`, `Tooltip`, `MenuItem`, `SideSheet{Modal,Standard}` |
+| Navigation & Shell | `Toolbar{Docked,Floating}`, `TopAppBar`, `StatusBar` (fixed-shape members; see `BUILD_TRACKER.md` M22), `Tabs`/`TabsItem`, `NavigationRail`/`NavigationRailItem`, `NavigationDrawer`/`NavigationDrawerItem` (M56) |
+| Overlays | `Dialog`, `Snackbar`, `Tooltip`, `Menu`/`MenuItem`, `SideSheet{Modal,Standard}` |
 | Search | `SearchBar`, `SearchView` |
 | Progress & Status | `CircularProgress`, `LinearProgress`, `LoadingIndicator` |
 | Media & Graphics | `Image`, `NodeGraph` |

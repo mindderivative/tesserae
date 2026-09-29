@@ -1,0 +1,14 @@
+# MD3's button group (M56, #9): `tesserae.widgets.button_group`'s layout,
+# declared. `items` is a list of `{label}`, one `button` fragment each
+# (`ButtonFilled` by default; any `Button*`), `width`x`height`, 8 px apart,
+# fully rounded. The press morph (a pressed button widening while its
+# neighbours shrink) is behaviour: for it, use `tesserae.widgets.button_group`.
+params: [items, width, height, corner_radius, {button: ButtonFilled}]
+id: root
+kind: Container
+style: {flex_direction: horizontal, gap: 8}
+children:
+  - id: b
+    component: "{{ button }}"
+    with: {width: "{{ width }}", height: "{{ height }}", corner_radius: "{{ corner_radius }}"}
+    repeat: "{{ items }}"

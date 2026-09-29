@@ -1483,3 +1483,21 @@ adjust the scopes as you start them."
   decisions and draft phases, and gets refined when it starts.
 - The known gaps name their milestone.
 - Saved as a feedback memory: milestones go in before they start.
+
+## M56: per-item styling for repeat: (#9)
+
+User: "push and start the milestones in order". Pushed `a4ac4c1..9092b53`
+(CI run 36506034375 passed), and closed #1 and #8.
+
+M56, refined when it started:
+- Only tabs, the rail and the drawer have a selected item. `button_group`
+  and `Menu` needed only a list of items.
+- A fragment can forward `items` to `repeat:` with no expander change.
+- Style has no absolute positioning, so the tab indicator is laid out at
+  the bottom of a column the label's width.
+
+Built: `Tabs`, `NavigationRail`, `NavigationDrawer` (and their `*Item`s
+with `selected`), `Menu` and `ButtonGroup`. `MenuItem` gains optional
+`height` and `padding`. 15 parity tests; 12/12 mutants caught.
+
+1552 passed; all five examples clean.

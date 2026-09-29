@@ -1,0 +1,18 @@
+# MD3's navigation rail (M56, #9): `tesserae.widgets.navigation_rail`'s
+# declarative counterpart. `items` is a list of `{label, icon, selected?}`,
+# one `NavigationRailItem` each (`repeat:`). The selected destination is
+# static here: for live selection use `tesserae.widgets.navigation_rail`.
+params: [items]
+id: root
+kind: Container
+style:
+  width: 80
+  flex_direction: vertical
+  align_items: center
+  gap: 12
+  padding: {left: 0, right: 0, top: 12, bottom: 12}
+  background: surface
+children:
+  - id: item
+    component: NavigationRailItem
+    repeat: "{{ items }}"

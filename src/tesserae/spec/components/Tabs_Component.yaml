@@ -1,0 +1,21 @@
+# MD3's primary tabs (M56, #9): `tesserae.widgets.tabs`' declarative
+# counterpart. `items` is a list of `{label, icon?, selected?}`, one
+# `TabsItem` each (`repeat:`), `item_width` wide; a 1 px `surface_variant`
+# divider below. The selected tab is static here: for live selection
+# (clicks, arrows) use `tesserae.widgets.tabs`.
+params: [items, item_width]
+id: root
+kind: Container
+style: {flex_direction: vertical, background: surface}
+children:
+  - id: row
+    kind: Container
+    style: {flex_direction: horizontal}
+    children:
+      - id: item
+        component: TabsItem
+        with: {width: "{{ item_width }}"}
+        repeat: "{{ items }}"
+  - id: divider
+    kind: Rect
+    style: {width: "100%", height: 1, background: surface_variant}

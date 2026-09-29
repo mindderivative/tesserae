@@ -65,7 +65,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M53 — Undocking Panels and the OS's Appearance, on `tre` 0.3.5.2 | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-28) |
 | M54 — An Open Overlay Follows a Window Resize (#1) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M55 — Fragment Conditionals and the Text-Only Extended FAB (#8) | `██████████` 100% | ✅ Complete (2026-09-28) |
-| M56 — Per-Item Styling for `repeat:` (#9) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M56 — Per-Item Styling for `repeat:` (#9) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M57 — A Theme's `components:` in the Declarative Cascade (#10) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M58 — A `SpinBox` YAML Control Kind (#5) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M59 — A Declarative Video (#6) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
@@ -92,7 +92,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** push, then close #1 (M54 Phase 3) and #8. Then the rest of the backlog, each scoped below as a draft (⬜) to be refined when it starts: M56 (#9, per-item styling for `repeat:`), M57 (#10), M58 (#5), M59 (#6), M60 (#7), M61 (#4), M62 (#2), M63 (#16), M64 (#11), M65 (#13), M66 (#12), M67 (#14).
+**Up next:** M57 (#10, a theme's `components:` in the declarative cascade), then M58–M67 as scoped. M56 (#9) is done locally, and #9 closes when it's pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -103,13 +103,13 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 - **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4) (M61).
 - **The `SpinBox` fragment has no behaviour.** There's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5): [#5](https://github.com/mindderivative/tesserae/issues/5) (M58).
 - **Declarative fragments cover 67 of ~68 MD3 widgets, and since M55 `extended_fab`'s text-only shape too.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6) (M59)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7) (M60)).
-- **`repeat:` can't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` can't be declared with full fidelity (M28): [#9](https://github.com/mindderivative/tesserae/issues/9) (M56). `repeat:` is also deliberately not reactive; `tesserae.Repeater` covers runtime-changing lists.
 - **The declarative cascade doesn't consult a theme's `components:` overrides**, which only `tesserae.widgets` use: [#10](https://github.com/mindderivative/tesserae/issues/10) (M57).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
+- ~~**`repeat:` couldn't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` couldn't be declared with full fidelity (M28).~~ **Fixed (M56).** Item fragments take a `selected` flag with M55's `{if:}`, and container fragments forward an `items` list to `repeat:`: `Tabs`, `NavigationRail`, `NavigationDrawer`, `Menu` and `ButtonGroup`, checked against the widgets. Live selection stays with the widgets. [#9](https://github.com/mindderivative/tesserae/issues/9), closes once pushed.
 - ~~**An open overlay's scrim didn't follow a window resize** (M41 Phase 5).~~ **Fixed (M54).** Overlays refit on every `resize` while open, through one shared dispatcher per window (`listeners.listen_window`). [#1](https://github.com/mindderivative/tesserae/issues/1) closed.
 - ~~**`extended_fab`'s icon-less shape had no fragment** (deferred in M18).~~ **Fixed (M55).** Fragment params can have defaults, and fragments can use expansion-time `when:` and `{if:, then:, else:}`. The `ExtendedFab*` fragments take an optional `icon`, and `extended_fab(icon=None)` uses the fragment's text-only shape. [#8](https://github.com/mindderivative/tesserae/issues/8) closed.
 - ~~**Removing a panel from a shell file needed a restart** (M52 Phase 4): `tre` couldn't undock a panel.~~ **Fixed (M53 Phase 2).** `Dock.remove_panel` undocks through `tre` 0.3.5.2's `undock_panel` ([`tre` #16](https://github.com/mindderivative/tre/issues/16)), and a shell-file edit that drops a panel undocks it while the app runs, keeping its screen registered. [#3](https://github.com/mindderivative/tesserae/issues/3) closed.
@@ -1608,25 +1608,25 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 56 — Per-Item Styling for `repeat:` (#9)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#9](https://github.com/mindderivative/tesserae/issues/9). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** From the backlog order M54 set: [#9](https://github.com/mindderivative/tesserae/issues/9) (closes once pushed). It was scoped up front as a draft (2026-09-28) and refined when it started (user: "push and start the milestones in order"). The recommendations are taken.
 
-**The gap:** `repeat:` substitutes each item into a template but can't style one item differently, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` can't be declared with full fidelity: their selected item looks different (M28).
+**The gap:** `repeat:` couldn't style one item differently, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` couldn't be declared with full fidelity (M28).
 
-**Draft approach:** Build on M55's expansion-time conditionals. Each `repeat:` item can carry a `selected: true`, and the item fragments pick colours with `{if: "{{ selected }}", then: ..., else: ...}`. That gives a faithful static snapshot. For live selection, a view binds the selected index, and the imperative widgets' `_Selection` stays the runtime path. Then add the five fragments (`Tabs`, `NavigationRail`, `NavigationDrawer`, `ButtonGroup`, `Menu`) and their item fragments.
+**Refined at the start:**
+- Only three of the five have a selected item in Tesserae: tabs, the rail and the drawer. `button_group` and `Menu` have no per-item state. That was `tre`'s old Rust-side colouring, since replaced by Tesserae's widgets. So for them the gap is only declaring a variable list of items.
+- **A fragment can forward a list param to `repeat:`** (`repeat: "{{ items }}"`), because params are substituted before nested components expand. So container fragments take their items as one list, with no expander change.
+- **Style has no absolute positioning.** So the tab indicator is laid out as the bottom of a column as wide as the label, which gives it the label's width and position without measuring.
 
-**Decisions to settle at the start** (provisional):
-- Q1 static selection via per-item `selected:` and `{if:}` (recommended), or an `item.index == selected` expression in the expander
-- Q2 live selection left to the imperative widgets (recommended), or a new binding-driven per-item style
+**Decisions** (recommended, taken): Q1, static selection through a per-item `selected:` and M55's `{if:}`, not an index-comparison expression; Q2, live selection (clicks, arrows), a menu's open and close, and a button group's press morph stay with the imperative widgets. The fragments are static.
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: settle Q1-Q2 against the five widgets' item specs — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read the five widgets' specs and paint functions in `widgets/navigation.py`, `widgets/buttons.py` and `overlays.py`. Refined as above, and Q1–Q2 settled — ✅
 
-### Phase 2 — Item Fragments and the Five Widgets ⬜
-- Step 1: `*Item_Component.yaml` with per-item `selected`, the five container fragments, parity tests against the imperative widgets (colours, layout, a11y), mutation-checked — ⬜
+### Phase 2 — Item Fragments and the Five Widgets ✅
+- Step 1: `TabsItem`, `NavigationRailItem` and `NavigationDrawerItem` take `{selected: false}` and pick each part's colour with `{if:}`: tabs `primary` vs `on_surface_variant` with an indicator at the bottom; the rail's `secondary_container` pill; the drawer's full-width pill. `Tabs`, `NavigationRail` and `NavigationDrawer` repeat them over `items`. `Menu` repeats `MenuItem`, which gains optional `height` and `padding` params (defaults unchanged; a menu passes 48 and 12, as the overlay does). `ButtonGroup` repeats any `Button*` fragment named by `button` (default `ButtonFilled`). `tests/test_fragments_repeat_widgets.py` (15): each fragment against its imperative widget, built with the same theme. Checked: each part's colour for every selected position; tabs with and without icons; labels', pills' and slots' positions relative to the root; the tab indicator's colour, span and y, and clear on unselected tabs; the button group across three variants and its default. Mutation-checked, 12/12 caught (every selected-colour conditional, the tab spacer, the menu's item size, the group's gap and default, the rail's gap). 1518 → 1553 (1552 passed, 1 skipped; the paint checks cover the new fragment files too); all five examples clean — ✅
 
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the fragments guide (the scope-limit section goes), the known gap closed — ⬜
-
+### Phase 3 — Docs, Tracker ✅
+- Step 1: the fragments guide: "Selected items, and repeating inside a fragment" replaces the old scope-limit section, with the eight new fragments in the catalog. The known gap moved to "Fixed gaps"; `mkdocs build --strict` clean — ✅
 
 ---
 
