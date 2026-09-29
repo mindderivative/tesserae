@@ -80,7 +80,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M69 — Handlers on a Component Call (#18) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M70 — Binding `disabled` on Any Clickable Node (#19) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
-| M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██⬜⬜⬜⬜⬜⬜⬜⬜` 25% | 🚧 In progress — Phase 1 of 4 done |
 
 **Just closed:** M67 (2026-09-29), done locally: a `tesserae` command, `tesserae new <name> [--shell]` and `tesserae add screen <Name>` (#14). With it the backlog M54 ordered is done: M64 `widgets.text` (#11), M65 shared state (#13), M66 routing (#12), done locally, and M68 the move onto `tre` 0.4.0 (pushed). 2422 passed.
 
@@ -1945,20 +1945,20 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** User: "Scope M71 and file the tre grid issue" (2026-09-29), after asking what layouts Tesserae has: [#21](https://github.com/mindderivative/tesserae/issues/21). Independent of `tre` 0.4.1; grids themselves wait on `tre` [#23](https://github.com/mindderivative/tre/issues/23) (filed with this scope).
+**Status: 🚧 In progress — Phase 1 of 4 done.** User: "Scope M71 and file the tre grid issue" (2026-09-29), after asking what layouts Tesserae has, then "push and start M71" (pushed as `d1e87a1..ba04848`): [#21](https://github.com/mindderivative/tesserae/issues/21). Independent of `tre` 0.4.1; grids themselves wait on `tre` [#23](https://github.com/mindderivative/tre/issues/23). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
-**The gap:** A view's style takes `flex_direction`, `gap`, `padding`, `margin`, `flex_grow`/`flex_shrink`/`flex_basis`, `align_items`, `justify_content` and sizes (numbers, `"auto"`, percentages). It refuses, as "unknown style field(s)", seven things `tre` 0.4.0 lays out (each tried): `flex_wrap`, `align_self`, `min_width`/`max_width`/`min_height`/`max_height`, `aspect_ratio`, `position` with `x`/`y`, `z_index` and `clip_children`. `tre`'s `scroll_view` (wheel-scrolled, one vertical `scroll_offset`, `scrollbar_fill`/`scrollbar_width`) has no `kind:`. And `tre` has no grid: its node properties are flexbox only, though it lays out with Taffy 0.14, which implements CSS Grid.
+**The gap:** A view's style takes `flex_direction`, `gap`, `padding`, `margin`, `flex_grow`/`flex_shrink`/`flex_basis`, `align_items`, `justify_content` and sizes (numbers, `"auto"`, percentages). It refuses, as "unknown style field(s)", seven things `tre` 0.4.0 lays out (each tried): `flex_wrap`, `align_self`, `min_width`/`max_width`/`min_height`/`max_height`, `aspect_ratio`, `position` with `x`/`y`, `z_index` and `clip_children`. `tre`'s `scroll_view` has no `kind:`. And `tre` has no grid (flexbox only, though its Taffy implements CSS Grid).
 
-**Draft approach:** The seven keys through the compiler's `_layout` (so a patch resets them too, as the others are), validated as `tre` validates them; `kind: ScrollView`, a vertical scrolling container with `scroll_offset` bindable and its scrollbar in the theme's colours; a "Layout" guide page (stacks, flexible sizing, wrapping, absolute placement, scrolling, and a grid-like layout today with `flex_wrap` and a fixed `flex_basis`). A `Grid` follows `tre` #23, as its own milestone.
+**What starting found** (each probed on `tre` 0.4.0): every new key has a default `tre` takes back (`no_wrap`, `None` for `align_self` and `aspect_ratio`, `"auto"` for the min/max sizes and `x`/`y`, `relative`, `0`, `False`), so a patch can reset each, and `tre` validates each value itself. But a bad layout value reaches the author as `tre`'s bare error, without the widget's id. `scroll_view` lays out its children like any box, so several children shrink to fit and nothing scrolls; with one content box that doesn't shrink it scrolls (the wheel moves it, an offset past the end clamps, a negative one is refused). It has no keyboard scrolling, doesn't answer `scroll_into_view`, doesn't reveal a focused child, and sends no event when it scrolls; but a `wheel` listener on it already reads the new offset, and focus and `a11y_action` events bubble to it.
 
-**Decisions to settle at the start** (provisional):
-- Q1 all seven keys (recommended), or the layout ones first and `z_index`/`clip_children` later
-- Q2 `position`'s values (`relative`/`absolute`, recommended) and how `x`/`y` relate to `margin`
-- Q3 `ScrollView`: vertical only, as `tre`'s is (recommended), a keyboard (Page Up/Down, arrows when focused) and a11y (`scroll_into_view`), and whether `scroll_offset` is two-way
-- Q4 whether a `Repeater` inside a `ScrollView` should use `tre`'s `virtual_list` for long lists (recommended: later, its own milestone)
+**Decisions** (recommended, taken):
+- Q1, all seven keys, through `STYLE_FIELDS` and `_layout` with those defaults (so a stylesheet can set them too, and a patch resets them); and the compiler names the widget in `tre`'s layout errors (for every key, not only the new ones).
+- Q2, `position` is `tre`'s `relative`/`absolute`; `x`/`y` take numbers, `"auto"` or percentages and place an `absolute` node in its parent.
+- Q3, `kind: ScrollView`: vertical only, as `tre`'s is; a `scroll_view` holding one content box (vertical by default, no shrinking, the full width) where its children go, so `flex_direction`, `gap`, `padding` and alignment lay out the content while the size is the scroll view's. Tesserae adds what `tre` lacks: arrows, Page Up/Down, Home/End when it has focus; a focused descendant scrolled into view; `scroll_into_view` answered. `scroll_offset` binds, and `two_way: scroll_offset` writes back what the wheel, the keys and those reveals do. Its scrollbar takes a theme colour. `tre` [#24](https://github.com/mindderivative/tre/issues/24) asks for the missing pieces in `tre` itself; Tesserae doesn't wait on it.
+- Q4, `tre`'s `virtual_list` for a long `Repeater` is its own milestone later.
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: read `_layout`, the style validation, patching and `tre`'s `scroll_view`; Q1-Q4 — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `_layout`, `STYLE_FIELDS` (`spec/cascade.py`), `_create` and patching; probed each key's default and validation and `scroll_view`'s layout, wheel, keys, accessibility and events on `tre` 0.4.0; settled Q1-Q4 above — ✅
 
 ### Phase 2 — The Flexbox Keys ⬜
 - Step 1: the seven keys in the compiler and patching; tests comparing laid-out boxes with `tre`'s own for each; mutation-checked — ⬜
