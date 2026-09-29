@@ -71,14 +71,14 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M59 — A Declarative Video (#6) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M60 — A Declarative Node Graph (#7) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M62 — Pagination with an Ellipsis (#2) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M62 — Pagination with an Ellipsis (#2) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
 | M63 — CSS Wide-Gamut Colours (#16) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
-**Just closed:** M53 (2026-09-28), all 4 phases, on `tre` 0.3.5.2: a panel a shell-file edit drops is undocked while the app runs (`Dock.remove_panel`, #3), and `App(dark="system")` starts in the OS's appearance (#17). 1474 → 1489. Before it, Tesserae 0.1.0 was published to PyPI as `tesserae-ui`, and M52 added a declarative app shell.
+**Just closed:** M61 (2026-09-28), pushed as `d78b5bc..234a67b`: a component is hot-reloaded in any view on the app's window, not only the app's known views (#4). Before it, M57–M60 added a theme's components, a SpinBox kind, a declarative video and a declarative node graph. 1614 passed.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -92,7 +92,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M62 (#2, pagination with an ellipsis), then M63–M67 as scoped. M61 (#4) is done locally, and #4 closes when it's pushed.
+**Up next:** M62 (#2, pagination with an ellipsis) is in progress, then M63–M67 as scoped.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1735,21 +1735,17 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 62 — Pagination with an Ellipsis (#2)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#2](https://github.com/mindderivative/tesserae/issues/2). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: 🚧 In progress — Phase 1 of 3 done.** User: "Push and start M62" (M61 pushed as `d78b5bc..234a67b`). From the backlog order M54 set: [#2](https://github.com/mindderivative/tesserae/issues/2). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** `pagination` draws a button for every page, which is crowded for dozens of pages.
 
-**Draft approach:** Show the first and last pages, the current page and its neighbours, and a non-interactive `…` for each gap (`1 … 6 7 [8] 9 10 … 42`). A `max_visible=` (about 7) sets when truncation starts; below it nothing changes. The visible buttons are rebuilt as the current page moves, and the arrows, keyboard and `on_change` work over real page numbers.
+**Decisions** (recommended, taken): Q1, `max_visible=7` by default, at least 5 (first, an ellipsis, the current page, an ellipsis, last); at or under it nothing changes, and the parts stay `page0`, `page1`, .... Q2, over it the widget has `max_visible` fixed slots (`slot0`, ...) redrawn as the current page moves, rather than a button per page kept hidden: a thousand pages cost seven buttons. A slot shows a page or `…`; `.shown` lists each slot's page (`None` for an ellipsis) in both modes. Q3, an ellipsis is inert: not focusable, not clickable, no hover, hidden from screen readers; a page slot is labelled "Page N" for the page it shows. Q4, the windowing keeps first and last, the current page centred in the middle, and never hides a single page behind an ellipsis (it shows it instead). Q5, when a click moves focus's page to another slot, focus follows the current page.
 
-**Decisions to settle at the start** (provisional):
-- Q1 `max_visible=7` by default (recommended)
-- Q2 the ellipsis hidden from screen readers, with each button labelled by its page (recommended)
-
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q2 against MD3's guidance — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `widgets/navigation.py`'s `pagination` and its tests; settled Q1-Q5 above — ✅
 
 ### Phase 2 — The Windowing ⬜
-- Step 1: `widgets/navigation.py`; tests for the start, middle and end, and short runs; mutation-checked — ⬜
+- Step 1: `max_visible=`, the slot windowing and the inert ellipsis in `widgets/navigation.py`; tests for the start, middle and end, short runs, focus, a11y and re-theming; mutation-checked — ⬜
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: the widget catalog; the known gap closed — ⬜
