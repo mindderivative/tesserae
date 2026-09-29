@@ -74,19 +74,16 @@ children:
 """
     expanded = expand_components(yaml_text)
     view = view_from(expanded, theme_seed=THEME_SEED)
-    decrement = view.node("sb.decrement")
-    field = view.node("sb.field")
-    increment = view.node("sb.increment")
+    declared = view.control("sb")  # M58: the fragment is the SpinBox control kind, with its behaviour
 
     window = Window(width=200, height=100)
     control = spin_box(window, "3")
 
-    # the fragment is still a composition (no SpinBox kind): it matches the control's shape
-    assert decrement.get("corner_radius") == control.decrement.get("corner_radius")
-    # a TextField's node is its text input; its box (background, corners) is the parent
-    assert field.parent().get("corner_radius") == control.field.get("corner_radius")
-    assert increment.get("corner_radius") == control.increment.get("corner_radius")
-    assert control.value.get() == 3 and control.input.get("text") == "3"
+    for part in ("decrement", "field", "increment"):
+        assert getattr(declared, part).get("corner_radius") == getattr(control, part).get("corner_radius"), part
+    assert declared.value.get() == control.value.get() == 3 and declared.input.get("text") == "3"
+    view.click(declared.increment)
+    assert declared.value.get() == 4 and declared.input.get("text") == "4"  # it steps, which the old composition didn't
 
 
 def test_radio_button_matches_the_imperative_catalog():

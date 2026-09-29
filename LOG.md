@@ -1517,3 +1517,14 @@ Built:
 - 25 tests; 12/12 mutants caught.
 
 1579 passed; all five examples clean.
+
+## M58: a SpinBox YAML control kind (#5)
+
+- `SpinBox` is the ninth control kind: `value`, `min`, `max` and `step`;
+  a bound value is clamped; two-way; `a11y:` goes on the input; new
+  bounds rebuild it. The fragment is now this kind.
+- **Found:** `SpinBox` had no `dispose()`, so a view rebuilding one
+  raised. Added.
+- 6 tests plus the reworked fragment test; 9/9 mutants caught.
+
+1587 passed; all five examples clean.

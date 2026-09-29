@@ -171,6 +171,14 @@ macOS and Windows answer, and it re-themes through `_apply_dark`, as a
 `conftest.os_appearance` (default `None`), so they don't depend on the
 desktop running them.
 
+**The `SpinBox` kind, M58:** a ninth control kind, built with
+`controls.SpinBox` (`value`, `min`, `max`, `step`; `_spin_number` reads a
+value as `spin_box()` does). Its bounds are part of `control_shape`, so
+changing them rebuilds the control. A bound `value` goes through the
+control's `_fit`, and `a11y:` goes to its focus target (`_a11y_target`,
+the text input). `SpinBox` gained the `dispose()` views call on
+controls, which it lacked.
+
 **A theme's `components:` for fragments, M57:** the expander tags each
 fragment's root with `component_of` (its name, or a key the fragment
 names itself, as the FABs' `fab.{{ fab_size }}`). `prepare_layers` puts

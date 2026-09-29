@@ -67,7 +67,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M55 — Fragment Conditionals and the Text-Only Extended FAB (#8) | `██████████` 100% | ✅ Complete (2026-09-28) |
 | M56 — Per-Item Styling for `repeat:` (#9) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M57 — A Theme's `components:` in the Declarative Cascade (#10) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M58 — A `SpinBox` YAML Control Kind (#5) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M58 — A `SpinBox` YAML Control Kind (#5) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M59 — A Declarative Video (#6) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M60 — A Declarative Node Graph (#7) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M61 — Hot Reload for Components in Any View (#4) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
@@ -92,7 +92,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M58 (#5, a `SpinBox` YAML control kind), then M59–M67 as scoped. M56 (#9) and M57 (#10) are done locally, and their issues close when they're pushed.
+**Up next:** M59 (#6, a declarative video), then M60–M67 as scoped. M56–M58 (#9, #10, #5) are done locally, and their issues close when they're pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -101,13 +101,13 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 **Known gaps:**
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2) (M62).
 - **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4) (M61).
-- **The `SpinBox` fragment has no behaviour.** There's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5): [#5](https://github.com/mindderivative/tesserae/issues/5) (M58).
 - **Declarative fragments cover 67 of ~68 MD3 widgets, and since M55 `extended_fab`'s text-only shape too.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6) (M59)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7) (M60)).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
+- ~~**The `SpinBox` fragment had no behaviour**, and there was no `SpinBox` YAML kind (M40 Phase 5).~~ **Fixed (M58).** `SpinBox` is a ninth YAML control kind (`value`, `min`, `max`, `step`; bindable, two-way, clamped), and the fragment is that kind. [#5](https://github.com/mindderivative/tesserae/issues/5), closes once pushed.
 - ~~**The declarative cascade didn't consult a theme's `components:` overrides.**~~ **Fixed (M57).** Widgets didn't either, beyond three special tokens. Now every fragment root, in views and widgets alike, takes its `components:` entry's corner radius and elevation (variant, then component), and a FAB's entry follows its size. [#10](https://github.com/mindderivative/tesserae/issues/10), closes once pushed.
 - ~~**`repeat:` couldn't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` couldn't be declared with full fidelity (M28).~~ **Fixed (M56).** Item fragments take a `selected` flag with M55's `{if:}`, and container fragments forward an `items` list to `repeat:`: `Tabs`, `NavigationRail`, `NavigationDrawer`, `Menu` and `ButtonGroup`, checked against the widgets. Live selection stays with the widgets. [#9](https://github.com/mindderivative/tesserae/issues/9), closes once pushed.
 - ~~**An open overlay's scrim didn't follow a window resize** (M41 Phase 5).~~ **Fixed (M54).** Overlays refit on every `resize` while open, through one shared dispatcher per window (`listeners.listen_window`). [#1](https://github.com/mindderivative/tesserae/issues/1) closed.
@@ -1656,25 +1656,20 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 58 — A `SpinBox` YAML Control Kind (#5)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#5](https://github.com/mindderivative/tesserae/issues/5). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** From the backlog order M54 set: [#5](https://github.com/mindderivative/tesserae/issues/5) (closes once pushed). It was scoped up front as a draft and refined when it started. The recommendations are taken.
 
-**The gap:** `SpinBox_Component.yaml` is a composition with no behaviour: its buttons don't step. A view can't have a working spin box, though `controls.SpinBox` gives one from Python.
+**The gap:** `SpinBox_Component.yaml` was a composition of Rects and a TextField with no behaviour, and there was no `SpinBox` YAML kind.
 
-**Draft approach:** Add `SpinBox` to the compiler's control kinds, built with `controls.SpinBox` as `Checkbox` and `Slider` are: `value`, `min`, `max`, `step`; `value` bindable with `two_way:`; `on_change` wired to the control's.
+**Decisions** (recommended, taken): Q1, a ninth control kind, built with `controls.SpinBox`, and the fragment becomes a thin `kind: SpinBox` so existing `component: SpinBox` uses gain the behaviour; Q2, the fields are `value`, `min`, `max` and `step`, with `value` and `disabled` bindable, `value` two-way, and `a11y:` on its text input. It's sized by MD3, not by `width`/`height`.
 
-**Decisions to settle at the start** (provisional):
-- Q1 a `SpinBox` control kind (recommended), and the fragment kept as a thin `kind: SpinBox` or retired
-- Q2 the fields exposed: `value`, `min`, `max`, `step`, `label` (recommended)
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `_control`, `_patch_control`, `control_shape`, `_apply_to_control` and `controls.SpinBox`. Q1–Q2 settled — ✅
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q2 — ⬜
+### Phase 2 — The Kind ✅
+- Step 1: `SpinBox` joins `_CONTROL_KINDS`, and `min`/`max`/`step` join the node keys. `_control` builds `controls.SpinBox` (no `color`), reading `value` as `spin_box()` does (`_spin_number`: text parses, and whole with a whole step stays an `int`). `_patch_control` sets the value, fitted. `control_shape` includes the bounds, so new bounds rebuild the control. `_apply_to_control` fits a bound `value` through the control's `_fit`. `_a11y_target` sends `a11y:` to the text input. **Found on the way:** `SpinBox` had no `dispose()`, which views call on their controls when they rebuild or tear down, so rebuilding one raised `AttributeError`. Added, as `Control.dispose` is, with `destroy()` using it. The fragment is now `kind: SpinBox` with optional `min`, `max` and `step`, and its selection test compares the kind's control part by part with `spin_box()`'s and steps it. `tests/test_spinbox_kind.py` (6): the control with its bounds, stepping to `max` and disabling +; a bound value clamped, two-way write-back and `on_change` for the user only; `disabled` bound and the `a11y:` label on the input; reconcile patching the value in place and rebuilding for new bounds (disposing the old, whose buttons leave the interactive list); the view's theme; a text value read as a number. Mutation-checked, 9/9 caught (the first run's survivor, dispose's detach, got its assertion). 1580 → 1588 (1587 passed, 1 skipped); all five examples clean — ✅
 
-### Phase 2 — The Kind ⬜
-- Step 1: `spec/build.py` control kind, patch and reconcile, bindings and `two_way:`; tests like `test_controls_in_views.py`; mutation-checked — ⬜
-
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the controls and fragments guides; the known gap closed — ⬜
-
+### Phase 3 — Docs, Tracker ✅
+- Step 1: the controls guide (nine kinds, `SpinBox`'s fields, the "not yet covered" note gone), the fragments guide, and `ARCHITECTURE.md`. The known gap moved to "Fixed gaps"; `mkdocs build --strict` clean — ✅
 
 ---
 

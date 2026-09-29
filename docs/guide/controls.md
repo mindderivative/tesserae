@@ -8,7 +8,7 @@ theme, including light and dark.
 
 ## In a view
 
-In a `*_View.yaml`, the eight control kinds are controls:
+In a `*_View.yaml`, the nine control kinds are controls (`SpinBox` since M58):
 
 ```yaml
 - id: agree
@@ -21,11 +21,15 @@ In a `*_View.yaml`, the eight control kinds are controls:
 ```
 
 - **State:** bind `checked` (Checkbox), `selected` (RadioButton, Switch),
-  `value` (Slider, the progress kinds), `hour` and `minute`
+  `value` (Slider, SpinBox, the progress kinds), `hour` and `minute`
   (TimePickerDial), and `disabled` (any). `two_way:` writes the user's
   changes back to the `Signal`.
 - **`on_change`** runs for changes the user makes, never for ones your
   code or a binding makes.
+- **A `SpinBox`** takes `value:`, `min:`, `max:` and `step:` (a bound
+  `value` is kept between the bounds), and its `a11y:` label goes to its
+  text field. It's sized by MD3, two 40 px buttons around a 64 px field,
+  not by `width`/`height`.
 - **Size:** `style: {width, height}` sets the control's touch target;
   it's MD3's 48 px when not given. A slider's `width` is its track's
   length, a dial's is its face, and a progress bar's is its track.
@@ -90,8 +94,6 @@ MD3's motion tokens.
 
 ## Not yet covered
 
-- The `SpinBox` fragment is a composition with no behaviour; use
-  `tesserae.widgets.spin_box` or `controls.SpinBox` for a working one.
 - Checkbox's indeterminate state, error colours, and the switch's icons
   aren't built. The linear indicator's indeterminate sweep is one bar,
   not MD3's two.

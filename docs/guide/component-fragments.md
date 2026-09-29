@@ -286,8 +286,8 @@ with the same `group:` name exclude each other and are one Tab stop:
 
 `view.control("small")` returns a control, whose `Signal`s are its state
 (see [Controls](controls.md)).
-The `SpinBox` fragment is still a composition, with no behaviour of its
-own; `tesserae.widgets.spin_box` gives a working one.
+The `SpinBox` fragment is the `SpinBox` control kind (M58), with its
+behaviour; `kind: SpinBox` works directly too.
 
 Since M41 a `Text` or `Link` with no `width` or `height` is sized to its
 content (`tre` 0.3.4's text has no size of its own, so before M41 such a

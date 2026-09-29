@@ -44,7 +44,7 @@ _TEXT_FIELD_GLYPH: RGBA = (0x1C, 0x1B, 0x1F, 0xFF)
 #: MD3's baseline colours, for nodes with no theme.
 _BASELINE = tokens.BASELINE
 _CONTROL_KINDS = frozenset({
-    "Checkbox", "RadioButton", "Switch", "Slider", "CircularProgress", "LinearProgress",
+    "Checkbox", "RadioButton", "Switch", "Slider", "SpinBox", "CircularProgress", "LinearProgress",
     "LoadingIndicator", "TimePickerDial",
 })
 _KINDS = _CONTROL_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon"}
@@ -52,6 +52,7 @@ _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
     "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
+    "min", "max", "step",  # a SpinBox's (M58)
 })
 
 
@@ -548,7 +549,7 @@ def _create(ctx, node, style, built):
         built.controls[node["id"]] = control
         a11y_props = _a11y_props(node, patching=False)  # its label, hidden, live, level (M47: they were dropped)
         if a11y_props:
-            control.node.set(**a11y_props)
+            _a11y_target(control).set(**a11y_props)
         return control.node, control.node
     tre_kind, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
@@ -593,7 +594,7 @@ def patch(
     if kind in _CONTROL_KINDS:
         if control is not None:
             _patch_control(ctx, node, style, control, state)
-            control.node.set(**_a11y_props(node, patching=True))
+            _a11y_target(control).set(**_a11y_props(node, patching=True))
         return
     _, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
@@ -676,6 +677,11 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
             control = controls.Switch(ctx.window, selected=bool(node.get("selected") or False), **size, **common)
         elif kind == "Slider":
             control = controls.Slider(ctx.window, value=float(node.get("value") or 0.0), **size, **common)
+        elif kind == "SpinBox":  # M58: two buttons and a field, sized by MD3, not `width`/`height`
+            common.pop("color")
+            control = controls.SpinBox(ctx.window, value=_spin_number(node.get("value") or 0, node.get("step") or 1),
+                                       min=node.get("min"), max=node.get("max"), step=node.get("step") or 1,
+                                       **common)
         else:  # TimePickerDial
             common.pop("color")
             control = controls.TimePickerDial(ctx.window, hour=int(node.get("hour") or 0),
@@ -685,6 +691,21 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
     if placement:
         control.node.set(**placement)
     return control
+
+
+def _spin_number(value: Any, step: Any) -> Any:
+    """A SpinBox's `value:` as `spin_box()` reads it: a number, or its text;
+    whole with a whole step stays an `int`."""
+    number = float(value) if isinstance(value, str) else value
+    if isinstance(number, float) and number.is_integer() and isinstance(step, int):
+        number = int(number)
+    return number
+
+
+def _a11y_target(control: Any) -> Any:
+    """Where a control's `a11y:` goes: its focus target -- a SpinBox's
+    text input, else the control's node (M58)."""
+    return getattr(control, "input", None) or control.node
 
 
 def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], control: Any, state: bool) -> None:
@@ -700,6 +721,8 @@ def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], c
         control.selected.set(bool(node.get("selected") or False))
     elif kind in ("Slider", "CircularProgress", "LinearProgress"):
         control.value.set(float(node.get("value") or 0.0))
+    elif kind == "SpinBox":
+        control.value.set(control._fit(_spin_number(node.get("value") or 0, control.step)))
     elif kind == "TimePickerDial":
         control.hour.set(int(node.get("hour") or 0) % 24)
         control.minute.set(int(node.get("minute") or 0) % 60)
@@ -709,4 +732,5 @@ def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> 
     """What a control is built at (its kind and size): when it changes,
     the reconciler rebuilds the control rather than patching it."""
     style = resolve_style(node, layers)
-    return node.get("kind"), style.get("width"), style.get("height"), node.get("group")
+    return (node.get("kind"), style.get("width"), style.get("height"), node.get("group"),
+            node.get("min"), node.get("max"), node.get("step"))  # a SpinBox's bounds are built in (M58)

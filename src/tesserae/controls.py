@@ -671,7 +671,10 @@ class SpinBox:
             it.retint(self.color("on_surface_variant"), self.color("secondary"))
         untrack(self._paint)
 
-    def destroy(self) -> None:
+    def dispose(self) -> None:
+        """Stops the spin box (its repainting and listeners) but leaves its
+        nodes, for a caller about to free the tree it sits in -- as a view
+        does with its controls (M58)."""
         unfollow(self.window, self)
         self._effect.dispose()
         for undo in self._undo:
@@ -679,6 +682,9 @@ class SpinBox:
         self._undo = []
         for it in (self._dec_it, self._inc_it):
             it.detach()
+
+    def destroy(self) -> None:
+        self.dispose()
         self.node.destroy()
 
     # -- internals -----------------------------------------------------------------

@@ -735,7 +735,8 @@ def _apply_to_control(control: Any, kind: Optional[str], prop: str, value: Any) 
     state = getattr(control, prop, None)
     if not isinstance(state, reactive.Signal):
         raise ValueError(f'a {kind} has no "{prop}" to bind')
-    state.set(expected(value))
+    fit = getattr(control, "_fit", None) if prop == "value" else None  # a SpinBox keeps to its bounds (M58)
+    state.set(fit(expected(value)) if fit is not None else expected(value))
 
 
 def _apply(node: Any, kind: Optional[str], prop: str, value: Any) -> None:
