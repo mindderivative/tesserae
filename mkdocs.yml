@@ -51,6 +51,7 @@ nav:
   - Getting Started: getting-started.md
   - Guide:
       - Apps & Screens: guide/apps-and-screens.md
+      - Layout: guide/layout.md
       - Components & Embedding: guide/components.md
       - Declarative Component Fragments: guide/component-fragments.md
       - Widget Catalog: guide/widget-catalog.md

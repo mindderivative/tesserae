@@ -178,6 +178,9 @@ count = text(app.window, "0 notes", color="on_surface_variant")
 count.content.set("3 notes")
 ```
 
+For laying these out -- rows, columns, wrapping, exact placement and a
+scrolling `ScrollView` -- see [Layout](layout.md).
+
 ## When to use this vs. a declarative fragment
 
 | | `tesserae.widgets` (this page) | [`component:` fragments](component-fragments.md) |

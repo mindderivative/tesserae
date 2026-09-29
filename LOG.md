@@ -1718,3 +1718,27 @@ closed.
 
 Taken between M71's Phases 2 and 3 (M71 Phase 2 was committed first).
 2503 passed.
+
+## M71: layout vocabulary -- the rest of flexbox, and a ScrollView (#21)
+
+User: "Scope M71 and file the tre grid issue" (tre#23), then "push and
+start M71" (pushed `d1e87a1..ba04848`, CI green).
+
+- A view's style (and a stylesheet) takes `flex_wrap`, `align_self`,
+  min/max width and height, `aspect_ratio`, `position` with `x`/`y`,
+  `z_index` and `clip_children`. A style sets one only when it gives it,
+  and a patch resets only those it dropped (`Built.layout_keys`), so
+  Python's placement of spec-built nodes survives a re-theme. `tre`'s
+  layout errors name the widget.
+- `kind: ScrollView`: `tre`'s `scroll_view` with one content box. A
+  `Scroller` adds the keys, focus reveal, `scroll_into_view` and
+  `two_way: scroll_offset`, which `tre` lacks (tre#24, filed).
+- Found on the way:
+  - `tre` clamps an offset only at its next layout;
+  - `layout_y` is in window space and includes scrolling;
+  - `scroll_view` never shrinks its one child and ignores its own padding.
+- A new Layout guide page.
+- 20 + 23 tests; 16/16 and 27/27 mutants caught.
+
+M72 (tre 0.4.1, the side buttons) was taken between Phases 2 and 3.
+2536 passed.
