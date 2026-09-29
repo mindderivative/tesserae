@@ -74,7 +74,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
-| M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M65 — An App-Level State Store (#13) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
@@ -93,7 +93,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M65 (#13, an app-level state store), then M66 (#12, routing) and M67 (#14, a scaffolding CLI). M64 (#11) is done locally, and #11 closes when it's pushed.
+**Up next:** M65 (#13, an app-level state store) is in progress, then M66 (#12, routing) and M67 (#14, a scaffolding CLI). M64 (#11) is done locally, and #11 closes when it's pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1795,24 +1795,22 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 65 — An App-Level State Store (#13)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#13](https://github.com/mindderivative/tesserae/issues/13). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: 🚧 In progress — Phase 1 of 3 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#13](https://github.com/mindderivative/tesserae/issues/13). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
-**The gap:** State shared by several screens (the signed-in user, settings, an open document) is passed around by hand, as `examples/multi_screen/` does by giving ViewModels the `app`.
+**The gap:** State shared by several screens (the signed-in user, settings, an open document) is passed around by hand: `examples/multi_screen/` gives each ViewModel the `app` through a widened constructor, which `App.load()` can't call.
 
-**Draft approach:** `app.state`: a container of `Signal`s and `Computed`s the app defines once, reachable from any ViewModel, and nameable in bindings (`{{ state.user.get() }}`) where a view opts in. It belongs to the `App`, with nothing global.
+**Design** (the note Phase 1 asked for): a ViewModel finds its app through its view's window, with M50's window-to-app registry (`follow.app_of`), so nothing is injected and no constructor changes.
 
-**Decisions to settle at the start** (provisional):
-- Q1 how a ViewModel gets it without every constructor changing (injection by `load()`, or `self.app.state`)
-- Q2 bindings: an opt-in `state` scope in views (recommended)
+**Decisions** (recommended, taken): Q1, the store is `App(state=...)`, also settable as `app.state`: any object, typically a small class or dataclass of `Signal`s and `Computed`s; no `Store` base class, and nothing global (each app has its own). Q2, `ViewModel.app` and `ViewModel.state` resolve through the view's window. They're non-data descriptors, so a ViewModel that sets `self.app = app` itself (the shell examples do) keeps its own, and type checkers still see real attributes (a `__getattr__` fallback would have made every attribute `Any`). Before `super().__init__(view)`, `App.of(view)` finds the app. Q3, bindings resolve names with `getattr` on the ViewModel, so `{{ state.user.get() }}` works in any view with no opt-in, and a ViewModel's own `state` wins. Q4, errors say what's missing: no app owns the view's window, the app has no state, or `super().__init__` hasn't run yet.
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: a design note on injection and the binding scope; Q1-Q2 — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `ViewModel`, `App.load`/`register`, the binding resolver (`getattr` on the ViewModel), `follow.app_of`, and `examples/multi_screen/`; wrote the design and settled Q1-Q4 above — ✅
 
 ### Phase 2 — The Store ⬜
-- Step 1: `App.state`, injection, the binding scope; tests; mutation-checked — ⬜
+- Step 1: `App(state=)`, `App.of`, `ViewModel.app`/`.state`; tests (shared across screens and components, bindings, a VM's own `app`/`state` winning, the errors); mutation-checked — ⬜
 
 ### Phase 3 — Docs, Example, Tracker ⬜
-- Step 1: a guide page; `examples/multi_screen/` uses it; the known gap narrowed — ⬜
+- Step 1: a guide section; `examples/multi_screen/` uses `load()` and `self.app` with shared state; the known gap narrowed — ⬜
 
 
 ---
