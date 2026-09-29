@@ -56,7 +56,7 @@ from tesserae.spec.images import check_frame
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
     focus_ring_color,
-    interaction_tint, natural_size, patch, prepare_layers,
+    interaction_tint, natural_size, patch, prepare_layers, resting_focus,
 )
 from tesserae.spec.cascade import resolve_style
 from tesserae.spec.cascade import check_stylesheet, check_theme
@@ -71,6 +71,8 @@ _EVENTS = {
     "on_change": "change", "on_focus_enter": "focus", "on_focus_exit": "unfocus",
 }
 _COLOR_PROPS = {"background": "fill", "foreground": "fill", "border_color": "stroke_color"}
+#: How far a disabled node fades (M70): MD3's disabled content opacity.
+DISABLED_OPACITY = 0.38
 _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius", "border_width", "elevation"}
 
 
@@ -78,7 +80,8 @@ def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     """`tre`'s `node_props_equal`, plus the state fields Tesserae builds from."""
     # `handlers` and `a11y` too: they change focus, role and label (M39)
     keys = ("kind", "classes", "style", "text", "image", "icon", "checked", "selected", "value", "hour", "minute",
-            "handlers", "a11y", "component_of", "min", "max", "step", "label", "x", "y")  # M57, M58, M60
+            "handlers", "a11y", "component_of", "min", "max", "step", "label", "x", "y",  # M57, M58, M60
+            "disabled")  # M70: a control's is its own
     return all(a.get(k) == b.get(k) for k in keys)
 
 
@@ -160,6 +163,8 @@ class View:
         self._wiring: list[Callable[[], None]] = []  # undo steps
         self._interactions: dict[str, Interaction] = {}
         self._scrollers: dict[str, Scroller] = {}  # each ScrollView's keys, reveals and write-back (M71)
+        #: M70: the nodes shown disabled now, by their `disabled:` key or binding.
+        self._disabled_on: set[str] = set()
         self._sync_interactions()
         if app is not None:
             app._followers[self] = None
@@ -370,6 +375,35 @@ class View:
                 current.retint(tint, ring)
             current.refresh()
         self._sync_scrolls()
+        self._sync_disabled()
+
+    def _sync_disabled(self) -> None:
+        """Shows every node disabled that its `disabled:` key says is (M70),
+        and enabled again those that no longer are -- after each build and
+        patch, which would otherwise make them focusable and opaque again.
+        A `disabled` binding is applied again right after, as every binding
+        is. A control keeps its own `disabled`."""
+        for node_id, spec in self._built.specs.items():
+            if node_id in self._built.controls:
+                continue
+            off = bool(spec.get("disabled") or False)
+            if off or node_id in self._disabled_on:
+                self._show_disabled(node_id, off)
+
+    def _show_disabled(self, node_id: str, off: bool) -> None:
+        spec = self._built.specs[node_id]
+        outer = self._built.outer[node_id]
+        target = self._built.nodes[node_id] if spec.get("kind") == "TextField" else outer
+        target.set(disabled=off, focusable=False if off else resting_focus(spec))
+        opacity = float(resolve_style(spec, self._layers).get("opacity", 1.0))
+        outer.set(opacity=opacity * DISABLED_OPACITY if off else opacity)
+        interaction = self._interactions.get(node_id)
+        if interaction is not None:
+            interaction.enabled = not off
+        if off:
+            self._disabled_on.add(node_id)
+        else:
+            self._disabled_on.discard(node_id)
 
     def _sync_scrolls(self) -> None:
         """Gives every ScrollView its `Scroller` (M71), and stops those whose
@@ -550,7 +584,13 @@ class View:
         tre_event = _EVENTS.get(event)
         if tre_event is None:
             return  # validated, not wired -- as in tre
-        call = _arity_adapter(method)
+        adapted = _arity_adapter(method)
+
+        def call(event_obj: Any) -> Any:
+            if node_id not in self._disabled_on:  # a disabled node's handlers don't run (M70)
+                return adapted(event_obj)
+            return None
+
         # a Link's box takes the events (its text never gets any, M41)
         node = self._built.outer[node_id] if node_spec.get("kind") == "Link" else self._built.nodes[node_id]
         control = self._built.controls.get(node_id)
@@ -602,6 +642,10 @@ class View:
                 dependency._subscribe(run)
             if control is not None and prop in _CONTROL_STATE:
                 _apply_to_control(control, kind, prop, value)
+            elif prop == "disabled":  # any other node's (M70): the View holds it
+                if not isinstance(value, bool):
+                    raise ValueError(f'widget property "disabled" expects a boolean binding, got {value_debug(value)}')
+                self._show_disabled(node_id, value)
             elif prop == "frame":  # M59: a video's frames, from the ViewModel
                 if kind != "Image":
                     raise ValueError(f"{where}: only an Image takes a frame")

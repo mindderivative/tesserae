@@ -56,6 +56,8 @@ _NODE_KEYS = frozenset({
     "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "min", "max", "step",  # a SpinBox's (M58)
+    "disabled",  # any node's (M70): the View applies it, or a control's own
+
     "label", "x", "y", "edges",  # a GraphNode's title and place, a NodeGraph's edges (M60)
 })
 
@@ -598,6 +600,15 @@ def _a11y_props(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:
     return props
 
 
+def resting_focus(node: dict[str, Any]) -> bool:
+    """Whether `node` is focusable when it isn't disabled (M70): a Link and
+    a TextField are, a clickable node is (a Tab stop, M39), and otherwise
+    it's what its `a11y:` says."""
+    if node["kind"] in ("Link", "TextField"):
+        return True
+    return bool(_a11y_props(node, patching=True).get("focusable", False))
+
+
 def interaction_tint(node: dict[str, Any], scheme: Optional[dict[str, RGBA]]) -> Optional[RGBA]:
     """The state layer and ripple's tint for `node` (M39), or `None` for no
     interaction feedback. A clickable Rect or Container gets it in the
@@ -785,6 +796,8 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
             control = controls.TimePickerDial(ctx.window, hour=int(node.get("hour") or 0),
                                               minute=int(node.get("minute") or 0), size=size.get("width", 256.0),
                                               **common)
+    if node.get("disabled") is not None:  # M70: a control's static `disabled:` is its own
+        control.disabled.set(bool(node["disabled"]))
     placement = {k: v for k, v in _layout(style).items() if k in _PLACEMENT}
     if placement:
         control.node.set(**placement)
@@ -865,6 +878,7 @@ def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], c
     if not state:
         return
     kind = node["kind"]
+    control.disabled.set(bool(node.get("disabled") or False))  # M70
     if kind == "Checkbox":
         control.checked.set(bool(node.get("checked") or False))
     elif kind in ("Switch", "RadioButton"):

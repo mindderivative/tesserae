@@ -79,7 +79,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M69 — Handlers on a Component Call (#18) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
-| M70 — Binding `disabled` on Any Clickable Node (#19) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
+| M70 — Binding `disabled` on Any Clickable Node (#19) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
@@ -1921,7 +1921,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 70 — Binding `disabled` on Any Clickable Node (#19)
 
-**Status: 🚧 In progress — Phase 1 of 3 done.** User: "push and start M70" (M69 pushed as `80ef0e9..d9057c3`): [#19](https://github.com/mindderivative/tesserae/issues/19). After M69, so a fragment button's call can bind it. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 3 done.** User: "push and start M70" (M69 pushed as `80ef0e9..d9057c3`): [#19](https://github.com/mindderivative/tesserae/issues/19). After M69, so a fragment button's call can bind it. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** `bindings: {disabled: ...}` works only on the control kinds (M40); on a clickable `Rect` or `Container` it's refused. And a node's own `disabled` only tells assistive technology: it still takes clicks and focus. So a back button can't show `app.can_go_back` (M66) from YAML (found in M66).
 
@@ -1934,8 +1934,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read `_wire_handler`, `_apply`/`_apply_to_control`, `_a11y_props` (a clickable's focus and role), `Interaction.enabled`, and the View's sync points; checked on `tre` that a node's `disabled` still takes clicks and that YAML clickables set no cursor; settled Q1-Q4 above — ✅
 
-### Phase 2 — Disabled Nodes ⬜
-- Step 1: the key and the binding, the click and key guard, focus, cursor, feedback and the look; tests (a fragment button through M69's `bindings:`, a back button on `app.can_go_back`); mutation-checked — ⬜
+### Phase 2 — Disabled Nodes ✅
+- Step 1: the `disabled:` key in `_NODE_KEYS` (a control's sets its own `disabled`, at build and patch) and `build.resting_focus`; in the View, `_sync_disabled` (run with the state layers and Scrollers after every build and patch) and `_show_disabled` (announced disabled, not focusable, faded to `DISABLED_OPACITY` 0.38 of the style's opacity, feedback off; enabled, back to the compiler's focus and the style's opacity), a `disabled` binding on any non-control node, handlers guarded (the click still taken), and `disabled` in `_props_equal` (so removing a control's key reaches it). **Simpler than planned:** a dict of bound values and an `_unwire` fallback turned out to be unobservable -- after every build or patch the sync applies the key and the bindings are applied again straight after -- so they went. New `tests/test_disabled.py` (11): the key, the binding both ways (no click, no focus, no Enter), a disabled child swallowing the click from its clickable parent, the fade from the style's opacity and back, a re-theme, restyle and reconcile keeping it, a dropped binding falling back to the key, a plain node (not a Tab stop when enabled) and a TextField's input, a fragment button through M69's `bindings:`, a back button on `not app.can_go_back.get()`, a control's own `disabled` (and no View fade), and a non-boolean binding named. Mutation-checked, 17/17 (the first run showed the tests had imported the fade constant, and pinned a control's look and a plain node's focus). 2551 → 2562 passed; all five examples clean — ✅
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: the interaction guide and the routing section's back-button advice; the known gap closed — ⬜
