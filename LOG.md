@@ -1581,3 +1581,21 @@ User: "Push and start M62". Pushed M61 as `d78b5bc..234a67b` (CI run
 - 20 tests; 14/14 mutants caught.
 
 1634 passed.
+
+## M63: CSS wide-gamut colours (#16)
+
+User: "push and start M63". Pushed M62 as `234a67b..f49dd36` (CI run
+36524137958 passed), and closed #2.
+
+- `tre` 0.3.5 parses no colour strings, so the reference is 0.3.4's
+  `color` crate (0.3.3). `tesserae._wide_gamut` ports its parser and
+  conversions in `f32`: 170,000 generated strings match a Rust harness
+  on the crate byte for byte, and 711 are recorded from `tre` 0.3.4 as
+  parity data.
+- Out-of-gamut colours clip per channel, as `to_rgba8` did.
+- 42/42 mutants caught, after rebalancing the corpus into gamut and
+  adding near-black inputs where a linear segment decides a byte.
+- Found: `tools/record_tre_reference.py` can't re-record
+  `test_tree_parity` since M56 (a known gap now).
+
+2358 passed.

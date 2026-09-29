@@ -72,13 +72,13 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M60 — A Declarative Node Graph (#7) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M63 — CSS Wide-Gamut Colours (#16) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
+| M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
-**Just closed:** M62 (2026-09-28), pushed as `234a67b..f49dd36` (CI green, #2 closed): `pagination` windows a long run of pages with an ellipsis (`1 … 20 21 22 … 42`). Before it, M61 hot-reloads components in any view (#4).
+**Just closed:** M63 (2026-09-28), done locally: `parse_color` accepts CSS's wide-gamut functions (`oklch()`, `color(display-p3 …)`, …), converted exactly as `tre` 0.3.4 did (#16). Before it, M62 (pushed, #2 closed) windows `pagination` with an ellipsis. 2358 passed.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -92,7 +92,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M63 (#16, CSS wide-gamut colours) is in progress, then M64–M67 as scoped.
+**Up next:** M64 (#11, a `tesserae.widgets.text` wrapper), then M65–M67 as scoped. M63 (#16) is done locally, and #16 closes when it's pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -102,9 +102,9 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 - **`tools/record_tre_reference.py` can't re-record every module:** `test_tree_parity` builds its corpus from every fragment, and fragments added after M46 (M56's `items` parameter) have no sample value, so collection fails on `tre` 0.3.4. Single modules record fine with `TESSERAE_RECORD_TRE=1 pytest tests/<module>.py` (found in M63).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
-- **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
+- ~~**Tesserae's colour parsing rejected CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepted (M37 Phase 1).~~ **Fixed (M63).** `tokens.parse_color` converts them as `tre` 0.3.4's `color` crate did, byte for byte, clipped into sRGB. [#16](https://github.com/mindderivative/tesserae/issues/16), closes once pushed.
 - ~~**`pagination` showed a button for every page**, with no ellipsis for a long run (M42 Phase 5).~~ **Fixed (M62).** Over `max_visible` pages (7) it windows the run into slots with an inert `…` for each run left out. [#2](https://github.com/mindderivative/tesserae/issues/2), closes once pushed.
 - ~~**A component instantiated into a view the app didn't know about wasn't hot-reloaded** (M51).~~ **Fixed (M61).** `tesserae.instantiate` registers each component with its app (weakly), and the watcher finds it in any view on the app's window. [#4](https://github.com/mindderivative/tesserae/issues/4), closes once pushed.
 - ~~**`graph_node` had no declarative form**: a node attaches to its graph's live node, which textual expansion can't express (M25).~~ **Fixed (M60).** `NodeGraph` and `GraphNode` are YAML kinds built with the widgets, with `edges:`, content in a node's body, and reloads that keep user drags. Every MD3 widget can now be declared. [#7](https://github.com/mindderivative/tesserae/issues/7) closed (pushed `392d8d8..d78b5bc`, CI run 36522987253).
@@ -1756,7 +1756,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 63 — CSS Wide-Gamut Colours (#16)
 
-**Status: 🚧 In progress — Phase 2 of 3 done.** User: "push and start M63" (M62 pushed as `234a67b..f49dd36`, CI run 36524137958 passed, and #2 closed). From the backlog order M54 set: [#16](https://github.com/mindderivative/tesserae/issues/16). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** User: "push and start M63" (M62 pushed as `234a67b..f49dd36`, CI run 36524137958 passed, and #2 closed). From the backlog order M54 set: [#16](https://github.com/mindderivative/tesserae/issues/16). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** `tokens.parse_color` rejected `color()`, `lab()`, `lch()`, `oklab()`, `oklch()` and `hwb()`, which `tre`'s parser accepted.
 
@@ -1770,8 +1770,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 2 — The Conversions ✅
 - Step 1: new `src/tesserae/_wide_gamut.py` (the crate's parser for the six functions and its conversions, in `f32`); `tokens.parse_color` routes a string whose leading identifier is one of the six to it. Cross-checked against the crate itself (a scratch Rust harness on `color` 0.3.3, offline): 170,000 generated strings, 170,000 byte-identical, errors included. Tests: `tests/test_tokens.py` gains 51 parity strings (every space, in and out of gamut, `none`, units, alpha, comments, exponents, NaN, near-black cases where a transfer's linear segment decides a byte) and 12 error reasons; new `tests/test_wide_gamut.py` (661): a seeded corpus of 660 strings (40 per `color()` space, mostly in gamut) plus a check that it reaches every space and both ends of the range. `tre` 0.3.4's answers recorded (`tests/reference/test_tokens.json`, additions only; new `tests/reference/test_wide_gamut.json`); `test_wide_gamut` added to `tools/record_tre_reference.py`. Mutation-checked, 42/42 caught (the first run's 13 survivors hid behind clipping and 8-bit rounding: the corpus was rebalanced into gamut, and byte-flipping near-black inputs were found by search and confirmed on the crate; an alpha clamp `_u8`'s saturation made unobservable went). 1634 → 2358 passed with `TRE_SOURCE_DIR` (no skips) — ✅
 
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the themes guide and the colour docs; the known gap closed — ⬜
+### Phase 3 — Docs, Tracker ✅
+- Step 1: a "Colour values" section in the themes-and-fonts guide (every accepted form, clipping, `none`, angle units, the error wording; its examples checked); `docs/design/building-blocks.md`'s colour strings, and why the port is byte-exact. The known gap moved to "Fixed gaps"; `mkdocs build --strict` clean — ✅
 
 ---
 

@@ -190,10 +190,16 @@ against `tre` 0.3.4 by `tests/test_tokens.py`:
   have no `elevation`, and level 1 is exactly the pair `tre`'s docs give;
 - the 15 **type** roles;
 - **colour strings**: hex, CSS names, `transparent`, and CSS Color 4
-  `rgb()`/`hsl()` with alpha.
+  `rgb()`/`hsl()` with alpha, and (M63) the wide-gamut functions,
+  `color()`, `lab()`, `lch()`, `oklab()`, `oklch()` and `hwb()`.
 
-`tre` also accepts CSS's wide-gamut functions (`color()`, `oklch()`, …),
-and Tesserae doesn't yet: it raises a clear error instead.
+The wide-gamut functions are `tre` 0.3.4's own path, ported
+(`tesserae._wide_gamut`): 0.3.4 read colour strings with the `color`
+crate (0.3.3), converted them to sRGB and stored them as 8-bit RGBA,
+clipping each channel. The port keeps that crate's grammar, constants
+and `f32` arithmetic, so its bytes match: `tests/test_wide_gamut.py`
+checks 660 strings against 0.3.4's recorded answers. `tre` 0.3.5 parses
+no colour strings itself; its nodes take RGBA tuples.
 
 ### Theme (M38)
 

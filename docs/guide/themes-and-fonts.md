@@ -78,6 +78,32 @@ upgrading, a screen whose stylesheet sets them may now lay out
 differently. A widget's own inline `style:` always applied, and still
 wins over any rule.
 
+## Colour values
+
+Anywhere a view, stylesheet or theme takes a colour, it takes a string:
+
+- hex, `#RGB`, `#RGBA`, `#RRGGBB` or `#RRGGBBAA`;
+- a CSS colour name, or `transparent`;
+- `rgb()`/`rgba()` and `hsl()`/`hsla()`, with commas or spaces and an
+  optional alpha;
+- CSS Color 4's wide-gamut functions (M63): `oklch()`, `oklab()`,
+  `lch()`, `lab()`, `hwb()`, and `color()` in `srgb`, `srgb-linear`,
+  `display-p3`, `a98-rgb`, `prophoto-rgb`, `rec2020`, `xyz`, `xyz-d50`
+  or `xyz-d65`.
+
+```yaml
+style:
+  background: "oklch(62.8% 0.2577 29.23)"   # sRGB red
+  foreground: "color(display-p3 0.3 0.6 0.2 / 0.8)"
+```
+
+Tesserae renders in sRGB, so a colour outside it is clipped channel by
+channel: `color(display-p3 1 0 0)` paints `#FF0000`. `none` counts as 0,
+and hues take `deg`, `rad`, `grad` or `turn`. These convert exactly as
+`tre` 0.3.4 converted them (the `color` crate it used), down to the byte.
+A string that doesn't parse names the problem, for example `invalid color
+'color(cmyk 0 0 0)': unknown color space`.
+
 ## Transparency: color alpha and `opacity`
 
 Since `tre` 0.3.4, two things work the way they do in CSS:
