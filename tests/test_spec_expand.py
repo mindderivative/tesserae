@@ -170,7 +170,8 @@ def test_extra_keys_at_call_site_are_rejected():
             ],
         }
     )
-    with pytest.raises(ComponentError, match=r"takes only `id:`, `with:`, and `repeat:`"):
+    # `style:` stays refused; since M69 a call also takes its root's handlers, bindings and naming
+    with pytest.raises(ComponentError, match=r"takes `id:`, `with:`, `repeat:`, and `handlers:`.*got \['style'\]"):
         expand_components(yaml_text)
 
 
