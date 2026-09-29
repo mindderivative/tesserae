@@ -1470,3 +1470,16 @@ gaps that would resolve or help other gaps."
 - 23 tests; 13/13 mutants caught.
 
 1517 passed; all five examples clean.
+
+## The backlog, scoped up front as M56-M67
+
+User: "Make sure you are updating the build tracker with the milestones
+before they are started as that is the whole point of the build tracker.
+If possible update the build tracker with all known milestones and
+adjust the scopes as you start them."
+
+- Every remaining backlog item is now a scoped (⬜) milestone in order,
+  M56-M67. Each has its issue, the gap, a draft approach, provisional
+  decisions and draft phases, and gets refined when it starts.
+- The known gaps name their milestone.
+- Saved as a feedback memory: milestones go in before they start.

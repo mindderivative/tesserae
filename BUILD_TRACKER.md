@@ -65,6 +65,18 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M53 — Undocking Panels and the OS's Appearance, on `tre` 0.3.5.2 | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-28) |
 | M54 — An Open Overlay Follows a Window Resize (#1) | `████████⬜⬜` 75% | 🚧 In progress — Phase 2 of 3 done |
 | M55 — Fragment Conditionals and the Text-Only Extended FAB (#8) | `██████████` 100% | ✅ Complete (2026-09-28) |
+| M56 — Per-Item Styling for `repeat:` (#9) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M57 — A Theme's `components:` in the Declarative Cascade (#10) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M58 — A `SpinBox` YAML Control Kind (#5) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M59 — A Declarative Video (#6) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M60 — A Declarative Node Graph (#7) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M61 — Hot Reload for Components in Any View (#4) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M62 — Pagination with an Ellipsis (#2) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M63 — CSS Wide-Gamut Colours (#16) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
 **Just closed:** M53 (2026-09-28), all 4 phases, on `tre` 0.3.5.2: a panel a shell-file edit drops is undocked while the app runs (`Dock.remove_panel`, #3), and `App(dark="system")` starts in the OS's appearance (#17). 1474 → 1489. Before it, Tesserae 0.1.0 was published to PyPI as `tesserae-ui`, and M52 added a declarative app shell.
 
@@ -80,23 +92,23 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** push, then close #1 (M54 Phase 3) and #8. Then #9, per-item styling for `repeat:` on M55's conditionals. After that, M54's order: #10, #5, #6, #7, #4, #2, #16, #11, #13, #12, #14.
+**Up next:** push, then close #1 (M54 Phase 3) and #8. Then the rest of the backlog, each scoped below as a draft (⬜) to be refined when it starts: M56 (#9, per-item styling for `repeat:`), M57 (#10), M58 (#5), M59 (#6), M60 (#7), M61 (#4), M62 (#2), M63 (#16), M64 (#11), M65 (#13), M66 (#12), M67 (#14).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **An open overlay's scrim doesn't follow a window resize**, since it's sized on `open()` (M41 Phase 5): [#1](https://github.com/mindderivative/tesserae/issues/1).
-- **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2).
-- **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4).
-- **The `SpinBox` fragment has no behaviour.** There's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5): [#5](https://github.com/mindderivative/tesserae/issues/5).
-- **Declarative fragments cover 67 of ~68 MD3 widgets, and since M55 `extended_fab`'s text-only shape too.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7)).
-- **`repeat:` can't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` can't be declared with full fidelity (M28): [#9](https://github.com/mindderivative/tesserae/issues/9). `repeat:` is also deliberately not reactive; `tesserae.Repeater` covers runtime-changing lists.
-- **The declarative cascade doesn't consult a theme's `components:` overrides**, which only `tesserae.widgets` use: [#10](https://github.com/mindderivative/tesserae/issues/10).
-- **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11).
-- **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14). These are README's "Explicitly deferred" items.
-- **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16).
+- **An open overlay's scrim doesn't follow a window resize**, since it's sized on `open()` (M41 Phase 5): [#1](https://github.com/mindderivative/tesserae/issues/1) (M54).
+- **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2) (M62).
+- **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4) (M61).
+- **The `SpinBox` fragment has no behaviour.** There's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5): [#5](https://github.com/mindderivative/tesserae/issues/5) (M58).
+- **Declarative fragments cover 67 of ~68 MD3 widgets, and since M55 `extended_fab`'s text-only shape too.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6) (M59)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7) (M60)).
+- **`repeat:` can't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` can't be declared with full fidelity (M28): [#9](https://github.com/mindderivative/tesserae/issues/9) (M56). `repeat:` is also deliberately not reactive; `tesserae.Repeater` covers runtime-changing lists.
+- **The declarative cascade doesn't consult a theme's `components:` overrides**, which only `tesserae.widgets` use: [#10](https://github.com/mindderivative/tesserae/issues/10) (M57).
+- **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
+- **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
+- **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
 - ~~**`extended_fab`'s icon-less shape had no fragment** (deferred in M18).~~ **Fixed (M55).** Fragment params can have defaults, and fragments can use expansion-time `when:` and `{if:, then:, else:}`. The `ExtendedFab*` fragments take an optional `icon`, and `extended_fab(icon=None)` uses the fragment's text-only shape. [#8](https://github.com/mindderivative/tesserae/issues/8), closed once pushed.
@@ -1591,4 +1603,291 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 1 — Conditionals, and the Text-Only FAB ✅
 - Step 1: `spec/expand.py`: `_declared_params` reads defaults; `_resolve_conditionals` runs after `_substitute` in each fragment expansion (a missing or extra key in an `{if:}` is a `ComponentError` naming the fragment and call id); `_truthy`. The four `ExtendedFab*` fragments take `{icon: null}`: the Icon child has `when: "{{ icon }}"`, the padding is `{if:}` (16/20 with an icon, 20/20 without), and `justify_content` centres the text-only shape. `extended_fab` passes `icon` straight through and drops its own edit. `tests/test_fragment_conditionals.py` (23): defaults; `when:` and `{if:}` with and without `else:`; 11 truthiness cases; per item in `repeat:`; malformed conditionals and params named; each of the four variants against the widget, with and without an icon (the children, padding, label position, and the text-only label centred). Mutation-checked, 13/13 caught. 1495 → 1518 (1517 passed, 1 skipped); all five examples clean. Docs: the fragments guide ("Optional params and conditionals", and the extended FAB gone from "What has no fragment yet"). The known gap moved to "Fixed gaps" — ✅
+
+---
+
+## Milestone 56 — Per-Item Styling for `repeat:` (#9)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#9](https://github.com/mindderivative/tesserae/issues/9). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** `repeat:` substitutes each item into a template but can't style one item differently, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` can't be declared with full fidelity: their selected item looks different (M28).
+
+**Draft approach:** Build on M55's expansion-time conditionals. Each `repeat:` item can carry a `selected: true`, and the item fragments pick colours with `{if: "{{ selected }}", then: ..., else: ...}`. That gives a faithful static snapshot. For live selection, a view binds the selected index, and the imperative widgets' `_Selection` stays the runtime path. Then add the five fragments (`Tabs`, `NavigationRail`, `NavigationDrawer`, `ButtonGroup`, `Menu`) and their item fragments.
+
+**Decisions to settle at the start** (provisional):
+- Q1 static selection via per-item `selected:` and `{if:}` (recommended), or an `item.index == selected` expression in the expander
+- Q2 live selection left to the imperative widgets (recommended), or a new binding-driven per-item style
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: settle Q1-Q2 against the five widgets' item specs — ⬜
+
+### Phase 2 — Item Fragments and the Five Widgets ⬜
+- Step 1: `*Item_Component.yaml` with per-item `selected`, the five container fragments, parity tests against the imperative widgets (colours, layout, a11y), mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the fragments guide (the scope-limit section goes), the known gap closed — ⬜
+
+
+---
+
+## Milestone 57 — A Theme's `components:` in the Declarative Cascade (#10)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#10](https://github.com/mindderivative/tesserae/issues/10). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** A theme's `components:` overrides (per-component shape and elevation, `Theme.components`) reach `tesserae.widgets` but not the declarative cascade, so a `*_Component.yaml` fragment in a view ignores them.
+
+**Draft approach:** The expander tags each fragment root with its fragment name (for example `component_of: FabPrimary`). The cascade then takes `corner_radius` and `elevation` from the theme's matching `components:` entry, below the node's own and stylesheet values and above the fragment's defaults. Theme hot reload re-applies it.
+
+**Decisions to settle at the start** (provisional):
+- Q1 a tag the expander adds to a fragment root (recommended), or a name convention on ids
+- Q2 the precedence: node style > stylesheet > theme `components:` > fragment defaults (recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q2; which `components:` keys map to which fragments — ⬜
+
+### Phase 2 — The Cascade Layer ⬜
+- Step 1: the tag, the cascade lookup, theme reload; tests pairing each fragment with its widget under a `components:` override; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the themes and fragments guides; the known gap closed — ⬜
+
+
+---
+
+## Milestone 58 — A `SpinBox` YAML Control Kind (#5)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#5](https://github.com/mindderivative/tesserae/issues/5). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** `SpinBox_Component.yaml` is a composition with no behaviour: its buttons don't step. A view can't have a working spin box, though `controls.SpinBox` gives one from Python.
+
+**Draft approach:** Add `SpinBox` to the compiler's control kinds, built with `controls.SpinBox` as `Checkbox` and `Slider` are: `value`, `min`, `max`, `step`; `value` bindable with `two_way:`; `on_change` wired to the control's.
+
+**Decisions to settle at the start** (provisional):
+- Q1 a `SpinBox` control kind (recommended), and the fragment kept as a thin `kind: SpinBox` or retired
+- Q2 the fields exposed: `value`, `min`, `max`, `step`, `label` (recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q2 — ⬜
+
+### Phase 2 — The Kind ⬜
+- Step 1: `spec/build.py` control kind, patch and reconcile, bindings and `two_way:`; tests like `test_controls_in_views.py`; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the controls and fragments guides; the known gap closed — ⬜
+
+
+---
+
+## Milestone 59 — A Declarative Video (#6)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#6](https://github.com/mindderivative/tesserae/issues/6). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** `video` has no faithful declarative form: `kind: Image` with no `src:` declares the placeholder, but playback needs the app to fetch the node and call `push_frame` itself.
+
+**Draft approach:** A bindable frame: `bindings: {frame: "{{ player.frame.get() }}"}` on an Image (or a `Video` kind), where `frame` is an `(rgba, width, height)` value; the view pushes each new frame. Decoding stays the app's. `tesserae.widgets.video` shares the code.
+
+**Decisions to settle at the start** (provisional):
+- Q1 a `frame` binding on `Image` (recommended), or a new `Video` kind
+- Q2 frames as `(rgba bytes, width, height)` (recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q2; how `push_frame` behaves across a reconcile — ⬜
+
+### Phase 2 — The Frame Binding ⬜
+- Step 1: compiler and view wiring; tests pushing frames through a `Signal`; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the fragments and media docs; the known gap narrowed or closed — ⬜
+
+
+---
+
+## Milestone 60 — A Declarative Node Graph (#7)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#7](https://github.com/mindderivative/tesserae/issues/7). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** `graph_node` has no fragment: a node attaches to its graph's live node, which textual expansion can't express (M25).
+
+**Draft approach:** Since M37 Tesserae's own compiler builds views, so a `NodeGraph` kind whose `children:` are `GraphNode` entries can be built with the live parent at hand. Each node has `x`, `y`, a title and ports; edges are data (`edges: [{from: a.out, to: b.in}]`), drawn by the existing `node_graph` code; positions two-way bindable.
+
+**Decisions to settle at the start** (provisional):
+- Q1 `NodeGraph`/`GraphNode` kinds in the compiler (recommended)
+- Q2 edges as data on the graph node (recommended)
+- Q3 reconcile keyed by node id, keeping positions the user dragged
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q3 against `widgets/media.py`'s node graph — ⬜
+
+### Phase 2 — The Kinds ⬜
+- Step 1: build, patch, reconcile; edges; two-way positions; tests; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the fragments guide; the known gap closed — ⬜
+
+
+---
+
+## Milestone 61 — Hot Reload for Components in Any View (#4)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#4](https://github.com/mindderivative/tesserae/issues/4). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** M51 finds a component's live instances through the app's views (screens, `build_view()`'s, following views). One instantiated into any other view isn't reloaded.
+
+**Draft approach:** Track instances where they're made: `tesserae.instantiate` already tells the running app about a new file, and it can register the instance too (a set pruned when its nodes are gone, as M50's followers are). The watcher's `instances()` reads that set.
+
+**Decisions to settle at the start** (provisional):
+- Q1 register instances at `instantiate` (recommended), or register every view built on an app's window
+- Q2 an instance on a window no app owns stays unwatched, logged once
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q2 — ⬜
+
+### Phase 2 — The Instance Registry ⬜
+- Step 1: `instantiate`, `App._live_components`; tests with a pinned-theme host view; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the hot-reload guide's limits; the known gap closed — ⬜
+
+
+---
+
+## Milestone 62 — Pagination with an Ellipsis (#2)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#2](https://github.com/mindderivative/tesserae/issues/2). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** `pagination` draws a button for every page, which is crowded for dozens of pages.
+
+**Draft approach:** Show the first and last pages, the current page and its neighbours, and a non-interactive `…` for each gap (`1 … 6 7 [8] 9 10 … 42`). A `max_visible=` (about 7) sets when truncation starts; below it nothing changes. The visible buttons are rebuilt as the current page moves, and the arrows, keyboard and `on_change` work over real page numbers.
+
+**Decisions to settle at the start** (provisional):
+- Q1 `max_visible=7` by default (recommended)
+- Q2 the ellipsis hidden from screen readers, with each button labelled by its page (recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q2 against MD3's guidance — ⬜
+
+### Phase 2 — The Windowing ⬜
+- Step 1: `widgets/navigation.py`; tests for the start, middle and end, and short runs; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the widget catalog; the known gap closed — ⬜
+
+
+---
+
+## Milestone 63 — CSS Wide-Gamut Colours (#16)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#16](https://github.com/mindderivative/tesserae/issues/16). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** `tokens.parse_color` rejects `color()`, `lab()`, `lch()`, `oklab()`, `oklch()` and `hwb()`, which `tre`'s parser accepts.
+
+**Draft approach:** Parse the six functions and convert them to sRGB RGBA (CSS Color 4 matrices, clipped into gamut, alpha where given) in a small pure-Python module, matching `tre`'s results for the same strings.
+
+**Decisions to settle at the start** (provisional):
+- Q1 clip to the sRGB gamut, as browsers' simplest fallback (recommended), or map chroma
+- Q2 parity with `tre`'s parser, recorded once as reference data (recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q2; which `color()` spaces — ⬜
+
+### Phase 2 — The Conversions ⬜
+- Step 1: a conversion module, `parse_color`, parity and edge-case tests; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the themes guide; the known gap closed — ⬜
+
+
+---
+
+## Milestone 64 — A `tesserae.widgets.text` Wrapper (#11)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#11](https://github.com/mindderivative/tesserae/issues/11). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** There's no `text(window, content, role=...)`: a bare themed text node from Python means `window.create("text", ...)` with the theme resolved by hand. Low priority.
+
+**Draft approach:** `text(window, content, role="body_medium", color="on_surface", x=, y=)`: a one-node `Widget` from a small `Text_Component.yaml`, so it gets the theme's type role and colour, follows the app's theme (M50), and has `set_text`.
+
+**Decisions to settle at the start** (provisional):
+- Q1 build it (recommended if kept small), or close #11 as not needed
+
+### Phase 1 — Scope and Decision ⬜
+- Step 1: Q1 — ⬜
+
+### Phase 2 — The Wrapper ⬜
+- Step 1: the widget and its fragment; tests; mutation-checked; the widget catalog — ⬜
+
+
+---
+
+## Milestone 65 — An App-Level State Store (#13)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#13](https://github.com/mindderivative/tesserae/issues/13). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** State shared by several screens (the signed-in user, settings, an open document) is passed around by hand, as `examples/multi_screen/` does by giving ViewModels the `app`.
+
+**Draft approach:** `app.state`: a container of `Signal`s and `Computed`s the app defines once, reachable from any ViewModel, and nameable in bindings (`{{ state.user.get() }}`) where a view opts in. It belongs to the `App`, with nothing global.
+
+**Decisions to settle at the start** (provisional):
+- Q1 how a ViewModel gets it without every constructor changing (injection by `load()`, or `self.app.state`)
+- Q2 bindings: an opt-in `state` scope in views (recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: a design note on injection and the binding scope; Q1-Q2 — ⬜
+
+### Phase 2 — The Store ⬜
+- Step 1: `App.state`, injection, the binding scope; tests; mutation-checked — ⬜
+
+### Phase 3 — Docs, Example, Tracker ⬜
+- Step 1: a guide page; `examples/multi_screen/` uses it; the known gap narrowed — ⬜
+
+
+---
+
+## Milestone 66 — Routing: a Back Stack and Deep Links (#12)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** Navigation is `App.show(name)` only: no history, no parameters for a screen, and no URL-style deep links.
+
+**Draft approach:** `app.navigate(name, **params)` pushes onto a history, and `app.back()`/`app.forward()` move through it; `show(name)` stays a jump with no history. A ViewModel takes params through an optional `on_navigated(params)`. Routes as strings (`"notes/42"`) map to names and params, for deep links and saving the last screen. The shell's rail and Alt+Left drive `back()`. Params can live in the state store (M65).
+
+**Decisions to settle at the start** (provisional):
+- Q1 what a route is (a name and params, or a string pattern)
+- Q2 how params reach a ViewModel (`on_navigated`, recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: a design note on routes and params; Q1-Q2 — ⬜
+
+### Phase 2 — History and Params ⬜
+- Step 1: `navigate`, `back`, `forward`, `on_navigated`; tests; mutation-checked — ⬜
+
+### Phase 3 — Routes and Deep Links ⬜
+- Step 1: the route table; the shell's rail and keyboard; tests — ⬜
+
+### Phase 4 — Docs, Example, Tracker ⬜
+- Step 1: a guide page and an example; the known gap narrowed — ⬜
+
+
+---
+
+## Milestone 67 — A `tesserae new` Scaffolding CLI (#14)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#14](https://github.com/mindderivative/tesserae/issues/14). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+
+**The gap:** A new app is assembled by hand, following the naming convention.
+
+**Draft approach:** `tesserae new <name>`: `app.py` and a `Home` View/ViewModel pair, runnable at once; `--shell` adds a shell file and panels (M52); `tesserae add screen <Name>` adds a pair. A `[project.scripts]` entry point. Last, so the templates use everything above.
+
+**Decisions to settle at the start** (provisional):
+- Q1 the commands and flags (recommended: `new`, `new --shell`, `add screen`)
+- Q2 templates packaged with Tesserae (recommended)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q2 — ⬜
+
+### Phase 2 — The CLI ⬜
+- Step 1: argparse, templates, the entry point; tests that generate into `tmp_path` and run the result headlessly — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: a getting-started update; the known gap closed — ⬜
 

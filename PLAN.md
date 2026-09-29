@@ -226,3 +226,5 @@ Phase 5 done, and M52 with it: `examples/app_shell_file/` (in CI), `App.screen`,
 **M53 (2026-09-28):** on `tre` 0.3.5.2, `Dock.remove_panel` and undocking on a shell-file reload (#3), and `dark="system"` starting in the OS's appearance (#17). Pushed; CI passed; #3 and #17 closed.
 
 **Up next:** nothing scoped; the open issues are the backlog.
+
+**Backlog milestones scoped up front (2026-09-28):** at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"), the rest of the backlog is in the tracker as draft-scoped milestones: M56 (#9), M57 (#10), M58 (#5), M59 (#6), M60 (#7), M61 (#4), M62 (#2), M63 (#16), M64 (#11), M65 (#13), M66 (#12), M67 (#14). Each is refined when it starts. M54 (#1) and M55 (#8) are done locally, and their issues close once pushed.
