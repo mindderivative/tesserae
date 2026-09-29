@@ -76,7 +76,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M65 — An App-Level State Store (#13) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
-| M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M67 — A `tesserae new` Scaffolding CLI (#14) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
 **Just closed:** M66 (2026-09-29), done locally: routing -- `navigate`/`back`/`forward` with `on_navigated(params)`, routes and deep links (`route`, `navigate_to`, `location`), the shell's rail navigating, and Alt+Left/Right (#12). Before it, M65 (done locally): an app-level state store (#13). 2410 passed.
@@ -93,13 +93,14 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M67 (#14, a `tesserae new` scaffolding CLI). M64 (#11), M65 (#13) and M66 (#12) are done locally, and their issues close when they're pushed.
+**Up next:** M67 (#14, a `tesserae new` scaffolding CLI) is in progress. M64 (#11), M65 (#13) and M66 (#12) are done locally, and their issues close when they're pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
+- **A fragment call can't take `handlers:`:** a `component:` node takes only `id:`, `with:` and `repeat:`, so a `component: ButtonFilled` in a view can't have an `on_click`. A clickable button in YAML is a `Rect` with `handlers:` and a `Text` child, as the interaction guide shows (found in M67).
 - **A button's `disabled` can't be bound in YAML:** `disabled` binds only on the control kinds (M40: `Checkbox`, `Switch`, `SpinBox`, ...); a button is a `Rect` fragment, so `bindings: {disabled: ...}` on it is refused. A back button can't show `app.can_go_back` from YAML; and a node's own `disabled` only tells assistive technology (it still takes clicks and focus), so greying one out is Python's job for now (found in M66).
 - **`tools/record_tre_reference.py` can't re-record every module:** `test_tree_parity` builds its corpus from every fragment, and fragments added after M46 (M56's `items` parameter) have no sample value, so collection fails on `tre` 0.3.4. Single modules record fine with `TESSERAE_RECORD_TRE=1 pytest tests/<module>.py` (found in M63).
 - **No `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67), README's last "Explicitly deferred" item.
@@ -1850,24 +1851,24 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 67 — A `tesserae new` Scaffolding CLI (#14)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#14](https://github.com/mindderivative/tesserae/issues/14). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: 🚧 In progress — Phase 1 of 3 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#14](https://github.com/mindderivative/tesserae/issues/14). Scoped up front as a draft, refined here as it starts; the recommendations are taken. Last, so its templates use M65's state and M66's routes.
 
 **The gap:** A new app is assembled by hand, following the naming convention.
 
-**Draft approach:** `tesserae new <name>`: `app.py` and a `Home` View/ViewModel pair, runnable at once; `--shell` adds a shell file and panels (M52); `tesserae add screen <Name>` adds a pair. A `[project.scripts]` entry point. Last, so the templates use everything above.
+**Decisions** (recommended, taken):
+- Q1, the commands: `tesserae new <name> [--shell] [--dir PARENT]` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair, runnable at once (`python app.py`, or `python app.py <route>` for a deep link); `--shell` adds `<Name>_Shell.yaml` (a top bar, a rail over `Home` and `Settings`, a status bar) and the `Settings` pair. `tesserae add screen <Name> [--dir DIR]` adds a pair, and adds its import, `load` and route to `app.py` at two marker comments the template leaves there (without them, it prints the lines to add). Neither overwrites a file. `tesserae --version`, and `python -m tesserae` works too.
+- Q2, the templates are packaged with Tesserae (`tesserae/templates/`, `string.Template`, so `{{ }}` bindings pass through untouched), and the generated app uses what M64-M66 added: `App(state=...)` with a greeting every screen can bind, `load()` for every screen, `self.app` in handlers, and routes (`""` for Home, the kebab-case name for a new screen, `settings` for Settings).
+- Q3, the entry point is `[project.scripts] tesserae = "tesserae.cli:main"`; `main(argv)` returns an exit code, and a mistake (a bad name, a folder that isn't empty, a screen that exists) is one line on stderr and exit code 2.
+- Q4, buttons in the templates are the documented clickable `Rect` with a `Text` child: a `component:` call takes only `id:`, `with:` and `repeat:`, so a `component: ButtonFilled` in a view can't have an `on_click` (a known gap now).
 
-**Decisions to settle at the start** (provisional):
-- Q1 the commands and flags (recommended: `new`, `new --shell`, `add screen`)
-- Q2 templates packaged with Tesserae (recommended)
-
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q2 — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read the naming convention, `load`/`load_shell`, the shell-file example, the fragments' call rules (no `handlers:` on a `component:` node) and the packaging (Hatch ships everything under `src/tesserae`); settled Q1-Q4 above — ✅
 
 ### Phase 2 — The CLI ⬜
-- Step 1: argparse, templates, the entry point; tests that generate into `tmp_path` and run the result headlessly — ⬜
+- Step 1: `tesserae/cli.py`, the templates, the entry point and `__main__`; tests that generate into `tmp_path` and run the result headlessly (clicking its button), `add screen` with and without markers, `--shell`, and the errors; mutation-checked — ⬜
 
 ### Phase 3 — Docs, Tracker ⬜
-- Step 1: a getting-started update; the known gap closed — ⬜
+- Step 1: a getting-started page for the CLI; README; the known gap closed — ⬜
 
 
 ---
