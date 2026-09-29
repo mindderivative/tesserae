@@ -63,7 +63,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M51 — Hot Reload for Components Added at Run Time | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-27) |
 | M52 — A Declarative App Shell | `██████████` 100% | ✅ Complete — all 5 phases done (2026-09-28) |
 | M53 — Undocking Panels and the OS's Appearance, on `tre` 0.3.5.2 | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-28) |
-| M54 — An Open Overlay Follows a Window Resize (#1) | `████████⬜⬜` 75% | 🚧 In progress — Phase 2 of 3 done |
+| M54 — An Open Overlay Follows a Window Resize (#1) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M55 — Fragment Conditionals and the Text-Only Extended FAB (#8) | `██████████` 100% | ✅ Complete (2026-09-28) |
 | M56 — Per-Item Styling for `repeat:` (#9) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M57 — A Theme's `components:` in the Declarative Cascade (#10) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
@@ -99,7 +99,6 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **An open overlay's scrim doesn't follow a window resize**, since it's sized on `open()` (M41 Phase 5): [#1](https://github.com/mindderivative/tesserae/issues/1) (M54).
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2) (M62).
 - **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4) (M61).
 - **The `SpinBox` fragment has no behaviour.** There's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5): [#5](https://github.com/mindderivative/tesserae/issues/5) (M58).
@@ -111,7 +110,8 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
-- ~~**`extended_fab`'s icon-less shape had no fragment** (deferred in M18).~~ **Fixed (M55).** Fragment params can have defaults, and fragments can use expansion-time `when:` and `{if:, then:, else:}`. The `ExtendedFab*` fragments take an optional `icon`, and `extended_fab(icon=None)` uses the fragment's text-only shape. [#8](https://github.com/mindderivative/tesserae/issues/8), closed once pushed.
+- ~~**An open overlay's scrim didn't follow a window resize** (M41 Phase 5).~~ **Fixed (M54).** Overlays refit on every `resize` while open, through one shared dispatcher per window (`listeners.listen_window`). [#1](https://github.com/mindderivative/tesserae/issues/1) closed.
+- ~~**`extended_fab`'s icon-less shape had no fragment** (deferred in M18).~~ **Fixed (M55).** Fragment params can have defaults, and fragments can use expansion-time `when:` and `{if:, then:, else:}`. The `ExtendedFab*` fragments take an optional `icon`, and `extended_fab(icon=None)` uses the fragment's text-only shape. [#8](https://github.com/mindderivative/tesserae/issues/8) closed.
 - ~~**Removing a panel from a shell file needed a restart** (M52 Phase 4): `tre` couldn't undock a panel.~~ **Fixed (M53 Phase 2).** `Dock.remove_panel` undocks through `tre` 0.3.5.2's `undock_panel` ([`tre` #16](https://github.com/mindderivative/tre/issues/16)), and a shell-file edit that drops a panel undocks it while the app runs, keeping its screen registered. [#3](https://github.com/mindderivative/tesserae/issues/3) closed.
 - ~~**`App(dark="system")` started dark**, learning the OS's appearance only at its first switch (M38 Q3).~~ **Fixed (M53 Phase 3).** It starts with `tre` 0.3.5.2's `window.get("dark")` ([`tre` #18](https://github.com/mindderivative/tre/issues/18)): at once on Linux, and on the first frame on macOS and Windows. Dark stays the fallback when the OS can't say. [#17](https://github.com/mindderivative/tesserae/issues/17) closed.
 - ~~**Not on PyPI.** `tre` and `tesserae` were both names taken there by unrelated projects.~~ **Fixed (2026-09-28).** Tesserae 0.1.0 is on PyPI as [`tesserae-ui`](https://pypi.org/project/tesserae-ui/) (the wheel and the sdist), depending on `tesserae-engine>=0.3.5.2`, which is `tre` on PyPI ([`tre` #19](https://github.com/mindderivative/tre/issues/19)). It was published by `release.yml` through trusted publishing from the [v0.1.0 release](https://github.com/mindderivative/tesserae/releases/tag/v0.1.0), in run 36501339807: the build, checks, tests (1469 passed) and examples, then the upload after the user approved the `pypi` environment. Checked afterwards: `pip install tesserae-ui` in a fresh venv installed `tesserae-engine` 0.3.5.2, and the counter example ran on it. [#15](https://github.com/mindderivative/tesserae/issues/15) closed.
@@ -1570,7 +1570,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 54 — An Open Overlay Follows a Window Resize (#1)
 
-**Status: 🚧 In progress — Phase 2 of 3 done (2026-09-28).** User: "Start addressing all of the backlog. Begin with bugs and then gaps that would resolve or help other gaps." [#1](https://github.com/mindderivative/tesserae/issues/1) is the backlog's only bug. The recommendations are taken, as the user asked for the whole backlog to be worked through.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** User: "Start addressing all of the backlog. Begin with bugs and then gaps that would resolve or help other gaps." [#1](https://github.com/mindderivative/tesserae/issues/1) is the backlog's only bug. The recommendations are taken, as the user asked for the whole backlog to be worked through.
 
 **The backlog order** (set at M54's start):
 1. The bug, #1.
@@ -1588,14 +1588,14 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 2 — Overlays Follow the Window ✅
 - Step 1: `listeners.listen_window(window, event, fn)` gives each window one dispatcher, held (with the window) while anything listens and dropped when the last listener goes. `Overlay.open()` calls `_fit(*_window_size())`, then `_before_open`, and listens for `resize` while open; `close()` stops listening. `_fit` sizes the `Dialog` scrim, the `_EdgeSheet` scrim and panel height (the slide-in start stays in `_before_open`), and the `Snackbar`'s bottom offset. `tests/test_overlay_resize.py` (6): a dialog's scrim after growing and shrinking, still centred; a side sheet and a drawer open together keep their scrims and edges; the event alone refits; a snackbar stays near the bottom; a closed overlay stops listening, releases the window, and fits the new size when it opens again; `listen_window` shares one dispatcher per window. Mutation-checked, 8/8 caught. The first run had two survivors, both dead code: a sizing-from-the-event branch (`tre` has laid the root out by then, which the first probe had misread) and a stale-id guard in `listen_window` (a live entry holds its window). Both were removed. 1489 → 1495 (1494 passed, 1 skipped); all five examples clean. Docs: the overlays guide and module docstring, and `ARCHITECTURE.md` — ✅
 
-### Phase 3 — Push and Close ⬜
-- Step 1: push; close #1 once CI passes; move its known gap to "Fixed gaps" — ⬜
+### Phase 3 — Push and Close ✅
+- Step 1: pushed `a4ac4c1..9092b53` (with M55 and the backlog scoping; user: "push and start the milestones in order"). CI run 36506034375 passed, with 1516 passed, 6 skipped and five examples clean. #1 and #8 closed with summaries, and #1's known gap moved to "Fixed gaps" — ✅
 
 ---
 
 ## Milestone 55 — Fragment Conditionals and the Text-Only Extended FAB (#8)
 
-**Status: ✅ Complete (2026-09-28).** Second in the backlog order M54 set: [#8](https://github.com/mindderivative/tesserae/issues/8), and the expansion-time conditionals #9 builds on. The recommendations are taken, under the user's "address all of the backlog". #8 closes once this is pushed.
+**Status: ✅ Complete (2026-09-28).** Second in the backlog order M54 set: [#8](https://github.com/mindderivative/tesserae/issues/8), and the expansion-time conditionals #9 builds on. The recommendations are taken, under the user's "address all of the backlog". #8 closed after the push (CI run 36506034375).
 
 **What the source said:** the imperative `extended_fab(icon=None)` removed the icon child and changed the padding and alignment with a Python `edit`, which no fragment could express. The expander's `params:` were all required.
 
