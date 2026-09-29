@@ -8,7 +8,7 @@ Tesserae is pre-alpha, and on PyPI as
 pip install tesserae-ui
 ```
 
-That also installs **`tre` 0.4.0 or newer**, which is on PyPI as
+That also installs **`tre` 0.4.1 or newer**, which is on PyPI as
 [`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (imported
 as `tre`). The rest of this page is for working on Tesserae itself, from
 a local editable checkout.
@@ -18,7 +18,7 @@ a local editable checkout.
 - Python 3.9 or newer
 - Linux, macOS, or Windows -- whatever `tre` itself supports (see
   [`tre`'s own installation guide](https://mindderivative.github.io/tre/installation/)).
-  `tesserae-engine` 0.4.0 has wheels for CPython 3.9–3.15 (and the
+  `tesserae-engine` 0.4.1 has wheels for CPython 3.9–3.15 (and the
   free-threaded 3.14t and 3.15t) on Linux x86_64, CPython 3.9–3.14 on
   macOS arm64 and Windows, and PyPy 3.11 on Linux. Elsewhere (Linux
   aarch64, Intel macOS) pip builds it from the sdist, which needs Rust
@@ -51,7 +51,7 @@ if you also use `tre` directly).
     --manifest-path /path/to/tre/crates/engine-py/Cargo.toml` with
     Tesserae's `.venv` active. From then on your local results follow
     that checkout -- every rebuild changes them -- so go back to the
-    released one (`pip install --force-reinstall "tesserae-engine>=0.4.0"`)
+    released one (`pip install --force-reinstall "tesserae-engine>=0.4.1"`)
     before trusting a test run. A real-font test reads a font file from
     `tre`'s source tree: set `TRE_SOURCE_DIR` to a `tre` checkout to run
     it (CI does).

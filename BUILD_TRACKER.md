@@ -81,6 +81,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M69 — Handlers on a Component Call (#18) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M70 — Binding `disabled` on Any Clickable Node (#19) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
+| M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 1 of 2 done |
 
 **Just closed:** M67 (2026-09-29), done locally: a `tesserae` command, `tesserae new <name> [--shell]` and `tesserae add screen <Name>` (#14). With it the backlog M54 ordered is done: M64 `widgets.text` (#11), M65 shared state (#13), M66 routing (#12), done locally, and M68 the move onto `tre` 0.4.0 (pushed). 2422 passed.
 
@@ -1968,3 +1969,18 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 4 — Docs, Tracker ⬜
 - Step 1: a Layout guide page, the widget catalog's pointers; the known gap narrowed to grids (`tre` #23) — ⬜
+
+
+---
+
+## Milestone 72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20)
+
+**Status: 🚧 In progress — Phase 1 of 2 done.** `tre`'s session reported 0.4.1 released (2026-09-29), closing `tre` #21: `Event.button` is `"back"`/`"forward"` on `pointer_down`/`pointer_up` from a mouse's side buttons, heard on the window's root wherever the pointer is, never a click. Verified before acting: the v0.4.1 release (24 assets), PyPI's 0.4.1 (22 wheels and an sdist), and `tre` #21 closed. The user had asked for this to wait on `tre` ("while we wait for tre to push 0.4.1 with our fixes"), and scoped #20 as small once it shipped. Taken between M71's Phase 2 and 3.
+
+**Draft approach:** Move `.venv`, the floor (`tesserae-engine>=0.4.1`) and CI's `tre` checkout to 0.4.1, and check its changes against Tesserae (a `show_damage` window property; the unknown-name and unknown-button errors list more). Then `App` hears `pointer_down` with `button` `"back"`/`"forward"` on the window's root, next to its Alt+Left/Right listener, and calls `back()`/`forward()`.
+
+### Phase 1 — The Move ✅
+- Step 1: verified (above); `.venv` on 0.4.1; the floor is `tesserae-engine>=0.4.1`; CI's and `release.yml`'s `tre` checkout at `v0.4.1` (Roboto still at the same path). 0.4.1's other changes checked against Tesserae: nothing reads `show_damage` or matches the unknown-name or unknown-button error text. Nothing broke: 2502 passed and all five examples clean. README and `docs/installation.md` name 0.4.1 — ✅
+
+### Phase 2 — The Side Buttons ⬜
+- Step 1: `App`'s listener; tests with `window.simulate("pointer_down", button="back")`; mutation-checked; the routing guide; #20 closed once pushed; report to `tre`'s session — ⬜
