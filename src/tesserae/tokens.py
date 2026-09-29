@@ -31,6 +31,8 @@ from materialyoucolor.hct import Hct
 from materialyoucolor.scheme.scheme_tonal_spot import SchemeTonalSpot
 from PIL import ImageColor
 
+from tesserae import _wide_gamut
+
 __all__ = [
     "BASELINE", "ELEVATION_LEVELS", "baseline_scheme", "ROLES", "SHAPES", "TYPE_SCALE", "TypeStyle", "color_scheme",
     "elevation", "elevation_shadows", "parse_color", "resolve_scheme", "shape", "type_style",
@@ -118,7 +120,7 @@ def color_scheme(seed: RGBA, dark: bool = False) -> dict[str, RGBA]:
 
 
 _FUNC = re.compile(r"^(rgba?|hsla?)\((.*)\)$", re.IGNORECASE)
-_UNSUPPORTED = re.compile(r"^(color|lab|lch|oklab|oklch|hwb)\(", re.IGNORECASE)
+_WIDE_GAMUT = re.compile(r"^(color|lab|lch|oklab|oklch|hwb)(?![a-z0-9_-])", re.IGNORECASE)  # the whole identifier
 
 
 def _alpha(text: str) -> int:
@@ -155,14 +157,17 @@ def parse_color(raw: str) -> RGBA:
     """A colour string as `tre` parses it: hex (`#RGB`, `#RGBA`,
     `#RRGGBB`, `#RRGGBBAA`), a CSS colour name, `transparent`, or
     `rgb()`/`rgba()`/`hsl()`/`hsla()` in CSS Color 4's comma or space
-    syntax with an optional alpha. `tre` also accepts CSS's wide-gamut
-    functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`);
-    Tesserae doesn't yet and says so. Raises `ValueError`."""
+    syntax with an optional alpha, and CSS's wide-gamut functions
+    (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), clipped
+    into sRGB (M63). Raises `ValueError`."""
     text = raw.strip()
     if text.lower() == "transparent":
         return (0, 0, 0, 0)
-    if _UNSUPPORTED.match(text):
-        raise ValueError(f"color {raw!r}: {text.split('(')[0]}() colours aren't supported by Tesserae yet")
+    if _WIDE_GAMUT.match(text):
+        try:
+            return _wide_gamut.parse(text)
+        except ValueError as exc:
+            raise ValueError(f"invalid color {raw!r}: {exc}") from None
     match = _FUNC.match(text)
     if match:
         try:

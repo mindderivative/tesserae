@@ -1,0 +1,5282 @@
+{
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb -0.009447 0.083487 0.83935 / -0.067325%)]#1": {
+  "__tuple__": [
+   0,
+   14,
+   219,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb -0.026068 0.48764 0.73419 / none)]#1": {
+  "__tuple__": [
+   0,
+   125,
+   191,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb -0.044131 0.41626 0.041203)]#1": {
+  "__tuple__": [
+   0,
+   106,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.016777 0.22392 0.61429 / none)]#1": {
+  "__tuple__": [
+   0,
+   54,
+   161,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.031588 0.77805 0.32036 / 0.87516)]#1": {
+  "__tuple__": [
+   0,
+   200,
+   70,
+   223
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.047879 -0.26388 0.95522 / 0.085433%)]#1": {
+  "__tuple__": [
+   42,
+   0,
+   249,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.065403 0.54074 0.72475 / 0.96667)]#1": {
+  "__tuple__": [
+   0,
+   139,
+   188,
+   247
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.070613 0.97753 0.36878 / 0.96421)]#1": {
+  "__tuple__": [
+   0,
+   249,
+   78,
+   246
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.080685 0.97516 0.30087 / 0.026624%)]#1": {
+  "__tuple__": [
+   0,
+   249,
+   51,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.11057 0.51862 0.19117 / none)]#1": {
+  "__tuple__": [
+   0,
+   133,
+   36,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.15066 0.012393 0.36661)]#1": {
+  "__tuple__": [
+   41,
+   0,
+   95,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.16847 0.57873 0.40677 / none)]#1": {
+  "__tuple__": [
+   0,
+   149,
+   101,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.20757 none -0.0057435 / none)]#1": {
+  "__tuple__": [
+   59,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.24863 0.72055 0.40199 / 1.8131%)]#1": {
+  "__tuple__": [
+   0,
+   185,
+   97,
+   5
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.27793 0.16572 0.095761)]#1": {
+  "__tuple__": [
+   78,
+   38,
+   16,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.3039 -0.0071544 0.56983 / none)]#1": {
+  "__tuple__": [
+   90,
+   0,
+   149,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.30555 0.084028 0.49112 / 80.598%)]#1": {
+  "__tuple__": [
+   90,
+   14,
+   129,
+   206
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.40675 0.25275 0.34936 / 0.16322)]#1": {
+  "__tuple__": [
+   116,
+   62,
+   90,
+   42
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.43674 0.95329 0.089143 / none)]#1": {
+  "__tuple__": [
+   0,
+   243,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.48969 -0.0038111 -0.38924 / none)]#1": {
+  "__tuple__": [
+   147,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.49077 0.1275 0.62293 / none)]#1": {
+  "__tuple__": [
+   146,
+   27,
+   163,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.5069 none 0.16619 / 90.755%)]#1": {
+  "__tuple__": [
+   152,
+   0,
+   39,
+   231
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.57227 0.81454 0.51115 / 80.525%)]#1": {
+  "__tuple__": [
+   110,
+   209,
+   127,
+   205
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.59899 0.47059 1.0104 / -1.5021%)]#1": {
+  "__tuple__": [
+   165,
+   121,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.62084 0.095081 none)]#1": {
+  "__tuple__": [
+   185,
+   17,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.62415 -0.18686 0.55159 / none)]#1": {
+  "__tuple__": [
+   189,
+   0,
+   145,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.75077 0.85413 0.06387 / none)]#1": {
+  "__tuple__": [
+   181,
+   219,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.80514 -0.053021 0.52619 / 83.853%)]#1": {
+  "__tuple__": [
+   240,
+   0,
+   138,
+   214
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.81434 0.31922 -0.069759)]#1": {
+  "__tuple__": [
+   238,
+   80,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.81496 0.097513 0.7654 / none)]#1": {
+  "__tuple__": [
+   242,
+   18,
+   200,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.83028 0.21471 0.37096)]#1": {
+  "__tuple__": [
+   245,
+   52,
+   96,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.83764 0.99314 -0.052507 / -0.04693%)]#1": {
+  "__tuple__": [
+   196,
+   253,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.8725 0.56515 0.82038 / none)]#1": {
+  "__tuple__": [
+   246,
+   145,
+   213,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.93382 0.0073328 0.209 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   51,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.94779 0.77071 0.42637)]#1": {
+  "__tuple__": [
+   255,
+   198,
+   103,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.962 0.013388 0.02583 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   1,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.97284 0.79635 0.065639 / none)]#1": {
+  "__tuple__": [
+   255,
+   204,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 0.98973 0.014588 0.67146 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   176,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb 1.3993 0.004531 0.97382)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   253,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(a98-rgb none 0.80544 0.46192)]#1": {
+  "__tuple__": [
+   0,
+   207,
+   113,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 -0.0049102 0.090608 0.78702 / 92.975%)]#1": {
+  "__tuple__": [
+   0,
+   24,
+   209,
+   237
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 -0.084929 0.52101 0.21342 / -0.17856)]#1": {
+  "__tuple__": [
+   0,
+   135,
+   42,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 -0.12672 0.88342 0.35772 / none)]#1": {
+  "__tuple__": [
+   0,
+   229,
+   67,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 -0.21637 0.095884 -0.035885)]#1": {
+  "__tuple__": [
+   0,
+   28,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.030886 0.65872 0.18468 / -0.021571%)]#1": {
+  "__tuple__": [
+   0,
+   171,
+   2,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.045837 0.91942 0.93429 / -0.090854)]#1": {
+  "__tuple__": [
+   0,
+   239,
+   241,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.052983 0.45415 -0.38022 / 103.05%)]#1": {
+  "__tuple__": [
+   0,
+   118,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.053072 0.52115 0.77059)]#1": {
+  "__tuple__": [
+   0,
+   135,
+   202,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.054164 0.71346 none)]#1": {
+  "__tuple__": [
+   0,
+   185,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.059368 0.023772 0.047457 / none)]#1": {
+  "__tuple__": [
+   17,
+   6,
+   12,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.093607 none 0.38473 / 107.18%)]#1": {
+  "__tuple__": [
+   27,
+   0,
+   103,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.098463 0.24743 -0.036533 / -0.13182)]#1": {
+  "__tuple__": [
+   3,
+   64,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.12305 -0.069843 1.1174 / 0.4564)]#1": {
+  "__tuple__": [
+   37,
+   0,
+   255,
+   116
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.13819 0.078785 0.93528 / none)]#1": {
+  "__tuple__": [
+   38,
+   19,
+   248,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.16039 0.29844 -0.31729)]#1": {
+  "__tuple__": [
+   27,
+   77,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.16324 0.65536 0.061756)]#1": {
+  "__tuple__": [
+   0,
+   170,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.21791 0.31033 0.14057 / none)]#1": {
+  "__tuple__": [
+   48,
+   80,
+   29,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.32185 -0.083304 -0.07929)]#1": {
+  "__tuple__": [
+   91,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.34074 0.48473 0.85758)]#1": {
+  "__tuple__": [
+   76,
+   125,
+   226,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.36546 0.96524 none / none)]#1": {
+  "__tuple__": [
+   0,
+   250,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.40895 0.11566 0.84155 / 31.993%)]#1": {
+  "__tuple__": [
+   114,
+   21,
+   223,
+   82
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.42996 0.68876 0.55217)]#1": {
+  "__tuple__": [
+   86,
+   178,
+   138,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.44247 0.35779 0.031398 / none)]#1": {
+  "__tuple__": [
+   117,
+   90,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.4473 -0.018657 0.37564)]#1": {
+  "__tuple__": [
+   125,
+   0,
+   99,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.55458 0.031675 0.0456 / 23.334%)]#1": {
+  "__tuple__": [
+   155,
+   0,
+   0,
+   60
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.57267 0.60028 0.40719 / none)]#1": {
+  "__tuple__": [
+   144,
+   153,
+   97,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.58622 0.5908 0.11049 / none)]#1": {
+  "__tuple__": [
+   149,
+   151,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.60647 0.012379 0.45134 / -0.079368%)]#1": {
+  "__tuple__": [
+   169,
+   0,
+   118,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.64118 0.28351 0.86234)]#1": {
+  "__tuple__": [
+   177,
+   65,
+   228,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.64295 0.33618 0.14516)]#1": {
+  "__tuple__": [
+   176,
+   80,
+   17,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.65013 0.65241 0.20744 / 13.802%)]#1": {
+  "__tuple__": [
+   166,
+   166,
+   4,
+   35
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.67859 none 0.89176 / -0.043448)]#1": {
+  "__tuple__": [
+   190,
+   0,
+   236,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.722 0.031897 0.12151 / 18.581%)]#1": {
+  "__tuple__": [
+   202,
+   0,
+   17,
+   47
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.73184 0.96228 0.88945 / none)]#1": {
+  "__tuple__": [
+   170,
+   247,
+   226,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.85504 0.34601 0.44442 / 90.263%)]#1": {
+  "__tuple__": [
+   236,
+   76,
+   112,
+   230
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 0.87387 0.28917 0.69698)]#1": {
+  "__tuple__": [
+   242,
+   56,
+   182,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 1.141 0.87795 0.27967 / -0.16574)]#1": {
+  "__tuple__": [
+   255,
+   220,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 1.2315 0.46235 0.041702)]#1": {
+  "__tuple__": [
+   255,
+   97,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 1.3653 0.068906 0.32651 / 1.1824)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   66,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(display-p3 none 0.73875 -0.019533 / 0.16041)]#1": {
+  "__tuple__": [
+   0,
+   192,
+   0,
+   41
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb -0.029408 0.81725 0.30487 / none)]#1": {
+  "__tuple__": [
+   0,
+   238,
+   49,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb -0.036579 0.065461 0.94274 / 101.51%)]#1": {
+  "__tuple__": [
+   0,
+   20,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb -0.038039 0.34767 0.030914)]#1": {
+  "__tuple__": [
+   0,
+   119,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb -0.057877 0.34884 0.42595 / 0.074104%)]#1": {
+  "__tuple__": [
+   0,
+   119,
+   131,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.091368 0.9887 0.42091)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   87,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.099189 0.61876 0.88755 / 70.849%)]#1": {
+  "__tuple__": [
+   0,
+   190,
+   240,
+   181
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.11008 -0.058077 0.27476)]#1": {
+  "__tuple__": [
+   30,
+   0,
+   95,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.11287 -0.087816 0.56106)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   172,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.13092 0.78073 0.44117 / 0.75166)]#1": {
+  "__tuple__": [
+   0,
+   229,
+   114,
+   192
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.15771 0.066402 0.68036)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   200,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.18592 0.89837 0.47804 / none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   118,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.2217 0.18789 0.34566 / 0.028269)]#1": {
+  "__tuple__": [
+   66,
+   60,
+   112,
+   7
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.23003 0.046738 -0.036698 / none)]#1": {
+  "__tuple__": [
+   105,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.25159 -0.095695 0.49129 / none)]#1": {
+  "__tuple__": [
+   87,
+   0,
+   154,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.26297 0.32576 none)]#1": {
+  "__tuple__": [
+   83,
+   106,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.30068 0.47605 0.17048 / none)]#1": {
+  "__tuple__": [
+   48,
+   148,
+   20,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.30644 0.7523 0.63711)]#1": {
+  "__tuple__": [
+   0,
+   219,
+   174,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.37059 0.40341 0.64441 / none)]#1": {
+  "__tuple__": [
+   69,
+   124,
+   187,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.37311 -0.088428 0.69451 / 0.044361)]#1": {
+  "__tuple__": [
+   122,
+   0,
+   204,
+   11
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.43521 0.65796 0.57059)]#1": {
+  "__tuple__": [
+   3,
+   192,
+   160,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.47507 0.66238 0.69046 / 87.206%)]#1": {
+  "__tuple__": [
+   47,
+   192,
+   191,
+   222
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.50153 0.032349 -0.092313 / none)]#1": {
+  "__tuple__": [
+   202,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.5115 0.17531 0.41621 / none)]#1": {
+  "__tuple__": [
+   190,
+   0,
+   132,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.54824 -0.047726 0.092729 / 1.0252)]#1": {
+  "__tuple__": [
+   216,
+   0,
+   31,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.55767 0.62172 0.70165 / 107.02%)]#1": {
+  "__tuple__": [
+   134,
+   177,
+   195,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.57372 1.0768 -0.012522)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.58891 0.43892 0.1587 / 95.095%)]#1": {
+  "__tuple__": [
+   205,
+   121,
+   13,
+   242
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.61565 1.0614 0.087578 / 25.378%)]#1": {
+  "__tuple__": [
+   53,
+   255,
+   0,
+   65
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.6311 0.54088 0.90414 / none)]#1": {
+  "__tuple__": [
+   168,
+   150,
+   245,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.63895 0.29694 0.12772)]#1": {
+  "__tuple__": [
+   234,
+   53,
+   21,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.65699 0.9394 0.060128 / 0.43306)]#1": {
+  "__tuple__": [
+   150,
+   254,
+   0,
+   110
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.68561 0.84201 0.87657 / -0.018953)]#1": {
+  "__tuple__": [
+   138,
+   229,
+   231,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.72425 1.1655 -0.042359 / 0.98644)]#1": {
+  "__tuple__": [
+   118,
+   255,
+   0,
+   252
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.72473 -0.07892 0.056444 / 0.035121)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   11,
+   9
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.76275 none -0.033724)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.81057 0.054672 none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.87241 0.18811 -0.057001)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 0.95799 0.24032 0.5852 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   174,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb 1.1306 0.59339 0.20446 / none)]#1": {
+  "__tuple__": [
+   255,
+   122,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(prophoto-rgb none 0.49228 0.18663 / 18.998%)]#1": {
+  "__tuple__": [
+   0,
+   158,
+   31,
+   48
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 -0.024061 0.82038 0.061769 / 0.7752)]#1": {
+  "__tuple__": [
+   0,
+   226,
+   0,
+   198
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 -0.046428 0.67591 0.010212 / 0.053118)]#1": {
+  "__tuple__": [
+   0,
+   191,
+   0,
+   14
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 -0.047705 0.50069 0.043456 / 0.38121)]#1": {
+  "__tuple__": [
+   0,
+   148,
+   0,
+   97
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 -0.066109 0.20236 0.2729)]#1": {
+  "__tuple__": [
+   0,
+   72,
+   87,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 -0.082353 0.22852 0.22213 / none)]#1": {
+  "__tuple__": [
+   0,
+   79,
+   73,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 -0.085832 0.2404 none / none)]#1": {
+  "__tuple__": [
+   0,
+   83,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.001698 -0.091411 0.42521 / 0.39847)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   129,
+   102
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.096922 0.64554 0.50675)]#1": {
+  "__tuple__": [
+   0,
+   183,
+   138,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.099447 -0.027742 0.035605)]#1": {
+  "__tuple__": [
+   56,
+   0,
+   24,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.11849 0.24253 0.070538 / 1.0432)]#1": {
+  "__tuple__": [
+   2,
+   80,
+   25,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.12797 0.025778 -0.012709 / 30.78%)]#1": {
+  "__tuple__": [
+   61,
+   9,
+   0,
+   78
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.18937 0.75279 0.92561)]#1": {
+  "__tuple__": [
+   0,
+   208,
+   243,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.19883 0.32698 0.19297)]#1": {
+  "__tuple__": [
+   34,
+   101,
+   60,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.2154 -0.073528 0.5935 / 57.61%)]#1": {
+  "__tuple__": [
+   83,
+   0,
+   170,
+   147
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.22131 -0.095645 0.14175 / 0.031542%)]#1": {
+  "__tuple__": [
+   96,
+   0,
+   56,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.2465 0.90142 0.73255)]#1": {
+  "__tuple__": [
+   0,
+   244,
+   191,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.26491 0.23965 -0.023544)]#1": {
+  "__tuple__": [
+   89,
+   76,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.33863 0.07558 -0.15496)]#1": {
+  "__tuple__": [
+   126,
+   11,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.39472 0.0083182 0.68205)]#1": {
+  "__tuple__": [
+   136,
+   0,
+   191,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.40359 0.94684 -0.024274 / 0.096316%)]#1": {
+  "__tuple__": [
+   0,
+   254,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.4045 0.30834 0.3873 / none)]#1": {
+  "__tuple__": [
+   128,
+   90,
+   114,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.58027 0.57088 0.054753)]#1": {
+  "__tuple__": [
+   164,
+   156,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.58796 0.60008 0.65265 / -0.0203)]#1": {
+  "__tuple__": [
+   157,
+   163,
+   177,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.59715 0.21785 0.079223 / none)]#1": {
+  "__tuple__": [
+   198,
+   45,
+   20,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.62429 -0.089899 0.052725)]#1": {
+  "__tuple__": [
+   213,
+   0,
+   22,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.66797 0.7004 -0.018067 / none)]#1": {
+  "__tuple__": [
+   180,
+   188,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.68881 0.060161 0.84051 / -0.08408)]#1": {
+  "__tuple__": [
+   222,
+   0,
+   228,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.75677 0.095763 0.464 / 0.51095)]#1": {
+  "__tuple__": [
+   246,
+   0,
+   135,
+   130
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.75679 0.38552 -0.068789 / 49.658%)]#1": {
+  "__tuple__": [
+   238,
+   94,
+   0,
+   127
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.78368 0.16394 0.91164 / none)]#1": {
+  "__tuple__": [
+   248,
+   0,
+   245,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.80544 0.46325 0.794)]#1": {
+  "__tuple__": [
+   243,
+   114,
+   214,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.87314 0.53917 -0.078947)]#1": {
+  "__tuple__": [
+   255,
+   135,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.90412 0.93034 0.18519 / 54.453%)]#1": {
+  "__tuple__": [
+   237,
+   241,
+   0,
+   139
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.92979 0.087489 1.229)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.9358 0.32709 0.59874)]#1": {
+  "__tuple__": [
+   255,
+   45,
+   166,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.94723 0.94692 0.0442 / 74.185%)]#1": {
+  "__tuple__": [
+   251,
+   244,
+   0,
+   189
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.97701 0.076536 0.98087)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 0.99297 0.2387 -0.086541 / 0.0057827)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   1
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 none 0.52642 none / -0.063471%)]#1": {
+  "__tuple__": [
+   0,
+   154,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(rec2020 none 0.55624 0.60479 / 0.64864)]#1": {
+  "__tuple__": [
+   0,
+   161,
+   166,
+   165
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb -0.0021849 0.30494 0.78959)]#1": {
+  "__tuple__": [
+   0,
+   78,
+   201,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb -0.008371 0.055412 0.3677)]#1": {
+  "__tuple__": [
+   0,
+   14,
+   94,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb -0.013979 none 0.50056)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   128,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb -0.093989 -0.039999 0.7466 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   190,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.00055611 0.61127 0.051156)]#1": {
+  "__tuple__": [
+   0,
+   156,
+   13,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.01051 0.043323 -0.078771 / -1.7977%)]#1": {
+  "__tuple__": [
+   3,
+   11,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.014409 0.038189 0.20681 / 0.0064767)]#1": {
+  "__tuple__": [
+   4,
+   10,
+   53,
+   2
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.01875 0.080326 0.29488 / 25.658%)]#1": {
+  "__tuple__": [
+   5,
+   20,
+   75,
+   65
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.039234 0.36646 0.082836 / 54.515%)]#1": {
+  "__tuple__": [
+   10,
+   93,
+   21,
+   139
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.064903 0.047319 0.086953 / none)]#1": {
+  "__tuple__": [
+   17,
+   12,
+   22,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.067037 0.79397 0.48036)]#1": {
+  "__tuple__": [
+   17,
+   202,
+   122,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.091589 0.50233 -0.032291)]#1": {
+  "__tuple__": [
+   23,
+   128,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.12681 0.97908 0.23288 / none)]#1": {
+  "__tuple__": [
+   32,
+   250,
+   59,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.15584 0.53284 0.25342)]#1": {
+  "__tuple__": [
+   40,
+   136,
+   65,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.1934 0.015575 0.92752 / 0.4128)]#1": {
+  "__tuple__": [
+   49,
+   4,
+   237,
+   105
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.23307 0.70443 0.13874 / 0.98583)]#1": {
+  "__tuple__": [
+   59,
+   180,
+   35,
+   251
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.28787 0.46738 0.48714)]#1": {
+  "__tuple__": [
+   73,
+   119,
+   124,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.29759 none 0.429)]#1": {
+  "__tuple__": [
+   76,
+   0,
+   109,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.3322 0.19043 0.9324)]#1": {
+  "__tuple__": [
+   85,
+   49,
+   238,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.34044 none 0.41037 / 95.846%)]#1": {
+  "__tuple__": [
+   87,
+   0,
+   105,
+   244
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.3602 0.62101 0.0043048 / none)]#1": {
+  "__tuple__": [
+   92,
+   158,
+   1,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.36744 0.55374 0.47663)]#1": {
+  "__tuple__": [
+   94,
+   141,
+   122,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.39532 0.096229 -0.030253)]#1": {
+  "__tuple__": [
+   101,
+   25,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.4143 0.42431 0.1848 / 0.73196)]#1": {
+  "__tuple__": [
+   106,
+   108,
+   47,
+   187
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.41943 0.06652 0.66111 / 0.083026)]#1": {
+  "__tuple__": [
+   107,
+   17,
+   169,
+   21
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.46662 0.02868 0.063669)]#1": {
+  "__tuple__": [
+   119,
+   7,
+   16,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.47424 0.93593 0.28688)]#1": {
+  "__tuple__": [
+   121,
+   239,
+   73,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.51479 0.066001 0.027247 / none)]#1": {
+  "__tuple__": [
+   131,
+   17,
+   7,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.53368 0.52323 -0.031105 / 74.016%)]#1": {
+  "__tuple__": [
+   136,
+   133,
+   0,
+   189
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.67376 0.87672 0.022586)]#1": {
+  "__tuple__": [
+   172,
+   224,
+   6,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.67942 0.92324 -0.027759)]#1": {
+  "__tuple__": [
+   173,
+   235,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.72945 0.5339 0.79817)]#1": {
+  "__tuple__": [
+   186,
+   136,
+   204,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.77024 -0.068363 0.92826 / -0.15519)]#1": {
+  "__tuple__": [
+   196,
+   0,
+   237,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.79861 0.10178 none / 80.177%)]#1": {
+  "__tuple__": [
+   204,
+   26,
+   0,
+   204
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.82632 0.28406 0.62851 / none)]#1": {
+  "__tuple__": [
+   211,
+   72,
+   160,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.85033 0.61467 none / none)]#1": {
+  "__tuple__": [
+   217,
+   157,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.90943 0.049992 -0.26694)]#1": {
+  "__tuple__": [
+   232,
+   13,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb 0.95181 0.069342 0.40997 / 0.022613)]#1": {
+  "__tuple__": [
+   243,
+   18,
+   105,
+   6
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb none 0.070217 0.076981 / -0.034356)]#1": {
+  "__tuple__": [
+   0,
+   18,
+   20,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb none 0.43877 0.43273)]#1": {
+  "__tuple__": [
+   0,
+   112,
+   110,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear -0.032089 none 0.32578)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   155,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear -0.039363 0.068705 -0.010378 / 66.12%)]#1": {
+  "__tuple__": [
+   0,
+   74,
+   0,
+   169
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear -0.087567 0.5194 0.68744 / 73.11%)]#1": {
+  "__tuple__": [
+   0,
+   191,
+   216,
+   186
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.011311 0.61867 0.06285 / 94.872%)]#1": {
+  "__tuple__": [
+   28,
+   206,
+   71,
+   242
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.020584 0.21077 0.60138 / none)]#1": {
+  "__tuple__": [
+   39,
+   127,
+   204,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.038189 0.25715 none)]#1": {
+  "__tuple__": [
+   55,
+   139,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.052818 0.51246 0.64374 / none)]#1": {
+  "__tuple__": [
+   65,
+   190,
+   210,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.059544 0.25224 0.56108)]#1": {
+  "__tuple__": [
+   69,
+   138,
+   197,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.064293 0.68038 0.75957 / none)]#1": {
+  "__tuple__": [
+   72,
+   215,
+   226,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.08257 0.10334 0.91149 / none)]#1": {
+  "__tuple__": [
+   81,
+   90,
+   245,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.090448 0.98996 -0.09084)]#1": {
+  "__tuple__": [
+   85,
+   254,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.114 0.7049 0.11096)]#1": {
+  "__tuple__": [
+   95,
+   219,
+   94,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.27159 1.1338 0.70783 / 12.13%)]#1": {
+  "__tuple__": [
+   142,
+   255,
+   219,
+   31
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.28963 0.053729 0.82961 / 49.788%)]#1": {
+  "__tuple__": [
+   147,
+   66,
+   235,
+   127
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.32392 0.066682 0.20285)]#1": {
+  "__tuple__": [
+   154,
+   73,
+   124,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.33689 0.41184 -0.012742)]#1": {
+  "__tuple__": [
+   157,
+   172,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.34987 0.93647 0.27925 / 95.061%)]#1": {
+  "__tuple__": [
+   160,
+   248,
+   144,
+   242
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.37129 0.98132 0.087205 / 0.082345)]#1": {
+  "__tuple__": [
+   164,
+   253,
+   83,
+   21
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.37217 -0.026643 -0.079075)]#1": {
+  "__tuple__": [
+   164,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.41674 0.62157 0.85827 / -0.018698)]#1": {
+  "__tuple__": [
+   173,
+   207,
+   238,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.45805 0.97015 0.38854)]#1": {
+  "__tuple__": [
+   180,
+   252,
+   167,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.46992 0.11608 0.86434)]#1": {
+  "__tuple__": [
+   182,
+   96,
+   239,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.47271 0.15969 0.11322 / 0.97174)]#1": {
+  "__tuple__": [
+   183,
+   111,
+   95,
+   248
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.48226 0.40555 0.18492)]#1": {
+  "__tuple__": [
+   185,
+   171,
+   119,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.48336 0.69285 0.55681 / -0.13712)]#1": {
+  "__tuple__": [
+   185,
+   217,
+   197,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.52753 0.58808 0.045484 / 16.341%)]#1": {
+  "__tuple__": [
+   192,
+   202,
+   60,
+   42
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.58017 none 0.75686 / 0.57921)]#1": {
+  "__tuple__": [
+   200,
+   0,
+   226,
+   148
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.59841 0.075449 -0.088841 / 94.147%)]#1": {
+  "__tuple__": [
+   203,
+   78,
+   0,
+   240
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.6635 0.0083677 0.68412 / 1.1883)]#1": {
+  "__tuple__": [
+   213,
+   23,
+   216,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.70736 0.33969 0.66295 / 107.61%)]#1": {
+  "__tuple__": [
+   219,
+   158,
+   213,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.81251 0.77673 0.087378)]#1": {
+  "__tuple__": [
+   233,
+   228,
+   83,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.82011 0.42524 0.2044 / 13.155%)]#1": {
+  "__tuple__": [
+   234,
+   174,
+   125,
+   34
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.8438 none 0.98381)]#1": {
+  "__tuple__": [
+   237,
+   0,
+   253,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.85958 0.45794 0.15412)]#1": {
+  "__tuple__": [
+   239,
+   180,
+   109,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.87678 0.34814 none / -0.094584)]#1": {
+  "__tuple__": [
+   241,
+   159,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.88614 0.31429 0.36537)]#1": {
+  "__tuple__": [
+   242,
+   152,
+   163,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.89073 0.27672 0.085477)]#1": {
+  "__tuple__": [
+   242,
+   143,
+   83,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 0.91484 0.99675 0.40973 / 24.957%)]#1": {
+  "__tuple__": [
+   245,
+   255,
+   171,
+   64
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear 1.0605 1.0478 0.87141)]#1": {
+  "__tuple__": [
+   255,
+   255,
+   240,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(srgb-linear none 0.64246 0.096192)]#1": {
+  "__tuple__": [
+   0,
+   210,
+   87,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.013236 -0.088467 0.13584 / 109.58%)]#1": {
+  "__tuple__": [
+   44,
+   0,
+   112,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.032789 0.97553 0.61819)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   179,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.033839 -0.03329 -0.033351 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.064504 0.73513 0.84796)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   224,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.066425 0.57381 0.46902 / none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   165,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.08024 0.22872 0.21512)]#1": {
+  "__tuple__": [
+   0,
+   190,
+   116,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.082565 0.67139 none / none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.18132 -0.057489 0.77518)]#1": {
+  "__tuple__": [
+   0,
+   89,
+   234,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz -0.34045 0.28349 0.11352 / -7.4038%)]#1": {
+  "__tuple__": [
+   0,
+   239,
+   59,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.02669 0.094717 0.48971 / none)]#1": {
+  "__tuple__": [
+   0,
+   115,
+   187,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.047609 0.72837 0.02066)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.074349 0.65011 0.17195 / 51.055%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   65,
+   130
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.07949 0.29384 -0.24912 / 1.1062)]#1": {
+  "__tuple__": [
+   0,
+   181,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.12105 -0.049703 0.56256 / none)]#1": {
+  "__tuple__": [
+   120,
+   0,
+   205,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.13693 0.34093 0.022549)]#1": {
+  "__tuple__": [
+   0,
+   189,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.14994 0.40786 0.39404 / none)]#1": {
+  "__tuple__": [
+   0,
+   209,
+   158,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.16397 0.31789 0.40321 / 54.515%)]#1": {
+  "__tuple__": [
+   0,
+   180,
+   164,
+   139
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.27203 0.058028 0.74709 / 0.074625%)]#1": {
+  "__tuple__": [
+   173,
+   0,
+   230,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.27232 0.060053 0.58261 / none)]#1": {
+  "__tuple__": [
+   187,
+   0,
+   206,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.27982 0.61354 0.6491 / 0.057156%)]#1": {
+  "__tuple__": [
+   0,
+   244,
+   200,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.33139 0.22682 0.39763)]#1": {
+  "__tuple__": [
+   192,
+   97,
+   168,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.33915 0.92531 0.53799 / none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   169,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.39397 0.010084 none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.55738 0.32929 0.004386)]#1": {
+  "__tuple__": [
+   255,
+   79,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.58416 0.043463 0.30657 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   159,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.6081 0.58744 0.80302 / -0.01487)]#1": {
+  "__tuple__": [
+   213,
+   195,
+   226,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.62631 0.017681 0.69369 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   227,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.69041 0.039884 0.17223)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   127,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.71289 0.98454 0.63449 / 1.0378)]#1": {
+  "__tuple__": [
+   184,
+   255,
+   189,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.73069 0.040472 0.26617 / 69.611%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   152,
+   178
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.73133 0.85444 1.0221 / 109.19%)]#1": {
+  "__tuple__": [
+   195,
+   248,
+   249,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.76189 0.85073 0.80644)]#1": {
+  "__tuple__": [
+   226,
+   242,
+   221,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.85069 0.82338 0.68238)]#1": {
+  "__tuple__": [
+   255,
+   224,
+   204,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.87721 0.60842 none / 0.38117)]#1": {
+  "__tuple__": [
+   255,
+   147,
+   0,
+   97
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.96007 0.072993 0.21139 / 0.52079)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   140,
+   133
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.97176 none 0.3479)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   174,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 0.99321 0.39936 none / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 1.0062 0.50477 0.70562)]#1": {
+  "__tuple__": [
+   255,
+   3,
+   218,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz 1.262 0.044582 0.47479)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   198,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz none -0.011164 0.51957)]#1": {
+  "__tuple__": [
+   0,
+   2,
+   196,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.028774 0.3006 0.68092 / 0.09433)]#1": {
+  "__tuple__": [
+   0,
+   199,
+   242,
+   24
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.034152 0.67792 0.33138)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   152,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.038435 0.30215 0.79381 / 37.294%)]#1": {
+  "__tuple__": [
+   0,
+   199,
+   255,
+   95
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.051941 0.22353 0.59171)]#1": {
+  "__tuple__": [
+   0,
+   169,
+   229,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.060145 0.16526 0.25809)]#1": {
+  "__tuple__": [
+   0,
+   141,
+   155,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.065441 0.57536 0.26059)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   134,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.065684 0.7533 0.56317 / 0.79529)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   207,
+   203
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.068114 0.94055 0.14228 / -0.035126%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.068872 0.11725 -0.086569 / none)]#1": {
+  "__tuple__": [
+   74,
+   109,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.076452 0.81394 0.53625)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   199,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.078484 0.40378 none / 102.25%)]#1": {
+  "__tuple__": [
+   0,
+   217,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.080075 0.70655 0.39692 / -5.4296%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   170,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.1458 0.91337 0.6646 / 18.064%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   223,
+   46
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.16376 0.76616 0.099349)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.18592 0.59807 0.76761)]#1": {
+  "__tuple__": [
+   0,
+   254,
+   250,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.19907 0.22535 0.83703)]#1": {
+  "__tuple__": [
+   0,
+   141,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.1995 0.68705 0.073852 / none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.27672 -0.063825 0.3692 / 1.125)]#1": {
+  "__tuple__": [
+   230,
+   0,
+   196,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.37162 0.09607 0.26744 / 103.8%)]#1": {
+  "__tuple__": [
+   241,
+   0,
+   166,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.48444 0.012182 -0.04236)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.51537 -0.083134 -0.052488 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.51681 0.90749 5.303e-05 / -0.048307%)]#1": {
+  "__tuple__": [
+   109,
+   255,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.5725 0.22114 0.64112 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   242,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.57611 0.12943 0.014158 / 73.254%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   50,
+   187
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.59407 0.96276 0.48344)]#1": {
+  "__tuple__": [
+   73,
+   255,
+   188,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.61477 0.47708 -0.018539)]#1": {
+  "__tuple__": [
+   255,
+   152,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.63621 -0.088504 0.47392 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   222,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.63779 -0.10836 0.26522 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   178,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.69798 0.0092989 0.49624)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   224,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.75429 0.2266 0.025726 / 88.948%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   55,
+   227
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.78147 -0.091028 0.00884)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   84,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.80956 0.14375 0.73452 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.8384 0.76504 0.50385 / none)]#1": {
+  "__tuple__": [
+   255,
+   213,
+   202,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.91292 0.51857 0.76382 / 101.88%)]#1": {
+  "__tuple__": [
+   255,
+   99,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.93157 0.015135 0.17778)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   152,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.96026 1.2918 0.37361 / 0.74538)]#1": {
+  "__tuple__": [
+   223,
+   255,
+   149,
+   190
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 0.97106 0.045437 0.84303 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 none -0.19139 0.75983)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 none 0.65398 0.97158)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d50 none 0.94091 0.27757)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   116,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 -0.05071 0.077755 0.42243 / 0.79315)]#1": {
+  "__tuple__": [
+   0,
+   127,
+   175,
+   202
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 -0.056241 0.082677 0.033902 / none)]#1": {
+  "__tuple__": [
+   0,
+   127,
+   34,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 -0.060577 0.60516 0.44922 / -1.4015%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   159,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 -0.071028 0.97601 0.82349 / 7.9405%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   213,
+   20
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.0035339 0.58512 0.031431)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.033384 0.29051 -0.17081)]#1": {
+  "__tuple__": [
+   0,
+   188,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.042042 0.98805 none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.055009 0.47756 0.89205 / none)]#1": {
+  "__tuple__": [
+   0,
+   241,
+   237,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.060889 0.19354 0.24626 / none)]#1": {
+  "__tuple__": [
+   0,
+   152,
+   130,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.14717 -0.070455 0.9203 / 49.526%)]#1": {
+  "__tuple__": [
+   100,
+   0,
+   254,
+   126
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.16094 1.0827 0.026199)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.1631 0.23252 none)]#1": {
+  "__tuple__": [
+   115,
+   144,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.20877 0.068347 0.36352 / 79.684%)]#1": {
+  "__tuple__": [
+   168,
+   0,
+   166,
+   203
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.21503 0.23734 0.71822 / 47.042%)]#1": {
+  "__tuple__": [
+   0,
+   141,
+   221,
+   120
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.23349 -0.0014414 0.30848 / none)]#1": {
+  "__tuple__": [
+   204,
+   0,
+   157,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.24455 0.075235 0.87683 / none)]#1": {
+  "__tuple__": [
+   134,
+   0,
+   246,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.24681 0.77255 none / 37.713%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   96
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.24752 0.11353 0.8971)]#1": {
+  "__tuple__": [
+   118,
+   26,
+   248,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.25049 0.48 0.55278)]#1": {
+  "__tuple__": [
+   0,
+   215,
+   188,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.2648 0.075208 -0.069724 / 0.76505)]#1": {
+  "__tuple__": [
+   228,
+   0,
+   0,
+   195
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.28153 0.92394 0.723)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   202,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.3022 0.70259 0.053956 / none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.33354 0.92744 0.16867)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   21,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.35729 0.97048 0.0013608)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.38188 0.67821 0.14063 / 73.67%)]#1": {
+  "__tuple__": [
+   99,
+   244,
+   50,
+   188
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.39464 0.88192 0.66815)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   195,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.59559 0.1069 0.039355 / 1.1533)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   65,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.70207 0.002397 0.091802 / -0.082012)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   103,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.71467 0.43904 0.71898 / none)]#1": {
+  "__tuple__": [
+   255,
+   112,
+   219,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.73574 0.092376 0.96615)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.73843 0.13871 -0.019591)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.75563 0.33265 0.060645)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   55,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.8442 0.79161 0.43477 / 0.23671)]#1": {
+  "__tuple__": [
+   255,
+   216,
+   159,
+   60
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.86004 0.78535 0.21724 / none)]#1": {
+  "__tuple__": [
+   255,
+   211,
+   96,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.86622 0.3902 0.60973 / 77.93%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   205,
+   199
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.88161 0.076948 0.73945 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   233,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.88703 0.75176 -0.071731)]#1": {
+  "__tuple__": [
+   255,
+   195,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.90992 -0.092918 -0.095855)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 0.94998 0.49597 0.78274)]#1": {
+  "__tuple__": [
+   255,
+   58,
+   228,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[color(xyz-d65 1.1953 0.027764 0.24677 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   154,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-149.29 81.555 31.362)]#1": {
+  "__tuple__": [
+   184,
+   184,
+   184,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-167.76 63.013% 94.791)]#1": {
+  "__tuple__": [
+   102,
+   102,
+   102,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-169.28 30.169 80.506 / 90.257%)]#1": {
+  "__tuple__": [
+   70,
+   70,
+   70,
+   230
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-21.159grad 65.116% 98.192% / 54.407%)]#1": {
+  "__tuple__": [
+   102,
+   102,
+   102,
+   139
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-23.399 0.011615 -0.079115 / none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   100,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-233.82 0.049267 96.063% / 0.10256)]#1": {
+  "__tuple__": [
+   0,
+   10,
+   1,
+   26
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-246.6 1.1361 91.136 / 0.19731)]#1": {
+  "__tuple__": [
+   5,
+   23,
+   3,
+   50
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-279.23 -0.0065342 118.96)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-3.8318 -0.074355 5.8049)]#1": {
+  "__tuple__": [
+   240,
+   0,
+   15,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-303.37rad 106.24 69.327%)]#1": {
+  "__tuple__": [
+   154,
+   154,
+   154,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-311.92 none 109.03)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-363.67 34.783 0.071901 / 0.24775)]#1": {
+  "__tuple__": [
+   255,
+   89,
+   99,
+   63
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-372.03 none -0.045936 / 0.074691)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   51,
+   19
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-382.77rad 95.178 101.52)]#1": {
+  "__tuple__": [
+   123,
+   123,
+   123,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-416.62 111.21% 15.456% / none)]#1": {
+  "__tuple__": [
+   224,
+   224,
+   224,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-463.91 72.657 none / -0.048454)]#1": {
+  "__tuple__": [
+   204,
+   185,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-475.95 -0.097246% 32.283 / 96.083%)]#1": {
+  "__tuple__": [
+   11,
+   0,
+   173,
+   245
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-482.11 2.2856 none)]#1": {
+  "__tuple__": [
+   6,
+   15,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-592.82deg -0.63453 69.966 / none)]#1": {
+  "__tuple__": [
+   0,
+   77,
+   8,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-634.09deg 47.053 81.935)]#1": {
+  "__tuple__": [
+   93,
+   93,
+   93,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(-695.84 7.0714 95.179)]#1": {
+  "__tuple__": [
+   18,
+   18,
+   18,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(138.58 -8.3931 87.005)]#1": {
+  "__tuple__": [
+   0,
+   33,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(14.02 64.3 22.793 / -0.10704)]#1": {
+  "__tuple__": [
+   197,
+   172,
+   164,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(159.72 19.362% 97.707 / none)]#1": {
+  "__tuple__": [
+   42,
+   42,
+   42,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(166.05turn 83.544 98.087)]#1": {
+  "__tuple__": [
+   117,
+   117,
+   117,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(169.88 96.387 63.944 / none)]#1": {
+  "__tuple__": [
+   153,
+   153,
+   153,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(186.85 111.16% 0.094123%)]#1": {
+  "__tuple__": [
+   255,
+   255,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(263.64 21.314 -0.022667% / 17.946%)]#1": {
+  "__tuple__": [
+   133,
+   54,
+   255,
+   46
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(28.758turn 94.083 0.38856)]#1": {
+  "__tuple__": [
+   248,
+   240,
+   254,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(304.14 40.55 94.257)]#1": {
+  "__tuple__": [
+   77,
+   77,
+   77,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(318.8 57.433% 20.569 / -4.5844%)]#1": {
+  "__tuple__": [
+   203,
+   146,
+   185,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(322.23 -0.73544 -3.772 / 19.563%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   166,
+   50
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(344.09 3.4963% 12.065 / none)]#1": {
+  "__tuple__": [
+   224,
+   9,
+   66,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(359.53 44.654 10.944 / -0.14924)]#1": {
+  "__tuple__": [
+   227,
+   114,
+   115,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(378.66 -0.031225% -1.4419 / 0.9153)]#1": {
+  "__tuple__": [
+   255,
+   80,
+   0,
+   233
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(422.07deg -0.0371 75.819 / none)]#1": {
+  "__tuple__": [
+   60,
+   62,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(435.78 0.035128 -9.9828 / none)]#1": {
+  "__tuple__": [
+   207,
+   255,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(44.072deg 24.927 0.086903 / 0.61789)]#1": {
+  "__tuple__": [
+   255,
+   204,
+   64,
+   158
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(445 106.76 79.95)]#1": {
+  "__tuple__": [
+   146,
+   146,
+   146,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(467.95 0.045105% 108.59 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(475.97 17.97 109.77)]#1": {
+  "__tuple__": [
+   36,
+   36,
+   36,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(478.48 43.268% 74.278 / 55.183%)]#1": {
+  "__tuple__": [
+   94,
+   94,
+   94,
+   141
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(489.59 57.801 64.827 / -0.020997)]#1": {
+  "__tuple__": [
+   120,
+   120,
+   120,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(552.58turn -7.4931 0.036451)]#1": {
+  "__tuple__": [
+   0,
+   123,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(569.22 84.581% 85.513)]#1": {
+  "__tuple__": [
+   127,
+   127,
+   127,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(624.71 21.292 none)]#1": {
+  "__tuple__": [
+   137,
+   54,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(636.05turn 73.272 68.322)]#1": {
+  "__tuple__": [
+   132,
+   132,
+   132,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(637.64 55.871 9.292 / 0.38688)]#1": {
+  "__tuple__": [
+   198,
+   142,
+   231,
+   99
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(638.36 11.93 91.258 / none)]#1": {
+  "__tuple__": [
+   29,
+   29,
+   29,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(662.23rad none none / none)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   98,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(681.08 -1.536 83.705% / 33.449%)]#1": {
+  "__tuple__": [
+   42,
+   0,
+   26,
+   85
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(681.48 72.281% -0.083178%)]#1": {
+  "__tuple__": [
+   255,
+   184,
+   230,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(685.47 62.893% 27.651)]#1": {
+  "__tuple__": [
+   184,
+   160,
+   174,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(7.9125deg 13.83 none)]#1": {
+  "__tuple__": [
+   255,
+   64,
+   35,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(711.55 37.729 45.239)]#1": {
+  "__tuple__": [
+   140,
+   96,
+   102,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(715.38rad 87.821 0.080873%)]#1": {
+  "__tuple__": [
+   255,
+   224,
+   251,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(none 0.03637 25.079)]#1": {
+  "__tuple__": [
+   191,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(none 0.037371 43.173 / 26.863%)]#1": {
+  "__tuple__": [
+   145,
+   0,
+   0,
+   69
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(none 27.401 2.1094 / 77.334%)]#1": {
+  "__tuple__": [
+   250,
+   70,
+   70,
+   197
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[hwb(none none 53.565 / -0.023898)]#1": {
+  "__tuple__": [
+   118,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-0.016084 -111.21 -38.545% / -0.13056)]#1": {
+  "__tuple__": [
+   0,
+   47,
+   70,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-0.051282% 0.017179% none / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-0.070723% -139.77% -0.028554 / none)]#1": {
+  "__tuple__": [
+   0,
+   58,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-1.3871 -0.062428 -6.3097 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   15,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-2.0949 94.184 102.44 / -0.043808)]#1": {
+  "__tuple__": [
+   102,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-2.3837 -73.106 -87.788%)]#1": {
+  "__tuple__": [
+   0,
+   45,
+   165,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-3.1996 -55.584% -0.033026% / 0.064602%)]#1": {
+  "__tuple__": [
+   0,
+   35,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-6.0559 -48.934 -27.272% / -3.6009%)]#1": {
+  "__tuple__": [
+   0,
+   30,
+   51,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(-6.33% -103.97 none)]#1": {
+  "__tuple__": [
+   0,
+   44,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(0.00036314 155.61% 123.1%)]#1": {
+  "__tuple__": [
+   185,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(0.02501% 48.714 -43.277 / 0.79658)]#1": {
+  "__tuple__": [
+   40,
+   0,
+   65,
+   203
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(0.035005% 21.306% -102.98)]#1": {
+  "__tuple__": [
+   0,
+   4,
+   154,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(0.045564 none 140.75 / 1.1508)]#1": {
+  "__tuple__": [
+   54,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(0.05501% -3.3651% 65.098)]#1": {
+  "__tuple__": [
+   31,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(0.088957 -0.070299 67.85 / 0.90805)]#1": {
+  "__tuple__": [
+   36,
+   0,
+   0,
+   232
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(0.097351 48.81% 102.61 / none)]#1": {
+  "__tuple__": [
+   80,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(14.436 -82.993 -143.55)]#1": {
+  "__tuple__": [
+   0,
+   72,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(16.676 -97.433 79.912% / 0.049955)]#1": {
+  "__tuple__": [
+   0,
+   62,
+   0,
+   13
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(18.469 75.294 115.19 / none)]#1": {
+  "__tuple__": [
+   137,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(18.577 -56.681 -158.3)]#1": {
+  "__tuple__": [
+   0,
+   80,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(22.215 -140.64 -88.429 / 1.0651)]#1": {
+  "__tuple__": [
+   0,
+   86,
+   191,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(26.79 -19.976 -38.002)]#1": {
+  "__tuple__": [
+   0,
+   73,
+   122,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(28.368% 100.22% 1.9555% / 51.846%)]#1": {
+  "__tuple__": [
+   212,
+   0,
+   71,
+   132
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(30.086 -80.013% 65.245)]#1": {
+  "__tuple__": [
+   0,
+   94,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(31.979% 4.0602 -141.9 / none)]#1": {
+  "__tuple__": [
+   0,
+   91,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(34.989% -63.109 7.2121 / 58.267%)]#1": {
+  "__tuple__": [
+   0,
+   103,
+   69,
+   149
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(37.082 0.029155 0.057325)]#1": {
+  "__tuple__": [
+   87,
+   87,
+   87,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(37.837% 27.194 -95.059 / none)]#1": {
+  "__tuple__": [
+   0,
+   81,
+   249,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(42.205 -70.337 -85.699% / none)]#1": {
+  "__tuple__": [
+   0,
+   131,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(44.748 135.65 -111.84)]#1": {
+  "__tuple__": [
+   228,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(47.439 13.308 0.13169)]#1": {
+  "__tuple__": [
+   134,
+   105,
+   113,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(48.916% 0.1534 153.17)]#1": {
+  "__tuple__": [
+   141,
+   114,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(52.081 -47.148 37.043)]#1": {
+  "__tuple__": [
+   22,
+   143,
+   54,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(54.312% -115.63 46.02 / 0.054178%)]#1": {
+  "__tuple__": [
+   0,
+   165,
+   32,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(56.209 -63.485 none / none)]#1": {
+  "__tuple__": [
+   0,
+   161,
+   133,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(56.542 -69.929 -156.04% / -0.0081498)]#1": {
+  "__tuple__": [
+   0,
+   183,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(62.584% 33.046 17.622%)]#1": {
+  "__tuple__": [
+   213,
+   127,
+   114,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(67.697 -36.664% -66.469%)]#1": {
+  "__tuple__": [
+   0,
+   192,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(69.09 109.51 -0.035106 / -0.086868)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   175,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(72.301 -0.079492 0.027233 / 70.786%)]#1": {
+  "__tuple__": [
+   177,
+   177,
+   177,
+   181
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(73.981 38.62 113.66 / 0.90689)]#1": {
+  "__tuple__": [
+   255,
+   151,
+   0,
+   231
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(74.519 -147.82% -36.092)]#1": {
+  "__tuple__": [
+   0,
+   240,
+   246,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(79.865 none -66.324)]#1": {
+  "__tuple__": [
+   113,
+   202,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(87.488 15.104 -132.87)]#1": {
+  "__tuple__": [
+   0,
+   221,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(9.9244 -0.021799% 68.582% / -0.1099)]#1": {
+  "__tuple__": [
+   51,
+   25,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(9.9399 159.11% 0.027565%)]#1": {
+  "__tuple__": [
+   218,
+   0,
+   46,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(93.026 none 156.01 / none)]#1": {
+  "__tuple__": [
+   255,
+   232,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(97.353% 145.57 -0.072583 / 1.0262)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(97.98 -39.898% 9.348 / 0.84456)]#1": {
+  "__tuple__": [
+   127,
+   255,
+   229,
+   215
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(98.025 6.936 -0.67743)]#1": {
+  "__tuple__": [
+   255,
+   245,
+   251,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(98.522% 76.703% 0.073731 / 34.607%)]#1": {
+  "__tuple__": [
+   255,
+   154,
+   255,
+   88
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(99.045 -132.06 -150.2)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none -0.0056599 25.971)]#1": {
+  "__tuple__": [
+   19,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none -121.18 -20.968 / 0.71215)]#1": {
+  "__tuple__": [
+   0,
+   48,
+   32,
+   182
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none -16.179% 91.068)]#1": {
+  "__tuple__": [
+   22,
+   11,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none -4.1028% -50.788%)]#1": {
+  "__tuple__": [
+   0,
+   13,
+   93,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none -75.895 -131.05%)]#1": {
+  "__tuple__": [
+   0,
+   58,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none -79.821 -2.9288 / 0.58795)]#1": {
+  "__tuple__": [
+   0,
+   38,
+   2,
+   150
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none 45.997 8.0494%)]#1": {
+  "__tuple__": [
+   56,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lab(none 61.005 0.014523 / none)]#1": {
+  "__tuple__": [
+   65,
+   0,
+   4,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-0.0065509 144.41 none / 58.253%)]#1": {
+  "__tuple__": [
+   133,
+   0,
+   17,
+   149
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-0.046408 0.098407 none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-0.061199 15.402% -10.462 / 55.923%)]#1": {
+  "__tuple__": [
+   31,
+   0,
+   10,
+   143
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-0.075308 0.04651% -50.756 / -0.064528)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-0.089747% 60.135 427.06rad)]#1": {
+  "__tuple__": [
+   62,
+   0,
+   25,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-0.097181 -6.2169% -67.645 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-1.6927% 179 299.91 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   242,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-2.3618 219.81% 245.35turn / -2.6104%)]#1": {
+  "__tuple__": [
+   0,
+   53,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-3.3886 156.01 none / 0.16426)]#1": {
+  "__tuple__": [
+   143,
+   0,
+   19,
+   42
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-5.4488% 227.37 663.05grad / 24.786%)]#1": {
+  "__tuple__": [
+   0,
+   73,
+   255,
+   63
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(-6.621 177.73% -687.45deg / 32.445%)]#1": {
+  "__tuple__": [
+   177,
+   0,
+   0,
+   83
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(0.033976 148.54 636.33)]#1": {
+  "__tuple__": [
+   0,
+   32,
+   229,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(0.05285 none 375.89 / 15.283%)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   39
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(0.062909 211.31% none)]#1": {
+  "__tuple__": [
+   243,
+   0,
+   39,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(0.063499 54.504 -357.83 / 0.078367%)]#1": {
+  "__tuple__": [
+   61,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(0.075344 227.71 -256.57 / 74.72%)]#1": {
+  "__tuple__": [
+   35,
+   24,
+   0,
+   191
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(10.453 103.18 -36.284)]#1": {
+  "__tuple__": [
+   91,
+   0,
+   117,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(108.17% 186.01% 192.7 / 49.391%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   255,
+   126
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(14.788 10.394 -228.64 / 1.05)]#1": {
+  "__tuple__": [
+   30,
+   40,
+   26,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(17.241% 102.64 -650.88 / 0.55586)]#1": {
+  "__tuple__": [
+   97,
+   0,
+   0,
+   142
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(19.178 120.48% -171.98)]#1": {
+  "__tuple__": [
+   0,
+   76,
+   76,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(2.0067 142.72% -60.6deg)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   248,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(25.361 0.079896 -348.77)]#1": {
+  "__tuple__": [
+   60,
+   60,
+   60,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(29.787 -12.357 -103.13 / 0.51853)]#1": {
+  "__tuple__": [
+   70,
+   70,
+   70,
+   132
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(30.458 78.486 689.55)]#1": {
+  "__tuple__": [
+   143,
+   0,
+   136,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(32.248% 78.362% -148.91 / -0.042632%)]#1": {
+  "__tuple__": [
+   0,
+   102,
+   156,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(33.555 none -655.46 / 103.35%)]#1": {
+  "__tuple__": [
+   79,
+   79,
+   79,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(39.679% 23.97% -200.93rad / none)]#1": {
+  "__tuple__": [
+   138,
+   73,
+   88,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(4.0702% 0.058561 -695.37)]#1": {
+  "__tuple__": [
+   14,
+   14,
+   14,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(40.462 -0.016476 134.61 / 90.029%)]#1": {
+  "__tuple__": [
+   95,
+   95,
+   95,
+   230
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(46.436 -0.0018845 389.61)]#1": {
+  "__tuple__": [
+   110,
+   110,
+   110,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(5.7515 21.274 -156.07 / -0.0026405)]#1": {
+  "__tuple__": [
+   0,
+   27,
+   30,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(50.497 11.52 371.65 / 101.79%)]#1": {
+  "__tuple__": [
+   140,
+   113,
+   117,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(53.749 0.080874 -697.23 / 0.90684)]#1": {
+  "__tuple__": [
+   129,
+   128,
+   128,
+   231
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(54.14% 218.05 none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   145,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(54.959 0.010358 -451.26)]#1": {
+  "__tuple__": [
+   132,
+   132,
+   132,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(61.568 -17.815% -356.34 / none)]#1": {
+  "__tuple__": [
+   149,
+   149,
+   149,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(67.585 228.32 554.85 / 99.797%)]#1": {
+  "__tuple__": [
+   0,
+   221,
+   255,
+   254
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(69.874% 0.058235 323.53grad / 45.92%)]#1": {
+  "__tuple__": [
+   171,
+   171,
+   171,
+   117
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(71.25 145.29 -403.34turn / none)]#1": {
+  "__tuple__": [
+   0,
+   216,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(76.615 11.712 552.28deg / 0.065053%)]#1": {
+  "__tuple__": [
+   164,
+   196,
+   193,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(78.604 75.339 -283.2 / 1.1655)]#1": {
+  "__tuple__": [
+   248,
+   181,
+   42,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(8.5873 208.56 -558.08 / none)]#1": {
+  "__tuple__": [
+   0,
+   67,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(81.766 105.44% 590.6 / 0.4991)]#1": {
+  "__tuple__": [
+   0,
+   246,
+   255,
+   127
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(85.817 51.743 -54.362)]#1": {
+  "__tuple__": [
+   241,
+   196,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(90.865 188.79 -203.07 / 100.97%)]#1": {
+  "__tuple__": [
+   0,
+   255,
+   47,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(92.166 -0.040076% -645.04 / 0.069336)]#1": {
+  "__tuple__": [
+   232,
+   232,
+   232,
+   18
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(92.951 36.056 41.967 / 55.825%)]#1": {
+  "__tuple__": [
+   255,
+   215,
+   190,
+   142
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(93.529 43.542 -330.73)]#1": {
+  "__tuple__": [
+   255,
+   207,
+   198,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(93.82 83.396 -638.11)]#1": {
+  "__tuple__": [
+   255,
+   227,
+   60,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(94.619 64.062% 692.35 / 0.011889)]#1": {
+  "__tuple__": [
+   255,
+   181,
+   255,
+   3
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(95.123 94.024 none)]#1": {
+  "__tuple__": [
+   255,
+   146,
+   246,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(99.348 0.057885 530.39)]#1": {
+  "__tuple__": [
+   253,
+   253,
+   253,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(none 131.53 297.25)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   177,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(none 142.55% -325.14grad / none)]#1": {
+  "__tuple__": [
+   91,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(none 59.269 -519.66)]#1": {
+  "__tuple__": [
+   0,
+   31,
+   33,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(none 69.714% -479.14)]#1": {
+  "__tuple__": [
+   0,
+   32,
+   112,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(none 74.755 -21.541 / 4.8812%)]#1": {
+  "__tuple__": [
+   67,
+   0,
+   44,
+   12
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(none 98.692% 628.32 / 0.86916)]#1": {
+  "__tuple__": [
+   0,
+   30,
+   187,
+   222
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[lch(none none -584.65)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.006136 -0.39406% -0.098981 / 17.463%)]#1": {
+  "__tuple__": [
+   1,
+   0,
+   12,
+   45
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.010565 none -0.43616 / -0.18431)]#1": {
+  "__tuple__": [
+   55,
+   0,
+   150,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.015657 -0.10515% -0.07285 / 0.18991)]#1": {
+  "__tuple__": [
+   1,
+   0,
+   5,
+   48
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.038598 -0.075214% -0.43443 / -0.085187)]#1": {
+  "__tuple__": [
+   54,
+   0,
+   149,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.054822 0.067126 none / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.063549% -0.00082138 0.4851)]#1": {
+  "__tuple__": [
+   0,
+   81,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.067935 0.0055343% -0.065355 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   3,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.077089 0.33557 0.47948% / 32.714%)]#1": {
+  "__tuple__": [
+   25,
+   0,
+   0,
+   83
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(-0.081795 0.31819 -0.04974 / 58.203%)]#1": {
+  "__tuple__": [
+   19,
+   0,
+   0,
+   148
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.0012551% -0.35066 -0.1881 / none)]#1": {
+  "__tuple__": [
+   0,
+   2,
+   53,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.0015245 0.21386 0.0033407 / 0.037603)]#1": {
+  "__tuple__": [
+   9,
+   0,
+   0,
+   10
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.01238 0.30574 -0.23749)]#1": {
+  "__tuple__": [
+   22,
+   0,
+   58,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.021069% -0.42572 -0.29301 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   98,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.035975 -0.26993 none)]#1": {
+  "__tuple__": [
+   0,
+   4,
+   1,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.045044 -0.22201 none / none)]#1": {
+  "__tuple__": [
+   0,
+   3,
+   1,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.065717% 0.17787% 0.013064)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.079042 -0.24683 -0.33625)]#1": {
+  "__tuple__": [
+   44,
+   0,
+   140,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.12531 -0.31423 0.023869% / 0.79952)]#1": {
+  "__tuple__": [
+   0,
+   24,
+   11,
+   204
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.14513 0.058442 0.027492% / none)]#1": {
+  "__tuple__": [
+   27,
+   0,
+   9,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.14645 none 0.22444%)]#1": {
+  "__tuple__": [
+   10,
+   10,
+   10,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.16462 -0.41397 0.039753 / 0.62514)]#1": {
+  "__tuple__": [
+   0,
+   40,
+   0,
+   159
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.19789 -0.082494% -0.045279% / 0.0021449%)]#1": {
+  "__tuple__": [
+   21,
+   22,
+   22,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.23762 -0.055309% -0.1904 / 25.887%)]#1": {
+  "__tuple__": [
+   17,
+   0,
+   118,
+   66
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.25715% 0.1749 -0.44904 / 0.67157)]#1": {
+  "__tuple__": [
+   58,
+   0,
+   151,
+   171
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.261% -0.01933 -0.3641)]#1": {
+  "__tuple__": [
+   41,
+   0,
+   118,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.27836 0.10826 0.051262% / none)]#1": {
+  "__tuple__": [
+   78,
+   3,
+   38,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.31492 -0.13601 0.37629 / none)]#1": {
+  "__tuple__": [
+   74,
+   44,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.34421 -0.22386 0.077819 / 0.020803)]#1": {
+  "__tuple__": [
+   0,
+   86,
+   0,
+   5
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.38528 -0.030797 -0.33736 / 91.973%)]#1": {
+  "__tuple__": [
+   28,
+   0,
+   244,
+   235
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.43627 0.36082 -0.19913)]#1": {
+  "__tuple__": [
+   182,
+   0,
+   178,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.52563 -0.33184% none / 29.336%)]#1": {
+  "__tuple__": [
+   106,
+   107,
+   106,
+   75
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.54541 0.25103 -0.11194 / 0.48496)]#1": {
+  "__tuple__": [
+   198,
+   0,
+   170,
+   124
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.55427 -0.42486 -0.37777 / 37.566%)]#1": {
+  "__tuple__": [
+   0,
+   113,
+   255,
+   96
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.55623 -0.010235% 0.057142 / 0.15733)]#1": {
+  "__tuple__": [
+   128,
+   114,
+   76,
+   40
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.56701 -0.08727 -0.054633 / none)]#1": {
+  "__tuple__": [
+   0,
+   134,
+   154,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.56889% -0.020564 0.21148 / 0.64725)]#1": {
+  "__tuple__": [
+   0,
+   19,
+   0,
+   165
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.58269% -0.46834 -0.24892% / none)]#1": {
+  "__tuple__": [
+   0,
+   22,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.59428 -0.067448 -0.25188 / none)]#1": {
+  "__tuple__": [
+   0,
+   115,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.61154% none 0.034202 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.626 -0.45929 0.43109)]#1": {
+  "__tuple__": [
+   0,
+   189,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.69519 0.31098 -0.13955%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   149,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.70942% 0.018748% -0.21712)]#1": {
+  "__tuple__": [
+   16,
+   0,
+   57,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.71537 -0.021988% -0.49766)]#1": {
+  "__tuple__": [
+   95,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.71686 -0.49312 -0.043182 / none)]#1": {
+  "__tuple__": [
+   0,
+   237,
+   204,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.72293 0.47261 -0.050583%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   154,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.74615 0.3207 -0.23456 / 14.309%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   255,
+   36
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.82146 -0.023876 0.30099)]#1": {
+  "__tuple__": [
+   255,
+   184,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.83011% 0.033921 0.44052 / none)]#1": {
+  "__tuple__": [
+   0,
+   69,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.87171 0.3769% 0.26622 / -0.11175)]#1": {
+  "__tuple__": [
+   255,
+   197,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.89392 0.10709 0.0050353 / 0.66246)]#1": {
+  "__tuple__": [
+   255,
+   190,
+   213,
+   169
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.89818 0.26578 0.27332%)]#1": {
+  "__tuple__": [
+   255,
+   126,
+   213,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.93669% -0.049678 0.031869 / 1.0002)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(0.99518 0.41788% -0.28729 / none)]#1": {
+  "__tuple__": [
+   182,
+   233,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(1.0318% 0.060688% 0.38786)]#1": {
+  "__tuple__": [
+   0,
+   56,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(1.0689 -0.125% 0.37938 / none)]#1": {
+  "__tuple__": [
+   255,
+   228,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(1.0852 -0.034884 -0.16415%)]#1": {
+  "__tuple__": [
+   231,
+   255,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(none -0.077617 0.27761 / 0.72583)]#1": {
+  "__tuple__": [
+   0,
+   32,
+   0,
+   185
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(none 0.27312 0.16616 / 0.5893)]#1": {
+  "__tuple__": [
+   24,
+   2,
+   0,
+   150
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(none 0.41786 -0.27327)]#1": {
+  "__tuple__": [
+   29,
+   0,
+   65,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklab(none none 0.23545)]#1": {
+  "__tuple__": [
+   0,
+   24,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.00017364 -0.03449 568.37rad)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.019915 none 700grad)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.021676 0.41647 -106.04)]#1": {
+  "__tuple__": [
+   43,
+   0,
+   137,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.036478% none 494.3turn / 0.0050159%)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.039432 -0.0027545% -321.36deg)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.042327 0.34254 -11.599rad / 20.948%)]#1": {
+  "__tuple__": [
+   0,
+   33,
+   0,
+   53
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.04339 0.078411% 437.04)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.046686 0.32701 -206.94deg)]#1": {
+  "__tuple__": [
+   0,
+   8,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.074724 0.067672% 186.73rad / 0.10903)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   28
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.084329% 0.49689 -664.06 / none)]#1": {
+  "__tuple__": [
+   0,
+   62,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(-0.087559 0.074735 -0.74937)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.059645 0.47502 -510.14 / 104.76%)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   93,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.061556 0.31895 -343.58 / 29.739%)]#1": {
+  "__tuple__": [
+   51,
+   0,
+   0,
+   76
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.080175 0.016758 232.77 / -0.087376)]#1": {
+  "__tuple__": [
+   0,
+   2,
+   4,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.08637% 0.2672 -670.8 / 0.069399)]#1": {
+  "__tuple__": [
+   4,
+   16,
+   0,
+   18
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.10544% 0.49242 23.302 / 1.0105)]#1": {
+  "__tuple__": [
+   56,
+   0,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.11435 0.36298 -129.43deg / 89.462%)]#1": {
+  "__tuple__": [
+   33,
+   0,
+   126,
+   228
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.18537 0.27267 145.25)]#1": {
+  "__tuple__": [
+   0,
+   36,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.1879% 0.12328 245.31)]#1": {
+  "__tuple__": [
+   2,
+   0,
+   18,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.19241 0.48888% -394.76 / 0.080358%)]#1": {
+  "__tuple__": [
+   21,
+   20,
+   21,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.20133 0.38528 586.67rad / 0.60389)]#1": {
+  "__tuple__": [
+   0,
+   40,
+   0,
+   154
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.20615% 0.35724% 296.26 / none)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.21068 0.090598 666.06 / 0.85462)]#1": {
+  "__tuple__": [
+   35,
+   7,
+   56,
+   218
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.22092% 0.49378 -44.477)]#1": {
+  "__tuple__": [
+   36,
+   0,
+   99,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.24143 0.28774 -114.99 / -0.0062376)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   157,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.30232% 0.21753% -321.67 / -0.039899)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.34864 0.38402 none)]#1": {
+  "__tuple__": [
+   174,
+   0,
+   50,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.39397 0.011749 -310.7 / 67.026%)]#1": {
+  "__tuple__": [
+   76,
+   68,
+   65,
+   171
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.41269 0.44363% -439.53 / 102.78%)]#1": {
+  "__tuple__": [
+   75,
+   75,
+   76,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.41867 0.38367 none / none)]#1": {
+  "__tuple__": [
+   202,
+   0,
+   68,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.42401% 0.38062 -272.96grad / none)]#1": {
+  "__tuple__": [
+   0,
+   46,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.42593 0.29895 -55.01turn)]#1": {
+  "__tuple__": [
+   180,
+   0,
+   83,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.4337 -0.04557 575.69)]#1": {
+  "__tuple__": [
+   81,
+   81,
+   81,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.43849 0.45767 -290.45turn / none)]#1": {
+  "__tuple__": [
+   0,
+   123,
+   171,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.45353 0.36649% -427.5 / none)]#1": {
+  "__tuple__": [
+   86,
+   86,
+   87,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.46168% 0.4478 -49.633)]#1": {
+  "__tuple__": [
+   36,
+   0,
+   99,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.47783 0.39301% -276.88 / none)]#1": {
+  "__tuple__": [
+   93,
+   93,
+   92,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.50074 0.0333 -282.61turn)]#1": {
+  "__tuple__": [
+   90,
+   104,
+   87,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.51389 0.080277 -7.026grad)]#1": {
+  "__tuple__": [
+   139,
+   83,
+   107,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.51542 0.32043% -510.6 / none)]#1": {
+  "__tuple__": [
+   103,
+   104,
+   104,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.53701 0.4068% 362.06grad)]#1": {
+  "__tuple__": [
+   110,
+   109,
+   110,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.55315 -0.00043545% 375.4)]#1": {
+  "__tuple__": [
+   114,
+   114,
+   114,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.5585 0.035701% -189.42)]#1": {
+  "__tuple__": [
+   116,
+   116,
+   116,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.59523% 0.12732 -603.91 / 105.29%)]#1": {
+  "__tuple__": [
+   0,
+   3,
+   0,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.60919 0.23403% none)]#1": {
+  "__tuple__": [
+   131,
+   131,
+   131,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.61277 0.45713 263.44)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   255,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.6392 0.14162 -166.96 / none)]#1": {
+  "__tuple__": [
+   0,
+   165,
+   163,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.65871 0.23924 140.29rad / -4.7066%)]#1": {
+  "__tuple__": [
+   136,
+   161,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.66367% 0.49532 479.81 / none)]#1": {
+  "__tuple__": [
+   0,
+   63,
+   0,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.69777 0.036819 185.98grad)]#1": {
+  "__tuple__": [
+   137,
+   165,
+   153,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.75246 0.063386% -464.5 / none)]#1": {
+  "__tuple__": [
+   174,
+   175,
+   175,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.75601 0.29833 242.72 / -0.11244)]#1": {
+  "__tuple__": [
+   0,
+   182,
+   255,
+   0
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.78334 0.3371 -424.6 / 40.45%)]#1": {
+  "__tuple__": [
+   210,
+   107,
+   255,
+   103
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.79251 0.38666 607.98 / 0.61953)]#1": {
+  "__tuple__": [
+   0,
+   177,
+   255,
+   158
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.82739 0.40672 -366.36 / 80.246%)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   218,
+   205
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.91336% 0.020036 68.075 / 12.895%)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   33
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(0.93052 0.0037416 144.8)]#1": {
+  "__tuple__": [
+   230,
+   233,
+   230,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(1.0914 0.4129 none)]#1": {
+  "__tuple__": [
+   255,
+   0,
+   244,
+   255
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(none -0.061759 -149.89 / 29.915%)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   76
+  ]
+ },
+ "test_the_corpus_parses_as_tre_parses_it[oklch(none -0.082162% 259.04)]#1": {
+  "__tuple__": [
+   0,
+   0,
+   0,
+   255
+  ]
+ }
+}

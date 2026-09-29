@@ -72,13 +72,13 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M60 — A Declarative Node Graph (#7) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M63 — CSS Wide-Gamut Colours (#16) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M63 — CSS Wide-Gamut Colours (#16) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
-**Just closed:** M62 (2026-09-28): `pagination` windows a long run of pages with an ellipsis (`1 … 20 21 22 … 42`, #2), done locally. Before it, M61 (pushed, CI green, #4 closed) hot-reloads components in any view. 1634 passed.
+**Just closed:** M62 (2026-09-28), pushed as `234a67b..f49dd36` (CI green, #2 closed): `pagination` windows a long run of pages with an ellipsis (`1 … 20 21 22 … 42`). Before it, M61 hot-reloads components in any view (#4).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -92,13 +92,14 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M63 (#16, CSS wide-gamut colours), then M64–M67 as scoped. M62 (#2) is done locally, and #2 closes when it's pushed.
+**Up next:** M63 (#16, CSS wide-gamut colours) is in progress, then M64–M67 as scoped.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
+- **`tools/record_tre_reference.py` can't re-record every module:** `test_tree_parity` builds its corpus from every fragment, and fragments added after M46 (M56's `items` parameter) have no sample value, so collection fails on `tre` 0.3.4. Single modules record fine with `TESSERAE_RECORD_TRE=1 pytest tests/<module>.py` (found in M63).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
@@ -1755,25 +1756,22 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 63 — CSS Wide-Gamut Colours (#16)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#16](https://github.com/mindderivative/tesserae/issues/16). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: 🚧 In progress — Phase 2 of 3 done.** User: "push and start M63" (M62 pushed as `234a67b..f49dd36`, CI run 36524137958 passed, and #2 closed). From the backlog order M54 set: [#16](https://github.com/mindderivative/tesserae/issues/16). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
-**The gap:** `tokens.parse_color` rejects `color()`, `lab()`, `lch()`, `oklab()`, `oklch()` and `hwb()`, which `tre`'s parser accepts.
+**The gap:** `tokens.parse_color` rejected `color()`, `lab()`, `lch()`, `oklab()`, `oklch()` and `hwb()`, which `tre`'s parser accepted.
 
-**Draft approach:** Parse the six functions and convert them to sRGB RGBA (CSS Color 4 matrices, clipped into gamut, alpha where given) in a small pure-Python module, matching `tre`'s results for the same strings.
+**What starting found:** `tre` 0.3.5 parses no colour strings at all (its nodes take RGBA tuples; string colours are Tesserae's since M46). "`tre`'s parser" is 0.3.4's: `peniko::color::parse_color(raw).to_alpha_color::<Srgb>()`, the linebender `color` crate 0.3.3, stored by `to_rgba8`. So the target is that crate's exact bytes.
 
-**Decisions to settle at the start** (provisional):
-- Q1 clip to the sRGB gamut, as browsers' simplest fallback (recommended), or map chroma
-- Q2 parity with `tre`'s parser, recorded once as reference data (recommended)
+**Decisions** (recommended, taken): Q1, out-of-gamut colours clip per channel, which is what `to_rgba8`'s saturating `as u8` does, so matching 0.3.4 settles it (no chroma mapping). Q2, parity with 0.3.4, recorded once through `tests/reference.py` in a scratch venv on the `tre-v0.3.4` wheel. Q3, every `color()` space the crate knows: `srgb`, `srgb-linear`, `display-p3`, `a98-rgb`, `prophoto-rgb`, `rec2020`, `xyz`, `xyz-d50`, `xyz-d65`. Q4, a byte-exact port: the crate works in `f32`, so the port rounds each step to `f32` (`+ - * /` rounded from `f64` are exact; the transcendental calls agreed on every input tried), with its grammar (comments, `none`, `deg`/`rad`/`grad`/`turn`, percentages) and its CSS Color 4 § 12.2 rule that a missing channel of an RGB-like space stays 0 in sRGB. Errors carry the crate's reason (`invalid color '…': unknown color space`).
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q2; which `color()` spaces — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: traced `tre`'s colour parsing to 0.3.4's `color` crate (0.3.5 has none); read its parser, conversions and `to_rgba8`; settled Q1-Q4 above — ✅
 
-### Phase 2 — The Conversions ⬜
-- Step 1: a conversion module, `parse_color`, parity and edge-case tests; mutation-checked — ⬜
+### Phase 2 — The Conversions ✅
+- Step 1: new `src/tesserae/_wide_gamut.py` (the crate's parser for the six functions and its conversions, in `f32`); `tokens.parse_color` routes a string whose leading identifier is one of the six to it. Cross-checked against the crate itself (a scratch Rust harness on `color` 0.3.3, offline): 170,000 generated strings, 170,000 byte-identical, errors included. Tests: `tests/test_tokens.py` gains 51 parity strings (every space, in and out of gamut, `none`, units, alpha, comments, exponents, NaN, near-black cases where a transfer's linear segment decides a byte) and 12 error reasons; new `tests/test_wide_gamut.py` (661): a seeded corpus of 660 strings (40 per `color()` space, mostly in gamut) plus a check that it reaches every space and both ends of the range. `tre` 0.3.4's answers recorded (`tests/reference/test_tokens.json`, additions only; new `tests/reference/test_wide_gamut.json`); `test_wide_gamut` added to `tools/record_tre_reference.py`. Mutation-checked, 42/42 caught (the first run's 13 survivors hid behind clipping and 8-bit rounding: the corpus was rebalanced into gamut, and byte-flipping near-black inputs were found by search and confirmed on the crate; an alpha clamp `_u8`'s saturation made unobservable went). 1634 → 2358 passed with `TRE_SOURCE_DIR` (no skips) — ✅
 
 ### Phase 3 — Docs, Tracker ⬜
-- Step 1: the themes guide; the known gap closed — ⬜
-
+- Step 1: the themes guide and the colour docs; the known gap closed — ⬜
 
 ---
 

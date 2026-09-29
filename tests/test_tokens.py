@@ -130,6 +130,44 @@ def test_invalid_colours_raise(raw, message):
         tokens.parse_color(raw)
 
 
-def test_wide_gamut_colours_say_they_arent_supported_yet():
-    with pytest.raises(ValueError, match=r"oklch\(\) colours aren't supported by Tesserae yet"):
-        tokens.parse_color("oklch(0.5 0.1 200)")
+#: M63: CSS Color 4's wide-gamut functions, every `color()` space, in and out of sRGB's gamut
+#: (clipped), with `none`, angle units, percentages, alpha, comments and odd spacing.
+WIDE_GAMUT = [
+    "oklch(0.5 0.1 200)", "oklch(62.8% 0.2577 29.23)", "oklch(70% 0.4 145)", "oklch(0.7 none 30)",
+    "oklch(0.6 0.15 1.2rad)", "oklch(0.6 0.15 0.25turn / 50%)", "OKLCH(0.9 0.05 300grad)",
+    "oklab(0.5 0.1 -0.1)", "oklab(40% 25% -50%)", "oklab(1 0 0)", "oklab(0 0 0 / 0.3)",
+    "lab(50 20 -30)", "lab(100 0 0)", "lab(0% 0 0)", "lab(29.2345% 39.3825 20.0664)", "lab(60 150 -150)",
+    "lch(50 30 270)", "lch(52.2345% 72.2 56.2 / .5)", "lch(80 200 120)", "lch(none 40 none)",
+    "hwb(120 10% 20%)", "hwb(0 100% 100%)", "hwb(200deg 0% 0%)", "hwb(-30 20 30 / 25%)", "hwb(90 60% 60%)",
+    "color(srgb 0.2 0.4 0.6)", "color(srgb-linear 0.5 0.5 0.5)", "color(display-p3 1 0 0)",
+    "color(display-p3 0.3 0.6 0.2 / 0.8)", "color(a98-rgb 0.5 0.2 0.9)", "color(prophoto-rgb 0.4 0.4 0.4)",
+    "color(rec2020 0.1 0.8 0.3)", "color(xyz 0.2 0.3 0.4)", "color(xyz-d50 0.3 0.3 0.2)",
+    "color(xyz-d65 0.9505 1 1.089)", "color(display-p3 none 0.5 0.5)", "color(srgb 120% -10% 50%)",
+    "lab( 50 /* a comment */ 20 -30 )", "oklch(0.5 0.1 200 / none)", " hwb(60 5% 5%) ",
+    "color(srgb 5e-1 2.5E-1 1e0)", "lab(5e1 +20 -3e1)", "color(srgb .5 +.25 -0)", "oklch(0.5 0.1 200 / 1.5)",
+    "color(xyz none -0.5 -0.1)",  # a missing channel stays 0 in sRGB, though X = 0 would make red 234
+    "color(xyz 1e39 1e39 0)",  # infinite, then NaN: a NaN channel is 0
+    "oklch(0.6 50% 120)",  # 100% chroma is 0.4
+    # near black, where each transfer's linear segment decides a byte
+    "color(display-p3 0.03306 0.03306 0.03306)", "color(display-p3 0.00195 0.00195 0.00195)",
+    "color(display-p3 0.00981 0.00981 0.00981)", "color(prophoto-rgb 0.00243 0.00243 0.00243)",
+]
+
+
+@pytest.mark.parametrize("raw", WIDE_GAMUT)
+def test_wide_gamut_colours_parse_as_tre_parses_them(raw):
+    spec = {"id": "r", "kind": "Rect", "style": {"width": 1, "height": 1, "background": raw}}
+    assert tokens.parse_color(raw) == _tre_read(spec, "fill", show=True)
+
+
+@pytest.mark.parametrize("raw, reason", [
+    ("color(cmyk 0 0 0)", "unknown color space"), ("color()", "expected color space identifier"),
+    ("lab(50 20)", "unknown color component"), ("oklch(0.5 0.1 20px)", "unknown angle dimension"),
+    ("hwb(10% 0 0)", "unknown angle"), ("lab(50 20 -30", "expected closing parenthesis"),
+    ("oklab(0.5 0 0) x", "expected end of string"), ("lch(50 /* 30 270)", "unclosed comment"),
+    ("lab (50 20 -30)", "expected arguments"), ("lab(50, 20, -30)", "unknown color component"),
+    ("color(--x 0 0 0)", "expected color space identifier"), ("color(- 0 0 0)", "expected color space identifier"),
+])
+def test_invalid_wide_gamut_colours_say_why(raw, reason):
+    with pytest.raises(ValueError, match=rf"invalid color .*: {reason}$"):
+        tokens.parse_color(raw)
