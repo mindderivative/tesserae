@@ -86,13 +86,12 @@ class NoteViewModel(ViewModel):
   called `name`.
 - `show(name)` pushes nothing and calls no hook; it replaces the current
   entry, so `back()` leaves it for the entry before.
-- `app.can_go_back` and `app.can_go_forward` are `Signal`s, for showing
-  whether a back button would do anything. A back button can simply call
-  `app.back()`, which does nothing (and returns `False`) with nowhere to
-  go. A YAML button's `disabled` can't be bound yet (only controls'
-  can), and setting a node's `disabled` only tells assistive technology
-  -- it still takes clicks -- so follow the signal from Python to change
-  how the button looks.
+- `app.can_go_back` and `app.can_go_forward` are `Signal`s. A back
+  button binds its `disabled` to one (M70), and is greyed out, skipped by
+  Tab and deaf to clicks while there's nowhere to go:
+  `bindings: {disabled: "{{ not app.can_go_back.get() }}"}` (see
+  [Disabled](interaction.md#disabled)). `app.back()` itself does nothing,
+  and returns `False`, with nowhere to go.
 - **Alt+Left** and **Alt+Right** go back and forward, except in a text
   input, where Option+Left moves by word on macOS. So do the mouse's
   **back and forward side buttons**, wherever the pointer is (M72, on

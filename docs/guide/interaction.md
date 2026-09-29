@@ -80,6 +80,43 @@ The opacities are MD3's. The ripple's timing is Material Web's: it grows
 over 450 ms with MD3's standard easing, fades in over 105 ms and fades out
 over 375 ms.
 
+## Disabled
+
+Any node can be disabled (M70), with a `disabled:` key or a binding:
+
+```yaml
+id: root
+kind: Container
+style: {flex_direction: horizontal, gap: 8}
+children:
+  - id: back
+    component: ButtonFilledTonal
+    with: {label: "Back", width: 96, height: 40, corner_radius: 20}
+    handlers: {on_click: "go_back"}
+    bindings: {disabled: "{{ not app.can_go_back.get() }}"}
+    a11y: {label: "Back"}
+  - id: save
+    kind: Rect
+    style: {width: 120, height: 40, background: primary, corner_radius: 20}
+    handlers: {on_click: "save"}
+    disabled: true
+```
+
+While it's disabled a node:
+
+- is announced disabled, and isn't focusable (Tab skips it);
+- shows no state layer, ripple or focus ring;
+- runs none of its handlers. A click on it is still taken, as a disabled
+  button swallows one, so a clickable card behind it doesn't get it;
+- fades to 38% of its style's `opacity` (MD3's disabled content
+  opacity), and returns to it when enabled.
+
+Enabled again, it's focusable as before: a clickable node is a Tab stop,
+a plain one isn't. The state holds through a re-theme, a stylesheet
+change and a reload. A control (`Checkbox`, `Switch`, `SpinBox`, ...)
+takes the same key and binding for its own `disabled`, and draws its own
+disabled look.
+
 ## Labels and roles: `a11y:`
 
 A node's `a11y:` field sets what assistive technology hears:

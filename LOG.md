@@ -1761,3 +1761,24 @@ and #20 closed).
   (an older test pinned the refusal's wording). The chained command's
   `tail` hid pytest's exit code, so commits now check it. The fix is
   the next commit.
+
+## M70: `disabled` on any node (#19)
+
+User: "push and start M70" (pushed `80ef0e9..d9057c3`, CI green; #18
+closed).
+
+- `disabled:` as a node key or a binding on any node. Disabled, a node
+  is announced disabled, isn't focusable, shows no state layer, ripple
+  or ring, runs no handlers (the click is still taken), and fades to 38%
+  of its style's opacity. A control's `disabled` is its own.
+- The View applies it after every build and patch (`_sync_disabled`,
+  beside the state layers and Scrollers). A planned dict of bound values
+  turned out to be unobservable, since bindings are applied again after
+  every patch, so it went.
+- Found: `_props_equal` didn't compare `disabled`, so removing a
+  control's key wouldn't have reached it.
+- Docs: the interaction guide's "Disabled" section. The routing guide's
+  back button is now a binding.
+- 11 tests; 17/17 mutants caught.
+
+2562 passed.
