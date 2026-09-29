@@ -33,7 +33,7 @@ signals.
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 __all__ = ["Computed", "Effect", "Signal", "ViewModel", "batch", "untrack"]
 
@@ -258,6 +258,34 @@ class Effect:
         self._dependencies = []
 
 
+class _FromApp:
+    """`ViewModel.app` and `ViewModel.state` (M65): found through the
+    view's window, the app that owns it (M50's registry). A non-data
+    descriptor, so a ViewModel that sets `self.app` itself keeps its own."""
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        self._name = name
+
+    def __get__(self, viewmodel: Any, owner: Optional[type] = None) -> Any:
+        if viewmodel is None:
+            return self
+        cls = type(viewmodel).__name__
+        view = getattr(viewmodel, "_view", None)
+        if view is None:
+            raise AttributeError(f"{cls}.{self._name}: call super().__init__(view) first, "
+                                 "or find the app with App.of(view)")
+        from tesserae.follow import app_of  # tesserae.follow imports the theme, which imports this
+
+        app = app_of(getattr(view, "window", None))
+        if app is None:
+            raise AttributeError(f"{cls}.{self._name}: its view isn't on an App's window")
+        if self._name == "app":
+            return app
+        if app.state is None:
+            raise AttributeError(f"{cls}.state: the app has no state -- give App(state=...)")
+        return app.state
+
+
 class ViewModel:
     """The object a view's bindings and handlers resolve against.
     Constructing one attaches it to `view`: every declared handler is
@@ -273,7 +301,14 @@ class ViewModel:
                 self.clicks.update(lambda n: n + 1)
 
     `view` is a `tesserae.View` or `Component`.
+
+    On an app's window, `self.app` is the app and `self.state` its shared
+    state (`App(state=...)`, M65), and a binding can read it:
+    `{{ state.user.get() }}`. An attribute the ViewModel sets itself wins.
     """
+
+    app = _FromApp()
+    state = _FromApp()
 
     def __init__(self, view: Any) -> None:
         self._view = view

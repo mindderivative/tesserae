@@ -74,7 +74,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
-| M65 — An App-Level State Store (#13) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
+| M65 — An App-Level State Store (#13) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
@@ -1795,7 +1795,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 65 — An App-Level State Store (#13)
 
-**Status: 🚧 In progress — Phase 1 of 3 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#13](https://github.com/mindderivative/tesserae/issues/13). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 3 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#13](https://github.com/mindderivative/tesserae/issues/13). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** State shared by several screens (the signed-in user, settings, an open document) is passed around by hand: `examples/multi_screen/` gives each ViewModel the `app` through a widened constructor, which `App.load()` can't call.
 
@@ -1806,8 +1806,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read `ViewModel`, `App.load`/`register`, the binding resolver (`getattr` on the ViewModel), `follow.app_of`, and `examples/multi_screen/`; wrote the design and settled Q1-Q4 above — ✅
 
-### Phase 2 — The Store ⬜
-- Step 1: `App(state=)`, `App.of`, `ViewModel.app`/`.state`; tests (shared across screens and components, bindings, a VM's own `app`/`state` winning, the errors); mutation-checked — ⬜
+### Phase 2 — The Store ✅
+- Step 1: `App(state=None)` (and `app.state`), `App.of(view)` (a view, a component or a window), and `ViewModel.app`/`.state` (`reactive._FromApp`, a non-data descriptor resolving through `follow.app_of`). New `tests/test_app_state.py` (9): two screens sharing state through bindings, a ViewModel reaching the app and its state from a handler, state set later and `App.of`, a ViewModel's own `app`/`state` winning, `App.of` before `super().__init__` (and the error without it), no app off an app's window, each app its own state, a component reaching it, and the descriptors on the class. Mutation-checked, 10/10 caught (the first run pinned class-level access, and showed a `__dict__` lookup was no different from `getattr`, so the simpler one stays). 2372 → 2381 passed — ✅
 
 ### Phase 3 — Docs, Example, Tracker ⬜
 - Step 1: a guide section; `examples/multi_screen/` uses `load()` and `self.app` with shared state; the known gap narrowed — ⬜

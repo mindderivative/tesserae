@@ -26,7 +26,7 @@ from loguru import logger
 from tre import App as _TreApp
 from tre import Window
 
-from tesserae.follow import alive, register_app, retheme
+from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.naming import check_naming_convention
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
@@ -141,7 +141,12 @@ class App:
         custom_theme_spec: dict[str, Any] | None = None,
         stylesheet: str | Path | None = None,
         stylesheet_spec: dict[str, Any] | None = None,
+        state: Any = None,
     ) -> None:
+        #: The app's shared state (M65): any object, typically a class of
+        #: `Signal`s every screen reads. A ViewModel reaches it as
+        #: `self.state`, and a binding as `{{ state.<name>.get() }}`.
+        self.state = state
         self._width = width
         self._height = height
         self._title = title
@@ -515,6 +520,13 @@ class App:
         if registered is None:
             raise KeyError(f"no view registered under {name!r} -- call register() first")
         return registered.view, registered.viewmodel
+
+    @classmethod
+    def of(cls, view: Any) -> "App | None":
+        """The live app whose window `view` (a view, a component, or a
+        window) is on, or `None` (M65): for a ViewModel's constructor,
+        before `super().__init__(view)` gives it `self.app`."""
+        return app_of(getattr(view, "window", view))
 
     @property
     def current(self) -> str | None:
