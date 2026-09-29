@@ -73,13 +73,13 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M64 — A `tesserae.widgets.text` Wrapper (#11) | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 1 of 2 done |
+| M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
-**Just closed:** Tesserae moved onto `tre` 0.4.0 (`tesserae-engine>=0.4.0`, 2026-09-29), reported by `tre`'s session and verified (the GitHub release, and 22 wheels plus an sdist on PyPI): 2360 passed and all five examples clean, with nothing broken. Before it, M63 (done locally): `parse_color` accepts CSS's wide-gamut functions, converted exactly as `tre` 0.3.4 did (#16).
+**Just closed:** M64 (2026-09-29), done locally: `tesserae.widgets.text`, plain themed text with a `.content` `Signal` (#11), and every widget now follows its theme's `typography:`. Before it, M68 moved Tesserae onto `tre` 0.4.0 (pushed, CI green, #16 closed). 2372 passed.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -93,7 +93,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M64 (#11, a `tesserae.widgets.text` wrapper) is in progress, then M65 (#13, a state store), M66 (#12, routing) and M67 (#14, a scaffolding CLI).
+**Up next:** M65 (#13, an app-level state store), then M66 (#12, routing) and M67 (#14, a scaffolding CLI). M64 (#11) is done locally, and #11 closes when it's pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -101,10 +101,10 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 
 **Known gaps:**
 - **`tools/record_tre_reference.py` can't re-record every module:** `test_tree_parity` builds its corpus from every fragment, and fragments added after M46 (M56's `items` parameter) have no sample value, so collection fails on `tre` 0.3.4. Single modules record fine with `TESSERAE_RECORD_TRE=1 pytest tests/<module>.py` (found in M63).
-- **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 
 **Fixed gaps:**
+- ~~**No `tesserae.widgets.text` wrapper** for a bare text node.~~ **Fixed (M64).** `widgets.text(window, content, typography_role=, color=)`, from a `Text` fragment, with a `.content` `Signal`; and every widget now follows its theme's `typography:`. [#11](https://github.com/mindderivative/tesserae/issues/11), closes once pushed.
 - ~~**Tesserae's colour parsing rejected CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepted (M37 Phase 1).~~ **Fixed (M63).** `tokens.parse_color` converts them as `tre` 0.3.4's `color` crate did, byte for byte, clipped into sRGB. [#16](https://github.com/mindderivative/tesserae/issues/16), closes once pushed.
 - ~~**`pagination` showed a button for every page**, with no ellipsis for a long run (M42 Phase 5).~~ **Fixed (M62).** Over `max_visible` pages (7) it windows the run into slots with an inert `…` for each run left out. [#2](https://github.com/mindderivative/tesserae/issues/2), closes once pushed.
 - ~~**A component instantiated into a view the app didn't know about wasn't hot-reloaded** (M51).~~ **Fixed (M61).** `tesserae.instantiate` registers each component with its app (weakly), and the watcher finds it in any view on the app's window. [#4](https://github.com/mindderivative/tesserae/issues/4), closes once pushed.
@@ -1778,7 +1778,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 64 — A `tesserae.widgets.text` Wrapper (#11)
 
-**Status: 🚧 In progress — Phase 1 of 2 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0" (pushed as `f49dd36..f9f1147`). From the backlog order M54 set: [#11](https://github.com/mindderivative/tesserae/issues/11). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: ✅ Complete — all 2 phases done (2026-09-29).** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0" (pushed as `f49dd36..f9f1147`). From the backlog order M54 set: [#11](https://github.com/mindderivative/tesserae/issues/11). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** There's no `text(window, content, ...)`: a bare themed text node from Python means `window.create("text", ...)` with the type role and colour resolved by hand, and no re-theming.
 
@@ -1787,8 +1787,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: looked for callers (`create("text")` in `controls.py` and `docking.py`, none suited); read `Widget`, the `Link` fragment and the compiler's text sizing (`natural_size`); settled Q1-Q3 above — ✅
 
-### Phase 2 — The Wrapper ⬜
-- Step 1: the widget and its fragment; tests; mutation-checked; the widget catalog; the known gap closed — ⬜
+### Phase 2 — The Wrapper ✅
+- Step 1: `widgets.text` (in `structural.py`) and `Text_Component.yaml` (`params: [text, {typography_role: body_medium}, {color: on_surface}]`). Two findings while testing: a re-theme restyles a widget from its fragment, so it put the original content back (`text` now re-applies `.content` after each re-colour); and **no widget followed a theme's `typography:`** (`Widget` gave its view the theme's `components:`, M57, but not its type scale), so `Widget` now hands over `type_overrides` too, at build and in `set_theme` (a `link` with the theme's `body_large` is restyled, for instance). New `tests/test_text_widget.py` (10): the defaults and its measured size, type and colour roles and a colour string, `.content` re-measuring, a given width kept while the height follows (multi-line), a re-theme keeping content and taking the type scale, every widget taking it, following the app's theme, destroy, an unknown role, and the fragment in a view with its own defaults. Mutation-checked, 11/11 caught (the first run's survivors pinned the multi-line height and the fragment's default role). Docs: the widget catalog (a paragraph, an example and the table), the themes guide (widgets follow `typography:`), and `ARCHITECTURE.md`'s stale fragment count (67, now 77). 2362 → 2372 passed; all five examples clean; `mkdocs build --strict` clean — ✅
 
 
 ---

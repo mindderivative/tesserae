@@ -1617,3 +1617,19 @@ PyPI's project index lagged, but the version's own page listed them).
 - Docs: the dependency floor, 0.4.0's wheels and sdist (Rust 1.90+),
   `run()`'s headless and GPU behaviour, and partial redraw. Also, the
   themes guide's new example no longer gives text a translucent colour.
+
+## M64: a `tesserae.widgets.text` wrapper (#11)
+
+User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". Pushed
+M63 and the move onto `tre` 0.4.0 as `f49dd36..f9f1147` (CI run
+36526332657 passed on 0.4.0), and closed #16. The move is recorded as M68.
+
+- `widgets.text(window, content, typography_role="body_medium",
+  color="on_surface", width=None)`, from a new `Text` fragment.
+  `.content` is a `Signal` that re-measures the text.
+- Found and fixed: a re-theme put a widget's original fragment content
+  back, and no widget followed a theme's `typography:`. `Widget` now
+  hands its theme's type overrides to its view, as M57 did components.
+- 10 tests; 11/11 mutants caught.
+
+2372 passed.

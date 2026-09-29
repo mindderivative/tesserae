@@ -69,6 +69,7 @@ class Widget:
         self.spec = spec
         self.view = View(spec, window=window, theme_seed=tokens.BASELINE["primary"], frames=frames)
         self.view._layers.components = dict(self.theme.components)  # its theme's shapes (M57)
+        self.view._layers.typography = dict(self.theme.type_overrides)  # and its type scale (M64)
         self.view._use_scheme(self._scheme())
         self.node = self.view.root
         if label is not None:
@@ -137,6 +138,7 @@ class Widget:
         """Re-colours the widget for `theme`, at once."""
         self.theme = theme
         self.view._layers.components = dict(theme.components)  # its theme's shapes (M57)
+        self.view._layers.typography = dict(theme.type_overrides)  # and its type scale (M64)
         self.view._use_scheme(self._scheme())
         for fn in list(self._restyles):
             fn()

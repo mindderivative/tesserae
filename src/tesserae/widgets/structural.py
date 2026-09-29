@@ -283,6 +283,45 @@ def link(
     return widget
 
 
+def text(
+    window: "Window",
+    content: str,
+    typography_role: str = "body_medium",
+    color: str = "on_surface",
+    width: float | None = None,
+    x: float | None = None,
+    y: float | None = None,
+    *,
+    theme: "Theme | None" = None,
+) -> Widget:
+    """Plain text in a type role and a colour of the theme (M64, from the
+    `Text` fragment): `color` is a colour role (`on_surface` by default)
+    or any colour string. `.content` is a `Signal`; setting it re-measures
+    the text in its resolved font, keeping `width` when one was given.
+    It follows the app's theme like the other widgets."""
+    def edit(spec: dict[str, Any]) -> None:
+        if width is not None:
+            spec["style"]["width"] = float(width)
+
+    widget = Widget(window, "Text", {"text": content, "typography_role": typography_role, "color": color},
+                    theme=theme, x=x, y=y, edit=edit, name="text")
+    widget.content = Signal(content)
+
+    def fit() -> None:
+        now = widget.content.get()
+        node = widget.node
+        measured_width, measured_height = window.measure_text(
+            now, font_family=node.get("font_family"), font_size=node.get("font_size"),
+            font_weight=node.get("font_weight"), line_height=node.get("line_height"))
+        node.set(text=now, height=float(measured_height),
+                 **({} if width is not None else {"width": float(measured_width)}))
+
+    effect = Effect(fit)
+    widget._undo.append(effect.dispose)
+    widget.after_theme(fit)  # a re-colour restyles from the fragment, so its content goes back on
+    return widget
+
+
 class _Expandable:
     """The expanded state of an accordion header or tree node: a `Signal`
     toggled by a click, Enter or Space; the chevron turns with it; the

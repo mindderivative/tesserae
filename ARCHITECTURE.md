@@ -578,8 +578,8 @@ before tearing down" ordering.
 
 See `README.md`'s own "Explicitly deferred" section -- app-level
 state/routing beyond `App.show`, a `tesserae new` CLI, PyPI publishing.
-(The widget catalog once listed here is real now: 67 fragments plus
-`tesserae.widgets`.)
+(The widget catalog once listed here is real now: 77 fragments, as of
+M64's `Text`, plus `tesserae.widgets`.)
 `Repeater`'s own real, stated scope boundaries (no reordering, no
 per-item data re-application) are named directly above, not repeated
 here.

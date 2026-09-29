@@ -1,0 +1,12 @@
+# Plain themed text (M64): `tesserae.widgets.text`'s fragment, and usable
+# in a view as `component: Text`. The type role and the colour are the
+# theme's, so a re-theme restyles it; its size is measured from its
+# content (the compiler's `natural_size`) unless a style gives one.
+params: [text, {typography_role: body_medium}, {color: on_surface}]
+id: root
+kind: Text
+text:
+  content: "{{ text }}"
+  typography_role: "{{ typography_role }}"
+style:
+  foreground: "{{ color }}"

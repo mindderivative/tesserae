@@ -33,6 +33,7 @@ from tesserae.widgets.structural import (
     link,
     list_,
     list_item,
+    text,
     tree_node,
 )
 from tesserae.widgets.navigation import (
@@ -104,6 +105,7 @@ __all__ = [
     "status_bar",
     "switch",
     "tabs",
+    "text",
     "time_input_field",
     "time_picker_dial",
     "toolbar",

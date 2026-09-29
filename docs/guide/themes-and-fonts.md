@@ -159,6 +159,10 @@ the theme. A custom theme's entry for a role replaces the default
 theme's entry for that role, rather than merging with it. Re-theming,
 including hot reload of a theme file, updates the text in place.
 
+`tesserae.widgets` follow it too (M64): a widget's text takes its
+theme's type roles, and `set_theme` restyles it. Before M64 widgets
+kept MD3's base scale whatever the theme said.
+
 (`tre` applied a theme's `typography:` only to its imperative widgets,
 never to a view; Tesserae applies it to both.)
 

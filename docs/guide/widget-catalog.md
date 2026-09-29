@@ -162,6 +162,22 @@ and dragging the handle, the arrow keys (5%) and Home and End move it.
 Every function in `tesserae.widgets` is now built by Tesserae; none
 delegates to `tre`.
 
+**Plain text (M64).** `text(window, content, typography_role="body_medium",
+color="on_surface", width=None)` is a line of text in one of the theme's
+type roles and colours: a label beside a switch, a heading over a list.
+`color` is a colour role or any colour string. `.content` is a `Signal`;
+setting it re-measures the text (the height follows it, and a given
+`width` stays), and a re-theme keeps it. In a view it's `component: Text`
+(`with: {text: ..., typography_role: ..., color: ...}`).
+
+```python
+from tesserae.widgets import text
+
+title = text(app.window, "Notes", typography_role="title_large")
+count = text(app.window, "0 notes", color="on_surface_variant")
+count.content.set("3 notes")
+```
+
 ## When to use this vs. a declarative fragment
 
 | | `tesserae.widgets` (this page) | [`component:` fragments](component-fragments.md) |
@@ -183,7 +199,7 @@ constructs) or when it's one of the 3 fragment gaps below.
 | --- | --- |
 | Buttons & Actions | `button`, `icon_button`, `fab`, `extended_fab`, `split_button`, `button_group`, `segmented_button` |
 | Selection & Input | `checkbox`, `radio_button`, `switch`, `slider`, `spin_box` |
-| Cards/Lists/Chips/Structural | `card`, `list_`, `list_item`, `chip`, `badge`, `divider`, `link`, `accordion_header`, `tree_node`, `carousel`, `splitter` |
+| Cards/Lists/Chips/Structural | `card`, `list_`, `list_item`, `chip`, `badge`, `divider`, `link`, `accordion_header`, `tree_node`, `carousel`, `splitter`, `text` |
 | Navigation & Shell | `tabs`, `toolbar`, `top_app_bar`, `status_bar`, `navigation_rail`, `navigation_drawer`, `pagination` |
 | Overlays | `dialog`, `snackbar`, `tooltip`, `popover`, `menu`, `menu_item`, `side_sheet` |
 | Search | `search_bar`, `search_view` |
