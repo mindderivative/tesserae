@@ -11,6 +11,13 @@ It runs the parity tests with `TESSERAE_RECORD_TRE=1`, which makes each
 `reference.tre(fn)` call `fn` and keep its answer. The files are written
 only if every test passes (a mismatch is never written in as `tre`'s
 answer); each module's file is replaced whole.
+
+The corpora a recording builds keep every question asked before, exactly
+as it was asked (`reference.previous`), and add only what's new, so an
+existing answer never changes: the tree corpus reuses each recorded
+case's spec and frames, and the binding corpus each recorded expression.
+Fragments and views `tre` 0.3.4 can't build are left out (`Tabs`, whose
+divider is `width: "100%"`, which 0.3.4's `View` doesn't take).
 """
 
 from __future__ import annotations

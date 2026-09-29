@@ -1682,3 +1682,24 @@ M63 and the move onto `tre` 0.4.0 as `f49dd36..f9f1147` (CI run
 - 12 tests, each running a generated app headlessly; 21/21 mutants caught.
 
 That finishes the backlog M54 ordered. 2422 passed.
+
+## The `tre` 0.3.4 recorder re-records every module again (2026-09-29)
+
+`tools/record_tre_reference.py` failed collecting `test_tree_parity`:
+fragments added after M46 had no sample values (`items`, `item_width`),
+and a defaulted param (M55) would have crashed the lookup.
+
+- Required params come from `VALUES`, and `items:` per fragment.
+- `tre` gets specs without the `component_of` tag (M57), and new cases
+  are recorded without it.
+- While recording, each corpus keeps every question it asked before
+  (`reference.previous`) and adds only new ones. Keys are positions (a
+  doc's nth block), so rebuilding them from edited files would have
+  given old keys new questions.
+- Binding expressions rooted at M65's `app`/`state` aren't asked of `tre`.
+
+Recorded on `tre` 0.3.4 (1357 passed). Every existing answer is
+identical, key by key in all eight files: +27 tree cases (8 example
+views, 9 fragments, 10 inline views) and +33 binding expressions.
+`Tabs` stays out: its `width: "100%"` divider is beyond 0.3.4's `View`.
+The main suite on 0.4.0 has 2482 passed.

@@ -153,14 +153,21 @@ DESIGNED = [
 ]
 
 
+#: A name every ViewModel has since M65 (`self.app`, `self.state`), which
+#: `tre` never had, so it isn't the reference for an expression rooted there.
+_TESSERAE_NAMES = re.compile(r"(?<![\w.])(app|state)\b")
+
+
 def _repo_bindings():
-    found = set()
+    # recording: what was asked before is asked again, and new expressions are added
+    found = set(reference.previous(__name__).get("corpus", {}).get("repo", []))
     for path in [*ROOT.glob("src/**/*.yaml"), *ROOT.glob("examples/**/*.yaml"), *ROOT.glob("docs/**/*.md"),
                  *ROOT.glob("examples/**/*.py"), *ROOT.glob("tests/*.py"), ROOT / "README.md"]:
         if path.name == Path(__file__).name:
             continue
         for match in re.findall(r"\{\{\s*(.*?)\s*\}\}", path.read_text()):
-            if match and "{" not in match and "\\" not in match and match not in DESIGNED:
+            if (match and "{" not in match and "\\" not in match and match not in DESIGNED
+                    and not _TESSERAE_NAMES.search(match)):
                 found.add(match)
     return sorted(found)
 

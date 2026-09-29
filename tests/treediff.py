@@ -22,7 +22,7 @@ PAINT = ("fill", "stroke_color", "stroke_width", "corner_radius", "opacity")
 TEXT = ("text", "font_family", "font_size", "font_weight", "line_height")
 #: Fields `tre` never had (M39): its builder rejects them, so its copy of
 #: the spec goes without; they add no layout or paint the differ reads.
-TESSERAE_ONLY = ("a11y", "interaction", "group")
+TESSERAE_ONLY = ("a11y", "interaction", "group", "component_of")  # component_of: the cascade tag (M57)
 #: Kinds Tesserae draws as MD3's controls since M40 (Q2: MD3's look, not
 #: tre's legacy one), so they aren't compared.
 CONTROLS = frozenset({"Checkbox", "RadioButton", "Switch", "Slider", "CircularProgress", "LinearProgress",

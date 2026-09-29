@@ -123,17 +123,31 @@
    ".."
   ],
   "repo": [
+   "'none'",
+   "'x'",
    "-1",
+   "...",
    "agreed.get()",
    "background",
+   "button",
+   "button_label.get()",
    "checked",
+   "collapsed.get()",
+   "color",
    "color.get()",
+   "content: \"\", font_family: Roboto, font_size: 14",
    "corner_radius",
    "day",
    "day: \"15\"",
+   "depth.get()",
    "done.get()",
+   "echo.get()",
+   "fab_size",
    "fit",
    "flag.get() and title.get() or other.get()",
+   "frame",
+   "frame.get()",
+   "greeting.get()",
    "headline",
    "headline.get()",
    "height",
@@ -142,22 +156,35 @@
    "icon",
    "icon: add, size: 56, corner_radius: 16",
    "icon: settings, size: 40, corner_radius: 20",
+   "item_width",
    "label",
    "label.get()",
    "label: Compose, icon: add, width: 160",
    "label: Send, width: 100, height: 40, corner_radius: 20",
    "label: Tag, width: 100",
+   "last.get()",
+   "left: 220",
+   "left: [Home]",
    "left_padding",
    "level.get()",
+   "max",
+   "min",
    "minute",
    "missing.get()",
    "name",
    "name.get()",
    "name.get() + '!'",
+   "note.get()",
+   "nothing.get()",
+   "number.get()",
+   "off.get()",
    "on",
    "on.get()",
+   "p",
+   "padding",
    "param",
    "placeholder",
+   "player.frame.get()",
    "scrim_height",
    "scrim_width",
    "selected",
@@ -165,9 +192,15 @@
    "size.get()",
    "some_signal.get()",
    "src",
+   "step",
+   "summary.get()",
    "text",
    "text.get()",
    "title",
+   "typography_role",
+   "unread",
+   "unread.get()",
+   "unread_summary.get()",
    "value",
    "width",
    "width.get()",
@@ -185,6 +218,18 @@
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[\"x\"]#1": {
+  "__tuple__": [
+   "value",
+   "Str(\"x\")"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does['none']#1": {
+  "__tuple__": [
+   "value",
+   "Str(\"none\")"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does['x']#1": {
   "__tuple__": [
    "value",
    "Str(\"x\")"
@@ -212,6 +257,12 @@
   "__tuple__": [
    "error",
    "failed to parse binding expression: unexpected token Some(Minus)"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[...]#1": {
+  "__tuple__": [
+   "error",
+   "failed to parse binding expression: unexpected token Some(Dot)"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[..]#1": {
@@ -430,6 +481,18 @@
    "Handle(1)"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[button]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'button'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[button_label.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'button_label'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[cash + 1]#1": {
   "__tuple__": [
    "value",
@@ -460,10 +523,28 @@
    "AttributeError: 'VM' object has no attribute 'checked'"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[collapsed.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'collapsed'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[color.get()]#1": {
   "__tuple__": [
    "error",
    "AttributeError: 'VM' object has no attribute 'color'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[color]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'color'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[content: \"\", font_family: Roboto, font_size: 14]#1": {
+  "__tuple__": [
+   "error",
+   "failed to parse binding expression: unexpected character ':'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[corner_radius]#1": {
@@ -508,10 +589,22 @@
    "Float(2.5)"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[depth.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'depth'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[done.get()]#1": {
   "__tuple__": [
    "error",
    "AttributeError: 'VM' object has no attribute 'done'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[echo.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'echo'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[empty or \"fallback\"]#1": {
@@ -568,6 +661,12 @@
    "Float(2.5)"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[fab_size]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'fab_size'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[fit]#1": {
   "__tuple__": [
    "error",
@@ -586,10 +685,28 @@
    "Float(0.25)"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[frame.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'frame'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[frame]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'frame'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[g / g]#1": {
   "__tuple__": [
    "value",
    "Float(NaN)"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[greeting.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'greeting'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[headline.get()]#1": {
@@ -644,6 +761,12 @@
   "__tuple__": [
    "error",
    "AttributeError: 'VM' object has no attribute 'icon'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[item_width]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'item_width'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[items * 2]#1": {
@@ -736,6 +859,24 @@
    "AttributeError: 'VM' object has no attribute 'label'"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[last.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'last'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[left: 220]#1": {
+  "__tuple__": [
+   "error",
+   "failed to parse binding expression: unexpected character ':'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[left: [Home]]#1": {
+  "__tuple__": [
+   "error",
+   "failed to parse binding expression: unexpected character ':'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[left_padding]#1": {
   "__tuple__": [
    "error",
@@ -746,6 +887,18 @@
   "__tuple__": [
    "error",
    "AttributeError: 'VM' object has no attribute 'level'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[max]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'max'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[min]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'min'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[minute]#1": {
@@ -886,6 +1039,12 @@
    "failed to parse binding expression: unexpected token None"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[note.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'note'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[nothing == nothing]#1": {
   "__tuple__": [
    "value",
@@ -898,10 +1057,28 @@
    "Int(5)"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[nothing.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'NoneType' object has no attribute 'get'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[nothing]#1": {
   "__tuple__": [
    "value",
    "Handle(0)"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[number.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'number'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[off.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'off'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[on.get()]#1": {
@@ -916,6 +1093,18 @@
    "AttributeError: 'VM' object has no attribute 'on'"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[p]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'p'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[padding]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'padding'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[param]#1": {
   "__tuple__": [
    "error",
@@ -926,6 +1115,12 @@
   "__tuple__": [
    "error",
    "AttributeError: 'VM' object has no attribute 'placeholder'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[player.frame.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'player'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[pt.1]#1": {
@@ -1066,6 +1261,18 @@
    "AttributeError: 'VM' object has no attribute 'src'"
   ]
  },
+ "test_tesserae_evaluates_exactly_as_tre_does[step]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'step'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[summary.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'summary'"
+  ]
+ },
  "test_tesserae_evaluates_exactly_as_tre_does[table[\"k\"]]#1": {
   "__tuple__": [
    "value",
@@ -1118,6 +1325,30 @@
   "__tuple__": [
    "value",
    "Int(14)"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[typography_role]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'typography_role'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[unread.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'unread'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[unread]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'unread'"
+  ]
+ },
+ "test_tesserae_evaluates_exactly_as_tre_does[unread_summary.get()]#1": {
+  "__tuple__": [
+   "error",
+   "AttributeError: 'VM' object has no attribute 'unread_summary'"
   ]
  },
  "test_tesserae_evaluates_exactly_as_tre_does[value]#1": {

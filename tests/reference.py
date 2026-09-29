@@ -125,6 +125,16 @@ def _answer(module: str, key: str, fn: Callable[[], Any]) -> Any:
     return decode(recorded)
 
 
+def previous(module: str) -> dict[str, Any]:
+    """Every answer recorded for `module` before this run, decoded -- read
+    from its file even while recording, so a recording can ask each
+    question it asked before exactly as it did then, and add only new
+    ones (a corpus built from files that have since changed would
+    otherwise re-key old answers)."""
+    path = DIR / f"{module}.json"
+    return {k: decode(v) for k, v in json.loads(path.read_text()).items()} if path.exists() else {}
+
+
 def recorded(module: str) -> dict[str, Any]:
     """Every answer recorded for `module`, decoded (replay only)."""
     return {k: decode(v) for k, v in STORE.data(module).items()}
