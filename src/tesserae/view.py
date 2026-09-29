@@ -51,6 +51,7 @@ from tesserae.binding import BindingError, Handle, evaluate_value, parse_binding
 from tesserae.follow import app_of
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
+from tesserae.spec.images import check_frame
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, a11y_bindings, build_with, control_shape, focus_ring_color,
     interaction_tint, natural_size, patch, prepare_layers,
@@ -535,6 +536,15 @@ class View:
                 dependency._subscribe(run)
             if control is not None and prop in _CONTROL_STATE:
                 _apply_to_control(control, kind, prop, value)
+            elif prop == "frame":  # M59: a video's frames, from the ViewModel
+                if kind != "Image":
+                    raise ValueError(f"{where}: only an Image takes a frame")
+                frame = value.obj if isinstance(value, Handle) else value
+                if frame is not None:
+                    try:
+                        self._show_frame(node_id, node, frame)
+                    except (TypeError, ValueError) as exc:
+                        raise ValueError(f"{where}: a frame is (rgba bytes, width, height): {exc}") from None
             else:
                 _apply(node, kind, prop, value)
                 if measured:
@@ -549,6 +559,15 @@ class View:
                 dependency._unsubscribe(run)
             subscribed.clear()
         self._wiring.append(undo)
+
+    def _show_frame(self, node_id: str, node: Any, frame: Any) -> None:
+        """Shows `frame`, `(rgba, width, height)`, on an Image node, and
+        keeps it as the node's frame so a re-theme or reconcile shows the
+        latest (M59; the `video` widget uses it too)."""
+        rgba, width, height = frame
+        data, width, height = check_frame(rgba, width, height)
+        node.set(rgba=data, pixel_width=width, pixel_height=height)
+        self._frames[node_id] = (data, width, height)
 
     def _wire_a11y(self, node_spec: dict[str, Any], field_name: str, raw: str) -> None:
         """A bound `a11y:` field (M47): `label`, `hidden` or `level`, set on

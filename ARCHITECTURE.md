@@ -171,6 +171,13 @@ macOS and Windows answer, and it re-themes through `_apply_dark`, as a
 `conftest.os_appearance` (default `None`), so they don't depend on the
 desktop running them.
 
+**Video frames, M59:** a `frame` binding on an `Image` goes through
+`View._show_frame`, which checks the bytes (`spec.images.check_frame`),
+sets `rgba`/`pixel_width`/`pixel_height`, and keeps the frame in the
+view's `_frames`, which build and patch read, so a re-theme or reconcile
+shows the latest. The `video` widget's `frame()` uses the same path. The
+`Video` fragment adds the binding only when given one (`{if:}`).
+
 **The `SpinBox` kind, M58:** a ninth control kind, built with
 `controls.SpinBox` (`value`, `min`, `max`, `step`; `_spin_number` reads a
 value as `spin_box()` does). Its bounds are part of `control_shape`, so

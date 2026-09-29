@@ -23,7 +23,7 @@ from typing import Any
 from tesserae.images import decode_image
 from tesserae.spec.expand import ComponentError
 
-__all__ = ["Frame", "extract_images"]
+__all__ = ["Frame", "check_frame", "extract_images"]
 
 #: `(node_id, rgba, pixel_width, pixel_height)` -- one decoded image,
 #: waiting to be pushed onto its node once `tre` has built the view.
@@ -82,3 +82,13 @@ def extract_images(
     frames: list[Frame] = []
     deps = dependencies if dependencies is not None else set()
     return _extract(spec, base_dir, frames, deps), frames
+
+
+def check_frame(rgba: Any, width: Any, height: Any) -> tuple[bytes, int, int]:
+    """A video frame for an Image node (M59): `width*height*4` bytes of
+    RGBA, and its size. Raises `ValueError` for bytes that don't match."""
+    width, height = int(width), int(height)
+    data = bytes(rgba)
+    if len(data) != width * height * 4:
+        raise ValueError(f"a {width}x{height} frame is {width * height * 4} bytes of RGBA, got {len(data)}")
+    return data, width, height

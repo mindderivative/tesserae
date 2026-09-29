@@ -72,12 +72,7 @@ def video(
     a11y.describe(widget.node, **({"role": "img", "label": label} if label is not None else {"hidden": True}))
 
     def frame(rgba: bytes, frame_width: int, frame_height: int) -> None:
-        if len(rgba) != int(frame_width) * int(frame_height) * 4:
-            raise ValueError(f"a {frame_width}x{frame_height} frame is {frame_width * frame_height * 4} bytes of "
-                             f"RGBA, got {len(rgba)}")
-        widget.node.set(rgba=bytes(rgba), pixel_width=int(frame_width), pixel_height=int(frame_height))
-        # a re-colour re-applies the view's frames: keep the latest there
-        widget.view._frames["video"] = (bytes(rgba), int(frame_width), int(frame_height))
+        widget.view._show_frame("video", widget.node, (rgba, frame_width, frame_height))  # as a `frame` binding does (M59)
 
     widget.frame = frame
     return widget

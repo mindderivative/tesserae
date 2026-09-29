@@ -1,0 +1,16 @@
+# A video surface (M59, #6): `tesserae.widgets.video`'s declarative
+# counterpart. An Image that starts blank and shows the frames a binding
+# gives it: `frame` is a binding expression, as a string, whose value is
+# `(rgba bytes, width, height)` -- a ViewModel's `Signal` of the latest
+# frame, say. Decoding the video stays the app's; the view pushes each new
+# frame. With no `frame`, it stays blank until code pushes one
+# (`view.node(id).set(rgba=..., pixel_width=..., pixel_height=...)`).
+params: [width, height, {fit: fill}, {frame: null}]
+id: root
+kind: Image
+image: {fit: "{{ fit }}"}
+style:
+  width: "{{ width }}"
+  height: "{{ height }}"
+bindings: {if: "{{ frame }}", then: {frame: "{{ frame }}"}}
+a11y: {hidden: true}

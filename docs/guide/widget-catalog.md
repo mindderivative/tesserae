@@ -232,11 +232,10 @@ already fully expressible as a plain `Container` with N children, so
 `repeat:` only needed to add the "don't hand-duplicate N blocks" part,
 not a new list primitive.
 
-## `video` and `graph_node`: real, structural fragment gaps
+## `graph_node`: a real, structural fragment gap
 
-Both `video` and `graph_node` (plus `node_graph`, which composes
-`graph_node`s) are **not** available as declarative fragments -- see
+`graph_node` (and `node_graph`, which composes `graph_node`s) isn't
+available as a declarative fragment yet -- see
 [Component Fragments](component-fragments.md#what-has-no-fragment-yet-and-why)
-for why. Use these two functions directly from `tesserae.widgets`
-whenever a screen needs them; there's no declarative equivalent to
-reach for instead.
+for why. `video` is, since M59: the `Video` fragment, or an `Image` with
+a `frame` binding (see [Binding Expressions](bindings.md#video-frames)).

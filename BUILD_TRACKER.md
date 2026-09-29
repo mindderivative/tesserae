@@ -68,7 +68,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M56 — Per-Item Styling for `repeat:` (#9) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M57 — A Theme's `components:` in the Declarative Cascade (#10) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M58 — A `SpinBox` YAML Control Kind (#5) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M59 — A Declarative Video (#6) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M59 — A Declarative Video (#6) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M60 — A Declarative Node Graph (#7) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M61 — Hot Reload for Components in Any View (#4) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M62 — Pagination with an Ellipsis (#2) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
@@ -92,7 +92,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M59 (#6, a declarative video), then M60–M67 as scoped. M56–M58 (#9, #10, #5) are done locally, and their issues close when they're pushed.
+**Up next:** M60 (#7, a declarative node graph), then M61–M67 as scoped. M56–M59 (#9, #10, #5, #6) are done locally, and their issues close when they're pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -101,12 +101,13 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 **Known gaps:**
 - **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2) (M62).
 - **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4) (M61).
-- **Declarative fragments cover 67 of ~68 MD3 widgets, and since M55 `extended_fab`'s text-only shape too.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6) (M59)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7) (M60)).
+- **Declarative fragments cover every MD3 widget but `graph_node`** (and `node_graph`, which composes them): a node needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7) (M60)). `extended_fab`'s text-only shape came in M55, and `video` in M59.
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
+- ~~**`video` had no faithful declarative form**: frames had to be pushed from Python (M25).~~ **Fixed (M59).** An `Image` takes a `frame` binding, `(rgba, width, height)` from a ViewModel `Signal`, and the `Video` fragment wraps it. [#6](https://github.com/mindderivative/tesserae/issues/6), closes once pushed.
 - ~~**The `SpinBox` fragment had no behaviour**, and there was no `SpinBox` YAML kind (M40 Phase 5).~~ **Fixed (M58).** `SpinBox` is a ninth YAML control kind (`value`, `min`, `max`, `step`; bindable, two-way, clamped), and the fragment is that kind. [#5](https://github.com/mindderivative/tesserae/issues/5), closes once pushed.
 - ~~**The declarative cascade didn't consult a theme's `components:` overrides.**~~ **Fixed (M57).** Widgets didn't either, beyond three special tokens. Now every fragment root, in views and widgets alike, takes its `components:` entry's corner radius and elevation (variant, then component), and a FAB's entry follows its size. [#10](https://github.com/mindderivative/tesserae/issues/10), closes once pushed.
 - ~~**`repeat:` couldn't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` couldn't be declared with full fidelity (M28).~~ **Fixed (M56).** Item fragments take a `selected` flag with M55's `{if:}`, and container fragments forward an `items` list to `repeat:`: `Tabs`, `NavigationRail`, `NavigationDrawer`, `Menu` and `ButtonGroup`, checked against the widgets. Live selection stays with the widgets. [#9](https://github.com/mindderivative/tesserae/issues/9), closes once pushed.
@@ -1675,25 +1676,20 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 59 — A Declarative Video (#6)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#6](https://github.com/mindderivative/tesserae/issues/6). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** User: "Start M59". From the backlog order M54 set: [#6](https://github.com/mindderivative/tesserae/issues/6) (closes once pushed). It was scoped up front as a draft and refined when it started. The recommendations are taken.
 
-**The gap:** `video` has no faithful declarative form: `kind: Image` with no `src:` declares the placeholder, but playback needs the app to fetch the node and call `push_frame` itself.
+**The gap:** a fragment could declare the blank Image, but playing video needed the app to fetch the node and push frames itself.
 
-**Draft approach:** A bindable frame: `bindings: {frame: "{{ player.frame.get() }}"}` on an Image (or a `Video` kind), where `frame` is an `(rgba, width, height)` value; the view pushes each new frame. Decoding stays the app's. `tesserae.widgets.video` shares the code.
+**Decisions** (recommended, taken): Q1, a `frame` binding on `Image`, not a new kind, since a video is an Image with changing pixels; Q2, a frame is `(rgba bytes, width, height)`, as the `video` widget's `frame()` takes; Q3, `None` keeps the last frame, and the latest frame is kept in the view's frames so a re-theme or reconcile shows it (the `video` widget already did this by hand). Q4, a `Video` fragment forwards the binding expression, adding it only when given one (M55's `{if:}`).
 
-**Decisions to settle at the start** (provisional):
-- Q1 a `frame` binding on `Image` (recommended), or a new `Video` kind
-- Q2 frames as `(rgba bytes, width, height)` (recommended)
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `widgets/media.py`'s `video`, `_image_props`, `View._wire_binding` and `_apply`. There's no whitelist of bindable properties, so `frame` is handled where a binding applies. Q1–Q4 settled — ✅
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q2; how `push_frame` behaves across a reconcile — ⬜
+### Phase 2 — The Frame Binding ✅
+- Step 1: `View._wire_binding` handles `frame`: only on an `Image`; a Handle is unwrapped; `None` is skipped; otherwise `View._show_frame` checks the bytes (`spec.images.check_frame`, `width*height*4` of RGBA), sets `rgba`/`pixel_width`/`pixel_height`, and stores it in `_frames`. A bad frame is named by widget and binding. The `video` widget's `frame()` now uses `_show_frame`. `Video_Component.yaml`: an Image with `{fit: fill}`, hidden from screen readers, and `bindings: {frame: ...}` only when `frame` is given. `tests/test_video_binding.py` (5): each new frame shown, a new size, `None` keeping the last; the latest frame surviving a re-theme and a reconcile; a wrong-size frame, a non-frame and a frame on a Rect each named; the fragment with and without a binding; the `video` widget sharing the check. Mutation-checked, 8/8 caught. 1588 → 1595 (1594 passed, 1 skipped; the paint checks cover the new fragment); all five examples clean — ✅
 
-### Phase 2 — The Frame Binding ⬜
-- Step 1: compiler and view wiring; tests pushing frames through a `Signal`; mutation-checked — ⬜
-
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the fragments and media docs; the known gap narrowed or closed — ⬜
-
+### Phase 3 — Docs, Tracker ✅
+- Step 1: the bindings guide ("Video frames"), the fragments guide and widget catalog (video is no longer a gap), and `ARCHITECTURE.md`. The known gap was narrowed to `graph_node`; `mkdocs build --strict` clean — ✅
 
 ---
 

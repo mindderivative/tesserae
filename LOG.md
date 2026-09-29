@@ -1528,3 +1528,16 @@ Built:
 - 6 tests plus the reworked fragment test; 9/9 mutants caught.
 
 1587 passed; all five examples clean.
+
+## M59: a declarative video (#6)
+
+User: "Start M59".
+
+- An `Image` takes a `frame` binding, `(rgba, width, height)`. Each
+  frame is shown and the latest kept, so it survives a re-theme or
+  reconcile.
+- The `video` widget shares the path. The `Video` fragment adds the
+  binding only when given one.
+- 5 tests; 8/8 mutants caught.
+
+1594 passed; all five examples clean.

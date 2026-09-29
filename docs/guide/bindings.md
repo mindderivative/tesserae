@@ -36,6 +36,25 @@ works, a bare `described()` doesn't. A method can't take arguments.
 An `a11y:` field can be bound the same way (`label`, `hidden` and
 `level`): see [Interaction & Accessibility](interaction.md#bound-fields).
 
+### Video frames
+
+An `Image` takes a `frame` binding (M59): a value `(rgba, width, height)`,
+`width * height * 4` bytes of RGBA and the frame's size. Each new value
+is shown as it arrives, and `None` keeps the last one. Decoding the video
+is the app's: a ViewModel sets a `Signal` of the latest frame, and the
+view pushes it. The latest frame survives a re-theme and a reconcile.
+
+```yaml
+- id: screen
+  kind: Image
+  image: {fit: fill}
+  style: {width: 640, height: 360}
+  bindings: {frame: "{{ player.frame.get() }}"}
+```
+
+The `Video` fragment is that Image: `component: Video` with `width`,
+`height`, `fit` and `frame` (the binding expression, as a string).
+
 ## Rules that differ from Python
 
 Arithmetic and comparison between plain values (numbers, strings,
