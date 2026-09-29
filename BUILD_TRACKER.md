@@ -75,11 +75,11 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M65 — An App-Level State Store (#13) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
-| M66 — Routing: a Back Stack and Deep Links (#12) | `███████⬜⬜⬜` 75% | 🚧 In progress — Phase 3 of 4 done |
+| M66 — Routing: a Back Stack and Deep Links (#12) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
-**Just closed:** M65 (2026-09-29), done locally: an app-level state store, `App(state=...)`, reached as `self.state` from any ViewModel on the app's window and as `{{ state.<name>.get() }}` in bindings (#13). Before it, M64 (done locally): `tesserae.widgets.text` (#11). 2383 passed.
+**Just closed:** M66 (2026-09-29), done locally: routing -- `navigate`/`back`/`forward` with `on_navigated(params)`, routes and deep links (`route`, `navigate_to`, `location`), the shell's rail navigating, and Alt+Left/Right (#12). Before it, M65 (done locally): an app-level state store (#13). 2410 passed.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -93,18 +93,19 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M66 (#12, routing) is in progress, then M67 (#14, a scaffolding CLI). M64 (#11) and M65 (#13) are done locally, and their issues close when they're pushed.
+**Up next:** M67 (#14, a `tesserae new` scaffolding CLI). M64 (#11), M65 (#13) and M66 (#12) are done locally, and their issues close when they're pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **A button's `disabled` can't be bound in YAML:** `disabled` binds only on the control kinds (M40: `Checkbox`, `Switch`, `SpinBox`, ...); a button is a `Rect` fragment, so `bindings: {disabled: ...}` on it is refused. A back button bound to `app.can_go_back` has to be driven from Python for now (found in M66).
+- **A button's `disabled` can't be bound in YAML:** `disabled` binds only on the control kinds (M40: `Checkbox`, `Switch`, `SpinBox`, ...); a button is a `Rect` fragment, so `bindings: {disabled: ...}` on it is refused. A back button can't show `app.can_go_back` from YAML; and a node's own `disabled` only tells assistive technology (it still takes clicks and focus), so greying one out is Python's job for now (found in M66).
 - **`tools/record_tre_reference.py` can't re-record every module:** `test_tree_parity` builds its corpus from every fragment, and fragments added after M46 (M56's `items` parameter) have no sample value, so collection fails on `tre` 0.3.4. Single modules record fine with `TESSERAE_RECORD_TRE=1 pytest tests/<module>.py` (found in M63).
-- **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
+- **No `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67), README's last "Explicitly deferred" item.
 
 **Fixed gaps:**
+- ~~**No routing beyond `App.show(name)`** (no back stack, params or deep links).~~ **Fixed (M66).** `navigate`/`back`/`forward` with `on_navigated(params)`, `route`/`navigate_to`/`location`, the shell's rail navigating, and Alt+Left/Right (the mouse's side buttons wait on `tre` [#21](https://github.com/mindderivative/tre/issues/21)). [#12](https://github.com/mindderivative/tesserae/issues/12), closes once pushed.
 - ~~**No app-level state store** shared across screens (README's "Explicitly deferred").~~ **Fixed (M65).** `App(state=...)`, reached as `self.state` (and the app as `self.app`) from any ViewModel on the app's window, and as `{{ state.<name>.get() }}` in any binding. [#13](https://github.com/mindderivative/tesserae/issues/13), closes once pushed.
 - ~~**No `tesserae.widgets.text` wrapper** for a bare text node.~~ **Fixed (M64).** `widgets.text(window, content, typography_role=, color=)`, from a `Text` fragment, with a `.content` `Signal`; and every widget now follows its theme's `typography:`. [#11](https://github.com/mindderivative/tesserae/issues/11), closes once pushed.
 - ~~**Tesserae's colour parsing rejected CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepted (M37 Phase 1).~~ **Fixed (M63).** `tokens.parse_color` converts them as `tre` 0.3.4's `color` crate did, byte for byte, clipped into sRGB. [#16](https://github.com/mindderivative/tesserae/issues/16), closes once pushed.
@@ -1819,7 +1820,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 66 — Routing: a Back Stack and Deep Links (#12)
 
-**Status: 🚧 In progress — Phase 3 of 4 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: ✅ Complete — all 4 phases done (2026-09-29).** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#12](https://github.com/mindderivative/tesserae/issues/12). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** Navigation is `App.show(name)` only: no history, no parameters for a screen, and no URL-style deep links.
 
@@ -1841,8 +1842,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 3 — Routes, the Rail and the Keys ✅
 - Step 1: `App.route(pattern, name)` (`_Route`, validated: `{name}` or `{name:int}` segments, no repeats, no empty or mixed segments; `""` is the root), `navigate_to(route)` (the first match, else a `KeyError`), and `location` (the first route of the showing screen that reads its params back exactly). The shell's rail calls `app.navigate` (`shell_file.bind_navigation`). Alt+Left/Right from a `Listeners` on the window's root (`App._history_key`), not with another modifier, and not from a text input or terminal. **A bug found by a test:** a param called `name` collided with `navigate`'s own argument, so `name` is now positional-only. `tre` [#21](https://github.com/mindderivative/tre/issues/21) filed for the mouse's back and forward buttons. `tests/test_routing.py` +16 (27): routes with params and slashes, unmatched routes, negative ints and route order, `location`'s `None` cases and first fitting route, bad patterns, the rail with history and the rail following `back`, the keys and their modifiers, and a text input keeping Alt+Left. Mutation-checked, 23/23 (the first run pinned `location`'s screen check and a non-arrow key with somewhere to go), and Phase 2's 15/15 again. 2394 → 2410 passed — ✅
 
-### Phase 4 — Docs, Example, Tracker ⬜
-- Step 1: a guide section and an example; the known gap closed — ⬜
+### Phase 4 — Docs, Example, Tracker ✅
+- Step 1: `docs/guide/apps-and-screens.md`'s "Navigation and history" and "Routes and deep links". Checking the draft's back-button advice showed a node's `disabled` doesn't stop clicks or focus (it only tells assistive technology), so the guide says `back()` is harmless with nowhere to go and leaves the look to Python; the known gap says so too. `examples/multi_screen/`: Home `navigate`s to Settings, Settings goes `back()`, routes name both, and `python app.py settings` opens on Settings as a deep link (both runs clean). README (the example; routing out of "Explicitly deferred") and `ARCHITECTURE.md`. The known gap moved to "Fixed gaps"; `mkdocs build --strict` clean. 2410 passed (the guide's new blocks are Python, which the docs checks don't collect); all five examples clean — ✅
 
 
 ---

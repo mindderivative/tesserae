@@ -1648,3 +1648,21 @@ M63 and the move onto `tre` 0.4.0 as `f49dd36..f9f1147` (CI run
 - 9 tests; 10/10 mutants caught.
 
 2383 passed.
+
+## M66: routing, a back stack and deep links (#12)
+
+- `navigate(name, /, **params)`, `back()` and `forward()`, with
+  `on_navigated(params)` on the screen's ViewModel before it shows.
+  `can_go_back`/`can_go_forward` are Signals, set together. `show` stays
+  a jump that replaces the current entry.
+- Routes: `route("notes/{id:int}", "Note")`, `navigate_to("notes/42")`
+  and `location`.
+- The shell's rail navigates. Alt+Left/Right go back and forward, except
+  in text inputs. The mouse's side buttons wait on tre#21, filed.
+- Found by tests: set one at a time, the two history signals showed a
+  follower a state that never existed; and a param called `name`
+  collided with `navigate`'s argument (now positional-only).
+- `examples/multi_screen/` navigates, goes back, and takes a deep link.
+- 27 tests; 23/23 and 15/15 mutants caught.
+
+2410 passed.

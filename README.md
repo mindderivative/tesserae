@@ -85,11 +85,13 @@ python examples/app_shell_file/app.py
 genuine render loop.
 
 `multi_screen/`: two independent screens (`Home`/`Settings`), each its
-own `*_View.yaml`/`*_ViewModel.py` pair, switched via `self.app.show(name)`
-from inside each screen's own real dispatched `on_click` handler --
+own `*_View.yaml`/`*_ViewModel.py` pair: Home navigates to Settings and
+Settings goes `back()` (M66), from inside each screen's own real
+dispatched `on_click` handler --
 proving a switch works even when triggered *reentrantly*, from the
 handler `App.show` itself is dispatching into. Both screens show the
-app's shared state (`App(state=...)`, M65), which each handler writes.
+app's shared state (`App(state=...)`, M65), which each handler writes, and
+routes make `python app.py settings` a deep link.
 
 `todo_list/`: a real dynamic list, driven by `tesserae.Repeater` -- one
 list `Signal` of stable item ids (`TodoViewModel.items`) is the single
@@ -230,9 +232,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 Named for the record, not designed in detail yet -- each is real, future
 work once this foundation is proven further:
 
-- Routing beyond a plain named `App.show(name)` (history/back-stack,
-  URL-style deep links; [#12](https://github.com/mindderivative/tesserae/issues/12)),
-  a `tesserae new` CLI scaffolding tool ([#14](https://github.com/mindderivative/tesserae/issues/14)).
+- A `tesserae new` CLI scaffolding tool ([#14](https://github.com/mindderivative/tesserae/issues/14)).
 
 **Releasing:** publishing a GitHub Release runs `.github/workflows/release.yml`.
 It checks that the tag matches the version and that no dependency is PyPI's

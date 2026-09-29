@@ -6,4 +6,4 @@ from tesserae import ViewModel
 class SettingsViewModel(ViewModel):
     def go_to_home(self):
         self.state.came_from.set("from Settings")
-        self.app.show("Home")
+        self.app.back()  # to the screen that navigated here (M66)

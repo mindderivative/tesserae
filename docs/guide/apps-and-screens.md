@@ -54,6 +54,71 @@ Switching screens from inside a handler works even *reentrantly* --
 from the very handler `App.show` itself is dispatching into (see
 `examples/multi_screen/` in the repository).
 
+## Navigation and history
+
+`show(name)` is a jump. `navigate` is a step the user can come back from
+(M66):
+
+```python
+app.navigate("Note", id=42)  # pushes a history entry; forward entries are dropped
+app.back()                   # the entry before (returns False if there's none)
+app.forward()                # the entry back() left
+```
+
+The screen's ViewModel gets the params before the screen shows, through
+an optional `on_navigated` method, each time its entry is reached --
+by `navigate`, `back` or `forward`:
+
+```python
+class NoteViewModel(ViewModel):
+    def __init__(self, view):
+        self.title = Signal("")
+        super().__init__(view)
+
+    def on_navigated(self, params):
+        self.title.set(f"Note {params['id']}")
+```
+
+- If `on_navigated` raises, nothing changes: the screen showing and the
+  history stay as they were.
+- Navigating to the entry already showing (same screen, same params)
+  does nothing. The screen name is positional-only, so a param can be
+  called `name`.
+- `show(name)` pushes nothing and calls no hook; it replaces the current
+  entry, so `back()` leaves it for the entry before.
+- `app.can_go_back` and `app.can_go_forward` are `Signal`s, for showing
+  whether a back button would do anything. A back button can simply call
+  `app.back()`, which does nothing (and returns `False`) with nowhere to
+  go. A YAML button's `disabled` can't be bound yet (only controls'
+  can), and setting a node's `disabled` only tells assistive technology
+  -- it still takes clicks -- so follow the signal from Python to change
+  how the button looks.
+- **Alt+Left** and **Alt+Right** go back and forward, except in a text
+  input, where Option+Left moves by word on macOS. The mouse's side
+  buttons wait on `tre` ([tre#21](https://github.com/mindderivative/tre/issues/21)).
+- A shell file's navigation rail navigates, so `back()` returns from a
+  rail choice, and the rail follows `back()` and `forward()`.
+
+### Routes and deep links
+
+Routes name screens with strings, in both directions:
+
+```python
+app.route("", "Home")
+app.route("notes", "Notes")
+app.route("notes/{id:int}", "Note")   # {id} is a string; {id:int} an int
+
+app.navigate_to("notes/42")           # Note, with {"id": 42}
+app.location                          # "notes/42": save it, reopen there next time
+```
+
+- Routes are tried in the order they're added; `navigate_to` raises
+  `KeyError` when none matches.
+- `location` is the showing screen as a route string: the first route
+  of that screen that reads its params back exactly, or `None`.
+- A deep link from the command line is `app.navigate_to(sys.argv[1])`
+  (`examples/multi_screen/` does this).
+
 ## Shared state
 
 State several screens use -- the signed-in user, settings, an open
