@@ -417,6 +417,9 @@ def _expand_component(
             # The fragment's own root gets the call site's id directly,
             # not a further "local_call_id.local_call_id"-prefixed one.
             fragment[_ID_KEY] = local_call_id
+        if isinstance(fragment, dict):
+            # its theme `components:` entry (M57): the fragment's own, if it names one
+            fragment.setdefault("component_of", name)
         results.append(fragment)
 
     return results

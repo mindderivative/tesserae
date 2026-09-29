@@ -156,7 +156,8 @@ def fab(
         if border is not None:
             border(spec)
 
-    widget = Widget(window, _variant("FAB", variant, _FABS), {"icon": icon, "size": box, "corner_radius": radius},
+    widget = Widget(window, _variant("FAB", variant, _FABS),
+                    {"icon": icon, "size": box, "corner_radius": radius, "fab_size": size},
                     theme=theme, label=label, x=x, y=y, interactive={None: None}, edit=edit, name="fab")
     if on_click is not None:
         widget.on_click(on_click)

@@ -9,8 +9,9 @@
 # sizes each pair a fixed container size with its own real shape token
 # (small=40dp/corner_medium, default=56dp/corner_large,
 # large=96dp/corner_extra_large), so a caller picks the matching pair.
-params: [icon, size, corner_radius]
+params: [icon, size, corner_radius, {fab_size: default}]  # default, small or large: its theme `components:` entry (M57)
 id: root
+component_of: "fab.{{ fab_size }}"
 kind: Rect
 style:
   width: "{{ size }}"

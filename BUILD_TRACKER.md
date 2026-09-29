@@ -66,7 +66,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M54 — An Open Overlay Follows a Window Resize (#1) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M55 — Fragment Conditionals and the Text-Only Extended FAB (#8) | `██████████` 100% | ✅ Complete (2026-09-28) |
 | M56 — Per-Item Styling for `repeat:` (#9) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M57 — A Theme's `components:` in the Declarative Cascade (#10) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M57 — A Theme's `components:` in the Declarative Cascade (#10) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M58 — A `SpinBox` YAML Control Kind (#5) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M59 — A Declarative Video (#6) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M60 — A Declarative Node Graph (#7) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
@@ -92,7 +92,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M57 (#10, a theme's `components:` in the declarative cascade), then M58–M67 as scoped. M56 (#9) is done locally, and #9 closes when it's pushed.
+**Up next:** M58 (#5, a `SpinBox` YAML control kind), then M59–M67 as scoped. M56 (#9) and M57 (#10) are done locally, and their issues close when they're pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -103,12 +103,12 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 - **A component instantiated into a view the app doesn't know about isn't hot-reloaded**: one that's not a screen, not `build_view()`'s, and not a view following the app's theme (M51): [#4](https://github.com/mindderivative/tesserae/issues/4) (M61).
 - **The `SpinBox` fragment has no behaviour.** There's no `SpinBox` YAML kind; `tesserae.widgets.spin_box` gives a working one (M40 Phase 5): [#5](https://github.com/mindderivative/tesserae/issues/5) (M58).
 - **Declarative fragments cover 67 of ~68 MD3 widgets, and since M55 `extended_fab`'s text-only shape too.** The rest: `video` needs its frames pushed by the app ([#6](https://github.com/mindderivative/tesserae/issues/6) (M59)); `graph_node` needs a live parent, which textual expansion can't express, though Tesserae's own compiler now could ([#7](https://github.com/mindderivative/tesserae/issues/7) (M60)).
-- **The declarative cascade doesn't consult a theme's `components:` overrides**, which only `tesserae.widgets` use: [#10](https://github.com/mindderivative/tesserae/issues/10) (M57).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
+- ~~**The declarative cascade didn't consult a theme's `components:` overrides.**~~ **Fixed (M57).** Widgets didn't either, beyond three special tokens. Now every fragment root, in views and widgets alike, takes its `components:` entry's corner radius and elevation (variant, then component), and a FAB's entry follows its size. [#10](https://github.com/mindderivative/tesserae/issues/10), closes once pushed.
 - ~~**`repeat:` couldn't style one item differently**, so `tabs`, `navigation_rail`, `navigation_drawer`, `button_group` and `menu` couldn't be declared with full fidelity (M28).~~ **Fixed (M56).** Item fragments take a `selected` flag with M55's `{if:}`, and container fragments forward an `items` list to `repeat:`: `Tabs`, `NavigationRail`, `NavigationDrawer`, `Menu` and `ButtonGroup`, checked against the widgets. Live selection stays with the widgets. [#9](https://github.com/mindderivative/tesserae/issues/9), closes once pushed.
 - ~~**An open overlay's scrim didn't follow a window resize** (M41 Phase 5).~~ **Fixed (M54).** Overlays refit on every `resize` while open, through one shared dispatcher per window (`listeners.listen_window`). [#1](https://github.com/mindderivative/tesserae/issues/1) closed.
 - ~~**`extended_fab`'s icon-less shape had no fragment** (deferred in M18).~~ **Fixed (M55).** Fragment params can have defaults, and fragments can use expansion-time `when:` and `{if:, then:, else:}`. The `ExtendedFab*` fragments take an optional `icon`, and `extended_fab(icon=None)` uses the fragment's text-only shape. [#8](https://github.com/mindderivative/tesserae/issues/8) closed.
@@ -1632,25 +1632,25 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 57 — A Theme's `components:` in the Declarative Cascade (#10)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** From the backlog order M54 set (2026-09-28): [#10](https://github.com/mindderivative/tesserae/issues/10). Scoped up front at the user's request ("update the build tracker with all known milestones and adjust the scopes as you start them"); the scope, decisions and phases below are a draft, adjusted when it starts.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** From the backlog order M54 set: [#10](https://github.com/mindderivative/tesserae/issues/10) (closes once pushed). It was scoped up front as a draft and refined when it started. The recommendations are taken.
 
-**The gap:** A theme's `components:` overrides (per-component shape and elevation, `Theme.components`) reach `tesserae.widgets` but not the declarative cascade, so a `*_Component.yaml` fragment in a view ignores them.
+**The gap, as filed:** a theme's `components:` reached `tesserae.widgets` but not fragments in views.
 
-**Draft approach:** The expander tags each fragment root with its fragment name (for example `component_of: FabPrimary`). The cascade then takes `corner_radius` and `elevation` from the theme's matching `components:` entry, below the node's own and stylesheet values and above the fragment's defaults. Theme hot reload re-applies it.
+**Refined at the start (checked, not assumed):**
+- **Widgets didn't use it either,** apart from three special tokens: the split button's and button group's `tightened`, and the carousel's item shape. So neither path applied a theme's per-component shape or elevation to anything built from a fragment. One change in the compiler fixes both, since widgets build from the same fragments.
+- **The shipped default theme has `components:` entries** that had never been applied (`card`, `dialog`, `fab.default`/`small`/`large`, `chip` and more). Applying them could change existing looks. The suite showed only the FAB sizes did: a FAB's variant is its size, not its colour.
+- **Each family names its keys its own way,** so the mapping is a table plus a fallback, not a mechanical split.
 
-**Decisions to settle at the start** (provisional):
-- Q1 a tag the expander adds to a fragment root (recommended), or a name convention on ids
-- Q2 the precedence: node style > stylesheet > theme `components:` > fragment defaults (recommended)
+**Decisions** (recommended, taken): Q1, the expander tags a fragment root with `component_of`, its name or a key the fragment names itself; Q2, the precedence is the `components:` entry (variant, then component) over the fragment's own values, since a component call can't carry inline style anyway; Q3, a FAB's key follows its size through an optional `fab_size` param.
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q2; which `components:` keys map to which fragments — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: refined as above, from `theme.py`, `spec/cascade.py`, `spec/build.py`, `spec/expand.py`, the shipped default theme and the widget factories — ✅
 
-### Phase 2 — The Cascade Layer ⬜
-- Step 1: the tag, the cascade lookup, theme reload; tests pairing each fragment with its widget under a `components:` override; mutation-checked — ⬜
+### Phase 2 — The Cascade Layer ✅
+- Step 1: the expander sets `component_of` on each fragment root (`setdefault`, so a fragment can name its own key). `component_of` is a node key. `prepare_layers` parses both themes' `components:` onto `Layers.components`, a custom entry replacing the default's. `resolve_style` gives a tagged root its entry's `corner_radius` and `elevation`, which build and patch share, so theme changes and reloads re-apply it. `cascade.component_key` maps names through variant families (`Card*`, `Button*`, `IconButton*`, `Chip*`, `Badge*`, `SideSheet*`, `Toolbar*`, `SplitButton*`), exact keys (`ButtonGroup`, `ChipFilterSelected`, `SideSheetStandard`, `ExtendedFab*`, `DatePickerDay*`, `PeriodSelector*`, `TreeNode*`), dotted keys as given, and snake case otherwise. The four `Fab*` fragments take `{fab_size: default}` and name `fab.{{ fab_size }}`, and `fab()` passes its size. A `Widget` puts its theme's `components:` on its view's layers when built and on `set_theme`. Found on the way: the first run failed the small and large FABs (the default theme's `fab.default` over their sizes), which led to the FAB's own size key. `tests/test_theme_components.py` (25): the key mapping (17 cases); only a fragment root is tagged; a custom theme's entry in a view; variant over component; a FAB's size entry; a theme change re-applies and reverts; a plain node is untouched; widgets take their theme's entries and follow a new one; the FAB sizes keep MD3's 12, 16 and 28 under the default theme. Mutation-checked, 12/12 caught (the first run's survivor, the prefix-only guard, got a case). 1553 → 1580 (1579 passed, 1 skipped); all five examples clean — ✅
 
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the themes and fragments guides; the known gap closed — ⬜
-
+### Phase 3 — Docs, Tracker ✅
+- Step 1: the themes guide ("Component shapes in a theme") and `ARCHITECTURE.md`. The known gap moved to "Fixed gaps"; `mkdocs build --strict` clean — ✅
 
 ---
 

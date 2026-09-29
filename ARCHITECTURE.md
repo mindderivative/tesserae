@@ -171,6 +171,15 @@ macOS and Windows answer, and it re-themes through `_apply_dark`, as a
 `conftest.os_appearance` (default `None`), so they don't depend on the
 desktop running them.
 
+**A theme's `components:` for fragments, M57:** the expander tags each
+fragment's root with `component_of` (its name, or a key the fragment
+names itself, as the FABs' `fab.{{ fab_size }}`). `prepare_layers` puts
+the themes' parsed `components:` on the `Layers`, and `resolve_style`
+gives a tagged root its entry's `corner_radius` and `elevation`
+(variant, then component; `cascade.component_key` maps a fragment name).
+Build and patch share it, so theme changes and reloads re-apply it. A
+`Widget` puts its own theme's `components:` on its view's layers.
+
 **Following the app's theme, M50:** `follow.py` finds an app by its
 window: `App.__init__` calls `register_app`, which keeps a weak
 reference keyed by `id(window)`. `tre`'s `Window` can't be weakly

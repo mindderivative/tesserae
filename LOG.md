@@ -1501,3 +1501,19 @@ with `selected`), `Menu` and `ButtonGroup`. `MenuItem` gains optional
 `height` and `padding`. 15 parity tests; 12/12 mutants caught.
 
 1552 passed; all five examples clean.
+
+## M57: a theme's components: for fragments (#10)
+
+Refined at the start:
+- Widgets didn't use `components:` either, beyond three special tokens.
+- The shipped default theme's entries had never been applied.
+- A FAB's variant is its size.
+
+Built:
+- Fragment roots are tagged with `component_of`, and the cascade applies
+  the entry's corner radius and elevation (variant, then component), in
+  views and widgets alike.
+- The FAB fragments name `fab.{{ fab_size }}`.
+- 25 tests; 12/12 mutants caught.
+
+1579 passed; all five examples clean.

@@ -51,6 +51,7 @@ _KINDS = _CONTROL_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Im
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
     "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
 })
 
 
@@ -112,6 +113,9 @@ class Layers(tuple):
     which display text resolves its `typography_role` through."""
 
     typography: dict[str, dict[str, Any]]
+    #: The two themes' `components:` (M57), a custom theme's entry
+    #: replacing the default's: shape and elevation for fragment roots.
+    components: dict[str, Any]
 
 
 def prepare_layers(
@@ -122,15 +126,18 @@ def prepare_layers(
     """The cascade's three layers, prepared once (`default_theme` defaults
     to `tre`'s shipped one), with the themes' typography overrides: a
     custom theme's role entry replaces the default theme's."""
-    from tesserae.theme import _type_override
+    from tesserae.theme import _component, _type_override
 
     if default_theme is None:
         default_theme = shipped_default_theme()
     layers = Layers((Sheet.of(default_theme), Sheet.of(custom_theme), Sheet.of(stylesheet)))
     layers.typography = {}
+    layers.components = {}
     for theme in (default_theme, custom_theme):
         for role, raw in ((theme or {}).get("typography") or {}).items():
             layers.typography[role] = _type_override(role, raw)
+        for key, raw in ((theme or {}).get("components") or {}).items():
+            layers.components[key] = _component(key, raw)
     return layers
 
 

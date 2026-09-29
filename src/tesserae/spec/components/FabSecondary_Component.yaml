@@ -2,8 +2,9 @@
 # `FabSurface_Component.yaml` for the shared real design. Colors match
 # `resolve_fab_colors`'s "secondary" exactly: container=
 # secondary_container, icon glyph=on_secondary_container.
-params: [icon, size, corner_radius]
+params: [icon, size, corner_radius, {fab_size: default}]  # default, small or large: its theme `components:` entry (M57)
 id: root
+component_of: "fab.{{ fab_size }}"
 kind: Rect
 style:
   width: "{{ size }}"

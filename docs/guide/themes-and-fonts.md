@@ -136,6 +136,29 @@ including hot reload of a theme file, updates the text in place.
 (`tre` applied a theme's `typography:` only to its imperative widgets,
 never to a view; Tesserae applies it to both.)
 
+## Component shapes in a theme
+
+A theme's `components:` sets a component's corner radius and elevation,
+by MD3 component and variant (M57):
+
+```yaml
+components:
+  card.elevated: {corner_radius: 4, elevation: level_5}
+  dialog: {corner_radius: small}
+  fab.small: {corner_radius: 8}
+```
+
+It shapes widgets from `tesserae.widgets` and `*_Component.yaml`
+fragments in views alike. A fragment's root reads the entry for its
+variant (`card.elevated`), then its component's (`card`), over the
+fragment's own values. Fragment names map as
+`CardElevated` -> `card.elevated`, `ButtonFilledTonal` ->
+`button.filled_tonal`, `SideSheetModal` -> `side_sheet.modal` and
+`Dialog` -> `dialog`. A FAB's variant is its size: its fragments take
+`fab_size: small` (or `large`; `default` otherwise). The shipped default
+theme has entries for MD3's own shapes, and a custom theme's entry
+replaces the default's. A theme change or reload re-applies them.
+
 ## Reading the theme from code
 
 `app.theme` (and `view.theme`) is the resolved theme, a `tesserae.Theme`:
@@ -151,7 +174,8 @@ theme.duration("medium2")             # 300 (ms)
 ```
 
 `shape` and `elevation` return `None` when the theme's `components:`
-doesn't mention the component, and the widget uses its own MD3 default.
+doesn't mention the component, and the widget uses its own MD3 default
+(see [Component shapes in a theme](#component-shapes-in-a-theme)).
 A custom theme's `components:` entry, or `typography:` role, replaces
 the default theme's entry for the same key. MD3's easing and duration
 tokens are all there. `emphasized` is MD3's single-curve form
