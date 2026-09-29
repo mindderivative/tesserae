@@ -1568,3 +1568,16 @@ passed), and closed #7.
 - 4 tests; 5/5 mutants caught.
 
 1614 passed; all five examples clean.
+
+## M62: pagination with an ellipsis (#2)
+
+User: "Push and start M62". Pushed M61 as `d78b5bc..234a67b` (CI run
+36523682265 passed), and closed #4.
+
+- `pagination(max_visible=7)`: over that many pages, as many slots show
+  the first and last pages, the current page amid its neighbours, and an
+  inert `…` for each run left out. They're redrawn as the page moves, and
+  focus follows the current page. `.shown` lists each slot's page.
+- 20 tests; 14/14 mutants caught.
+
+1634 passed.

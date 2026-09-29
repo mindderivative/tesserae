@@ -138,7 +138,13 @@ and the arrows move focus. `.selected` is a `Signal` (an index or `None`,
 or a `frozenset` with `multi`), and `.on_change(fn)` hears the user's
 changes. `pagination(window, page_count, current=0)` is previous, a
 button per page and next; `.current` is a `Signal` (0-based) with
-`.on_change(fn)`, and previous and next are disabled at the ends. For a
+`.on_change(fn)`, and previous and next are disabled at the ends. Over
+`max_visible` pages (7 by default, at least 5) it windows the run
+(M62): `1 … 20 21 22 … 42`, the first and last pages, the current one
+amid its neighbours, and an inert `…` (not focusable, hidden from screen
+readers) for each run left out. The buttons are then `max_visible` slots
+(`slot0`, ...) redrawn as the page moves, not one per page, and `.shown`
+lists each slot's page (`None` for an ellipsis). For a
 rich tooltip (`tre`'s popover), see `popover` in [Overlays](overlays.md#each-one).
 
 **Carousel and splitter (M42).** `carousel(window, width, height,

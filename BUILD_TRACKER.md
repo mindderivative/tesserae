@@ -71,14 +71,14 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M59 — A Declarative Video (#6) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M60 — A Declarative Node Graph (#7) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M61 — Hot Reload for Components in Any View (#4) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
-| M62 — Pagination with an Ellipsis (#2) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
+| M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M63 — CSS Wide-Gamut Colours (#16) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M65 — An App-Level State Store (#13) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
-**Just closed:** M61 (2026-09-28), pushed as `d78b5bc..234a67b`: a component is hot-reloaded in any view on the app's window, not only the app's known views (#4). Before it, M57–M60 added a theme's components, a SpinBox kind, a declarative video and a declarative node graph. 1614 passed.
+**Just closed:** M62 (2026-09-28): `pagination` windows a long run of pages with an ellipsis (`1 … 20 21 22 … 42`, #2), done locally. Before it, M61 (pushed, CI green, #4 closed) hot-reloads components in any view. 1634 passed.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -92,19 +92,19 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M62 (#2, pagination with an ellipsis) is in progress, then M63–M67 as scoped.
+**Up next:** M63 (#16, CSS wide-gamut colours), then M64–M67 as scoped. M62 (#2) is done locally, and #2 closes when it's pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **`pagination` shows a button for every page**, with no ellipsis for a long run (M42 Phase 5): [#2](https://github.com/mindderivative/tesserae/issues/2) (M62).
 - **No `tesserae.widgets.text` wrapper** for a bare text node. Low priority; revisit if a real caller needs it: [#11](https://github.com/mindderivative/tesserae/issues/11) (M64).
 - **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 - **Tesserae's colour parsing rejects CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepts; nothing in the repo uses them (M37 Phase 1): [#16](https://github.com/mindderivative/tesserae/issues/16) (M63).
 
 **Fixed gaps:**
+- ~~**`pagination` showed a button for every page**, with no ellipsis for a long run (M42 Phase 5).~~ **Fixed (M62).** Over `max_visible` pages (7) it windows the run into slots with an inert `…` for each run left out. [#2](https://github.com/mindderivative/tesserae/issues/2), closes once pushed.
 - ~~**A component instantiated into a view the app didn't know about wasn't hot-reloaded** (M51).~~ **Fixed (M61).** `tesserae.instantiate` registers each component with its app (weakly), and the watcher finds it in any view on the app's window. [#4](https://github.com/mindderivative/tesserae/issues/4), closes once pushed.
 - ~~**`graph_node` had no declarative form**: a node attaches to its graph's live node, which textual expansion can't express (M25).~~ **Fixed (M60).** `NodeGraph` and `GraphNode` are YAML kinds built with the widgets, with `edges:`, content in a node's body, and reloads that keep user drags. Every MD3 widget can now be declared. [#7](https://github.com/mindderivative/tesserae/issues/7) closed (pushed `392d8d8..d78b5bc`, CI run 36522987253).
 - ~~**`video` had no faithful declarative form**: frames had to be pushed from Python (M25).~~ **Fixed (M59).** An `Image` takes a `frame` binding, `(rgba, width, height)` from a ViewModel `Signal`, and the `Video` fragment wraps it. [#6](https://github.com/mindderivative/tesserae/issues/6) closed (pushed `9092b53..392d8d8`, CI run 36510904115).
@@ -1735,7 +1735,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 62 — Pagination with an Ellipsis (#2)
 
-**Status: 🚧 In progress — Phase 2 of 3 done.** User: "Push and start M62" (M61 pushed as `d78b5bc..234a67b`). From the backlog order M54 set: [#2](https://github.com/mindderivative/tesserae/issues/2). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: ✅ Complete — all 3 phases done (2026-09-28).** User: "Push and start M62" (M61 pushed as `d78b5bc..234a67b`). From the backlog order M54 set: [#2](https://github.com/mindderivative/tesserae/issues/2). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** `pagination` draws a button for every page, which is crowded for dozens of pages.
 
@@ -1747,8 +1747,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 2 — The Windowing ✅
 - Step 1: `pagination(max_visible=7)` and `_pages_shown` in `widgets/navigation.py`: over `max_visible` pages, `slot0`, ... redrawn by the page `Effect` (text, label, focusable, `a11y_hidden`, cursor, hover); an ellipsis click is a no-op; focus on a slot follows the current page to its new slot. New `tests/test_pagination_ellipsis.py` (20): the window at the start, middle and end, an even middle run, a sweep of counts and sizes (the current page always shows, no ellipsis stands for one page), short runs unchanged, the inert ellipsis (checked on stderr too, since `tre` logs a handler's error rather than raising), moving, focus, `.current.set`, a re-theme, and `max_visible`'s check. Mutation-checked, 14/14 caught (the first run's survivors pinned the even run and the quiet ellipsis click, and showed a `bool` check was dead, so it went). 1614 → 1634 passed (1 skipped); no example uses `pagination` — ✅
 
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the widget catalog; the known gap closed — ⬜
+### Phase 3 — Docs, Tracker ✅
+- Step 1: the widget catalog (windowing, `max_visible`, the slots and `.shown`); the known gap moved to "Fixed gaps"; `mkdocs build --strict` clean — ✅
 
 
 ---
