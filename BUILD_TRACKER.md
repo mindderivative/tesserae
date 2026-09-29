@@ -78,6 +78,8 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M66 — Routing: a Back Stack and Deep Links (#12) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
+| M69 — Handlers on a Component Call (#18) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M70 — Binding `disabled` on Any Clickable Node (#19) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
 **Just closed:** M67 (2026-09-29), done locally: a `tesserae` command, `tesserae new <name> [--shell]` and `tesserae add screen <Name>` (#14). With it the backlog M54 ordered is done: M64 `widgets.text` (#11), M65 shared state (#13), M66 routing (#12), done locally, and M68 the move onto `tre` 0.4.0 (pushed). 2422 passed.
 
@@ -93,15 +95,16 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** nothing is scoped. M64-M67 are pushed (`f9f1147..d1e87a1`, CI green) and #11, #13, #12 and #14 are closed. Still open (Known gaps): YAML can't bind a button's `disabled`; and a fragment call can't take `handlers:`. Separately, the mouse's side buttons for `back()` wait on `tre` #21.
+**Up next:** M69 (#18, handlers on a component call), then M70 (#19, binding `disabled` on any clickable node), both scoped as drafts. The mouse's side buttons (#20) wait on `tre` #21.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **A fragment call can't take `handlers:`:** a `component:` node takes only `id:`, `with:` and `repeat:`, so a `component: ButtonFilled` in a view can't have an `on_click`. A clickable button in YAML is a `Rect` with `handlers:` and a `Text` child, as the interaction guide shows (found in M67).
-- **A button's `disabled` can't be bound in YAML:** `disabled` binds only on the control kinds (M40: `Checkbox`, `Switch`, `SpinBox`, ...); a button is a `Rect` fragment, so `bindings: {disabled: ...}` on it is refused. A back button can't show `app.can_go_back` from YAML; and a node's own `disabled` only tells assistive technology (it still takes clicks and focus), so greying one out is Python's job for now (found in M66).
+- **The mouse's side buttons don't go back and forward** (M66): `tre`'s pointer events report only `primary`, `secondary` and `middle`. Blocked on `tre` [#21](https://github.com/mindderivative/tre/issues/21); Tesserae's side is [#20](https://github.com/mindderivative/tesserae/issues/20), small once it ships (not a milestone until then).
+- **A fragment call can't take `handlers:`:** a `component:` node takes only `id:`, `with:` and `repeat:`, so a `component: ButtonFilled` in a view can't have an `on_click`. A clickable button in YAML is a `Rect` with `handlers:` and a `Text` child, as the interaction guide shows (found in M67): [#18](https://github.com/mindderivative/tesserae/issues/18) (M69).
+- **A button's `disabled` can't be bound in YAML:** `disabled` binds only on the control kinds (M40: `Checkbox`, `Switch`, `SpinBox`, ...); a button is a `Rect` fragment, so `bindings: {disabled: ...}` on it is refused. A back button can't show `app.can_go_back` from YAML; and a node's own `disabled` only tells assistive technology (it still takes clicks and focus), so greying one out is Python's job for now (found in M66): [#19](https://github.com/mindderivative/tesserae/issues/19) (M70).
 
 **Fixed gaps:**
 - ~~**`tools/record_tre_reference.py` couldn't re-record every module:** `test_tree_parity`'s corpus had no sample values for the fragments added after M46 (found in M63).~~ **Fixed (2026-09-29).** Required params come from `VALUES` (M55's defaulted ones keep their defaults) and `items:` per fragment; `tre` gets specs without the `component_of` tag (M57); and while recording, each corpus keeps every question asked before exactly as asked (`reference.previous`), adding only new ones, so no existing answer changed (checked key by key across all eight modules: +27 tree cases, +33 binding expressions). Expressions rooted at M65's `app`/`state` aren't asked of `tre`, which never had them; `Tabs` stays out (its `width: "100%"` divider is beyond 0.3.4's `View`).
@@ -1884,3 +1887,53 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 2 — Docs, Tracker ✅
 - Step 1: README and `docs/installation.md` (the floor, 0.4.0's wheels and sdist); `docs/guide/apps-and-screens.md` and `App.run`'s docstring (the headless return, the GPU `RuntimeError`, partial redraw); the themes guide's example no longer gives text a translucent colour. `LOG.md`; reported to `tre`'s session (counts, nothing broken, no `tre` bugs); `mkdocs build --strict` clean — ✅
+
+
+---
+
+## Milestone 69 — Handlers on a Component Call (#18)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** User: "Scope these two, yaml button binding disabled, component taking handlers, and submit an issues for the mouse's side buttons for back()" (2026-09-29): [#18](https://github.com/mindderivative/tesserae/issues/18). First of the two, since a fragment button with a bound `disabled` (M70) needs a call to take `bindings:` too.
+
+**The gap:** A `component:` node takes only `id:`, `with:` and `repeat:` (`spec/expand.py`'s `ComponentError`), so `component: ButtonFilled` in a view can't have an `on_click`; a YAML button is a `Rect` with `handlers:` and a `Text` child instead (found in M67).
+
+**Draft approach:** A `component:` call also takes `handlers:`, `a11y:`, `interaction:` and `bindings:`, merged onto the fragment's root after expansion, the call site's values winning. With `repeat:` every item gets them, and the event's target (each item's namespaced root id) says which fired. Hot reload and `reconcile` carry them like any node's keys. The fragment docs and the widget catalog show a clickable `component: ButtonFilled`, and the `tesserae new` templates switch to it.
+
+**Decisions to settle at the start** (provisional):
+- Q1 which keys a call takes (recommended: `handlers:`, `a11y:`, `interaction:`, `bindings:`), and whether `style:`/`classes:` join them
+- Q2 root only (recommended), or a way to name a part (`label.bindings:`)
+- Q3 with `repeat:`, the event's target is enough to tell items apart (recommended), or handlers get the item
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: read `expand.py`'s call handling, `repeat:` and the ids it namespaces; Q1-Q3 — ⬜
+
+### Phase 2 — The Keys on a Call ⬜
+- Step 1: `expand.py`; tests for each key, with `repeat:`, the call site winning, and through reload; mutation-checked — ⬜
+
+### Phase 3 — Docs, Templates, Tracker ⬜
+- Step 1: the fragments guide and widget catalog; the `tesserae new` templates use `component: ButtonFilled`; the known gap closed — ⬜
+
+
+---
+
+## Milestone 70 — Binding `disabled` on Any Clickable Node (#19)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** User: as M69's. [#19](https://github.com/mindderivative/tesserae/issues/19). After M69, so a fragment button's call can bind it.
+
+**The gap:** `bindings: {disabled: ...}` works only on the control kinds (M40); on a clickable `Rect` or `Container` it's refused. And a node's own `disabled` only tells assistive technology: it still takes clicks and focus. So a back button can't show `app.can_go_back` (M66) from YAML (found in M66).
+
+**Draft approach:** `disabled:` as a node key and as a binding on any node with handlers. Disabled, a node is announced disabled, isn't focusable, has the default cursor, shows no state layer or ripple (`Interaction.enabled = False`), and its handlers don't run; enabled again, all of it comes back. A disabled look (see Q2).
+
+**Decisions to settle at the start** (provisional):
+- Q1 both a static `disabled:` key and the binding (recommended)
+- Q2 the look: fade the node to MD3's 38% with `opacity` unless its style says otherwise (recommended), or no look (leave it to a bound `background`)
+- Q3 what a disabled node's handlers skip: `on_click` only, or every handler (recommended: the pointer and key handlers, not `on_change` from code)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: read `view.py`'s handler wiring, `_apply`, `Interaction.enabled` and focus; Q1-Q3 — ⬜
+
+### Phase 2 — Disabled Nodes ⬜
+- Step 1: the key and the binding, the click and key guard, focus, cursor, feedback and the look; tests (a fragment button through M69's `bindings:`, a back button on `app.can_go_back`); mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the interaction guide and the routing section's back-button advice; the known gap closed — ⬜
