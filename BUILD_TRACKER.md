@@ -79,7 +79,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M69 — Handlers on a Component Call (#18) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
-| M70 — Binding `disabled` on Any Clickable Node (#19) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M70 — Binding `disabled` on Any Clickable Node (#19) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
@@ -97,7 +97,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M70 (#19, binding `disabled` on any clickable node), scoped as a draft; with M69, a fragment button's call can bind it. M69 (#18) is done locally, and #18 closes when it's pushed. Waiting on `tre`: grids (`tre` #23) and `scroll_view`'s own keyboard and events (`tre` #24, which Tesserae covers meanwhile).
+**Up next:** M70 (#19, binding `disabled` on any clickable node) is in progress. M69 (#18) is pushed; #18 closes once CI passes. Waiting on `tre`: grids (`tre` #23) and `scroll_view`'s own keyboard and events (`tre` #24, which Tesserae covers meanwhile).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -1921,19 +1921,18 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 70 — Binding `disabled` on Any Clickable Node (#19)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** User: as M69's. [#19](https://github.com/mindderivative/tesserae/issues/19). After M69, so a fragment button's call can bind it.
+**Status: 🚧 In progress — Phase 1 of 3 done.** User: "push and start M70" (M69 pushed as `80ef0e9..d9057c3`): [#19](https://github.com/mindderivative/tesserae/issues/19). After M69, so a fragment button's call can bind it. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** `bindings: {disabled: ...}` works only on the control kinds (M40); on a clickable `Rect` or `Container` it's refused. And a node's own `disabled` only tells assistive technology: it still takes clicks and focus. So a back button can't show `app.can_go_back` (M66) from YAML (found in M66).
 
-**Draft approach:** `disabled:` as a node key and as a binding on any node with handlers. Disabled, a node is announced disabled, isn't focusable, has the default cursor, shows no state layer or ripple (`Interaction.enabled = False`), and its handlers don't run; enabled again, all of it comes back. A disabled look (see Q2).
+**Decisions** (recommended, taken):
+- Q1, both a static `disabled:` node key and the binding, on any kind (a control's goes to its own `disabled`, as its binding already does). Where it comes from, the View holds the state and applies it after every build and patch, as it keeps state layers and Scrollers (`_sync_interactions`), so a re-theme, restyle or reconcile never undoes it; a binding that's gone falls back to the static key.
+- Q2, the look: disabled, a node fades to MD3's 38% of its style's `opacity`, and returns to it when enabled. (A bound `opacity` on a disabled node is the enabled look's; not combined.)
+- Q3, disabled, a node is announced disabled, isn't focusable, shows no state layer, ripple or focus ring (`Interaction.enabled = False`), and none of its handlers run -- a click on it is still taken (so a clickable parent doesn't get it), as a disabled button swallows it. Enabled again, its focus comes back as the compiler gives it (a clickable is a Tab stop).
+- Q4, not in scope: YAML clickables have no pointer cursor at all today (widgets' do), so M70 doesn't touch the cursor.
 
-**Decisions to settle at the start** (provisional):
-- Q1 both a static `disabled:` key and the binding (recommended)
-- Q2 the look: fade the node to MD3's 38% with `opacity` unless its style says otherwise (recommended), or no look (leave it to a bound `background`)
-- Q3 what a disabled node's handlers skip: `on_click` only, or every handler (recommended: the pointer and key handlers, not `on_change` from code)
-
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: read `view.py`'s handler wiring, `_apply`, `Interaction.enabled` and focus; Q1-Q3 — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: read `_wire_handler`, `_apply`/`_apply_to_control`, `_a11y_props` (a clickable's focus and role), `Interaction.enabled`, and the View's sync points; checked on `tre` that a node's `disabled` still takes clicks and that YAML clickables set no cursor; settled Q1-Q4 above — ✅
 
 ### Phase 2 — Disabled Nodes ⬜
 - Step 1: the key and the binding, the click and key guard, focus, cursor, feedback and the look; tests (a fragment button through M69's `bindings:`, a back button on `app.can_go_back`); mutation-checked — ⬜
