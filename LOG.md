@@ -1781,4 +1781,4 @@ closed).
   back button is now a binding.
 - 11 tests; 17/17 mutants caught.
 
-2562 passed.
+2564 passed (+2 docs checks on the guide's new example).
