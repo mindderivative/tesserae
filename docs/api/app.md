@@ -44,10 +44,12 @@ theme file changes.
 
 `dark="system"` (the default) follows the OS: when it switches between
 light and dark, every screen is re-themed in place, with
-bound values kept. It **starts dark** until the OS's first switch. `tre`
-0.3.5.2 can now report the appearance at start-up (`window.get("dark")`,
-[`tre` #18](https://github.com/mindderivative/tre/issues/18)), and starting
-with it is [#17](https://github.com/mindderivative/tesserae/issues/17). `dark=True` or `dark=False` fixes
+bound values kept. It **starts in the OS's appearance** (M53): `tre`
+0.3.5.2 reports it (`window.get("dark")`,
+[`tre` #18](https://github.com/mindderivative/tre/issues/18)) at once on
+Linux, and once the window opens on macOS and Windows, where the app
+starts dark and `run()` switches on the first frame. Where the OS can't
+say (headless), it starts dark. `dark=True` or `dark=False` fixes
 the appearance, whatever the OS does.
 
 **`set_dark(dark) -> None`** -- `True`/`False` switches to that

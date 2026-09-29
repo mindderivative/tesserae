@@ -162,6 +162,14 @@ Link; not text inputs), carried on the cascade's prepared layers.
 `App(dark="system")` is the default: it starts dark and follows the
 window's `color_scheme` event; `set_dark` fixes or releases it. `App`
 no longer themes the window (M42 Phase 7).
+M53: `app._os_dark(window)` reads `tre` 0.3.5.2's `window.get("dark")`
+(`None` when the OS can't say, or on an older `tre`). `App.__init__` uses
+it for `"system"`, which Linux answers at once. `run()` queues
+`_adopt_os_appearance` on its loop handle for the first frame, where
+macOS and Windows answer, and it re-themes through `_apply_dark`, as a
+`color_scheme` event would. The tests fix the answer with
+`conftest.os_appearance` (default `None`), so they don't depend on the
+desktop running them.
 
 **Following the app's theme, M50:** `follow.py` finds an app by its
 window: `App.__init__` calls `register_app`, which keeps a weak

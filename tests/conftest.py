@@ -79,3 +79,18 @@ def pytest_sessionfinish(session, exitstatus):
     written in as `tre`'s answer."""
     if reference.RECORDING and exitstatus == 0:
         reference.STORE.save()
+
+
+@pytest.fixture(autouse=True)
+def os_appearance(monkeypatch):
+    """The OS's light/dark appearance, as `App(dark="system")` reads it
+    (M53): unknown (`None`) by default, so an app starts dark whatever the
+    desktop running the tests uses. A test sets `os_appearance.dark`."""
+    import tesserae.app
+
+    class Appearance:
+        dark = None
+
+    appearance = Appearance()
+    monkeypatch.setattr(tesserae.app, "_os_dark", lambda window: appearance.dark)
+    return appearance

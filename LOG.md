@@ -1424,3 +1424,17 @@ Phase 2:
 - 5 tests; 8/8 mutants caught.
 
 1478 passed; all five examples clean.
+
+## M53 Phase 3: the OS's appearance at start (#17)
+
+User: "start phase 3".
+
+- `App(dark="system")` starts with `window.get("dark")`: at once on
+  Linux, and on the first frame on macOS and Windows (queued by `run()`).
+  It falls back to dark when the OS can't say.
+- `_os_dark` is the test seam, and `conftest.os_appearance` makes it
+  answer `None` by default, so the suite doesn't depend on the desktop.
+- 10 tests, including a live `run()` in a subprocess; 7/7 mutants
+  caught.
+
+1488 passed; all five examples clean.

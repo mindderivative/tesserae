@@ -51,6 +51,18 @@ class _Built:
     stylesheet_file: Path | None = None
 
 
+def _os_dark(window: Any) -> bool | None:
+    """The OS's appearance: `True` dark, `False` light, or `None` when it
+    can't say (`tre` 0.3.5.2's `window.get("dark")`, `tre` issue #18). On
+    Linux it answers at once; on macOS and Windows, once the window is open;
+    headless, never. One function, so tests can fix the answer (M53 Q3)."""
+    try:
+        value = window.get("dark")
+    except ValueError:  # a `tre` before 0.3.5.2
+        return None
+    return None if value is None else bool(value)
+
+
 def _apply_all(views: list[Any], apply: Any, undo: Any) -> None:
     """`apply(view)` for each view; if one raises, `undo(view)` the ones
     already done, then re-raise -- so a rejected theme or stylesheet
@@ -137,8 +149,8 @@ class App:
             raise ValueError(f'App: dark must be True, False or "system", got {dark!r}')
         #: "system" follows the OS; True/False is the app's own fixed choice (M38).
         self._dark_mode: bool | str = dark
-        #: The appearance in use. "system" starts dark: 0.3.4 can't read the
-        #: OS's appearance until its first `color_scheme` event (M38 Q3).
+        #: The appearance in use. "system" starts with the OS's, once the window
+        #: exists to ask (M53), and dark where the OS can't say yet (M38 Q3).
         self._dark: bool = True if dark == "system" else bool(dark)
         self._default_theme_spec = _file_or_spec("App", "default_theme", default_theme, default_theme_spec, load_theme)
         self._custom_theme_spec = _file_or_spec("App", "custom_theme", custom_theme, custom_theme_spec, load_theme)
@@ -158,6 +170,10 @@ class App:
         self._window: Window = Window(width=width, height=height, title=title)
         self._window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0,
                               align_items="flex_start")
+        if dark == "system":  # M53: Linux answers now; macOS and Windows once the window opens (run())
+            os_dark = _os_dark(self._window)
+            if os_dark is not None:
+                self._dark = os_dark
         self._current: str | None = None
         self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
         self._shell_file: Path | None = None  # the `*_Shell.yaml` `load_shell` read (M52)
@@ -204,6 +220,15 @@ class App:
         whole app follows; with a fixed choice, nothing changes."""
         if self._dark_mode == "system":
             self._apply_dark(bool(event.dark))
+
+    def _adopt_os_appearance(self) -> None:
+        """Following the OS, asks it again once the window is open (M53
+        Q2): macOS and Windows can't say before, and the app re-themes then,
+        as a `color_scheme` event would."""
+        if self._dark_mode == "system":
+            os_dark = _os_dark(self._window)
+            if os_dark is not None:
+                self._apply_dark(os_dark)
 
     def _apply_dark(self, dark: bool) -> None:
         if dark == self._dark:
@@ -675,6 +700,7 @@ class App:
             self._tre_app = _TreApp()
         tre_app = self._tre_app
         tre_app.add_window(self._window)
+        tre_app.thread_handle().call_soon(self._adopt_os_appearance)  # on the first frame (M53 Q2)
         try:
             if hot_reload:
                 self._start_watchers(tre_app.thread_handle())
