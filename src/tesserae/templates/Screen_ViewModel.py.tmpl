@@ -1,0 +1,12 @@
+"""The ${name} screen's ViewModel. `on_navigated` gets the params it was
+navigated to with (`app.navigate("${name}", id=7)`)."""
+
+from tesserae import ViewModel
+
+
+class ${name}ViewModel(ViewModel):
+    def on_navigated(self, params):
+        pass
+
+    def go_back(self):
+        self.app.back()

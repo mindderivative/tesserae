@@ -32,6 +32,9 @@ dependencies = [
     "materialyoucolor>=3.0.4,<4",
 ]
 
+[project.scripts]
+tesserae = "tesserae.cli:main"  # `tesserae new`, `tesserae add screen` (M67)
+
 [project.urls]
 Repository = "https://github.com/mindderivative/tesserae"
 

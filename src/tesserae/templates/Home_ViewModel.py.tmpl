@@ -1,0 +1,14 @@
+"""The Home screen's ViewModel: `Home_View.yaml` binds `label` and calls
+`increment`. `self.app` and `self.state` are the app and its shared state."""
+
+from tesserae import Computed, Signal, ViewModel
+
+
+class HomeViewModel(ViewModel):
+    def __init__(self, view):
+        self.clicks = Signal(0)
+        self.label = Computed(lambda: f"Clicked {self.clicks.get()} times")
+        super().__init__(view)
+
+    def increment(self):
+        self.clicks.update(lambda n: n + 1)

@@ -76,7 +76,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M65 — An App-Level State Store (#13) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
-| M67 — A `tesserae new` Scaffolding CLI (#14) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
+| M67 — A `tesserae new` Scaffolding CLI (#14) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
 **Just closed:** M66 (2026-09-29), done locally: routing -- `navigate`/`back`/`forward` with `on_navigated(params)`, routes and deep links (`route`, `navigate_to`, `location`), the shell's rail navigating, and Alt+Left/Right (#12). Before it, M65 (done locally): an app-level state store (#13). 2410 passed.
@@ -1851,7 +1851,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 67 — A `tesserae new` Scaffolding CLI (#14)
 
-**Status: 🚧 In progress — Phase 1 of 3 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#14](https://github.com/mindderivative/tesserae/issues/14). Scoped up front as a draft, refined here as it starts; the recommendations are taken. Last, so its templates use M65's state and M66's routes.
+**Status: 🚧 In progress — Phase 2 of 3 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#14](https://github.com/mindderivative/tesserae/issues/14). Scoped up front as a draft, refined here as it starts; the recommendations are taken. Last, so its templates use M65's state and M66's routes.
 
 **The gap:** A new app is assembled by hand, following the naming convention.
 
@@ -1864,8 +1864,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read the naming convention, `load`/`load_shell`, the shell-file example, the fragments' call rules (no `handlers:` on a `component:` node) and the packaging (Hatch ships everything under `src/tesserae`); settled Q1-Q4 above — ✅
 
-### Phase 2 — The CLI ⬜
-- Step 1: `tesserae/cli.py`, the templates, the entry point and `__main__`; tests that generate into `tmp_path` and run the result headlessly (clicking its button), `add screen` with and without markers, `--shell`, and the errors; mutation-checked — ⬜
+### Phase 2 — The CLI ✅
+- Step 1: `tesserae/cli.py` (`new`, `add_screen`, `screen_route`, `main`), six templates in `tesserae/templates/` (`app.py`, the Home pair, a screen pair with a Back button calling `self.app.back()`, and the shell file), `[project.scripts] tesserae`, and `tesserae/__main__.py`. A refused `add screen` checks both files before writing either. A built wheel ships the templates and the console script. New `tests/test_cli.py` (12): each generated app runs in a subprocess through a wrapper that swaps `App.run` for a check (Home's greeting from the shared state, a click on its button, each screen's Back button, the routes, the shell and its rail, the window size) before rendering 3 frames; a deep link opens a screen; `add screen`'s lines land just above their markers; with no markers, or only one, it prints the lines and leaves `app.py` alone; bad names; nothing overwritten; the command and `python -m tesserae`. Mutation-checked, 21/21 across the CLI and the templates (the first run pinned the shell's window size and rail, a half-marked `app.py`, and where an import lands). 2410 → 2422 passed — ✅
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: a getting-started page for the CLI; README; the known gap closed — ⬜

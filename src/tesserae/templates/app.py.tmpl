@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+"""${title}: a Tesserae app, made by `tesserae new`.
+
+Run it with `python app.py`, or `python app.py <route>` to open on a
+screen by its route. Add a screen with `tesserae add screen <Name>`.
+"""
+
+import sys
+from pathlib import Path
+
+from tesserae import App, Signal, configure_logging
+
+from Home_ViewModel import HomeViewModel
+# (tesserae add screen adds each new screen's import above this line)
+
+configure_logging()
+
+HERE = Path(__file__).parent
+
+
+class AppState:
+    """What every screen shares: `self.state` in a ViewModel, `state` in a binding."""
+
+    def __init__(self):
+        self.greeting = Signal("Hello from ${title}")
+
+
+app = App(width=${width}, height=${height}, title="${title}", theme_seed=(0x67, 0x50, 0xA4, 0xFF), state=AppState())
+
+app.load(HERE / "Home_View.yaml", HomeViewModel)
+app.route("", "Home")
+# (tesserae add screen adds each new screen's load and route above this line)
+
+app.navigate_to(sys.argv[1] if len(sys.argv) > 1 else "")  # a route, or "" for Home
+${shell}app.run()
