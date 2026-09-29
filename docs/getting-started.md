@@ -3,6 +3,48 @@
 A real Tesserae app is always a `*_View.yaml` + `*_ViewModel.py` pair,
 loaded and shown by one `app.py` entry point.
 
+## The quick way: `tesserae new`
+
+Installing Tesserae installs a `tesserae` command (M67), which makes an
+app you can run at once:
+
+```bash
+tesserae new notes
+cd notes
+python app.py
+```
+
+`notes/` has `app.py`, and a `Home_View.yaml`/`Home_ViewModel.py` pair
+following the [naming convention](guide/naming-convention.md): a
+greeting from the app's [shared state](guide/apps-and-screens.md#shared-state)
+and a button that counts its clicks. `app.py` gives Home the route `""`,
+so `python app.py <route>` opens on a screen by its route (a
+[deep link](guide/apps-and-screens.md#routes-and-deep-links)).
+
+Add a screen with:
+
+```bash
+tesserae add screen Settings
+```
+
+That writes `Settings_View.yaml` and `Settings_ViewModel.py` (a title
+and a Back button that calls `self.app.back()`), and adds its import,
+`app.load(...)` and route (`settings`) to `app.py`, above the two marker
+comments `tesserae new` left there. Without them it prints the lines to
+add instead. A CamelCase name gets a kebab-case route: `UserProfile` is
+`user-profile`.
+
+- `tesserae new notes --shell` also makes an [app shell](guide/app-shell.md)
+  file, `Notes_Shell.yaml` (a top bar, a navigation rail over Home and
+  Settings, a status bar), and the Settings screen.
+- `--dir` makes the app somewhere other than here, or adds a screen to
+  an app somewhere else.
+- Nothing is overwritten: a folder that isn't empty, or a screen whose
+  files exist, is refused with a one-line message (exit code 2).
+- `python -m tesserae` is the same command.
+
+The rest of this page builds the same kind of app by hand.
+
 ## The view
 
 ```yaml

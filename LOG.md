@@ -1666,3 +1666,19 @@ M63 and the move onto `tre` 0.4.0 as `f49dd36..f9f1147` (CI run
 - 27 tests; 23/23 and 15/15 mutants caught.
 
 2410 passed.
+
+## M67: a `tesserae new` scaffolding CLI (#14)
+
+- A `tesserae` console script (and `python -m tesserae`).
+  - `tesserae new <name> [--shell] [--dir]` makes a runnable app:
+    `app.py` with shared state and routes, and a Home pair. `--shell`
+    adds a shell file and a Settings screen.
+  - `tesserae add screen <Name>` adds a pair, and loads and routes it in
+    `app.py` at two marker comments (it prints the lines without them).
+    Nothing is overwritten.
+- The templates ship in `tesserae/templates/` (checked in a built wheel).
+- Found: a `component:` call can't take `handlers:`, so a YAML button is
+  a `Rect` with a `Text` child (a known gap).
+- 12 tests, each running a generated app headlessly; 21/21 mutants caught.
+
+That finishes the backlog M54 ordered. 2422 passed.

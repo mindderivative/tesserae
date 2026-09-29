@@ -227,12 +227,15 @@ life of the app.
 
 See [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## Explicitly deferred
+## Starting an app
 
-Named for the record, not designed in detail yet -- each is real, future
-work once this foundation is proven further:
+`tesserae new notes` makes a runnable app (`app.py` and a `Home` pair,
+with shared state and routes); `--shell` adds an app shell file and a
+Settings screen. `tesserae add screen Settings` adds a pair and loads and
+routes it in `app.py` (M67). See [Getting Started](https://mindderivative.github.io/tesserae/getting-started/).
 
-- A `tesserae new` CLI scaffolding tool ([#14](https://github.com/mindderivative/tesserae/issues/14)).
+The items once listed here as deferred are done: shared state (M65),
+routing with a history and deep links (M66), and this CLI (M67).
 
 **Releasing:** publishing a GitHub Release runs `.github/workflows/release.yml`.
 It checks that the tag matches the version and that no dependency is PyPI's
