@@ -80,7 +80,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M69 — Handlers on a Component Call (#18) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M70 — Binding `disabled` on Any Clickable Node (#19) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
-| M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██⬜⬜⬜⬜⬜⬜⬜⬜` 25% | 🚧 In progress — Phase 1 of 4 done |
+| M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
 
 **Just closed:** M67 (2026-09-29), done locally: a `tesserae` command, `tesserae new <name> [--shell]` and `tesserae add screen <Name>` (#14). With it the backlog M54 ordered is done: M64 `widgets.text` (#11), M65 shared state (#13), M66 routing (#12), done locally, and M68 the move onto `tre` 0.4.0 (pushed). 2422 passed.
 
@@ -1945,7 +1945,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21)
 
-**Status: 🚧 In progress — Phase 1 of 4 done.** User: "Scope M71 and file the tre grid issue" (2026-09-29), after asking what layouts Tesserae has, then "push and start M71" (pushed as `d1e87a1..ba04848`): [#21](https://github.com/mindderivative/tesserae/issues/21). Independent of `tre` 0.4.1; grids themselves wait on `tre` [#23](https://github.com/mindderivative/tre/issues/23). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 4 done.** User: "Scope M71 and file the tre grid issue" (2026-09-29), after asking what layouts Tesserae has, then "push and start M71" (pushed as `d1e87a1..ba04848`): [#21](https://github.com/mindderivative/tesserae/issues/21). Independent of `tre` 0.4.1; grids themselves wait on `tre` [#23](https://github.com/mindderivative/tre/issues/23). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** A view's style takes `flex_direction`, `gap`, `padding`, `margin`, `flex_grow`/`flex_shrink`/`flex_basis`, `align_items`, `justify_content` and sizes (numbers, `"auto"`, percentages). It refuses, as "unknown style field(s)", seven things `tre` 0.4.0 lays out (each tried): `flex_wrap`, `align_self`, `min_width`/`max_width`/`min_height`/`max_height`, `aspect_ratio`, `position` with `x`/`y`, `z_index` and `clip_children`. `tre`'s `scroll_view` has no `kind:`. And `tre` has no grid (flexbox only, though its Taffy implements CSS Grid).
 
@@ -1960,8 +1960,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read `_layout`, `STYLE_FIELDS` (`spec/cascade.py`), `_create` and patching; probed each key's default and validation and `scroll_view`'s layout, wheel, keys, accessibility and events on `tre` 0.4.0; settled Q1-Q4 above — ✅
 
-### Phase 2 — The Flexbox Keys ⬜
-- Step 1: the seven keys in the compiler and patching; tests comparing laid-out boxes with `tre`'s own for each; mutation-checked — ⬜
+### Phase 2 — The Flexbox Keys ✅
+- Step 1: the keys in `STYLE_FIELDS` (so stylesheets take them too) and `_layout`. **A design change a test forced:** giving every node the keys' defaults, so a patch could reset one, sent a graph node back to 0 on a re-theme -- Python code places and clips spec-built nodes (a widget's `x`/`y`, overlays, viewports, a time field's `align_self`). So a style sets an M71 key only when it gives it, `Built.layout_keys` records which it gave, and `patch(..., before=)` resets only those it dropped (the View passes and updates them on reconcile, re-theme and restyle); a control's placement and a Link's box and text follow the same rule. `tre`'s layout errors now name the widget, at build and at patch. New `tests/test_layout_vocabulary.py` (20): each key's laid-out boxes against the same tree built with `tre` directly (wrapping, `align_self`, min/max widths and heights, `aspect_ratio`, absolute `x`/`y` in pixels and percentages), `z_index`/`clip_children` on the node, a stylesheet giving and dropping one, reconcile setting and resetting, Python's placement surviving a re-theme, a control's placement and its reset, a Link's box and text, and the named errors from a build, a stylesheet and a reconcile. Mutation-checked, 16/16 (the first run pinned a Link's text-side reset and the patch path's errors). 2482 → 2502 passed — ✅
 
 ### Phase 3 — ScrollView ⬜
 - Step 1: the kind, its binding, keyboard and a11y, reconcile and hot reload; tests; mutation-checked — ⬜

@@ -338,9 +338,10 @@ class View:
 
     def _repatch(self, scheme: Any, layers: Any) -> None:
         for node_id, node_spec in self._built.specs.items():
-            patch(self.window, node_spec, self._built.outer[node_id], self._built.nodes[node_id],
-                  scheme=scheme, layers=layers, frames=self._frames, state=False,
-                  control=self._built.controls.get(node_id))
+            self._built.layout_keys[node_id] = patch(
+                self.window, node_spec, self._built.outer[node_id], self._built.nodes[node_id],
+                scheme=scheme, layers=layers, frames=self._frames, state=False,
+                control=self._built.controls.get(node_id), before=self._built.layout_keys.get(node_id, frozenset()))
         self._sync_interactions(scheme)
 
     def _sync_interactions(self, scheme: Any = None) -> None:
@@ -376,8 +377,10 @@ class View:
         node_id = new["id"]
         outer = self._built.outer[node_id]
         if not _props_equal(old, new):
-            patch(self.window, new, outer, self._built.nodes[node_id], scheme=self._scheme, layers=self._layers,
-                  frames=self._frames, control=self._built.controls.get(node_id))
+            self._built.layout_keys[node_id] = patch(
+                self.window, new, outer, self._built.nodes[node_id], scheme=self._scheme, layers=self._layers,
+                frames=self._frames, control=self._built.controls.get(node_id),
+                before=self._built.layout_keys.get(node_id, frozenset()))
         self._built.specs[node_id] = new
         if new.get("kind") == "NodeGraph":
             self._reconcile_graph(old, new)

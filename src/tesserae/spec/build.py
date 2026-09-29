@@ -77,6 +77,8 @@ class Built:
     controls: dict[str, Any] = field(default_factory=dict)
     #: RadioButtons' `group:` names, each one `tesserae.controls.RadioGroup`.
     radio_groups: dict[str, Any] = field(default_factory=dict)
+    #: The M71 layout keys each node's style gave, for `patch`'s `before`.
+    layout_keys: dict[str, frozenset[str]] = field(default_factory=dict)
 
 
 @dataclass
@@ -198,7 +200,13 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     if unknown_style:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}")
 
-    outer, inner = _create(ctx, node, style, built)
+    try:
+        outer, inner = _create(ctx, node, style, built)
+    except ValueError as exc:
+        if isinstance(exc, SpecBuildError):
+            raise
+        raise SpecBuildError(f"widget {_q(node_id)}: {exc}") from None  # `tre`'s message, naming the widget (M71)
+    built.layout_keys[node_id] = layout_keys(style)
     built.nodes[node_id] = inner
     built.outer[node_id] = outer
     built.specs[node_id] = node
@@ -235,6 +243,23 @@ def _spacing(value: Any, prefix: str) -> dict[str, float]:
     return {f"{prefix}_{side}": float(value.get(side, 0.0)) for side in ("top", "right", "bottom", "left")}
 
 
+#: M71's layout keys, each with the default `tre` takes back. A style sets
+#: one only when it gives it, and a patch resets one only when the style
+#: gave it before (`patch`'s `before`): Python code also places and clips
+#: nodes a spec built (a widget's `x`/`y`, an overlay's `position`, a
+#: viewport's `clip_children`), and a re-theme mustn't undo that.
+_OPTIONAL_LAYOUT: dict[str, Any] = {
+    "flex_wrap": "no_wrap", "align_self": None, "min_width": "auto", "max_width": "auto", "min_height": "auto",
+    "max_height": "auto", "aspect_ratio": None, "position": "relative", "x": "auto", "y": "auto", "z_index": 0,
+    "clip_children": False,
+}
+
+
+def layout_keys(style: dict[str, Any]) -> frozenset[str]:
+    """Which of M71's layout keys `style` gives."""
+    return frozenset(k for k in _OPTIONAL_LAYOUT if k in style)
+
+
 def _layout(style: dict[str, Any]) -> dict[str, Any]:
     """Every layout property, defaults included, as `tre`'s
     `layout_style` sets it -- so a patch can also reset one."""
@@ -248,6 +273,7 @@ def _layout(style: dict[str, Any]) -> dict[str, Any]:
         "flex_grow": float(style.get("flex_grow", 0.0)),
         "flex_shrink": float(style.get("flex_shrink", 1.0)),
         "flex_basis": style.get("flex_basis", "auto"),
+        **{k: style[k] for k in _OPTIONAL_LAYOUT if k in style},  # M71: only those a style gives
         # `tre` leaves these unset unless given, and `create` won't take None.
         **({"align_items": style["align_items"]} if style.get("align_items") is not None else {}),
         **({"justify_content": style["justify_content"]} if style.get("justify_content") is not None else {}),
@@ -383,7 +409,8 @@ def _text_props(ctx, node, style):
 
 
 _PLACED = ("margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
-           "align_self", "position", "x", "y")
+           "align_self", "position", "x", "y", "z_index", "min_width", "max_width", "min_height", "max_height",
+           "aspect_ratio")
 
 
 def _link_props(ctx, node, style):
@@ -607,32 +634,47 @@ def patch(
     frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
     state: bool = True,
     control: Any = None,
-) -> None:
+    before: frozenset[str] = frozenset(),
+) -> frozenset[str]:
     """Sets `node`'s properties on its existing nodes, in place -- what
     `tre`'s `patch_node` does. The node keeps its identity, focus and
     running animations. Children aren't touched.
 
     For a control kind, `control` is its control: it's re-themed, and its
     state set from the spec unless `state=False` (a theme or stylesheet
-    change, which leaves what the user did)."""
+    change, which leaves what the user did).
+
+    `before` is the M71 layout keys the node's style gave when it was last
+    built or patched (`Built.layout_keys`): one it no longer gives is reset.
+    Returns the keys it gives now."""
     ctx = _Context(window, layers, scheme, frames or {})
     style = resolve_style(node, layers)
     kind = node["kind"]
-    if kind in _WIDGET_KINDS:
-        if control is not None:
-            _patch_graph_widget(ctx, node, control, state)
-        return
-    if kind in _CONTROL_KINDS:
-        if control is not None:
-            _patch_control(ctx, node, style, control, state)
-            _a11y_target(control).set(**_a11y_props(node, patching=True))
-        return
-    _, props_of = _PRIMITIVE[kind]
-    outer_props, inner_props = props_of(ctx, node, style)
-    (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=True))
-    outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins
-    if inner_props is not None:
-        inner.set(**inner_props)
+    given = layout_keys(style)
+    resets = {k: _OPTIONAL_LAYOUT[k] for k in before - given}
+    try:
+        if kind in _WIDGET_KINDS:
+            if control is not None:
+                _patch_graph_widget(ctx, node, control, state)
+            return given
+        if kind in _CONTROL_KINDS:
+            if control is not None:
+                _patch_control(ctx, node, style, control, state, resets)
+                _a11y_target(control).set(**_a11y_props(node, patching=True))
+            return given
+        _, props_of = _PRIMITIVE[kind]
+        outer_props, inner_props = props_of(ctx, node, style)
+        (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=True))
+        for key, value in resets.items():  # where `_layout` would have put it (a Link's text keeps its own)
+            (inner_props if kind == "Link" and key not in _PLACED else outer_props)[key] = value
+        outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins
+        if inner_props is not None:
+            inner.set(**inner_props)
+    except ValueError as exc:
+        if isinstance(exc, SpecBuildError):
+            raise
+        raise SpecBuildError(f"widget {_q(node['id'])}: {exc}") from None
+    return given
 
 
 def _role(ctx, name):
@@ -643,7 +685,7 @@ def _role(ctx, name):
 #: size (a control is built at its size) or its own content alignment.
 _PLACEMENT = frozenset({
     "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
-    "align_self", "position", "x", "y",
+    "align_self", "position", "x", "y", "z_index",
 })
 _PLACEMENT_RESET = {"margin_top": 0.0, "margin_right": 0.0, "margin_bottom": 0.0, "margin_left": 0.0,
                     "flex_grow": 0.0, "flex_shrink": 1.0}
@@ -789,8 +831,10 @@ def _a11y_target(control: Any) -> Any:
     return getattr(control, "input", None) or control.node
 
 
-def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], control: Any, state: bool) -> None:
-    control.node.set(**{**_PLACEMENT_RESET, **{k: v for k, v in _layout(style).items() if k in _PLACEMENT}})
+def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], control: Any, state: bool,
+                   resets: Optional[dict[str, Any]] = None) -> None:
+    placement = {k: v for k, v in {**(resets or {}), **_layout(style)}.items() if k in _PLACEMENT}
+    control.node.set(**{**_PLACEMENT_RESET, **placement})
     control._color = _control_colour(ctx, node, style)
     control.set_theme(_theme(ctx))
     if not state:

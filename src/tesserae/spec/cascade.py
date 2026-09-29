@@ -53,6 +53,9 @@ STYLE_FIELDS = frozenset({
     "width", "height", "flex_direction", "padding", "margin", "gap", "flex_grow", "flex_shrink",
     "flex_basis", "align_items", "justify_content", "background", "foreground", "corner_radius",
     "opacity", "border_width", "border_color", "elevation",
+    # M71: the rest of `tre`'s flexbox
+    "flex_wrap", "align_self", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
+    "position", "x", "y", "z_index", "clip_children",
 })
 
 
