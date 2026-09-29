@@ -85,10 +85,11 @@ python examples/app_shell_file/app.py
 genuine render loop.
 
 `multi_screen/`: two independent screens (`Home`/`Settings`), each its
-own `*_View.yaml`/`*_ViewModel.py` pair, switched via `App.show(name)`
+own `*_View.yaml`/`*_ViewModel.py` pair, switched via `self.app.show(name)`
 from inside each screen's own real dispatched `on_click` handler --
 proving a switch works even when triggered *reentrantly*, from the
-handler `App.show` itself is dispatching into.
+handler `App.show` itself is dispatching into. Both screens show the
+app's shared state (`App(state=...)`, M65), which each handler writes.
 
 `todo_list/`: a real dynamic list, driven by `tesserae.Repeater` -- one
 list `Signal` of stable item ids (`TodoViewModel.items`) is the single
@@ -208,10 +209,10 @@ Raises `ValueError` immediately if the view file doesn't end in
 `_ViewModel.py`, or the two prefixes don't match -- catching a
 mismatched pair at load time rather than a cryptic failure later when a
 handler name doesn't resolve. `App.register(name, view, viewmodel)`
-stays available directly for the real cases `load()` doesn't cover (a
-`ViewModel` that needs a live reference to `App` itself at construction
-time, e.g. to call `app.show(...)` from its own handler -- see
-`examples/multi_screen/`).
+stays available directly for a view and ViewModel built by hand. A
+ViewModel doesn't need the app passed in: on the app's window it has
+`self.app`, and `self.state` for state the screens share
+(`App(state=...)`, M65; see `examples/multi_screen/`).
 
 `app.py` is the real entry point: it loads (or registers) each pair and
 calls `App.show(name)` to pick which one is currently on screen --
@@ -229,8 +230,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 Named for the record, not designed in detail yet -- each is real, future
 work once this foundation is proven further:
 
-- App-level state stores shared across screens ([#13](https://github.com/mindderivative/tesserae/issues/13)),
-  routing beyond a plain named `App.show(name)` (history/back-stack,
+- Routing beyond a plain named `App.show(name)` (history/back-stack,
   URL-style deep links; [#12](https://github.com/mindderivative/tesserae/issues/12)),
   a `tesserae new` CLI scaffolding tool ([#14](https://github.com/mindderivative/tesserae/issues/14)).
 

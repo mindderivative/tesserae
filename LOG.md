@@ -1633,3 +1633,18 @@ M63 and the move onto `tre` 0.4.0 as `f49dd36..f9f1147` (CI run
 - 10 tests; 11/11 mutants caught.
 
 2372 passed.
+
+## M65: an app-level state store (#13)
+
+- `App(state=...)`, also settable as `app.state`: any object, typically
+  a class of `Signal`s. `App.of(view)` finds the app from a view,
+  component or window.
+- `ViewModel.app` and `ViewModel.state` resolve through the view's
+  window (M50's registry). They're non-data descriptors, so a
+  ViewModel's own attribute wins. Bindings read `{{ state.x.get() }}`
+  in any view.
+- `examples/multi_screen/` now `load()`s both screens and shares state
+  between them.
+- 9 tests; 10/10 mutants caught.
+
+2383 passed.

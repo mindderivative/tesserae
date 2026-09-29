@@ -1,36 +1,30 @@
 #!/usr/bin/env python3
-"""Tesserae's own real, second vertical slice: `App.show(name)` switching
-between two fully-bootstrapped, independent screens -- `Home`/`Settings`,
-each its own `*_View.yaml` + `*_ViewModel.py` pair -- through the same
-live `Window`, entirely from inside a real dispatched click handler on
-each screen's own nav button.
+"""Tesserae's second vertical slice: `App.show(name)` switching between two
+fully-bootstrapped, independent screens -- `Home`/`Settings`, each its
+own `*_View.yaml` + `*_ViewModel.py` pair -- through the same live
+`Window`, from inside a real dispatched click handler on each screen's
+own nav button.
 
-Mirrors `tre`'s own `examples/live_view_switch.py` (which proves the
-same real capability one layer lower, by attaching and detaching screen roots
-directly) -- this proves it through Tesserae's own real `App` entry
-point instead, the shape a real Tesserae app actually uses.
+Mirrors `tre`'s own `examples/live_view_switch.py` (the same capability
+one layer lower, attaching and detaching screen roots directly) -- this
+proves it through Tesserae's `App`, the shape a real Tesserae app uses.
 
-Uses `App.register()` directly rather than `App.load()`: each
-`ViewModel` here needs a live reference to `app` itself (to call
-`app.show(...)` from its own handler), which `load()`'s own narrower
-`viewmodel_cls(view)` construction doesn't pass -- a real, honest
-scope boundary, not an oversight. `load()` stays the right choice for
-the common case (`examples/counter/app.py`), where a `ViewModel` never
-needs to reach back into `App`.
+Both screens are `load()`ed. Their ViewModels reach the app as
+`self.app` (to call `show`) and its shared state as `self.state`, found
+through the view's window (M65), so neither needs a widened constructor
+and `load()`'s plain `viewmodel_cls(view)` does. The state is one
+`Signal`, `came_from`, which each handler sets and both screens bind to
+(`{{ state.came_from.get() }}`): one write, both screens.
 
-Each view is built with `app.build_view`, not `tesserae.View(path)`: Tesserae
-reads the file (and anything it includes) and hands `tre` only the
-finished spec (M29), using the app's theme and stylesheet (M30) -- the
-way to theme a screen given to `register()`. Built from a file, each
-screen is also hot-reloaded by `app.run(hot_reload=True)`, as a `load()`ed
-one is (M48).
+`load()` builds each view with the app's theme and stylesheet, and a
+screen built from a file is hot-reloaded by `app.run(hot_reload=True)`.
 """
 
 from pathlib import Path
 
 from loguru import logger
 
-from tesserae import App, configure_logging
+from tesserae import App, Signal, configure_logging
 
 from Home_ViewModel import HomeViewModel
 from Settings_ViewModel import SettingsViewModel
@@ -39,18 +33,22 @@ configure_logging()  # Tesserae's console format; configure_logging("DEBUG") sho
 
 directory = Path(__file__).parent
 
-app = App(width=240, height=120, title="Tesserae Multi-Screen")
 
-home_view = app.build_view(directory / "Home_View.yaml")
-home_vm = HomeViewModel(home_view, app)
-app.register("Home", home_view, home_vm)
+class AppState:
+    """What both screens share (M65)."""
 
-settings_view = app.build_view(directory / "Settings_View.yaml")
-settings_vm = SettingsViewModel(settings_view, app)
-app.register("Settings", settings_view, settings_vm)
+    def __init__(self):
+        self.came_from = Signal("just started")
+
+
+app = App(width=240, height=150, title="Tesserae Multi-Screen", state=AppState())
+
+home_view, _ = app.load(directory / "Home_View.yaml", HomeViewModel)
+settings_view, _ = app.load(directory / "Settings_View.yaml", SettingsViewModel)
 
 window = app.show("Home")
 assert app.current == "Home"
+assert home_view.node("came_from").get("text") == "just started"
 
 home_button = home_view.node("button")
 settings_button = settings_view.node("button")
@@ -59,17 +57,21 @@ settings_button = settings_view.node("button")
 # genuinely active at that moment -- Home -> Settings -> Home -> Settings,
 # each switch happening *from inside* the handler App.show() calls into,
 # the exact reentrant scenario tre's own M42 Phase 2 caught and fixed a
-# real borrow-panic bug for.
+# real borrow-panic bug for. Each click also writes the shared state,
+# which both screens show.
 window.simulate("click", node=home_button)
 assert app.current == "Settings"
+assert settings_view.node("came_from").get("text") == home_view.node("came_from").get("text") == "from Home"
 
 window.simulate("click", node=settings_button)
 assert app.current == "Home"
+assert home_view.node("came_from").get("text") == "from Settings"
 
 window.simulate("click", node=home_button)
 assert app.current == "Settings"
+assert app.state.came_from.get() == "from Home"
 
-logger.info(f"final screen: {app.current!r}")
+logger.info(f"final screen: {app.current!r}, came {app.state.came_from.get()}")
 
 app.run(max_frames=20)
 logger.info("examples/multi_screen/app.py: exited cleanly after a real 20-frame render loop")

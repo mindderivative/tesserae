@@ -576,8 +576,9 @@ before tearing down" ordering.
 
 ## Explicitly deferred
 
-See `README.md`'s own "Explicitly deferred" section -- app-level
-state/routing beyond `App.show`, a `tesserae new` CLI, PyPI publishing.
+See `README.md`'s own "Explicitly deferred" section -- routing beyond
+`App.show` and a `tesserae new` CLI. (App-level state is `App(state=...)`
+since M65, and Tesserae is on PyPI as `tesserae-ui`.)
 (The widget catalog once listed here is real now: 77 fragments, as of
 M64's `Text`, plus `tesserae.widgets`.)
 `Repeater`'s own real, stated scope boundaries (no reordering, no

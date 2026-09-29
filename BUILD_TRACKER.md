@@ -74,12 +74,12 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M62 — Pagination with an Ellipsis (#2) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M63 — CSS Wide-Gamut Colours (#16) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-28) |
 | M64 — A `tesserae.widgets.text` Wrapper (#11) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
-| M65 — An App-Level State Store (#13) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
+| M65 — An App-Level State Store (#13) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M66 — Routing: a Back Stack and Deep Links (#12) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M67 — A `tesserae new` Scaffolding CLI (#14) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M68 — Moving onto `tre` 0.4.0 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 
-**Just closed:** M64 (2026-09-29), done locally: `tesserae.widgets.text`, plain themed text with a `.content` `Signal` (#11), and every widget now follows its theme's `typography:`. Before it, M68 moved Tesserae onto `tre` 0.4.0 (pushed, CI green, #16 closed). 2372 passed.
+**Just closed:** M65 (2026-09-29), done locally: an app-level state store, `App(state=...)`, reached as `self.state` from any ViewModel on the app's window and as `{{ state.<name>.get() }}` in bindings (#13). Before it, M64 (done locally): `tesserae.widgets.text` (#11). 2383 passed.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -93,7 +93,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M65 (#13, an app-level state store) is in progress, then M66 (#12, routing) and M67 (#14, a scaffolding CLI). M64 (#11) is done locally, and #11 closes when it's pushed.
+**Up next:** M66 (#12, routing), then M67 (#14, a scaffolding CLI). M64 (#11) and M65 (#13) are done locally, and their issues close when they're pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -101,9 +101,10 @@ Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026
 
 **Known gaps:**
 - **`tools/record_tre_reference.py` can't re-record every module:** `test_tree_parity` builds its corpus from every fragment, and fragments added after M46 (M56's `items` parameter) have no sample value, so collection fails on `tre` 0.3.4. Single modules record fine with `TESSERAE_RECORD_TRE=1 pytest tests/<module>.py` (found in M63).
-- **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no app-level state store** shared across screens [#13](https://github.com/mindderivative/tesserae/issues/13) (M65); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
+- **No routing beyond `App.show(name)`** (no back stack, params or deep links) [#12](https://github.com/mindderivative/tesserae/issues/12) (M66); **no `tesserae new` scaffolding CLI** [#14](https://github.com/mindderivative/tesserae/issues/14) (M67). These are README's "Explicitly deferred" items.
 
 **Fixed gaps:**
+- ~~**No app-level state store** shared across screens (README's "Explicitly deferred").~~ **Fixed (M65).** `App(state=...)`, reached as `self.state` (and the app as `self.app`) from any ViewModel on the app's window, and as `{{ state.<name>.get() }}` in any binding. [#13](https://github.com/mindderivative/tesserae/issues/13), closes once pushed.
 - ~~**No `tesserae.widgets.text` wrapper** for a bare text node.~~ **Fixed (M64).** `widgets.text(window, content, typography_role=, color=)`, from a `Text` fragment, with a `.content` `Signal`; and every widget now follows its theme's `typography:`. [#11](https://github.com/mindderivative/tesserae/issues/11), closes once pushed.
 - ~~**Tesserae's colour parsing rejected CSS's wide-gamut functions** (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), which `tre`'s parser accepted (M37 Phase 1).~~ **Fixed (M63).** `tokens.parse_color` converts them as `tre` 0.3.4's `color` crate did, byte for byte, clipped into sRGB. [#16](https://github.com/mindderivative/tesserae/issues/16), closes once pushed.
 - ~~**`pagination` showed a button for every page**, with no ellipsis for a long run (M42 Phase 5).~~ **Fixed (M62).** Over `max_visible` pages (7) it windows the run into slots with an inert `…` for each run left out. [#2](https://github.com/mindderivative/tesserae/issues/2), closes once pushed.
@@ -1795,7 +1796,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 65 — An App-Level State Store (#13)
 
-**Status: 🚧 In progress — Phase 2 of 3 done.** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#13](https://github.com/mindderivative/tesserae/issues/13). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: ✅ Complete — all 3 phases done (2026-09-29).** User: "Push and start M64-67 and Add M68 as a move to tre 0.4.0". From the backlog order M54 set: [#13](https://github.com/mindderivative/tesserae/issues/13). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **The gap:** State shared by several screens (the signed-in user, settings, an open document) is passed around by hand: `examples/multi_screen/` gives each ViewModel the `app` through a widened constructor, which `App.load()` can't call.
 
@@ -1809,8 +1810,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 2 — The Store ✅
 - Step 1: `App(state=None)` (and `app.state`), `App.of(view)` (a view, a component or a window), and `ViewModel.app`/`.state` (`reactive._FromApp`, a non-data descriptor resolving through `follow.app_of`). New `tests/test_app_state.py` (9): two screens sharing state through bindings, a ViewModel reaching the app and its state from a handler, state set later and `App.of`, a ViewModel's own `app`/`state` winning, `App.of` before `super().__init__` (and the error without it), no app off an app's window, each app its own state, a component reaching it, and the descriptors on the class. Mutation-checked, 10/10 caught (the first run pinned class-level access, and showed a `__dict__` lookup was no different from `getattr`, so the simpler one stays). 2372 → 2381 passed — ✅
 
-### Phase 3 — Docs, Example, Tracker ⬜
-- Step 1: a guide section; `examples/multi_screen/` uses `load()` and `self.app` with shared state; the known gap narrowed — ⬜
+### Phase 3 — Docs, Example, Tracker ✅
+- Step 1: `docs/guide/apps-and-screens.md`: `register()` is for hand-built pairs, `self.app` replaces a widened constructor, and a new "Shared state" section (every example in it run first: a binding must be a whole `{{ }}` expression, so the draft's `"Signed in as {{ ... }}"` was corrected). `examples/multi_screen/` now `load()`s both screens; their ViewModels use `self.app.show` and write `self.state.came_from`, which both views bind to, and the script asserts both screens show each write (it ran clean). README (the example, `register()`'s use, #13 out of "Explicitly deferred") and `ARCHITECTURE.md`. The known gap narrowed to routing and the CLI; `mkdocs build --strict` clean. 2381 → 2383 passed (the docs checks on the guide's new YAML); all five examples clean — ✅
 
 
 ---
