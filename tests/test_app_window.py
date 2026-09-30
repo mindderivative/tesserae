@@ -95,3 +95,67 @@ def test_an_icon_given_at_start(tmp_path):
     App(icon=png)  # tre accepts it (it checks the byte count)
     with pytest.raises(ValueError, match="isn't an image file"):
         App(icon=tmp_path / "missing.png")
+
+
+# -- Phase 2 (#46): the window's actions and state ----------------------------------
+
+def test_maximized_and_active_follow_the_window():
+    app = App()
+    assert app.maximized.get() is False and app.active.get() is False
+    app.window.simulate("maximized", maximized=True)
+    assert app.maximized.get() is True
+    app.window.simulate("active", active=True)
+    assert app.active.get() is True
+    app.window.simulate("maximized", maximized=False)
+    app.window.simulate("active", active=False)
+    assert (app.maximized.get(), app.active.get()) == (False, False)
+    assert not hasattr(app.maximized, "set") and not hasattr(app.active, "set")  # read-only
+
+
+def test_a_binding_follows_maximized():
+    from tesserae import View, ViewModel
+
+    app = App()
+    view = View({"id": "root", "kind": "Text", "text": {"content": "", "font_family": "Roboto", "font_size": 12},
+                 "style": {"width": 100, "height": 20, "foreground": "#000000"},
+                 "bindings": {"text": "{{ app.maximized.get() and 'restore' or 'maximize' }}"}},
+                window=app.window)
+    ViewModel(view)  # a ViewModel reaches the app as `app` (M65)
+    assert view.node("root").get("text") == "maximize"
+    app.window.simulate("maximized", maximized=True)
+    assert view.node("root").get("text") == "restore"
+
+
+def test_the_actions_before_the_window_opens():
+    app = App()
+    app.maximize()  # before run(): how it opens, and no event says so
+    assert app.window.get("maximized") is True and app.maximized.get() is True
+    app.toggle_maximized()
+    assert app.window.get("maximized") is False and app.maximized.get() is False
+    app.toggle_maximized()
+    assert app.maximized.get() is True
+    app.restore()
+    assert app.maximized.get() is False
+    app.minimize()
+    assert app.window.get("minimized") is True
+    app.restore()
+    assert app.window.get("minimized") is False
+
+
+def test_close_asks_first(monkeypatch):
+    app = App()
+    closed = []
+
+    class Recording:
+        def __init__(self, window):
+            self._window = window
+
+        def __getattr__(self, name):
+            return getattr(self._window, name)
+
+        def close(self):
+            closed.append(True)  # tre's own: close_requested first, on the next turn
+
+    monkeypatch.setattr(app, "_window", Recording(app._window))
+    app.close()
+    assert closed == [True]

@@ -31,7 +31,7 @@ from tre import Window
 from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.listeners import Listeners
 from tesserae.naming import check_naming_convention
-from tesserae.reactive import Signal, batch
+from tesserae.reactive import Computed, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
 from tesserae.shell_file import load_shell_spec
@@ -249,6 +249,16 @@ class App:
                          fullscreen=bool(fullscreen), system_menu=bool(system_menu))
         if icon is not None:
             self.set_icon(icon)
+        #: Whether the window is maximized, and whether it has the OS's
+        #: focus (0.3.0 M2): read-only, following `tre`'s `maximized` and
+        #: `active` events, for a title bar's bindings --
+        #: `{{ app.maximized.get() }}` swaps its maximize icon.
+        self._maximized = Signal(bool(self._window.get("maximized")))
+        self._active = Signal(bool(self._window.get("active")))
+        self.maximized = Computed(self._maximized.get)
+        self.active = Computed(self._active.get)
+        self._window.on("maximized", lambda event: self._maximized.set(bool(event.maximized)))
+        self._window.on("active", lambda event: self._active.set(bool(event.active)))
         if dark == "system":  # M53: Linux answers now; macOS and Windows once the window opens (run())
             os_dark = _os_dark(self._window)
             if os_dark is not None:
@@ -820,6 +830,41 @@ class App:
     def platform(self) -> str:
         """`"windows"`, `"macos"`, `"wayland"` or `"x11"`."""
         return str(self._window.get("platform"))
+
+    def minimize(self) -> None:
+        """Minimizes the window (before `run()`, it opens minimized)."""
+        self._window.minimize()
+        self._sync_maximized()
+
+    def maximize(self) -> None:
+        """Maximizes the window (before `run()`, it opens maximized)."""
+        self._window.maximize()
+        self._sync_maximized()
+
+    def restore(self) -> None:
+        """Restores the window from maximized or minimized."""
+        self._window.restore()
+        self._sync_maximized()
+
+    def toggle_maximized(self) -> None:
+        """Maximizes the window, or restores it if it's maximized: a title
+        bar's maximize button."""
+        if self._window.get("maximized"):
+            self.restore()
+        else:
+            self.maximize()
+
+    def _sync_maximized(self) -> None:
+        # Before `run()` these set how the window opens, and no event says
+        # so; an open window's state is `tre`'s event's to report (it may
+        # still read the old state here, and the event follows).
+        self._maximized.set(bool(self._window.get("maximized")))
+
+    def close(self) -> None:
+        """Closes the window as the user's close would: `close_requested`
+        fires first, so an app's "save changes?" check still runs and can
+        cancel it. It happens on the loop's next turn."""
+        self._window.close()
 
     def set_icon(self, icon: str | Path | None) -> None:
         """The window's icon, from an image file (a PNG, best square), or
