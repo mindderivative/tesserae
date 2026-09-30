@@ -1,5 +1,6 @@
 """The curated Material Symbols icons `kind: Icon` names, taken verbatim
-from `tre`'s `engine-md3/src/icons.rs` at v0.3.4 (`tre` hands its icon
+from `tre`'s `engine-md3/src/icons.rs` at v0.3.4 (and three window
+buttons drawn for Tesserae, 0.3.0) (`tre` hands its icon
 data to the framework, D4). Each is an SVG path `d=` string in the
 shared view box `0 -960 960 960`, drawn by a `tre` `path` node."""
 
@@ -23,6 +24,12 @@ ICONS = {
     "remove": "M200-440v-80h560v80H200Z",
     "arrow_forward": "M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z",
     "chevron_right": "M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z",
+    # 0.3.0 M3: a title bar's window buttons. Not Material Symbols (its set
+    # has none for these): drawn for Tesserae in the same view box and the
+    # same 80-unit stroke, a hole cut by the opposite winding.
+    "window_minimize": "M240-440v-80h480v80H240Z",
+    "window_maximize": "M200-200v-560h560v560H200Zm80-80h400v-400H280v400Z",
+    "window_restore": "M160-160v-480h480v480H160Zm80-80h320v-320H240v320Zm480-160v-320H400v-80h400v400h-80Z",
 }
 
 

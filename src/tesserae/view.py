@@ -53,6 +53,7 @@ from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.scrolling import Scroller
 from tesserae.spec.images import check_frame
+from tesserae.spec.title_bar import expand_title_bars
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
     focus_ring_color,
@@ -151,6 +152,7 @@ class View:
             window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
             # no `Window.set_theme` (removed in tre 0.3.5): since M40 nothing a view builds reads the window's theme
         self.window = window
+        spec = expand_title_bars(spec)  # 0.3.0 M3: `kind: TitleBar` into its nodes
         self._spec = spec
         self._built = Built(root=None)
         self._events = Listeners()
@@ -235,6 +237,7 @@ class View:
 
     def reconcile(self, spec: dict[str, Any], frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
         """Brings the live tree in line with `spec`, in place."""
+        spec = expand_title_bars(spec)  # 0.3.0 M3, as in `__init__`
         if frames is not None:
             self._frames = dict(frames)
         # All or nothing: build the new spec on the side first, so an error
