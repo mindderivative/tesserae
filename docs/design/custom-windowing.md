@@ -3,9 +3,9 @@
 !!! note "Decided 2026-09-30"
     This is Tesserae 0.3.0's M1 design ([#30](https://github.com/mindderivative/tesserae/issues/30)).
     The user approved it: "approved, go with your recommendations and start
-    M2". Each [question](#decisions) is decided as its **(decided)**
-    option, and M2 onwards follow it: M2 is
-    [#40](https://github.com/mindderivative/tesserae/issues/40).
+    M2". In each [question](#decisions), the option marked **(decided)**
+    is the recommendation the user approved; M2 onwards follow it, starting
+    with [#40](https://github.com/mindderivative/tesserae/issues/40).
 
 ## The goal
 
@@ -130,7 +130,7 @@ dragged would keep its pressed state layer, which today clears only on
 
 ## Milestones
 
-Drafted into the GitHub project's Backlog, each for the user's approval:
+Each is an issue in the GitHub project, under [#24](https://github.com/mindderivative/tesserae/issues/24):
 
 - **M2 — The window on `App`** (Q1, Q4): `decorations` and the other
   window options, the actions, `maximized`/`active` as Signals, the PNG
