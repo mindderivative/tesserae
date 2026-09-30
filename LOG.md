@@ -2050,3 +2050,22 @@ Tracked in the GitHub project (#35, #36, #39, #26).
   - Seven tests fake the events on any platform.
 - CI run 36767330299 is green on all three platforms. M78 is complete; the
   0.2.1 release (#29) is next. 2676 passed.
+
+## Tesserae 0.2.1 released
+
+User: "push and release", then "approved, check PyPI".
+
+- `a7d7c1a`: version 0.2.1 and the changelog section headed. CI (run
+  36772575520) was green on it before tagging.
+- GitHub pre-release `v0.2.1` on that commit. `release.yml` run
+  36773310140: build passed (the tag matches the version). The user
+  approved the `pypi` deployment, and publish succeeded.
+- Checked from PyPI in a fresh Python 3.14 venv, wheels only:
+  `pip install "tesserae-ui[build]==0.2.1"` brought `tesserae-engine`
+  0.4.4 and PyInstaller 6.22.3. A `tesserae new --shell` app built into
+  one executable (30 frames), and `--installer` made the AppImage, `.deb`,
+  pacman package and `.rpm` (30 frames), with the Flatpak skipped and its
+  install hint shown (no `flatpak-builder` here).
+- On GitHub: #37, #29 and the 0.2.1 umbrella #23 are closed, and so is the
+  repository's `0.2.1` milestone (14 issues). Next is 0.3.0 (#24), which
+  starts when the user says so.
