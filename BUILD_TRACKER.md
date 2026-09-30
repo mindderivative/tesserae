@@ -82,6 +82,8 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M70 — Binding `disabled` on Any Clickable Node (#19) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
+| M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 1 of 2 done |
+| M74 — Grids in YAML (`tre` #23) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
 **Just closed:** M70 (2026-09-29), done locally: `disabled` on any node, as a key or a binding -- announced, not focusable, no feedback, handlers off, faded to 38% -- so a back button binds `not app.can_go_back.get()` (#19). Before it, M69 (pushed, #18 closed): handlers on a component call.
 
@@ -1983,3 +1985,42 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 2 — The Side Buttons ✅
 - Step 1: `App._history_button`, a `pointer_down` listener on the window's root beside `_history_key`: `"back"` calls `back()`, `"forward"` `forward()` (probed first on 0.4.1: both reach the root over a node or over nothing, with no click and no focus change). `tests/test_routing.py` +1 (28): back over a node, forward over empty space, the primary, secondary and middle buttons moving nothing (with somewhere to go either way), and a release moving nothing. Mutation-checked, 5/5 (the first run pinned the other buttons with a forward entry waiting). The routing guide says so; the known gap moved to "Fixed gaps". 2502 → 2503 passed; reported to `tre`'s session — ✅
+
+
+---
+
+## Milestone 73 — `tre` 0.4.2: Its Scroll Views and the Scroller
+
+**Status: 🚧 In progress — Phase 1 of 2 done.** `tre`'s session reported 0.4.2 released (2026-09-30), closing `tre` #23 (CSS Grid) and #24 (scroll views), and asked Tesserae to move and report. Verified before acting: the v0.4.2 release (24 assets), PyPI's 0.4.2 (22 wheels and an sdist), and both issues closed.
+
+**What 0.4.2 changes for Tesserae:** two behaviour changes in `scroll_view`: the arrows, Page Up/Down and Home/End scroll the nearest scroll view around the focused node (unless a `key_down` listener between the focused node and the scroll view is there, which keeps every key; a text input keeps all but Page Up/Down); and focusing a node scrolls its scroll views to show it. Also `node.scroll_into_view()`, `tre` answering the a11y `scroll_into_view` itself, and a `scroll` event (`old_value`/`new_value`) on every offset change. And CSS Grid through node properties (M74).
+
+**Draft approach:** Move `.venv`, the floor (`tesserae-engine>=0.4.2`) and CI's checkout; run the suite and the examples. Then check the `Scroller` (M71) against `tre`'s own scrolling: its `key_down` listener on the scroll view would keep every key from `tre`, so a focused child's keys wouldn't scroll -- and what it does, `tre` now does. Let it lean on `tre`: drop its keys, reveals and `scroll_into_view`, and follow the `scroll` event for `two_way: scroll_offset`. Report to `tre`'s session.
+
+### Phase 1 — The Move ✅
+- Step 1: verified (above); `.venv` on 0.4.2; the floor is `tesserae-engine>=0.4.2`; CI's and `release.yml`'s `tre` checkout at `v0.4.2` (Roboto still there); README and `docs/installation.md` name 0.4.2. The examples ran clean; the suite had 2563 passed and 1 failed, from the focus behaviour change: `tre` now reveals a focused child itself, before the `Scroller` hears the focus, so the `Scroller` saw no change and `two_way: scroll_offset` wasn't told (the view did scroll). Probed 0.4.2: keys from a focused child scroll (with or without a modifier held); focus reveals; a `scroll` event (`old_value`/`new_value`) fires on every change, a `set` past the end included (it reads back as set until the next layout, which clamps it and fires again); and **a `key_down` listener on the scroll view -- the `Scroller` has one -- keeps every key from `tre`**, so a focused child's keys wouldn't scroll. Phase 2 follows from that — ✅
+
+### Phase 2 — The Scroller on `tre`'s Scroll Views ⬜
+- Step 1: what the `Scroller` still needs to do; tests; mutation-checked; the Layout guide; report to `tre`'s session — ⬜
+
+
+---
+
+## Milestone 74 — Grids in YAML (`tre` #23)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed): `display="grid"`, `grid_template_columns`/`rows` (track lists with `fr`, `auto`, `repeat()`, `minmax()`), `grid_auto_columns`/`rows`, `grid_auto_flow`, `grid_column`/`grid_row` (lines, `span`), `row_gap`/`column_gap`, `justify_items`/`justify_self`, `align_content`. M71 scoped grids "as its own milestone once `tre` has one"; this is it, scoped, not started (it waits for the user).
+
+**Draft approach:** The grid keys in a view's style and stylesheets, as M71's layout keys are (set only when given, reset when dropped); validated as `tre` validates them, errors naming the widget; each laid out as the same tree built with `tre` directly; a Grid section in the Layout guide replacing the `flex_wrap` stand-in.
+
+**Decisions to settle at the start** (provisional):
+- Q1 every grid key at once (recommended), or the minimal set (`display`, templates, placement, gaps) first
+- Q2 whether a `kind: Grid` is worth having as sugar for a Container with `display: grid` (recommended: no, a style key is enough)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: read `tre` 0.4.2's grid properties and their validation; Q1-Q2 — ⬜
+
+### Phase 2 — The Grid Keys ⬜
+- Step 1: the keys in the compiler and patching; tests against `tre`'s own layout; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the Layout guide's Grid section; the known gap closed — ⬜

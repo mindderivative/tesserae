@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: mindderivative/tre
-          ref: v0.4.1
+          ref: v0.4.2
           path: tre
 
       # Pulls `tesserae-engine` (tre) from PyPI, per pyproject's `>=` floor.
