@@ -133,6 +133,14 @@ def _from_file(path: Path, what: str, fn: Any) -> Any:
     return apply
 
 
+def _non_negative(name: str, value: Any, *, allow_none: bool = False) -> Any:
+    if value is None and allow_none:
+        return None
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or value < 0:
+        raise ValueError(f"App: {name} must be a number of pixels, 0 or more, got {value!r}")
+    return int(value)
+
+
 def _file_or_spec(owner: str, file_arg: str, file: Any, spec: Any, loader: Any) -> Any:
     """One `*=` file path / `*_spec=` dict pair -> the dict (or `None`).
     The file is read here, by Tesserae; `tre` only ever gets the dict."""
@@ -181,6 +189,13 @@ class App:
         stylesheet: str | Path | None = None,
         stylesheet_spec: dict[str, Any] | None = None,
         state: Any = None,
+        decorations: bool = True,
+        resize_border: int | None = None,
+        min_width: int = 0,
+        min_height: int = 0,
+        fullscreen: bool = False,
+        system_menu: bool = False,
+        icon: str | Path | None = None,
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
@@ -221,9 +236,19 @@ class App:
         # M37: the app's one window exists from the start, so screens are built
         # straight into it. Like a `Window.from_view` root: no padding, and a
         # screen root with no size of its own is sized to its content.
-        self._window: Window = Window(width=width, height=height, title=title)
+        self._window: Window = Window(width=width, height=height, title=title, decorations=bool(decorations))
         self._window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0,
                               align_items="flex_start")
+        # 0.3.0 M2: the window's own options, for a title bar the app draws
+        # (`tre` 0.5.0). An undecorated window resizes from a 6 px border
+        # unless the app gives its own width (the design's Q6).
+        self._resize_border: int | None = _non_negative("resize_border", resize_border, allow_none=True)
+        self._window.set(resize_border=self._border(bool(decorations)),
+                         min_width=_non_negative("min_width", min_width),
+                         min_height=_non_negative("min_height", min_height),
+                         fullscreen=bool(fullscreen), system_menu=bool(system_menu))
+        if icon is not None:
+            self.set_icon(icon)
         if dark == "system":  # M53: Linux answers now; macOS and Windows once the window opens (run())
             os_dark = _os_dark(self._window)
             if os_dark is not None:
@@ -719,6 +744,100 @@ class App:
         anyway" without the app keeping its own separate bookkeeping.
         """
         return self._current
+
+    # -- the window (0.3.0 M2: custom windowing, `tre` 0.5.0) ----------------
+
+    #: The resize border of an undecorated window whose app gives none.
+    DEFAULT_RESIZE_BORDER = 6
+
+    def _border(self, decorations: bool) -> int:
+        if self._resize_border is not None:
+            return self._resize_border
+        return 0 if decorations else self.DEFAULT_RESIZE_BORDER
+
+    @property
+    def decorations(self) -> bool:
+        """Whether the OS draws the title bar and borders. `False` leaves them
+        to the app (on macOS the title bar stays, transparent, with the
+        traffic lights); it can change while the app runs."""
+        return bool(self._window.get("decorations"))
+
+    @decorations.setter
+    def decorations(self, value: bool) -> None:
+        self._window.set(decorations=bool(value), resize_border=self._border(bool(value)))
+
+    @property
+    def resize_border(self) -> int:
+        """How many pixels along each edge resize an undecorated window
+        (`tre` turns it off while maximized or fullscreen, and on macOS).
+        Unless set, 6 while undecorated and 0 otherwise."""
+        return int(self._window.get("resize_border"))
+
+    @resize_border.setter
+    def resize_border(self, value: int | None) -> None:
+        self._resize_border = _non_negative("resize_border", value, allow_none=True)
+        self._window.set(resize_border=self._border(self.decorations))
+
+    @property
+    def min_width(self) -> int:
+        """The narrowest the user can resize the window to (0 for no limit)."""
+        return int(self._window.get("min_width"))
+
+    @min_width.setter
+    def min_width(self, value: int) -> None:
+        self._window.set(min_width=_non_negative("min_width", value))
+
+    @property
+    def min_height(self) -> int:
+        """The shortest the user can resize the window to (0 for no limit)."""
+        return int(self._window.get("min_height"))
+
+    @min_height.setter
+    def min_height(self, value: int) -> None:
+        self._window.set(min_height=_non_negative("min_height", value))
+
+    @property
+    def fullscreen(self) -> bool:
+        """Whether the window fills its monitor, borderless."""
+        return bool(self._window.get("fullscreen"))
+
+    @fullscreen.setter
+    def fullscreen(self, value: bool) -> None:
+        self._window.set(fullscreen=bool(value))
+
+    @property
+    def system_menu(self) -> bool:
+        """Whether a secondary press on the title bar opens the OS's window
+        menu (Windows, and Wayland compositors with one). Off by default,
+        so a right-click there is the app's."""
+        return bool(self._window.get("system_menu"))
+
+    @system_menu.setter
+    def system_menu(self, value: bool) -> None:
+        self._window.set(system_menu=bool(value))
+
+    @property
+    def platform(self) -> str:
+        """`"windows"`, `"macos"`, `"wayland"` or `"x11"`."""
+        return str(self._window.get("platform"))
+
+    def set_icon(self, icon: str | Path | None) -> None:
+        """The window's icon, from an image file (a PNG, best square), or
+        `None` for none. Shown on Windows and X11; Wayland and macOS take
+        an app's icon from its desktop entry or bundle, as `tesserae build
+        --installer` makes them."""
+        if icon is None:
+            self._window.set(icon=None)
+            return
+        from PIL import Image
+
+        path = Path(icon)
+        try:
+            with Image.open(path) as image:
+                rgba = image.convert("RGBA")
+        except (OSError, ValueError) as exc:
+            raise ValueError(f"App: icon {str(path)!r} isn't an image file ({exc})") from None
+        self._window.set(icon=(rgba.tobytes(), rgba.width, rgba.height))
 
     def thread_handle(self) -> Any:
         """`tre`'s thread-safe `LoopHandle` for this app (tre M87): the one
