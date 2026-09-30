@@ -52,7 +52,8 @@ def test_include_and_exclude_globs(tmp_path):
     assert not any(b.startswith("panels/") for b in _bundled(whole)) and whole.modules == ["Home_ViewModel"]
 
 
-def test_pyinstaller_args(tmp_path):
+def test_pyinstaller_args(tmp_path, monkeypatch):
+    monkeypatch.setattr(sys, "platform", "linux")  # one file on macOS has no --windowed (M78; tested below)
     app_file = _app_folder(tmp_path)
     collected = build.collect_files(app_file)
     args = build.pyinstaller_args(app_file, "demo", collected, tmp_path / "work", tmp_path / "dist")
@@ -213,6 +214,7 @@ def test_a_run_reports_the_frames_it_drew(tmp_path, monkeypatch):
 # -- M78: installers -------------------------------------------------------------
 
 def test_a_folder_build_and_the_windowed_rule(tmp_path, monkeypatch):
+    monkeypatch.setattr(sys, "platform", "linux")
     app_file = _app_folder(tmp_path)
     collected = build.collect_files(app_file)
     folder = build.pyinstaller_args(app_file, "demo", collected, tmp_path, tmp_path, onefile=False)
@@ -260,7 +262,7 @@ def test_the_macos_installer_stamps_signs_and_makes_a_dmg(tmp_path, monkeypatch)
     ran = []
     monkeypatch.setattr(build, "_run", ran.append)
     info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme Ltd")
-    result = build._macos(built, "Demo App", info, tmp_path / "dist")
+    result = build._macos(built, "Demo App", info, tmp_path / "dist", None)
     app = tmp_path / "dist" / "Demo App.app"
     assert result == build.Built(app / "Contents" / "MacOS" / "Demo App", [tmp_path / "dist" / "Demo App-1.2.0.dmg"])
     plist = plistlib.loads((app / "Contents" / "Info.plist").read_bytes())
@@ -302,3 +304,118 @@ def test_cli_passes_the_installer_details_and_notes_a_placeholder(tmp_path, caps
     assert "placeholder" not in capsys.readouterr().out
     assert cli.main(["build", str(app_file), "--app-version", "one"]) == 2
     assert "version 'one' isn't one installers take" in capsys.readouterr().err
+
+
+# -- M78: Windows, with Inno Setup -------------------------------------------------
+
+def test_the_inno_script():
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme Ltd", "Takes notes")
+    script = build.inno_script("Demo App", info, Path("D:/a/dist/Demo App"), Path("D:/a/dist"), Path("D:/t/i.ico"))
+    lines = script.splitlines()
+    app_id = lines[1]
+    assert app_id == "AppId={{" + str(build.uuid.uuid5(build.uuid.NAMESPACE_DNS, "com.acme.demo")) + "}"
+    for line in ["AppName=Demo App", "AppVersion=1.2.0", "AppPublisher=Acme Ltd", "PrivilegesRequired=lowest",
+                 "DefaultDirName={autopf}\\Demo App", "OutputDir=D:/a/dist", "OutputBaseFilename=Demo App-1.2.0-setup",
+                 "VersionInfoVersion=1.2.0", "VersionInfoDescription=Takes notes", "SetupIconFile=D:/t/i.ico",
+                 'Source: "D:/a/dist/Demo App\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs',
+                 'Name: "{autoprograms}\\Demo App"; Filename: "{app}\\Demo App.exe"']:
+        assert line in lines, line
+    bare = build.inno_script("x", build.AppInfo("x", identifier="com.acme.x"), Path("f"), Path("o"), Path("i.png"))
+    assert "AppPublisher" not in bare and "SetupIconFile" not in bare and "VersionInfoDescription=x" in bare
+    assert "\n\n\n" not in bare and app_id not in bare  # another identifier, another AppId
+
+
+def test_finding_inno_setup(tmp_path, monkeypatch):
+    for var in ("TESSERAE_ISCC", "ProgramFiles(x86)", "ProgramFiles", "LOCALAPPDATA"):
+        monkeypatch.delenv(var, raising=False)
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    monkeypatch.setattr(build.shutil, "which", lambda name: None)
+    assert build.find_iscc() is None
+    cached = tmp_path / "cache" / "tesserae" / "tools" / f"innosetup-{build.INNO_VERSION}" / "ISCC.exe"
+    cached.parent.mkdir(parents=True)
+    cached.write_text("")
+    assert build.find_iscc() == cached
+    per_user = tmp_path / "local" / "Programs" / "Inno Setup 6" / "ISCC.exe"
+    per_user.parent.mkdir(parents=True)
+    per_user.write_text("")
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
+    assert build.find_iscc() == per_user
+    everyone = tmp_path / "pf86" / "Inno Setup 7" / "ISCC.exe"
+    everyone.parent.mkdir(parents=True)
+    everyone.write_text("")
+    monkeypatch.setenv("ProgramFiles(x86)", str(tmp_path / "pf86"))
+    assert build.find_iscc() == everyone
+    monkeypatch.setattr(build.shutil, "which", lambda name: "/bin/iscc" if name == "iscc" else None)
+    assert build.find_iscc() == Path("/bin/iscc")
+    monkeypatch.setenv("TESSERAE_ISCC", "/x/ISCC.exe")
+    assert build.find_iscc() == Path("/x/ISCC.exe")
+
+
+def test_fetching_inno_setup_checks_its_digest(tmp_path, monkeypatch, capsys):
+    monkeypatch.delenv("LOCALAPPDATA", raising=False)
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path))
+    tools = tmp_path / "tesserae" / "tools"
+    monkeypatch.setattr(build, "_download", lambda url, to: to.write_bytes(b"not inno"))
+    ran = []
+    monkeypatch.setattr(build, "_run", ran.append)
+    with pytest.raises(build.BuildError, match="SHA-256 is .*: not using it"):
+        build.fetch_iscc()
+    assert ran == [] and not any(tools.iterdir())  # a bad download isn't run, or kept
+    monkeypatch.setattr(build, "INNO_SHA256", build.hashlib.sha256(b"not inno").hexdigest())
+
+    def portable(command):
+        ran.append(command)
+        (tools / f"innosetup-{build.INNO_VERSION}").mkdir()
+        (tools / f"innosetup-{build.INNO_VERSION}" / "ISCC.exe").write_text("")
+
+    monkeypatch.setattr(build, "_run", portable)
+    assert build.fetch_iscc() == tools / f"innosetup-{build.INNO_VERSION}" / "ISCC.exe"
+    setup = tools / f"innosetup-{build.INNO_VERSION}-x64.exe"
+    assert ran == [[str(setup), "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CURRENTUSER", "/PORTABLE=1",
+                    f"/DIR={tools / ('innosetup-' + build.INNO_VERSION)}"]]
+    assert not setup.exists() and "fetching Inno Setup" in capsys.readouterr().out
+    assert build.INNO_URL.endswith(f"innosetup-{build.INNO_VERSION}-x64.exe")
+
+
+def test_the_windows_installer(tmp_path, monkeypatch):
+    built = tmp_path / "built"
+    (built / "Demo" / "_internal").mkdir(parents=True)
+    (built / "Demo" / "Demo.exe").write_text("")
+    (built / "Demo" / "_internal" / "lib.dll").write_text("")
+    dist = tmp_path / "dist"
+    ran = []
+
+    def iscc(command):
+        ran.append(command)
+        (dist / "Demo-1.2.0-setup.exe").write_text("")
+
+    monkeypatch.setattr(build, "_run", iscc)
+    monkeypatch.setattr(build, "find_iscc", lambda: Path("C:/Inno/ISCC.exe"))
+    result = build._windows(built, "Demo", build.AppInfo("Demo", "1.2.0", "com.acme.demo"), dist)
+    assert result == build.Built(dist / "Demo" / "Demo.exe", [dist / "Demo-1.2.0-setup.exe"])
+    assert (dist / "Demo" / "_internal" / "lib.dll").is_file()
+    assert ran == [[str(Path("C:/Inno/ISCC.exe")), "/Q", str(built / "Demo.iss")]]
+    raw = (built / "Demo.iss").read_bytes()
+    assert raw.startswith(b"\xef\xbb\xbf") and f"Source: \"{dist / 'Demo'}\\*\"".encode() in raw
+    with pytest.raises(build.BuildError, match="can't be a Windows program name"):
+        build._windows(built, "a:b", build.AppInfo("a:b"), dist)
+    monkeypatch.setattr(build, "find_iscc", lambda: None)
+    monkeypatch.setattr(build, "fetch_iscc", lambda: Path("C:/fetched/ISCC.exe"))
+    build._windows(built, "Demo", build.AppInfo("Demo", "1.2.0"), dist)  # over a previous build
+    assert ran[-1][0] == str(Path("C:/fetched/ISCC.exe"))
+
+
+def test_app_details_on_one_line():
+    with pytest.raises(build.BuildError, match="publisher can't span lines"):
+        build.AppInfo("x", publisher="Acme\nEvil=1")
+
+
+@pytest.mark.parametrize("platform", ["darwin", "win32"])
+def test_installer_is_ready_on_macos_and_windows(tmp_path, capsys, monkeypatch, platform):
+    def stop():
+        raise build.BuildError("got as far as building")
+
+    monkeypatch.setattr(sys, "platform", platform)
+    monkeypatch.setattr(build, "_pyinstaller", stop)
+    assert cli.main(["build", "--installer", str(_app_folder(tmp_path))]) == 2
+    assert "got as far as building" in capsys.readouterr().err

@@ -28,6 +28,7 @@ PyInstaller is an extra: `pip install tesserae-ui[build]`.
 from __future__ import annotations
 
 import fnmatch
+import hashlib
 import os
 import plistlib
 import re
@@ -35,6 +36,8 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Sequence
@@ -144,6 +147,9 @@ class AppInfo:
             self.identifier = f"com.example.{slug(self.name)}"
         elif not re.fullmatch(r"[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+", self.identifier):
             raise BuildError(f"identifier {self.identifier!r} isn't reverse-DNS, like com.yourcompany.notes")
+        for field in ("name", "publisher", "description"):
+            if any(c in getattr(self, field) for c in "\r\n"):
+                raise BuildError(f"the app's {field} can't span lines")
 
     @property
     def placeholder_identifier(self) -> bool:
@@ -217,7 +223,7 @@ def build(app_file: str | Path = "app.py", *, name: str | None = None, icon: str
                                 icon=platform_icon(icon_path, work), console=console, onefile=not installer)
         pyinstaller.run(args)
         if installer:
-            return _INSTALLERS[sys.platform](work / "dist", name, info, dist_path)
+            return _INSTALLERS[sys.platform](work / "dist", name, info, dist_path, platform_icon(icon_path, work))
     result = executable_path(dist_path, name)
     if not result.is_file():
         raise BuildError(f"PyInstaller finished without making {result}")
@@ -232,7 +238,7 @@ def _run(command: list[str]) -> None:
                          f"{(result.stderr or result.stdout).strip()}")
 
 
-def _macos(built: Path, name: str, info: AppInfo, dist: Path) -> Built:
+def _macos(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | None = None) -> Built:
     """The `.app` (with the installer's details in its `Info.plist`, then
     signed again, ad hoc, since the edit breaks PyInstaller's signature and
     Apple silicon runs nothing unsigned) and a `.dmg` holding it beside a
@@ -264,8 +270,142 @@ def _macos(built: Path, name: str, info: AppInfo, dist: Path) -> Built:
     return Built(final / "Contents" / "MacOS" / name, [dmg])
 
 
+# -- Windows: Inno Setup (M78) --------------------------------------------------
+
+#: The Inno Setup Tesserae fetches when there's none here: pinned, and
+#: checked against GitHub's own digest for the release asset.
+INNO_VERSION = "7.1.0"
+INNO_URL = f"https://github.com/jrsoftware/issrc/releases/download/is-7_1_0/innosetup-{INNO_VERSION}-x64.exe"
+INNO_SHA256 = "0362a383ed217d4c4239b5933866dd96d3eb2102737da92f80f6057a4b40df2f"
+
+
+def tools_dir() -> Path:
+    """Where Tesserae keeps the packaging tools it fetches."""
+    base = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache"
+    return Path(base) / "tesserae" / "tools"
+
+
+def find_iscc() -> Path | None:
+    """Inno Setup's compiler: `TESSERAE_ISCC`, then the PATH, then where
+    Inno Setup 7 or 6 installs (for everyone or per user), then the copy
+    Tesserae fetched."""
+    if os.environ.get("TESSERAE_ISCC"):
+        return Path(os.environ["TESSERAE_ISCC"])
+    on_path = shutil.which("iscc")
+    if on_path:
+        return Path(on_path)
+    roots = [os.environ.get("ProgramFiles(x86)"), os.environ.get("ProgramFiles")]
+    if os.environ.get("LOCALAPPDATA"):
+        roots.append(str(Path(os.environ["LOCALAPPDATA"]) / "Programs"))
+    for root in filter(None, roots):
+        for version in ("7", "6"):
+            candidate = Path(root) / f"Inno Setup {version}" / "ISCC.exe"
+            if candidate.is_file():
+                return candidate
+    cached = tools_dir() / f"innosetup-{INNO_VERSION}" / "ISCC.exe"
+    return cached if cached.is_file() else None
+
+
+def _download(url: str, to: Path) -> None:
+    with urllib.request.urlopen(url, timeout=120) as response, to.open("wb") as out:
+        shutil.copyfileobj(response, out)
+
+
+def fetch_iscc() -> Path:
+    """Fetches the pinned Inno Setup into `tools_dir()`, checks its
+    digest, and unpacks it there in portable mode (installing nothing)."""
+    tools = tools_dir()
+    tools.mkdir(parents=True, exist_ok=True)
+    setup = tools / f"innosetup-{INNO_VERSION}-x64.exe"
+    print(f"fetching Inno Setup {INNO_VERSION} (14 MB) from github.com/jrsoftware/issrc, once, into {tools}")
+    _download(INNO_URL, setup)
+    digest = hashlib.sha256(setup.read_bytes()).hexdigest()
+    if digest != INNO_SHA256:
+        setup.unlink()
+        raise BuildError(f"the Inno Setup download's SHA-256 is {digest}, not {INNO_SHA256}: not using it")
+    folder = tools / f"innosetup-{INNO_VERSION}"
+    _run([str(setup), "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CURRENTUSER", "/PORTABLE=1",
+          f"/DIR={folder}"])
+    setup.unlink()
+    iscc = folder / "ISCC.exe"
+    if not iscc.is_file():
+        raise BuildError(f"Inno Setup's setup finished without making {iscc}")
+    return iscc
+
+
+def inno_script(name: str, info: AppInfo, folder: Path, out: Path, icon: Path | None) -> str:
+    """The Inno Setup script: a per-user install (no admin rights needed,
+    though an admin may choose everyone) into Programs, a Start-menu entry,
+    an optional desktop one, and an uninstaller. Its AppId comes from the
+    identifier, so a new version replaces the old."""
+    app_id = uuid.uuid5(uuid.NAMESPACE_DNS, info.identifier)
+    lines = [
+        "[Setup]",
+        f"AppId={{{{{app_id}}}",
+        f"AppName={name}",
+        f"AppVersion={info.version}",
+        f"AppVerName={name} {info.version}",
+        f"AppPublisher={info.publisher}" if info.publisher else None,
+        f"DefaultDirName={{autopf}}\\{name}",
+        f"DefaultGroupName={name}",
+        "DisableProgramGroupPage=yes",
+        "PrivilegesRequired=lowest",
+        "PrivilegesRequiredOverridesAllowed=dialog",
+        f"OutputDir={out}",
+        f"OutputBaseFilename={name}-{info.version}-setup",
+        "Compression=lzma2",
+        "SolidCompression=yes",
+        "WizardStyle=modern",
+        "ArchitecturesAllowed=x64compatible",
+        "ArchitecturesInstallIn64BitMode=x64compatible",
+        f"UninstallDisplayIcon={{app}}\\{name}.exe",
+        f"VersionInfoVersion={info.version}",
+        f"VersionInfoDescription={info.description or name}",
+        f"SetupIconFile={icon}" if icon is not None and icon.suffix.lower() == ".ico" else None,
+        "",
+        "[Tasks]",
+        'Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; '
+        'GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked',
+        "",
+        "[Files]",
+        f'Source: "{folder}\\*"; DestDir: "{{app}}"; Flags: ignoreversion recursesubdirs createallsubdirs',
+        "",
+        "[Icons]",
+        f'Name: "{{autoprograms}}\\{name}"; Filename: "{{app}}\\{name}.exe"',
+        f'Name: "{{autodesktop}}\\{name}"; Filename: "{{app}}\\{name}.exe"; Tasks: desktopicon',
+        "",
+        "[Run]",
+        f'Filename: "{{app}}\\{name}.exe"; Description: "{{cm:LaunchProgram,{name}}}"; '
+        "Flags: nowait postinstall skipifsilent",
+    ]
+    return "\n".join(line for line in lines if line is not None) + "\n"
+
+
+def _windows(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | None = None) -> Built:
+    """The app's folder in `dist/<name>`, and `<name>-<version>-setup.exe`
+    made from it with Inno Setup (found, or fetched once)."""
+    if any(c in name for c in '\\/:*?"<>|{}'):
+        raise BuildError(f"{name!r} can't be a Windows program name: leave out \\ / : * ? \" < > | {{ }}")
+    folder = built / name
+    if not (folder / f"{name}.exe").is_file():
+        raise BuildError(f"PyInstaller finished without making {folder / (name + '.exe')}")
+    iscc = find_iscc() or fetch_iscc()
+    dist.mkdir(parents=True, exist_ok=True)
+    final = dist / name
+    if final.exists():
+        shutil.rmtree(final)
+    shutil.copytree(folder, final)
+    script = built / f"{name}.iss"
+    script.write_text(inno_script(name, info, final, dist, icon), encoding="utf-8-sig")  # Inno reads UTF-8 by its BOM
+    _run([str(iscc), "/Q", str(script)])
+    setup = dist / f"{name}-{info.version}-setup.exe"
+    if not setup.is_file():
+        raise BuildError(f"Inno Setup finished without making {setup}")
+    return Built(final / f"{name}.exe", [setup])
+
+
 #: Each platform's installer, from PyInstaller's one-folder build.
-_INSTALLERS = {"darwin": _macos}
+_INSTALLERS = {"darwin": _macos, "win32": _windows}
 
 
 @dataclass

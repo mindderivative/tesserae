@@ -152,12 +152,29 @@ Linux, for a `tesserae new` app).
   identifier and publisher are in the app's `Info.plist`, and it's signed
   ad hoc (Apple silicon runs nothing unsigned) -- not with a Developer ID,
   so Gatekeeper still asks the first time; see signing below.
-- **Windows and Linux:** coming next (M78): an Inno Setup installer, and
-  an AppImage, `.deb`, pacman package, `.rpm` and Flatpak. Until then
-  `--installer` there says so.
+- **Windows:** `dist/notes-1.2.0-setup.exe`, made with
+  [Inno Setup](https://jrsoftware.org/isinfo.php), and the app's folder
+  in `dist/notes`. The installer needs no admin rights: it installs for
+  the user into `AppData\Local\Programs` (an admin can choose everyone
+  instead), adds a Start-menu entry and optionally a desktop one, and
+  registers an uninstaller. A new version with the same `--identifier`
+  replaces the old one. Run silently, it takes Inno Setup's usual
+  `/VERYSILENT /CURRENTUSER`.
 
-`--check` runs the installed-to-be app (on macOS, the one in
-`dist/notes.app`) from an empty folder, as with a single file.
+  Tesserae uses the Inno Setup it finds (the PATH, or where Inno Setup 6
+  or 7 installs; `TESSERAE_ISCC` names one exactly). If there's none, it
+  fetches Inno Setup 7.1.0 (14 MB, from its GitHub releases, checked
+  against the release's SHA-256), once, into a cache
+  (`AppData\Local\tesserae\tools`), and unpacks it there in Inno
+  Setup's portable mode, which installs nothing. Inno Setup is free for
+  any use; its authors ask companies using it commercially to consider
+  [buying a licence](https://jrsoftware.org/isorder.php).
+- **Linux:** coming next (M78): an AppImage, `.deb`, pacman package,
+  `.rpm` and Flatpak. Until then `--installer` there says so.
+
+`--check` runs the app about to be packed (on macOS the one in
+`dist/notes.app`, on Windows `dist/notes/notes.exe`) from an empty
+folder, as with a single file.
 
 ## How it behaves
 

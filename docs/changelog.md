@@ -15,8 +15,10 @@
   [Releasing Your App](guide/releasing.md).
 - **`tesserae build --installer`**: the platform's installer, from a
   one-folder build. On macOS, a `.app` (its version, identifier and
-  publisher in `Info.plist`) in a `.dmg`; Windows and Linux follow. A PNG
-  `--icon` works on every platform.
+  publisher in `Info.plist`) in a `.dmg`. On Windows, an Inno Setup
+  installer that needs no admin rights, with a Start-menu entry and an
+  uninstaller; Tesserae fetches a pinned Inno Setup if there's none.
+  Linux follows. A PNG `--icon` works on every platform.
 - `TESSERAE_MAX_FRAMES=n` stops `app.run()` after `n` frames, and
   `TESSERAE_FRAMES_REPORT=<file>` writes how many it drew, for automated
   runs.

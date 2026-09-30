@@ -182,6 +182,50 @@ jobs:
           echo "installed app drew $(cat frames.txt) frames"
           test "$(cat frames.txt)" = 30
 
+      # On Windows, an Inno Setup installer: built with the runner's Inno
+      # Setup 6, then installed silently for this user, run from where it
+      # installed, and uninstalled. Then built again with the Inno Setup 7
+      # that Tesserae fetches itself.
+      - name: Build the installer (Windows), install, run and uninstall it
+        if: runner.os == 'Windows'
+        shell: pwsh
+        working-directory: work/demo
+        run: |
+          $ErrorActionPreference = "Stop"
+          & "$env:BIN/tesserae" build --installer --check --app-version 1.2.0 --identifier com.example.demo --publisher "Tesserae CI"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Start-Process -Wait -FilePath "dist/demo-1.2.0-setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/CURRENTUSER", "/NORESTART"
+          $app = Join-Path $env:LOCALAPPDATA "Programs/demo"
+          Get-ChildItem $app | Select-Object -First 5
+          $link = Join-Path $env:APPDATA "Microsoft/Windows/Start Menu/Programs/demo.lnk"
+          if (-not (Test-Path $link)) { throw "no Start-menu entry at $link" }
+          $report = Join-Path $env:RUNNER_TEMP "frames.txt"
+          $env:TESSERAE_MAX_FRAMES = "30"; $env:TESSERAE_FRAMES_REPORT = $report
+          Start-Process -Wait -NoNewWindow -WorkingDirectory $env:RUNNER_TEMP -FilePath (Join-Path $app "demo.exe")
+          $frames = Get-Content $report
+          Write-Output "installed app drew $frames frames"
+          if ($frames -ne "30") { throw "the installed app drew $frames frames" }
+          Remove-Item Env:TESSERAE_MAX_FRAMES, Env:TESSERAE_FRAMES_REPORT
+          Start-Process -Wait -FilePath (Join-Path $app "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES"
+          Start-Sleep -Seconds 3
+          if (Test-Path (Join-Path $app "demo.exe")) { throw "the uninstaller left demo.exe" }
+          if (Test-Path $link) { throw "the uninstaller left the Start-menu entry" }
+          Write-Output "installed, ran and uninstalled"
+
+      - name: Build the installer (Windows) with the Inno Setup Tesserae fetches
+        if: runner.os == 'Windows'
+        shell: pwsh
+        working-directory: work/demo
+        run: |
+          $ErrorActionPreference = "Stop"
+          $iscc = & "$env:BIN/python" -c "from tesserae import build; print(build.fetch_iscc())"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Write-Output "fetched $iscc"
+          $env:TESSERAE_ISCC = $iscc
+          & "$env:BIN/tesserae" build --installer --app-version 1.2.1 --identifier com.example.demo
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (-not (Test-Path "dist/demo-1.2.1-setup.exe")) { throw "no installer from the fetched Inno Setup" }
+
       - uses: actions/upload-artifact@v4
         with:
           name: demo-${{ matrix.os }}

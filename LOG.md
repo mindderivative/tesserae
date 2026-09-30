@@ -1948,3 +1948,24 @@ three phases became six.
 - The one-folder probe: 0.27 s to start against 0.55 s for one file and
   0.23 s from source; 107 MB uncompressed.
 - Decisions Q1-Q5 are in the tracker.
+- Phase 2: `tesserae build --installer`, from a one-folder build.
+  - App details come from options. A PNG icon is converted to `.ico` or
+    `.icns` with Pillow, which writes both, on Linux too.
+  - macOS: the `.app`'s `Info.plist` is stamped, re-signed ad hoc and put
+    in a `.dmg` with `hdiutil`. On a real Mac in CI the signature
+    verified, and the installed app drew 30 frames.
+  - The single file on macOS no longer adds `--windowed`. That closes the
+    known gap, and it broke one test that assumed `--windowed`
+    everywhere; that test is now pinned to Linux.
+  - 16/16 mutants caught.
+- Phase 3, Windows: Inno Setup, found (`TESSERAE_ISCC`, the PATH, the
+  usual installs, or Tesserae's cache) or fetched.
+  - The fetch is 7.1.0's x64 setup from jrsoftware/issrc. It's checked
+    against the digest GitHub publishes for the release asset,
+    `sha256:0362a383…`, and unpacked with `/PORTABLE=1`, which Inno
+    Setup's own `setup.iss` documents and which installs nothing.
+  - The script is a per-user install (`PrivilegesRequired=lowest`) with a
+    Start-menu entry, an optional desktop entry and an uninstaller. Its
+    AppId comes from the identifier. It's written as UTF-8 with a BOM.
+  - 20/20 mutants caught after one more test: the first run missed that
+    nothing checked Windows was registered for `--installer`.

@@ -87,10 +87,10 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M75 — A Node's Style from a File (#22) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M76 — One `pip install`, on Every Platform | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
 | M77 — `tesserae build`: an App as One Executable | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
-| M78 — Installers for Each Platform | `██⬜⬜⬜⬜⬜⬜⬜⬜` 17% | 🚧 In progress — Phase 1 of 6 done |
+| M78 — Installers for Each Platform | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 2 of 6 done |
 | M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 
-**Just closed:** M77 (2026-09-30): `tesserae build` makes an app one executable its users run with nothing installed, built and checked (frames drawn, not just a clean exit) in CI on Linux, macOS and Windows, with a "Releasing Your App" guide. Before it, M79: Tesserae on `tre` 0.4.3 (nothing broke; 0.4.3's scroll changes tested). Before that, M76 (one `pip install`; Tesserae 0.2.0 on PyPI).
+**Just closed:** M78 Phase 2 (2026-09-30): `tesserae build --installer`; on macOS a `.app` in a `.dmg`, installed and run in CI. Before it, M77 (2026-09-30): `tesserae build` makes an app one executable, built and checked in CI on Linux, macOS and Windows, with a "Releasing Your App" guide; and M79 (`tre` 0.4.3).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -104,16 +104,16 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M78 Phase 2: `tesserae build --installer` and macOS's `.app` in a `.dmg`. M77 and M79 are unreleased; the changelog has them under "Unreleased".
+**Up next:** M78 Phase 3, Windows's Inno Setup installer (in CI now), then Phase 4, Linux's AppImage, `.deb` and pacman. M77 and M79 are unreleased; the changelog has them under "Unreleased".
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **macOS: PyInstaller 7 will refuse `tesserae build`'s default there.** A single file without a console (`--windowed`) also makes a `.app`, which PyInstaller discourages and says 7.0 will block (6.13 changelog). 6.22 still builds it. M78 Phase 2 makes the macOS app from a one-folder build.
 
 **Fixed gaps:**
+- ~~**macOS: PyInstaller 7 will refuse `tesserae build`'s default there** (a `.app` beside a single file).~~ **Fixed (M78 Phase 2).** The single file there no longer adds `--windowed`, and `--installer` makes the `.app` from a one-folder build.
 - ~~**No grid layout** in YAML: `tre` laid out flexbox only (M71).~~ **Fixed (M74),** on `tre` 0.4.2's CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23)): `display: grid`, tracks, auto tracks and flow, placement, gaps and grid alignment in a view's style, a ScrollView's content included.
 - ~~**A button's `disabled` couldn't be bound in YAML** (only control kinds'), and a node's own `disabled` only told assistive technology (M66).~~ **Fixed (M70).** `disabled:` as a key or a binding on any node: announced, not focusable, no feedback, handlers off, faded to 38%; held through re-theme, restyle and reload. [#19](https://github.com/mindderivative/tesserae/issues/19), closed (pushed as `d9057c3..91ed3b2`, CI run 36647247015).
 - ~~**A fragment call couldn't take `handlers:`:** a `component:` node took only `id:`, `with:` and `repeat:`, so `component: ButtonFilled` couldn't be clicked (M67).~~ **Fixed (M69).** A call also takes `handlers:`, `bindings:`, `two_way:`, `a11y:`, `interaction:` and `classes:`, put on the fragment's root; the `tesserae new` templates use `component: ButtonFilled`. [#18](https://github.com/mindderivative/tesserae/issues/18), closes once pushed.
@@ -2120,7 +2120,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 78 — Installers for Each Platform
 
-**Status: 🚧 In progress — Phase 1 of 6 done.** The installer half of the user's release intent (M77's quote), built on M77. The user: "push and start M78" (M77 pushed as `40e2ab1..cd3918a`), then chose Inno Setup for Windows and documentation for signing, and asked for Linux: "Can we do a flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's three phases became six.
+**Status: 🚧 In progress — Phase 2 of 6 done.** The installer half of the user's release intent (M77's quote), built on M77. The user: "push and start M78" (M77 pushed as `40e2ab1..cd3918a`), then chose Inno Setup for Windows and documentation for signing, and asked for Linux: "Can we do a flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's three phases became six.
 
 **What's known** (Phase 1's research, sources in LOG):
 - **Runners:** GitHub's Windows runner has Inno Setup 6.7 and WiX 3.14 but no NSIS. The macOS runner has `hdiutil`, as every Mac does. The Ubuntu runner has `dpkg` and `rpm`, but no `appimagetool` or FUSE.
@@ -2156,8 +2156,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: research (the runners' tools, Inno Setup, WiX's fee, NSIS, AppImage, `.deb`, Briefcase, PyInstaller on macOS, notarization, Windows signing) and a one-folder probe; the user chose Inno Setup, all five Linux formats and documented signing; Q1-Q5 above; the guide's out-of-date Gatekeeper advice fixed (Sequoia removed Control-click, Open) — ✅
 
-### Phase 2 — `--installer`, and macOS ⬜
-- Step 1: `tesserae build --installer`, the one-folder build, the app-details options and a PNG icon made into `.ico`/`.icns`; the macOS `.app` in a `.dmg`; the single file without `--windowed` on macOS; tests, CI on macOS — ⬜
+### Phase 2 — `--installer`, and macOS ✅
+- Step 1: `tesserae build --installer`: a one-folder build handed to the platform's packager; `--app-version`/`--identifier`/`--publisher`/`--description` (checked: numbers and dots, reverse-DNS, one line; a `com.example` placeholder pointed out); a PNG `--icon` made into `.ico`/`.icns` with Pillow. On macOS the `.app`'s `Info.plist` gets the details, it's signed again ad hoc (the edit breaks PyInstaller's signature, and Apple silicon runs nothing unsigned), and `hdiutil` makes a `.dmg` with it beside an Applications link. The single file no longer adds `--windowed` on macOS (the known gap, closed). CI's macOS job mounted the `.dmg`, found the version and identifier, `codesign --verify --deep --strict` passed, and the app copied to Applications drew 30 frames (run 36683667103). 16/16 mutants caught. One test assumed `--windowed` on every platform and failed on macOS; it's pinned to Linux now — ✅
 
 ### Phase 3 — Windows ⬜
 - Step 1: an Inno Setup installer (per-user, Start-menu entry, uninstaller), with Inno Setup found or fetched; CI on Windows installs it silently and runs the installed app — ⬜
