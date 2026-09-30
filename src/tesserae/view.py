@@ -902,7 +902,7 @@ def _apply_to_control(control: Any, kind: Optional[str], prop: str, value: Any) 
 def _apply(node: Any, kind: Optional[str], prop: str, value: Any) -> None:
     """Sets one bound value, with `tre`'s type rules and messages; an
     unchanged value isn't set again."""
-    if prop in ("checked", "selected"):
+    if prop in ("checked", "selected", "visible"):  # visible: out of layout and hit-testing (0.3.0 M3)
         if not isinstance(value, bool):
             raise ValueError(f'widget property "{prop}" expects a boolean binding, got {value_debug(value)}')
         if node.get(prop) != value:

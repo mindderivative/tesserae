@@ -12,6 +12,7 @@ app whose window has no OS title bar (`App(decorations=False)`).
 It's expanded, before the view is built, into ordinary nodes -- so a
 theme, a stylesheet, reconcile and hot reload treat it as they treat any:
 
+- `<id>.inset`: on macOS, room for the traffic lights (`app.titlebar_inset`);
 - the bar, `<id>`: a `Container` that's the window's drag region
   (`window_region: drag`) -- a press on it, or on its title or icon,
   moves the window, and a double-click maximizes it;
@@ -21,7 +22,8 @@ theme, a stylesheet, reconcile and hot reload treat it as they treat any:
   `<id>.close` flush together: icon buttons whose handlers are the app's
   window actions (`window.minimize`, `window.toggle_maximized`,
   `window.close`). The maximize button shows the restore glyph while
-  `app.maximized` is true.
+  `app.maximized` is true, and the buttons hide while the OS's own
+  controls show (`app.native_controls`, macOS).
 
 Each part has a class for stylesheets: `title_bar`, `title_bar_icon`,
 `title_bar_title`, `title_bar_content`, `title_bar_buttons`,
@@ -98,7 +100,11 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
     buttons = node.get("buttons", list(BUTTONS))
     if not isinstance(buttons, list) or any(b not in BUTTONS for b in buttons) or len(set(buttons)) != len(buttons):
         raise TitleBarError(f"{where}'s buttons are some of {', '.join(BUTTONS)}, each once; got {buttons!r}")
-    parts: list[dict[str, Any]] = []
+    # macOS: room for the traffic lights, as wide as `titlebar_inset` says
+    # (0 elsewhere).
+    parts: list[dict[str, Any]] = [{"id": f"{bar_id}.inset", "kind": "Container", "classes": ["title_bar_inset"],
+                                    "style": {"width": 0, "height": HEIGHT, "flex_shrink": 0},
+                                    "bindings": {"width": "{{ app.titlebar_inset.get()[1] }}"}}]
     if icon is not None:
         parts.append({"id": f"{bar_id}.icon", "kind": "Icon", "icon": {"name": icon}, "classes": ["title_bar_icon"],
                       "style": {"width": 20, "height": 20, "flex_shrink": 0}, "bindings": {"opacity": _DIM}})
@@ -111,7 +117,9 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
                   "children": list(node.get("children") or [])})
     if buttons:  # flush together at the right, as desktops set them
         parts.append({"id": f"{bar_id}.buttons", "kind": "Container", "classes": ["title_bar_buttons"],
-                      "style": {"height": HEIGHT, "flex_shrink": 0}, "bindings": {"opacity": _DIM},
+                      "style": {"height": HEIGHT, "flex_shrink": 0},
+                      # hidden where the OS's own controls show (macOS's traffic lights)
+                      "bindings": {"opacity": _DIM, "visible": "{{ not app.native_controls.get() }}"},
                       "children": [_button(bar_id, name) for name in BUTTONS if name in buttons]})
     return {
         "id": bar_id, "kind": "Container", "window_region": "drag",

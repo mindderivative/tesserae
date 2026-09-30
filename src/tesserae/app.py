@@ -133,6 +133,11 @@ def _from_file(path: Path, what: str, fn: Any) -> Any:
     return apply
 
 
+def _inset(value: Any) -> tuple[float, float]:
+    height, width = value
+    return (float(height), float(width))
+
+
 def _non_negative(name: str, value: Any, *, allow_none: bool = False) -> Any:
     if value is None and allow_none:
         return None
@@ -259,6 +264,16 @@ class App:
         self.active = Computed(self._active.get)
         self._window.on("maximized", lambda event: self._maximized.set(bool(event.maximized)))
         self._window.on("active", lambda event: self._active.set(bool(event.active)))
+        #: macOS keeps its title bar, transparent, with the traffic lights
+        #: (0.3.0 M3): `titlebar_inset` is `(height, width)` of the space
+        #: they take -- `(0, 0)` elsewhere, decorated, and in fullscreen --
+        #: and `native_controls` whether they're showing, for a title bar
+        #: to leave room and hide its own buttons.
+        self._titlebar_inset = Signal(_inset(self._window.get("titlebar_inset")))
+        self._native_controls = Signal(bool(self._window.get("native_controls")))
+        self.titlebar_inset = Computed(self._titlebar_inset.get)
+        self.native_controls = Computed(self._native_controls.get)
+        self._window.on("titlebar_inset", self._on_titlebar_inset)
         if dark == "system":  # M53: Linux answers now; macOS and Windows once the window opens (run())
             os_dark = _os_dark(self._window)
             if os_dark is not None:
@@ -853,6 +868,10 @@ class App:
             self.restore()
         else:
             self.maximize()
+
+    def _on_titlebar_inset(self, event: Any) -> None:
+        self._titlebar_inset.set(_inset(event.titlebar_inset))
+        self._native_controls.set(bool(self._window.get("native_controls")))
 
     def _sync_maximized(self) -> None:
         # Before `run()` these set how the window opens, and no event says

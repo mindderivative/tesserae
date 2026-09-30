@@ -40,8 +40,9 @@ def test_the_expansion():
     assert given == _page(BAR)  # the spec given is left as it was (a view keeps it for hot reload)
     bar = spec["children"][0]
     assert (bar["kind"], bar["window_region"], bar["classes"]) == ("Container", "drag", ["title_bar"])
-    assert [c["id"] for c in bar["children"]] == ["bar.icon", "bar.title", "bar.content", "bar.buttons"]
-    buttons = bar["children"][3]["children"]
+    assert [c["id"] for c in bar["children"]] == ["bar.inset", "bar.icon", "bar.title", "bar.content",
+                                                  "bar.buttons"]
+    buttons = bar["children"][4]["children"]
     assert [b["id"] for b in buttons] == ["bar.minimize", "bar.maximize", "bar.close"]
     assert [b["handlers"]["on_click"] for b in buttons] == ["window.minimize", "window.toggle_maximized",
                                                             "window.close"]
@@ -117,10 +118,10 @@ def test_its_children_are_the_content(tmp_path):
 
 def test_fewer_buttons_and_no_icon_or_title():
     spec = expand_title_bars(_page({"id": "bar", "kind": "TitleBar", "buttons": ["close"]}))
-    assert [c["id"] for c in spec["children"][0]["children"]] == ["bar.content", "bar.buttons"]
-    assert [b["id"] for b in spec["children"][0]["children"][1]["children"]] == ["bar.close"]
+    assert [c["id"] for c in spec["children"][0]["children"]] == ["bar.inset", "bar.content", "bar.buttons"]
+    assert [b["id"] for b in spec["children"][0]["children"][2]["children"]] == ["bar.close"]
     none = expand_title_bars(_page({"id": "bar", "kind": "TitleBar", "buttons": []}))
-    assert [c["id"] for c in none["children"][0]["children"]] == ["bar.content"]
+    assert [c["id"] for c in none["children"][0]["children"]] == ["bar.inset", "bar.content"]
 
 
 @pytest.mark.parametrize("bar, message", [
