@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.2.1 (unreleased)
+## 0.2.1
+
+Releasing an app (M77, M78) and `tre` 0.4.3 and 0.4.4 (M79, M80), tracked
+from here on in the [GitHub project](https://github.com/users/mindderivative/projects/2)
+(release [#23](https://github.com/mindderivative/tesserae/issues/23)).
 
 ### Requirements
 
