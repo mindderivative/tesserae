@@ -192,7 +192,8 @@ jobs:
         working-directory: work/demo
         run: |
           $ErrorActionPreference = "Stop"
-          & "$env:BIN/tesserae" build --installer --check --app-version 1.2.0 --identifier com.example.demo --publisher "Tesserae CI"
+          $bin = Join-Path $env:GITHUB_WORKSPACE "fresh/Scripts"  # BIN is Git Bash's /d/a/... form
+          & "$bin/tesserae.exe" build --installer --check --app-version 1.2.0 --identifier com.example.demo --publisher "Tesserae CI"
           if ($LASTEXITCODE -ne 0) { exit 1 }
           Start-Process -Wait -FilePath "dist/demo-1.2.0-setup.exe" -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/CURRENTUSER", "/NORESTART"
           $app = Join-Path $env:LOCALAPPDATA "Programs/demo"
@@ -218,11 +219,12 @@ jobs:
         working-directory: work/demo
         run: |
           $ErrorActionPreference = "Stop"
-          $iscc = & "$env:BIN/python" -c "from tesserae import build; print(build.fetch_iscc())"
+          $bin = Join-Path $env:GITHUB_WORKSPACE "fresh/Scripts"  # BIN is Git Bash's /d/a/... form
+          $iscc = & "$bin/python.exe" -c "from tesserae import build; print(build.fetch_iscc())"
           if ($LASTEXITCODE -ne 0) { exit 1 }
           Write-Output "fetched $iscc"
           $env:TESSERAE_ISCC = $iscc
-          & "$env:BIN/tesserae" build --installer --app-version 1.2.1 --identifier com.example.demo
+          & "$bin/tesserae.exe" build --installer --app-version 1.2.1 --identifier com.example.demo
           if ($LASTEXITCODE -ne 0) { exit 1 }
           if (-not (Test-Path "dist/demo-1.2.1-setup.exe")) { throw "no installer from the fetched Inno Setup" }
 

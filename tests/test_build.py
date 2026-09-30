@@ -310,14 +310,15 @@ def test_cli_passes_the_installer_details_and_notes_a_placeholder(tmp_path, caps
 
 def test_the_inno_script():
     info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme Ltd", "Takes notes")
-    script = build.inno_script("Demo App", info, Path("D:/a/dist/Demo App"), Path("D:/a/dist"), Path("D:/t/i.ico"))
+    folder, out, icon = Path("D:/a/dist/Demo App"), Path("D:/a/dist"), Path("D:/t/i.ico")  # as the OS writes them
+    script = build.inno_script("Demo App", info, folder, out, icon)
     lines = script.splitlines()
     app_id = lines[1]
     assert app_id == "AppId={{" + str(build.uuid.uuid5(build.uuid.NAMESPACE_DNS, "com.acme.demo")) + "}"
     for line in ["AppName=Demo App", "AppVersion=1.2.0", "AppPublisher=Acme Ltd", "PrivilegesRequired=lowest",
-                 "DefaultDirName={autopf}\\Demo App", "OutputDir=D:/a/dist", "OutputBaseFilename=Demo App-1.2.0-setup",
-                 "VersionInfoVersion=1.2.0", "VersionInfoDescription=Takes notes", "SetupIconFile=D:/t/i.ico",
-                 'Source: "D:/a/dist/Demo App\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs',
+                 "DefaultDirName={autopf}\\Demo App", f"OutputDir={out}", "OutputBaseFilename=Demo App-1.2.0-setup",
+                 "VersionInfoVersion=1.2.0", "VersionInfoDescription=Takes notes", f"SetupIconFile={icon}",
+                 f'Source: "{folder}\\*"; DestDir: "{{app}}"; Flags: ignoreversion recursesubdirs createallsubdirs',
                  'Name: "{autoprograms}\\Demo App"; Filename: "{app}\\Demo App.exe"']:
         assert line in lines, line
     bare = build.inno_script("x", build.AppInfo("x", identifier="com.acme.x"), Path("f"), Path("o"), Path("i.png"))
