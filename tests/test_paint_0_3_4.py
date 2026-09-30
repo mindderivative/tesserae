@@ -29,14 +29,14 @@ def _documents():
     """`(label, parsed YAML)` for every view and fragment file, and every
     `yaml` block in the docs that parses."""
     for path in sorted([*ROOT.glob("examples/**/*.yaml"), *ROOT.glob("src/tesserae/**/*.yaml")]):
-        yield str(path.relative_to(ROOT)), yaml.safe_load(path.read_text())
+        yield path.relative_to(ROOT).as_posix(), yaml.safe_load(path.read_text())  # "/" on Windows too
     for path in sorted([*ROOT.glob("docs/**/*.md"), ROOT / "README.md"]):
         for i, block in enumerate(FENCE.findall(path.read_text())):
             try:
                 data = yaml.safe_load(block)
             except yaml.YAMLError:
                 continue
-            yield f"{path.relative_to(ROOT)} (yaml block {i + 1})", data
+            yield f"{path.relative_to(ROOT).as_posix()} (yaml block {i + 1})", data
 
 
 def _nodes(data):
