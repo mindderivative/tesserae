@@ -222,6 +222,10 @@ children:
   with Ctrl, Alt or Meta are shortcuts and don't scroll; Shift still
   does. The scroll view is a Tab stop, so it can be scrolled with nothing
   inside it focusable.
+- A `ScrollView` inside another passes on what it can't use, as in a
+  browser: a wheel or a scroll key over an inner one that's already at
+  that end, or whose content fits, scrolls the one outside it (`tre`
+  0.4.4; M80). One that can move takes the whole wheel or key.
 - A child that takes focus is scrolled into view, just as far as needed,
   and so is one assistive technology asks to see (`scroll_into_view`).
   (`tre` does all of this since 0.4.2; M73.)

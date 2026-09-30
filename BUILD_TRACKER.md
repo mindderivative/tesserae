@@ -89,8 +89,9 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M77 — `tesserae build`: an App as One Executable | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
 | M78 — Installers for Each Platform | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 3 of 6 done |
 | M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
+| M80 — `tre` 0.4.4 | `██████████` 100% | ✅ Complete — all 1 phases done (2026-09-30) |
 
-**Just closed:** M78 Phase 3 (2026-09-30): the Windows installer (Inno Setup, found or fetched), installed, run and uninstalled in CI. Before it, Phase 2: `tesserae build --installer`, with macOS's `.app` in a `.dmg`. Before that, M77 (`tesserae build`, one executable on every platform) and M79 (`tre` 0.4.3).
+**Just closed:** M80 (2026-09-30): Tesserae on `tre` 0.4.4, whose browser-style scroll chaining (Tesserae's M79 suggestion) flipped the one test pinning 0.4.3's behaviour, as expected; nothing else broke. Before it, M78 Phase 3: the Windows installer, installed, run and uninstalled in CI.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -2183,4 +2184,14 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 2 — 0.4.3's Scroll Changes, Tested ✅
 - Step 1: tests for a `scroll_offset` bound past the end (held at the end at once, and that is what `two_way` writes back), a page key with Ctrl, Alt or Meta (doesn't scroll) and with Shift (does), and a nested `ScrollView` keeping a vertical wheel even when its content fits (`tre` passes a wheel on only past a view that doesn't scroll in its direction, and every `ScrollView` is vertical); the layout guide says so; 2630 passed — ✅
+
+
+---
+
+## Milestone 80 — `tre` 0.4.4
+
+**Status: ✅ Complete — all 1 phases done (2026-09-30).** `tre`'s session reported v0.4.4 during M78 Phase 4. It implements the scroll chaining Tesserae suggested after 0.4.3 (M79), for keys as well as the wheel, as `tre`'s user asked. Verified first: the v0.4.4 release (24 assets), `tesserae-engine` 0.4.4 on PyPI (22 wheels and an sdist). CI had already picked it up through the `>=0.4.3` floor, and the pinned test failed there, before this move.
+
+### Phase 1 — Move to 0.4.4 ✅
+- Step 1: `.venv` on `tesserae-engine` 0.4.4, the floor `>=0.4.4`, CI's and `release.yml`'s `tre` checkout `ref: v0.4.4`, README and installation page. The suite: exactly one failure, M79's `test_a_nested_scroll_view_keeps_the_wheel_even_when_its_content_fits`, which pinned 0.4.3's behaviour. It's flipped to `test_a_wheel_an_inner_scroll_view_cannot_use_goes_to_the_one_outside` (the page scrolls 50), with a new key test (Page Down in an inner view that can't move scrolls the page, and `two_way` hears it; Home brings it back). The layout guide and changelog say so. All five examples ran; 2659 passed — ✅
 

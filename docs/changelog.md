@@ -4,7 +4,7 @@
 
 ### Requirements
 
-- **`tre` 0.4.3 or newer** (was 0.4.2).
+- **`tre` 0.4.4 or newer** (was 0.4.2).
 
 ### Added
 
@@ -34,6 +34,9 @@
   from one file, so the `.app` comes with `--installer`.
 - A bare number as a grid track list (`grid_auto_rows: 96`) is passed to
   `tre`, which takes it since 0.4.3; Tesserae no longer converts it.
+- On `tre` 0.4.4, scrolling chains as in a browser: a wheel or scroll key
+  an inner `ScrollView` can't use (at its end, or its content fits) goes
+  to the one outside it.
 - On `tre` 0.4.3, a `scroll_offset` set past the end is held at the end at
   once (and written back through `two_way`), and scroll keys held with
   Ctrl, Alt or Meta no longer scroll.

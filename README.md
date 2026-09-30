@@ -71,7 +71,7 @@ for; see [Releasing Your App](https://mindderivative.github.io/tesserae/guide/re
 
 ## Install (development)
 
-Tesserae needs **`tre` 0.4.3 or newer**, which is on PyPI as
+Tesserae needs **`tre` 0.4.4 or newer**, which is on PyPI as
 [`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (still
 `import tre`). Installing Tesserae installs it:
 

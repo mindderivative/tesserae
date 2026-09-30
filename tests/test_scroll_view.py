@@ -230,15 +230,30 @@ def test_an_offset_past_the_end_is_held_at_the_end_and_written_back():  # tre 0.
     assert scroll.get("scroll_offset") == 300.0 and vm.pos.get() == 300.0
 
 
-def test_a_nested_scroll_view_keeps_the_wheel_even_when_its_content_fits():  # tre 0.4.3 (M79)
-    """`tre` 0.4.3 hands a wheel on past a scroll view that doesn't scroll
-    in its direction; every `ScrollView` is vertical, so an inner one keeps
-    a vertical wheel, room or not (no browser-style chaining)."""
+def test_a_wheel_an_inner_scroll_view_cannot_use_goes_to_the_one_outside():  # tre 0.4.4 (M80)
+    """Scroll chaining, as in a browser, since `tre` 0.4.4: an inner
+    `ScrollView` whose content fits can't move, so the wheel goes on to
+    the page around it. (On 0.4.3 the inner one kept it; M79 pinned that,
+    and this test flipped with 0.4.4.)"""
     row = {"id": "only", "kind": "Rect", "style": {"height": 40, "background": "#6750A4"}}
     inner = {"id": "inner", "kind": "ScrollView", "style": {"height": 40}, "children": [row]}
     view, vm, scroll = _view(_spec(children=[inner, *_rows()]))
     view.window.simulate("wheel", node=view.node("only"), delta_y=50.0)  # inner's content fits it
-    assert view._built.outer["inner"].get("scroll_offset") == 0.0 and scroll.get("scroll_offset") == 0.0
+    assert view._built.outer["inner"].get("scroll_offset") == 0.0 and scroll.get("scroll_offset") == 50.0
+
+
+def test_a_key_an_inner_scroll_view_cannot_use_goes_to_the_one_outside():  # tre 0.4.4 (M80)
+    row = {"id": "only", "kind": "Rect", "style": {"height": 40, "background": "#6750A4"},
+           "handlers": {"on_click": "noop"}}
+    inner = {"id": "inner", "kind": "ScrollView", "style": {"height": 40}, "children": [row]}
+    view, vm, scroll = _view(_spec(children=[inner, *_rows()], bindings={"scroll_offset": "{{ pos.get() }}"},
+                                   two_way="scroll_offset"))
+    view.node("only").focus()
+    view.window.simulate("key_down", key="page_down")
+    assert view._built.outer["inner"].get("scroll_offset") == 0.0 and scroll.get("scroll_offset") == 100.0
+    assert vm.pos.get() == 100.0  # and two_way hears the page move
+    view.window.simulate("key_down", key="home")  # the page can go back up; the inner view still can't
+    assert scroll.get("scroll_offset") == 0.0
 
 
 @pytest.mark.parametrize("modifier, scrolls", [("ctrl", False), ("alt", False), ("meta", False), ("shift", True)])

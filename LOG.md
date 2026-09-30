@@ -1976,3 +1976,17 @@ three phases became six.
   PowerShell couldn't run Git Bash's `/d/a/...` venv path; it took the
   fetch notice as part of the ISCC path; and a test expected `/` in
   Windows paths. Phase 3 done.
+
+## M80: `tre` 0.4.4
+
+`tre`'s session reported v0.4.4 during M78 Phase 4. It adds scroll
+chaining, for the wheel and keys, as Tesserae suggested after 0.4.3.
+Verified first: the release has 24 assets, and PyPI has 22 wheels and an
+sdist. CI had already installed it through the `>=0.4.3` floor, and M79's
+pinned test failed there, as the pin was meant to.
+
+- Moved `.venv`, the floor (`>=0.4.4`) and CI's and `release.yml`'s `tre`
+  checkout. Exactly the one expected failure. That test is flipped (the
+  page now takes the wheel the inner view can't use), and a key test is
+  added (Page Down chains too, and `two_way` hears it). The docs say so.
+  All five examples ran; 2659 passed.
