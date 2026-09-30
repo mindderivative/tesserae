@@ -83,7 +83,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
-| M74 — Grids in YAML (`tre` #23) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M74 — Grids in YAML (`tre` #23) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
 
 **Just closed:** M73 (2026-09-30), done locally: Tesserae on `tre` 0.4.2 (`tesserae-engine>=0.4.2`), whose scroll views now scroll with the keys, reveal focus and answer `scroll_into_view` themselves (`tre` #24), so the `Scroller` only follows their `scroll` event. Before it, M70 (pushed, #19 closed).
 
@@ -99,7 +99,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M74 (grids in YAML, on `tre` 0.4.2's CSS Grid) is scoped and waits for the user. M73 is done locally.
+**Up next:** M74 (grids in YAML) is in progress. M73 is pushed.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -2008,16 +2008,18 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 74 — Grids in YAML (`tre` #23)
 
-**Status: ⬜ Scoped — draft, refined when it starts.** `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed): `display="grid"`, `grid_template_columns`/`rows` (track lists with `fr`, `auto`, `repeat()`, `minmax()`), `grid_auto_columns`/`rows`, `grid_auto_flow`, `grid_column`/`grid_row` (lines, `span`), `row_gap`/`column_gap`, `justify_items`/`justify_self`, `align_content`. M71 scoped grids "as its own milestone once `tre` has one"; this is it, scoped, not started (it waits for the user).
+**Status: 🚧 In progress — Phase 1 of 3 done.** User: "push and start M74" (M73 pushed as `91ed3b2..9f05cae`). `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed); M71 scoped grids "as its own milestone once `tre` has one". Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
-**Draft approach:** The grid keys in a view's style and stylesheets, as M71's layout keys are (set only when given, reset when dropped); validated as `tre` validates them, errors naming the widget; each laid out as the same tree built with `tre` directly; a Grid section in the Layout guide replacing the `flex_wrap` stand-in.
+**What starting found** (probed on 0.4.2): 13 properties -- `display` (`flex`/`grid`), `grid_template_columns`/`rows` and `grid_auto_columns`/`rows` (track lists as a string, or a list, read back as a string), `grid_auto_flow`, `grid_column`/`grid_row` (a line, `-2`, `"span 2"`, `"1 / 3"`; a number reads back as a string), `row_gap`/`column_gap`, `justify_items`/`justify_self` and `align_content`. `tre` validates each, naming the property. Each default can be set back except `justify_items` and `align_content` (they read `None` and refuse it), where `"stretch"` lays out identically. `gap` sets both `row_gap` and `column_gap`, and within one `set` the later one wins.
 
-**Decisions to settle at the start** (provisional):
-- Q1 every grid key at once (recommended), or the minimal set (`display`, templates, placement, gaps) first
-- Q2 whether a `kind: Grid` is worth having as sugar for a Container with `display: grid` (recommended: no, a style key is enough)
+**Decisions** (recommended, taken):
+- Q1, all 13 at once, in `STYLE_FIELDS` (so stylesheets take them) and M71's optional-layout table: set only when a style gives them, reset when it drops them. Each reset is `tre`'s default, but `"stretch"` for `justify_items`/`align_content`, and **a dropped `row_gap`/`column_gap` resets to the style's `gap`** (0 without one), since 0 would undo `gap`'s rows or columns; `_layout` puts `gap` before them so a given `row_gap` wins.
+- Q2, no `kind: Grid`: `display: grid` on a Container is enough.
+- Q3, where each lands: a child's placement (`grid_column`, `grid_row`, `justify_self`) goes on a Link's box and a control's node, like `align_self`; a ScrollView's grid-container keys go on its content box, so a scrolling grid works.
+- Q4, errors are `tre`'s, naming the widget (M71's wrapping).
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: read `tre` 0.4.2's grid properties and their validation; Q1-Q2 — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: probed the 13 properties' defaults, validation and read-back, which defaults can be set back, `"stretch"` against unset for `justify_items`/`align_content`, and `gap` against `row_gap` in one `set`; settled Q1-Q4 above — ✅
 
 ### Phase 2 — The Grid Keys ⬜
 - Step 1: the keys in the compiler and patching; tests against `tre`'s own layout; mutation-checked — ⬜
