@@ -469,7 +469,8 @@ def _expand_component(
 
 #: What a `component:` call puts on the fragment's root (M69): the view's
 #: own wiring and naming, not the fragment's look (that's its params).
-_CALL_KEYS = ("handlers", "bindings", "two_way", "a11y", "interaction", "classes")
+_CALL_KEYS = ("handlers", "bindings", "two_way", "a11y", "interaction", "classes",
+              "window_region")  # 0.3.0 M3: a fragment can be (part of) the title bar
 _CALL_MAPPINGS = ("handlers", "bindings", "a11y", "interaction")
 
 

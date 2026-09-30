@@ -71,6 +71,9 @@ _EVENTS = {
     "on_change": "change", "on_focus_enter": "focus", "on_focus_exit": "unfocus",
 }
 _COLOR_PROPS = {"background": "fill", "foreground": "fill", "border_color": "stroke_color"}
+#: The app's window actions a handler can name without a ViewModel method
+#: (0.3.0 M3): `on_click: window.close`, for a title bar's buttons.
+WINDOW_ACTIONS = ("minimize", "maximize", "restore", "toggle_maximized", "close")
 #: How far a disabled node fades (M70): MD3's disabled content opacity.
 DISABLED_OPACITY = 0.38
 _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius", "border_width", "elevation"}
@@ -81,7 +84,8 @@ def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     # `handlers` and `a11y` too: they change focus, role and label (M39)
     keys = ("kind", "classes", "style", "text", "image", "icon", "checked", "selected", "value", "hour", "minute",
             "handlers", "a11y", "component_of", "min", "max", "step", "label", "x", "y",  # M57, M58, M60
-            "disabled")  # M70: a control's is its own
+            "disabled",  # M70: a control's is its own
+            "window_region")  # 0.3.0 M3
     return all(a.get(k) == b.get(k) for k in keys)
 
 
@@ -573,11 +577,14 @@ class View:
 
     def _wire_handler(self, node_spec: dict[str, Any], event: str, method_name: str) -> None:
         node_id = node_spec["id"]
-        try:
-            method = getattr(self._viewmodel, method_name)
-        except AttributeError:
-            raise ValueError(f'widget "{node_id}": handler "{event}" names "{method_name}", which has no matching '
-                             "attribute on the ViewModel") from None
+        if method_name.startswith("window."):
+            method = self._window_action(node_id, event, method_name)
+        else:
+            try:
+                method = getattr(self._viewmodel, method_name)
+            except AttributeError:
+                raise ValueError(f'widget "{node_id}": handler "{event}" names "{method_name}", which has no '
+                                 "matching attribute on the ViewModel") from None
         if not callable(method):
             raise ValueError(f'widget "{node_id}": handler "{event}" names "{method_name}", which is not callable')
         tre_event = _EVENTS.get(event)
@@ -601,6 +608,23 @@ class View:
             self._add_listener(node, tre_event, handled(call))
             return
         self._add_listener(node, tre_event, call)
+
+    def _window_action(self, node_id: str, event: str, name: str) -> Callable[[], None]:
+        """`window.<action>`: the app's window action (0.3.0 M3), checked
+        now and looked up when it runs."""
+        action = name[len("window."):]
+        where = f'widget "{node_id}": handler "{event}" names "{name}"'
+        if action not in WINDOW_ACTIONS:
+            raise ValueError(f"{where}, which isn't a window action "
+                             f"({', '.join('window.' + a for a in WINDOW_ACTIONS)})")
+        if app_of(self.window) is None:
+            raise ValueError(f"{where}, but this view isn't on an App's window, which the action needs")
+
+        def run() -> None:
+            app = app_of(self.window)
+            if app is not None:
+                getattr(app, action)()
+        return run
 
     def _add_listener(self, node: Any, event: str, fn: Callable[[Any], None]) -> None:
         """A ViewModel's listener: removed when the view is unwired."""

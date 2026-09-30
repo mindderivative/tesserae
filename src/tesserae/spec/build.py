@@ -57,6 +57,7 @@ _NODE_KEYS = frozenset({
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "min", "max", "step",  # a SpinBox's (M58)
     "disabled",  # any node's (M70): the View applies it, or a control's own
+    "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not
 
     "label", "x", "y", "edges",  # a GraphNode's title and place, a NodeGraph's edges (M60)
 })
@@ -641,6 +642,23 @@ def interaction_tint(node: dict[str, Any], scheme: Optional[dict[str, RGBA]]) ->
     return _role(ctx, "on_surface")
 
 
+#: `window_region:` (0.3.0 M3): `drag` makes a node part of the window's
+#: title bar -- a press on it (or on anything in it that isn't
+#: interactive) moves the window -- and `none` keeps a node out of one.
+WINDOW_REGIONS = ("drag", "none")
+
+
+def _window_region(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:
+    """The node's `window_region` for `tre`; on a patch, a dropped one
+    resets (`tre`'s default, `None`)."""
+    value = node.get("window_region")
+    if value is None:
+        return {"window_region": None} if patching else {}
+    if value not in WINDOW_REGIONS:
+        raise SpecBuildError(f'widget {_q(node["id"])}: window_region is "drag" or "none", got {value!r}')
+    return {"window_region": value}
+
+
 def _create(ctx, node, style, built):
     kind = node["kind"]
     if kind in _WIDGET_KINDS:  # M60
@@ -649,6 +667,8 @@ def _create(ctx, node, style, built):
         a11y_props = _a11y_props(node, patching=False)
         if a11y_props:
             widget.node.set(**a11y_props)
+        if node.get("window_region") is not None:
+            widget.node.set(**_window_region(node, patching=False))
         return widget.node, (widget.part("body") if kind == "GraphNode" else widget.node)
     if kind in _CONTROL_KINDS:
         control = _control(ctx, node, style, built)
@@ -656,12 +676,15 @@ def _create(ctx, node, style, built):
         a11y_props = _a11y_props(node, patching=False)  # its label, hidden, live, level (M47: they were dropped)
         if a11y_props:
             _a11y_target(control).set(**a11y_props)
+        if node.get("window_region") is not None:
+            control.node.set(**_window_region(node, patching=False))
         return control.node, control.node
     tre_kind, props_of = _PRIMITIVE[kind]
     outer_props, inner_props = props_of(ctx, node, style)
     # M39: as `tre`'s `set_on_click` did, a clickable node is a focusable
     # Tab stop that Enter and Space activate -- and a button.
     (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=False))
+    outer_props.update(_window_region(node, patching=False))
     outer = ctx.window.create(tre_kind, **outer_props)
     if inner_props is None:
         return outer, outer
@@ -708,15 +731,18 @@ def patch(
         if kind in _WIDGET_KINDS:
             if control is not None:
                 _patch_graph_widget(ctx, node, control, state)
+                control.node.set(**_window_region(node, patching=True))
             return given
         if kind in _CONTROL_KINDS:
             if control is not None:
                 _patch_control(ctx, node, style, control, state, resets)
                 _a11y_target(control).set(**_a11y_props(node, patching=True))
+                control.node.set(**_window_region(node, patching=True))
             return given
         _, props_of = _PRIMITIVE[kind]
         outer_props, inner_props = props_of(ctx, node, style)
         (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=True))
+        outer_props.update(_window_region(node, patching=True))
         for key, value in resets.items():  # where `_layout` would have put it (a Link's text, a ScrollView's content)
             on_inner = (kind == "Link" and key not in _PLACED) or (kind == "ScrollView" and key in _CONTENT)
             (inner_props if on_inner else outer_props)[key] = value
