@@ -2,6 +2,8 @@
 
 Updated after every milestone/phase/stage/step completion, kept in sync with `ARCHITECTURE.md`. Status legend: ✅ done · 🚧 in progress · ⬜ not started.
 
+**This tracker is the 0.2 line** (Tesserae 0.1.0 through 0.2.x). Following `tre`'s pattern (the user, 2026-09-30), when 0.2.x is complete and the 0.3 work starts, this file is archived whole as `BUILD_TRACKER_ARCHIVE_0.2.md` and a new tracker for Tesserae 0.3 begins, its milestones restarting at M1 and its own artifact page (this one's stays as 0.2's record). The 0.3 work happens on a `0.3.0` branch, off `main`, until the user merges it; 0.2.x fixes meanwhile ship from `main`.
+
 **Milestones 1-6 are seeded, written after the fact (2026-09-23):** this file didn't exist when Tesserae's first 6 commits landed (2026-09-19 through 2026-09-21) -- their real history is reconstructed honestly from those commits' own messages and the code as it exists today, not presented as if this tracker had been running from day one.
 
 ---
@@ -2202,6 +2204,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ## Milestone 81 — Tesserae 0.3.0: `tre` 0.5.0 and Custom Windowing
 
 **Status: ⬜ Scoped — waits for `tre` 0.5.0 and the user.** The user (2026-09-30): "Do not automatically push to 0.5.0. When Tesserae moves to 0.5.0 and implements the custom windowing it will move to 0.3.0 as a major feature. Before that all milestones from here on will use 0.2.x". So Tesserae's dependency is capped `tesserae-engine>=0.4.4,<0.5` (guarded by `tests/test_dependencies.py`), and this milestone starts only when the user says so, after `tre` 0.5.0 (`tre` #28) is released.
+
+**How it runs:** on a `0.3.0` branch, not `main`, until the user merges it; this tracker is archived as `BUILD_TRACKER_ARCHIVE_0.2.md` and a 0.3 tracker starts, where this milestone's work becomes M1 onwards (see this file's head).
 
 **Draft approach:** move to `tre` 0.5.0 (lifting the cap), then draw the title bar and borders Tesserae's way. `App(decorations=False)`; the app shell's top bar as the window's drag region, with the app's icon and title, and minimize, maximize/restore and close buttons wired to the window controls and state events; `resize_border`; macOS's transparent title bar with the bar laid out after `titlebar_inset`. Tesserae's review of `tre`'s design (2026-09-30) asked for: Q1's interactive rule scoped to the drag region and ignoring hover listeners, an opt-out for the Windows title-bar menu, a macOS inset event, a pointer cancel after a native drag, fullscreen, a window icon and a minimum size. What `tre` decides shapes this scope.
 
