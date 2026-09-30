@@ -15,14 +15,14 @@ a local editable checkout.
 
 ## Requirements
 
-- Python 3.9 or newer
-- Linux, macOS, or Windows -- whatever `tre` itself supports (see
-  [`tre`'s own installation guide](https://mindderivative.github.io/tre/installation/)).
-  `tesserae-engine` 0.4.2 has wheels for CPython 3.9–3.15 (and the
-  free-threaded 3.14t and 3.15t) on Linux x86_64, CPython 3.9–3.14 on
-  macOS arm64 and Windows, and PyPy 3.11 on Linux. Elsewhere (Linux
-  aarch64, Intel macOS) pip builds it from the sdist, which needs Rust
-  1.90 or newer.
+- Python 3.12 or newer. (On macOS, the `python3` that comes with
+  Xcode's command-line tools is 3.9: install 3.12+ from python.org or
+  Homebrew.)
+- Linux x86-64, macOS on Apple silicon, or Windows x64. On these, every
+  dependency -- `tre`'s engine included -- installs as a prebuilt wheel,
+  so one `pip install` is all it takes. Elsewhere (Linux ARM, Intel
+  macOS) pip builds `tre` from source, which needs Rust 1.90 or newer
+  (see [`tre`'s own installation guide](https://mindderivative.github.io/tre/installation/)).
 
 ## Get the checkout
 
