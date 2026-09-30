@@ -84,6 +84,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 | M74 — Grids in YAML (`tre` #23) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
+| M75 — A Node's Style from a File (#22) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
 **Just closed:** M74 (2026-09-30), done locally: CSS Grid in a view's style on `tre` 0.4.2 (`display: grid`, tracks, placement, gaps, alignment; a ScrollView's content can be a grid), with a Grids section in the Layout guide. No known gaps remain. Before it, M73 (pushed): the Scroller on `tre` 0.4.2's scroll views.
 
@@ -99,7 +100,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** nothing is scoped, and there are no known gaps. M74 is done locally. Open with `tre`: #27 (a bare number as a one-track list; Tesserae converts it meanwhile).
+**Up next:** M75 (#22, a node's style from a file) is scoped and waits for the user. M74 is done locally. Open with `tre`: #27 (a bare number as a one-track list; Tesserae converts it meanwhile).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -2026,3 +2027,29 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 3 — Docs, Tracker ✅
 - Step 1: the Layout guide's new "Grids" section (tracks, auto tracks and flow, placement, gaps, alignment, a scrolling grid) with two examples, a label/field form and a tile dashboard with spans, each built and its positions checked; the wrapping section now points to it. **Found by the dashboard example:** `tre` refuses a bare number as a track list (`grid_auto_rows: 96`, how YAML writes one track), though it takes one for `grid_column`; the compiler now passes a number as its string for the four track keys (`_track`, with a test, 14/14 mutants caught), and `tre` [#27](https://github.com/mindderivative/tre/issues/27) asks for it there. The known gap -- the last -- moved to "Fixed gaps"; `mkdocs build --strict` clean; 2585 → 2590 passed (the bare-number test, and the docs checks on the two examples) — ✅
+
+
+---
+
+## Milestone 75 — A Node's Style from a File (#22)
+
+**Status: ⬜ Scoped — draft, refined when it starts.** Filed by the user as [#22](https://github.com/mindderivative/tesserae/issues/22) (2026-09-30): "The YAML view should allow for importing styles from file as well as inline", e.g. `style: counter_Style.yaml`, with `*_Style.yaml` and `*_Theme.yaml` naming conventions so Tesserae can tell a theme file from a style file. Scoped up front when checking the issues; not started.
+
+**What's there already:** M29's `include:` is generic, so `style: {include: counter_Style.yaml}` already reads a node's style from a file today (checked: the file's mapping becomes the style), and hot reload watches included files. What's missing is the bare form, a naming convention, and the docs. Themes and stylesheets have no naming convention now (the guides use `themes/Brand.yaml`, `styles/Default.yaml`).
+
+**Draft approach:** `style:` given as a string names a style file, relative to the view's file, read as `include:` is (so hot reload and error naming come with it); a `*_Style.yaml` file is one node's style mapping. The naming check, if any, follows the view/ViewModel convention's (M-era `naming.py`).
+
+**Decisions to settle at the start** (provisional):
+- Q1 the bare form only for a string ending `_Style.yaml` (recommended: a clear error otherwise), or any path
+- Q2 the conventions: `*_Style.yaml` a node's style (a mapping), `*_Theme.yaml` a theme, and what a stylesheet (a `styles:` list) is called -- `*_Stylesheet.yaml`, to keep "style" and "stylesheet" apart (recommended); whether `App(custom_theme=)`/`stylesheet=` check the suffix (recommended: warn, not refuse, since existing apps use other names)
+- Q3 merging: a file style plus inline overrides (`style: {include: a_Style.yaml, width: 300}`?), or file-or-inline only as the issue has it (recommended first)
+- Q4 does a stylesheet rule's `style:` take a file too (recommended: yes, the same rule)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: read `include:` handling, the stylesheet/theme loaders and `naming.py`; Q1-Q4 — ⬜
+
+### Phase 2 — Style Files ⬜
+- Step 1: the string form, the conventions, hot reload; tests; mutation-checked — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: the themes-and-styles guide and the naming convention page; #22 closed once pushed — ⬜
