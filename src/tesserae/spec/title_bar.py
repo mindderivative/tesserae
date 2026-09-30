@@ -25,9 +25,12 @@ theme, a stylesheet, reconcile and hot reload treat it as they treat any:
 
 Each part has a class for stylesheets: `title_bar`, `title_bar_icon`,
 `title_bar_title`, `title_bar_content`, `title_bar_buttons`,
-`title_bar_button` and `title_bar_close`. Its colours are Material 3
-roles, so it needs a themed app (`theme_seed`), as the Material
-fragments do.
+`title_bar_button`, `title_bar_close` and `title_bar_glyph`. Its look
+(`STYLES`) is Material 3 roles on those classes, in the cascade's first
+layer, so a theme or stylesheet overrides any of it; it needs a themed
+app (`theme_seed`), as the Material fragments do. While the window
+isn't the focused one (`app.active`), the title, icon and buttons fade,
+and close's hover is red.
 """
 
 from __future__ import annotations
@@ -35,7 +38,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-__all__ = ["BUTTONS", "TitleBarError", "expand_title_bars"]
+__all__ = ["BUTTONS", "STYLES", "TitleBarError", "expand_title_bars"]
 
 #: The window buttons a title bar can have, in the order they're laid out.
 BUTTONS = ("minimize", "maximize", "close")
@@ -44,6 +47,21 @@ _ACTIONS = {"minimize": "window.minimize", "maximize": "window.toggle_maximized"
 _LABELS = {"minimize": "Minimize", "maximize": "Maximize", "close": "Close"}
 #: The bar's height and each button's width: the size desktops use.
 HEIGHT, BUTTON_WIDTH, GLYPH = 40, 46, 16
+#: How far the title, icon and buttons fade while the window isn't the
+#: focused one, as desktops dim an inactive title bar.
+INACTIVE = 0.6
+_DIM = f"{{{{ app.active.get() and 1 or {INACTIVE} }}}}"
+
+#: A title bar's look (0.3.0 M3 Phase 3): Material 3 roles on its parts'
+#: classes. It's the cascade's first layer, under every theme, so an
+#: app's theme or stylesheet restyles any part, and a theme of the app's
+#: own can't leave a part without its colour.
+STYLES = {"styles": [
+    {"classes": ["title_bar"], "style": {"background": "surface"}},
+    {"classes": ["title_bar_title"], "style": {"foreground": "on_surface"}},
+    {"classes": ["title_bar_icon"], "style": {"foreground": "on_surface"}},
+    {"classes": ["title_bar_glyph"], "style": {"foreground": "on_surface"}},
+]}
 
 
 class TitleBarError(ValueError):
@@ -83,23 +101,23 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
     parts: list[dict[str, Any]] = []
     if icon is not None:
         parts.append({"id": f"{bar_id}.icon", "kind": "Icon", "icon": {"name": icon}, "classes": ["title_bar_icon"],
-                      "style": {"width": 20, "height": 20, "foreground": "on_surface", "flex_shrink": 0}})
+                      "style": {"width": 20, "height": 20, "flex_shrink": 0}, "bindings": {"opacity": _DIM}})
     if title is not None:
         parts.append({"id": f"{bar_id}.title", "kind": "Text", "classes": ["title_bar_title"],
                       "text": {"content": title, "typography_role": "title_small"},
-                      "style": {"foreground": "on_surface", "flex_shrink": 0}})
+                      "style": {"flex_shrink": 0}, "bindings": {"opacity": _DIM}})
     parts.append({"id": f"{bar_id}.content", "kind": "Container", "classes": ["title_bar_content"],
                   "style": {"flex_grow": 1, "height": HEIGHT, "align_items": "center", "gap": 8},
                   "children": list(node.get("children") or [])})
     if buttons:  # flush together at the right, as desktops set them
         parts.append({"id": f"{bar_id}.buttons", "kind": "Container", "classes": ["title_bar_buttons"],
-                      "style": {"height": HEIGHT, "flex_shrink": 0},
+                      "style": {"height": HEIGHT, "flex_shrink": 0}, "bindings": {"opacity": _DIM},
                       "children": [_button(bar_id, name) for name in BUTTONS if name in buttons]})
     return {
         "id": bar_id, "kind": "Container", "window_region": "drag",
         "classes": ["title_bar", *(node.get("classes") or [])],
         **({"a11y": node["a11y"]} if "a11y" in node else {}),
-        "style": {"height": HEIGHT, "flex_shrink": 0, "align_items": "center", "gap": 8, "background": "surface",
+        "style": {"height": HEIGHT, "flex_shrink": 0, "align_items": "center", "gap": 8,
                   "padding": {"left": 12, "right": 0, "top": 0, "bottom": 0}, **(node.get("style") or {})},
         "children": parts,
     }
@@ -107,8 +125,8 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
 
 def _glyph(button_id: str, name: str, **extra: Any) -> dict[str, Any]:
     style = extra.pop("style", {})
-    return {"id": f"{button_id}.{name}", "kind": "Icon", "icon": {"name": name},
-            "style": {"width": GLYPH, "height": GLYPH, "foreground": "on_surface", **style}, **extra}
+    return {"id": f"{button_id}.{name}", "kind": "Icon", "icon": {"name": name}, "classes": ["title_bar_glyph"],
+            "style": {"width": GLYPH, "height": GLYPH, **style}, **extra}
 
 
 def _button(bar_id: str, name: str) -> dict[str, Any]:
@@ -123,7 +141,10 @@ def _button(bar_id: str, name: str) -> dict[str, Any]:
                          bindings={"opacity": "{{ app.maximized.get() and 1 or 0 }}"})]
     else:
         glyphs = [_glyph(button_id, "window_minimize" if name == "minimize" else "close")]
-    return {"id": button_id, "kind": "Container", "classes": classes,
+    # Close's hover and pressed layers are red, as desktops colour close
+    # (`error`: `error_container` is too pale at a state layer's 8%).
+    tint = {"interaction": {"color": "error"}} if name == "close" else {}
+    return {"id": button_id, "kind": "Container", "classes": classes, **tint,
             "handlers": {"on_click": _ACTIONS[name]}, "a11y": {"label": _LABELS[name]},
             "style": {"width": BUTTON_WIDTH, "height": HEIGHT, "flex_shrink": 0, "align_items": "center",
                       "justify_content": "center"},

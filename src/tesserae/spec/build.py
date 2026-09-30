@@ -120,8 +120,9 @@ def build(
 
 
 class Layers(tuple):
-    """The cascade's three prepared layers (default theme, custom theme,
-    stylesheet), plus the two themes' `typography:` overrides (M38),
+    """The cascade's prepared layers (Tesserae's own parts' looks -- a
+    TitleBar's, 0.3.0 M3 -- then the default theme, the custom theme and
+    the stylesheet), plus the two themes' `typography:` overrides (M38),
     which display text resolves its `typography_role` through."""
 
     typography: dict[str, dict[str, Any]]
@@ -142,7 +143,12 @@ def prepare_layers(
 
     if default_theme is None:
         default_theme = shipped_default_theme()
-    layers = Layers((Sheet.of(default_theme), Sheet.of(custom_theme), Sheet.of(stylesheet)))
+    from tesserae.spec.title_bar import STYLES as title_bar_styles
+
+    # First, under every theme: the look of Tesserae's own generated parts
+    # (a TitleBar's, 0.3.0 M3), which any layer above can restyle.
+    layers = Layers((Sheet.of(title_bar_styles), Sheet.of(default_theme), Sheet.of(custom_theme),
+                     Sheet.of(stylesheet)))
     layers.typography = {}
     layers.components = {}
     for theme in (default_theme, custom_theme):
