@@ -1804,3 +1804,23 @@ wheels and an sdist), and both issues closed.
 - M74 (grids in YAML) is scoped and waits for the user.
 
 2565 passed.
+
+## M74: grids in YAML (on tre 0.4.2, tre#23)
+
+User: "push and start M74" (pushed `91ed3b2..9f05cae`, CI green).
+
+- All 13 grid properties are in a view's style and stylesheets:
+  `display`, the templates, auto tracks and flow, `grid_column`/`grid_row`,
+  `row_gap`/`column_gap`, `justify_items`/`justify_self`, `align_content`.
+  - They follow M71's rule: set only when given, reset when dropped. A
+    dropped row or column gap goes back to the style's `gap`, since 0
+    would undo it.
+  - Placement goes on a Link's box and a control; a ScrollView's content
+    can be a grid.
+- Found by a guide example: `tre` refuses a bare number as a track list.
+  The compiler passes it as a string; filed tre#27.
+- A "Grids" section in the Layout guide.
+- 21 tests; 14/14 mutants caught, and M71's 16/16 again.
+- No known gaps remain.
+
+2590 passed.

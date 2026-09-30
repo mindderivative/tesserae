@@ -170,3 +170,13 @@ children:
     view = View(yaml.safe_load(text), theme_seed=SEED)
     view.window.advance(16)
     assert view.node("field").get("layout_x") == 88.0 and view.node("field").get("layout_width") == 212.0
+
+
+def test_a_bare_number_is_one_track():
+    """`tre` takes a track list as a string or a list, not a bare number,
+    which is how YAML writes one track; the compiler passes it as text."""
+    view = _view({**GRID, "grid_template_columns": 100, "grid_auto_rows": 30.0}, _cells(2))
+    assert view.node("g").get("grid_template_columns") == "100" and view.node("g").get("grid_auto_rows") == "30"
+    assert view.node("c1").get("layout_y") == 30.0 and view.node("c0").get("layout_width") == 100.0
+    assert _view({**GRID, "grid_template_columns": "100 100", "grid_column": 2}, _cells(1)).node("g").get(
+        "grid_column") == "2"  # not a track list: passed as given

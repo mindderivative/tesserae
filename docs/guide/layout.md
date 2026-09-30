@@ -93,8 +93,76 @@ children:
 ```
 
 Rows of a wrapped layout don't line up their columns with each other,
-and a tile can't span two columns: that's a grid, which `tre` doesn't
-lay out yet ([`tre` #23](https://github.com/mindderivative/tre/issues/23)).
+and a tile can't span two columns: for that, use a grid.
+
+## Grids
+
+`display: grid` lays a container's children out in rows and columns
+(M74, on `tre` 0.4.2). `grid_template_columns` and `grid_template_rows`
+list the tracks: pixels, `auto` (its content), `fr` (a share of what's
+left), percentages, `minmax(min, max)` and `repeat(n, ...)`, as a string
+(`"120 1fr"`) or a list (`[120, "1fr"]`). Children fill the cells in
+order.
+
+```yaml
+id: root
+kind: Container
+style: {display: grid, grid_template_columns: "120 1fr", row_gap: 12, column_gap: 16, width: 360, padding: 16}
+children:
+  - id: name_label
+    kind: Text
+    text: {content: "Name", typography_role: label_large}
+    style: {foreground: on_surface_variant}
+  - id: name
+    kind: TextField
+    text: {content: "", typography_role: body_large}
+    style: {height: 40, background: surface_container_highest, corner_radius: 4}
+  - id: email_label
+    kind: Text
+    text: {content: "Email", typography_role: label_large}
+    style: {foreground: on_surface_variant}
+  - id: email
+    kind: TextField
+    text: {content: "", typography_role: body_large}
+    style: {height: 40, background: surface_container_highest, corner_radius: 4}
+```
+
+- `grid_auto_rows` and `grid_auto_columns` size the tracks the templates
+  don't list, and `grid_auto_flow` fills by `row` (the default) or
+  `column`, `dense` to fill holes.
+- A child is placed with `grid_column` and `grid_row`: a line number
+  (`2`, or `-2` counting from the end), a span (`"span 2"`), or a range
+  (`"1 / 3"`).
+- `row_gap` and `column_gap` space the tracks; `gap` sets both, and
+  either one wins over it.
+- `justify_items` (on the grid) and `justify_self` (on a child) place
+  children across their cells; `align_items` and `align_self` down them;
+  `align_content` places the tracks in a grid bigger than they are.
+
+A dashboard of tiles, one spanning two columns:
+
+```yaml
+id: root
+kind: Container
+style: {display: grid, grid_template_columns: "repeat(3, 1fr)", grid_auto_rows: 96, gap: 8, width: 360}
+children:
+  - id: wide
+    kind: Rect
+    style: {grid_column: "span 2", background: primary_container, corner_radius: 12}
+  - id: one
+    kind: Rect
+    style: {background: secondary_container, corner_radius: 12}
+  - id: two
+    kind: Rect
+    style: {background: secondary_container, corner_radius: 12}
+  - id: three
+    kind: Rect
+    style: {grid_column: "2 / 4", background: tertiary_container, corner_radius: 12}
+```
+
+A `ScrollView` can be a grid too: its `display` and track keys lay out
+its children, and a `grid_column` on it places the scroll view in its
+own parent.
 
 ## Placing a node exactly
 

@@ -83,9 +83,9 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
-| M74 — Grids in YAML (`tre` #23) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
+| M74 — Grids in YAML (`tre` #23) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 
-**Just closed:** M73 (2026-09-30), done locally: Tesserae on `tre` 0.4.2 (`tesserae-engine>=0.4.2`), whose scroll views now scroll with the keys, reveal focus and answer `scroll_into_view` themselves (`tre` #24), so the `Scroller` only follows their `scroll` event. Before it, M70 (pushed, #19 closed).
+**Just closed:** M74 (2026-09-30), done locally: CSS Grid in a view's style on `tre` 0.4.2 (`display: grid`, tracks, placement, gaps, alignment; a ScrollView's content can be a grid), with a Grids section in the Layout guide. No known gaps remain. Before it, M73 (pushed): the Scroller on `tre` 0.4.2's scroll views.
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -99,16 +99,16 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M74 (grids in YAML) is in progress. M73 is pushed.
+**Up next:** nothing is scoped, and there are no known gaps. M74 is done locally. Open with `tre`: #27 (a bare number as a one-track list; Tesserae converts it meanwhile).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **No grid layout in YAML:** `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed), but a view's style doesn't take its keys yet: M74, scoped. A grid-like layout today is `flex_wrap` with fixed sizes (docs/guide/layout.md).
 
 **Fixed gaps:**
+- ~~**No grid layout** in YAML: `tre` laid out flexbox only (M71).~~ **Fixed (M74),** on `tre` 0.4.2's CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23)): `display: grid`, tracks, auto tracks and flow, placement, gaps and grid alignment in a view's style, a ScrollView's content included.
 - ~~**A button's `disabled` couldn't be bound in YAML** (only control kinds'), and a node's own `disabled` only told assistive technology (M66).~~ **Fixed (M70).** `disabled:` as a key or a binding on any node: announced, not focusable, no feedback, handlers off, faded to 38%; held through re-theme, restyle and reload. [#19](https://github.com/mindderivative/tesserae/issues/19), closed (pushed as `d9057c3..91ed3b2`, CI run 36647247015).
 - ~~**A fragment call couldn't take `handlers:`:** a `component:` node took only `id:`, `with:` and `repeat:`, so `component: ButtonFilled` couldn't be clicked (M67).~~ **Fixed (M69).** A call also takes `handlers:`, `bindings:`, `two_way:`, `a11y:`, `interaction:` and `classes:`, put on the fragment's root; the `tesserae new` templates use `component: ButtonFilled`. [#18](https://github.com/mindderivative/tesserae/issues/18), closes once pushed.
 - ~~**YAML layouts were part of flexbox, with no scrolling:** a style refused `flex_wrap`, `align_self`, the min/max sizes, `aspect_ratio`, `position`/`x`/`y`, `z_index` and `clip_children`, and `tre`'s `scroll_view` had no `kind:`.~~ **Fixed (M71).** All of them in styles and stylesheets, and `kind: ScrollView` with the keys, focus reveal, `scroll_into_view` and `two_way: scroll_offset`. [#21](https://github.com/mindderivative/tesserae/issues/21), closes once pushed.
@@ -2008,7 +2008,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 74 — Grids in YAML (`tre` #23)
 
-**Status: 🚧 In progress — Phase 2 of 3 done.** User: "push and start M74" (M73 pushed as `91ed3b2..9f05cae`). `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed); M71 scoped grids "as its own milestone once `tre` has one". Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: ✅ Complete — all 3 phases done (2026-09-30).** User: "push and start M74" (M73 pushed as `91ed3b2..9f05cae`). `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed); M71 scoped grids "as its own milestone once `tre` has one". Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **What starting found** (probed on 0.4.2): 13 properties -- `display` (`flex`/`grid`), `grid_template_columns`/`rows` and `grid_auto_columns`/`rows` (track lists as a string, or a list, read back as a string), `grid_auto_flow`, `grid_column`/`grid_row` (a line, `-2`, `"span 2"`, `"1 / 3"`; a number reads back as a string), `row_gap`/`column_gap`, `justify_items`/`justify_self` and `align_content`. `tre` validates each, naming the property. Each default can be set back except `justify_items` and `align_content` (they read `None` and refuse it), where `"stretch"` lays out identically. `gap` sets both `row_gap` and `column_gap`, and within one `set` the later one wins.
 
@@ -2024,5 +2024,5 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 2 — The Grid Keys ✅
 - Step 1: the 13 keys in `STYLE_FIELDS` and `_OPTIONAL_LAYOUT` (with the `"stretch"` resets), `_resets` (a dropped row or column gap back to the style's `gap`), placement keys in `_PLACED`/`_PLACEMENT`, and a ScrollView's grid-container keys in `_CONTENT`. New `tests/test_grid_layout.py` (20): ten grids laid out against the same trees built with `tre` (templates with `fr`, a list of tracks, `repeat()`/`minmax()`, auto rows, column flow, dense flow with spans, line placement with `-2` and `1 / 3`, row and column gaps, a `row_gap` winning over `gap`, and grid alignment), that it really is a grid, reconcile setting and resetting (the gap to `gap`, the alignments to `stretch`, back to flex), Python's placement surviving a re-theme, a stylesheet making a grid, a scrolling grid (the content a grid, the placement on the scroll view), a Link's box and a control taking grid placement, `tre`'s errors naming the widget, and a grid written in YAML. Mutation-checked, 11/11 on the first run; M71's 16/16 again. 2565 → 2585 passed; all five examples clean — ✅
 
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: the Layout guide's Grid section; the known gap closed — ⬜
+### Phase 3 — Docs, Tracker ✅
+- Step 1: the Layout guide's new "Grids" section (tracks, auto tracks and flow, placement, gaps, alignment, a scrolling grid) with two examples, a label/field form and a tile dashboard with spans, each built and its positions checked; the wrapping section now points to it. **Found by the dashboard example:** `tre` refuses a bare number as a track list (`grid_auto_rows: 96`, how YAML writes one track), though it takes one for `grid_column`; the compiler now passes a number as its string for the four track keys (`_track`, with a test, 14/14 mutants caught), and `tre` [#27](https://github.com/mindderivative/tre/issues/27) asks for it there. The known gap -- the last -- moved to "Fixed gaps"; `mkdocs build --strict` clean; 2585 → 2590 passed (the bare-number test, and the docs checks on the two examples) — ✅
