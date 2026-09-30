@@ -86,7 +86,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M74 — Grids in YAML (`tre` #23) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M75 — A Node's Style from a File (#22) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M76 — One `pip install`, on Every Platform | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
-| M77 — `tesserae build`: an App as One Executable | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M77 — `tesserae build`: an App as One Executable | `██⬜⬜⬜⬜⬜⬜⬜⬜` 25% | 🚧 In progress — Phase 1 of 4 done |
 | M78 — Installers for Each Platform | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
 **Just closed:** M76 (2026-09-30): one `pip install tesserae-ui` installs everything, as wheels, on Linux x86-64, macOS arm64 and Windows x64 (Python 3.12+), proven in CI on all three and the full suite passing on each; **Tesserae 0.2.0 is on PyPI**, installed from there into a fresh venv and run. Before it, M75 (a node's style from a file).
@@ -103,7 +103,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M77 (`tesserae build`: an app as one executable), then M78 (installers), both scoped from the user's release intent.
+**Up next:** M77 (`tesserae build`) is in progress, then M78 (installers).
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -2088,19 +2088,21 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 77 — `tesserae build`: an App as One Executable
 
-**Status: ⬜ Scoped — draft, refined when it starts.** The user's intent (2026-09-30): "When the developer has completed their application and is ready to release it. They should be able to compile their application into a single executable file or installer, that can be used by any User based on their platform." This is the executable; M78 the installer.
+**Status: 🚧 In progress — Phase 1 of 4 done.** The user's intent (2026-09-30): "When the developer has completed their application and is ready to release it. They should be able to compile their application into a single executable file or installer, that can be used by any User based on their platform." Then "push and start M77" (M76 pushed as `1bbb361..eb811c3`; Tesserae 0.2.0 on PyPI). This is the executable; M78 the installer. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
-**What's known:** PyInstaller 6.22's `--onefile` froze a `tesserae new` app into one 31 MB Linux executable that ran from another folder with nothing installed -- `tre`'s engine, the fragments, the theme and the app's YAML inside -- given `--collect-data tesserae` and an `--add-data` per view file. Listing an app's files by hand is the part to automate; Tesserae already knows them (a view's `include:`s, style files, images and fragments are its dependencies, M29). An executable is built on the platform it's for (PyInstaller doesn't cross-compile).
+**What's known:** PyInstaller 6.22's `--onefile` froze a `tesserae new` app into one 31 MB Linux executable that ran from another folder with nothing installed, given `--collect-data tesserae` and an `--add-data` per view file. An app also loads Python by path: a shell file's panels import `<Name>_ViewModel.py` with `importlib` (`shell_file._import`), which PyInstaller's import analysis can't see. An executable is built on the platform it's for.
 
-**Draft approach:** `tesserae build [app.py]` finds the app's files (its views and everything they read, its themes and stylesheets, shell files), freezes it with PyInstaller into one file named after the app (no console window on Windows and macOS), with an icon if one is given, and runs a quick self-check of the result. PyInstaller comes with a `build` extra (`pip install tesserae-ui[build]`), so the everyday install stays lean. CI builds and runs a generated app's executable on Linux, macOS and Windows.
+**Decisions** (recommended, taken):
+- Q1, PyInstaller: proven here, on all three platforms, and a pure `pip install`.
+- Q2, **the app's folder is scanned**, not a dry run (the draft's recommendation, reversed on reading how apps load files: a dry run sees only what loads at start-up, not a screen opened later, a panel, or an image or style file picked at run time). Every data file under it (YAML, images, fonts, and the app's `.py` files, which panels import by path) goes in at the same relative place, skipping `.git`, virtual environments, `build`, `dist`, `__pycache__` and hidden folders; its `.py` files are also analysed for their imports. `--include`/`--exclude` globs adjust it.
+- Q3, one file, as asked: `dist/<name>` (`.exe` on Windows), the name from the folder unless `--name`; PyInstaller's work in a temporary folder.
+- Q4, no console window on Windows and macOS (`--console` keeps one, for debugging).
+- Q5, PyInstaller comes with an extra, `pip install tesserae-ui[build]`, so the everyday install stays as it is; without it, `tesserae build` says what to install.
+- Q6, a self-check: with `TESSERAE_MAX_FRAMES=n` set, `App.run()` stops after `n` frames, so `tesserae build --check` (and CI) can run the result and see it exit cleanly.
+- Q7, on macOS M77 makes the single executable; the `.app` bundle (and its `.dmg`) is M78's.
 
-**Decisions to settle at the start** (provisional):
-- Q1 PyInstaller (recommended: proven here, wide platform support) or Nuitka (compiles to C: smaller, faster, slower builds)
-- Q2 how the app's files are found: from what `App` loads when `app.py` runs in a dry mode (recommended), or by scanning the folder
-- Q3 one file (recommended, the user's ask) or also a folder build (faster start-up)
-
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q3; what a frozen app needs (paths relative to the executable, no hot reload) — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: the PyInstaller probe (M76), how an app loads files and code (`HERE = Path(__file__).parent` in the template; panels' ViewModels by path); settled Q1-Q7 above — ✅
 
 ### Phase 2 — The Build Command ⬜
 - Step 1: `tesserae build`; tests that build and run a generated app; mutation-checked — ⬜
