@@ -83,7 +83,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
-| M74 — Grids in YAML (`tre` #23) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
+| M74 — Grids in YAML (`tre` #23) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 
 **Just closed:** M73 (2026-09-30), done locally: Tesserae on `tre` 0.4.2 (`tesserae-engine>=0.4.2`), whose scroll views now scroll with the keys, reveal focus and answer `scroll_into_view` themselves (`tre` #24), so the `Scroller` only follows their `scroll` event. Before it, M70 (pushed, #19 closed).
 
@@ -2008,7 +2008,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 74 — Grids in YAML (`tre` #23)
 
-**Status: 🚧 In progress — Phase 1 of 3 done.** User: "push and start M74" (M73 pushed as `91ed3b2..9f05cae`). `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed); M71 scoped grids "as its own milestone once `tre` has one". Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 3 done.** User: "push and start M74" (M73 pushed as `91ed3b2..9f05cae`). `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed); M71 scoped grids "as its own milestone once `tre` has one". Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **What starting found** (probed on 0.4.2): 13 properties -- `display` (`flex`/`grid`), `grid_template_columns`/`rows` and `grid_auto_columns`/`rows` (track lists as a string, or a list, read back as a string), `grid_auto_flow`, `grid_column`/`grid_row` (a line, `-2`, `"span 2"`, `"1 / 3"`; a number reads back as a string), `row_gap`/`column_gap`, `justify_items`/`justify_self` and `align_content`. `tre` validates each, naming the property. Each default can be set back except `justify_items` and `align_content` (they read `None` and refuse it), where `"stretch"` lays out identically. `gap` sets both `row_gap` and `column_gap`, and within one `set` the later one wins.
 
@@ -2021,8 +2021,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: probed the 13 properties' defaults, validation and read-back, which defaults can be set back, `"stretch"` against unset for `justify_items`/`align_content`, and `gap` against `row_gap` in one `set`; settled Q1-Q4 above — ✅
 
-### Phase 2 — The Grid Keys ⬜
-- Step 1: the keys in the compiler and patching; tests against `tre`'s own layout; mutation-checked — ⬜
+### Phase 2 — The Grid Keys ✅
+- Step 1: the 13 keys in `STYLE_FIELDS` and `_OPTIONAL_LAYOUT` (with the `"stretch"` resets), `_resets` (a dropped row or column gap back to the style's `gap`), placement keys in `_PLACED`/`_PLACEMENT`, and a ScrollView's grid-container keys in `_CONTENT`. New `tests/test_grid_layout.py` (20): ten grids laid out against the same trees built with `tre` (templates with `fr`, a list of tracks, `repeat()`/`minmax()`, auto rows, column flow, dense flow with spans, line placement with `-2` and `1 / 3`, row and column gaps, a `row_gap` winning over `gap`, and grid alignment), that it really is a grid, reconcile setting and resetting (the gap to `gap`, the alignments to `stretch`, back to flex), Python's placement surviving a re-theme, a stylesheet making a grid, a scrolling grid (the content a grid, the placement on the scroll view), a Link's box and a control taking grid placement, `tre`'s errors naming the widget, and a grid written in YAML. Mutation-checked, 11/11 on the first run; M71's 16/16 again. 2565 → 2585 passed; all five examples clean — ✅
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: the Layout guide's Grid section; the known gap closed — ⬜

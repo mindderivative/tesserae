@@ -56,6 +56,10 @@ STYLE_FIELDS = frozenset({
     # M71: the rest of `tre`'s flexbox
     "flex_wrap", "align_self", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
     "position", "x", "y", "z_index", "clip_children",
+    # M74: CSS Grid (`tre` 0.4.2)
+    "display", "grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows",
+    "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap", "justify_items", "justify_self",
+    "align_content",
 })
 
 

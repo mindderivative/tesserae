@@ -256,7 +256,20 @@ _OPTIONAL_LAYOUT: dict[str, Any] = {
     "flex_wrap": "no_wrap", "align_self": None, "min_width": "auto", "max_width": "auto", "min_height": "auto",
     "max_height": "auto", "aspect_ratio": None, "position": "relative", "x": "auto", "y": "auto", "z_index": 0,
     "clip_children": False,
+    # M74: CSS Grid. `justify_items`/`align_content` can't be set back to unset;
+    # "stretch" lays out the same. A dropped `row_gap`/`column_gap` goes back
+    # to the style's `gap` (`_resets`), which `_layout` sets before them.
+    "display": "flex", "grid_template_columns": "", "grid_template_rows": "", "grid_auto_columns": "",
+    "grid_auto_rows": "", "grid_auto_flow": "row", "grid_column": "auto", "grid_row": "auto", "row_gap": 0.0,
+    "column_gap": 0.0, "justify_items": "stretch", "justify_self": None, "align_content": "stretch",
 }
+
+
+def _resets(style: dict[str, Any], dropped: frozenset[str]) -> dict[str, Any]:
+    """What each dropped M71/M74 key goes back to: `tre`'s default, but a
+    row or column gap to the style's `gap`, which sets both."""
+    gap = float(style.get("gap", 0.0))
+    return {k: gap if k in ("row_gap", "column_gap") else _OPTIONAL_LAYOUT[k] for k in dropped}
 
 
 def layout_keys(style: dict[str, Any]) -> frozenset[str]:
@@ -395,7 +408,10 @@ def _box_props(ctx, node, style):
 #: What a ScrollView's content box takes from its style (M71): how its
 #: children are laid out. Its size, placement and paint are the scroll view's.
 _CONTENT = frozenset({"flex_direction", "gap", "padding_top", "padding_right", "padding_bottom", "padding_left",
-                      "align_items", "justify_content", "flex_wrap"})
+                      "align_items", "justify_content", "flex_wrap",
+                      # M74: a scrolling grid's container keys
+                      "display", "grid_template_columns", "grid_template_rows", "grid_auto_columns",
+                      "grid_auto_rows", "grid_auto_flow", "row_gap", "column_gap", "justify_items", "align_content"})
 
 
 def _scroll_props(ctx, node, style):
@@ -437,7 +453,7 @@ def _text_props(ctx, node, style):
 
 _PLACED = ("margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
            "align_self", "position", "x", "y", "z_index", "min_width", "max_width", "min_height", "max_height",
-           "aspect_ratio")
+           "aspect_ratio", "grid_column", "grid_row", "justify_self")
 
 
 def _link_props(ctx, node, style):
@@ -687,7 +703,7 @@ def patch(
     style = resolve_style(node, layers)
     kind = node["kind"]
     given = layout_keys(style)
-    resets = {k: _OPTIONAL_LAYOUT[k] for k in before - given}
+    resets = _resets(style, before - given)
     try:
         if kind in _WIDGET_KINDS:
             if control is not None:
@@ -722,7 +738,7 @@ def _role(ctx, name):
 #: size (a control is built at its size) or its own content alignment.
 _PLACEMENT = frozenset({
     "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
-    "align_self", "position", "x", "y", "z_index",
+    "align_self", "position", "x", "y", "z_index", "grid_column", "grid_row", "justify_self",
 })
 _PLACEMENT_RESET = {"margin_top": 0.0, "margin_right": 0.0, "margin_bottom": 0.0, "margin_left": 0.0,
                     "flex_grow": 0.0, "flex_shrink": 1.0}
