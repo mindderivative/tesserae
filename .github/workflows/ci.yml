@@ -220,7 +220,8 @@ jobs:
         run: |
           $ErrorActionPreference = "Stop"
           $bin = Join-Path $env:GITHUB_WORKSPACE "fresh/Scripts"  # BIN is Git Bash's /d/a/... form
-          $iscc = & "$bin/python.exe" -c "from tesserae import build; print(build.fetch_iscc())"
+          # fetch_iscc says what it's fetching first; its path is the last line
+          $iscc = & "$bin/python.exe" -c "from tesserae import build; print(build.fetch_iscc())" | Select-Object -Last 1
           if ($LASTEXITCODE -ne 0) { exit 1 }
           Write-Output "fetched $iscc"
           $env:TESSERAE_ISCC = $iscc
