@@ -43,6 +43,19 @@ add instead. A CamelCase name gets a kebab-case route: `UserProfile` is
   files exist, is refused with a one-line message (exit code 2).
 - `python -m tesserae` is the same command.
 
+When the app is ready for its users, build it into one executable:
+
+```bash
+pip install "tesserae-ui[build]"
+tesserae build --check
+```
+
+That makes `dist/notes` (`dist/notes.exe` on Windows), with every file
+under the app's folder inside it, and `--check` runs it briefly to see it
+start. It runs on the kind of computer it was built on, with nothing else
+installed. `--name`, `--icon`, `--console`, `--include` and `--exclude`
+adjust it.
+
 The rest of this page builds the same kind of app by hand.
 
 ## The view

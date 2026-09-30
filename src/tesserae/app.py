@@ -17,6 +17,8 @@ life of the `App`.
 
 from __future__ import annotations
 
+import os
+import sys
 import weakref
 from dataclasses import dataclass
 from pathlib import Path
@@ -900,9 +902,24 @@ class App:
         default from `App(stylesheet=)` (re-applied, with
         `set_stylesheet_spec`, to every screen using it) and each screen's
         own `stylesheet=` file (re-applied to the screens built with it).
+
+        M77: `TESSERAE_MAX_FRAMES=n` in the environment stops a run with no
+        `max_frames` after `n` frames -- how `tesserae build --check` and CI
+        run a built executable and see it exit. A frozen app (one
+        `tesserae build` made) has no source files to edit, so
+        `hot_reload` does nothing there.
         """
         if self._current is None:
             raise RuntimeError("App.run() called before show() -- nothing to display yet")
+        if max_frames is None and os.environ.get("TESSERAE_MAX_FRAMES"):
+            try:
+                max_frames = int(os.environ["TESSERAE_MAX_FRAMES"])
+            except ValueError:
+                raise ValueError(f"TESSERAE_MAX_FRAMES must be a whole number of frames, "
+                                 f"got {os.environ['TESSERAE_MAX_FRAMES']!r}") from None
+        if hot_reload and getattr(sys, "frozen", False):
+            logger.info("hot reload is off in a built app: there are no source files to watch")
+            hot_reload = False
         if self._tre_app is None:
             self._tre_app = _TreApp()
         tre_app = self._tre_app

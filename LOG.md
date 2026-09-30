@@ -1871,3 +1871,18 @@ their users (M77, M78).
   Checked from PyPI itself: a fresh venv, `pip install tesserae-ui` alone
   (wheels only) installed all six dependencies, and a `tesserae new` app
   ran. M76 complete.
+
+## M77: `tesserae build`, an app as one executable
+
+User: "push and start M77". Phase 1 settled the decisions (see the tracker).
+
+- Phase 2: `tesserae build [app.py] [--name] [--icon] [--console]
+  [--include] [--exclude] [--check]`, in `tesserae/build.py`. It scans the
+  app's folder (skipping `.git`, venvs, `build`, `dist`, caches and hidden
+  files), bundles every file at its relative place, analyses the app's
+  `.py` files for imports, and calls PyInstaller `--onefile`. `App.run`
+  now takes `TESSERAE_MAX_FRAMES` and turns hot reload off in a frozen
+  app. A `tesserae new --shell` app builds into one 41 MB Linux
+  executable in 13 s, and `--check` runs it for 30 frames from an empty
+  folder. The mutation check caught 14/15; the survivor was a redundant
+  glob form, now removed. 2622 passed.

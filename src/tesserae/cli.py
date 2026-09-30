@@ -2,12 +2,14 @@
 
     tesserae new <name> [--shell] [--dir PARENT]
     tesserae add screen <Name> [--dir DIR]
+    tesserae build [app.py] [--name N] [--icon F] [--console] [--include G] [--exclude G] [--check]
 
 `new` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair
 following the naming convention, runnable at once; `--shell` adds an app
 shell file and a `Settings` screen. `add screen` adds a pair and, at the
 marker comments `new` leaves in `app.py`, its import, `load()` and route.
 Neither overwrites a file. The templates are in `tesserae/templates/`.
+`build` (M77) makes the app one executable: see `tesserae.build`.
 """
 
 from __future__ import annotations
@@ -122,7 +124,36 @@ def _parser() -> argparse.ArgumentParser:
     screen_cmd = what.add_parser("screen", help="add a screen: a View/ViewModel pair")
     screen_cmd.add_argument("name", help="the screen's CamelCase name, e.g. Settings")
     screen_cmd.add_argument("--dir", type=Path, default=Path("."), help="the app's folder (default: here)")
+    build_cmd = commands.add_parser("build", help="build the app into one executable (needs tesserae-ui[build])")
+    build_cmd.add_argument("app", nargs="?", type=Path, default=Path("app.py"),
+                           help="the app's entry point (default: app.py)")
+    build_cmd.add_argument("--name", help="the executable's name (default: the app's folder name)")
+    build_cmd.add_argument("--icon", type=Path, help="an icon file (.ico on Windows, .icns on macOS)")
+    build_cmd.add_argument("--console", action="store_true", help="keep a console window (Windows and macOS)")
+    build_cmd.add_argument("--include", action="append", default=[], metavar="GLOB",
+                           help="bundle files the scan skips, e.g. .config (repeatable)")
+    build_cmd.add_argument("--exclude", action="append", default=[], metavar="GLOB",
+                           help="leave files out, e.g. 'notes/*.md' (repeatable)")
+    build_cmd.add_argument("--check", action="store_true", help="run the executable briefly to check it starts")
     return parser
+
+
+def _build(args: argparse.Namespace) -> int:
+    from tesserae import build
+
+    try:
+        executable = build.build(args.app, name=args.name, icon=args.icon, console=args.console,
+                                 include=args.include, exclude=args.exclude)
+    except build.BuildError as exc:
+        raise CliError(str(exc)) from None
+    print(f"built {executable}")
+    if args.check:
+        result = build.check(executable)
+        if result.returncode != 0:
+            print(f"tesserae: {executable.name} exited with {result.returncode}:\n{result.stderr}", file=sys.stderr)
+            return 1
+        print(f"checked: it ran {build.CHECK_FRAMES} frames and exited cleanly")
+    return 0
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -130,6 +161,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     reported on one line."""
     args = _parser().parse_args(argv)
     try:
+        if args.command == "build":
+            return _build(args)
         if args.command == "new":
             folder = new(args.name, args.dir, shell=args.shell)
             print(f"made {folder}; run it with\n\n    cd {folder}\n    python app.py\n")

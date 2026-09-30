@@ -42,7 +42,8 @@ tesserae = "tesserae.cli:main"  # `tesserae new`, `tesserae add screen` (M67)
 Repository = "https://github.com/mindderivative/tesserae"
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+build = ["pyinstaller>=6.10"]
+dev = ["pytest>=8.0", "pyinstaller>=6.10"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tesserae"]
