@@ -12,6 +12,23 @@ Built on the `0.3.0` branch, following the
 - **`tre` 0.5.0 or newer, below 0.6** (0.2.x needed 0.4.4 or newer, below
   0.5).
 
+### Added
+
+- **The window on `App`** ([#40](https://github.com/mindderivative/tesserae/issues/40)):
+  `decorations` (a window with no OS title bar or borders, for a title bar
+  the app draws), `resize_border` (6 px by default when undecorated),
+  `min_width`/`min_height`, `fullscreen`, `system_menu` and `icon` (an
+  image file), as `App` options and live properties, and `app.platform`.
+  The actions `minimize()`, `maximize()`, `restore()`,
+  `toggle_maximized()` and `close()`, and `app.maximized` and
+  `app.active` as read-only Computeds for bindings.
+
+### Changed
+
+- Every pressed widget (state layers, the split button, splitters, dock
+  tabs, sliders and other drags) releases on `pointer_cancel`, which
+  `tre` 0.5.0 sends when the OS takes a press, as on `pointer_up`.
+
 ## 0.2.1
 
 Releasing an app (M77, M78) and `tre` 0.4.3 and 0.4.4 (M79, M80), tracked

@@ -174,6 +174,51 @@ class SettingsViewModel(ViewModel):
 A component made with `tesserae.instantiate` on the app's window reaches
 it the same way.
 
+## The window
+
+`App` owns the window, and its options are `App`'s (0.3.0, on `tre`
+0.5.0). Each is also a property that can change while the app runs.
+
+```python
+app = App(width=960, height=640, title="Notes",
+          decorations=False,   # no OS title bar or borders: the app draws its own
+          min_width=480, min_height=320, icon="icon.png")
+```
+
+| Option | What it does |
+|---|---|
+| `decorations` | Whether the OS draws the title bar and borders (default `True`). Without them the app draws its own title bar; on macOS the title bar stays, transparent, with the traffic lights. |
+| `resize_border` | How many pixels along each edge resize an undecorated window. Unless given, 6 while undecorated and 0 otherwise. `tre` turns it off while maximized or fullscreen, and on macOS, where the OS resizes the window. |
+| `min_width`, `min_height` | The smallest the user can resize the window to (0 for no limit), so a title bar's buttons never crush. |
+| `fullscreen` | Borderless, filling the monitor. |
+| `system_menu` | Whether a right-click on the title bar opens the OS's window menu (Windows, and Wayland compositors that have one). Off by default, so the right-click is the app's. |
+| `icon` | An image file (a square PNG is best), shown on Windows and X11; `app.set_icon(path)` changes it. Wayland and macOS take the icon from the app's desktop entry or bundle, which `tesserae build --installer` makes. |
+
+`app.platform` says which it is: `"windows"`, `"macos"`, `"wayland"` or
+`"x11"`.
+
+A title bar the app draws calls the window's actions and follows its
+state:
+
+- **Actions:** `app.minimize()`, `app.maximize()`, `app.restore()`,
+  `app.toggle_maximized()` (a maximize button) and `app.close()`. `close()`
+  closes the window as the user's close would, so a "save changes?" check
+  on `close_requested` still runs and can cancel it.
+- **State:** `app.maximized` and `app.active` are read-only
+  [Computeds](reactivity.md) that follow the window: maximized or not, and
+  whether it has the OS's focus. A binding follows them like any Signal:
+
+  ```yaml
+  bindings:
+    text: "{{ app.maximized.get() and 'Restore' or 'Maximize' }}"
+  ```
+
+When the OS takes a press -- moving the window from its title bar,
+maximizing it on a double-click -- the pressed node gets
+`pointer_cancel` instead of `pointer_up`, and no click. Every Tesserae
+widget releases its press on it; a widget of your own that tracks a
+press should listen for both.
+
 ## Running the app
 
 ```python
