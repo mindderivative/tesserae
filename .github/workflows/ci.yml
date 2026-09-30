@@ -119,7 +119,9 @@ jobs:
   # `build` extra) goes into a fresh venv, a `tesserae new --shell` app is
   # built into one executable, and `--check` runs it from an empty folder:
   # it must draw frames and exit cleanly. Linux has no display, so it runs
-  # under Xvfb with lavapipe (Mesa's software Vulkan).
+  # under Xvfb with lavapipe (Mesa's software Vulkan), and needs
+  # libxkbcommon-x11, which winit loads for an X11 window (every Linux
+  # desktop has it; the runner image doesn't).
   build-executable:
     strategy:
       fail-fast: false
@@ -135,7 +137,7 @@ jobs:
 
       - name: Install a display and software Vulkan
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y xvfb mesa-vulkan-drivers
+        run: sudo apt-get update && sudo apt-get install -y xvfb mesa-vulkan-drivers libxkbcommon-x11-0
 
       - name: Build the wheel and install it with the build extra
         shell: bash
