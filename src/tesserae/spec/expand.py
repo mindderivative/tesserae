@@ -225,12 +225,49 @@ def _load_fragment(path: Path) -> dict[str, Any]:
         raise ComponentError(f"cannot read {path}: {exc}") from exc
     if not isinstance(raw, dict):
         raise ComponentError(f"{path}: a component fragment must be a mapping, got {type(raw).__name__}")
-    if _contains_include(raw):
+    if _contains_include(raw) or _contains_style_file(raw):
         raise ComponentError(
-            f"{path}: `include:` is not supported inside a component fragment -- "
+            f"{path}: `include:` (or a `style:` file) is not supported inside a component fragment -- "
             "use a nested `component:` instead"
         )
     return raw
+
+
+#: The file conventions (M75): one node's style, a stylesheet (a `styles:`
+#: list), a theme. Each loader refuses the others' suffixes.
+STYLE_SUFFIX, STYLESHEET_SUFFIX, THEME_SUFFIX = "_Style.yaml", "_Stylesheet.yaml", "_Theme.yaml"
+_KIND_OF = {STYLE_SUFFIX: "one node's style", STYLESHEET_SUFFIX: "a stylesheet", THEME_SUFFIX: "a theme"}
+
+
+def kind_of_file(name: str) -> str | None:
+    """What a file's suffix says it is, or `None` for no convention."""
+    return next((kind for suffix, kind in _KIND_OF.items() if name.endswith(suffix)), None)
+
+
+def _style_file(owner: str, path: Any) -> str:
+    """A `style:` given as text (M75): the `*_Style.yaml` file it names."""
+    if not isinstance(path, str) or not path.endswith(STYLE_SUFFIX):
+        kind = kind_of_file(path) if isinstance(path, str) else None
+        what = f" ({path!r} is {kind})" if kind else ""
+        raise ComponentError(f"{owner}: `style:` is a mapping of style fields or a `*{STYLE_SUFFIX}` file, "
+                             f"got {path!r}{what}")
+    return path
+
+
+def _style_from_file(owner: str, path: Any, base_dir: Path | None, visited: list[Path], deps: set[Path]) -> Any:
+    style = _expand_includes({_INCLUDE_KEY: _style_file(owner, path)}, base_dir, visited, deps)
+    if not isinstance(style, dict):
+        raise ComponentError(f"{owner}: {path}: a style file holds a mapping of style fields, "
+                             f"got {type(style).__name__}")
+    return style
+
+
+def _contains_style_file(node: Any) -> bool:
+    if isinstance(node, list):
+        return any(_contains_style_file(v) for v in node)
+    if isinstance(node, dict):
+        return isinstance(node.get("style"), str) or any(_contains_style_file(v) for v in node.values())
+    return False
 
 
 def _contains_include(node: Any) -> bool:
@@ -268,7 +305,9 @@ def _expand_includes(node: Any, base_dir: Path | None, visited: list[Path], deps
     if not isinstance(node, dict):
         return node
     if _INCLUDE_KEY not in node:
-        return {k: _expand_includes(v, base_dir, visited, deps) for k, v in node.items()}
+        owner = f'widget "{node.get("id")}"' if "id" in node else "a style rule"
+        return {k: _style_from_file(owner, v, base_dir, visited, deps) if k == "style" and isinstance(v, str)
+                else _expand_includes(v, base_dir, visited, deps) for k, v in node.items()}  # M75: a style file
 
     include_path = node[_INCLUDE_KEY]
     if not isinstance(include_path, str):

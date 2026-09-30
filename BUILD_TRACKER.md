@@ -84,7 +84,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
 | M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 | M74 — Grids in YAML (`tre` #23) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
-| M75 — A Node's Style from a File (#22) | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 1 of 3 done |
+| M75 — A Node's Style from a File (#22) | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 2 of 3 done |
 
 **Just closed:** M74 (2026-09-30), done locally: CSS Grid in a view's style on `tre` 0.4.2 (`display: grid`, tracks, placement, gaps, alignment; a ScrollView's content can be a grid), with a Grids section in the Layout guide. No known gaps remain. Before it, M73 (pushed): the Scroller on `tre` 0.4.2's scroll views.
 
@@ -2033,7 +2033,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 75 — A Node's Style from a File (#22)
 
-**Status: 🚧 In progress — Phase 1 of 3 done.** Filed by the user as [#22](https://github.com/mindderivative/tesserae/issues/22) (2026-09-30): "The YAML view should allow for importing styles from file as well as inline", e.g. `style: counter_Style.yaml`, with `*_Style.yaml` and `*_Theme.yaml` naming conventions so Tesserae can tell a theme file from a style file. Then "push and start M75" (M74 pushed as `9f05cae..d315db7`). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: 🚧 In progress — Phase 2 of 3 done.** Filed by the user as [#22](https://github.com/mindderivative/tesserae/issues/22) (2026-09-30): "The YAML view should allow for importing styles from file as well as inline", e.g. `style: counter_Style.yaml`, with `*_Style.yaml` and `*_Theme.yaml` naming conventions so Tesserae can tell a theme file from a style file. Then "push and start M75" (M74 pushed as `9f05cae..d315db7`). Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **What's there already:** M29's `include:` is generic, so `style: {include: counter_Style.yaml}` already reads a node's style from a file (checked), relative to the file it's in, confined to its folder, cycle-checked, and recorded for hot reload. Themes and stylesheets are loaded by `load_theme`/`load_stylesheet` (`spec/themes.py`), not through `include:`, and have no naming convention (the guides use `themes/Brand.yaml`, `styles/Default.yaml`).
 
@@ -2046,8 +2046,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: read `_expand_includes` (path rules, cycles, `deps`), `load_theme`/`load_stylesheet` and `naming.py`; checked that `style: {include: ...}` already works; settled Q1-Q4 above — ✅
 
-### Phase 2 — Style Files ⬜
-- Step 1: the string form, the conventions, hot reload; tests; mutation-checked — ⬜
+### Phase 2 — Style Files ✅
+- Step 1: `spec/expand.py`: the three suffixes and `kind_of_file`; `_style_file` (a string `style:` must end `_Style.yaml`, and one wearing another kind's suffix is named as that kind) and `_style_from_file` (read as an `include:`, so relative, confined, cycle-checked and in the view's dependencies for hot reload; the result must be a mapping); a fragment refuses a style file anywhere in it, as it refuses `include:`. `spec/themes.py`: `load_stylesheet`/`load_theme` resolve a rule's style file next to themselves, and refuse a file named for another kind (a name with no convention loads as before). New `tests/test_style_files.py` (16): the issue's `Counter_View.yaml` example (the style from the file, inline styles untouched, the file in the dependencies), a style file in an included file resolving next to it, the refusals (no suffix, a theme's, a stylesheet's), a non-mapping and a `../` escape, no base directory, a fragment's root and child, stylesheet and theme rules, a stylesheet with a style file styling a view, each loader refusing the other kinds' names, and conventionless names still loading. Mutation-checked, 14/14 (the first run pinned a style file on a fragment's child). A style file named from a stylesheet or theme isn't watched for hot reload (only the stylesheet file is); a view's is. 2590 → 2606 passed; all five examples clean — ✅
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: the themes-and-styles guide and the naming convention page; #22 closed once pushed — ⬜
