@@ -87,7 +87,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M75 — A Node's Style from a File (#22) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M76 — One `pip install`, on Every Platform | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
 | M77 — `tesserae build`: an App as One Executable | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
-| M78 — Installers for Each Platform | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M78 — Installers for Each Platform | `██⬜⬜⬜⬜⬜⬜⬜⬜` 17% | 🚧 In progress — Phase 1 of 6 done |
 | M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 
 **Just closed:** M77 (2026-09-30): `tesserae build` makes an app one executable its users run with nothing installed, built and checked (frames drawn, not just a clean exit) in CI on Linux, macOS and Windows, with a "Releasing Your App" guide. Before it, M79: Tesserae on `tre` 0.4.3 (nothing broke; 0.4.3's scroll changes tested). Before that, M76 (one `pip install`; Tesserae 0.2.0 on PyPI).
@@ -104,13 +104,14 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M78 (installers for each platform, and signing) is scoped, waiting for the user to start it. M77 and M79 are unreleased: the changelog has them under "Unreleased".
+**Up next:** M78 Phase 2: `tesserae build --installer` and macOS's `.app` in a `.dmg`. M77 and M79 are unreleased; the changelog has them under "Unreleased".
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
+- **macOS: PyInstaller 7 will refuse `tesserae build`'s default there.** A single file without a console (`--windowed`) also makes a `.app`, which PyInstaller discourages and says 7.0 will block (6.13 changelog). 6.22 still builds it. M78 Phase 2 makes the macOS app from a one-folder build.
 
 **Fixed gaps:**
 - ~~**No grid layout** in YAML: `tre` laid out flexbox only (M71).~~ **Fixed (M74),** on `tre` 0.4.2's CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23)): `display: grid`, tracks, auto tracks and flow, placement, gaps and grid alignment in a view's style, a ScrollView's content included.
@@ -2119,24 +2120,56 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 78 — Installers for Each Platform
 
-**Status: ⬜ Scoped — draft, refined when it starts.** The installer half of the user's release intent (M77's quote), built on M77's executable.
+**Status: 🚧 In progress — Phase 1 of 6 done.** The installer half of the user's release intent (M77's quote), built on M77. The user: "push and start M78" (M77 pushed as `40e2ab1..cd3918a`), then chose Inno Setup for Windows and documentation for signing, and asked for Linux: "Can we do a flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's three phases became six.
 
-**Draft approach:** `tesserae build --installer` wraps the executable in each platform's usual form: a Windows installer (`.exe` or `.msi`, with Start-menu entry and uninstaller), a macOS `.app` bundle in a `.dmg`, and a Linux AppImage (and perhaps a `.deb`). Each built on its own platform, in CI.
+**What's known** (Phase 1's research, sources in LOG):
+- **Runners:** GitHub's Windows runner has Inno Setup 6.7 and WiX 3.14 but no NSIS. The macOS runner has `hdiutil`, as every Mac does. The Ubuntu runner has `dpkg` and `rpm`, but no `appimagetool` or FUSE.
+- **One-folder vs one-file:** a one-folder PyInstaller build of a `tesserae new` app starts in 0.27 s, against 0.55 s for M77's single file (0.23 s from source). It's 107 MB uncompressed, which an installer compresses.
+- **macOS:** PyInstaller recommends the one-folder build for a `.app`. It ad-hoc signs its output (Apple silicon needs a signature), and `hdiutil create -srcfolder` makes a `.dmg`.
+- **Windows tools:** Inno Setup is free for any use; its authors ask for-profits to buy a licence, voluntarily. WiX 6+ binaries carry a maintenance fee for organisations with $10k+ a year in revenue.
+- **Linux formats:**
+  - A `.deb` is an `ar` archive of `debian-binary`, `control.tar` and `data.tar`.
+  - A pacman package is a tar with `.PKGINFO`.
+  - An AppImage needs `appimagetool`, which downloads its runtime at build time; with no FUSE it runs with `--appimage-extract-and-run`.
+  - An `.rpm` needs `rpmbuild`.
+  - A Flatpak needs `flatpak` and `flatpak-builder`, and a Flathub runtime.
+- **Signing:** macOS signing and notarization need Apple's Developer Program ($99 a year). Windows needs a certificate or Azure Artifact Signing, and SmartScreen reputation still builds with downloads, EV certificates included.
 
-**Decisions to settle at the start** (provisional):
-- Q1 the tools: Inno Setup or WiX for Windows, `hdiutil` for the `.dmg`, `appimagetool` for Linux; or one tool across them (Briefcase)
-- Q2 code signing: unsigned apps warn (SmartScreen on Windows, Gatekeeper on macOS); signing and macOS notarization need the developer's own certificates, so Tesserae can take them as options but can't provide them
-- Q3 app metadata (name, version, icon, identifier) from a `[tool.tesserae]` section or command options
+**Decisions:**
+- **Q1, tools:**
+  - macOS: a `.app` from a one-folder build, in a `.dmg` made with `hdiutil`.
+  - Windows: Inno Setup (the user's choice), the one on the PATH or a pinned copy Tesserae fetches and keeps in a cache on first use.
+  - Linux, all five formats the user asked for:
+    - AppImage, with a pinned `appimagetool` fetched the same way.
+    - `.deb` and pacman `.pkg.tar.zst`, written by Tesserae itself.
+    - `.rpm` with `rpmbuild` and Flatpak with `flatpak-builder`, when those are installed.
 
-### Phase 1 — Scope and Decisions ⬜
-- Step 1: Q1-Q3 — ⬜
+  `tesserae build` makes what it can and names what to install for the rest. CI builds all of them.
+- **Q2, installers wrap a one-folder build:** it starts faster, and PyInstaller 7 won't make a `.app` from a single file. `tesserae build` without `--installer` stays M77's single file, and on macOS it no longer adds `--windowed` (closing the known gap).
+- **Q3, signing is documented, not built** (the user's choice): the guide shows `codesign`/`notarytool` and `signtool` on the output. There are no options CI couldn't test without certificates.
+- **Q4, app details:**
+  - Command options, with defaults: name, version, identifier, publisher, description.
+  - One PNG icon, which Tesserae turns into `.ico` and `.icns` itself with Pillow, a dependency already.
+  - A config file only if the options grow unwieldy.
+- **Q5, per-user installs by default on Windows** (no admin rights needed). Linux packages put the app in `/opt/<name>` with a `.desktop` entry and icon.
 
-### Phase 2 — Installers ⬜
-- Step 1: each platform's installer from `tesserae build --installer`; CI builds each — ⬜
+### Phase 1 — Scope and Decisions ✅
+- Step 1: research (the runners' tools, Inno Setup, WiX's fee, NSIS, AppImage, `.deb`, Briefcase, PyInstaller on macOS, notarization, Windows signing) and a one-folder probe; the user chose Inno Setup, all five Linux formats and documented signing; Q1-Q5 above; the guide's out-of-date Gatekeeper advice fixed (Sequoia removed Control-click, Open) — ✅
 
-### Phase 3 — Docs, Tracker ⬜
-- Step 1: installers and signing in the "Releasing your app" guide — ⬜
+### Phase 2 — `--installer`, and macOS ⬜
+- Step 1: `tesserae build --installer`, the one-folder build, the app-details options and a PNG icon made into `.ico`/`.icns`; the macOS `.app` in a `.dmg`; the single file without `--windowed` on macOS; tests, CI on macOS — ⬜
 
+### Phase 3 — Windows ⬜
+- Step 1: an Inno Setup installer (per-user, Start-menu entry, uninstaller), with Inno Setup found or fetched; CI on Windows installs it silently and runs the installed app — ⬜
+
+### Phase 4 — Linux: AppImage, `.deb`, pacman ⬜
+- Step 1: an AppImage (pinned `appimagetool`), and a `.deb` and a pacman package written by Tesserae; CI installs the `.deb` and runs it, and checks the others — ⬜
+
+### Phase 5 — Linux: `.rpm` and Flatpak ⬜
+- Step 1: an `.rpm` with `rpmbuild` and a Flatpak with `flatpak-builder` (the GPU and display allowed through its sandbox), each built when its tool is installed; CI builds both and runs them — ⬜
+
+### Phase 6 — Docs, Tracker ⬜
+- Step 1: installers in the "Releasing Your App" guide, and how to sign and notarize them with your own certificates — ⬜
 
 ---
 

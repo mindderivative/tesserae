@@ -161,7 +161,9 @@ app, built or not, when an automated test or CI runs it:
 - **macOS:** `dist/` holds the single executable, which runs from a
   terminal, and beside it a `notes.app` that PyInstaller makes for a
   build without a console. Unsigned, either is stopped by Gatekeeper the
-  first time until the user allows it (Control-click, Open).
+  first time; since macOS 15 (Sequoia) the user allows it in System
+  Settings › Privacy & Security › Open Anyway. PyInstaller 7 will refuse
+  that `.app` beside a single file; M78's installers make a proper one.
 - **Windows:** unsigned, SmartScreen warns the first time it's run.
 
 Installers — a proper `.app` in a `.dmg`, a Windows installer with a

@@ -1920,3 +1920,31 @@ acting on it.
   views that don't scroll in its direction), unlike a browser's scroll
   chaining, so it's reported to `tre`'s session as a possible feature,
   not a bug. 2630 passed.
+
+## M78: installers for each platform
+
+User: "push and start M78". The user then chose Inno Setup for Windows and
+documented signing, and asked for five Linux formats: "Can we do a
+flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's
+three phases became six.
+
+- Phase 1, research (2026-09-29, primary sources):
+  - GitHub runner images
+    (github.com/actions/runner-images: Windows2025, macos-26-arm64 and
+    Ubuntu2404 readmes): Inno Setup 6.7.1 and WiX 3.14 on Windows, no
+    NSIS; `dpkg` and `rpm` on Ubuntu, no `appimagetool` or FUSE.
+  - Inno Setup licence: jrsoftware.org/files/is/license.txt. Free for any
+    use; its authors ask for-profits to buy a licence, voluntarily.
+  - WiX 6+ maintenance fee (github.com/wixtoolset/wix OSMFEULA.txt):
+    organisations with $10k+ a year in revenue.
+  - AppImage: docs.appimage.org and AppImage/appimagetool.
+  - `.deb` format: deb(5).
+  - PyInstaller: the 6.13 changelog says onefile with a `.app` will be
+    blocked in 7.0 (a new known gap for M77's macOS default); its docs
+    say it ad-hoc signs its output.
+  - Apple's notarization docs, and Sequoia removing Control-click, Open
+    (developer.apple.com/news/?id=saqachfa). The M77 guide said
+    Control-click, so I fixed it.
+- The one-folder probe: 0.27 s to start against 0.55 s for one file and
+  0.23 s from source; 107 MB uncompressed.
+- Decisions Q1-Q5 are in the tracker.
