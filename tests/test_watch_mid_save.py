@@ -80,9 +80,9 @@ def test_settling(tmp_path):
     assert time.monotonic() - started < 0.5  # a finished save costs one check
 
     growing = tmp_path / "growing.yaml"
-    growing.write_text("", encoding="utf-8")
-    threading.Timer(0.15, lambda: growing.write_text("b: 2\n", encoding="utf-8")).start()
-    assert _settled([growing])[growing][1] == len("b: 2\n")  # waited out the empty file
+    growing.write_bytes(b"")
+    threading.Timer(0.15, lambda: growing.write_bytes(b"b: 2\n")).start()  # bytes: Windows writes \r\n as text
+    assert _settled([growing])[growing][1] == len(b"b: 2\n")  # waited out the empty file
 
     empty = tmp_path / "empty.yaml"
     empty.write_text("", encoding="utf-8")
@@ -90,3 +90,132 @@ def test_settling(tmp_path):
     started = time.monotonic()
     assert _settled([empty, gone], limit=0.2) == {empty: _stamp(empty), gone: None}
     assert 0.2 <= time.monotonic() - started < 1.0  # really empty: read as it is, after the limit
+
+
+def test_a_save_that_lands_while_a_view_is_read_is_read_again(tmp_path, monkeypatch, logs):
+    """CI, macOS: a save can land after the change settles but while the
+    file is read (a test re-saving until a reload was queued did it). The
+    read that failed isn't logged; the file is read again."""
+    view_file = tmp_path / "Home_View.yaml"
+    rect = lambda width: yaml.safe_dump(  # noqa: E731
+        {"id": "root", "kind": "Rect", "style": {"width": width, "height": 10, "background": "#000000"}})
+    view_file.write_text(rect(10), encoding="utf-8")
+    view = load_view(view_file)
+    watcher, handle = ViewWatcher(view, view_file), FakeHandle()
+    real_rebuild, reads = watcher._rebuild, []
+
+    def rebuild_as_a_save_lands():
+        reads.append(True)
+        if len(reads) == 1:  # the save lands during the first read, which saw it half-written
+            time.sleep(0.01)
+            view_file.write_text(rect(42), encoding="utf-8")
+            raise ValueError("'NoneType' object has no attribute 'get'")
+        return real_rebuild()
+
+    monkeypatch.setattr(watcher, "_rebuild", rebuild_as_a_save_lands)
+
+    def fake_watch(*dirs, watch_filter, stop_event, recursive):
+        view_file.write_text(rect(20), encoding="utf-8")
+        yield {(watch.watchfiles.Change.modified, str(view_file))}
+        stop_event.wait()
+
+    monkeypatch.setattr(watch.watchfiles, "watch", fake_watch)
+    watcher.start(handle)
+    try:
+        handle.queued.get(timeout=5)()
+        assert view.node("root").get("width") == 42.0 and len(reads) == 2
+        assert logs.messages("ERROR") == []
+    finally:
+        watcher.stop()
+
+
+def test_a_save_that_lands_while_a_file_is_read_is_read_again(tmp_path, monkeypatch, logs):
+    theme = tmp_path / "Brand_Theme.yaml"
+    theme.write_text("styles: []\n", encoding="utf-8")
+    reads = []
+
+    def rebuild():
+        reads.append(theme.read_text(encoding="utf-8"))
+        if len(reads) == 1:
+            time.sleep(0.01)
+            theme.write_text("styles: [{kind: Rect}]\n", encoding="utf-8")
+            raise ValueError("half a file")
+        return reads[-1]
+
+    def fake_watch(*dirs, watch_filter, stop_event, recursive):
+        theme.write_text("styles: [{kind: Text}]\n", encoding="utf-8")
+        yield {(watch.watchfiles.Change.modified, str(theme))}
+        stop_event.wait()
+
+    monkeypatch.setattr(watch.watchfiles, "watch", fake_watch)
+    applied = []
+    watcher, handle = FileWatcher([theme], rebuild, applied.append), FakeHandle()
+    watcher.start(handle)
+    try:
+        handle.queued.get(timeout=5)()
+        assert applied == ["styles: [{kind: Rect}]\n"] and logs.messages("ERROR") == []
+    finally:
+        watcher.stop()
+
+
+def test_a_read_that_finished_before_a_save_landed_is_not_queued(tmp_path, monkeypatch):
+    """A read can succeed and still be stale: the save landed just after
+    it. What's queued is the saved file, not what was read before it."""
+    view_file = tmp_path / "Home_View.yaml"
+    rect = lambda width: yaml.safe_dump(  # noqa: E731
+        {"id": "root", "kind": "Rect", "style": {"width": width, "height": 10, "background": "#000000"}})
+    view_file.write_text(rect(10), encoding="utf-8")
+    view = load_view(view_file)
+    watcher, handle = ViewWatcher(view, view_file), FakeHandle()
+    real_rebuild, reads = watcher._rebuild, []
+
+    def rebuild_then_a_save_lands():
+        result = real_rebuild()
+        reads.append(True)
+        if len(reads) == 1:
+            time.sleep(0.01)
+            view_file.write_text(rect(42), encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(watcher, "_rebuild", rebuild_then_a_save_lands)
+
+    def fake_watch(*dirs, watch_filter, stop_event, recursive):
+        view_file.write_text(rect(20), encoding="utf-8")
+        yield {(watch.watchfiles.Change.modified, str(view_file))}
+        stop_event.wait()
+
+    monkeypatch.setattr(watch.watchfiles, "watch", fake_watch)
+    watcher.start(handle)
+    try:
+        handle.queued.get(timeout=5)()
+        assert view.node("root").get("width") == 42.0 and handle.queued.empty()
+    finally:
+        watcher.stop()
+
+
+def test_a_file_read_that_finished_before_a_save_landed_is_not_queued(tmp_path, monkeypatch):
+    theme = tmp_path / "Brand_Theme.yaml"
+    theme.write_text("styles: []\n", encoding="utf-8")
+    reads = []
+
+    def rebuild():
+        reads.append(theme.read_text(encoding="utf-8"))
+        if len(reads) == 1:
+            time.sleep(0.01)
+            theme.write_text("styles: [{kind: Rect}]\n", encoding="utf-8")
+        return reads[-1]
+
+    def fake_watch(*dirs, watch_filter, stop_event, recursive):
+        theme.write_text("styles: [{kind: Text}]\n", encoding="utf-8")
+        yield {(watch.watchfiles.Change.modified, str(theme))}
+        stop_event.wait()
+
+    monkeypatch.setattr(watch.watchfiles, "watch", fake_watch)
+    applied = []
+    watcher, handle = FileWatcher([theme], rebuild, applied.append), FakeHandle()
+    watcher.start(handle)
+    try:
+        handle.queued.get(timeout=5)()
+        assert applied == ["styles: [{kind: Rect}]\n"] and handle.queued.empty()
+    finally:
+        watcher.stop()

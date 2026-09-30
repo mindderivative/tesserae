@@ -91,6 +91,16 @@ def _settled(paths: Iterable[Path], *, interval: float = 0.05, limit: float = 1.
     return current
 
 
+#: How often a change is read again when a save lands while it's read.
+_REREADS = 5
+
+
+def _moved(stamps: dict[Path, _Stamp]) -> bool:
+    """Whether any of these files changed since `stamps` were taken: a save
+    that landed while they were read (#39)."""
+    return any(_stamp(p) != stamp for p, stamp in stamps.items())
+
+
 def _log_failure(what: str, exc: BaseException) -> None:
     """One ERROR line naming `what` and the error, with the traceback at
     DEBUG -- a YAML typo shouldn't print a stack trace by default."""
@@ -209,6 +219,29 @@ class ViewWatcher:
             self._thread.join(timeout)
             self._thread = None
 
+    def _reload(self, handle: Any) -> set[Path] | None:
+        """One change: reads the files once they've settled and queues the
+        new spec; returns what it was built from (`None` if nothing was
+        queued). A save that lands while they're read is read again (#39)."""
+        for _attempt in range(_REREADS):
+            current = _settled(self._stamps)  # not mid-save (#39)
+            if current == self._stamps:
+                return None  # nothing changed: macOS reports writes from before the watch began (M76)
+            self._stamps = current  # before reading, as `poll` does, so a write mid-reload isn't lost
+            try:
+                spec, frames, deps = self._rebuild()
+            except Exception as exc:
+                if _moved(current):
+                    continue  # read mid-save: read it again
+                _log_failure(str(self._path), exc)
+                return None
+            if _moved(current):
+                continue
+            self._stamps = {p: current[p] if p in current else _stamp(p) for p in deps}
+            handle.call_soon(_guarded(str(self._path), lambda spec=spec, frames=frames: self._apply(spec, frames)))
+            return deps
+        return None
+
     def _watch(self, handle: Any) -> None:
         try:
             while not self._stop.is_set():
@@ -222,20 +255,8 @@ class ViewWatcher:
                     stop_event=self._stop,
                     recursive=False,
                 ):
-                    current = _settled(self._stamps)  # not mid-save (#39)
-                    if current == self._stamps:
-                        continue  # nothing changed: macOS reports writes from before the watch began (M76)
-                    self._stamps = current  # before reading, as `poll` does, so a write mid-reload isn't lost
-                    try:
-                        spec, frames, deps = self._rebuild()
-                    except Exception as exc:
-                        _log_failure(str(self._path), exc)
-                        continue
-                    self._stamps = {p: current[p] if p in current else _stamp(p) for p in deps}
-                    handle.call_soon(
-                        _guarded(str(self._path), lambda spec=spec, frames=frames: self._apply(spec, frames))
-                    )
-                    if sorted({p.parent for p in deps if p.parent.is_dir()}) != dirs:
+                    deps = self._reload(handle)
+                    if deps is not None and sorted({p.parent for p in deps if p.parent.is_dir()}) != dirs:
                         break  # a dependency moved to a new directory: re-watch
         except Exception as exc:  # the watcher itself failed; report it, don't die silently
             logger.opt(exception=exc).error("the hot-reload watcher for {} stopped", self._path)
@@ -331,15 +352,21 @@ class FileWatcher:
                 stop_event=self._stop,
                 recursive=False,
             ):
-                current = _settled(self._files)  # not mid-save (#39)
-                if current == self._stamps:
-                    continue  # nothing changed: macOS reports writes from before the watch began (M76)
-                self._stamps = current
-                try:
-                    result = self._rebuild()
-                except Exception as exc:
-                    _log_failure(self._what, exc)
-                    continue
-                handle.call_soon(_guarded(self._what, lambda result=result: self._apply(result)))
+                for _attempt in range(_REREADS):
+                    current = _settled(self._files)  # not mid-save (#39)
+                    if current == self._stamps:
+                        break  # nothing changed: macOS reports writes from before the watch began (M76)
+                    self._stamps = current
+                    try:
+                        result = self._rebuild()
+                    except Exception as exc:
+                        if _moved(current):
+                            continue  # read mid-save: read it again (#39)
+                        _log_failure(self._what, exc)
+                        break
+                    if _moved(current):
+                        continue
+                    handle.call_soon(_guarded(self._what, lambda result=result: self._apply(result)))
+                    break
         except Exception as exc:  # the watcher itself failed; report it, don't die silently
             logger.opt(exception=exc).error("the hot-reload watcher for {} stopped", self._what)
