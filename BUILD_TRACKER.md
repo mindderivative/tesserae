@@ -85,6 +85,9 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 | M74 — Grids in YAML (`tre` #23) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M75 — A Node's Style from a File (#22) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
+| M76 — One `pip install`, on Every Platform | `███⬜⬜⬜⬜⬜⬜⬜` 25% | 🚧 In progress — Phase 1 of 4 done |
+| M77 — `tesserae build`: an App as One Executable | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M78 — Installers for Each Platform | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
 **Just closed:** M75 (2026-09-30), done locally: a node's `style:` can name a `*_Style.yaml` file (#22), and `*_Style.yaml`, `*_Stylesheet.yaml` and `*_Theme.yaml` say what a file is. Before it, M74 (pushed): grids in YAML.
 
@@ -100,7 +103,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** nothing is scoped, and there are no known gaps. M75 is pushed and #22 closed. Open with `tre`: #27 (a bare number as a one-track list; Tesserae converts it meanwhile).
+**Up next:** M76 (one `pip install` on every platform) is in progress, then M77 (`tesserae build`: an app as one executable) and M78 (installers), scoped from the user's intent.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -2051,3 +2054,82 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 3 — Docs, Tracker ✅
 - Step 1: the themes guide's new "A node's style from a file" (the issue's example, the rules, and the hot-reload limit for a stylesheet's style files) and the naming page's "Style, stylesheet and theme files" (the three suffixes, what each loader refuses, and that they're recommended, not required). `test_paint_0_3_4`'s docs lint assumed every `style:` is a mapping; it now skips a style file it can't read. `mkdocs build --strict` clean; 2606 → 2610 passed (the docs checks on the new examples); all five examples clean. #22 closed (pushed as `d315db7..246f15f`, CI run 36666269639) — ✅
+
+
+---
+
+## Milestone 76 — One `pip install`, on Every Platform
+
+**Status: 🚧 In progress — Phase 1 of 4 done.** The user's intent (2026-09-30): "When a developer is creating an application with Tesserae they should be able to setup a python venv, do a single pip install of Tesserae and all required libraries and dependencies should be installed and ready to use for that developer. No extra setup or separate installs." Then "Scope all three and start the first". M76 is that first half; M77 and M78 are the release half.
+
+**What starting found:** on Linux it already holds -- a fresh venv, `pip install` of the built wheel pulled all six dependencies (`tesserae-engine` 0.4.2 with its native engine, PyYAML, Pillow, watchfiles, loguru, materialyoucolor) and a `tesserae new` app ran, with nothing else installed. `tre`'s wheel bundles its own fontconfig, freetype and libpng, so a Linux user needs no system packages beyond a GPU driver (CI's Mesa is for GPU-less runners). But PyPI has Tesserae 0.1.0, from before M52. And two things break "no extra setup": **materialyoucolor has no wheels for Python 3.9** (pip would compile it, needing a C compiler), and the newest Pillow and watchfiles need 3.10; and the platforms where *every* dependency has a wheel are **Linux x86-64, macOS on Apple silicon and Windows x64** (the overlap of `tre`'s and materialyoucolor's wheels) -- elsewhere pip builds `tre` from its sdist, which needs Rust. Tesserae's own code has no syntax or standard library newer than 3.9 (checked statically).
+
+**Decisions** (recommended, taken):
+- Q1, `requires-python >= 3.10` (3.9 needs a compiler for materialyoucolor, and is past end of life); the classifiers name 3.10-3.14.
+- Q2, supported platforms: Linux x86-64, macOS arm64 and Windows x64, where the install is wheels only; others are documented as building `tre` from source (Rust needed), not tested.
+- Q3, proof in CI: a "clean install" job on the three platforms and on Python 3.10 and 3.14, which builds the wheel, installs only it into a fresh venv **with `--only-binary=:all:`** (so a dependency that would need compiling fails the job), makes an app with `tesserae new`, and runs it headlessly (build its views, show, click, a few frames of layout -- no GPU needed). Then the full test suite on macOS and Windows too, fixing what's platform-specific.
+- Q4, then Tesserae 0.2.0: the version, a changelog of what's new since 0.1.0 (M52-M75), and the install docs. Publishing stays the user's step (a GitHub Release, approved in the `pypi` environment), as 0.1.0 was.
+- Pushing is the user's call: the macOS and Windows runs happen on GitHub, so each push to try them waits for a go-ahead.
+
+### Phase 1 — Scope and Decisions ✅
+- Step 1: a fresh-venv install and run on Linux; `tre`'s linked libraries (`ldd`); each dependency's wheels and `requires-python` on PyPI; a static scan for syntax and standard library newer than 3.9; settled Q1-Q4 above — ✅
+
+### Phase 2 — The Clean-Install Job ⬜
+- Step 1: `requires-python`; a smoke script and a CI matrix job (3 platforms x 3.10/3.14, binary-only install, a generated app run headlessly); run on GitHub after a push — ⬜
+
+### Phase 3 — The Suite on macOS and Windows ⬜
+- Step 1: the test suite in CI on macOS and Windows; fix what's platform-specific — ⬜
+
+### Phase 4 — Release 0.2.0 ⬜
+- Step 1: the version, a changelog, the install docs (the one command, the supported platforms); the release itself is the user's — ⬜
+
+
+---
+
+## Milestone 77 — `tesserae build`: an App as One Executable
+
+**Status: ⬜ Scoped — draft, refined when it starts.** The user's intent (2026-09-30): "When the developer has completed their application and is ready to release it. They should be able to compile their application into a single executable file or installer, that can be used by any User based on their platform." This is the executable; M78 the installer.
+
+**What's known:** PyInstaller 6.22's `--onefile` froze a `tesserae new` app into one 31 MB Linux executable that ran from another folder with nothing installed -- `tre`'s engine, the fragments, the theme and the app's YAML inside -- given `--collect-data tesserae` and an `--add-data` per view file. Listing an app's files by hand is the part to automate; Tesserae already knows them (a view's `include:`s, style files, images and fragments are its dependencies, M29). An executable is built on the platform it's for (PyInstaller doesn't cross-compile).
+
+**Draft approach:** `tesserae build [app.py]` finds the app's files (its views and everything they read, its themes and stylesheets, shell files), freezes it with PyInstaller into one file named after the app (no console window on Windows and macOS), with an icon if one is given, and runs a quick self-check of the result. PyInstaller comes with a `build` extra (`pip install tesserae-ui[build]`), so the everyday install stays lean. CI builds and runs a generated app's executable on Linux, macOS and Windows.
+
+**Decisions to settle at the start** (provisional):
+- Q1 PyInstaller (recommended: proven here, wide platform support) or Nuitka (compiles to C: smaller, faster, slower builds)
+- Q2 how the app's files are found: from what `App` loads when `app.py` runs in a dry mode (recommended), or by scanning the folder
+- Q3 one file (recommended, the user's ask) or also a folder build (faster start-up)
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q3; what a frozen app needs (paths relative to the executable, no hot reload) — ⬜
+
+### Phase 2 — The Build Command ⬜
+- Step 1: `tesserae build`; tests that build and run a generated app; mutation-checked — ⬜
+
+### Phase 3 — Every Platform ⬜
+- Step 1: CI builds and runs an executable on Linux, macOS and Windows — ⬜
+
+### Phase 4 — Docs, Tracker ⬜
+- Step 1: a "Releasing your app" guide — ⬜
+
+
+---
+
+## Milestone 78 — Installers for Each Platform
+
+**Status: ⬜ Scoped — draft, refined when it starts.** The installer half of the user's release intent (M77's quote), built on M77's executable.
+
+**Draft approach:** `tesserae build --installer` wraps the executable in each platform's usual form: a Windows installer (`.exe` or `.msi`, with Start-menu entry and uninstaller), a macOS `.app` bundle in a `.dmg`, and a Linux AppImage (and perhaps a `.deb`). Each built on its own platform, in CI.
+
+**Decisions to settle at the start** (provisional):
+- Q1 the tools: Inno Setup or WiX for Windows, `hdiutil` for the `.dmg`, `appimagetool` for Linux; or one tool across them (Briefcase)
+- Q2 code signing: unsigned apps warn (SmartScreen on Windows, Gatekeeper on macOS); signing and macOS notarization need the developer's own certificates, so Tesserae can take them as options but can't provide them
+- Q3 app metadata (name, version, icon, identifier) from a `[tool.tesserae]` section or command options
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: Q1-Q3 — ⬜
+
+### Phase 2 — Installers ⬜
+- Step 1: each platform's installer from `tesserae build --installer`; CI builds each — ⬜
+
+### Phase 3 — Docs, Tracker ⬜
+- Step 1: installers and signing in the "Releasing your app" guide — ⬜
