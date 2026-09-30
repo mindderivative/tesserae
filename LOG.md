@@ -1886,3 +1886,10 @@ User: "push and start M77". Phase 1 settled the decisions (see the tracker).
   executable in 13 s, and `--check` runs it for 30 frames from an empty
   folder. The mutation check caught 14/15; the survivor was a redundant
   glob form, now removed. 2622 passed.
+- Phase 3 (user: "push and start phase 3"): a `build-executable` CI job
+  builds a `tesserae new --shell` app from the wheel on Linux, macOS and
+  Windows and runs `--check`. With no display `App.run` returns at once,
+  so `--check` now needs frames drawn: `TESSERAE_FRAMES_REPORT` makes a
+  run write how many. Linux runs under Xvfb and needed
+  `libxkbcommon-x11`, which winit loads for an X11 window. All three
+  drew 30 frames and exited cleanly.
