@@ -4,7 +4,7 @@
 
 ## Goal
 
-User-directed: "scope tre's building-block program". `tre`'s approved plan (its M93–M103, D1–D11) moves the declarative layer, reactivity, the MD3 catalog and MD3 theming out of `tre` and into Tesserae. `tre` 0.3.4 has the building blocks with the old API still present. `tre` removes the old API (M98–M99, released as 0.3.5) only after its M97 gate confirms Tesserae no longer uses it. This program is Tesserae's side of that gate. Full write-up: `BUILD_TRACKER.md`, "Program — `tre`'s Building-Block Migration".
+User-directed: "scope tre's building-block program". `tre`'s approved plan (its M93–M103, D1–D11) moves the declarative layer, reactivity, the MD3 catalog and MD3 theming out of `tre` and into Tesserae. `tre` 0.3.4 has the building blocks with the old API still present. `tre` removes the old API (M98–M99, released as 0.3.5) only after its M97 gate confirms Tesserae no longer uses it. This program is Tesserae's side of that gate. Full write-up: `BUILD_TRACKER_ARCHIVE_0.2.md`, "Program — `tre`'s Building-Block Migration".
 
 ## Status
 
@@ -49,7 +49,7 @@ Spikes (`tools/spikes/`): Python cascade and bindings build 4,000 nodes in 20.7 
 
 **M36 complete (2026-09-25):** `tesserae.binding`, identical to `tre`'s on 166 expressions. The wiring moved to M37 (user's choice), because `tre`'s new API can't drive the legacy Checkbox/Switch state; bindings on `checked`/`selected`/`value` move to M40.
 
-**M37 scoped in detail (2026-09-25):** six phases (tokens, compiler and cascade, tree parity, View/reconciler/bindings, components and screens, tests and docs) and four decisions, Q1–Q4, in `BUILD_TRACKER.md`.
+**M37 scoped in detail (2026-09-25):** six phases (tokens, compiler and cascade, tree parity, View/reconciler/bindings, components and screens, tests and docs) and four decisions, Q1–Q4, in `BUILD_TRACKER_ARCHIVE_0.2.md`.
 
 **M37:** decisions Q1–Q4 as recommended. Phase 1 done: `tesserae.tokens` matches `tre` on 74 checks (roles, shapes, elevation shadows, type scale, colour strings); 698 passed.
 
@@ -63,7 +63,7 @@ Phase 5 done: components on Tesserae's builder, with the host's theme and styles
 
 Phase 6 done: `load_view`, `instantiate`, `ViewWatcher` and the suite off `tre`'s `View` (reference tests excepted); the recording bridge removed; atomic reconcile; theme key validation; 909 passed. **M37 complete.**
 
-**M38 scoped (2026-09-25):** a `tesserae.Theme` (roles, `components:`, `typography:`, motion), theme typography in views, light/dark with the OS, docs; decisions Q1–Q4 in `BUILD_TRACKER.md`.
+**M38 scoped (2026-09-25):** a `tesserae.Theme` (roles, `components:`, `typography:`, motion), theme typography in views, light/dark with the OS, docs; decisions Q1–Q4 in `BUILD_TRACKER_ARCHIVE_0.2.md`.
 
 **M38 decisions (user):**
 - Q1: theme typography for display text, not text inputs.

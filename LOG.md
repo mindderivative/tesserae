@@ -2010,3 +2010,21 @@ pinned test failed there, as the pin was meant to.
     inset changes.
   - Also asked for: a pointer cancel after a native drag, fullscreen, a
     window icon, and a minimum size.
+
+## The build tracker is archived; the GitHub project takes over
+
+User: "Finish out this build tracker and then archive it, start using the
+GitHub project instead."
+
+- The tracker's final state:
+  - a dated archive note at the top;
+  - "Just closed" and "Up next" pointing to the GitHub project;
+  - M78 (Phase 4 of 6 done), M81 and M82 each naming the issue they
+    continue in (#26, #24, #29).
+- It's archived as `BUILD_TRACKER_ARCHIVE_0.2.md`, the complete record of
+  M1-M82. References to it are updated; the docs' "project status"
+  sections point to the project.
+- Tracking continues in the GitHub project Tesserae UI Framework
+  (users/mindderivative/projects/2): releases are milestones with umbrella
+  issues (#23 for 0.2.1, #24 for 0.3.0). This LOG continues as the repo's
+  running narrative.

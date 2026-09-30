@@ -2,7 +2,7 @@ from helpers import elevation, view_from
 """Real coverage for the Progress & Status component fragments --
 `CircularProgress`/`LinearProgress`/`LoadingIndicator`. All 3 were
 blocked until `tre`'s own M84 added declarative `NodeKindSpec` support
-for them (this repo's own M27) -- see `BUILD_TRACKER.md`.
+for them (this repo's own M27) -- see `BUILD_TRACKER_ARCHIVE_0.2.md`.
 
 `Node.get()` only exposes a small numeric whitelist (`engine-py::
 node.rs`, confirmed directly) -- `value` is readable for both progress

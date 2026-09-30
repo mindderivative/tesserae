@@ -3,7 +3,7 @@ component fragments: `Card` (3 variants), `Chip` (5 variants),
 `ListItem`, `Badge` (2 structural shapes), `Divider`,
 `AccordionHeader`, `TreeNode` (2 structural shapes), `Link` (was
 blocked until `tre`'s own M84 added declarative `NodeKindSpec` support
-for it, this repo's own M27 -- see `BUILD_TRACKER.md`).
+for it, this repo's own M27 -- see `BUILD_TRACKER_ARCHIVE_0.2.md`).
 """
 
 import pytest

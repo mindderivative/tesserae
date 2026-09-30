@@ -96,5 +96,8 @@ pass `tre` the `*_spec=` forms (e.g. `load_theme(...)` for
 
 ## Project status
 
-See [`BUILD_TRACKER.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER.md)
-in the repository for the complete, phase-by-phase build history.
+Work is planned and tracked, release by release, in the GitHub project
+[Tesserae UI Framework](https://github.com/users/mindderivative/projects/2):
+each release is a milestone whose issues are its steps. The complete,
+phase-by-phase history of everything before it (milestones M1–M82, up to
+0.2.1) is in [`BUILD_TRACKER_ARCHIVE_0.2.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER_ARCHIVE_0.2.md).

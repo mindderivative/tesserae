@@ -73,10 +73,11 @@ hot reload.
 
 ## Build history
 
-See [`BUILD_TRACKER.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER.md)
-for the complete, phase-by-phase build history -- every real milestone
-this project has built, what was learned, and every real gap found and
-closed.
+See [`BUILD_TRACKER_ARCHIVE_0.2.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER_ARCHIVE_0.2.md)
+for the complete, phase-by-phase build history up to 0.2.1 -- every real
+milestone this project built, what was learned, and every real gap found
+and closed. Since then, work is tracked in the GitHub project
+[Tesserae UI Framework](https://github.com/users/mindderivative/projects/2).
 
 Tesserae's own shape follows [pyCopper](https://github.com/mindderivative/pycopper)
 (an earlier, standalone framework by the same author, powered by a
