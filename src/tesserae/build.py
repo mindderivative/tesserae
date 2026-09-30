@@ -435,10 +435,12 @@ RUNTIME_URL = "https://github.com/AppImage/type2-runtime/releases/download/20251
 RUNTIME_SHA256 = "2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d"
 
 #: What the app needs from a Linux system that PyInstaller doesn't bundle:
-#: the Vulkan loader (and a driver) and the X11 keyboard library winit loads.
-DEB_DEPENDS = "libvulkan1, libxkbcommon-x11-0"
+#: the Vulkan loader (and a driver), and the X11 libraries winit loads when
+#: it opens a window -- without libXcursor and libXi, missing from a bare
+#: Arch system, it finds "no display" (M78: CI, then an Arch container).
+DEB_DEPENDS = "libvulkan1, libx11-6, libx11-xcb1, libxcursor1, libxi6, libxkbcommon-x11-0"
 DEB_RECOMMENDS = "mesa-vulkan-drivers"
-PACMAN_DEPENDS = ("vulkan-icd-loader", "libxkbcommon-x11")
+PACMAN_DEPENDS = ("vulkan-icd-loader", "libx11", "libxcursor", "libxi", "libxkbcommon-x11")
 PACMAN_OPTDEPENDS = ("vulkan-driver: a Vulkan driver for the GPU",)
 
 
@@ -474,7 +476,7 @@ def _tree(folder: Path) -> list[tuple[str, Path]]:
 
 
 def _add(tar: tarfile.TarFile, arcname: str, path: Path | None = None, *, data: bytes | None = None,
-         mode: int = 0o644, link: str | None = None, folder: bool = False) -> None:
+         mode: int = 0o644, link: str | None = None, folder: bool = False, program: bool = False) -> None:
     """One entry, owned by root, as a system package's files are."""
     info = tarfile.TarInfo(arcname)
     info.uname = info.gname = "root"  # uid and gid are 0 already
@@ -491,7 +493,7 @@ def _add(tar: tarfile.TarFile, arcname: str, path: Path | None = None, *, data: 
     else:
         content = data if data is not None else path.read_bytes()
         info.size = len(content)
-        executable = path is not None and path.stat().st_mode & stat.S_IXUSR
+        executable = program or (path is not None and path.stat().st_mode & stat.S_IXUSR)
         info.mode = 0o755 if executable else mode
         tar.addfile(info, io.BytesIO(content))
 
@@ -508,7 +510,7 @@ def _system_files(tar: tarfile.TarFile, app: Path, name: str, info: AppInfo, ico
         _add(tar, prefix + folder, folder=True)
     _add(tar, f"{prefix}opt/{pkg}", folder=True)
     for rel, path in _tree(app):
-        _add(tar, f"{prefix}opt/{pkg}/{rel}", path)
+        _add(tar, f"{prefix}opt/{pkg}/{rel}", path, program=rel == name)  # executable, whatever made the folder
         size += path.stat().st_size if path.is_file() and not path.is_symlink() else 0
     _add(tar, f"{prefix}usr/bin/{pkg}", link=f"/opt/{pkg}/{name}")
     entry = desktop_entry(name, info, f"/opt/{pkg}/{name}").encode()

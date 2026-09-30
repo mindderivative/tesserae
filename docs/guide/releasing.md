@@ -179,8 +179,8 @@ Linux, for a `tesserae new` app).
 
     The packages put the app in `/opt/notes`, a `notes` command in
     `/usr/bin`, and a menu entry (named after `--identifier`) with its
-    icon; they depend on the Vulkan loader and `libxkbcommon-x11`, which a
-    desktop has. The package name is the app's name in lower case with
+    icon; they depend on the Vulkan loader and those X11 libraries, which
+    a desktop has, so a package manager installs any that are missing. The package name is the app's name in lower case with
     dashes (`Demo App` is `demo-app`). Tesserae writes the `.deb` and the
     pacman package itself; for the AppImage it fetches `appimagetool`
     1.9.1 and the AppImage runtime (16 MB together, from their GitHub
@@ -218,7 +218,9 @@ app, built or not, when an automated test or CI runs it:
 ## On each platform
 
 - **Linux:** the executable needs what any desktop has: a display, a
-  Vulkan driver, and `libxkbcommon-x11`. It's also tied to the system
+  Vulkan driver, and the X11 libraries winit loads for a window
+  (`libX11`, `libXcursor`, `libXi`, `libxkbcommon-x11`). Without one of
+  them the app finds "no display" and exits, as on a bare container. It's also tied to the system
   library (glibc) of the machine it was built on, and runs on that
   version or newer: build on the oldest Linux you want to support.
 - **macOS:** the single executable runs from a terminal; for an app to

@@ -437,8 +437,7 @@ def test_installer_is_ready_on_every_platform(tmp_path, capsys, monkeypatch, pla
 def _linux_app(tmp_path, name="Demo App"):
     folder = tmp_path / "built" / name
     (folder / "_internal").mkdir(parents=True)
-    (folder / name).write_bytes(b"\x7fELF")
-    (folder / name).chmod(0o755)
+    (folder / name).write_bytes(b"\x7fELF")  # no chmod: the packager marks the program executable itself
     (folder / "_internal" / "lib.so").write_bytes(b"lib")
     (folder / "_internal" / "link.so").symlink_to("lib.so")
     return folder
@@ -531,7 +530,8 @@ def test_the_pacman_package(tmp_path):
     assert names[0] == ".PKGINFO" and "usr/share/applications/com.acme.demo.desktop" in names
     assert exe.mode == 0o755 and link.linkname == "/opt/demo-app/Demo App"
     for line in ["pkgname = demo-app", "pkgver = 1.2.0-1", "pkgdesc = Takes notes", "packager = Acme",
-                 "arch = x86_64", "depend = vulkan-icd-loader", "depend = libxkbcommon-x11"]:
+                 "arch = x86_64", "depend = vulkan-icd-loader", "depend = libxcursor", "depend = libxi",
+                 "depend = libx11", "depend = libxkbcommon-x11"]:
         assert line in pkginfo, line
 
 
