@@ -82,10 +82,10 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M70 — Binding `disabled` on Any Clickable Node (#19) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-29) |
 | M71 — Layout Vocabulary: the Rest of Flexbox and a ScrollView (#21) | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-29) |
 | M72 — `tre` 0.4.1 and the Mouse's Side Buttons (#20) | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-29) |
-| M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 1 of 2 done |
+| M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 | M74 — Grids in YAML (`tre` #23) | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
-**Just closed:** M70 (2026-09-29), done locally: `disabled` on any node, as a key or a binding -- announced, not focusable, no feedback, handlers off, faded to 38% -- so a back button binds `not app.can_go_back.get()` (#19). Before it, M69 (pushed, #18 closed): handlers on a component call.
+**Just closed:** M73 (2026-09-30), done locally: Tesserae on `tre` 0.4.2 (`tesserae-engine>=0.4.2`), whose scroll views now scroll with the keys, reveal focus and answer `scroll_into_view` themselves (`tre` #24), so the `Scroller` only follows their `scroll` event. Before it, M70 (pushed, #19 closed).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -99,14 +99,14 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** nothing is scoped. M70 is pushed and #19 closed. Still open (Known gaps): grids, waiting on `tre` #23. `tre` #24 (`scroll_view`'s own keyboard and events) would let Tesserae's Scroller shrink, but nothing waits on it.
+**Up next:** M74 (grids in YAML, on `tre` 0.4.2's CSS Grid) is scoped and waits for the user. M73 is done locally.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
 Every open gap below was re-checked against the source and `tre` 0.3.5.1 on 2026-09-28, and each has an issue with its scope. Tesserae's are mindderivative/tesserae #1–#17 (#3, #15 and #17 are done); `tre`'s were mindderivative/tre #16, #18 and #19, all fixed in `tre` 0.3.5.2.
 
 **Known gaps:**
-- **No grid layout:** `tre` lays out flexbox only, though its Taffy implements CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23)); a grid-like layout today is `flex_wrap` with fixed sizes (docs/guide/layout.md). A `Grid` follows as its own milestone once `tre` has one.
+- **No grid layout in YAML:** `tre` 0.4.2 lays out CSS Grid ([`tre` #23](https://github.com/mindderivative/tre/issues/23), closed), but a view's style doesn't take its keys yet: M74, scoped. A grid-like layout today is `flex_wrap` with fixed sizes (docs/guide/layout.md).
 
 **Fixed gaps:**
 - ~~**A button's `disabled` couldn't be bound in YAML** (only control kinds'), and a node's own `disabled` only told assistive technology (M66).~~ **Fixed (M70).** `disabled:` as a key or a binding on any node: announced, not focusable, no feedback, handlers off, faded to 38%; held through re-theme, restyle and reload. [#19](https://github.com/mindderivative/tesserae/issues/19), closed (pushed as `d9057c3..91ed3b2`, CI run 36647247015).
@@ -1991,7 +1991,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 73 — `tre` 0.4.2: Its Scroll Views and the Scroller
 
-**Status: 🚧 In progress — Phase 1 of 2 done.** `tre`'s session reported 0.4.2 released (2026-09-30), closing `tre` #23 (CSS Grid) and #24 (scroll views), and asked Tesserae to move and report. Verified before acting: the v0.4.2 release (24 assets), PyPI's 0.4.2 (22 wheels and an sdist), and both issues closed.
+**Status: ✅ Complete — all 2 phases done (2026-09-30).** `tre`'s session reported 0.4.2 released (2026-09-30), closing `tre` #23 (CSS Grid) and #24 (scroll views), and asked Tesserae to move and report. Verified before acting: the v0.4.2 release (24 assets), PyPI's 0.4.2 (22 wheels and an sdist), and both issues closed.
 
 **What 0.4.2 changes for Tesserae:** two behaviour changes in `scroll_view`: the arrows, Page Up/Down and Home/End scroll the nearest scroll view around the focused node (unless a `key_down` listener between the focused node and the scroll view is there, which keeps every key; a text input keeps all but Page Up/Down); and focusing a node scrolls its scroll views to show it. Also `node.scroll_into_view()`, `tre` answering the a11y `scroll_into_view` itself, and a `scroll` event (`old_value`/`new_value`) on every offset change. And CSS Grid through node properties (M74).
 
@@ -2000,8 +2000,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — The Move ✅
 - Step 1: verified (above); `.venv` on 0.4.2; the floor is `tesserae-engine>=0.4.2`; CI's and `release.yml`'s `tre` checkout at `v0.4.2` (Roboto still there); README and `docs/installation.md` name 0.4.2. The examples ran clean; the suite had 2563 passed and 1 failed, from the focus behaviour change: `tre` now reveals a focused child itself, before the `Scroller` hears the focus, so the `Scroller` saw no change and `two_way: scroll_offset` wasn't told (the view did scroll). Probed 0.4.2: keys from a focused child scroll (with or without a modifier held); focus reveals; a `scroll` event (`old_value`/`new_value`) fires on every change, a `set` past the end included (it reads back as set until the next layout, which clamps it and fires again); and **a `key_down` listener on the scroll view -- the `Scroller` has one -- keeps every key from `tre`**, so a focused child's keys wouldn't scroll. Phase 2 follows from that — ✅
 
-### Phase 2 — The Scroller on `tre`'s Scroll Views ⬜
-- Step 1: what the `Scroller` still needs to do; tests; mutation-checked; the Layout guide; report to `tre`'s session — ⬜
+### Phase 2 — The Scroller on `tre`'s Scroll Views ✅
+- Step 1: the `Scroller` (`tesserae/scrolling.py`) is now a follower of `tre`'s `scroll` event for `two_way: scroll_offset`, and nothing else: its keys, reveals, `scroll_into_view` and clamping went, since `tre` does them and its `key_down` listener kept a focused child's keys from `tre`. `tests/test_scroll_view.py` (24) checks the same outcomes whoever scrolls: the keys (advancing a frame, since `tre` clamps a far offset at its next layout), a focused child's keys scrolling it and a text field keeping its arrows (new: it would have failed with the old `Scroller`), `on_scroll` hearing a `set` and the wheel until undone, and a detached Scroller hearing nothing with its listener off the node. Mutation-checked, 7/7 (the first run pinned `detach()`'s listener removal). The Layout guide's scrolling notes: the keys work from any focused node inside, `tre` does it since 0.4.2. 2564 → 2565 passed; all five examples clean; reported to `tre`'s session — ✅
 
 
 ---

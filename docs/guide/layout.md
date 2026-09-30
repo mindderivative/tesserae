@@ -147,14 +147,15 @@ children:
         style: {height: 56, background: surface_container, corner_radius: 12}
 ```
 
-- The wheel scrolls it. It's a Tab stop: focused, the arrows scroll by a
-  line, Page Up and Page Down by its height, and Home and End to the
-  ends.
+- The wheel scrolls it. The keys do too, when it or a node inside it has
+  focus: the arrows by a line, Page Up and Page Down by its height, Home
+  and End to the ends. A node that handles keys itself keeps them (a
+  text field keeps its arrows, but not Page Up and Page Down). The
+  scroll view is a Tab stop, so it can be scrolled with nothing inside
+  it focusable.
 - A child that takes focus is scrolled into view, just as far as needed,
   and so is one assistive technology asks to see (`scroll_into_view`).
-  (`tre`'s own `scroll_view` doesn't do these yet,
-  [`tre` #24](https://github.com/mindderivative/tre/issues/24); Tesserae
-  does them itself.)
+  (`tre` does all of this since 0.4.2; M73.)
 - `scroll_offset` binds (`bindings: {scroll_offset: "{{ pos.get() }}"}`),
   and `two_way: scroll_offset` writes back where the user scrolled, to
   save and restore a position.

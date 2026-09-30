@@ -403,8 +403,9 @@ def _scroll_props(ctx, node, style):
     which is where its children go: several children straight in a
     `scroll_view` shrink to fit it, and nothing scrolls (it lays its one
     child out unshrunk, and ignores its own padding). The content is
-    vertical unless the style says otherwise, and the full width. The scroll view is a Tab stop (its keys are Tesserae's,
-    `tesserae.scrolling`), and its scrollbar is the theme's `outline`."""
+    vertical unless the style says otherwise, and the full width. The
+    scroll view is a Tab stop (its keys are `tre`'s since 0.4.2), and its
+    scrollbar is the theme's `outline`."""
     outer, _ = _box_props(ctx, node, style)
     content = {k: v for k, v in outer.items() if k in _CONTENT}
     outer = {k: v for k, v in outer.items() if k not in _CONTENT}

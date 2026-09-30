@@ -162,7 +162,7 @@ class View:
         self._viewmodel: Any = None
         self._wiring: list[Callable[[], None]] = []  # undo steps
         self._interactions: dict[str, Interaction] = {}
-        self._scrollers: dict[str, Scroller] = {}  # each ScrollView's keys, reveals and write-back (M71)
+        self._scrollers: dict[str, Scroller] = {}  # each ScrollView's write-back (M71; `tre` scrolls, M73)
         #: M70: the nodes shown disabled now, by their `disabled:` key or binding.
         self._disabled_on: set[str] = set()
         self._sync_interactions()
@@ -415,8 +415,7 @@ class View:
                 del self._scrollers[node_id]
         for node_id, spec in self._built.specs.items():
             if spec.get("kind") == "ScrollView" and node_id not in self._scrollers:
-                self._scrollers[node_id] = Scroller(self._built.outer[node_id], self._built.nodes[node_id],
-                                                    self._listen)
+                self._scrollers[node_id] = Scroller(self._built.outer[node_id], self._listen)
 
     def _drop_interactions(self) -> None:
         for current in self._interactions.values():
@@ -733,7 +732,7 @@ class View:
             raise ValueError(f'widget "{node_id}": two_way binding names "{name}", which has no matching attribute '
                              "on the ViewModel")
         node = self._node_for(node_spec, prop)
-        if node_spec.get("kind") == "ScrollView":  # `tre` sends no event when it scrolls; its Scroller does (M71)
+        if node_spec.get("kind") == "ScrollView":  # its Scroller follows `tre`'s `scroll` event (M71, M73)
             if prop != "scroll_offset":
                 raise ValueError(f'widget "{node_id}": a ScrollView\'s only user-editable property is "scroll_offset"')
             self._wiring.append(self._scrollers[node_id].on_scroll(signal.set))

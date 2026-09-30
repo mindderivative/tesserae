@@ -1,15 +1,16 @@
 """M71 (#21): `kind: ScrollView`, `tre`'s `scroll_view` holding one content
 box its children lay out in (vertical unless the style says otherwise).
-Tesserae adds what `tre` 0.4 lacks (`tre` #24): the arrows, Page Up/Down
-and Home/End when focused; a focused child scrolled into view;
-`scroll_into_view` answered; and `two_way: scroll_offset` hearing the
-wheel, the keys and those reveals.
+Since `tre` 0.4.2 (`tre` #24, M73) `tre` scrolls it with the keys around
+the focused node, reveals a focused child and answers `scroll_into_view`;
+Tesserae's `Scroller` follows its `scroll` event for `two_way:
+scroll_offset`. These check the outcomes, whoever does the scrolling.
 """
 
 import pytest
 
 from tesserae import Signal, Theme, View, ViewModel
-from tesserae.scrolling import LINE
+
+LINE = 40.0  # an arrow key's scroll (tre's)
 
 SEED = (0x67, 0x50, 0xA4, 0xFF)
 
@@ -76,18 +77,23 @@ def test_the_keys_scroll_it_when_it_has_focus(keys, offset, capfd):
     scroll.focus()
     for key in keys:
         view.window.simulate("key_down", key=key)
+        view.window.advance(16)  # tre clamps a far offset at its next layout
     assert scroll.get("scroll_offset") == offset and vm.pos.get() == offset  # what it reports is where it stops
     assert "uncaught exception" not in capfd.readouterr().err  # never a negative offset (tre refuses one)
 
 
-def test_keys_for_a_child_or_with_a_modifier_dont_scroll_it():
-    view, _, scroll = _view()
+def test_a_focused_childs_keys_scroll_it_but_a_text_field_keeps_its_arrows():  # tre 0.4.2 (M73)
+    field = {"id": "field", "kind": "TextField", "text": {"content": "", "font_family": "Roboto", "font_size": 14},
+             "style": {"height": 32, "foreground": "#000000", "background": "#FFFFFF"}}
+    view, vm, scroll = _view(_spec(children=[*_rows(), field],
+                                   bindings={"scroll_offset": "{{ pos.get() }}"}, two_way="scroll_offset"))
     view.node("r0").focus()
-    view.window.simulate("key_down", key="page_down")  # the child has focus
-    scroll.focus()
-    for mods in ({"alt": True}, {"ctrl": True}, {"meta": True}):
-        view.window.simulate("key_down", key="page_down", **mods)
-    assert scroll.get("scroll_offset") == 0.0
+    view.window.simulate("key_down", key="page_down")  # the Scroller mustn't keep it from tre (it did, before M73)
+    assert scroll.get("scroll_offset") == 100.0 and vm.pos.get() == 100.0
+    view.node("field").focus()  # revealed at the bottom
+    at = scroll.get("scroll_offset")
+    view.window.simulate("key_down", key="arrow_up")  # the text field's own
+    assert scroll.get("scroll_offset") == at
 
 
 def test_a_focused_child_is_scrolled_into_view_and_only_as_far_as_needed():
@@ -118,19 +124,17 @@ def test_focusing_the_scroll_view_itself_moves_nothing():
     assert scroll.get("scroll_offset") == 100.0
 
 
-def test_on_scroll_hears_changes_only_and_reveal_ignores_a_node_elsewhere():
+def test_on_scroll_hears_each_change_until_undone():
     view, _, scroll = _view(vm=False)
     scroller, heard = view._scrollers["list"], []
     undo = scroller.on_scroll(heard.append)
-    scroller.scroll_to(0.0)  # already there
-    scroller.scroll_to(60.0)
-    scroller.scroll_to(60.0)
-    assert heard == [60.0]
-    scroller.reveal(view.node("root"))  # not in its content
-    assert scroller.offset == 60.0
+    scroll.set(scroll_offset=0.0)  # already there: no change
+    scroll.set(scroll_offset=60.0)
+    view.window.simulate("wheel", node=view.node("r3"), delta_y=20.0)
+    assert heard == [60.0, 80.0] and scroller.offset == 80.0
     undo()
-    scroller.scroll_to(0.0)
-    assert heard == [60.0]
+    scroll.set(scroll_offset=0.0)
+    assert heard == [60.0, 80.0]
 
 
 def test_a_nested_scroll_view_reveals_through_both():
@@ -164,7 +168,7 @@ def test_a_rebuilt_scroll_view_gets_a_new_scroller_and_the_old_one_stops():
     old = view._scrollers["list"]
     view.reconcile({"id": "root", "kind": "Container", "style": {"width": 300, "height": 300},
                     "children": [{"id": "list", "kind": "Container", "style": {"width": 10}}]})
-    assert "list" not in view._scrollers and old._undo == []
+    assert "list" not in view._scrollers and old._followers == []
     view.reconcile(_spec())
     assert view._scrollers["list"] is not old and view._scrollers["list"].node == view._built.outer["list"]
 
@@ -205,3 +209,15 @@ def test_two_way_on_anything_but_scroll_offset_is_refused():
     view = View(_spec(bindings={"width": "{{ pos.get() }}"}, two_way="width"), theme_seed=SEED)
     with pytest.raises(ValueError, match='a ScrollView\'s only user-editable property is "scroll_offset"'):
         VM(view)
+
+
+def test_a_detached_scroller_hears_nothing_more():
+    view, _, scroll = _view(vm=False)
+    scroller, heard = view._scrollers["list"], []
+    scroller.on_scroll(heard.append)
+    scroll.set(scroll_offset=40.0)
+    scroller.detach()
+    scroll.set(scroll_offset=80.0)
+    assert heard == [40.0]
+    assert scroller._followers == []  # and it lets them go
+    assert not [key for key in view._events._slots if key[1] == "scroll"]  # its listener is off the node

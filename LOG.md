@@ -1782,3 +1782,25 @@ closed).
 - 11 tests; 17/17 mutants caught.
 
 2564 passed (+2 docs checks on the guide's new example).
+
+## M73: tre 0.4.2 -- its scroll views, and a smaller Scroller
+
+`tre`'s session reported 0.4.2, which closes tre#23 (CSS Grid) and tre#24
+(scroll views). Verified: the release (24 assets), PyPI's 0.4.2 (22
+wheels and an sdist), and both issues closed.
+
+- `.venv` on 0.4.2; the floor is `tesserae-engine>=0.4.2`; CI's `tre`
+  checkout moved to v0.4.2. The examples ran clean. One test failed,
+  from 0.4.2's focus reveal: `tre` scrolled before the `Scroller` heard
+  the focus, so the Scroller saw no change and the two-way binding
+  wasn't told.
+- Probing 0.4.2 found a real conflict: a `key_down` listener on the
+  scroll view, which the `Scroller` had, keeps every key from `tre`, so
+  a focused child's keys wouldn't scroll.
+- The `Scroller` now only follows `tre`'s `scroll` event for
+  `two_way: scroll_offset`. Its keys, reveals and clamping went.
+- 24 ScrollView tests, one of them new (a focused child's keys scroll);
+  7/7 mutants caught.
+- M74 (grids in YAML) is scoped and waits for the user.
+
+2565 passed.
