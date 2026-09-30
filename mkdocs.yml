@@ -73,5 +73,6 @@ nav:
       - Repeater: api/repeater.md
       - spec (load_view/expand_components): api/spec.md
   - Architecture: architecture.md
+  - Changelog: changelog.md
   - Design:
       - Tesserae on tre's Building Blocks: design/building-blocks.md

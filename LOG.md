@@ -1842,3 +1842,27 @@ User: "push and start M75" (pushed `9f05cae..d315db7`, CI green).
 - 16 tests; 14/14 mutants caught.
 
 2610 passed.
+
+## M76: one `pip install`, on every platform
+
+User: "Scope all three and start the first", after describing the intent:
+one `pip install` for a developer, and a single executable or installer for
+their users (M77, M78).
+
+- Linux already worked from a fresh venv. materialyoucolor has no Python
+  3.9 wheels, and the user set the floor at **3.12**. Supported platforms
+  are where every dependency has a wheel: Linux x86-64, macOS arm64 and
+  Windows x64.
+- A CI `clean-install` job: the wheel alone, `--only-binary=:all:`, then a
+  `tesserae new` app run headlessly. It passes on 3 platforms x 3.12 and
+  3.14.
+- The suite on macOS and Windows found:
+  - on macOS, watchers reloading files that hadn't changed (FSEvents
+    reports writes from before the watch), so both watchers now compare
+    stamps;
+  - on Windows, a source read without an encoding, now UTF-8 with a lint
+    to keep it so, and a test's backslash labels.
+
+  Now 2613 passed on each, 0 skipped on macOS and Windows.
+- 0.2.0 prepared: the version, a changelog, and the README's install
+  section. Publishing is the user's step.

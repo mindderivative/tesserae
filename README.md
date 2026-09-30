@@ -54,6 +54,18 @@ Tesserae is on PyPI as [`tesserae-ui`](https://pypi.org/project/tesserae-ui/)
 pip install tesserae-ui
 ```
 
+## Install
+
+```bash
+pip install tesserae-ui
+```
+
+That's all: it installs Tesserae and everything it needs, `tre`'s engine
+included, as prebuilt wheels. It needs **Python 3.12 or newer**, on Linux
+x86-64, macOS on Apple silicon or Windows x64 (elsewhere, pip builds `tre`
+from source, which needs Rust). The import name is `tesserae`; start an app
+with `tesserae new myapp`. What's new: the [changelog](https://mindderivative.github.io/tesserae/changelog/).
+
 ## Install (development)
 
 Tesserae needs **`tre` 0.4.2 or newer**, which is on PyPI as
