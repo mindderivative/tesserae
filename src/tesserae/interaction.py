@@ -95,6 +95,7 @@ class Interaction:
         self._undo = [listen(node, event, handler) for event, handler in (
             ("pointer_enter", self._on_enter), ("pointer_leave", self._on_leave),
             ("pointer_down", self._on_down), ("pointer_up", self._on_up), ("click", self._on_click),
+            ("pointer_cancel", self._on_up),  # the OS took the press (a window drag, 0.3.0): released, no click
             ("focus", self._on_focus), ("unfocus", self._on_unfocus),
         )]
 

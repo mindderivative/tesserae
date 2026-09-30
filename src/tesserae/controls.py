@@ -386,6 +386,7 @@ class Switch(Control):
         super().__init__(window, **kwargs)
         self._undo.append(self._listen(self.node, "pointer_down", lambda e: self._press(True)))
         self._undo.append(self._listen(self.node, "pointer_up", lambda e: self._press(False)))
+        self._undo.append(self._listen(self.node, "pointer_cancel", lambda e: self._press(False)))  # 0.3.0 M2
         self._undo.append(self._listen(self.node, "pointer_leave", lambda e: self._press(False)))
 
     #: The handle's centre travels this far, from `HEIGHT / 2` to `WIDTH - HEIGHT / 2`.
@@ -490,7 +491,8 @@ class Slider(Control):
         self.value = Signal(self._snap(value))
         super().__init__(window, width=self.width, height=height, **kwargs)
         for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
-                               ("pointer_up", self._on_up), ("key_down", self._on_key)):
+                               ("pointer_up", self._on_up), ("pointer_cancel", self._on_up),
+                               ("key_down", self._on_key)):
             self._undo.append(self._listen(self.node, event, handler))
         self._undo.append(a11y.on_action(self.node, {
             "increment": lambda e: self._user_set(self.value.get() + self._key_step()),
@@ -1040,7 +1042,8 @@ class TimePickerDial(Control):
         self._start: tuple[int, int] = (0, 0)
         super().__init__(window, **kwargs)
         for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
-                               ("pointer_up", self._on_up), ("key_down", self._on_key)):
+                               ("pointer_up", self._on_up), ("pointer_cancel", self._on_up),
+                               ("key_down", self._on_key)):
             self._undo.append(self._listen(self.node, event, handler))
         self._undo.append(a11y.on_action(self.node, {"increment": lambda e: self._step(1),
                                                     "decrement": lambda e: self._step(-1)}, listen=self._listen))

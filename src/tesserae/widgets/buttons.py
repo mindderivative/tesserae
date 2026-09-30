@@ -314,6 +314,7 @@ def button_group(
         part = widget.part(f"b{i}")
         widget._undo.append(widget.view._listen(part, "pointer_down", lambda e, i=i: press(i)))
         widget._undo.append(widget.view._listen(part, "pointer_up", lambda e: release()))
+        widget._undo.append(widget.view._listen(part, "pointer_cancel", lambda e: release()))  # 0.3.0 M2
         widget._undo.append(widget.view._listen(part, "pointer_leave", lambda e: release()))
         if on_click is not None:
             widget.on_click(lambda i=i: on_click(i), part=f"b{i}")

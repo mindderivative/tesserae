@@ -201,7 +201,8 @@ def node_graph(
         widget.zoom.set(target)
 
     listen = widget.view._listen
-    for name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("wheel", wheel)):
+    for name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("pointer_cancel", up),
+                     ("wheel", wheel)):
         widget._undo.append(listen(viewport, name, fn))
 
     def route(a: Any, b: Any, path: Any) -> None:
@@ -340,6 +341,7 @@ def graph_node(
             user_move((px + step[0], py + step[1]))
 
     listen = widget.view._listen
-    for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("key_down", key)):
+    for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up),
+                           ("pointer_cancel", up), ("key_down", key)):
         widget._undo.append(listen(node, event_name, fn))
     return widget

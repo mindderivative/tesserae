@@ -230,8 +230,8 @@ def carousel(
         else:
             user_scroll(widget.scroll.get() + step * (SMALL + CAROUSEL_GAP))
 
-    for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("wheel", wheel),
-                           ("key_down", key)):
+    for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up),
+                           ("pointer_cancel", up), ("wheel", wheel), ("key_down", key)):
         widget._undo.append(widget.view._listen(root, event_name, fn))
 
     def add(item: Any) -> Any:
@@ -382,7 +382,8 @@ def splitter(
         if event.key in moves:
             user(round(moves[event.key], 6))
 
-    for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("key_down", key)):
+    for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up),
+                           ("pointer_cancel", up), ("key_down", key)):
         widget._undo.append(widget.view._listen(handle, event_name, fn))
     widget._undo.append(a11y.on_action(handle, {
         "increment": lambda e: user(round(widget.position.get() + SPLIT_STEP, 6)),

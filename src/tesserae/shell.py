@@ -66,7 +66,7 @@ class _Handle:
         self._drag: Optional[tuple[float, float]] = None
         listen = shell._events.listen
         for event, fn in (("pointer_down", self._down), ("pointer_move", self._move), ("pointer_up", self._up),
-                          ("key_down", self._key)):
+                          ("pointer_cancel", self._up), ("key_down", self._key)):  # cancel: the OS took the press
             listen(self.node, event, fn)
 
     def _axis(self, event: Any) -> Optional[float]:

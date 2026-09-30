@@ -255,6 +255,7 @@ class Dock:
             listen(node, "pointer_down", lambda e: self._down(e, entry, tab)),
             listen(node, "pointer_move", lambda e: self._drag_past_threshold(e)),
             listen(node, "pointer_up", lambda e: self._up()),
+            listen(node, "pointer_cancel", lambda e: self._up()),  # the OS took the press (0.3.0 M2)
             listen(node, "secondary_click", handled(lambda e: self._open_menu(entry, at=(e.window_x, e.window_y)))),
         ]
         return tab
