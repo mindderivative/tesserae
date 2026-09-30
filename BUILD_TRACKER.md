@@ -85,7 +85,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M73 — `tre` 0.4.2: Its Scroll Views and the Scroller | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 | M74 — Grids in YAML (`tre` #23) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M75 — A Node's Style from a File (#22) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
-| M76 — One `pip install`, on Every Platform | `███⬜⬜⬜⬜⬜⬜⬜` 25% | 🚧 In progress — Phase 1 of 4 done |
+| M76 — One `pip install`, on Every Platform | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 2 of 4 done |
 | M77 — `tesserae build`: an App as One Executable | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M78 — Installers for Each Platform | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 
@@ -2060,7 +2060,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 76 — One `pip install`, on Every Platform
 
-**Status: 🚧 In progress — Phase 1 of 4 done.** The user's intent (2026-09-30): "When a developer is creating an application with Tesserae they should be able to setup a python venv, do a single pip install of Tesserae and all required libraries and dependencies should be installed and ready to use for that developer. No extra setup or separate installs." Then "Scope all three and start the first". M76 is that first half; M77 and M78 are the release half.
+**Status: 🚧 In progress — Phase 2 of 4 done.** The user's intent (2026-09-30): "When a developer is creating an application with Tesserae they should be able to setup a python venv, do a single pip install of Tesserae and all required libraries and dependencies should be installed and ready to use for that developer. No extra setup or separate installs." Then "Scope all three and start the first". M76 is that first half; M77 and M78 are the release half.
 
 **What starting found:** on Linux it already holds -- a fresh venv, `pip install` of the built wheel pulled all six dependencies (`tesserae-engine` 0.4.2 with its native engine, PyYAML, Pillow, watchfiles, loguru, materialyoucolor) and a `tesserae new` app ran, with nothing else installed. `tre`'s wheel bundles its own fontconfig, freetype and libpng, so a Linux user needs no system packages beyond a GPU driver (CI's Mesa is for GPU-less runners). But PyPI has Tesserae 0.1.0, from before M52. And two things break "no extra setup": **materialyoucolor has no wheels for Python 3.9** (pip would compile it, needing a C compiler), and the newest Pillow and watchfiles need 3.10; and the platforms where *every* dependency has a wheel are **Linux x86-64, macOS on Apple silicon and Windows x64** (the overlap of `tre`'s and materialyoucolor's wheels) -- elsewhere pip builds `tre` from its sdist, which needs Rust. Tesserae's own code has no syntax or standard library newer than 3.9 (checked statically).
 
@@ -2074,8 +2074,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: a fresh-venv install and run on Linux; `tre`'s linked libraries (`ldd`); each dependency's wheels and `requires-python` on PyPI; a static scan for syntax and standard library newer than 3.9; settled Q1-Q4 above — ✅
 
-### Phase 2 — The Clean-Install Job 🚧
-- Step 1: `requires-python = ">=3.12"` (the user's floor) and the 3.12-3.14 classifiers; `tools/clean_install_smoke.py` (with a fresh venv's Python: `tesserae new`, then the app run headlessly -- its views built, Home shown, its button clicked, frames laid out -- checking the greeting from shared state and the click count); CI's new `clean-install` job (Linux, macOS, Windows x Python 3.12 and 3.14: build the wheel, install only it into a fresh venv with `--only-binary=:all:`, run the smoke script). Passes locally on Linux (a fresh binary-only venv); the suite unchanged (2610). The six GitHub runs wait for a push — 🚧
+### Phase 2 — The Clean-Install Job ✅
+- Step 1: `requires-python = ">=3.12"` (the user's floor) and the 3.12-3.14 classifiers; `tools/clean_install_smoke.py` (with a fresh venv's Python: `tesserae new`, then the app run headlessly -- its views built, Home shown, its button clicked, frames laid out -- checking the greeting from shared state and the click count); CI's new `clean-install` job (Linux, macOS, Windows x Python 3.12 and 3.14: build the wheel, install only it into a fresh venv with `--only-binary=:all:`, run the smoke script). The install guide's requirements (3.12+, the three platforms, Rust elsewhere). **On GitHub** (pushed as `2de260e..5986c25`): Linux and macOS passed at once; both Windows runs failed -- after the app ran -- because the smoke script had `chdir`ed into its temporary folder and Windows can't remove the folder a process is in, so it steps back out first now. CI run 36669940400: all seven jobs pass, and each of the six installed only wheels and ran the generated app on `tre` 0.4.2 (Windows, macOS and Linux, 3.12 and 3.14) — ✅
 
 ### Phase 3 — The Suite on macOS and Windows ⬜
 - Step 1: the test suite in CI on macOS and Windows; fix what's platform-specific — ⬜
