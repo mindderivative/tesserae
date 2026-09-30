@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "A pyCopper-style declarative Python GUI framework, powered by the Tesserae Render Engine (tre)."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.9"
+requires-python = ">=3.10"  # materialyoucolor has no 3.9 wheels (M76)
 authors = [{ name = "Phil Hodgins", email = "philip.a.hodgins@gmail.com" }]
 keywords = ["gui", "desktop", "declarative", "mvvm", "material-design"]
 classifiers = [
@@ -19,6 +19,11 @@ classifiers = [
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: User Interfaces",
     "Topic :: Software Development :: Libraries :: Application Frameworks",
 ]

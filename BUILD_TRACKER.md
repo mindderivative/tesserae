@@ -2074,8 +2074,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 1 — Scope and Decisions ✅
 - Step 1: a fresh-venv install and run on Linux; `tre`'s linked libraries (`ldd`); each dependency's wheels and `requires-python` on PyPI; a static scan for syntax and standard library newer than 3.9; settled Q1-Q4 above — ✅
 
-### Phase 2 — The Clean-Install Job ⬜
-- Step 1: `requires-python`; a smoke script and a CI matrix job (3 platforms x 3.10/3.14, binary-only install, a generated app run headlessly); run on GitHub after a push — ⬜
+### Phase 2 — The Clean-Install Job 🚧
+- Step 1: `requires-python = ">=3.10"` and the 3.10-3.14 classifiers; `tools/clean_install_smoke.py` (with a fresh venv's Python: `tesserae new`, then the app run headlessly -- its views built, Home shown, its button clicked, frames laid out -- checking the greeting from shared state and the click count); CI's new `clean-install` job (Linux, macOS, Windows x Python 3.10 and 3.14: build the wheel, install only it into a fresh venv with `--only-binary=:all:`, run the smoke script). Passes locally on Linux (a fresh binary-only venv); the suite unchanged (2610). The six GitHub runs wait for a push — 🚧
 
 ### Phase 3 — The Suite on macOS and Windows ⬜
 - Step 1: the test suite in CI on macOS and Windows; fix what's platform-specific — ⬜
