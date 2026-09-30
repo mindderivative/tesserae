@@ -2,7 +2,7 @@
 
 Updated after every milestone/phase/stage/step completion, kept in sync with `ARCHITECTURE.md`. Status legend: ✅ done · 🚧 in progress · ⬜ not started.
 
-**This tracker is the 0.2 line** (Tesserae 0.1.0 through 0.2.x). Following `tre`'s pattern (the user, 2026-09-30), when 0.2.x is complete and the 0.3 work starts, this file is archived whole as `BUILD_TRACKER_ARCHIVE_0.2.md` and a new tracker for Tesserae 0.3 begins, its milestones restarting at M1 and its own artifact page (this one's stays as 0.2's record). The 0.3 work happens on a `0.3.0` branch, off `main`, until the user merges it; 0.2.x fixes meanwhile ship from `main`.
+**This tracker is the 0.2 line** (Tesserae 0.1.0 through 0.2.x). Following `tre`'s pattern (the user, 2026-09-30): from 0.3.0 on, the GitHub project [Tesserae UI Framework](https://github.com/users/mindderivative/projects/2) is the tracker, as `tre`'s project replaced its `BUILD_TRACKER.md` from 0.5.0. Releases are repo milestones, each with an umbrella issue ([#23](https://github.com/mindderivative/tesserae/issues/23) for 0.2.1, [#24](https://github.com/mindderivative/tesserae/issues/24) for 0.3.0) whose sub-issues are its milestones. The rest of 0.2.1 (M78, M82) is tracked in both. When 0.2.1 ships, this file is archived whole as `BUILD_TRACKER_ARCHIVE_0.2.md` (the artifact page stays as 0.2's record). The 0.3 work happens on a `0.3.0` branch, off `main`, until the user merges it; 0.2.x fixes meanwhile ship from `main`.
 
 **Milestones 1-6 are seeded, written after the fact (2026-09-23):** this file didn't exist when Tesserae's first 6 commits landed (2026-09-19 through 2026-09-21) -- their real history is reconstructed honestly from those commits' own messages and the code as it exists today, not presented as if this tracker had been running from day one.
 
@@ -93,6 +93,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 | M80 — `tre` 0.4.4 | `██████████` 100% | ✅ Complete — all 1 phases done (2026-09-30) |
 | M81 — Tesserae 0.3.0: `tre` 0.5.0 and Custom Windowing | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — waits for `tre` 0.5.0 and the user |
+| M82 — Release 0.2.1 | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — after M78 |
 
 **Just closed:** M78 Phase 4 (2026-09-30): Linux's AppImage, `.deb` and pacman package, each installed and run in CI (the pacman one on Arch). Before it, M80 (`tre` 0.4.4, scroll chaining) and M78 Phase 3 (the Windows installer).
 
@@ -2124,7 +2125,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 78 — Installers for Each Platform
 
-**Status: 🚧 In progress — Phase 4 of 6 done.** The installer half of the user's release intent (M77's quote), built on M77. The user: "push and start M78" (M77 pushed as `40e2ab1..cd3918a`), then chose Inno Setup for Windows and documentation for signing, and asked for Linux: "Can we do a flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's three phases became six.
+**Status: 🚧 In progress — Phase 4 of 6 done.** Issue [#26](https://github.com/mindderivative/tesserae/issues/26). The installer half of the user's release intent (M77's quote), built on M77. The user: "push and start M78" (M77 pushed as `40e2ab1..cd3918a`), then chose Inno Setup for Windows and documentation for signing, and asked for Linux: "Can we do a flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's three phases became six.
 
 **What's known** (Phase 1's research, sources in LOG):
 - **Runners:** GitHub's Windows runner has Inno Setup 6.7 and WiX 3.14 but no NSIS. The macOS runner has `hdiutil`, as every Mac does. The Ubuntu runner has `dpkg` and `rpm`, but no `appimagetool` or FUSE.
@@ -2203,7 +2204,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 81 — Tesserae 0.3.0: `tre` 0.5.0 and Custom Windowing
 
-**Status: ⬜ Scoped — waits for `tre` 0.5.0 and the user.** The user (2026-09-30): "Do not automatically push to 0.5.0. When Tesserae moves to 0.5.0 and implements the custom windowing it will move to 0.3.0 as a major feature. Before that all milestones from here on will use 0.2.x". So Tesserae's dependency is capped `tesserae-engine>=0.4.4,<0.5` (guarded by `tests/test_dependencies.py`), and this milestone starts only when the user says so, after `tre` 0.5.0 (`tre` #28) is released.
+**Status: ⬜ Scoped — waits for `tre` 0.5.0 and the user.** Issue [#24](https://github.com/mindderivative/tesserae/issues/24) (its M1 is [#30](https://github.com/mindderivative/tesserae/issues/30)). The user (2026-09-30): "Do not automatically push to 0.5.0. When Tesserae moves to 0.5.0 and implements the custom windowing it will move to 0.3.0 as a major feature. Before that all milestones from here on will use 0.2.x". So Tesserae's dependency is capped `tesserae-engine>=0.4.4,<0.5` (guarded by `tests/test_dependencies.py`), and this milestone starts only when the user says so, after `tre` 0.5.0 (`tre` #28) is released.
 
 **How it runs:** on a `0.3.0` branch, not `main`, until the user merges it; this tracker is archived as `BUILD_TRACKER_ARCHIVE_0.2.md` and a 0.3 tracker starts, where this milestone's work becomes M1 onwards (see this file's head).
 
@@ -2211,4 +2212,17 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 1 — Scope and Decisions ⬜
 - Step 1: `tre` 0.5.0's final API; Tesserae's questions (the title bar in YAML, the shell, themes); refine this milestone — ⬜
+
+
+---
+
+## Milestone 82 — Release 0.2.1
+
+**Status: ⬜ Scoped — after M78.** Issue [#29](https://github.com/mindderivative/tesserae/issues/29). The 0.2 line's release of M77-M80 (and M78 once done): the user's release intent met.
+
+### Phase 1 — Release ⬜
+- Step 1: the version to 0.2.1 and the changelog's "0.2.1" section dated — ⬜
+- Step 2: a GitHub pre-release `v0.2.1` (`release.yml`); the user approves the `pypi` deployment — ⬜
+- Step 3: checked from PyPI: a fresh venv, `pip install tesserae-ui` and `tesserae-ui[build]`, a `tesserae new` app built with `--installer` — ⬜
+- Step 4: this tracker archived as `BUILD_TRACKER_ARCHIVE_0.2.md`; the 0.2 line is complete and the GitHub project carries on — ⬜
 
