@@ -87,10 +87,10 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M75 — A Node's Style from a File (#22) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M76 — One `pip install`, on Every Platform | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
 | M77 — `tesserae build`: an App as One Executable | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
-| M78 — Installers for Each Platform | `███⬜⬜⬜⬜⬜⬜⬜` 33% | 🚧 In progress — Phase 2 of 6 done |
+| M78 — Installers for Each Platform | `█████⬜⬜⬜⬜⬜` 50% | 🚧 In progress — Phase 3 of 6 done |
 | M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 
-**Just closed:** M78 Phase 2 (2026-09-30): `tesserae build --installer`; on macOS a `.app` in a `.dmg`, installed and run in CI. Before it, M77 (2026-09-30): `tesserae build` makes an app one executable, built and checked in CI on Linux, macOS and Windows, with a "Releasing Your App" guide; and M79 (`tre` 0.4.3).
+**Just closed:** M78 Phase 3 (2026-09-30): the Windows installer (Inno Setup, found or fetched), installed, run and uninstalled in CI. Before it, Phase 2: `tesserae build --installer`, with macOS's `.app` in a `.dmg`. Before that, M77 (`tesserae build`, one executable on every platform) and M79 (`tre` 0.4.3).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -104,7 +104,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M78 Phase 3, Windows's Inno Setup installer (in CI now), then Phase 4, Linux's AppImage, `.deb` and pacman. M77 and M79 are unreleased; the changelog has them under "Unreleased".
+**Up next:** M78 Phase 4, Linux: an AppImage, a `.deb` and a pacman package. M77 and M79 are unreleased; the changelog has them under "Unreleased".
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -2120,7 +2120,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 78 — Installers for Each Platform
 
-**Status: 🚧 In progress — Phase 2 of 6 done.** The installer half of the user's release intent (M77's quote), built on M77. The user: "push and start M78" (M77 pushed as `40e2ab1..cd3918a`), then chose Inno Setup for Windows and documentation for signing, and asked for Linux: "Can we do a flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's three phases became six.
+**Status: 🚧 In progress — Phase 3 of 6 done.** The installer half of the user's release intent (M77's quote), built on M77. The user: "push and start M78" (M77 pushed as `40e2ab1..cd3918a`), then chose Inno Setup for Windows and documentation for signing, and asked for Linux: "Can we do a flatpak, appimage, .deb, .rpm, and an arch pacman type?" So the draft's three phases became six.
 
 **What's known** (Phase 1's research, sources in LOG):
 - **Runners:** GitHub's Windows runner has Inno Setup 6.7 and WiX 3.14 but no NSIS. The macOS runner has `hdiutil`, as every Mac does. The Ubuntu runner has `dpkg` and `rpm`, but no `appimagetool` or FUSE.
@@ -2159,8 +2159,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 2 — `--installer`, and macOS ✅
 - Step 1: `tesserae build --installer`: a one-folder build handed to the platform's packager; `--app-version`/`--identifier`/`--publisher`/`--description` (checked: numbers and dots, reverse-DNS, one line; a `com.example` placeholder pointed out); a PNG `--icon` made into `.ico`/`.icns` with Pillow. On macOS the `.app`'s `Info.plist` gets the details, it's signed again ad hoc (the edit breaks PyInstaller's signature, and Apple silicon runs nothing unsigned), and `hdiutil` makes a `.dmg` with it beside an Applications link. The single file no longer adds `--windowed` on macOS (the known gap, closed). CI's macOS job mounted the `.dmg`, found the version and identifier, `codesign --verify --deep --strict` passed, and the app copied to Applications drew 30 frames (run 36683667103). 16/16 mutants caught. One test assumed `--windowed` on every platform and failed on macOS; it's pinned to Linux now — ✅
 
-### Phase 3 — Windows ⬜
-- Step 1: an Inno Setup installer (per-user, Start-menu entry, uninstaller), with Inno Setup found or fetched; CI on Windows installs it silently and runs the installed app — ⬜
+### Phase 3 — Windows ✅
+- Step 1: `<name>-<version>-setup.exe` with Inno Setup: a per-user install (no admin rights) into `AppData\\Local\\Programs`, a Start-menu entry, an optional desktop one and an uninstaller, the AppId from the identifier so a new version replaces the old; Inno Setup found (`TESSERAE_ISCC`, the PATH, the usual installs, Tesserae's cache) or the pinned 7.1.0 fetched, checked against GitHub's SHA-256 and unpacked with `/PORTABLE=1`, installing nothing. CI (run 36685061823): built with the runner's Inno Setup 6.7, installed silently, the Start-menu entry found, the installed app drew 30 frames, uninstalled and gone; then built again with the Inno Setup 7.1.0 Tesserae fetched. Along the way, CI's own bugs: PowerShell couldn't run Git Bash's `/d/a/...` path, and took the fetch notice as part of the path; and a test expected `/` in Windows paths. 20/20 mutants caught — ✅
 
 ### Phase 4 — Linux: AppImage, `.deb`, pacman ⬜
 - Step 1: an AppImage (pinned `appimagetool`), and a `.deb` and a pacman package written by Tesserae; CI installs the `.deb` and runs it, and checks the others — ⬜

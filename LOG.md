@@ -1969,3 +1969,10 @@ three phases became six.
     AppId comes from the identifier. It's written as UTF-8 with a BOM.
   - 20/20 mutants caught after one more test: the first run missed that
     nothing checked Windows was registered for `--installer`.
+- Phase 3 verified in CI (run 36685061823): the installer built with the
+  runner's Inno Setup 6.7 installed silently, got its Start-menu entry,
+  ran (30 frames) and uninstalled cleanly. A second build used the Inno
+  Setup 7.1.0 that Tesserae fetched. Three CI-side fixes on the way:
+  PowerShell couldn't run Git Bash's `/d/a/...` venv path; it took the
+  fetch notice as part of the ISCC path; and a test expected `/` in
+  Windows paths. Phase 3 done.
