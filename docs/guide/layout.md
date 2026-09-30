@@ -218,15 +218,17 @@ children:
 - The wheel scrolls it. The keys do too, when it or a node inside it has
   focus: the arrows by a line, Page Up and Page Down by its height, Home
   and End to the ends. A node that handles keys itself keeps them (a
-  text field keeps its arrows, but not Page Up and Page Down). The
-  scroll view is a Tab stop, so it can be scrolled with nothing inside
-  it focusable.
+  text field keeps its arrows, but not Page Up and Page Down). Keys held
+  with Ctrl, Alt or Meta are shortcuts and don't scroll; Shift still
+  does. The scroll view is a Tab stop, so it can be scrolled with nothing
+  inside it focusable.
 - A child that takes focus is scrolled into view, just as far as needed,
   and so is one assistive technology asks to see (`scroll_into_view`).
   (`tre` does all of this since 0.4.2; M73.)
 - `scroll_offset` binds (`bindings: {scroll_offset: "{{ pos.get() }}"}`),
   and `two_way: scroll_offset` writes back where the user scrolled, to
-  save and restore a position.
+  save and restore a position. An offset past the end is held at the end
+  at once, and that is what's written back (`tre` 0.4.3; M79).
 - Its scrollbar is the theme's `outline`.
 - It scrolls vertically only, as `tre`'s does.
 

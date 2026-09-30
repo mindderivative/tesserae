@@ -221,3 +221,29 @@ def test_a_detached_scroller_hears_nothing_more():
     assert heard == [40.0]
     assert scroller._followers == []  # and it lets them go
     assert not [key for key in view._events._slots if key[1] == "scroll"]  # its listener is off the node
+
+
+def test_an_offset_past_the_end_is_held_at_the_end_and_written_back():  # tre 0.4.3 (M79)
+    view, vm, scroll = _view(_spec(bindings={"scroll_offset": "{{ pos.get() }}"}, two_way="scroll_offset"))
+    view.window.advance(16)
+    vm.pos.set(9999.0)  # no frame needed: tre clamps it as it's set, with one `scroll` event
+    assert scroll.get("scroll_offset") == 300.0 and vm.pos.get() == 300.0
+
+
+def test_a_nested_scroll_view_keeps_the_wheel_even_when_its_content_fits():  # tre 0.4.3 (M79)
+    """`tre` 0.4.3 hands a wheel on past a scroll view that doesn't scroll
+    in its direction; every `ScrollView` is vertical, so an inner one keeps
+    a vertical wheel, room or not (no browser-style chaining)."""
+    row = {"id": "only", "kind": "Rect", "style": {"height": 40, "background": "#6750A4"}}
+    inner = {"id": "inner", "kind": "ScrollView", "style": {"height": 40}, "children": [row]}
+    view, vm, scroll = _view(_spec(children=[inner, *_rows()]))
+    view.window.simulate("wheel", node=view.node("only"), delta_y=50.0)  # inner's content fits it
+    assert view._built.outer["inner"].get("scroll_offset") == 0.0 and scroll.get("scroll_offset") == 0.0
+
+
+@pytest.mark.parametrize("modifier, scrolls", [("ctrl", False), ("alt", False), ("meta", False), ("shift", True)])
+def test_a_shortcut_does_not_scroll_but_shift_does(modifier, scrolls):  # tre 0.4.3 (M79)
+    view, vm, scroll = _view(_spec(bindings={"scroll_offset": "{{ pos.get() }}"}, two_way="scroll_offset"))
+    scroll.focus()
+    view.window.simulate("key_down", key="page_down", **{modifier: True})
+    assert scroll.get("scroll_offset") == (100.0 if scrolls else 0.0) and vm.pos.get() == scroll.get("scroll_offset")

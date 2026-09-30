@@ -265,17 +265,6 @@ _OPTIONAL_LAYOUT: dict[str, Any] = {
 }
 
 
-#: A grid's track lists (M74). `tre` takes a string or a list, but not a
-#: bare number, which is how YAML writes one track (`grid_auto_rows: 96`).
-_TRACKS = frozenset({"grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows"})
-
-
-def _track(key: str, value: Any) -> Any:
-    if key in _TRACKS and isinstance(value, (int, float)) and not isinstance(value, bool):
-        return f"{value:g}"
-    return value
-
-
 def _resets(style: dict[str, Any], dropped: frozenset[str]) -> dict[str, Any]:
     """What each dropped M71/M74 key goes back to: `tre`'s default, but a
     row or column gap to the style's `gap`, which sets both."""
@@ -301,7 +290,7 @@ def _layout(style: dict[str, Any]) -> dict[str, Any]:
         "flex_grow": float(style.get("flex_grow", 0.0)),
         "flex_shrink": float(style.get("flex_shrink", 1.0)),
         "flex_basis": style.get("flex_basis", "auto"),
-        **{k: _track(k, style[k]) for k in _OPTIONAL_LAYOUT if k in style},  # M71: only those a style gives
+        **{k: style[k] for k in _OPTIONAL_LAYOUT if k in style},  # M71: only those a style gives
         # `tre` leaves these unset unless given, and `create` won't take None.
         **({"align_items": style["align_items"]} if style.get("align_items") is not None else {}),
         **({"justify_content": style["justify_content"]} if style.get("justify_content") is not None else {}),

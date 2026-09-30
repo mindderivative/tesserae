@@ -68,7 +68,7 @@ with `tesserae new myapp`. What's new: the [changelog](https://mindderivative.gi
 
 ## Install (development)
 
-Tesserae needs **`tre` 0.4.2 or newer**, which is on PyPI as
+Tesserae needs **`tre` 0.4.3 or newer**, which is on PyPI as
 [`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (still
 `import tre`). Installing Tesserae installs it:
 

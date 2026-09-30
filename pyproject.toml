@@ -27,7 +27,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "tesserae-engine>=0.4.2",  # tre, on PyPI (still `import tre`); PyPI's own `tre` is an unrelated regex library
+    "tesserae-engine>=0.4.3",  # tre, on PyPI (still `import tre`); PyPI's own `tre` is an unrelated regex library
     "pyyaml>=6.0",
     "Pillow>=10.0",
     "watchfiles>=1.0",

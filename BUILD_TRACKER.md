@@ -88,8 +88,9 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M76 — One `pip install`, on Every Platform | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
 | M77 — `tesserae build`: an App as One Executable | `████████⬜⬜` 75% | 🚧 In progress — Phase 3 of 4 done |
 | M78 — Installers for Each Platform | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
+| M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 
-**Just closed:** M77 Phase 3: CI builds a generated app into one executable on Linux, macOS and Windows, and each draws frames and exits cleanly. Before it, M77 Phase 2 (`tesserae build [--check]`) and M76 (2026-09-30): one `pip install tesserae-ui` installs everything, as wheels, on Linux x86-64, macOS arm64 and Windows x64 (Python 3.12+), proven in CI on all three and the full suite passing on each; **Tesserae 0.2.0 is on PyPI**, installed from there into a fresh venv and run. Before it, M75 (a node's style from a file).
+**Just closed:** M79: Tesserae on `tre` 0.4.3 (closes `tre` #27): nothing broke, M74's bare-number track conversion is dropped for `tre`'s own, and 0.4.3's scroll changes are tested. Before it, M77 Phase 3: CI builds a generated app into one executable on Linux, macOS and Windows, and each draws frames and exits cleanly. Before it, M77 Phase 2 (`tesserae build [--check]`) and M76 (2026-09-30): one `pip install tesserae-ui` installs everything, as wheels, on Linux x86-64, macOS arm64 and Windows x64 (Python 3.12+), proven in CI on all three and the full suite passing on each; **Tesserae 0.2.0 is on PyPI**, installed from there into a fresh venv and run. Before it, M75 (a node's style from a file).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -2135,3 +2136,18 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 3 — Docs, Tracker ⬜
 - Step 1: installers and signing in the "Releasing your app" guide — ⬜
+
+
+---
+
+## Milestone 79 — `tre` 0.4.3
+
+**Status: ✅ Complete — all 2 phases done (2026-09-30).** `tre`'s session reported v0.4.3 mid-M77 (closing `tre` #27, a bare number as a one-track grid list, and changing how scroll views take keys, wheels and a far `scroll_offset`), asking Tesserae to move to it and report. Verified first: the v0.4.3 release (24 assets), `tesserae-engine` 0.4.3 on PyPI (22 wheels and an sdist), `tre` #27 closed.
+
+### Phase 1 — Move to 0.4.3 ✅
+- Step 1: `.venv` on `tesserae-engine` 0.4.3, the floor `>=0.4.3`, CI's and `release.yml`'s `tre` checkout `ref: v0.4.3`, README and installation page; the suite passed unchanged (2624) and all five examples ran — ✅
+- Step 2: M74's `_track` (a bare number to text for the track lists) dropped: `tre` takes it since #27, reading `96` back as `"96"`; the grid tests pass as they were — ✅
+
+### Phase 2 — 0.4.3's Scroll Changes, Tested ✅
+- Step 1: tests for a `scroll_offset` bound past the end (held at the end at once, and that is what `two_way` writes back), a page key with Ctrl, Alt or Meta (doesn't scroll) and with Shift (does), and a nested `ScrollView` keeping a vertical wheel even when its content fits (`tre` passes a wheel on only past a view that doesn't scroll in its direction, and every `ScrollView` is vertical); the layout guide says so; 2630 passed — ✅
+

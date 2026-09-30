@@ -8,7 +8,7 @@ Tesserae is pre-alpha, and on PyPI as
 pip install tesserae-ui
 ```
 
-That also installs **`tre` 0.4.2 or newer**, which is on PyPI as
+That also installs **`tre` 0.4.3 or newer**, which is on PyPI as
 [`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (imported
 as `tre`). The rest of this page is for working on Tesserae itself, from
 a local editable checkout.
@@ -51,7 +51,7 @@ if you also use `tre` directly).
     --manifest-path /path/to/tre/crates/engine-py/Cargo.toml` with
     Tesserae's `.venv` active. From then on your local results follow
     that checkout -- every rebuild changes them -- so go back to the
-    released one (`pip install --force-reinstall "tesserae-engine>=0.4.2"`)
+    released one (`pip install --force-reinstall "tesserae-engine>=0.4.3"`)
     before trusting a test run. A real-font test reads a font file from
     `tre`'s source tree: set `TRE_SOURCE_DIR` to a `tre` checkout to run
     it (CI does).

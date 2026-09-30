@@ -173,8 +173,9 @@ children:
 
 
 def test_a_bare_number_is_one_track():
-    """`tre` takes a track list as a string or a list, not a bare number,
-    which is how YAML writes one track; the compiler passes it as text."""
+    """How YAML writes one track (`grid_auto_rows: 96`). `tre` takes it as a
+    one-track list since 0.4.3 (`tre` #27, M79); M74's compiler turned it
+    into text itself before."""
     view = _view({**GRID, "grid_template_columns": 100, "grid_auto_rows": 30.0}, _cells(2))
     assert view.node("g").get("grid_template_columns") == "100" and view.node("g").get("grid_auto_rows") == "30"
     assert view.node("c1").get("layout_y") == 30.0 and view.node("c0").get("layout_width") == 100.0

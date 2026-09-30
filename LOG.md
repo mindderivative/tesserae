@@ -1893,3 +1893,21 @@ User: "push and start M77". Phase 1 settled the decisions (see the tracker).
   run write how many. Linux runs under Xvfb and needed
   `libxkbcommon-x11`, which winit loads for an X11 window. All three
   drew 30 frames and exited cleanly.
+
+## M79: `tre` 0.4.3
+
+`tre`'s session reported v0.4.3 during M77. I checked the release (24
+assets), PyPI (22 wheels and an sdist) and that `tre` #27 is closed before
+acting on it.
+
+- Moved `.venv`, the floor (`>=0.4.3`) and CI's and `release.yml`'s `tre`
+  checkout. The suite passed unchanged (2624), and all five examples ran.
+- Dropped M74's bare-number track conversion, since `tre` now does it
+  itself.
+- New tests for 0.4.3's scroll changes: a far offset is held at the end,
+  and `two_way` writes back the end; shortcut keys don't scroll, but Shift
+  does; a nested vertical `ScrollView` keeps the wheel even when its
+  content fits. The last one is what `tre` documents (a wheel passes only
+  views that don't scroll in its direction), unlike a browser's scroll
+  chaining, so it's reported to `tre`'s session as a possible feature,
+  not a bug. 2630 passed.
