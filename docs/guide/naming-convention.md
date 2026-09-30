@@ -21,6 +21,22 @@ Raises `ValueError` immediately if:
 - the two prefixes don't match (`Counter_View.yaml` paired with
   `Settings_ViewModel.py`, say).
 
+## Style, stylesheet and theme files
+
+Three more names say what a YAML file is (M75):
+
+| Suffix | What it holds | Used by |
+|---|---|---|
+| `*_Style.yaml` | one node's style: a mapping of style fields | a node's `style:`, a stylesheet or theme rule's `style:` |
+| `*_Stylesheet.yaml` | a stylesheet: a `styles:` list of rules | `App(stylesheet=)`, `app.load(..., stylesheet=)`, `load_stylesheet` |
+| `*_Theme.yaml` | a theme: `seed:`, `colors:`, `styles:`, ... | `App(default_theme=, custom_theme=)`, `load_theme` |
+
+A node's `style:` given as a file must be a `*_Style.yaml` one. A file
+named for one kind and loaded as another is refused, naming what its
+name says it is -- `load_theme("card_Style.yaml")`, say. A theme or
+stylesheet file with none of these suffixes (`themes/Brand.yaml`) loads
+as before; the suffixes are recommended, not required.
+
 ## Why enforce this at all?
 
 A `ViewModel` is scoped one-per-view-file by convention, so a

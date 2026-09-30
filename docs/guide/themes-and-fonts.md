@@ -68,6 +68,48 @@ view = load_view(
   ValueError: themes/Brand.yaml: custom_theme_spec=: unknown field `colours`, ...
   ```
 
+## A node's style from a file
+
+A node's `style:` can name a `*_Style.yaml` file instead of being
+written inline (M75), so several views can share one:
+
+```yaml
+# Counter_View.yaml
+id: root
+kind: Container
+style: counter_Style.yaml   # or {flex_direction: vertical, width: 240, height: 120, gap: 12, padding: 16}
+children:
+  - id: label
+    kind: Text
+    text: {content: "Count: 0", font_family: Roboto, font_size: 20}
+    style: {width: 200, height: 32, foreground: "#FFFFFF"}
+```
+
+```yaml
+# counter_Style.yaml -- one node's style: a mapping of style fields
+flex_direction: vertical
+width: 240
+height: 120
+gap: 12
+padding: 16
+```
+
+- The file is found next to the file that names it (a view, or a file
+  it `include:`s), and can't be outside that folder -- the same rules as
+  `include:`, which it's read with.
+- `app.run(hot_reload=True)` watches it: an edit restyles the view.
+- It's the whole style: a node's `style:` is a file or a mapping, not
+  both. To vary one node, give it a class and a stylesheet rule.
+- A stylesheet's or a theme's rule can name one too
+  (`- {kind: Rect, class: card, style: card_Style.yaml}`), next to the
+  stylesheet. (An edit to that file is picked up when the stylesheet
+  is next read, not by hot reload.)
+- A component fragment can't name one, as it can't `include:`: its look
+  comes from its params.
+
+See [Naming Convention](naming-convention.md#style-stylesheet-and-theme-files)
+for what the file names mean.
+
 ## Layout rules in stylesheets and themes
 
 A stylesheet's or theme's `styles:` rules can set layout as well as

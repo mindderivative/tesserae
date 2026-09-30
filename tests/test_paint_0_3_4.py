@@ -71,7 +71,8 @@ def test_the_scan_covers_views_fragments_and_docs():
 @pytest.mark.parametrize("label,data", DOCS, ids=[label for label, _ in DOCS])
 def test_no_glyph_color_is_translucent(label, data):
     for node in _nodes(data):
-        color = (node.get("style") or {}).get("foreground")
+        style = node.get("style")
+        color = style.get("foreground") if isinstance(style, dict) else None  # a `*_Style.yaml` file (M75) isn't read here
         if isinstance(color, str) and HEX.match(color):
             assert _alpha(color) == 255, f"{label}: {node.get('id')!r} has glyph color {color}, invisible on tre 0.3.4"
 
@@ -79,6 +80,6 @@ def test_no_glyph_color_is_translucent(label, data):
 @pytest.mark.parametrize("label,data", DOCS, ids=[label for label, _ in DOCS])
 def test_no_node_with_children_sets_opacity(label, data):
     for node in _nodes(data):
-        style = node.get("style") or {}
+        style = node.get("style") if isinstance(node.get("style"), dict) else {}  # (a style file, M75: not read here)
         if "opacity" in style and node.get("children"):
             pytest.fail(f"{label}: {node.get('id')!r} sets opacity {style['opacity']} and has children, which fade too on tre 0.3.4")

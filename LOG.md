@@ -1824,3 +1824,21 @@ User: "push and start M74" (pushed `91ed3b2..9f05cae`, CI green).
 - No known gaps remain.
 
 2590 passed.
+
+## M75: a node's style from a file (#22)
+
+User: "push and start M75" (pushed `9f05cae..d315db7`, CI green).
+
+- `style: counter_Style.yaml` reads a node's style from the file. It's
+  read as an `include:` is: relative to the file that names it, kept
+  inside that folder, cycle-checked, and watched for hot reload.
+- A stylesheet or theme rule's `style:` can name one too.
+- Naming conventions: `*_Style.yaml` is one node's style,
+  `*_Stylesheet.yaml` a stylesheet, `*_Theme.yaml` a theme. Each loader
+  refuses the others' suffixes; names with none still load.
+- M29's generic `include:` already did most of this
+  (`style: {include: ...}` worked before M75).
+- The docs lint assumed a mapping `style:`; it skips a style file now.
+- 16 tests; 14/14 mutants caught.
+
+2610 passed.
