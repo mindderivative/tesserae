@@ -86,11 +86,11 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M74 — Grids in YAML (`tre` #23) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M75 — A Node's Style from a File (#22) | `██████████` 100% | ✅ Complete — all 3 phases done (2026-09-30) |
 | M76 — One `pip install`, on Every Platform | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
-| M77 — `tesserae build`: an App as One Executable | `████████⬜⬜` 75% | 🚧 In progress — Phase 3 of 4 done |
+| M77 — `tesserae build`: an App as One Executable | `██████████` 100% | ✅ Complete — all 4 phases done (2026-09-30) |
 | M78 — Installers for Each Platform | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — draft, refined when it starts |
 | M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 
-**Just closed:** M79: Tesserae on `tre` 0.4.3 (closes `tre` #27): nothing broke, M74's bare-number track conversion is dropped for `tre`'s own, and 0.4.3's scroll changes are tested. Before it, M77 Phase 3: CI builds a generated app into one executable on Linux, macOS and Windows, and each draws frames and exits cleanly. Before it, M77 Phase 2 (`tesserae build [--check]`) and M76 (2026-09-30): one `pip install tesserae-ui` installs everything, as wheels, on Linux x86-64, macOS arm64 and Windows x64 (Python 3.12+), proven in CI on all three and the full suite passing on each; **Tesserae 0.2.0 is on PyPI**, installed from there into a fresh venv and run. Before it, M75 (a node's style from a file).
+**Just closed:** M77 (2026-09-30): `tesserae build` makes an app one executable its users run with nothing installed, built and checked (frames drawn, not just a clean exit) in CI on Linux, macOS and Windows, with a "Releasing Your App" guide. Before it, M79: Tesserae on `tre` 0.4.3 (nothing broke; 0.4.3's scroll changes tested). Before that, M76 (one `pip install`; Tesserae 0.2.0 on PyPI).
 
 User direction, relayed from the `tre` session: "Tesserae should not be pushing files directly to tre. It should be pushing spec information and handling the files itself." Phase 6 (hot reload inside `App.run()`) was added last and is called "Phase 3b" in commits. In detail:
 
@@ -104,7 +104,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M77 Phase 4, the "Releasing your app" guide; then M78 (installers).
+**Up next:** M78 (installers for each platform, and signing) is scoped, waiting for the user to start it. M77 and M79 are unreleased: the changelog has them under "Unreleased".
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -2089,7 +2089,7 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ## Milestone 77 — `tesserae build`: an App as One Executable
 
-**Status: 🚧 In progress — Phase 3 of 4 done.** The user's intent (2026-09-30): "When the developer has completed their application and is ready to release it. They should be able to compile their application into a single executable file or installer, that can be used by any User based on their platform." Then "push and start M77" (M76 pushed as `1bbb361..eb811c3`; Tesserae 0.2.0 on PyPI). This is the executable; M78 the installer. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
+**Status: ✅ Complete — all 4 phases done (2026-09-30).** The user's intent (2026-09-30): "When the developer has completed their application and is ready to release it. They should be able to compile their application into a single executable file or installer, that can be used by any User based on their platform." Then "push and start M77" (M76 pushed as `1bbb361..eb811c3`; Tesserae 0.2.0 on PyPI). This is the executable; M78 the installer. Scoped up front as a draft, refined here as it starts; the recommendations are taken.
 
 **What's known:** PyInstaller 6.22's `--onefile` froze a `tesserae new` app into one 31 MB Linux executable that ran from another folder with nothing installed, given `--collect-data tesserae` and an `--add-data` per view file. An app also loads Python by path: a shell file's panels import `<Name>_ViewModel.py` with `importlib` (`shell_file._import`), which PyInstaller's import analysis can't see. An executable is built on the platform it's for.
 
@@ -2111,8 +2111,8 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 ### Phase 3 — Every Platform ✅
 - Step 1: a `build-executable` CI job builds a `tesserae new --shell` app from the wheel (`[build]` extra) on Linux, macOS and Windows and runs `--check`; `--check` now needs frames drawn, not just a clean exit (`App.run` writes the count to `TESSERAE_FRAMES_REPORT`), since with no display a run returns at once; Linux runs under Xvfb with lavapipe and needed `libxkbcommon-x11` (winit loads it for an X11 window; every Linux desktop has it, the runner image didn't); all three drew 30 frames and exited cleanly (run 36675368102); 6/6 mutants caught — ✅
 
-### Phase 4 — Docs, Tracker ⬜
-- Step 1: a "Releasing your app" guide — ⬜
+### Phase 4 — Docs, Tracker ✅
+- Step 1: a "Releasing Your App" guide (`docs/guide/releasing.md`): the command and its options, building per platform with a GitHub Actions matrix, what the scan takes and leaves, finding files through `__file__` and saving user files elsewhere (the unpacked folder is temporary), start-up (0.55 s against 0.23 s on Linux) and size (41 MB Linux, 25 MB macOS, 30 MB Windows, all measured), `TESSERAE_MAX_FRAMES`/`TESSERAE_FRAMES_REPORT`, and each platform's needs (Linux's libraries and glibc, macOS's PyInstaller `.app` beside the executable, unsigned warnings); linked from Getting Started and a new README "Release an app" section (and the README's duplicated "Install" heading merged); an "Unreleased" changelog section for M77 and M79 — ✅
 
 
 ---

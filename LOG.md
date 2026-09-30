@@ -1893,6 +1893,15 @@ User: "push and start M77". Phase 1 settled the decisions (see the tracker).
   run write how many. Linux runs under Xvfb and needed
   `libxkbcommon-x11`, which winit loads for an X11 window. All three
   drew 30 frames and exited cleanly.
+- Phase 4 (user: "push and start phase 4"): the "Releasing Your App"
+  guide. Its numbers were measured, not assumed: start-up 0.55 s built
+  against 0.23 s from source (Linux), and sizes of 41/25/30 MB (Linux,
+  macOS, Windows, from CI). That the unpacked folder is where `__file__`
+  points came from the CI log. The macOS listing showed PyInstaller also
+  makes a `.app` beside the executable, so the guide says so. The README
+  had "Install" twice; they're now merged, with a "Release an app"
+  section. The changelog gains an "Unreleased" section (M77, M79). M77
+  complete.
 
 ## M79: `tre` 0.4.3
 

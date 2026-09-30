@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased
+
+### Requirements
+
+- **`tre` 0.4.3 or newer** (was 0.4.2).
+
+### Added
+
+- **`tesserae build`**: an app as one executable, which its users run with
+  nothing else installed. `pip install "tesserae-ui[build]"` adds
+  PyInstaller; `--check` runs the result and checks it draws frames. Built
+  and checked in CI on Linux, macOS and Windows. See
+  [Releasing Your App](guide/releasing.md).
+- `TESSERAE_MAX_FRAMES=n` stops `app.run()` after `n` frames, and
+  `TESSERAE_FRAMES_REPORT=<file>` writes how many it drew, for automated
+  runs.
+
+### Changed
+
+- A built (frozen) app runs without hot reload, which has no source files
+  to watch.
+- A bare number as a grid track list (`grid_auto_rows: 96`) is passed to
+  `tre`, which takes it since 0.4.3; Tesserae no longer converts it.
+- On `tre` 0.4.3, a `scroll_offset` set past the end is held at the end at
+  once (and written back through `two_way`), and scroll keys held with
+  Ctrl, Alt or Meta no longer scroll.
+
 ## 0.2.0
 
 Everything since 0.1.0 (M53-M76).

@@ -54,7 +54,7 @@ That makes `dist/notes` (`dist/notes.exe` on Windows), with every file
 under the app's folder inside it, and `--check` runs it briefly to see it
 start. It runs on the kind of computer it was built on, with nothing else
 installed. `--name`, `--icon`, `--console`, `--include` and `--exclude`
-adjust it.
+adjust it; [Releasing Your App](guide/releasing.md) has the details.
 
 The rest of this page builds the same kind of app by hand.
 

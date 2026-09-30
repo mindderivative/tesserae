@@ -47,15 +47,6 @@ reloads, failed reloads naming the file, and warnings. Call
 
 ## Install
 
-Tesserae is on PyPI as [`tesserae-ui`](https://pypi.org/project/tesserae-ui/)
-(imported as `tesserae`; `tesserae` on PyPI is an unrelated project):
-
-```bash
-pip install tesserae-ui
-```
-
-## Install
-
 ```bash
 pip install tesserae-ui
 ```
@@ -63,8 +54,20 @@ pip install tesserae-ui
 That's all: it installs Tesserae and everything it needs, `tre`'s engine
 included, as prebuilt wheels. It needs **Python 3.12 or newer**, on Linux
 x86-64, macOS on Apple silicon or Windows x64 (elsewhere, pip builds `tre`
-from source, which needs Rust). The import name is `tesserae`; start an app
-with `tesserae new myapp`. What's new: the [changelog](https://mindderivative.github.io/tesserae/changelog/).
+from source, which needs Rust). The PyPI name is `tesserae-ui` (`tesserae`
+on PyPI is an unrelated project); the import name is `tesserae`. Start an
+app with `tesserae new myapp`. What's new: the [changelog](https://mindderivative.github.io/tesserae/changelog/).
+
+## Release an app
+
+```bash
+pip install "tesserae-ui[build]"
+tesserae build --check
+```
+
+makes the app one executable, `dist/myapp` (`.exe` on Windows), which its
+users run with nothing else installed. Build on each platform you release
+for; see [Releasing Your App](https://mindderivative.github.io/tesserae/guide/releasing/).
 
 ## Install (development)
 
