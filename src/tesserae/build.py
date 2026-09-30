@@ -234,6 +234,15 @@ def build(app_file: str | Path = "app.py", *, name: str | None = None, icon: str
     return Built(result, [])
 
 
+def _clear(path: Path) -> None:
+    """Removes what's at `path` from an earlier build: a folder, or a file
+    (a single-file build's executable can have the same name)."""
+    if path.is_dir() and not path.is_symlink():
+        shutil.rmtree(path)
+    elif path.exists() or path.is_symlink():
+        path.unlink()
+
+
 def _run(command: list[str]) -> None:
     """Runs a packaging tool, raising its own words if it fails."""
     result = subprocess.run(command, capture_output=True, text=True)
@@ -262,8 +271,7 @@ def _macos(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | None 
     _run(["codesign", "--force", "--deep", "--sign", "-", str(app)])
     dist.mkdir(parents=True, exist_ok=True)
     final = dist / app.name
-    if final.exists():
-        shutil.rmtree(final)
+    _clear(final)
     shutil.copytree(app, final, symlinks=True)
     staging = built / "dmg"
     staging.mkdir()
@@ -405,8 +413,7 @@ def _windows(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | Non
     iscc = find_iscc() or fetch_iscc()
     dist.mkdir(parents=True, exist_ok=True)
     final = dist / name
-    if final.exists():
-        shutil.rmtree(final)
+    _clear(final)
     shutil.copytree(folder, final)
     script = built / f"{name}.iss"
     script.write_text(inno_script(name, info, final, dist, icon), encoding="utf-8-sig")  # Inno reads UTF-8 by its BOM
@@ -593,17 +600,17 @@ def make_appimage(app: Path, name: str, info: AppInfo, icon: Path, work: Path, o
 
 
 def _linux(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | None = None) -> Built:
-    """The app's folder in `dist/<name>`, and from it an AppImage, a
-    `.deb` and a pacman package."""
+    """The app's folder in `dist/<name>-<version>` (`dist/<name>` is a
+    single-file build's executable), and from it an AppImage, a `.deb` and
+    a pacman package."""
     if "/" in name or name.startswith("."):
         raise BuildError(f"{name!r} can't be a Linux program name: no / and no leading .")
     folder = built / name
     if not (folder / name).is_file():
         raise BuildError(f"PyInstaller finished without making {folder / name}")
     dist.mkdir(parents=True, exist_ok=True)
-    final = dist / name
-    if final.exists():
-        shutil.rmtree(final)
+    final = dist / f"{name}-{info.version}"
+    _clear(final)
     shutil.copytree(folder, final, symlinks=True)
     png = linux_icon(icon, built / "icon.png")
     made = [make_appimage(final, name, info, png, built, dist), make_deb(final, name, info, png, dist),

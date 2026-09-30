@@ -407,6 +407,15 @@ def test_the_windows_installer(tmp_path, monkeypatch):
     assert ran[-1][0] == str(Path("C:/fetched/ISCC.exe"))
 
 
+def test_clearing_an_earlier_build(tmp_path):
+    (tmp_path / "folder" / "sub").mkdir(parents=True)
+    (tmp_path / "file").write_text("")
+    (tmp_path / "link").symlink_to(tmp_path / "gone")
+    for name in ("folder", "file", "link", "nothing"):
+        build._clear(tmp_path / name)
+    assert list(tmp_path.iterdir()) == []
+
+
 def test_app_details_on_one_line():
     with pytest.raises(build.BuildError, match="publisher can't span lines"):
         build.AppInfo("x", publisher="Acme\nEvil=1")
@@ -595,10 +604,13 @@ def test_the_linux_installer_makes_all_three(tmp_path, monkeypatch):
                         lambda app, name, info, icon, work, out: made.append(("appimage", app, icon)) or out / "ai")
     _linux_app(tmp_path)
     dist = tmp_path / "dist"
-    result = build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App"), dist)
-    assert result == build.Built(dist / "Demo App" / "Demo App", [dist / "ai", dist / "make_deb", dist / "make_pacman"])
-    assert {m[1] for m in made} == {dist / "Demo App"} and all(m[2].suffix == ".png" for m in made)
-    assert (dist / "Demo App" / "_internal" / "link.so").is_symlink()
-    build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App"), dist)  # over a previous build
+    dist.mkdir()
+    (dist / "Demo App").write_text("a single-file build")  # CI found this clash: not where the folder goes
+    result = build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App", "1.2.0"), dist)
+    app = dist / "Demo App-1.2.0"
+    assert result == build.Built(app / "Demo App", [dist / "ai", dist / "make_deb", dist / "make_pacman"])
+    assert {m[1] for m in made} == {app} and all(m[2].suffix == ".png" for m in made)
+    assert (app / "_internal" / "link.so").is_symlink() and (dist / "Demo App").read_text() == "a single-file build"
+    build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App", "1.2.0"), dist)  # over a previous build
     with pytest.raises(build.BuildError, match="can't be a Linux program name"):
         build._linux(tmp_path / "built", ".hidden", build.AppInfo("hidden"), dist)

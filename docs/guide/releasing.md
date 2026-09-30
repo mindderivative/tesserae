@@ -169,7 +169,7 @@ Linux, for a `tesserae new` app).
   Setup's portable mode, which installs nothing. Inno Setup is free for
   any use; its authors ask companies using it commercially to consider
   [buying a licence](https://jrsoftware.org/isorder.php).
-- **Linux:** three at once, and the app's folder in `dist/notes`:
+- **Linux:** three at once, and the app's folder in `dist/notes-1.2.0`:
     - `notes-1.2.0-x86_64.AppImage` runs on most distributions with no
       install step: download, make executable, run.
     - `notes_1.2.0_amd64.deb` installs on Debian, Ubuntu and their kin
@@ -189,7 +189,7 @@ Linux, for a `tesserae new` app).
     An `.rpm` and a Flatpak are coming next (M78).
 
 `--check` runs the app about to be packed (on macOS the one in
-`dist/notes.app`, elsewhere the one in `dist/notes/`) from an empty
+`dist/notes.app`, on Windows `dist/notes/`, on Linux `dist/notes-1.2.0/`) from an empty
 folder, as with a single file.
 
 ## How it behaves
