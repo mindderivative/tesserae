@@ -229,6 +229,43 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
           if (-not (Test-Path "dist/demo-1.2.1-setup.exe")) { throw "no installer from the fetched Inno Setup" }
 
+      # On Linux, an AppImage, a .deb and a pacman package. The .deb is
+      # installed with apt here, run and removed; the AppImage run as it is
+      # (no FUSE on the runner); the pacman package installed in an Arch
+      # Linux container, with its dependencies from Arch's repositories,
+      # and run there under Xvfb with Mesa's software Vulkan.
+      - name: Build the installers (Linux), install and run each
+        if: runner.os == 'Linux'
+        shell: bash
+        working-directory: work/demo
+        run: |
+          set -euo pipefail
+          sudo apt-get install -y desktop-file-utils
+          xvfb-run -a "$BIN/tesserae" build --installer --check --app-version 1.2.0 --identifier com.example.demo --publisher "Tesserae CI <ci@example.com>"
+          ls -l dist
+          frames() { cat "$RUNNER_TEMP/frames.txt"; }
+          run() { (cd "$RUNNER_TEMP" && TESSERAE_MAX_FRAMES=30 TESSERAE_FRAMES_REPORT="$RUNNER_TEMP/frames.txt" xvfb-run -a "$@"); }
+
+          sudo apt-get install -y ./dist/demo_1.2.0_amd64.deb
+          test -L /usr/bin/demo && test -x /opt/demo/demo
+          desktop-file-validate /usr/share/applications/com.example.demo.desktop
+          run demo && echo ".deb: the installed app drew $(frames) frames" && test "$(frames)" = 30
+          sudo apt-get remove -y demo && test ! -e /opt/demo && test ! -e /usr/bin/demo
+
+          APPIMAGE_EXTRACT_AND_RUN=1 run "$PWD/dist/demo-1.2.0-x86_64.AppImage"
+          echo "AppImage: drew $(frames) frames" && test "$(frames)" = 30
+
+          docker run --rm -v "$PWD/dist:/pkg:ro" archlinux:latest bash -euc '
+            pacman -Syu --noconfirm --needed xorg-server-xvfb vulkan-swrast > /dev/null
+            pacman -U --noconfirm /pkg/demo-1.2.0-1-x86_64.pkg.tar.xz
+            pacman -Qi demo | head -3
+            pacman -Qk demo
+            desktop-file-validate /usr/share/applications/com.example.demo.desktop 2>/dev/null || true
+            cd /tmp && TESSERAE_MAX_FRAMES=30 TESSERAE_FRAMES_REPORT=/tmp/frames.txt xvfb-run -a demo
+            echo "pacman: the installed app drew $(cat /tmp/frames.txt) frames"
+            test "$(cat /tmp/frames.txt)" = 30
+            pacman -R --noconfirm demo && test ! -e /opt/demo'
+
       - uses: actions/upload-artifact@v4
         with:
           name: demo-${{ matrix.os }}

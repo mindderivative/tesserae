@@ -29,12 +29,16 @@ from __future__ import annotations
 
 import fnmatch
 import hashlib
+import io
 import os
 import plistlib
 import re
 import shutil
+import stat
 import subprocess
 import sys
+import tarfile
+import time
 import tempfile
 import urllib.request
 import uuid
@@ -311,18 +315,27 @@ def _download(url: str, to: Path) -> None:
         shutil.copyfileobj(response, out)
 
 
+def _fetch(what: str, url: str, sha256: str, to: Path) -> Path:
+    """Downloads `url` to `to` (once: a file already there is kept) and
+    checks it against its pinned SHA-256, deleting it if it doesn't match."""
+    if to.is_file():
+        return to
+    to.parent.mkdir(parents=True, exist_ok=True)
+    print(f"fetching {what} from {url.split('/releases/')[0].removeprefix('https://')}, once, into {to.parent}")
+    _download(url, to)
+    digest = hashlib.sha256(to.read_bytes()).hexdigest()
+    if digest != sha256:
+        to.unlink()
+        raise BuildError(f"the {what} download's SHA-256 is {digest}, not {sha256}: not using it")
+    return to
+
+
 def fetch_iscc() -> Path:
     """Fetches the pinned Inno Setup into `tools_dir()`, checks its
     digest, and unpacks it there in portable mode (installing nothing)."""
     tools = tools_dir()
-    tools.mkdir(parents=True, exist_ok=True)
-    setup = tools / f"innosetup-{INNO_VERSION}-x64.exe"
-    print(f"fetching Inno Setup {INNO_VERSION} (14 MB) from github.com/jrsoftware/issrc, once, into {tools}")
-    _download(INNO_URL, setup)
-    digest = hashlib.sha256(setup.read_bytes()).hexdigest()
-    if digest != INNO_SHA256:
-        setup.unlink()
-        raise BuildError(f"the Inno Setup download's SHA-256 is {digest}, not {INNO_SHA256}: not using it")
+    setup = _fetch(f"Inno Setup {INNO_VERSION} (14 MB)", INNO_URL, INNO_SHA256,
+                   tools / f"innosetup-{INNO_VERSION}-x64.exe")
     folder = tools / f"innosetup-{INNO_VERSION}"
     _run([str(setup), "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CURRENTUSER", "/PORTABLE=1",
           f"/DIR={folder}"])
@@ -404,8 +417,202 @@ def _windows(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | Non
     return Built(final / f"{name}.exe", [setup])
 
 
+# -- Linux: AppImage, .deb, pacman (M78) -------------------------------------------
+
+#: `appimagetool` and the AppImage runtime it puts at the front of an
+#: AppImage, pinned and checked against GitHub's digests; passing the
+#: runtime keeps `appimagetool` from downloading one on every build.
+APPIMAGETOOL_URL = "https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage"
+APPIMAGETOOL_SHA256 = "ed4ce84f0d9caff66f50bcca6ff6f35aae54ce8135408b3fa33abfc3cb384eb0"
+RUNTIME_URL = "https://github.com/AppImage/type2-runtime/releases/download/20251108/runtime-x86_64"
+RUNTIME_SHA256 = "2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d"
+
+#: What the app needs from a Linux system that PyInstaller doesn't bundle:
+#: the Vulkan loader (and a driver) and the X11 keyboard library winit loads.
+DEB_DEPENDS = "libvulkan1, libxkbcommon-x11-0"
+DEB_RECOMMENDS = "mesa-vulkan-drivers"
+PACMAN_DEPENDS = ("vulkan-icd-loader", "libxkbcommon-x11")
+PACMAN_OPTDEPENDS = ("vulkan-driver: a Vulkan driver for the GPU",)
+
+
+def linux_icon(icon: Path | None, out: Path) -> Path:
+    """A 256 px PNG for the desktop entry: the app's icon fitted to a
+    square, or, with none, a plain one (AppImage needs an icon)."""
+    from PIL import Image
+
+    square = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    if icon is not None and icon.suffix.lower() == ".png":
+        image = Image.open(icon).convert("RGBA")
+        image.thumbnail((256, 256))
+        square.paste(image, ((256 - image.width) // 2, (256 - image.height) // 2))
+    else:
+        square.paste((103, 80, 164, 255), (32, 32, 224, 224))
+    square.save(out)
+    return out
+
+
+def desktop_entry(name: str, info: AppInfo, exec_path: str) -> str:
+    """The freedesktop.org entry that puts the app in the menu."""
+    quoted = exec_path if " " not in exec_path else f'"{exec_path}"'
+    lines = ["[Desktop Entry]", "Type=Application", f"Name={name}", f"Exec={quoted}", f"Icon={info.identifier}",
+             "Terminal=false", "Categories=Utility;"]
+    if info.description:
+        lines.insert(3, f"Comment={info.description}")
+    return "\n".join(lines) + "\n"
+
+
+def _tree(folder: Path) -> list[tuple[str, Path]]:
+    """`folder`'s files and folders as (relative POSIX path, path), sorted."""
+    return sorted((p.relative_to(folder).as_posix(), p) for p in folder.rglob("*"))
+
+
+def _add(tar: tarfile.TarFile, arcname: str, path: Path | None = None, *, data: bytes | None = None,
+         mode: int = 0o644, link: str | None = None, folder: bool = False) -> None:
+    """One entry, owned by root, as a system package's files are."""
+    info = tarfile.TarInfo(arcname)
+    info.uname = info.gname = "root"  # uid and gid are 0 already
+    info.mtime = int(time.time())
+    if link is not None:
+        info.type, info.linkname, info.mode = tarfile.SYMTYPE, link, 0o777
+        tar.addfile(info)
+    elif folder or (path is not None and path.is_dir() and not path.is_symlink()):
+        info.type, info.mode = tarfile.DIRTYPE, 0o755
+        tar.addfile(info)
+    elif path is not None and path.is_symlink():
+        info.type, info.linkname, info.mode = tarfile.SYMTYPE, os.readlink(path), 0o777
+        tar.addfile(info)
+    else:
+        content = data if data is not None else path.read_bytes()
+        info.size = len(content)
+        executable = path is not None and path.stat().st_mode & stat.S_IXUSR
+        info.mode = 0o755 if executable else mode
+        tar.addfile(info, io.BytesIO(content))
+
+
+def _system_files(tar: tarfile.TarFile, app: Path, name: str, info: AppInfo, icon: Path, prefix: str = "") -> int:
+    """The installed layout, under `prefix`: the app in `/opt/<slug>`, a
+    `/usr/bin/<slug>` link, the desktop entry and the icon. Returns the
+    bytes installed."""
+    pkg = slug(name)
+    size = 0
+    parents = ["opt", "usr", "usr/bin", "usr/share", "usr/share/applications", "usr/share/icons",
+               "usr/share/icons/hicolor", "usr/share/icons/hicolor/256x256", "usr/share/icons/hicolor/256x256/apps"]
+    for folder in parents:
+        _add(tar, prefix + folder, folder=True)
+    _add(tar, f"{prefix}opt/{pkg}", folder=True)
+    for rel, path in _tree(app):
+        _add(tar, f"{prefix}opt/{pkg}/{rel}", path)
+        size += path.stat().st_size if path.is_file() and not path.is_symlink() else 0
+    _add(tar, f"{prefix}usr/bin/{pkg}", link=f"/opt/{pkg}/{name}")
+    entry = desktop_entry(name, info, f"/opt/{pkg}/{name}").encode()
+    _add(tar, f"{prefix}usr/share/applications/{info.identifier}.desktop", data=entry)
+    _add(tar, f"{prefix}usr/share/icons/hicolor/256x256/apps/{info.identifier}.png", data=icon.read_bytes())
+    return size + len(entry) + icon.stat().st_size
+
+
+def _ar(members: list[tuple[str, bytes]]) -> bytes:
+    """A common-format `ar` archive, as a `.deb` is."""
+    out = [b"!<arch>\n"]
+    for member, content in members:
+        out.append(f"{member:<16}{int(time.time()):<12}{0:<6}{0:<6}{'100644':<8}{len(content):<10}`\n".encode())
+        out.append(content + (b"\n" if len(content) % 2 else b""))
+    return b"".join(out)
+
+
+def make_deb(app: Path, name: str, info: AppInfo, icon: Path, out: Path) -> Path:
+    """A `.deb` (Debian, Ubuntu and their kin): control and data tars in
+    an `ar` archive, written here rather than with `dpkg-deb`."""
+    pkg = slug(name)
+    data = io.BytesIO()
+    with tarfile.open(fileobj=data, mode="w:gz", format=tarfile.GNU_FORMAT) as tar:
+        size = _system_files(tar, app, name, info, icon, prefix="./")
+    control_text = "\n".join([
+        f"Package: {pkg}", f"Version: {info.version}", "Architecture: amd64",
+        f"Maintainer: {info.publisher or name}", f"Installed-Size: {(size + 1023) // 1024}",
+        f"Depends: {DEB_DEPENDS}", f"Recommends: {DEB_RECOMMENDS}", "Section: utils", "Priority: optional",
+        f"Description: {info.description or name}", ""]).encode()
+    control = io.BytesIO()
+    with tarfile.open(fileobj=control, mode="w:gz", format=tarfile.GNU_FORMAT) as tar:
+        _add(tar, ".", folder=True)
+        _add(tar, "./control", data=control_text)
+    deb = out / f"{pkg}_{info.version}_amd64.deb"
+    deb.write_bytes(_ar([("debian-binary", b"2.0\n"), ("control.tar.gz", control.getvalue()),
+                         ("data.tar.gz", data.getvalue())]))
+    return deb
+
+
+def make_pacman(app: Path, name: str, info: AppInfo, icon: Path, out: Path) -> Path:
+    """An Arch Linux package: `.PKGINFO` and the files in one tar, xz
+    compressed (pacman reads it as it reads zstd, and Python has no zstd
+    before 3.14)."""
+    pkg = slug(name)
+    body = io.BytesIO()
+    with tarfile.open(fileobj=body, mode="w", format=tarfile.GNU_FORMAT) as files:
+        size = _system_files(files, app, name, info, icon)
+    pkginfo = "\n".join([
+        f"pkgname = {pkg}", f"pkgbase = {pkg}", f"pkgver = {info.version}-1",
+        f"pkgdesc = {info.description or name}", f"builddate = {int(time.time())}",
+        f"packager = {info.publisher or 'Unknown Packager'}", f"size = {size}", "arch = x86_64",
+        "license = custom", *(f"depend = {d}" for d in PACMAN_DEPENDS),
+        *(f"optdepend = {d}" for d in PACMAN_OPTDEPENDS), ""]).encode()
+    package = out / f"{pkg}-{info.version}-1-x86_64.pkg.tar.xz"
+    with tarfile.open(package, mode="w:xz", format=tarfile.GNU_FORMAT) as tar:
+        _add(tar, ".PKGINFO", data=pkginfo)
+        body.seek(0)
+        with tarfile.open(fileobj=body) as files:
+            for member in files.getmembers():
+                tar.addfile(member, files.extractfile(member) if member.isfile() else None)
+    return package
+
+
+def make_appimage(app: Path, name: str, info: AppInfo, icon: Path, work: Path, out: Path) -> Path:
+    """An AppImage (runs on most distributions, with no install step):
+    an AppDir with the app, an `AppRun`, the desktop entry and icon,
+    packed by the pinned `appimagetool` with the pinned runtime."""
+    tools = tools_dir()
+    tool = _fetch("appimagetool 1.9.1 (15 MB)", APPIMAGETOOL_URL, APPIMAGETOOL_SHA256,
+                  tools / "appimagetool-1.9.1-x86_64.AppImage")
+    tool.chmod(0o755)
+    runtime = _fetch("the AppImage runtime (1 MB)", RUNTIME_URL, RUNTIME_SHA256, tools / "runtime-20251108-x86_64")
+    appdir = work / f"{slug(name)}.AppDir"
+    shutil.copytree(app, appdir / "usr" / "lib" / slug(name), symlinks=True)
+    run = appdir / "AppRun"
+    run.write_text(f'#!/bin/sh\nHERE="$(dirname "$(readlink -f "$0")")"\n'
+                   f'exec "$HERE/usr/lib/{slug(name)}/{name}" "$@"\n', encoding="utf-8")
+    run.chmod(0o755)
+    (appdir / f"{info.identifier}.desktop").write_text(desktop_entry(name, info, "AppRun"), encoding="utf-8")
+    shutil.copy(icon, appdir / f"{info.identifier}.png")
+    shutil.copy(icon, appdir / ".DirIcon")
+    image = out / f"{name}-{info.version}-x86_64.AppImage"
+    env = {**os.environ, "ARCH": "x86_64", "APPIMAGE_EXTRACT_AND_RUN": "1"}  # no FUSE needed, as in CI
+    result = subprocess.run([str(tool), "--no-appstream", "--runtime-file", str(runtime), str(appdir), str(image)],
+                            capture_output=True, text=True, env=env)
+    if result.returncode != 0 or not image.is_file():
+        raise BuildError(f"appimagetool failed ({result.returncode}): {(result.stderr or result.stdout).strip()}")
+    return image
+
+
+def _linux(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | None = None) -> Built:
+    """The app's folder in `dist/<name>`, and from it an AppImage, a
+    `.deb` and a pacman package."""
+    if "/" in name or name.startswith("."):
+        raise BuildError(f"{name!r} can't be a Linux program name: no / and no leading .")
+    folder = built / name
+    if not (folder / name).is_file():
+        raise BuildError(f"PyInstaller finished without making {folder / name}")
+    dist.mkdir(parents=True, exist_ok=True)
+    final = dist / name
+    if final.exists():
+        shutil.rmtree(final)
+    shutil.copytree(folder, final, symlinks=True)
+    png = linux_icon(icon, built / "icon.png")
+    made = [make_appimage(final, name, info, png, built, dist), make_deb(final, name, info, png, dist),
+            make_pacman(final, name, info, png, dist)]
+    return Built(final / name, made)
+
+
 #: Each platform's installer, from PyInstaller's one-folder build.
-_INSTALLERS = {"darwin": _macos, "win32": _windows}
+_INSTALLERS = {"darwin": _macos, "win32": _windows, "linux": _linux}
 
 
 @dataclass

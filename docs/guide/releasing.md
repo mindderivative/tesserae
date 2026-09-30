@@ -169,11 +169,27 @@ Linux, for a `tesserae new` app).
   Setup's portable mode, which installs nothing. Inno Setup is free for
   any use; its authors ask companies using it commercially to consider
   [buying a licence](https://jrsoftware.org/isorder.php).
-- **Linux:** coming next (M78): an AppImage, `.deb`, pacman package,
-  `.rpm` and Flatpak. Until then `--installer` there says so.
+- **Linux:** three at once, and the app's folder in `dist/notes`:
+    - `notes-1.2.0-x86_64.AppImage` runs on most distributions with no
+      install step: download, make executable, run.
+    - `notes_1.2.0_amd64.deb` installs on Debian, Ubuntu and their kin
+      (`sudo apt install ./notes_1.2.0_amd64.deb`).
+    - `notes-1.2.0-1-x86_64.pkg.tar.xz` installs on Arch Linux and its kin
+      (`sudo pacman -U ...`).
+
+    The packages put the app in `/opt/notes`, a `notes` command in
+    `/usr/bin`, and a menu entry (named after `--identifier`) with its
+    icon; they depend on the Vulkan loader and `libxkbcommon-x11`, which a
+    desktop has. The package name is the app's name in lower case with
+    dashes (`Demo App` is `demo-app`). Tesserae writes the `.deb` and the
+    pacman package itself; for the AppImage it fetches `appimagetool`
+    1.9.1 and the AppImage runtime (16 MB together, from their GitHub
+    releases, checked against the releases' SHA-256), once, into
+    `~/.cache/tesserae/tools`. With no `--icon`, the menu gets a plain one.
+    An `.rpm` and a Flatpak are coming next (M78).
 
 `--check` runs the app about to be packed (on macOS the one in
-`dist/notes.app`, on Windows `dist/notes/notes.exe`) from an empty
+`dist/notes.app`, elsewhere the one in `dist/notes/`) from an empty
 folder, as with a single file.
 
 ## How it behaves

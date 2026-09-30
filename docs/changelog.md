@@ -18,7 +18,9 @@
   publisher in `Info.plist`) in a `.dmg`. On Windows, an Inno Setup
   installer that needs no admin rights, with a Start-menu entry and an
   uninstaller; Tesserae fetches a pinned Inno Setup if there's none.
-  Linux follows. A PNG `--icon` works on every platform.
+  On Linux, an AppImage, a `.deb` and a pacman package (the latter two
+  written by Tesserae; `appimagetool` fetched, pinned). A PNG `--icon`
+  works on every platform.
 - `TESSERAE_MAX_FRAMES=n` stops `app.run()` after `n` frames, and
   `TESSERAE_FRAMES_REPORT=<file>` writes how many it drew, for automated
   runs.

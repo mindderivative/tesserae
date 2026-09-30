@@ -4,6 +4,7 @@ PyInstaller's command line, how `App.run` behaves in a built app
 real build of a generated shell app run from somewhere else.
 """
 
+import io
 import os
 import subprocess
 import sys
@@ -411,8 +412,8 @@ def test_app_details_on_one_line():
         build.AppInfo("x", publisher="Acme\nEvil=1")
 
 
-@pytest.mark.parametrize("platform", ["darwin", "win32"])
-def test_installer_is_ready_on_macos_and_windows(tmp_path, capsys, monkeypatch, platform):
+@pytest.mark.parametrize("platform", ["darwin", "win32", "linux"])
+def test_installer_is_ready_on_every_platform(tmp_path, capsys, monkeypatch, platform):
     def stop():
         raise build.BuildError("got as far as building")
 
@@ -420,3 +421,184 @@ def test_installer_is_ready_on_macos_and_windows(tmp_path, capsys, monkeypatch, 
     monkeypatch.setattr(build, "_pyinstaller", stop)
     assert cli.main(["build", "--installer", str(_app_folder(tmp_path))]) == 2
     assert "got as far as building" in capsys.readouterr().err
+
+
+# -- M78: Linux, AppImage, .deb, pacman ----------------------------------------------
+
+def _linux_app(tmp_path, name="Demo App"):
+    folder = tmp_path / "built" / name
+    (folder / "_internal").mkdir(parents=True)
+    (folder / name).write_bytes(b"\x7fELF")
+    (folder / name).chmod(0o755)
+    (folder / "_internal" / "lib.so").write_bytes(b"lib")
+    (folder / "_internal" / "link.so").symlink_to("lib.so")
+    return folder
+
+
+def test_the_desktop_entry():
+    info = build.AppInfo("Demo App", "1.0", "com.acme.demo", description="Takes notes")
+    assert build.desktop_entry("Demo App", info, "/opt/demo-app/Demo App").splitlines() == [
+        "[Desktop Entry]", "Type=Application", "Name=Demo App", "Comment=Takes notes",
+        'Exec="/opt/demo-app/Demo App"', "Icon=com.acme.demo", "Terminal=false", "Categories=Utility;"]
+    assert "Comment" not in build.desktop_entry("x", build.AppInfo("x"), "AppRun")
+    assert "Exec=AppRun" in build.desktop_entry("x", build.AppInfo("x"), "AppRun")
+
+
+def test_the_linux_icon(tmp_path):
+    from PIL import Image
+
+    wide = tmp_path / "wide.png"
+    Image.new("RGBA", (400, 200), (255, 0, 0, 255)).save(wide)
+    icon = Image.open(build.linux_icon(wide, tmp_path / "a.png"))
+    assert icon.size == (256, 256) and icon.getpixel((128, 128))[:3] == (255, 0, 0)
+    assert icon.getpixel((128, 10))[3] == 0  # fitted, not stretched: clear above and below
+    assert icon.getpixel((128, 60))[3] == 0 and icon.getpixel((128, 70))[:3] == (255, 0, 0)  # scaled to 256x128
+    plain = Image.open(build.linux_icon(None, tmp_path / "b.png"))
+    assert plain.size == (256, 256) and plain.getpixel((128, 128)) == (103, 80, 164, 255)
+
+
+def _ar_members(data: bytes) -> dict[str, bytes]:
+    assert data.startswith(b"!<arch>\n")
+    members, at = {}, 8
+    while at < len(data):
+        header = data[at:at + 60]
+        assert header[58:60] == b"`\n"
+        name, size = header[:16].decode().strip(), int(header[48:58])
+        assert header[40:48].decode().strip() == "100644"
+        members[name] = data[at + 60:at + 60 + size]
+        at += 60 + size + size % 2
+    return members
+
+
+def test_an_ar_archive_pads_each_member_to_an_even_length():
+    data = build._ar([("odd", b"abc"), ("even", b"ab")])
+    assert _ar_members(data) == {"odd": b"abc", "even": b"ab"}
+    assert data[8 + 60:8 + 60 + 4] == b"abc\n" and len(data) == 8 + 60 + 4 + 60 + 2
+
+
+def test_the_deb(tmp_path):
+    import tarfile
+
+    app = _linux_app(tmp_path)
+    icon = build.linux_icon(None, tmp_path / "i.png")
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme <a@acme.example>", "Takes notes")
+    deb = build.make_deb(app, "Demo App", info, icon, tmp_path)
+    assert deb == tmp_path / "demo-app_1.2.0_amd64.deb"
+    members = _ar_members(deb.read_bytes())
+    assert list(members) == ["debian-binary", "control.tar.gz", "data.tar.gz"] and members["debian-binary"] == b"2.0\n"
+    with tarfile.open(fileobj=io.BytesIO(members["control.tar.gz"])) as tar:
+        control = tar.extractfile("./control").read().decode().splitlines()
+    assert control[:4] == ["Package: demo-app", "Version: 1.2.0", "Architecture: amd64",
+                           "Maintainer: Acme <a@acme.example>"]
+    assert f"Depends: {build.DEB_DEPENDS}" in control and "Description: Takes notes" in control
+    with tarfile.open(fileobj=io.BytesIO(members["data.tar.gz"])) as tar:
+        entries = {m.name: m for m in tar.getmembers()}
+    exe = entries["./opt/demo-app/Demo App"]
+    assert exe.mode == 0o755 and exe.uid == 0 and exe.uname == "root"
+    assert entries["./opt/demo-app/_internal/lib.so"].mode == 0o644
+    assert entries["./opt/demo-app/_internal/link.so"].linkname == "lib.so"
+    assert entries["./usr/bin/demo-app"].linkname == "/opt/demo-app/Demo App"
+    assert "./usr/share/applications/com.acme.demo.desktop" in entries
+    assert "./usr/share/icons/hicolor/256x256/apps/com.acme.demo.png" in entries
+    assert all(entries[p].isdir() for p in ("./opt", "./usr/bin", "./usr/share/icons/hicolor/256x256/apps"))
+    size = int(next(line for line in control if line.startswith("Installed-Size")).split()[1])
+    assert size == (len(b"\x7fELF") + 3 + len(build.desktop_entry("Demo App", info, "/opt/demo-app/Demo App"))
+                    + icon.stat().st_size + 1023) // 1024
+
+
+def test_the_pacman_package(tmp_path):
+    import tarfile
+
+    app = _linux_app(tmp_path)
+    icon = build.linux_icon(None, tmp_path / "i.png")
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme", "Takes notes")
+    package = build.make_pacman(app, "Demo App", info, icon, tmp_path)
+    assert package == tmp_path / "demo-app-1.2.0-1-x86_64.pkg.tar.xz"
+    with tarfile.open(package) as tar:
+        names = tar.getnames()
+        pkginfo = tar.extractfile(".PKGINFO").read().decode().splitlines()
+        exe = tar.getmember("opt/demo-app/Demo App")
+        link = tar.getmember("usr/bin/demo-app")
+    assert names[0] == ".PKGINFO" and "usr/share/applications/com.acme.demo.desktop" in names
+    assert exe.mode == 0o755 and link.linkname == "/opt/demo-app/Demo App"
+    for line in ["pkgname = demo-app", "pkgver = 1.2.0-1", "pkgdesc = Takes notes", "packager = Acme",
+                 "arch = x86_64", "depend = vulkan-icd-loader", "depend = libxkbcommon-x11"]:
+        assert line in pkginfo, line
+
+
+def test_the_appimage_and_its_pinned_tools(tmp_path, monkeypatch):
+    """`appimagetool` itself runs in CI; here it's recorded."""
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "cache"))
+    monkeypatch.delenv("LOCALAPPDATA", raising=False)
+    fetched = []
+
+    def fetch(what, url, sha256, to):
+        fetched.append((url, sha256, to.name))
+        to.parent.mkdir(parents=True, exist_ok=True)
+        to.write_text("")
+        return to
+
+    monkeypatch.setattr(build, "_fetch", fetch)
+    ran = {}
+
+    def tool(command, capture_output, text, env):
+        ran["command"], ran["env"] = command, env
+        Path(command[-1]).write_text("")
+        return build.subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(build.subprocess, "run", tool)
+    app = _linux_app(tmp_path)
+    icon = build.linux_icon(None, tmp_path / "i.png")
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo")
+    image = build.make_appimage(app, "Demo App", info, icon, tmp_path / "work", tmp_path)
+    assert image == tmp_path / "Demo App-1.2.0-x86_64.AppImage"
+    assert [f[:2] for f in fetched] == [(build.APPIMAGETOOL_URL, build.APPIMAGETOOL_SHA256),
+                                       (build.RUNTIME_URL, build.RUNTIME_SHA256)]
+    appdir = tmp_path / "work" / "demo-app.AppDir"
+    tools = tmp_path / "cache" / "tesserae" / "tools"
+    assert ran["command"] == [str(tools / fetched[0][2]), "--no-appstream", "--runtime-file",
+                              str(tools / fetched[1][2]), str(appdir), str(image)]
+    assert ran["env"]["ARCH"] == "x86_64" and ran["env"]["APPIMAGE_EXTRACT_AND_RUN"] == "1"
+    run = appdir / "AppRun"
+    assert os.access(run, os.X_OK) and 'exec "$HERE/usr/lib/demo-app/Demo App" "$@"' in run.read_text()
+    assert (appdir / "usr" / "lib" / "demo-app" / "Demo App").is_file()
+    assert (appdir / "usr" / "lib" / "demo-app" / "_internal" / "link.so").is_symlink()
+    assert "Exec=AppRun" in (appdir / "com.acme.demo.desktop").read_text()
+    assert (appdir / "com.acme.demo.png").read_bytes() == (appdir / ".DirIcon").read_bytes() == icon.read_bytes()
+
+    def failing(command, capture_output, text, env):
+        return build.subprocess.CompletedProcess(command, 1, "", "no FUSE")
+
+    monkeypatch.setattr(build.subprocess, "run", failing)
+    with pytest.raises(build.BuildError, match="appimagetool failed \\(1\\): no FUSE"):
+        build.make_appimage(app, "Demo App", info, icon, tmp_path / "work2", tmp_path)
+
+
+def test_a_fetched_tool_is_kept_and_checked(tmp_path, monkeypatch, capsys):
+    downloads = []
+    monkeypatch.setattr(build, "_download", lambda url, to: (downloads.append(url), to.write_bytes(b"tool")))
+    good = build.hashlib.sha256(b"tool").hexdigest()
+    to = tmp_path / "tools" / "t"
+    assert build._fetch("a tool", "https://github.com/o/r/releases/download/1/t", good, to) == to
+    assert build._fetch("a tool", "https://github.com/o/r/releases/download/1/t", good, to) == to
+    assert len(downloads) == 1 and "fetching a tool from github.com/o/r, once" in capsys.readouterr().out
+    with pytest.raises(build.BuildError, match="SHA-256 is .*, not bad: not using it"):
+        build._fetch("a tool", "https://x/releases/y", "bad", tmp_path / "other")
+    assert not (tmp_path / "other").exists()
+
+
+def test_the_linux_installer_makes_all_three(tmp_path, monkeypatch):
+    made = []
+    for fn in ("make_deb", "make_pacman"):
+        monkeypatch.setattr(build, fn, lambda app, name, info, icon, out, fn=fn: made.append((fn, app, icon)) or out / fn)
+    monkeypatch.setattr(build, "make_appimage",
+                        lambda app, name, info, icon, work, out: made.append(("appimage", app, icon)) or out / "ai")
+    _linux_app(tmp_path)
+    dist = tmp_path / "dist"
+    result = build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App"), dist)
+    assert result == build.Built(dist / "Demo App" / "Demo App", [dist / "ai", dist / "make_deb", dist / "make_pacman"])
+    assert {m[1] for m in made} == {dist / "Demo App"} and all(m[2].suffix == ".png" for m in made)
+    assert (dist / "Demo App" / "_internal" / "link.so").is_symlink()
+    build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App"), dist)  # over a previous build
+    with pytest.raises(build.BuildError, match="can't be a Linux program name"):
+        build._linux(tmp_path / "built", ".hidden", build.AppInfo("hidden"), dist)
