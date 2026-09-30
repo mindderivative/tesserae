@@ -66,8 +66,11 @@ tesserae build --check
 ```
 
 makes the app one executable, `dist/myapp` (`.exe` on Windows), which its
-users run with nothing else installed. Build on each platform you release
-for; see [Releasing Your App](https://mindderivative.github.io/tesserae/guide/releasing/).
+users run with nothing else installed. `tesserae build --installer` makes
+each platform's installer instead: a `.dmg` on macOS, a setup `.exe` on
+Windows, and an AppImage, `.deb`, pacman package, `.rpm` and Flatpak on
+Linux. Build on each platform you release for; signing with your own
+certificates, and the rest, is in [Releasing Your App](https://mindderivative.github.io/tesserae/guide/releasing/).
 
 ## Install (development)
 

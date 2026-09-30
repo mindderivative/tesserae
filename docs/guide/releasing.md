@@ -151,7 +151,7 @@ Linux, for a `tesserae new` app).
   to the app beside a link to Applications, to drag it onto. The version,
   identifier and publisher are in the app's `Info.plist`, and it's signed
   ad hoc (Apple silicon runs nothing unsigned) -- not with a Developer ID,
-  so Gatekeeper still asks the first time; see signing below.
+  so Gatekeeper still asks the first time; see [Signing](#signing).
 - **Windows:** `dist/notes-1.2.0-setup.exe`, made with
   [Inno Setup](https://jrsoftware.org/isinfo.php), and the app's folder
   in `dist/notes`. The installer needs no admin rights: it installs for
@@ -211,6 +211,28 @@ Linux, for a `tesserae new` app).
 `dist/notes.app`, on Windows `dist/notes/`, on Linux `dist/notes-1.2.0/`) from an empty
 folder, as with a single file.
 
+## Installing and uninstalling
+
+What your users do with each installer, for `notes` at 1.2.0 (the
+package name is the app's name in lower case with dashes, and the
+Flatpak ID is your `--identifier`):
+
+| Installer | Install | Uninstall |
+|---|---|---|
+| macOS `.dmg` | Open it and drag `notes.app` onto Applications | Drag `notes.app` from Applications to the Trash |
+| Windows `-setup.exe` | Run it; silently, `notes-1.2.0-setup.exe /VERYSILENT /CURRENTUSER` | Settings › Apps, or `unins000.exe /VERYSILENT` in the app's folder |
+| AppImage | `chmod +x notes-1.2.0-x86_64.AppImage`, then run it | Delete the file |
+| `.deb` | `sudo apt install ./notes_1.2.0_amd64.deb` | `sudo apt remove notes` |
+| pacman | `sudo pacman -U notes-1.2.0-1-x86_64.pkg.tar.xz` | `sudo pacman -R notes` |
+| `.rpm` | `sudo dnf install ./notes-1.2.0-1.x86_64.rpm` | `sudo dnf remove notes` |
+| Flatpak | `flatpak install --user notes-1.2.0-x86_64.flatpak` | `flatpak uninstall --user com.yourcompany.notes` |
+
+A new version installs over the old one in each: the same `--identifier`
+(macOS, Windows, Flatpak) or package name (Linux) is what ties them
+together. Tesserae's own CI installs and runs each of these on every
+change to Tesserae, on the platform it's for (Fedora and Arch in
+containers), and removes the Windows and Linux ones again.
+
 ## How it behaves
 
 - **Start-up** takes a little longer than `python app.py`: the executable
@@ -249,6 +271,72 @@ app, built or not, when an automated test or CI runs it:
   Open Anyway.
 - **Windows:** unsigned, SmartScreen warns the first time it's run.
 
-Signing with your own certificates (Apple's Developer ID and
-notarization, a Windows code-signing certificate) will be covered here
-with the rest of M78.
+## Signing
+
+Without a signature, macOS and Windows warn the first time an app is
+opened. Signing is done with your own certificate, which Tesserae can't
+supply, so `tesserae build` leaves it to you; these are the steps, run
+after `tesserae build --installer`.
+
+### macOS: Developer ID and notarization
+
+This needs Apple's [Developer Program](https://developer.apple.com/programs/)
+(99 USD a year), a *Developer ID Application* certificate in your
+keychain, and, once, an app-specific password stored for `notarytool`:
+
+```bash
+xcrun notarytool store-credentials notary --apple-id you@example.com --team-id TEAMID
+```
+
+Then sign the app with the hardened runtime (which notarization
+requires), make the `.dmg` again from the signed app (the one Tesserae
+made holds the ad-hoc-signed app), sign it, notarize it and staple the
+ticket to it:
+
+```bash
+IDENTITY="Developer ID Application: Your Name (TEAMID)"
+codesign --force --deep --options runtime --timestamp --sign "$IDENTITY" dist/notes.app
+codesign --verify --deep --strict dist/notes.app
+
+mkdir dmg && cp -R dist/notes.app dmg/ && ln -s /Applications dmg/Applications
+hdiutil create -volname notes -srcfolder dmg -ov -format UDZO dist/notes-1.2.0.dmg
+codesign --sign "$IDENTITY" --timestamp dist/notes-1.2.0.dmg
+
+xcrun notarytool submit dist/notes-1.2.0.dmg --keychain-profile notary --wait
+xcrun stapler staple dist/notes-1.2.0.dmg
+```
+
+Once stapled, the `.dmg` opens with no warning, even offline. If the
+signed app won't start, PyInstaller's [notes on macOS code
+signing](https://pyinstaller.org/en/stable/feature-notes.html) cover
+the hardened-runtime entitlements some Python libraries need.
+
+### Windows: a code-signing certificate
+
+This needs a code-signing certificate, from a certificate authority (on
+a hardware token, as they're now issued) or through
+[Azure Artifact Signing](https://learn.microsoft.com/en-us/azure/artifact-signing/),
+and `signtool` from the Windows SDK. Sign the installer, with a
+timestamp so the signature outlives the certificate:
+
+```powershell
+signtool sign /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 /a dist\notes-1.2.0-setup.exe
+signtool verify /pa dist\notes-1.2.0-setup.exe
+```
+
+`/a` picks the best certificate it finds; `/f cert.pfx` or `/sha1
+<thumbprint>` names one. SmartScreen still warns about a new signed
+installer until it has been downloaded often enough to earn a
+reputation, which then carries over to later versions signed with the
+same certificate. This signs the installer, not the app it installs:
+that would mean signing `dist\notes\notes.exe` before Inno Setup packs
+it, which `tesserae build` doesn't do.
+
+### Linux
+
+Linux packages are usually trusted through the repository that serves
+them rather than signed one by one: publishing to an apt, dnf or
+Flatpak repository means signing that repository with its GPG key.
+Given as files, an `.rpm` can still carry a signature
+(`rpm --addsign`, with a GPG key set in `%_gpg_name`), and a Flatpak
+bundle one (`flatpak build-bundle --gpg-sign`).
