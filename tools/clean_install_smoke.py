@@ -23,6 +23,7 @@ def main() -> int:
     engine = importlib.metadata.version("tesserae-engine")
     print(f"tesserae {importlib.metadata.version('tesserae-ui')} on tre {engine}, Python {sys.version.split()[0]}, "
           f"{sys.platform}")
+    home = os.getcwd()
     with tempfile.TemporaryDirectory() as parent:
         if cli.main(["new", "hello", "--dir", parent]) != 0:
             return 1
@@ -41,7 +42,11 @@ def main() -> int:
         sys.path.insert(0, str(project))
         os.chdir(project)
         sys.argv = ["app.py"]
-        runpy.run_path(str(project / "app.py"), run_name="__main__")
+        try:
+            runpy.run_path(str(project / "app.py"), run_name="__main__")
+        finally:
+            os.chdir(home)  # Windows can't remove the folder a process is in
+        print("the app reported:", report)
     expected = {"current": "Home", "greeting": "Hello from Hello", "count": "Clicked 1 times"}
     if report != expected:
         print(f"the generated app didn't run as expected: {report} (wanted {expected})", file=sys.stderr)
