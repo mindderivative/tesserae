@@ -240,7 +240,8 @@ jobs:
         working-directory: work/demo
         run: |
           set -euo pipefail
-          sudo apt-get install -y desktop-file-utils
+          sudo apt-get install -y desktop-file-utils rpm flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
           xvfb-run -a "$BIN/tesserae" build --installer --check --app-version 1.2.0 --identifier com.example.demo --publisher "Tesserae CI <ci@example.com>"
           ls -l dist
           frames() { cat "$RUNNER_TEMP/frames.txt"; }
@@ -265,6 +266,25 @@ jobs:
             echo "pacman: the installed app drew $(cat /tmp/frames.txt) frames"
             test "$(cat /tmp/frames.txt)" = 30
             pacman -R --noconfirm demo && test ! -e /opt/demo'
+
+          # M78 Phase 5: the .rpm, installed with dnf in a Fedora container,
+          # verified, run and removed; the Flatpak, installed from its bundle
+          # (flatpak fetches the runtime) and run in its sandbox.
+          docker run --rm -v "$PWD/dist:/pkg:ro" registry.fedoraproject.org/fedora:latest bash -euc '
+            dnf install -y -q xorg-x11-server-Xvfb xorg-x11-xauth mesa-vulkan-drivers > /dev/null
+            dnf install -y /pkg/demo-1.2.0-1.x86_64.rpm | grep -E "^ (demo|lib|vulkan)" || true
+            rpm -V demo && echo "rpm -V: clean"
+            cd /tmp && TESSERAE_MAX_FRAMES=30 TESSERAE_FRAMES_REPORT=/tmp/frames.txt xvfb-run -a demo
+            echo ".rpm: the installed app drew $(cat /tmp/frames.txt) frames"
+            test "$(cat /tmp/frames.txt)" = 30
+            dnf remove -y -q demo && test ! -e /opt/demo'
+
+          flatpak install --user -y --noninteractive dist/demo-1.2.0-x86_64.flatpak
+          flatpak info --user com.example.demo
+          (cd "$RUNNER_TEMP" && xvfb-run -a flatpak run --filesystem="$RUNNER_TEMP" \
+            --env=TESSERAE_MAX_FRAMES=30 --env=TESSERAE_FRAMES_REPORT="$RUNNER_TEMP/frames.txt" com.example.demo)
+          echo "Flatpak: the installed app drew $(frames) frames" && test "$(frames)" = 30
+          flatpak uninstall --user -y --noninteractive com.example.demo
 
       - uses: actions/upload-artifact@v4
         with:

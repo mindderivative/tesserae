@@ -158,6 +158,8 @@ def _build(args: argparse.Namespace) -> int:
     print(f"built {executable}")
     for made in built.installers:
         print(f"made {made}")
+    for skipped in built.skipped:
+        print(f"skipped {skipped}")
     if args.installer and info.placeholder_identifier:
         print(f"note: the identifier is a placeholder, {info.identifier}; give yours with --identifier "
               "before releasing")

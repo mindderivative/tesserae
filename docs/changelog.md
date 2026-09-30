@@ -19,9 +19,11 @@
   publisher in `Info.plist`) in a `.dmg`. On Windows, an Inno Setup
   installer that needs no admin rights, with a Start-menu entry and an
   uninstaller; Tesserae fetches a pinned Inno Setup if there's none.
-  On Linux, an AppImage, a `.deb` and a pacman package (the latter two
-  written by Tesserae; `appimagetool` fetched, pinned). A PNG `--icon`
-  works on every platform.
+  On Linux, an AppImage, a `.deb`, a pacman package, an `.rpm` and a
+  Flatpak (the `.deb` and pacman package written by Tesserae,
+  `appimagetool` fetched and pinned, the `.rpm` and Flatpak made when
+  `rpmbuild` and `flatpak-builder` are installed, and reported otherwise).
+  A PNG `--icon` works on every platform.
 - `TESSERAE_MAX_FRAMES=n` stops `app.run()` after `n` frames, and
   `TESSERAE_FRAMES_REPORT=<file>` writes how many it drew, for automated
   runs.

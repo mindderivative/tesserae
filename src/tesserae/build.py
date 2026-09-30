@@ -30,6 +30,7 @@ from __future__ import annotations
 import fnmatch
 import hashlib
 import io
+import json
 import os
 import plistlib
 import re
@@ -42,7 +43,7 @@ import time
 import tempfile
 import urllib.request
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable, Sequence
 
@@ -188,10 +189,17 @@ def platform_icon(icon: Path | None, work: Path) -> Path | None:
 class Built:
     """What a build made: `executable`, what `--check` runs, and
     `installers`, what to give users (none for a single file, which is
-    itself the thing to give)."""
+    itself the thing to give). `skipped` says which installers couldn't be
+    made here, and what to install to make them."""
 
     executable: Path
     installers: list[Path]
+    skipped: list[str] = field(default_factory=list)
+
+
+class MissingTool(BuildError):
+    """An installer whose tool isn't on this machine: the others are made
+    and this one is reported, not fatal."""
 
 
 def _pyinstaller():
@@ -460,10 +468,10 @@ def linux_icon(icon: Path | None, out: Path) -> Path:
     return out
 
 
-def desktop_entry(name: str, info: AppInfo, exec_path: str) -> str:
+def desktop_entry(name: str, info: AppInfo, exec_path: str, icon: str | None = None) -> str:
     """The freedesktop.org entry that puts the app in the menu."""
     quoted = exec_path if " " not in exec_path else f'"{exec_path}"'
-    lines = ["[Desktop Entry]", "Type=Application", f"Name={name}", f"Exec={quoted}", f"Icon={info.identifier}",
+    lines = ["[Desktop Entry]", "Type=Application", f"Name={name}", f"Exec={quoted}", f"Icon={icon or info.identifier}",
              "Terminal=false", "Categories=Utility;"]
     if info.description:
         lines.insert(3, f"Comment={info.description}")
@@ -601,10 +609,139 @@ def make_appimage(app: Path, name: str, info: AppInfo, icon: Path, work: Path, o
     return image
 
 
+# -- Linux: .rpm and Flatpak, with tools installed here (M78 Phase 5) ------------
+
+#: The `.rpm`'s dependencies, as Fedora names the libraries in DEB_DEPENDS.
+RPM_REQUIRES = ("vulkan-loader", "libX11", "libX11-xcb", "libXcursor", "libXi", "libxkbcommon-x11")
+
+#: The Flatpak's runtime (Flathub's; its X11, Wayland and Vulkan libraries
+#: and Mesa come with it) and what the sandbox lets the app reach: a
+#: display (Wayland, or X11 where there's none) and the GPU.
+FLATPAK_RUNTIME = "26.08"
+FLATPAK_FINISH_ARGS = ("--socket=wayland", "--socket=fallback-x11", "--share=ipc", "--device=dri")
+
+
+def _stage(app: Path, name: str, info: AppInfo, icon: Path, to: Path) -> int:
+    """The installed layout (as the `.deb` and pacman package have it) as
+    files under `to`; returns the bytes installed."""
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w", format=tarfile.GNU_FORMAT) as tar:
+        size = _system_files(tar, app, name, info, icon)
+    buffer.seek(0)
+    with tarfile.open(fileobj=buffer) as tar:
+        tar.extractall(to, filter="fully_trusted")  # ours: /usr/bin's link points at /opt
+    return size
+
+
+def rpm_spec(name: str, info: AppInfo, root: Path) -> str:
+    """The spec `rpmbuild` builds the `.rpm` from: the staged layout copied
+    in as it is -- no dependency scan (PyInstaller bundles its libraries),
+    no stripping or other post-install changes to PyInstaller's files."""
+    pkg = slug(name)
+
+    def text(value: str) -> str:
+        return value.replace("%", "%%")
+
+    return "\n".join([
+        "%global debug_package %{nil}", "%global __os_install_post %{nil}", "%global _build_id_links none",
+        f"Name: {pkg}", f"Version: {info.version}", "Release: 1", f"Summary: {text(info.description or name)}",
+        "License: LicenseRef-Proprietary", "BuildArch: x86_64", "AutoReqProv: no",
+        *(f"Requires: {r}" for r in RPM_REQUIRES),
+        f"Packager: {text(info.publisher)}" if info.publisher else "",
+        "", "%description", text(info.description or name),
+        "", "%install", "mkdir -p %{buildroot}", f'cp -a "{root}/." %{{buildroot}}/',
+        "", "%files", "%defattr(-,root,root,-)", f"/opt/{pkg}", f"/usr/bin/{pkg}",
+        f"/usr/share/applications/{info.identifier}.desktop",
+        f"/usr/share/icons/hicolor/256x256/apps/{info.identifier}.png", ""])
+
+
+def make_rpm(app: Path, name: str, info: AppInfo, icon: Path, work: Path, out: Path) -> Path:
+    """An `.rpm` (Fedora, openSUSE and their kin), with `rpmbuild`."""
+    rpmbuild = shutil.which("rpmbuild")
+    if rpmbuild is None:
+        raise MissingTool("the .rpm needs rpmbuild: install rpm-build (Fedora) or rpm (Debian, Ubuntu)")
+    root = work / "rpm-root"
+    _clear(root)
+    _stage(app, name, info, icon, root)
+    top = work / "rpmbuild"
+    spec = work / f"{slug(name)}.spec"
+    spec.write_text(rpm_spec(name, info, root), encoding="utf-8")
+    _run([rpmbuild, "-bb", "--define", f"_topdir {top}", spec.as_posix()])
+    built = top / "RPMS" / "x86_64" / f"{slug(name)}-{info.version}-1.x86_64.rpm"
+    if not built.is_file():
+        raise BuildError(f"rpmbuild finished without making {built}")
+    rpm = out / built.name
+    shutil.copy(built, rpm)
+    return rpm
+
+
+def flatpak_id(info: AppInfo) -> str:
+    """The identifier as a Flatpak app ID, whose last part can't hold a
+    dash: `com.acme.demo-app` is `com.acme.demo_app`."""
+    *first, last = info.identifier.split(".")
+    return ".".join([*first, last.replace("-", "_")])
+
+
+def flatpak_builder() -> list[str] | None:
+    """`flatpak-builder`, or Flathub's own packaging of it, if either is
+    here."""
+    if shutil.which("flatpak-builder"):
+        return [shutil.which("flatpak-builder")]
+    flatpak = shutil.which("flatpak")
+    if flatpak and subprocess.run([flatpak, "info", "org.flatpak.Builder"], capture_output=True).returncode == 0:
+        return [flatpak, "run", "org.flatpak.Builder"]
+    return None
+
+
+def flatpak_manifest(name: str, info: AppInfo, source: Path) -> dict:
+    """The manifest `flatpak-builder` builds from: the app's folder into
+    `/app/lib/<slug>`, a `/app/bin/<slug>` link, and its desktop entry and
+    icon under the Flatpak's ID."""
+    pkg, fid = slug(name), flatpak_id(info)
+    return {
+        "id": fid, "runtime": "org.freedesktop.Platform", "runtime-version": FLATPAK_RUNTIME,
+        "sdk": "org.freedesktop.Sdk", "command": pkg, "finish-args": list(FLATPAK_FINISH_ARGS),
+        "modules": [{
+            "name": pkg, "buildsystem": "simple",
+            "sources": [{"type": "dir", "path": str(source)}],
+            "build-commands": [
+                f"mkdir -p /app/lib && cp -a app /app/lib/{pkg}",
+                f"mkdir -p /app/bin && ln -s '/app/lib/{pkg}/{name}' /app/bin/{pkg}",
+                f"install -Dm644 app.desktop /app/share/applications/{fid}.desktop",
+                f"install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/{fid}.png",
+            ],
+        }],
+    }
+
+
+def make_flatpak(app: Path, name: str, info: AppInfo, icon: Path, work: Path, out: Path) -> Path:
+    """A Flatpak bundle (any distribution with Flatpak, sandboxed), with
+    `flatpak-builder` and the Freedesktop runtime from Flathub."""
+    builder = flatpak_builder()
+    if builder is None:
+        raise MissingTool("the Flatpak needs flatpak-builder: install flatpak-builder, or "
+                          "flatpak install flathub org.flatpak.Builder")
+    fid = flatpak_id(info)
+    source = work / "flatpak-source"
+    _clear(source)
+    shutil.copytree(app, source / "app", symlinks=True)
+    (source / "app.desktop").write_text(desktop_entry(name, info, slug(name), icon=fid), encoding="utf-8")
+    shutil.copy(icon, source / "icon.png")
+    manifest = work / f"{fid}.json"
+    manifest.write_text(json.dumps(flatpak_manifest(name, info, source), indent=2), encoding="utf-8")
+    repo = work / "flatpak-repo"
+    _run([*builder, "--user", "--install-deps-from=flathub", "--disable-rofiles-fuse", "--force-clean",
+          f"--repo={repo}", str(work / "flatpak-build"), str(manifest)])
+    bundle = out / f"{name}-{info.version}-x86_64.flatpak"
+    _run([shutil.which("flatpak") or "flatpak", "build-bundle", str(repo), str(bundle), fid])
+    return bundle
+
+
 def _linux(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | None = None) -> Built:
     """The app's folder in `dist/<name>-<version>` (`dist/<name>` is a
-    single-file build's executable), and from it an AppImage, a `.deb` and
-    a pacman package."""
+    single-file build's executable), and from it an AppImage, a `.deb`, a
+    pacman package, and -- where `rpmbuild` and `flatpak-builder` are
+    installed -- an `.rpm` and a Flatpak."""
     if "/" in name or name.startswith("."):
         raise BuildError(f"{name!r} can't be a Linux program name: no / and no leading .")
     folder = built / name
@@ -617,7 +754,13 @@ def _linux(built: Path, name: str, info: AppInfo, dist: Path, icon: Path | None 
     png = linux_icon(icon, built / "icon.png")
     made = [make_appimage(final, name, info, png, built, dist), make_deb(final, name, info, png, dist),
             make_pacman(final, name, info, png, dist)]
-    return Built(final / name, made)
+    skipped = []
+    for make in (make_rpm, make_flatpak):  # each needs a tool Tesserae can't fetch
+        try:
+            made.append(make(final, name, info, png, built, dist))
+        except MissingTool as missing:
+            skipped.append(str(missing))
+    return Built(final / name, made, skipped)
 
 
 #: Each platform's installer, from PyInstaller's one-folder build.

@@ -169,24 +169,43 @@ Linux, for a `tesserae new` app).
   Setup's portable mode, which installs nothing. Inno Setup is free for
   any use; its authors ask companies using it commercially to consider
   [buying a licence](https://jrsoftware.org/isorder.php).
-- **Linux:** three at once, and the app's folder in `dist/notes-1.2.0`:
+- **Linux:** up to five at once, and the app's folder in `dist/notes-1.2.0`:
     - `notes-1.2.0-x86_64.AppImage` runs on most distributions with no
       install step: download, make executable, run.
     - `notes_1.2.0_amd64.deb` installs on Debian, Ubuntu and their kin
       (`sudo apt install ./notes_1.2.0_amd64.deb`).
     - `notes-1.2.0-1-x86_64.pkg.tar.xz` installs on Arch Linux and its kin
       (`sudo pacman -U ...`).
+    - `notes-1.2.0-1.x86_64.rpm` installs on Fedora, openSUSE and their kin
+      (`sudo dnf install ./notes-1.2.0-1.x86_64.rpm`), when `rpmbuild` is
+      installed where you build (`rpm-build` on Fedora, `rpm` on Ubuntu).
+    - `notes-1.2.0-x86_64.flatpak` installs on any distribution with
+      Flatpak (`flatpak install --user notes-1.2.0-x86_64.flatpak`), which
+      fetches the Freedesktop 26.08 runtime it runs on. It needs
+      `flatpak-builder` where you build (or Flathub's
+      `org.flatpak.Builder`), and Flathub set up as a remote. The app's
+      Flatpak ID is `--identifier` with any dash in its last part made an
+      underscore; its sandbox lets it reach the display (Wayland, or X11)
+      and the GPU.
 
     The packages put the app in `/opt/notes`, a `notes` command in
     `/usr/bin`, and a menu entry (named after `--identifier`) with its
     icon; they depend on the Vulkan loader and those X11 libraries, which
-    a desktop has, so a package manager installs any that are missing. The package name is the app's name in lower case with
+    a desktop has, so a package manager installs any that are missing.
+    The package name is the app's name in lower case with
     dashes (`Demo App` is `demo-app`). Tesserae writes the `.deb` and the
     pacman package itself; for the AppImage it fetches `appimagetool`
     1.9.1 and the AppImage runtime (16 MB together, from their GitHub
     releases, checked against the releases' SHA-256), once, into
     `~/.cache/tesserae/tools`. With no `--icon`, the menu gets a plain one.
-    An `.rpm` and a Flatpak are coming next (M78).
+
+    The `.rpm` and the Flatpak need tools Tesserae can't fetch; where one
+    is missing, the build makes the rest and says what to install:
+    `skipped the Flatpak needs flatpak-builder: ...`. Like the
+    executable, the `.rpm`, `.deb`, pacman package and AppImage run on
+    Linux as new as the one they were built on or newer, so build on the
+    oldest you support; the Flatpak brings its own runtime, but that
+    runtime's system library must be as new as the build machine's.
 
 `--check` runs the app about to be packed (on macOS the one in
 `dist/notes.app`, on Windows `dist/notes/`, on Linux `dist/notes-1.2.0/`) from an empty

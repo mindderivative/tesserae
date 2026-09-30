@@ -602,15 +602,148 @@ def test_the_linux_installer_makes_all_three(tmp_path, monkeypatch):
         monkeypatch.setattr(build, fn, lambda app, name, info, icon, out, fn=fn: made.append((fn, app, icon)) or out / fn)
     monkeypatch.setattr(build, "make_appimage",
                         lambda app, name, info, icon, work, out: made.append(("appimage", app, icon)) or out / "ai")
+
+    def missing(*a):
+        raise build.MissingTool("not here")
+
+    monkeypatch.setattr(build, "make_rpm", missing)  # Phase 5's, tested below
+    monkeypatch.setattr(build, "make_flatpak", missing)
     _linux_app(tmp_path)
     dist = tmp_path / "dist"
     dist.mkdir()
     (dist / "Demo App").write_text("a single-file build")  # CI found this clash: not where the folder goes
     result = build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App", "1.2.0"), dist)
     app = dist / "Demo App-1.2.0"
-    assert result == build.Built(app / "Demo App", [dist / "ai", dist / "make_deb", dist / "make_pacman"])
+    assert result == build.Built(app / "Demo App", [dist / "ai", dist / "make_deb", dist / "make_pacman"],
+                                 ["not here", "not here"])
     assert {m[1] for m in made} == {app} and all(m[2].suffix == ".png" for m in made)
     assert (app / "_internal" / "link.so").is_symlink() and (dist / "Demo App").read_text() == "a single-file build"
     build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App", "1.2.0"), dist)  # over a previous build
     with pytest.raises(build.BuildError, match="can't be a Linux program name"):
         build._linux(tmp_path / "built", ".hidden", build.AppInfo("hidden"), dist)
+
+
+# -- M78 Phase 5: .rpm and Flatpak -----------------------------------------------------
+
+def test_the_rpm_spec(tmp_path):
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme 100%", "Takes notes, 100%")
+    lines = build.rpm_spec("Demo App", info, tmp_path / "root").splitlines()
+    for line in ["%global debug_package %{nil}", "%global __os_install_post %{nil}", "Name: demo-app",
+                 "Version: 1.2.0", "Release: 1", "Summary: Takes notes, 100%%", "BuildArch: x86_64",
+                 "AutoReqProv: no", "Requires: vulkan-loader", "Requires: libXcursor", "Requires: libXi",
+                 "Packager: Acme 100%%", f'cp -a "{tmp_path / "root"}/." %{{buildroot}}/', "/opt/demo-app",
+                 "/usr/bin/demo-app", "/usr/share/applications/com.acme.demo.desktop",
+                 "/usr/share/icons/hicolor/256x256/apps/com.acme.demo.png"]:
+        assert line in lines, line
+    assert lines.index("%install") < lines.index("%files") and "Packager" not in "".join(
+        build.rpm_spec("x", build.AppInfo("x"), tmp_path))
+
+
+def test_staging_the_layout_as_files(tmp_path):
+    app = _linux_app(tmp_path)
+    icon = build.linux_icon(None, tmp_path / "i.png")
+    root = tmp_path / "root"
+    build._stage(app, "Demo App", build.AppInfo("Demo App", identifier="com.acme.demo"), icon, root)
+    assert os.access(root / "opt" / "demo-app" / "Demo App", os.X_OK)
+    assert os.readlink(root / "usr" / "bin" / "demo-app") == "/opt/demo-app/Demo App"
+    assert (root / "usr" / "share" / "applications" / "com.acme.demo.desktop").is_file()
+
+
+@pytest.mark.skipif(not build.shutil.which("rpmbuild") or not build.shutil.which("rpm"), reason="needs rpmbuild")
+def test_a_real_rpm(tmp_path):
+    app = _linux_app(tmp_path)
+    icon = build.linux_icon(None, tmp_path / "i.png")
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme", "Takes notes")
+    rpm = build.make_rpm(app, "Demo App", info, icon, tmp_path / "work", tmp_path)
+    assert rpm == tmp_path / "demo-app-1.2.0-1.x86_64.rpm"
+    query = lambda *a: subprocess.run(["rpm", "-qp", *a, str(rpm)], capture_output=True, text=True).stdout
+    assert set(build.RPM_REQUIRES) <= set(query("-R").split())
+    files = query("--queryformat", "[%{FILEMODES:perms} %{FILENAMES}\\n]").splitlines()
+    assert "-rwxr-xr-x /opt/demo-app/Demo App" in files and "lrwxrwxrwx /usr/bin/demo-app" in files
+
+
+def test_missing_rpmbuild_is_reported_not_fatal(tmp_path, monkeypatch):
+    monkeypatch.setattr(build.shutil, "which", lambda name: None)
+    with pytest.raises(build.MissingTool, match="the .rpm needs rpmbuild: install rpm-build"):
+        build.make_rpm(tmp_path, "x", build.AppInfo("x"), tmp_path, tmp_path, tmp_path)
+
+
+def test_the_flatpak_id_and_manifest(tmp_path):
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo-app")
+    assert build.flatpak_id(info) == "com.acme.demo_app"
+    assert build.flatpak_id(build.AppInfo("x", identifier="com.my-co.x")) == "com.my-co.x"
+    manifest = build.flatpak_manifest("Demo App", info, tmp_path)
+    assert (manifest["id"], manifest["runtime"], manifest["runtime-version"], manifest["sdk"], manifest["command"]) == (
+        "com.acme.demo_app", "org.freedesktop.Platform", build.FLATPAK_RUNTIME, "org.freedesktop.Sdk", "demo-app")
+    assert "--device=dri" in manifest["finish-args"] and "--socket=fallback-x11" in manifest["finish-args"]
+    module = manifest["modules"][0]
+    assert module["sources"] == [{"type": "dir", "path": str(tmp_path)}]
+    assert "ln -s '/app/lib/demo-app/Demo App' /app/bin/demo-app" in " ".join(module["build-commands"])
+    assert any("/app/share/applications/com.acme.demo_app.desktop" in c for c in module["build-commands"])
+
+
+def test_finding_flatpak_builder(monkeypatch):
+    monkeypatch.setattr(build.shutil, "which", lambda n: "/usr/bin/flatpak-builder" if n == "flatpak-builder" else None)
+    assert build.flatpak_builder() == ["/usr/bin/flatpak-builder"]
+    monkeypatch.setattr(build.shutil, "which", lambda n: "/usr/bin/flatpak" if n == "flatpak" else None)
+    ran = []
+
+    def info(command, capture_output, returncode=0):
+        ran.append(command)
+        return build.subprocess.CompletedProcess(command, returncode)
+
+    monkeypatch.setattr(build.subprocess, "run", info)
+    assert build.flatpak_builder() == ["/usr/bin/flatpak", "run", "org.flatpak.Builder"]
+    assert ran == [["/usr/bin/flatpak", "info", "org.flatpak.Builder"]]
+    monkeypatch.setattr(build.subprocess, "run", lambda command, capture_output: info(command, capture_output, 1))
+    assert build.flatpak_builder() is None
+    monkeypatch.setattr(build.shutil, "which", lambda n: None)
+    assert build.flatpak_builder() is None
+
+
+def test_the_flatpak_build(tmp_path, monkeypatch):
+    """`flatpak-builder` runs in CI; here it's recorded."""
+    import json
+
+    monkeypatch.setattr(build, "flatpak_builder", lambda: ["flatpak-builder"])
+    monkeypatch.setattr(build.shutil, "which", lambda n: "/usr/bin/flatpak" if n == "flatpak" else None)
+    ran = []
+    monkeypatch.setattr(build, "_run", ran.append)
+    app = _linux_app(tmp_path)
+    icon = build.linux_icon(None, tmp_path / "i.png")
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo-app", description="Takes notes")
+    work = tmp_path / "work"
+    bundle = build.make_flatpak(app, "Demo App", info, icon, work, tmp_path)
+    assert bundle == tmp_path / "Demo App-1.2.0-x86_64.flatpak"
+    manifest = work / "com.acme.demo_app.json"
+    assert json.loads(manifest.read_text())["id"] == "com.acme.demo_app"
+    assert ran[0] == ["flatpak-builder", "--user", "--install-deps-from=flathub", "--disable-rofiles-fuse",
+                      "--force-clean", f"--repo={work / 'flatpak-repo'}", str(work / "flatpak-build"), str(manifest)]
+    assert ran[1] == ["/usr/bin/flatpak", "build-bundle", str(work / "flatpak-repo"), str(bundle), "com.acme.demo_app"]
+    source = work / "flatpak-source"
+    entry = (source / "app.desktop").read_text()
+    assert "Exec=demo-app" in entry and "Icon=com.acme.demo_app" in entry
+    assert (source / "app" / "Demo App").is_file() and (source / "app" / "_internal" / "link.so").is_symlink()
+    monkeypatch.setattr(build, "flatpak_builder", lambda: None)
+    with pytest.raises(build.MissingTool, match="the Flatpak needs flatpak-builder"):
+        build.make_flatpak(app, "Demo App", info, icon, work, tmp_path)
+
+
+def test_linux_makes_what_it_can_and_reports_the_rest(tmp_path, monkeypatch, capsys):
+    for fn in ("make_appimage", "make_deb", "make_pacman"):
+        monkeypatch.setattr(build, fn, lambda *a, fn=fn: a[-1] / fn)
+    monkeypatch.setattr(build, "make_rpm", lambda *a: a[-1] / "x.rpm")
+
+    def no_flatpak(*a):
+        raise build.MissingTool("the Flatpak needs flatpak-builder")
+
+    monkeypatch.setattr(build, "make_flatpak", no_flatpak)
+    _linux_app(tmp_path)
+    dist = tmp_path / "dist"
+    result = build._linux(tmp_path / "built", "Demo App", build.AppInfo("Demo App", "1.2.0"), dist)
+    assert result.installers == [dist / "make_appimage", dist / "make_deb", dist / "make_pacman", dist / "x.rpm"]
+    assert result.skipped == ["the Flatpak needs flatpak-builder"]
+    monkeypatch.setattr(build, "build", lambda *a, **k: result)
+    (tmp_path / "app.py").write_text("")
+    assert cli.main(["build", "--installer", str(tmp_path / "app.py")]) == 0
+    assert "skipped the Flatpak needs flatpak-builder" in capsys.readouterr().out
