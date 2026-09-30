@@ -5,6 +5,7 @@ real build of a generated shell app run from somewhere else.
 """
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -149,20 +150,61 @@ def test_a_generated_shell_app_builds_and_runs_from_elsewhere(tmp_path, capsys, 
     pytest.importorskip("PyInstaller")
     folder = cli.new("demo", tmp_path, shell=True)
     monkeypatch.chdir(folder)
-    assert cli.main(["build", "--check", "--name", "Demo App"]) == 0, capsys.readouterr().err
-    out = capsys.readouterr().out
-    assert f"built {build.executable_path(folder / 'dist', 'Demo App')}" in out
-    assert f"it ran {build.CHECK_FRAMES} frames and exited cleanly" in out
+    assert cli.main(["build", "--name", "Demo App"]) == 0, capsys.readouterr().err
+    executable = build.executable_path(folder / "dist", "Demo App")
+    assert f"built {executable}" in capsys.readouterr().out
+    result = build.check(executable)
+    assert result.returncode == 0, result.stderr
+    if result.frames == 0:
+        pytest.skip("no display reachable -- the executable drew no frames (CI's build-executable job has one)")
+    assert result.frames == build.CHECK_FRAMES
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="runs a script as the executable, by its #! line")
 def test_check_runs_the_executable_elsewhere_with_a_frame_bound(tmp_path, monkeypatch):
     fake = tmp_path / "fake"
     fake.write_text(f"#!{sys.executable}\nimport os, sys\n"
-                    "print(os.getcwd()); print(os.environ['TESSERAE_MAX_FRAMES']); sys.exit(3)\n")
+                    "open(os.environ['TESSERAE_FRAMES_REPORT'], 'w').write(os.environ['TESSERAE_MAX_FRAMES'])\n"
+                    "print(os.getcwd(), file=sys.stderr); sys.exit(3)\n")
     fake.chmod(0o755)
     monkeypatch.chdir(tmp_path)
     result = build.check(fake, frames=7)
-    cwd, frames = result.stdout.split()
-    assert result.returncode == 3 and frames == "7"
+    assert result.returncode == 3 and result.frames == 7
+    cwd = result.stderr.strip()
     assert Path(cwd).resolve() != tmp_path.resolve() and "tesserae-check-" in cwd
+    fake.write_text(f"#!{sys.executable}\n")  # returned without drawing, as with no display
+    assert build.check(fake).frames == 0
+
+
+def test_check_fails_an_app_that_drew_nothing(tmp_path, capsys, monkeypatch):
+    (tmp_path / "app.py").write_text("")
+    monkeypatch.setattr(build, "build", lambda *a, **k: tmp_path / "app")
+    monkeypatch.setattr(build, "check", lambda exe: build.Checked(0, 0, "no display"))
+    assert cli.main(["build", "--check", str(tmp_path / "app.py")]) == 1
+    assert "drew no frames: is there a display" in capsys.readouterr().err
+    monkeypatch.setattr(build, "check", lambda exe: build.Checked(1, 0, "Traceback"))
+    assert cli.main(["build", "--check", str(tmp_path / "app.py")]) == 1
+    assert "exited with 1:\nTraceback" in capsys.readouterr().err
+
+
+def test_a_run_reports_the_frames_it_drew(tmp_path, monkeypatch):
+    """The real loop, in a fresh process: 12 frames asked for, 12 counted
+    (or 0 where there's no display)."""
+    report = tmp_path / "frames.txt"
+    script = tmp_path / "run.py"
+    script.write_text(
+        "from tesserae import App, View\n"
+        "app = App(width=60, height=40)\n"
+        "app.register('Home', View({'id': 'root', 'kind': 'Container', 'style': {'width': 10, 'height': 10}},"
+        " window=app.window), None)\n"
+        "app.show('Home')\n"
+        "seen = [0]\nhandle = app.thread_handle()\n"
+        "def tick():\n    seen[0] += 1\n    handle.call_soon(tick)\n"
+        "handle.call_soon(tick)\napp.run()\nprint(seen[0])\n")
+    env = {**os.environ, "TESSERAE_MAX_FRAMES": "12", "TESSERAE_FRAMES_REPORT": str(report)}
+    result = subprocess.run([sys.executable, str(script)], env=env, capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stderr
+    seen = int(result.stdout)  # the script's own count, to tell no display from no report
+    if seen == 0:
+        pytest.skip("no display reachable -- App.run() drew no frames")
+    assert int(report.read_text()) == seen == 12

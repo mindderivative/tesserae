@@ -152,7 +152,11 @@ def _build(args: argparse.Namespace) -> int:
         if result.returncode != 0:
             print(f"tesserae: {executable.name} exited with {result.returncode}:\n{result.stderr}", file=sys.stderr)
             return 1
-        print(f"checked: it ran {build.CHECK_FRAMES} frames and exited cleanly")
+        if result.frames == 0:
+            print(f"tesserae: {executable.name} exited cleanly but drew no frames: is there a display to open "
+                  f"a window on?\n{result.stderr}", file=sys.stderr)
+            return 1
+        print(f"checked: it drew {result.frames} frames and exited cleanly")
     return 0
 
 

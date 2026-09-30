@@ -12,8 +12,8 @@ the same relative place, except `.git`, virtual environments, `build`,
 adjust that. The app's `.py` files are also analysed, so what they
 import comes along. The result is `dist/<name>` (`.exe` on Windows), with
 no console window on Windows and macOS unless `--console`. `--check`
-runs it with `TESSERAE_MAX_FRAMES` set and reports whether it exits
-cleanly. An executable is built for the platform it's built on.
+runs it with `TESSERAE_MAX_FRAMES` set and reports whether it drew
+frames and exited cleanly. An executable is built for the platform it's built on.
 
 PyInstaller is an extra: `pip install tesserae-ui[build]`.
 """
@@ -134,9 +134,23 @@ def build(app_file: str | Path = "app.py", *, name: str | None = None, icon: str
     return result
 
 
-def check(executable: Path, frames: int = CHECK_FRAMES, timeout: float = 120.0) -> subprocess.CompletedProcess:
+@dataclass
+class Checked:
+    """How a `check` went: the exit code, the frames the app drew (0 if it
+    found no display, or never got as far as `App.run`), and its stderr."""
+
+    returncode: int
+    frames: int
+    stderr: str
+
+
+def check(executable: Path, frames: int = CHECK_FRAMES, timeout: float = 120.0) -> Checked:
     """Runs a built executable for `frames` frames from a folder of its own
     (so it can't lean on the app's files) and returns how it went."""
     with tempfile.TemporaryDirectory(prefix="tesserae-check-") as elsewhere:
-        return subprocess.run([str(executable)], cwd=elsewhere, capture_output=True, text=True, timeout=timeout,
-                              env={**os.environ, "TESSERAE_MAX_FRAMES": str(frames)})
+        report = Path(elsewhere, "frames.txt")
+        result = subprocess.run([str(executable)], cwd=elsewhere, capture_output=True, text=True, timeout=timeout,
+                                env={**os.environ, "TESSERAE_MAX_FRAMES": str(frames),
+                                     "TESSERAE_FRAMES_REPORT": str(report)})
+        drawn = int(report.read_text(encoding="utf-8")) if report.is_file() else 0
+    return Checked(result.returncode, drawn, result.stderr)

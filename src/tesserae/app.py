@@ -907,7 +907,9 @@ class App:
         `max_frames` after `n` frames -- how `tesserae build --check` and CI
         run a built executable and see it exit. A frozen app (one
         `tesserae build` made) has no source files to edit, so
-        `hot_reload` does nothing there.
+        `hot_reload` does nothing there. `TESSERAE_FRAMES_REPORT=<file>`
+        writes how many frames the run drew to that file, so a check can
+        tell a run that drew from one that found no display and returned.
         """
         if self._current is None:
             raise RuntimeError("App.run() called before show() -- nothing to display yet")
@@ -925,12 +927,24 @@ class App:
         tre_app = self._tre_app
         tre_app.add_window(self._window)
         tre_app.thread_handle().call_soon(self._adopt_os_appearance)  # on the first frame (M53 Q2)
+        report = os.environ.get("TESSERAE_FRAMES_REPORT")
+        drawn = [0]
+        if report:
+            handle = tre_app.thread_handle()
+
+            def count() -> None:  # once a frame, each call queuing the next
+                drawn[0] += 1
+                handle.call_soon(count)
+
+            handle.call_soon(count)
         try:
             if hot_reload:
                 self._start_watchers(tre_app.thread_handle())
             tre_app.run(max_frames=max_frames)
         finally:
             self._stop_watchers()
+            if report:
+                Path(report).write_text(str(drawn[0]), encoding="utf-8")
             # A later run() starts from a fresh tre App, as before
             # thread_handle() existed; a handle from this run is spent.
             self._tre_app = None
