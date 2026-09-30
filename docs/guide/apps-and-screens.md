@@ -213,6 +213,67 @@ state:
     text: "{{ app.maximized.get() and 'Restore' or 'Maximize' }}"
   ```
 
+### A title bar
+
+With `decorations=False`, a view draws the title bar, most simply with
+`kind: TitleBar`:
+
+```yaml
+children:
+  - id: bar
+    kind: TitleBar
+    title: Notes
+    icon: home                              # optional: an icon name
+    buttons: [minimize, maximize, close]    # the default; any of them
+    children:                               # the app's own, between the
+      - {id: search, kind: TextField, ...}  # title and the buttons
+  - id: body
+    ...
+```
+
+It's a 40 px bar that moves the window when it's dragged (from anywhere
+but its buttons and the app's own controls) and maximizes on a
+double-click; the icon and title at its start; the app's children in
+the middle; and minimize, maximize and close at the right. Maximize
+shows the restore glyph while the window is maximized. Its colours are
+Material 3 roles (`surface`, `on_surface`), so it needs a themed app;
+the title, icon and buttons fade while the window isn't the focused
+one, and close's hover is red. Each part has a class, so a stylesheet
+or theme restyles it: `title_bar`, `title_bar_icon`, `title_bar_title`,
+`title_bar_content`, `title_bar_buttons`, `title_bar_button`,
+`title_bar_close` and `title_bar_glyph` (and its ids are `bar.title`,
+`bar.close` and so on, after the bar's).
+
+On macOS the OS keeps its title bar, transparent, with the traffic
+lights: the bar leaves room for them at its start and hides its own
+buttons. `app.titlebar_inset` (the `(height, width)` they take, `(0, 0)`
+elsewhere and in fullscreen) and `app.native_controls` (whether they
+show) are there for a bar of your own.
+
+A bar of your own is any node marked as the window's drag region, with
+buttons whose handlers are the window's actions -- no ViewModel method
+needed:
+
+```yaml
+- id: my_bar
+  kind: Container
+  window_region: drag          # a press here moves the window
+  style: {height: 36, background: surface_container}
+  children:
+    - {id: tabs, kind: Container, window_region: none, ...}   # not a handle
+    - id: close
+      kind: Rect
+      handlers: {on_click: window.close}
+      ...
+```
+
+`window_region: drag` covers the node and everything in it that isn't
+interactive (a node with a click handler, a focusable one or a text
+field is pressed as usual); `none` keeps a node, and what's in it, from
+moving the window. The handlers are `window.minimize`,
+`window.maximize`, `window.restore`, `window.toggle_maximized` and
+`window.close`; they need the view to be on an `App`'s window.
+
 When the OS takes a press -- moving the window from its title bar,
 maximizing it on a double-click -- the pressed node gets
 `pointer_cancel` instead of `pointer_up`, and no click. Every Tesserae

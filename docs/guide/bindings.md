@@ -16,6 +16,14 @@ a change to one evaluates it again and updates the property.
 Expressions are a small, safe language, not Python: nothing in a view
 file can run arbitrary code.
 
+A binding can drive text, sizes, colours and other numbers, `checked`
+and `selected`, and `visible` (0.3.0): `False` takes a node out of the
+layout and out of hit-testing, not just out of sight. There's no
+conditional expression; `and`/`or` return their operands, so
+`{{ app.maximized.get() and 'Restore' or 'Maximize' }}` picks a label
+(but mind that `0` and `''` are false: `{{ cond and 0 or 1 }}` is always
+`1`, so write `{{ 1 - (cond and 1 or 0) }}`).
+
 ## What you can write
 
 | | Examples |

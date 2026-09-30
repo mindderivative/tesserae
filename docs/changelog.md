@@ -22,6 +22,15 @@ Built on the `0.3.0` branch, following the
   The actions `minimize()`, `maximize()`, `restore()`,
   `toggle_maximized()` and `close()`, and `app.maximized` and
   `app.active` as read-only Computeds for bindings.
+- **Title bars in YAML** ([#41](https://github.com/mindderivative/tesserae/issues/41)):
+  `kind: TitleBar` (icon, title, the app's own content, and minimize,
+  maximize/restore and close buttons; Material 3 colours by class, faded
+  while the window isn't focused; on macOS, room for the traffic lights);
+  `window_region: drag | none` on any node; the handlers
+  `window.minimize`, `window.maximize`, `window.restore`,
+  `window.toggle_maximized` and `window.close`; `app.titlebar_inset` and
+  `app.native_controls`. Three window glyphs in the icon set, and
+  `visible` can be bound.
 
 ### Changed
 
