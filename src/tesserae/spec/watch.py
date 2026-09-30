@@ -48,8 +48,9 @@ from __future__ import annotations
 
 import copy
 import threading
+import time
 from pathlib import Path
-from typing import Any, Callable, Optional, Tuple
+from typing import Any, Callable, Iterable, Optional, Tuple
 
 import watchfiles
 from loguru import logger
@@ -69,6 +70,25 @@ def _stamp(path: Path) -> _Stamp:
     except OSError:
         return None
     return (stat.st_mtime_ns, stat.st_size)
+
+
+def _settled(paths: Iterable[Path], *, interval: float = 0.05, limit: float = 1.0) -> dict[Path, _Stamp]:
+    """The files' stamps once a change has settled: an editor's save
+    empties a file, then writes it, and macOS can report both as one
+    event while the file is still empty (#39). So re-stat every `interval`
+    until two readings agree and no watched file that exists is empty,
+    giving up after `limit` (a file really left empty is then read as it
+    is). A save that finished before the event costs one `interval`."""
+    paths = list(paths)
+    current = {p: _stamp(p) for p in paths}
+    deadline = time.monotonic() + limit
+    while time.monotonic() < deadline:
+        time.sleep(interval)
+        again = {p: _stamp(p) for p in paths}
+        if again == current and not any(stamp is not None and stamp[1] == 0 for stamp in again.values()):
+            return again
+        current = again
+    return current
 
 
 def _log_failure(what: str, exc: BaseException) -> None:
@@ -202,7 +222,7 @@ class ViewWatcher:
                     stop_event=self._stop,
                     recursive=False,
                 ):
-                    current = {p: _stamp(p) for p in self._stamps}
+                    current = _settled(self._stamps)  # not mid-save (#39)
                     if current == self._stamps:
                         continue  # nothing changed: macOS reports writes from before the watch began (M76)
                     self._stamps = current  # before reading, as `poll` does, so a write mid-reload isn't lost
@@ -311,7 +331,7 @@ class FileWatcher:
                 stop_event=self._stop,
                 recursive=False,
             ):
-                current = {f: _stamp(f) for f in self._files}
+                current = _settled(self._files)  # not mid-save (#39)
                 if current == self._stamps:
                     continue  # nothing changed: macOS reports writes from before the watch began (M76)
                 self._stamps = current
