@@ -49,10 +49,13 @@ jobs:
         working-directory: tesserae
         run: pip install -e ".[dev]"
 
+      # PYTHONUTF8 for the tests' own file reads (Windows defaults to its
+      # code page); Tesserae's source says UTF-8 itself (test_source_encoding).
       - name: Run tests
         working-directory: tesserae
         env:
           TRE_SOURCE_DIR: ${{ github.workspace }}/tre
+          PYTHONUTF8: "1"
         run: pytest tests/
 
       - name: Run the counter example

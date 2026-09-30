@@ -202,12 +202,16 @@ class ViewWatcher:
                     stop_event=self._stop,
                     recursive=False,
                 ):
+                    current = {p: _stamp(p) for p in self._stamps}
+                    if current == self._stamps:
+                        continue  # nothing changed: macOS reports writes from before the watch began (M76)
+                    self._stamps = current  # before reading, as `poll` does, so a write mid-reload isn't lost
                     try:
                         spec, frames, deps = self._rebuild()
                     except Exception as exc:
                         _log_failure(str(self._path), exc)
                         continue
-                    self._stamps = {p: _stamp(p) for p in deps}
+                    self._stamps = {p: current[p] if p in current else _stamp(p) for p in deps}
                     handle.call_soon(
                         _guarded(str(self._path), lambda spec=spec, frames=frames: self._apply(spec, frames))
                     )
@@ -259,6 +263,7 @@ class FileWatcher:
         name: str = "files",
     ) -> None:
         self._files = frozenset(Path(f).resolve() for f in files)
+        self._stamps: dict[Path, _Stamp] = {f: _stamp(f) for f in self._files}  # what was last read (M76)
         self._rebuild = rebuild
         self._apply = apply
         self._name = name
@@ -306,6 +311,10 @@ class FileWatcher:
                 stop_event=self._stop,
                 recursive=False,
             ):
+                current = {f: _stamp(f) for f in self._files}
+                if current == self._stamps:
+                    continue  # nothing changed: macOS reports writes from before the watch began (M76)
+                self._stamps = current
                 try:
                     result = self._rebuild()
                 except Exception as exc:
