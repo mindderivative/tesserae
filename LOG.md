@@ -1990,3 +1990,23 @@ pinned test failed there, as the pin was meant to.
   page now takes the wheel the inner view can't use), and a key test is
   added (Page Down chains too, and `two_way` hears it). The docs say so.
   All five examples ran; 2659 passed.
+- Phase 4, Linux: an AppImage, a `.deb` and a pacman package.
+  - Tesserae writes the `.deb` and the pacman package itself. The
+    AppImage uses the pinned `appimagetool` and runtime.
+  - Three CI runs to green. First, the single file `dist/demo` clashed
+    with the app folder, which is now `dist/<name>-<version>`. Second, on
+    Arch the installed app found "no display": winit couldn't load
+    `libXcursor` or `libXi`. I reproduced it in a local podman container,
+    declared every X11 library `tre` loads (from the names in its
+    engine), and pacman then pulled them in. Third, a Windows test run
+    showed the program's executable bit must be set by the packager.
+  - Final run 36749555627: all three installed and ran for 30 frames.
+- Reviewed `tre` 0.5.0's custom-windowing design (`tre` #28) for `tre`'s
+  session, against Tesserae's code:
+  - Q1's "interactive" rule must stop at the drag region, above which
+    Tesserae's root listener for the mouse's back/forward buttons sits,
+    and ignore hover and tooltip listeners.
+  - The Windows menu needs an opt-out, and macOS needs an event when its
+    inset changes.
+  - Also asked for: a pointer cancel after a native drag, fullscreen, a
+    window icon, and a minimum size.
