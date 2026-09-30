@@ -160,6 +160,28 @@ jobs:
           $RUN "$BIN/tesserae" build --check
           ls -l dist
 
+      # M78: the installer. On macOS, a .app in a .dmg: mount it, check the
+      # .app's details and signature, copy it out as a user would, run it.
+      - name: Build the installer (macOS), and install and run it from the .dmg
+        if: runner.os == 'macOS'
+        shell: bash
+        working-directory: work/demo
+        run: |
+          "$BIN/tesserae" build --installer --check --app-version 1.2.0 --identifier com.example.demo --publisher "Tesserae CI"
+          hdiutil attach dist/demo-1.2.0.dmg -mountpoint /tmp/demo-dmg -nobrowse
+          ls -la /tmp/demo-dmg
+          test -L /tmp/demo-dmg/Applications
+          plist=/tmp/demo-dmg/demo.app/Contents/Info.plist
+          test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleShortVersionString' "$plist")" = 1.2.0
+          test "$(/usr/libexec/PlistBuddy -c 'Print CFBundleIdentifier' "$plist")" = com.example.demo
+          codesign --verify --deep --strict --verbose=2 /tmp/demo-dmg/demo.app
+          mkdir -p ~/Applications && cp -R /tmp/demo-dmg/demo.app ~/Applications/
+          hdiutil detach /tmp/demo-dmg
+          cd "$RUNNER_TEMP"
+          TESSERAE_MAX_FRAMES=30 TESSERAE_FRAMES_REPORT=frames.txt ~/Applications/demo.app/Contents/MacOS/demo
+          echo "installed app drew $(cat frames.txt) frames"
+          test "$(cat frames.txt)" = 30
+
       - uses: actions/upload-artifact@v4
         with:
           name: demo-${{ matrix.os }}

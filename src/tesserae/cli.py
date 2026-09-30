@@ -135,6 +135,12 @@ def _parser() -> argparse.ArgumentParser:
     build_cmd.add_argument("--exclude", action="append", default=[], metavar="GLOB",
                            help="leave files out, e.g. 'notes/*.md' (repeatable)")
     build_cmd.add_argument("--check", action="store_true", help="run the executable briefly to check it starts")
+    build_cmd.add_argument("--installer", action="store_true",
+                           help="make this platform's installer (macOS: a .app in a .dmg)")
+    build_cmd.add_argument("--app-version", default="0.1.0", help="the installer's version, e.g. 1.2.0")
+    build_cmd.add_argument("--identifier", help="reverse-DNS, e.g. com.yourcompany.notes")
+    build_cmd.add_argument("--publisher", default="", help="who makes the app")
+    build_cmd.add_argument("--description", default="", help="a line about the app")
     return parser
 
 
@@ -142,11 +148,19 @@ def _build(args: argparse.Namespace) -> int:
     from tesserae import build
 
     try:
-        executable = build.build(args.app, name=args.name, icon=args.icon, console=args.console,
-                                 include=args.include, exclude=args.exclude)
+        info = build.AppInfo(args.name or Path(args.app).resolve().parent.name, args.app_version, args.identifier,
+                             args.publisher, args.description)
+        built = build.build(args.app, name=args.name, icon=args.icon, console=args.console, include=args.include,
+                            exclude=args.exclude, installer=args.installer, info=info)
     except build.BuildError as exc:
         raise CliError(str(exc)) from None
+    executable = built.executable
     print(f"built {executable}")
+    for made in built.installers:
+        print(f"made {made}")
+    if args.installer and info.placeholder_identifier:
+        print(f"note: the identifier is a placeholder, {info.identifier}; give yours with --identifier "
+              "before releasing")
     if args.check:
         result = build.check(executable)
         if result.returncode != 0:

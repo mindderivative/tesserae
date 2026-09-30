@@ -120,14 +120,44 @@ instead (`Path.home()`, or a per-platform app-data folder, which the
 |---|---|
 | `app.py` (positional) | The app's entry point; defaults to `app.py` here. |
 | `--name NAME` | The executable's name; defaults to the app's folder name. |
-| `--icon FILE` | The executable's icon: `.ico` on Windows, `.icns` on macOS. |
-| `--console` | Keeps a console window (Windows and macOS), to see the app's log while debugging. Without it there's none. |
+| `--icon FILE` | The app's icon. A PNG (square, 1024 px or more is best) works everywhere: it's made into an `.ico` on Windows and an `.icns` on macOS. An `.ico` or `.icns` is used as it is. |
+| `--console` | Keeps a console window on Windows, to see the app's log while debugging. Without it there's none. |
 | `--include GLOB` | Bundles files the scan leaves out. |
 | `--exclude GLOB` | Leaves more files out. |
 | `--check` | Runs the result for 30 frames from an empty folder. |
+| `--installer` | Makes this platform's installer instead of a single file (see below). |
+| `--app-version 1.2.0` | The installer's version: numbers and dots. Defaults to 0.1.0. |
+| `--identifier ID` | Reverse-DNS, like `com.yourcompany.notes`. macOS keeps the app's settings under it. Defaults to a `com.example` placeholder, which the build points out. |
+| `--publisher NAME` | Who makes the app; shown as its copyright on macOS. |
+| `--description TEXT` | A line about the app. |
 
 PyInstaller's working files go in a temporary folder, so the app's
 folder gains only `dist/`.
+
+## Installers
+
+`--installer` makes what users of each platform expect to install,
+instead of a single file:
+
+```bash
+tesserae build --installer --check --app-version 1.2.0 --identifier com.yourcompany.notes --icon icon.png
+```
+
+It builds the app as one folder rather than one file, so the installed
+app doesn't unpack itself each time it starts (0.27 s against 0.55 s, on
+Linux, for a `tesserae new` app).
+
+- **macOS:** `dist/notes.app` and `dist/notes-1.2.0.dmg`. The `.dmg` opens
+  to the app beside a link to Applications, to drag it onto. The version,
+  identifier and publisher are in the app's `Info.plist`, and it's signed
+  ad hoc (Apple silicon runs nothing unsigned) -- not with a Developer ID,
+  so Gatekeeper still asks the first time; see signing below.
+- **Windows and Linux:** coming next (M78): an Inno Setup installer, and
+  an AppImage, `.deb`, pacman package, `.rpm` and Flatpak. Until then
+  `--installer` there says so.
+
+`--check` runs the installed-to-be app (on macOS, the one in
+`dist/notes.app`) from an empty folder, as with a single file.
 
 ## How it behaves
 
@@ -158,14 +188,13 @@ app, built or not, when an automated test or CI runs it:
   Vulkan driver, and `libxkbcommon-x11`. It's also tied to the system
   library (glibc) of the machine it was built on, and runs on that
   version or newer: build on the oldest Linux you want to support.
-- **macOS:** `dist/` holds the single executable, which runs from a
-  terminal, and beside it a `notes.app` that PyInstaller makes for a
-  build without a console. Unsigned, either is stopped by Gatekeeper the
-  first time; since macOS 15 (Sequoia) the user allows it in System
-  Settings › Privacy & Security › Open Anyway. PyInstaller 7 will refuse
-  that `.app` beside a single file; M78's installers make a proper one.
+- **macOS:** the single executable runs from a terminal; for an app to
+  double-click, use `--installer`. Without a Developer ID signature
+  either is stopped by Gatekeeper the first time; since macOS 15
+  (Sequoia) the user allows it in System Settings › Privacy & Security ›
+  Open Anyway.
 - **Windows:** unsigned, SmartScreen warns the first time it's run.
 
-Installers — a proper `.app` in a `.dmg`, a Windows installer with a
-Start-menu entry, a Linux package — and signing are the next step for
-Tesserae (M78).
+Signing with your own certificates (Apple's Developer ID and
+notarization, a Windows code-signing certificate) will be covered here
+with the rest of M78.

@@ -56,7 +56,7 @@ def test_pyinstaller_args(tmp_path):
     app_file = _app_folder(tmp_path)
     collected = build.collect_files(app_file)
     args = build.pyinstaller_args(app_file, "demo", collected, tmp_path / "work", tmp_path / "dist")
-    assert args[0] == str(app_file) and "--onefile" in args and "--windowed" in args
+    assert args[0] == str(app_file) and "--onefile" in args and "--windowed" in args and "--onedir" not in args
     pairs = list(zip(args, args[1:]))
     assert ("--name", "demo") in pairs and ("--distpath", str(tmp_path / "dist")) in pairs
     assert ("--collect-data", "tesserae") in pairs and ("--collect-submodules", "tesserae") in pairs
@@ -178,7 +178,7 @@ def test_check_runs_the_executable_elsewhere_with_a_frame_bound(tmp_path, monkey
 
 def test_check_fails_an_app_that_drew_nothing(tmp_path, capsys, monkeypatch):
     (tmp_path / "app.py").write_text("")
-    monkeypatch.setattr(build, "build", lambda *a, **k: tmp_path / "app")
+    monkeypatch.setattr(build, "build", lambda *a, **k: build.Built(tmp_path / "app", []))
     monkeypatch.setattr(build, "check", lambda exe: build.Checked(0, 0, "no display"))
     assert cli.main(["build", "--check", str(tmp_path / "app.py")]) == 1
     assert "drew no frames: is there a display" in capsys.readouterr().err
@@ -208,3 +208,97 @@ def test_a_run_reports_the_frames_it_drew(tmp_path, monkeypatch):
     if seen == 0:
         pytest.skip("no display reachable -- App.run() drew no frames")
     assert int(report.read_text()) == seen == 12
+
+
+# -- M78: installers -------------------------------------------------------------
+
+def test_a_folder_build_and_the_windowed_rule(tmp_path, monkeypatch):
+    app_file = _app_folder(tmp_path)
+    collected = build.collect_files(app_file)
+    folder = build.pyinstaller_args(app_file, "demo", collected, tmp_path, tmp_path, onefile=False)
+    assert "--onedir" in folder and "--onefile" not in folder and "--windowed" in folder
+    monkeypatch.setattr(sys, "platform", "darwin")  # one file there runs from a terminal: PyInstaller 7 refuses a .app
+    assert "--windowed" not in build.pyinstaller_args(app_file, "demo", collected, tmp_path, tmp_path)
+    assert "--windowed" in build.pyinstaller_args(app_file, "demo", collected, tmp_path, tmp_path, onefile=False)
+
+
+def test_app_info_checks_and_defaults():
+    info = build.AppInfo("Demo App")
+    assert (info.version, info.identifier, info.placeholder_identifier) == ("0.1.0", "com.example.demo-app", True)
+    assert build.AppInfo("x", "2.10.3", "com.acme.x").placeholder_identifier is False
+    with pytest.raises(build.BuildError, match="version '1.0-beta' isn't one installers take"):
+        build.AppInfo("x", "1.0-beta")
+    with pytest.raises(build.BuildError, match="identifier 'notes' isn't reverse-DNS"):
+        build.AppInfo("x", identifier="notes")
+    assert build.slug("  Demo  App! 2 ") == "demo-app-2" and build.slug("!!") == "app"
+
+
+@pytest.mark.parametrize("platform, suffix", [("win32", ".ico"), ("darwin", ".icns"), ("linux", ".png")])
+def test_a_png_icon_becomes_the_platforms_own(tmp_path, monkeypatch, platform, suffix):
+    from PIL import Image
+
+    png = tmp_path / "logo.png"
+    Image.new("RGBA", (300, 200), (103, 80, 164, 255)).save(png)
+    monkeypatch.setattr(sys, "platform", platform)
+    out = build.platform_icon(png, tmp_path)
+    assert out.suffix == suffix and Image.open(out).format == {".ico": "ICO", ".icns": "ICNS", ".png": "PNG"}[suffix]
+    ico = tmp_path / "given.ico"
+    ico.write_bytes(b"")
+    assert build.platform_icon(ico, tmp_path) == ico and build.platform_icon(None, tmp_path) is None
+
+
+def test_the_macos_installer_stamps_signs_and_makes_a_dmg(tmp_path, monkeypatch):
+    """`hdiutil` and `codesign` are macOS's; here they're recorded, and
+    CI's macOS job runs them for real."""
+    import plistlib
+
+    built = tmp_path / "built"
+    contents = built / "Demo App.app" / "Contents"
+    (contents / "MacOS").mkdir(parents=True)
+    (contents / "MacOS" / "Demo App").write_text("")
+    (contents / "Info.plist").write_bytes(plistlib.dumps({"CFBundleIdentifier": "old", "NSHighResolutionCapable": True}))
+    ran = []
+    monkeypatch.setattr(build, "_run", ran.append)
+    info = build.AppInfo("Demo App", "1.2.0", "com.acme.demo", "Acme Ltd")
+    result = build._macos(built, "Demo App", info, tmp_path / "dist")
+    app = tmp_path / "dist" / "Demo App.app"
+    assert result == build.Built(app / "Contents" / "MacOS" / "Demo App", [tmp_path / "dist" / "Demo App-1.2.0.dmg"])
+    plist = plistlib.loads((app / "Contents" / "Info.plist").read_bytes())
+    assert plist == {"CFBundleIdentifier": "com.acme.demo", "NSHighResolutionCapable": True,
+                     "CFBundleShortVersionString": "1.2.0", "CFBundleVersion": "1.2.0",
+                     "CFBundleDisplayName": "Demo App", "NSHumanReadableCopyright": "Acme Ltd"}
+    assert ran[0] == ["codesign", "--force", "--deep", "--sign", "-", str(built / "Demo App.app")]
+    assert ran[1] == ["hdiutil", "create", "-volname", "Demo App", "-srcfolder", str(built / "dmg"), "-ov",
+                      "-format", "UDZO", str(tmp_path / "dist" / "Demo App-1.2.0.dmg")]
+    assert os.readlink(built / "dmg" / "Applications") == "/Applications"  # drag it there
+    assert (built / "dmg" / "Demo App.app" / "Contents" / "Info.plist").is_file()
+
+
+def test_a_failing_tool_says_why(tmp_path):
+    with pytest.raises(build.BuildError, match=r"python.* failed \(3\): nope"):
+        build._run([sys.executable, "-c", "import sys; sys.stderr.write('nope'); sys.exit(3)"])
+
+
+def test_installer_where_there_is_none_yet(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr(sys, "platform", "sunos5")
+    assert cli.main(["build", "--installer", str(_app_folder(tmp_path))]) == 2
+    assert "--installer isn't ready on sunos5 yet" in capsys.readouterr().err
+
+
+def test_cli_passes_the_installer_details_and_notes_a_placeholder(tmp_path, capsys, monkeypatch):
+    seen = {}
+
+    def fake_build(app, **kwargs):
+        seen.update(kwargs)
+        return build.Built(tmp_path / "app", [tmp_path / "App-1.0.dmg"])
+
+    monkeypatch.setattr(build, "build", fake_build)
+    app_file = _app_folder(tmp_path)
+    assert cli.main(["build", str(app_file), "--installer", "--app-version", "1.0", "--publisher", "Acme"]) == 0
+    out = capsys.readouterr().out
+    assert seen["installer"] is True and seen["info"] == build.AppInfo(tmp_path.name, "1.0", None, "Acme")
+    assert f"made {tmp_path / 'App-1.0.dmg'}" in out and "the identifier is a placeholder" in out
+    assert cli.main(["build", str(app_file), "--installer", "--identifier", "com.acme.x"]) == 0
+    assert "placeholder" not in capsys.readouterr().out
+    assert cli.main(["build", str(app_file), "--app-version", "one"]) == 2
+    assert "version 'one' isn't one installers take" in capsys.readouterr().err

@@ -13,6 +13,10 @@
   PyInstaller; `--check` runs the result and checks it draws frames. Built
   and checked in CI on Linux, macOS and Windows. See
   [Releasing Your App](guide/releasing.md).
+- **`tesserae build --installer`**: the platform's installer, from a
+  one-folder build. On macOS, a `.app` (its version, identifier and
+  publisher in `Info.plist`) in a `.dmg`; Windows and Linux follow. A PNG
+  `--icon` works on every platform.
 - `TESSERAE_MAX_FRAMES=n` stops `app.run()` after `n` frames, and
   `TESSERAE_FRAMES_REPORT=<file>` writes how many it drew, for automated
   runs.
@@ -21,6 +25,9 @@
 
 - A built (frozen) app runs without hot reload, which has no source files
   to watch.
+- On macOS, `tesserae build` without `--installer` makes only the single
+  executable, which runs from a terminal; PyInstaller 7 won't make a `.app`
+  from one file, so the `.app` comes with `--installer`.
 - A bare number as a grid track list (`grid_auto_rows: 96`) is passed to
   `tre`, which takes it since 0.4.3; Tesserae no longer converts it.
 - On `tre` 0.4.3, a `scroll_offset` set past the end is held at the end at
