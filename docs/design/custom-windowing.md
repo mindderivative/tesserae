@@ -1,10 +1,11 @@
 # Custom windowing (0.3.0)
 
-!!! warning "Proposal — awaiting the user's decisions"
-    This is Tesserae 0.3.0's M1 design ([#30](https://github.com/mindderivative/tesserae/issues/30)),
-    for the user's review. Nothing here exists yet except the move to `tre`
-    0.5.0. Each [question](#decisions) carries a recommendation; once they're
-    decided, this page records the answers and M2 onwards follow it.
+!!! note "Decided 2026-09-30"
+    This is Tesserae 0.3.0's M1 design ([#30](https://github.com/mindderivative/tesserae/issues/30)).
+    The user approved it: "approved, go with your recommendations and start
+    M2". Each [question](#decisions) is decided as its **(decided)**
+    option, and M2 onwards follow it: M2 is
+    [#40](https://github.com/mindderivative/tesserae/issues/40).
 
 ## The goal
 
@@ -44,7 +45,7 @@ from Material 3 roles, hot-reloadable.
 
 **Q1. How an app asks for it.**
 
-- **(recommended)** `App(decorations=False)`, with the rest as `App`
+- **(decided)** `App(decorations=False)`, with the rest as `App`
   options: `resize_border=6`, `min_width`/`min_height`, `system_menu=False`
   and `icon="icon.png"`. Tesserae decodes the PNG with Pillow, as
   `tesserae build` already does. `app.minimize()`, `maximize()`,
@@ -54,7 +55,7 @@ from Material 3 roles, hot-reloadable.
 
 **Q2. How a title bar is written.** Two layers:
 
-- **(recommended)** Both of:
+- **(decided)** Both of:
   - **The vocabulary:** `window_region: drag | none` becomes a node
     property in YAML views. The window actions become handlers any node
     can name without a ViewModel method: `on_click: window.minimize`,
@@ -70,7 +71,7 @@ from Material 3 roles, hot-reloadable.
 
 **Q3. The app shell.**
 
-- **(recommended)** When the app is undecorated, the shell's `top_bar`
+- **(decided)** When the app is undecorated, the shell's `top_bar`
   *is* the title bar. `top_bar: {title, leading_icon, trailing_icons}`
   keeps its keys, and gains the drag region and the window buttons after
   the trailing icons. A shell app gets a custom title bar from one
@@ -82,7 +83,7 @@ from Material 3 roles, hot-reloadable.
 dragged would keep its pressed state layer, which today clears only on
 `pointer_up` or `pointer_leave`.
 
-- **(recommended)** Every state layer and every pointer-driven widget
+- **(decided)** Every state layer and every pointer-driven widget
   (splitters, dock tabs, sliders) clears on `pointer_cancel`, as on
   `pointer_up`. That's also right for any other press the OS takes.
 - Nothing: only nodes marked `drag` are affected. But a title bar is made
@@ -90,7 +91,7 @@ dragged would keep its pressed state layer, which today clears only on
 
 **Q5. Theme.**
 
-- **(recommended)** The bar is a Material 3 top app bar: `surface`, or
+- **(decided)** The bar is a Material 3 top app bar: `surface`, or
   `surface_container` when the content scrolls under it; the title
   `on_surface`, dimmed to `on_surface_variant` when the window is
   inactive. Window buttons are icon buttons whose hover and pressed layers
@@ -102,7 +103,7 @@ dragged would keep its pressed state layer, which today clears only on
 
 **Q6. Each platform.**
 
-- **(recommended)** On Windows and Linux, Tesserae's buttons sit at the
+- **(decided)** On Windows and Linux, Tesserae's buttons sit at the
   right of the bar, as both desktops' defaults put them. On macOS, when
   `native_controls` is true, Tesserae's buttons hide, and the bar pads its
   start by `titlebar_inset`'s width (following the event, as it changes in
@@ -112,7 +113,7 @@ dragged would keep its pressed state layer, which today clears only on
 
 **Q7. Scaffolding and examples.**
 
-- **(recommended)** `tesserae new --shell --custom-title-bar` makes an app
+- **(decided)** `tesserae new --shell --custom-title-bar` makes an app
   with it on. A new `examples/custom_title_bar` shows the kind and the
   vocabulary, and the existing shell examples stay decorated.
 - Turn it on for every new shell app. It's a real change in behaviour on
@@ -120,7 +121,7 @@ dragged would keep its pressed state layer, which today clears only on
 
 **Q8. Hot reload and tests.**
 
-- **(recommended)** The title bar reloads like any view or shell file.
+- **(decided)** The title bar reloads like any view or shell file.
   Tests drive it headless with `tre`'s `simulate` (a drag press, a
   double-click, `maximized`, `active`, `titlebar_inset`), and CI builds a
   custom-title-bar app with `tesserae build --check` on all three
