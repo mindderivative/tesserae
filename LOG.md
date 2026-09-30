@@ -1866,3 +1866,8 @@ their users (M77, M78).
   Now 2613 passed on each, 0 skipped on macOS and Windows.
 - 0.2.0 prepared: the version, a changelog, and the README's install
   section. Publishing is the user's step.
+- Released: GitHub pre-release v0.2.0 (user: "push and release"). The
+  user approved the `pypi` deployment, and Tesserae 0.2.0 is on PyPI.
+  Checked from PyPI itself: a fresh venv, `pip install tesserae-ui` alone
+  (wheels only) installed all six dependencies, and a `tesserae new` app
+  ran. M76 complete.
