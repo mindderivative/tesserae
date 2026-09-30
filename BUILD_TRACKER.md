@@ -90,6 +90,7 @@ Updated after every milestone/phase/stage/step completion, kept in sync with `AR
 | M78 — Installers for Each Platform | `███████⬜⬜⬜` 67% | 🚧 In progress — Phase 4 of 6 done |
 | M79 — `tre` 0.4.3 | `██████████` 100% | ✅ Complete — all 2 phases done (2026-09-30) |
 | M80 — `tre` 0.4.4 | `██████████` 100% | ✅ Complete — all 1 phases done (2026-09-30) |
+| M81 — Tesserae 0.3.0: `tre` 0.5.0 and Custom Windowing | `⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜` 0% | ⬜ Scoped — waits for `tre` 0.5.0 and the user |
 
 **Just closed:** M78 Phase 4 (2026-09-30): Linux's AppImage, `.deb` and pacman package, each installed and run in CI (the pacman one on Arch). Before it, M80 (`tre` 0.4.4, scroll chaining) and M78 Phase 3 (the Windows installer).
 
@@ -105,7 +106,7 @@ Real findings along the way, each recorded in its phase: dropping `path` in Phas
 
 **Previously:** M15-M28 — the macro-expansion engine, its wiring, all 9 MD3 widget categories (67 fragments), the M25/M26 scoping of the last real fronts, M27's 7 primitive fragments, and M28's `repeat:`. See their own entries below.
 
-**Up next:** M78 Phase 5, Linux's `.rpm` (with `rpmbuild`) and Flatpak (with `flatpak-builder`). `tre` 0.5.0 (custom windowing, `tre` #28) is being designed; Tesserae reviewed it. M77, M79 and M80 are unreleased; the changelog has them under "Unreleased".
+**Up next:** M78 Phase 5, Linux's `.rpm` (with `rpmbuild`) and Flatpak (with `flatpak-builder`). M77, M79 and M80 are unreleased: they, and every milestone until the move to `tre` 0.5.0, are Tesserae 0.2.x (the changelog's "0.2.1 (unreleased)"). `tre` 0.5.0 (custom windowing, `tre` #28) is being designed; Tesserae reviewed it; moving to it is Tesserae 0.3.0, M81, which the user starts.
 
 **2026-09-24 sync check:** `tre` v0.3.1 is now a real, tagged, released version (`github.com/mindderivative/tre/releases/tag/v0.3.1`) -- Tesserae's own `App` was on hold until this happened, per the user's own earlier call. Re-verified against it directly: 135/135 `pytest` passing, all 3 examples (`counter`/`multi_screen`/`todo_list`) run clean end to end, zero changes needed this time (unlike M6's own real 7-file fix) -- the editable install (`Editable project location: /home/phil/rustDev/projects/tre`) tracks `tre`'s own source tree live, with no reinstall step required. `tre` issues #2 and #3 (both referenced below) are now genuinely closed on GitHub, not just code-complete -- their own real fixes had shipped weeks of `tre`-side milestones ago but the issues themselves were never closed until now.
 
@@ -2194,4 +2195,16 @@ Losing these would lose the proof that Tesserae matches `tre` (784 colour roles,
 
 ### Phase 1 — Move to 0.4.4 ✅
 - Step 1: `.venv` on `tesserae-engine` 0.4.4, the floor `>=0.4.4`, CI's and `release.yml`'s `tre` checkout `ref: v0.4.4`, README and installation page. The suite: exactly one failure, M79's `test_a_nested_scroll_view_keeps_the_wheel_even_when_its_content_fits`, which pinned 0.4.3's behaviour. It's flipped to `test_a_wheel_an_inner_scroll_view_cannot_use_goes_to_the_one_outside` (the page scrolls 50), with a new key test (Page Down in an inner view that can't move scrolls the page, and `two_way` hears it; Home brings it back). The layout guide and changelog say so. All five examples ran; 2659 passed — ✅
+
+
+---
+
+## Milestone 81 — Tesserae 0.3.0: `tre` 0.5.0 and Custom Windowing
+
+**Status: ⬜ Scoped — waits for `tre` 0.5.0 and the user.** The user (2026-09-30): "Do not automatically push to 0.5.0. When Tesserae moves to 0.5.0 and implements the custom windowing it will move to 0.3.0 as a major feature. Before that all milestones from here on will use 0.2.x". So Tesserae's dependency is capped `tesserae-engine>=0.4.4,<0.5` (guarded by `tests/test_dependencies.py`), and this milestone starts only when the user says so, after `tre` 0.5.0 (`tre` #28) is released.
+
+**Draft approach:** move to `tre` 0.5.0 (lifting the cap), then draw the title bar and borders Tesserae's way. `App(decorations=False)`; the app shell's top bar as the window's drag region, with the app's icon and title, and minimize, maximize/restore and close buttons wired to the window controls and state events; `resize_border`; macOS's transparent title bar with the bar laid out after `titlebar_inset`. Tesserae's review of `tre`'s design (2026-09-30) asked for: Q1's interactive rule scoped to the drag region and ignoring hover listeners, an opt-out for the Windows title-bar menu, a macOS inset event, a pointer cancel after a native drag, fullscreen, a window icon and a minimum size. What `tre` decides shapes this scope.
+
+### Phase 1 — Scope and Decisions ⬜
+- Step 1: `tre` 0.5.0's final API; Tesserae's questions (the title bar in YAML, the shell, themes); refine this milestone — ⬜
 

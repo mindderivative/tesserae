@@ -8,7 +8,7 @@ Tesserae is pre-alpha, and on PyPI as
 pip install tesserae-ui
 ```
 
-That also installs **`tre` 0.4.4 or newer**, which is on PyPI as
+That also installs **`tre` 0.4.4 or newer, below 0.5**, which is on PyPI as
 [`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (imported
 as `tre`). The rest of this page is for working on Tesserae itself, from
 a local editable checkout.

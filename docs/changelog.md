@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 (unreleased)
 
 ### Requirements
 
-- **`tre` 0.4.4 or newer** (was 0.4.2).
+- **`tre` 0.4.4 or newer, below 0.5** (was 0.4.2 or newer). `tre` 0.5, with
+  custom windowing, comes with Tesserae 0.3.0.
 
 ### Added
 
