@@ -2028,3 +2028,25 @@ GitHub project instead."
   (users/mindderivative/projects/2): releases are milestones with umbrella
   issues (#23 for 0.2.1, #24 for 0.3.0). This LOG continues as the repo's
   running narrative.
+
+## M78 Phases 5-6, #39, and M78 complete
+
+Tracked in the GitHub project (#35, #36, #39, #26).
+
+- Phase 5 (`beb73a7`): an `.rpm` (with `rpmbuild`) and a Flatpak (with
+  `flatpak-builder`, on Freedesktop 26.08), each made when its tool is
+  installed and reported when it isn't.
+  - The `.rpm` passed locally in a Fedora 44 container.
+  - Both passed in CI. The Flatpak runs a build from Ubuntu 24.04
+    (glibc 2.39).
+- Phase 6 (`2ae7cd0`): the guide's install/uninstall table for all seven
+  installers, and signing with the developer's own certificates.
+- #39, a macOS hot-reload race CI found (the test job failed on reload
+  tests that hadn't changed):
+  - A save can arrive as one event while the file is empty. The watchers
+    now let a change settle (`ab4b2da`).
+  - A save can also land while the file is read. They now read it again
+    (`d2537b6`).
+  - Seven tests fake the events on any platform.
+- CI run 36767330299 is green on all three platforms. M78 is complete; the
+  0.2.1 release (#29) is next. 2676 passed.
