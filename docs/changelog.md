@@ -24,6 +24,9 @@
   `appimagetool` fetched and pinned, the `.rpm` and Flatpak made when
   `rpmbuild` and `flatpak-builder` are installed, and reported otherwise).
   A PNG `--icon` works on every platform.
+- The [Releasing Your App](guide/releasing.md) guide: building, what goes
+  in, each installer and how its users install and uninstall it, and
+  signing and notarizing with your own certificates.
 - `TESSERAE_MAX_FRAMES=n` stops `app.run()` after `n` frames, and
   `TESSERAE_FRAMES_REPORT=<file>` writes how many it drew, for automated
   runs.
@@ -43,6 +46,14 @@
 - On `tre` 0.4.3, a `scroll_offset` set past the end is held at the end at
   once (and written back through `two_way`), and scroll keys held with
   Ctrl, Alt or Meta no longer scroll.
+
+### Fixed
+
+- Hot reload no longer reads a file in the middle of a save. On macOS a
+  save could arrive as one event while the file was still empty, so a
+  reload failed ("'NoneType' object has no attribute 'get'") and missed
+  the edit; the watchers now wait for a change to settle
+  ([#39](https://github.com/mindderivative/tesserae/issues/39)).
 
 ## 0.2.0
 
