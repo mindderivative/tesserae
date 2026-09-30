@@ -12,8 +12,13 @@ on:
     branches: [main]
 
 jobs:
+  # The suite and the examples on each supported platform (M76 Phase 3).
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,6 +32,7 @@ jobs:
       # (Mesa's software Vulkan implementation) is enough for a real
       # `wgpu::Instance::request_adapter` to succeed headlessly.
       - name: Install system dependencies
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libfontconfig1-dev
 
       # tre's source at the release pyproject's floor names, checked out only
