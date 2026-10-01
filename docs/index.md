@@ -12,10 +12,13 @@ direct GLFW/wgpu-py stack instead): app authors write **YAML views**,
 paired with a Python `ViewModel` per view -- a plain `Signal`-driven
 MVVM layer, not a whole-tree reconcile.
 
-**Status: pre-alpha.** `App`/`Signal`/`View`/`ViewModel`/`Component`/
-`Repeater`/`Computed`/`Effect`/`batch`/`untrack` are real, exercised
-end to end by five real vertical-slice examples. See
-[Getting Started](getting-started.md) to build your first screen.
+**Status: pre-alpha, 0.3.0.** Tesserae is on PyPI as
+[`tesserae-ui`](https://pypi.org/project/tesserae-ui/) and runs on Linux,
+macOS and Windows. Screens, components, the MD3 widget catalog, themes,
+hot reload, app shells with docking, custom title bars, and building an
+app into one executable or an installer are all real, exercised by the
+examples and the test suite. [Getting Started](getting-started.md) takes
+you from a fresh install to your first window.
 
 ## What's built
 
@@ -58,6 +61,16 @@ end to end by five real vertical-slice examples. See
 - **A full reactivity layer** -- `Signal`, `Computed`, `Effect`,
   `batch`, `untrack` and `ViewModel`, Tesserae's own since M35. See
   [Reactivity](guide/reactivity.md).
+- **Custom title bars** (0.3.0) -- an undecorated window whose title bar
+  the app draws: `kind: TitleBar` in a view, the app shell's top bar, or
+  a bar of your own with `window_region` and the `window.*` handlers,
+  with a window border, light and dark theming, and macOS's traffic
+  lights. See [Custom Title Bars](guide/custom-title-bars.md).
+- **`tesserae new`, `tesserae add` and `tesserae build`** -- start an app
+  and add screens from the command line, and build an app into one
+  executable, or a `.dmg`, setup `.exe`, AppImage, `.deb`, `.rpm`,
+  pacman package or Flatpak. See [Getting Started](getting-started.md)
+  and [Releasing Your App](guide/releasing.md).
 - **An enforced naming convention** -- every real view is a
   `*_View.yaml` + `*_ViewModel.py` pair, checked at load time, not
   discovered as a cryptic failure later.
@@ -80,11 +93,10 @@ pass `tre` the `*_spec=` forms (e.g. `load_theme(...)` for
 
 ## Where to go next
 
-- **[Installation](installation.md)** -- set up a development
-  environment (Tesserae depends on `tre` as a local editable checkout
-  for now).
-- **[Getting Started](getting-started.md)** -- build and run your
-  first screen in a few lines.
+- **[Installation](installation.md)** -- `pip install tesserae-ui`, and
+  setting up a checkout to work on Tesserae itself.
+- **[Getting Started](getting-started.md)** -- from a fresh Linux
+  install to your first window and node, declaratively and from Python.
 - **[Guide](guide/apps-and-screens.md)** -- apps and screens,
   components, [declarative component fragments](guide/component-fragments.md),
   the [widget catalog](guide/widget-catalog.md), lists, reactivity,
@@ -100,4 +112,7 @@ Work is planned and tracked, release by release, in the GitHub project
 [Tesserae UI Framework](https://github.com/users/mindderivative/projects/2):
 each release is a milestone whose issues are its steps. The complete,
 phase-by-phase history of everything before it (milestones M1–M82, up to
-0.2.1) is in [`BUILD_TRACKER_ARCHIVE_0.2.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER_ARCHIVE_0.2.md).
+0.2.1) is in [`BUILD_TRACKER_ARCHIVE_0.2.md`](https://github.com/mindderivative/tesserae/blob/main/BUILD_TRACKER_ARCHIVE_0.2.md);
+0.3.0's (custom windowing) is in the project, under
+[#24](https://github.com/mindderivative/tesserae/issues/24). What changed in
+each release is in the [changelog](changelog.md).

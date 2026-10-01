@@ -10,7 +10,7 @@ GLFW/wgpu-py stack instead): app authors write **YAML views**, not Python
 widget-class trees, paired with a Python `ViewModel` per view -- a plain
 `Signal`-driven MVVM layer, not a whole-tree reconcile.
 
-**Status: pre-alpha, five vertical slices.** `App`/`Signal`/`View`/
+**Status: pre-alpha, 0.3.0** (custom title bars, `tesserae build`, a `tesserae new` CLI). `App`/`Signal`/`View`/
 `ViewModel`/`Component`/`Repeater` exist and are exercised end to end by
 `examples/counter/` (a single screen), `examples/multi_screen/` (two
 screens, switched via `App.show()` from inside a real dispatched

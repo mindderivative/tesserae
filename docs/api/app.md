@@ -2,10 +2,12 @@
 
 ## `App`
 
-**`App(width=480, height=320, title="Tesserae App", *, theme_seed=None, dark="system", default_theme=None, custom_theme=None, stylesheet=None)`**
+**`App(width=480, height=320, title="Tesserae App", *, theme_seed=None, dark="system", default_theme=None, custom_theme=None, stylesheet=None, state=None, decorations=True, resize_border=None, min_width=0, min_height=0, fullscreen=False, system_menu=False, icon=None, window_border=True)`**
 
 (Each of `default_theme=`, `custom_theme=` and `stylesheet=` also has a
-`*_spec=` twin that takes a dict instead of a file path.)
+`*_spec=` twin that takes a dict instead of a file path.) `state=` is the
+app's [shared state](../guide/apps-and-screens.md#shared-state), and the
+last eight arguments are [the window's](#the-window).
 
 `width`/`height`/`title` describe the one real window this `App`
 creates and shows its screens in. A screen root with no size of its own
@@ -27,6 +29,41 @@ re-colour them with the screens, and roll them back with the screens if
 one fails (M50). An explicit `theme=` pins a widget; a widget's
 `destroy()` stops it following. Since M42 the window itself has
 no theme: nothing `tre` draws reads one.
+
+## The window
+
+*0.3.0, on `tre` 0.5.0.1.* Each option is also a property, and can change
+while the app runs. The [Custom Title Bars](../guide/custom-title-bars.md)
+guide and [The window](../guide/apps-and-screens.md#the-window) explain
+them; here is the reference.
+
+| Property | |
+| --- | --- |
+| `decorations -> bool` | Whether the OS draws the title bar and borders. `False` leaves them to the app (on macOS the title bar stays, transparent, with the traffic lights). |
+| `resize_border -> int` | Pixels along each edge that resize an undecorated window; `None` (unset) is 6 while undecorated and 0 otherwise. |
+| `min_width`, `min_height -> int` | The smallest the user can resize the window to (0: no limit). |
+| `fullscreen -> bool` | Whether the window fills its monitor, borderless. |
+| `system_menu -> bool` | Whether a right-click on the title bar opens the OS's window menu (Windows, and Wayland compositors that have one). |
+| `window_border -> bool` | Whether an undecorated window gets its 1 px border, in the theme's `outline_variant`; it hides while maximized or fullscreen and on macOS. Restyle it by its `window_border` class. |
+| `platform -> str` | `"windows"`, `"macos"`, `"wayland"` or `"x11"`. |
+
+**`set_icon(icon) -> None`** -- the window's icon from an image file (a
+PNG, best square), or `None`. Shown on Windows and X11; Wayland and macOS
+take it from the app's desktop entry or bundle, which
+`tesserae build --installer` makes.
+
+**Actions:** `minimize()`, `maximize()`, `restore()`,
+`toggle_maximized()` and `close()`. Before `run()`, `minimize()` and
+`maximize()` set how the window opens. `close()` closes it as the user's
+close would, so `close_requested` fires first and a "save changes?" check
+can cancel it.
+
+**State**, as read-only [Computeds](../guide/reactivity.md) a binding or
+an `Effect` can follow: `app.maximized`, `app.active` (the window has the
+OS's focus), `app.titlebar_inset` (the `(height, width)` macOS's traffic
+lights take, `(0, 0)` elsewhere) and `app.native_controls` (whether the OS
+draws its own window buttons). Window buttons can call the actions with no
+ViewModel method: `handlers: {on_click: window.close}`.
 
 ## `set_theme_specs`
 
@@ -153,6 +190,43 @@ The view and ViewModel registered under `name`: by `register`, by
 `load`, or by a shell file's panels (M52), whose ViewModels the app
 builds. `viewmodel` is `None` for a view with none. An unknown name is a
 `KeyError`, as for `show`.
+
+## Routes and history
+
+A screen navigated to is a step in a history, as in a browser; see
+[Routes and deep links](../guide/apps-and-screens.md#routes-and-deep-links).
+
+**`navigate(name, /, **params) -> Window`** -- shows the screen `name` as
+a step in the history, after calling its ViewModel's
+`on_navigated(params)` if it has one. Forward entries are dropped, and
+navigating to the entry already showing does nothing.
+
+**`route(pattern, name) -> None`** -- adds a route: a pattern such as
+`"notes/{id}"` (`{param}` is a string, `{param:int}` an `int`) for the
+screen registered under `name`. Routes are tried in the order added.
+
+**`navigate_to(route) -> Window`** -- navigates to the screen the first
+matching route names, with the params read from `route` (a deep link such
+as `"notes/42"`). `KeyError` if none matches.
+
+**`back() -> bool`**, **`forward() -> bool`** -- move through the history,
+calling the entry's `on_navigated`; they return whether they moved.
+
+**`location -> str | None`** -- the screen showing, as a route string (to
+save where the user was), or `None` if no route reads its params back
+exactly.
+
+## `App.of`
+
+**`App.of(view) -> App | None`** -- the live app whose window `view` (a
+view, a component or a window) is on, or `None`: for a ViewModel's
+constructor, before `super().__init__(view)` gives it `self.app`.
+
+## `watch_component`
+
+**`watch_component(path) -> None`** -- while `run(hot_reload=True)` runs,
+watches a component file and reloads every live instance of it
+(`tesserae.instantiate` calls it). Outside hot reload it does nothing.
 
 ## `current`
 

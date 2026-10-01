@@ -73,6 +73,6 @@ See [Binding Expressions](bindings.md) for what a `{{ }}` expression can contain
 - **Use Tesserae's classes, not `tre`'s.** `tesserae.Signal` and friends
   track only each other. A `tre.Signal` read inside a
   `tesserae.Computed` isn't recorded.
-- **Bindings, for now:** until Tesserae evaluates `{{ }}` bindings itself
-  (M36), `tre` does, and Tesserae's signals feed `tre`'s dependency
-  tracking so bound nodes update as before.
+- **Bindings are Tesserae's too** (M36): it evaluates `{{ }}` expressions
+  itself, and a bound node updates when a `Signal` or `Computed` the
+  expression reads changes. See [Binding Expressions](bindings.md).

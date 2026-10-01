@@ -33,18 +33,6 @@ python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 ```
 
-!!! warning "Coming from a GitHub `tre` wheel"
-    If this environment has a `tre-...` wheel from a GitHub release (Tesserae
-    used them before 0.3.5.2), run `pip uninstall tre` **first**. pip treats
-    `tesserae-engine` as a different project and leaves the old `tre`
-    distribution installed; both then own the `tre` package, and a later
-    `pip uninstall tre` would delete files `tesserae-engine` needs.
-
-0.3.5 and later have only `tre`'s building blocks: its declarative views,
-reactivity, MD3 widgets and theming are gone, and Tesserae provides them
-(see `tre`'s [migration page](https://github.com/mindderivative/tre/blob/v0.3.5/docs/migrating-0.3.5.md)
-if you also use `tre` directly).
-
 !!! note "Testing against unreleased `tre`"
     To try Tesserae against a `tre` checkout you're working on, install
     it editable instead: `python -m maturin develop --release
@@ -88,11 +76,7 @@ files only if every test passes.
 
 ## Keeping `tre` up to date
 
-`tre` ships real releases (tags/GitHub Releases) roughly one per
-accumulated batch of changes rather than one per commit -- when you
-pull a new `tre` version, re-run `maturin develop --release` inside
-`tre`'s own checkout (targeting Tesserae's `.venv`) and re-run
-Tesserae's own test suite before assuming nothing broke; a real
-breaking API/schema change (like `tre` v0.3.0's `flex_direction`
-rename) is possible between versions and is documented in `tre`'s own
-release notes.
+`tre` publishes to PyPI as `tesserae-engine`, and Tesserae's requirement
+(`>=0.5.0.1,<0.6`) says which versions it works with. To pick up a newer
+one inside that range, `pip install --upgrade tesserae-engine` and re-run
+Tesserae's test suite. A new `tre` line (0.6) is a new Tesserae line.
