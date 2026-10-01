@@ -9,7 +9,8 @@ app whose window has no OS title bar (`App(decorations=False)`).
       children:                       # the app's own content, between the
         - {id: search, kind: TextField, ...}   # title and the buttons
 
-It's expanded, before the view is built, into ordinary nodes -- so a
+Its height is 40 px unless its `style:` gives another, which every part
+follows. It's expanded, before the view is built, into ordinary nodes -- so a
 theme, a stylesheet, reconcile and hot reload treat it as they treat any:
 
 - `<id>.inset`: on macOS, room for the traffic lights (`app.titlebar_inset`);
@@ -47,7 +48,9 @@ BUTTONS = ("minimize", "maximize", "close")
 _KEYS = {"id", "kind", "title", "icon", "buttons", "children", "style", "classes", "a11y"}
 _ACTIONS = {"minimize": "window.minimize", "maximize": "window.toggle_maximized", "close": "window.close"}
 _LABELS = {"minimize": "Minimize", "maximize": "Maximize", "close": "Close"}
-#: The bar's height and each button's width: the size desktops use.
+#: The bar's height and each button's width: the size desktops use. The
+#: height is a default: `style: {height: ...}` on the TitleBar sets it,
+#: and every part takes the bar's height.
 HEIGHT, BUTTON_WIDTH, GLYPH = 40, 46, 16
 #: How far the title, icon and buttons fade while the window isn't the
 #: focused one, as desktops dim an inactive title bar.
@@ -103,7 +106,7 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
     # macOS: room for the traffic lights, as wide as `titlebar_inset` says
     # (0 elsewhere).
     parts: list[dict[str, Any]] = [{"id": f"{bar_id}.inset", "kind": "Container", "classes": ["title_bar_inset"],
-                                    "style": {"width": 0, "height": HEIGHT, "flex_shrink": 0},
+                                    "style": {"width": 0, "height": "100%", "flex_shrink": 0},
                                     "bindings": {"width": "{{ app.titlebar_inset.get()[1] }}"}}]
     if icon is not None:
         parts.append({"id": f"{bar_id}.icon", "kind": "Icon", "icon": {"name": icon}, "classes": ["title_bar_icon"],
@@ -113,11 +116,11 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
                       "text": {"content": title, "typography_role": "title_small"},
                       "style": {"flex_shrink": 0}, "bindings": {"opacity": _DIM}})
     parts.append({"id": f"{bar_id}.content", "kind": "Container", "classes": ["title_bar_content"],
-                  "style": {"flex_grow": 1, "height": HEIGHT, "align_items": "center", "gap": 8},
+                  "style": {"flex_grow": 1, "height": "100%", "align_items": "center", "gap": 8},
                   "children": list(node.get("children") or [])})
     if buttons:  # flush together at the right, as desktops set them
         parts.append({"id": f"{bar_id}.buttons", "kind": "Container", "classes": ["title_bar_buttons"],
-                      "style": {"height": HEIGHT, "flex_shrink": 0},
+                      "style": {"height": "100%", "flex_shrink": 0},
                       # hidden where the OS's own controls show (macOS's traffic lights)
                       "bindings": {"opacity": _DIM, "visible": "{{ not app.native_controls.get() }}"},
                       "children": [_button(bar_id, name) for name in BUTTONS if name in buttons]})
@@ -141,12 +144,15 @@ def _button(bar_id: str, name: str) -> dict[str, Any]:
     button_id = f"{bar_id}.{name}"
     classes = ["title_bar_button", *(["title_bar_close"] if name == "close" else [])]
     if name == "maximize":
-        # Two glyphs in one place: restore shows while the window is maximized.
-        at = {"position": "absolute", "x": (BUTTON_WIDTH - GLYPH) / 2, "y": (HEIGHT - GLYPH) / 2}
-        glyphs = [_glyph(button_id, "window_maximize", style=dict(at),
-                         bindings={"opacity": "{{ 1 - (app.maximized.get() and 1 or 0) }}"}),
-                  _glyph(button_id, "window_restore", style=dict(at),
-                         bindings={"opacity": "{{ app.maximized.get() and 1 or 0 }}"})]
+        # Two glyphs in one place, a glyph-sized box the button centres at
+        # any height: restore shows while the window is maximized.
+        at = {"position": "absolute", "x": 0, "y": 0}
+        glyphs = [{"id": f"{button_id}.glyphs", "kind": "Container",
+                   "style": {"width": GLYPH, "height": GLYPH, "flex_shrink": 0},
+                   "children": [_glyph(button_id, "window_maximize", style=dict(at),
+                                       bindings={"opacity": "{{ 1 - (app.maximized.get() and 1 or 0) }}"}),
+                                _glyph(button_id, "window_restore", style=dict(at),
+                                       bindings={"opacity": "{{ app.maximized.get() and 1 or 0 }}"})]}]
     else:
         glyphs = [_glyph(button_id, "window_minimize" if name == "minimize" else "close")]
     # Close's hover and pressed layers are red, as desktops colour close
@@ -154,6 +160,6 @@ def _button(bar_id: str, name: str) -> dict[str, Any]:
     tint = {"interaction": {"color": "error"}} if name == "close" else {}
     return {"id": button_id, "kind": "Container", "classes": classes, **tint,
             "handlers": {"on_click": _ACTIONS[name]}, "a11y": {"label": _LABELS[name]},
-            "style": {"width": BUTTON_WIDTH, "height": HEIGHT, "flex_shrink": 0, "align_items": "center",
+            "style": {"width": BUTTON_WIDTH, "height": "100%", "flex_shrink": 0, "align_items": "center",
                       "justify_content": "center"},
             "children": glyphs}

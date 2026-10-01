@@ -231,7 +231,7 @@ children:
     ...
 ```
 
-It's a 40 px bar that moves the window when it's dragged (from anywhere
+It's a bar, 40 px high unless its `style: {height: ...}` says otherwise (every part follows), that moves the window when it's dragged (from anywhere
 but its buttons and the app's own controls) and maximizes on a
 double-click; the icon and title at its start; the app's children in
 the middle; and minimize, maximize and close at the right. Maximize

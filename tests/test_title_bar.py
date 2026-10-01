@@ -144,3 +144,15 @@ def test_reconcile_and_the_stylesheet_classes(tmp_path):
     view.reconcile(_page({**BAR, "title": "Notes, edited"}))
     assert view.node("bar.title").get("text") == "Notes, edited"
     assert expand_title_bars(_page({**BAR, "classes": ["mine"]}))["children"][0]["classes"] == ["title_bar", "mine"]
+
+
+@pytest.mark.parametrize("height", [32, 56])
+def test_any_height_and_every_part_follows(tmp_path, height):
+    app, view = _app_with(tmp_path, {**BAR, "style": {"width": 600, "height": height}})
+    g = lambda i, k: view.node(i).get(k)  # noqa: E731
+    assert g("bar", "layout_height") == height
+    for part in ("bar.inset", "bar.content", "bar.buttons", "bar.minimize", "bar.maximize", "bar.close"):
+        assert g(part, "layout_height") == height, part
+    for glyph in ("bar.minimize.window_minimize", "bar.close.close", "bar.maximize.window_maximize",
+                  "bar.maximize.window_restore"):  # centred at any height
+        assert g(glyph, "layout_y") - g("bar", "layout_y") == (height - 16) / 2, glyph
