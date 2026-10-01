@@ -51,6 +51,10 @@ from Material 3 roles, hot-reloadable.
   `tesserae build` already does. `app.minimize()`, `maximize()`,
   `restore()`, `close()` and `toggle_maximized()`; `app.maximized` and
   `app.active` as read-only `Signal`s, so bindings can follow them.
+  **As built (M2, #40):** they're read-only `Computed`s over private
+  Signals, which bindings follow the same way. `fullscreen` and
+  `app.platform` joined the options, and an action taken before `run()`
+  updates `app.maximized` at once, since no event comes then.
 - A per-screen setting. But decorations belong to the window, not a screen.
 
 **Q2. How a title bar is written.** Two layers:
@@ -75,7 +79,9 @@ from Material 3 roles, hot-reloadable.
   *is* the title bar. `top_bar: {title, leading_icon, trailing_icons}`
   keeps its keys, and gains the drag region and the window buttons after
   the trailing icons. A shell app gets a custom title bar from one
-  `App(decorations=False)`.
+  `App(decorations=False)`. **As built (M4, #54):** `top_app_bar` decides
+  it (`window_controls=`, by default whether the app is undecorated), so
+  a shell made in code and one from a shell file get it alike.
 - Keep the top bar under a separate title bar: two bars, and a taller
   chrome.
 
@@ -109,6 +115,9 @@ dragged would keep its pressed state layer, which today clears only on
   `native_controls` is true, Tesserae's buttons hide, and the bar pads its
   start by `titlebar_inset`'s width (following the event, as it changes in
   fullscreen). `resize_border` defaults to 6 px wherever `tre` honours it.
+  **As built (M3, #52):** `app.titlebar_inset` (a `(height, width)` tuple)
+  and `app.native_controls` are read-only Computeds; the buttons hide with
+  a bound `visible`, which takes them out of layout and hit-testing.
 - Mirror each platform's order (buttons at the left on macOS-like Linux
   themes): the desktop's setting isn't something `tre` reports.
 
@@ -119,6 +128,8 @@ dragged would keep its pressed state layer, which today clears only on
   vocabulary, and the existing shell examples stay decorated.
 - Turn it on for every new shell app. It's a real change in behaviour on
   some Linux desktops, so it should be asked for.
+  **As built (M4, #56):** the flag goes with `--shell` (alone it's a
+  one-line error), and the app gets `min_width=640, min_height=400`.
 
 **Q8. Hot reload and tests.**
 
@@ -127,7 +138,10 @@ dragged would keep its pressed state layer, which today clears only on
   double-click, `maximized`, `active`, `titlebar_inset`), and CI builds a
   custom-title-bar app with `tesserae build --check` on all three
   platforms. Moving and resizing the window is the OS's, so it's checked
-  by hand, as `tre` does.
+  by hand, as `tre` does. **As built (M4, #57):** reload needed no new
+  code, since a view's reconcile expands title bars as building it does,
+  and the shell rebuilds its top bar through `top_app_bar`. The CI build
+  and the hand checks are M5.
 
 **Q9. A window border.** Added by the user (2026-09-30): "yes, add the
 border to M4". An undecorated window otherwise has no visible edge on
@@ -138,7 +152,12 @@ Linux (Windows keeps its shadow; macOS keeps its frame).
   It's hidden while maximized or fullscreen, and on macOS. It's an `App`
   option, on by default for undecorated windows, so apps without the
   shell get it too. Rounded corners and a drawn shadow are out of reach:
-  they'd need transparent windows from `tre`.
+  they'd need transparent windows from `tre`. **As built (M4, #55):** a
+  full-window `Rect` over everything (`z_index` 1000) that isn't
+  hit-testable or in the accessibility tree, so presses reach the screen
+  under it; its look is the `window_border` class in the cascade's first
+  layer (`border_color`, `border_width`), and an unthemed app gets the
+  baseline colour inline. It's `App(window_border=)` and a live property.
 
 ## Milestones
 

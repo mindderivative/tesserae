@@ -69,7 +69,8 @@ shell = AppShell(app.window, top_bar=top_app_bar(app.window, "Studio", width=110
 the decorations; `True` needs the window to be an `App`'s. A shell
 file's `top_bar` does the same in an undecorated app, and hot-reloads
 as the title bar. `tesserae new notes --shell --custom-title-bar` makes
-such an app ([Getting Started](../getting-started.md)).
+such an app ([Getting Started](../getting-started.md)). [Custom Title Bars](custom-title-bars.md)
+has the rest: a title bar in a view, macOS, and the window border.
 
 ## Screens as tabs: `center=True`
 

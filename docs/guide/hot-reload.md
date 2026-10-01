@@ -104,7 +104,7 @@ too (M52). An edit is applied in place where it can be:
 
 | Edit | What happens |
 | --- | --- |
-| the top bar's title or icons | the bar is rebuilt where it is |
+| the top bar's title or icons | the bar is rebuilt where it is (in an undecorated app, still the [title bar](custom-title-bars.md)) |
 | the status bar's text | set on the same bar |
 | a zone's size | set, and a zone the file didn't change keeps the size the user dragged it to |
 | navigation items or `on_navigate` | the rail is rebuilt, the current screen still selected |

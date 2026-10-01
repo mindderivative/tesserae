@@ -39,6 +39,9 @@ Built on the `0.3.0` branch, following the
   while maximized or fullscreen and on macOS (`window_border`, and the
   `window_border` class); `tesserae new --shell --custom-title-bar`; and
   `examples/custom_title_bar`.
+- **A "Custom Title Bars" guide** ([#59](https://github.com/mindderivative/tesserae/issues/59)),
+  bringing the title bar, the border and each platform's differences
+  together.
 
 ### Changed
 

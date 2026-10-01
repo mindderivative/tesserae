@@ -39,7 +39,7 @@ add instead. A CamelCase name gets a kebab-case route: `UserProfile` is
   Settings, a status bar), and the Settings screen.
 - `tesserae new notes --shell --custom-title-bar` makes the window
   undecorated (`decorations=False`, at least 640 by 400), so the shell's
-  top bar is its [title bar](guide/app-shell.md#the-top-bar-as-the-title-bar):
+  top bar is its [title bar](guide/custom-title-bars.md):
   it moves the window, and it has the minimize, maximize and close
   buttons. It goes with `--shell`.
 - `--dir` makes the app somewhere other than here, or adds a screen to
