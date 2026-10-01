@@ -91,13 +91,14 @@ dragged would keep its pressed state layer, which today clears only on
 
 **Q5. Theme.**
 
-- **(decided)** The bar is a Material 3 top app bar: `surface`, or
-  `surface_container` when the content scrolls under it; the title
-  `on_surface`, dimmed to `on_surface_variant` when the window is
-  inactive. Window buttons are icon buttons whose hover and pressed layers
-  are the usual ones, except close, which uses `error_container`, as
-  desktops colour close. Stylesheets can override each part, like any
-  widget.
+- **(decided)** The bar is a Material 3 top app bar: `surface`, its title,
+  icon and glyphs `on_surface`, all on its parts' classes so stylesheets
+  and themes override each part. **As built and approved (M3, #51):**
+  while the window is inactive the title, icon and buttons fade to 0.6
+  opacity -- not a switch to `on_surface_variant`, since a bound colour
+  would override an app's stylesheet colour -- and close's hover and
+  pressed layers are `error`, not `error_container`, which is too pale at
+  a state layer's 8%.
 - Platform look-alikes (Windows' square buttons, GNOME's round ones): more
   code per platform, and against "the same app everywhere".
 
