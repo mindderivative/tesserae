@@ -66,6 +66,9 @@ STYLES = {"styles": [
     {"classes": ["title_bar_title"], "style": {"foreground": "on_surface"}},
     {"classes": ["title_bar_icon"], "style": {"foreground": "on_surface"}},
     {"classes": ["title_bar_glyph"], "style": {"foreground": "on_surface"}},
+    # 0.3.0 M4: an undecorated window's border (App(window_border=...)).
+    {"classes": ["window_border"], "style": {"background": "transparent", "border_color": "outline_variant",
+                                             "border_width": 1}},
 ]}
 
 

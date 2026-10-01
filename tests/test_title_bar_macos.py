@@ -108,3 +108,11 @@ def test_visible_takes_a_boolean():
 
     with pytest.raises(ValueError, match='widget property "visible" expects a boolean binding'):
         _box_bound_to("{{ shown }}", VM)
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="macOS's own answer, on a Mac (CI's macOS job)")
+def test_on_a_real_mac_an_undecorated_window_has_no_drawn_border():
+    """macOS keeps the window's frame, so Tesserae's border (M4) is never
+    built there."""
+    app = App(width=400, height=300, theme_seed=SEED, decorations=False)
+    assert app._border is None

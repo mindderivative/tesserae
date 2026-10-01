@@ -31,7 +31,8 @@ from tre import Window
 from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.listeners import Listeners
 from tesserae.naming import check_naming_convention
-from tesserae.reactive import Computed, Signal, batch
+from tesserae import tokens
+from tesserae.reactive import Computed, Effect, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
 from tesserae.shell_file import load_shell_spec
@@ -201,6 +202,7 @@ class App:
         fullscreen: bool = False,
         system_menu: bool = False,
         icon: str | Path | None = None,
+        window_border: bool = True,
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
@@ -248,7 +250,7 @@ class App:
         # (`tre` 0.5.0). An undecorated window resizes from a 6 px border
         # unless the app gives its own width (the design's Q6).
         self._resize_border: int | None = _non_negative("resize_border", resize_border, allow_none=True)
-        self._window.set(resize_border=self._border(bool(decorations)),
+        self._window.set(resize_border=self._resize_for(bool(decorations)),
                          min_width=_non_negative("min_width", min_width),
                          min_height=_non_negative("min_height", min_height),
                          fullscreen=bool(fullscreen), system_menu=bool(system_menu))
@@ -274,6 +276,14 @@ class App:
         self.titlebar_inset = Computed(self._titlebar_inset.get)
         self.native_controls = Computed(self._native_controls.get)
         self._window.on("titlebar_inset", self._on_titlebar_inset)
+        # 0.3.0 M4 (the design's Q9): an undecorated window's 1 px border,
+        # built the first time it shows, and shown while undecorated,
+        # neither maximized nor fullscreen, and not on macOS (its frame).
+        self._decorated = Signal(bool(decorations))
+        self._fullscreen = Signal(bool(fullscreen))
+        self._window_border = Signal(bool(window_border))
+        self._border: Any = None
+        self._border_effect = Effect(self._show_border)
         if dark == "system":  # M53: Linux answers now; macOS and Windows once the window opens (run())
             os_dark = _os_dark(self._window)
             if os_dark is not None:
@@ -775,7 +785,7 @@ class App:
     #: The resize border of an undecorated window whose app gives none.
     DEFAULT_RESIZE_BORDER = 6
 
-    def _border(self, decorations: bool) -> int:
+    def _resize_for(self, decorations: bool) -> int:
         if self._resize_border is not None:
             return self._resize_border
         return 0 if decorations else self.DEFAULT_RESIZE_BORDER
@@ -789,7 +799,8 @@ class App:
 
     @decorations.setter
     def decorations(self, value: bool) -> None:
-        self._window.set(decorations=bool(value), resize_border=self._border(bool(value)))
+        self._window.set(decorations=bool(value), resize_border=self._resize_for(bool(value)))
+        self._decorated.set(bool(value))
 
     @property
     def resize_border(self) -> int:
@@ -801,7 +812,7 @@ class App:
     @resize_border.setter
     def resize_border(self, value: int | None) -> None:
         self._resize_border = _non_negative("resize_border", value, allow_none=True)
-        self._window.set(resize_border=self._border(self.decorations))
+        self._window.set(resize_border=self._resize_for(self.decorations))
 
     @property
     def min_width(self) -> int:
@@ -829,6 +840,45 @@ class App:
     @fullscreen.setter
     def fullscreen(self, value: bool) -> None:
         self._window.set(fullscreen=bool(value))
+        self._fullscreen.set(bool(value))
+
+    @property
+    def window_border(self) -> bool:
+        """Whether an undecorated window gets its 1 px border (on by
+        default): around the window, in the theme's `outline_variant`, a
+        node of class `window_border` a theme or stylesheet can restyle.
+        It's hidden while maximized or fullscreen, and on macOS, where the
+        OS draws the window's frame."""
+        return self._window_border.get()
+
+    @window_border.setter
+    def window_border(self, value: bool) -> None:
+        self._window_border.set(bool(value))
+
+    def _show_border(self) -> None:
+        shown = (self._window_border.get() and not self._decorated.get() and not self._maximized.get()
+                 and not self._fullscreen.get() and self.platform != "macos")
+        if shown and self._border is None:
+            self._border = self._build_border()
+        if self._border is not None:
+            self._border.root.set(visible=shown)
+
+    def _build_border(self) -> Any:
+        style: dict[str, Any] = {"position": "absolute", "x": 0, "y": 0, "width": "100%", "height": "100%",
+                                 "z_index": 1000}
+        theme = self._view_theme()
+        if "theme_seed" not in theme and self._default_theme_spec is None and self._custom_theme_spec is None:
+            # an unthemed app has no roles to resolve: MD3's baseline colour
+            style.update(background="transparent", border_width=1,
+                         border_color="#{:02X}{:02X}{:02X}{:02X}".format(*tokens.BASELINE["outline_variant"]))
+        spec = {"id": "window_border", "kind": "Rect", "classes": ["window_border"], "style": style}
+        if self._stylesheet_spec is not None:
+            theme["stylesheet_spec"] = self._stylesheet_spec
+        view = TesseraeView(spec, window=self._window, **theme)
+        view.root.set(hit_testable=False, a11y_hidden=True)  # drawn over the app, never in its way
+        self._built.append(_Built(view))  # re-themed with the app's views
+        self._window.root.add_child(view.root)
+        return view
 
     @property
     def system_menu(self) -> bool:
