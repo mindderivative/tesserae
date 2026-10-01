@@ -1,0 +1,56 @@
+# A window's title bar, two ways.
+id: root
+kind: Container
+style: {width: "100%", height: "100%", flex_direction: vertical, background: surface}
+children:
+  # 1. The whole thing in one node: icon, title, the app's own content
+  #    (a search field), and minimize, maximize/restore and close.
+  - id: bar
+    kind: TitleBar
+    title: Notes
+    icon: home
+    style: {width: "100%"}
+    children:
+      - id: search
+        kind: TextField
+        text: {content: "", typography_role: body_medium}
+        style: {width: 220, height: 28, foreground: on_surface, background: surface_container_high,
+                corner_radius: 14, padding: {left: 12, right: 12, top: 0, bottom: 0}}
+        two_way: text
+        bindings: {text: "{{ query.get() }}"}
+        a11y: {label: Search}
+
+  - id: body
+    kind: Container
+    style: {flex_grow: 1, flex_direction: vertical, gap: 12, padding: 24}
+    children:
+      - id: heading
+        kind: Text
+        text: {content: "A title bar the app draws", typography_role: title_large}
+        style: {foreground: on_surface}
+      - id: about
+        kind: Text
+        text: {content: "Drag a bar to move the window; double-click it to maximize. The bar below is built by hand.",
+               typography_role: body_medium}
+        style: {foreground: on_surface_variant, width: 520}
+
+      # 2. The same pieces by hand: a drag region, and a button whose
+      #    handler is one of the app's window actions.
+      - id: own_bar
+        kind: Container
+        window_region: drag
+        style: {width: 520, height: 36, align_items: center, gap: 8, background: surface_container,
+                corner_radius: 8, padding: {left: 12, right: 4, top: 0, bottom: 0}}
+        children:
+          - id: own_label
+            kind: Text
+            text: {content: "A bar of my own: drag me", typography_role: label_large}
+            style: {foreground: on_surface, flex_grow: 1}
+          - id: own_close
+            kind: Rect
+            handlers: {on_click: window.close}
+            a11y: {label: Close}
+            style: {width: 28, height: 28, corner_radius: 14, background: transparent, align_items: center,
+                    justify_content: center}
+            children:
+              - {id: own_close_icon, kind: Icon, icon: {name: close}, style: {width: 16, height: 16, foreground: on_surface}}

@@ -38,6 +38,8 @@ RUNNER = textwrap.dedent('''
         report["shell"] = app._shell is not None
         report["rail"] = app._navigation[1] if app._navigation is not None else None
         report["size"] = [app.window.get("width"), app.window.get("height")]
+        report["decorations"] = app.decorations
+        report["title_bar"] = app._shell.top_bar.node.get("window_region") if app._shell is not None else None
         for name in report["screens"]:
             if name == "Home":
                 continue
@@ -97,6 +99,18 @@ def test_new_with_a_shell(tmp_path):
     assert report["shell"] and report["screens"] == ["Home", "Settings"] and report["routes"] == ["", "settings"]
     assert report["rail"] == ["Home", "Settings"] and report["size"] == [960, 600]
     assert report["back_from"] == [["Settings", "Home"]]
+
+
+def test_new_with_a_custom_title_bar(tmp_path, capsys):
+    """0.3.0 M4: an undecorated shell app, its top bar the title bar."""
+    assert cli.main(["new", "studio", "--shell", "--custom-title-bar", "--dir", str(tmp_path)]) == 0
+    report = _run(tmp_path / "studio")
+    assert report["decorations"] is False and report["title_bar"] == "drag" and report["shell"]
+    assert "min_width=640, min_height=400" in (tmp_path / "studio" / "app.py").read_text()
+    plain = cli.main(["new", "plain", "--shell", "--dir", str(tmp_path)])
+    assert plain == 0 and _run(tmp_path / "plain")["decorations"] is True
+    assert cli.main(["new", "lonely", "--custom-title-bar", "--dir", str(tmp_path)]) == 2
+    assert "--custom-title-bar goes with --shell" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("app_py", ["# an app of my own\n", f"# half of it\n{cli.IMPORT_MARKER}\n"])

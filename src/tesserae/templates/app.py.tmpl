@@ -25,7 +25,7 @@ class AppState:
         self.greeting = Signal("Hello from ${title}")
 
 
-app = App(width=${width}, height=${height}, title="${title}", theme_seed=(0x67, 0x50, 0xA4, 0xFF), state=AppState())
+app = App(width=${width}, height=${height}, title="${title}", theme_seed=(0x67, 0x50, 0xA4, 0xFF), state=AppState()${window})
 
 app.load(HERE / "Home_View.yaml", HomeViewModel)
 app.route("", "Home")

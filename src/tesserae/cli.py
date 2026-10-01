@@ -1,6 +1,6 @@
 """`tesserae`, the command line (M67): scaffolding for a new app.
 
-    tesserae new <name> [--shell] [--dir PARENT]
+    tesserae new <name> [--shell [--custom-title-bar]] [--dir PARENT]
     tesserae add screen <Name> [--dir DIR]
     tesserae build [app.py] [--name N] [--icon F] [--console] [--include G] [--exclude G] [--check]
 
@@ -52,8 +52,13 @@ def _write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def new(name: str, parent: Path, shell: bool = False) -> Path:
-    """Makes the app `name` in `parent` and returns its folder."""
+def new(name: str, parent: Path, shell: bool = False, custom_title_bar: bool = False) -> Path:
+    """Makes the app `name` in `parent` and returns its folder.
+    `custom_title_bar` (0.3.0, with `shell`) makes its window undecorated,
+    so the shell's top bar is its title bar."""
+    if custom_title_bar and not shell:
+        raise CliError("--custom-title-bar goes with --shell: the shell's top bar is the title bar "
+                       "(without a shell, put a `kind: TitleBar` in a view)")
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", name):
         raise CliError(f"{name!r} isn't a project name: start with a letter; then letters, digits, - or _")
     folder = parent / name
@@ -65,7 +70,10 @@ def new(name: str, parent: Path, shell: bool = False) -> Path:
     camel = "".join(w.capitalize() for w in words)
     load_shell = f'app.load_shell(HERE / "{camel}_Shell.yaml")  # the frame: a top bar, the rail, a status bar\n'
     size = {"width": "960", "height": "600"} if shell else {"width": "480", "height": "320"}
-    _write(folder / "app.py", _render("app.py.tmpl", title=title, shell=load_shell if shell else "", **size))
+    window = (",\n          decorations=False, min_width=640, min_height=400"  # the shell's top bar is the title bar
+              if custom_title_bar else "")
+    _write(folder / "app.py", _render("app.py.tmpl", title=title, shell=load_shell if shell else "", window=window,
+                                      **size))
     _write(folder / "Home_View.yaml", _render("Home_View.yaml.tmpl"))
     _write(folder / "Home_ViewModel.py", _render("Home_ViewModel.py.tmpl"))
     if shell:
@@ -119,6 +127,8 @@ def _parser() -> argparse.ArgumentParser:
     new_cmd.add_argument("--shell", action="store_true",
                          help="add an app shell (top bar, rail, status bar) and a Settings screen")
     new_cmd.add_argument("--dir", type=Path, default=Path("."), help="where to make it (default: here)")
+    new_cmd.add_argument("--custom-title-bar", action="store_true",
+                         help="with --shell: no OS title bar; the shell's top bar is the title bar")
     add_cmd = commands.add_parser("add", help="add to an app")
     what = add_cmd.add_subparsers(dest="what", required=True)
     screen_cmd = what.add_parser("screen", help="add a screen: a View/ViewModel pair")
@@ -184,7 +194,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.command == "build":
             return _build(args)
         if args.command == "new":
-            folder = new(args.name, args.dir, shell=args.shell)
+            folder = new(args.name, args.dir, shell=args.shell, custom_title_bar=args.custom_title_bar)
             print(f"made {folder}; run it with\n\n    cd {folder}\n    python app.py\n")
         else:
             missing = add_screen(args.name, args.dir)

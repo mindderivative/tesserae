@@ -3,6 +3,8 @@ bar with the app's icon, title and content, and the window buttons,
 which call the app's actions and follow `app.maximized`.
 """
 
+import sys
+
 import pytest
 import yaml
 
@@ -156,3 +158,33 @@ def test_any_height_and_every_part_follows(tmp_path, height):
     for glyph in ("bar.minimize.window_minimize", "bar.close.close", "bar.maximize.window_maximize",
                   "bar.maximize.window_restore"):  # centred at any height
         assert g(glyph, "layout_y") - g("bar", "layout_y") == (height - 16) / 2, glyph
+
+
+def test_the_example_builds(monkeypatch):
+    """`examples/custom_title_bar` (M4 Phase 3): a TitleBar with a search
+    field in it, and a bar built by hand from `window_region` and a
+    `window.close` handler."""
+    from pathlib import Path
+
+    import importlib.util
+
+    folder = Path(__file__).resolve().parent.parent / "examples" / "custom_title_bar"
+    # by its path, under a name of its own: other tests import a Home_ViewModel too
+    spec = importlib.util.spec_from_file_location("custom_title_bar_Home_ViewModel", folder / "Home_ViewModel.py")
+    module = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, spec.name, module)  # App.load asks inspect for the class's file
+    spec.loader.exec_module(module)
+    HomeViewModel = module.HomeViewModel
+
+    app = App(width=720, height=420, theme_seed=SEED, decorations=False)
+    app._native_controls.set(False)
+    view, vm = app.load(folder / "Home_View.yaml", HomeViewModel)
+    app.show("Home")
+    app.window.advance(16)
+    assert view.node("bar").get("window_region") == "drag" and view.node("own_bar").get("window_region") == "drag"
+    search = view.node("search").get("layout_x")
+    assert view.node("bar.content").get("layout_x") <= search < view.node("bar.minimize").get("layout_x")
+    closed = []
+    monkeypatch.setattr(app, "close", lambda: closed.append(True))
+    app.window.simulate("click", node=view.node("own_close"))
+    assert closed == [True]

@@ -78,6 +78,10 @@ jobs:
         working-directory: tesserae
         run: python examples/app_shell_file/app.py
 
+      - name: Run the custom title bar example
+        working-directory: tesserae
+        run: python examples/custom_title_bar/app.py
+
   # M76: one `pip install` is enough, on every supported platform. Only the
   # built wheel goes into a fresh venv; its dependencies come from PyPI as
   # wheels only (`--only-binary=:all:`), so one that would need compiling
