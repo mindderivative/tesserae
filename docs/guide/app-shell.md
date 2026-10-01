@@ -49,6 +49,28 @@ focus it and use the arrow keys (16 px a press), Home and End. Its size
 stays between 120 px and 70% of the space around it; `shell.size(side)`
 and `shell.set_size(side, px)` read and set it.
 
+## The top bar as the title bar
+
+In an app with `decorations=False` (see [The window](apps-and-screens.md#the-window)),
+the shell's top bar is the window's title bar. `top_app_bar` sees the
+app is undecorated and makes the bar the window's drag region, with
+minimize, maximize and close after its trailing icons, the maximize
+glyph swap, and the fade while the window isn't focused. On macOS it
+leaves room for the traffic lights and hides its own buttons. The
+leading and trailing icons are still buttons and work as before.
+
+```python
+app = App(width=1100, height=700, theme_seed=(0x67, 0x50, 0xA4, 0xFF),
+          decorations=False, min_width=640, min_height=400)
+shell = AppShell(app.window, top_bar=top_app_bar(app.window, "Studio", width=1100), ...)
+```
+
+`window_controls=True` or `False` asks for it or refuses it, whatever
+the decorations; `True` needs the window to be an `App`'s. A shell
+file's `top_bar` does the same in an undecorated app, and hot-reloads
+as the title bar. `tesserae new notes --shell --custom-title-bar` makes
+such an app ([Getting Started](../getting-started.md)).
+
 ## Screens as tabs: `center=True`
 
 With `center=True`, the middle is a dock zone too, like an IDE's editor

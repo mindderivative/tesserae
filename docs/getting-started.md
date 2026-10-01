@@ -37,6 +37,11 @@ add instead. A CamelCase name gets a kebab-case route: `UserProfile` is
 - `tesserae new notes --shell` also makes an [app shell](guide/app-shell.md)
   file, `Notes_Shell.yaml` (a top bar, a navigation rail over Home and
   Settings, a status bar), and the Settings screen.
+- `tesserae new notes --shell --custom-title-bar` makes the window
+  undecorated (`decorations=False`, at least 640 by 400), so the shell's
+  top bar is its [title bar](guide/app-shell.md#the-top-bar-as-the-title-bar):
+  it moves the window, and it has the minimize, maximize and close
+  buttons. It goes with `--shell`.
 - `--dir` makes the app somewhere other than here, or adds a screen to
   an app somewhere else.
 - Nothing is overwritten: a folder that isn't empty, or a screen whose

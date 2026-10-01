@@ -31,8 +31,14 @@ Built on the `0.3.0` branch, following the
   `window.toggle_maximized` and `window.close`; `app.titlebar_inset` and
   `app.native_controls`. Three window glyphs in the icon set, and
   `visible` can be bound.
-  A TitleBar, and a shell file's top bar in an undecorated app,
-  hot-reload ([#57](https://github.com/mindderivative/tesserae/issues/57)).
+  A TitleBar hot-reloads.
+- **Undecorated app shells** ([#42](https://github.com/mindderivative/tesserae/issues/42)):
+  in an undecorated app the shell's top bar is the title bar
+  (`top_app_bar(..., window_controls=)`, from code or a shell file, which
+  hot-reloads as one); a 1 px window border in `outline_variant`, hidden
+  while maximized or fullscreen and on macOS (`window_border`, and the
+  `window_border` class); `tesserae new --shell --custom-title-bar`; and
+  `examples/custom_title_bar`.
 
 ### Changed
 

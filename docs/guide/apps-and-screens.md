@@ -192,6 +192,7 @@ app = App(width=960, height=640, title="Notes",
 | `min_width`, `min_height` | The smallest the user can resize the window to (0 for no limit), so a title bar's buttons never crush. |
 | `fullscreen` | Borderless, filling the monitor. |
 | `system_menu` | Whether a right-click on the title bar opens the OS's window menu (Windows, and Wayland compositors that have one). Off by default, so the right-click is the app's. |
+| `window_border` | Whether an undecorated window gets a 1 px border (default `True`; see [The window border](#the-window-border)). |
 | `icon` | An image file (a square PNG is best), shown on Windows and X11; `app.set_icon(path)` changes it. Wayland and macOS take the icon from the app's desktop entry or bundle, which `tesserae build --installer` makes. |
 
 `app.platform` says which it is: `"windows"`, `"macos"`, `"wayland"` or
@@ -281,6 +282,26 @@ maximizing it on a double-click -- the pressed node gets
 `pointer_cancel` instead of `pointer_up`, and no click. Every Tesserae
 widget releases its press on it; a widget of your own that tracks a
 press should listen for both.
+
+### The window border
+
+Without the OS's frame, an undecorated window would blend into what's
+behind it, so Tesserae draws a 1 px border around it, in the theme's
+`outline_variant` (an unthemed app gets the baseline colour). It lies
+over every screen and the shell, but takes no presses: a press reaches
+whatever is under it, and one within `resize_border` of an edge resizes
+the window. It hides while the window is maximized or fullscreen, and
+it isn't drawn on macOS, where the OS keeps the frame. It follows the
+app's theme, light and dark.
+
+`App(window_border=False)`, or `app.window_border = False`, turns it
+off. Its class is `window_border`, so a stylesheet or theme restyles it:
+
+```yaml
+styles:
+  - classes: [window_border]
+    style: {border_color: "#FF0000", border_width: 2}   # 0 hides it too
+```
 
 ## Running the app
 
