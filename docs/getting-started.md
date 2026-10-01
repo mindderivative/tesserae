@@ -1,11 +1,253 @@
 # Getting Started
 
-A real Tesserae app is always a `*_View.yaml` + `*_ViewModel.py` pair,
-loaded and shown by one `app.py` entry point.
+This page takes you from a fresh Linux install to a window with a label
+and a button that counts. You build the same small app twice: first
+**declaratively**, with a YAML view and a Python ViewModel, then
+**imperatively**, creating nodes with Python calls. Every step is shown
+both ways, side by side, and every program on this page is a real file in
+[`examples/getting_started/`](https://github.com/mindderivative/tesserae/tree/main/examples/getting_started)
+that is run by Tesserae's tests.
+
+## Before you start
+
+You need:
+
+- **Python 3.12 or newer**, already installed. Check with
+  `python3 --version`.
+- **A Linux desktop session**, X11 or Wayland, on x86-64. (Tesserae also
+  runs on macOS with Apple silicon and on Windows; see
+  [Installation](installation.md).)
+- **A graphics driver with Vulkan.** Any current desktop install has one.
+  If a window won't open and Python ends with `no GPU adapter available`,
+  install your distribution's Mesa Vulkan driver:
+
+    ```bash
+    sudo apt install mesa-vulkan-drivers      # Debian, Ubuntu
+    sudo dnf install mesa-vulkan-drivers      # Fedora
+    ```
+
+- **`libxkbcommon-x11`**, which an X11 session needs (a Wayland session
+  doesn't). Most desktops have it. If the error names it:
+
+    ```bash
+    sudo apt install libxkbcommon-x11-0       # Debian, Ubuntu
+    sudo dnf install libxkbcommon-x11         # Fedora
+    ```
+
+## Set up
+
+Recent distributions won't let `pip` install into the system's Python,
+so make a virtual environment for the app. (Debian and Ubuntu split
+`venv` into its own package: `sudo apt install python3-venv`.)
+
+```bash
+mkdir counter
+cd counter
+python3 -m venv .venv
+source .venv/bin/activate     # fish: source .venv/bin/activate.fish
+pip install tesserae-ui
+```
+
+`tesserae-ui` is the name on PyPI; you import `tesserae`. It installs
+everything the app needs, including the rendering engine (`tre`) as a
+prebuilt wheel. Check it:
+
+```bash
+python -c "import tesserae; print('Tesserae is ready')"
+```
+
+Everything below goes in the `counter` folder, with the environment
+active (`source .venv/bin/activate` in a new terminal).
+
+## 1. A window
+
+An `App` owns the window and shows named **screens** in it. A screen is a
+`View`, so even the emptiest app has one. Make an empty screen, 360 by
+160 with a dark background, and open the window on it.
+
+=== "Declarative"
+
+    ```yaml title="Counter_View.yaml"
+    --8<-- "examples/getting_started/declarative/step1/Counter_View.yaml"
+    ```
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/declarative/step1/app.py"
+    ```
+
+=== "Imperative"
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/imperative/step1/app.py"
+    ```
+
+
+In the declarative version the screen is a file, `Counter_View.yaml`:
+`app.build_view` reads it and `app.register` names it. The `None` is its
+ViewModel, which it doesn't need yet. In the imperative version the
+screen is built in the program from a small dictionary, and you will put
+nodes in it by calling functions.
+
+Run it:
+
+```bash
+python app.py
+```
+
+An empty window opens, titled "Counter". Close it with its close button.
+
+## 2. A node
+
+A **node** is one thing on screen. Add a label: text that says
+`Count: 0`.
+
+=== "Declarative"
+
+    ```yaml title="Counter_View.yaml"
+    --8<-- "examples/getting_started/declarative/step2/Counter_View.yaml"
+    ```
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/declarative/step2/app.py"
+    ```
+
+=== "Imperative"
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/imperative/step2/app.py"
+    ```
+
+
+Declaratively, a node is an entry in `children:`. `kind: Text` makes a
+label, and `text:` holds what it says (a `Text` needs a `font_family`).
+Imperatively, `window.create("text", ...)` makes the node and
+`screen.root.add_child(...)` puts it in the screen. Both give the text node
+a size, and its colour is `foreground` in YAML and `fill=` in code.
+
+Run `python app.py` again: the window now says "Count: 0".
+
+## 3. A second node
+
+Add a button. It is a purple, rounded box with a text node in it, centred.
+
+=== "Declarative"
+
+    ```yaml title="Counter_View.yaml"
+    --8<-- "examples/getting_started/declarative/step3/Counter_View.yaml"
+    ```
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/declarative/step3/app.py"
+    ```
+
+=== "Imperative"
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/imperative/step3/app.py"
+    ```
+
+
+A button is nothing special: a `Rect` (a coloured box) with a `Text` in
+it. In code the box is `window.create("box", ...)`, and the text goes
+inside it with `add_child` before the box goes in the screen.
+
+The two ways name things a little differently:
+
+| In the YAML view | In Python |
+| --- | --- |
+| `kind: Text` / `kind: Rect` | `window.create("text", ...)` / `window.create("box", ...)` |
+| `style: {width: 96, ...}` | `width=96` |
+| `foreground` and `background` (`"#RRGGBB"`) | `fill=(r, g, b, a)` |
+| `text: {content: "...", font_size: 20}` | `text="..."`, `font_size=20` |
+| `children:` | `node.add_child(other)` |
+
+Run it again to see the button. It doesn't do anything yet.
+
+## 4. Make it count
+
+The count is the app's state, and the label shows it.
+
+=== "Declarative"
+
+    ```python title="Counter_ViewModel.py"
+    --8<-- "examples/getting_started/declarative/step4/Counter_ViewModel.py"
+    ```
+
+    ```yaml title="Counter_View.yaml"
+    --8<-- "examples/getting_started/declarative/step4/Counter_View.yaml"
+    ```
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/declarative/step4/app.py"
+    ```
+
+=== "Imperative"
+
+    ```python title="app.py"
+    --8<-- "examples/getting_started/imperative/step4/app.py"
+    ```
+
+
+**Declaratively**, the state lives in a ViewModel, a Python class paired
+with the view by name (`Counter_View.yaml` and `Counter_ViewModel.py`).
+Its `Signal` holds the label's text. In the view,
+`bindings: {text: "{{ label_text.get() }}"}` keeps the label showing it,
+and `handlers: {on_click: increment}` calls the ViewModel's `increment`
+method when the button is clicked. The `super().__init__(view)` call goes
+last, because it reads the Signals the view refers to. `app.py` now uses
+`app.load`, which pairs the view with its ViewModel class by that naming
+convention.
+
+**Imperatively**, the state is a variable and the "view" is you:
+`button.on("click", count)` runs `count` on a click, and `count` sets the
+label's text with `label.set(text=...)`. The last line makes the button
+a real button for the keyboard and for screen readers: Tab reaches it,
+and Enter or Space clicks it. (In YAML, a node with an `on_click` handler
+is made a button for you, with MD3's hover tint and press ripple as well.
+In code, [`tesserae.interaction`](guide/interaction.md#from-code) or the
+[`button` widget](guide/widget-catalog.md) add those.)
+
+## 5. Run it
+
+```bash
+python app.py
+```
+
+Click the button and the count goes up. Press Tab and the button takes
+focus (declaratively it also shows MD3's focus ring); Enter or Space
+counts too. The two versions are the same app: the same layout, colours
+and behaviour, the hover tint, ripple and focus ring aside.
+
+To see a declarative edit without restarting, run it with hot reload:
+change `app.run()` to `app.run(hot_reload=True)`, then edit
+`Counter_View.yaml` (the button's colour, say) while the app is open. It
+changes at once, and the count stays.
+
+## Which to use, and both together
+
+- **Declarative** suits the screens you design: the layout, the styling,
+  light and dark themes, bindings to state, and hot reload are all in the
+  view file, and the ViewModel holds only the app's own logic. It is how
+  `tesserae new` makes an app, and how most of Tesserae is documented.
+- **Imperative** suits what is made while the app runs, from data or
+  from a loop, and the [widget catalog](guide/widget-catalog.md) (every
+  MD3 widget as a Python function). For a list that grows and shrinks,
+  see [Repeater](guide/repeater.md).
+- **Both at once** works, because a declarative screen is made of the
+  same nodes you create in code. Add a node to a screen loaded from YAML:
+
+    ```python
+    view, viewmodel = app.load(Path(__file__).parent / "Counter_View.yaml", CounterViewModel)
+    note = app.window.create("text", text="Made in Python", font_size=14, width=120, height=20,
+                             fill=(255, 255, 255, 255))
+    view.root.add_child(note)
+    ```
+
+    `view.node("button")` gives you any node the YAML declared, by its `id`.
 
 ## The quick way: `tesserae new`
 
-Installing Tesserae installs a `tesserae` command (M67), which makes an
+Installing Tesserae installs a `tesserae` command, which makes an
 app you can run at once:
 
 ```bash
@@ -48,6 +290,8 @@ add instead. A CamelCase name gets a kebab-case route: `UserProfile` is
   files exist, is refused with a one-line message (exit code 2).
 - `python -m tesserae` is the same command.
 
+## Release it
+
 When the app is ready for its users, build it into one executable:
 
 ```bash
@@ -61,88 +305,15 @@ start. It runs on the kind of computer it was built on, with nothing else
 installed. `--name`, `--icon`, `--console`, `--include` and `--exclude`
 adjust it; [Releasing Your App](guide/releasing.md) has the details.
 
-The rest of this page builds the same kind of app by hand.
-
-## The view
-
-```yaml
-# Counter_View.yaml
-id: root
-kind: Container
-style: {flex_direction: vertical, width: 240, height: 120, gap: 12, padding: 16}
-children:
-  - id: label
-    kind: Text
-    text: {content: "Count: 0", font_family: Roboto, font_size: 20}
-    style: {width: 200, height: 32, foreground: "#FFFFFF"}
-    bindings: {text: "{{ label.get() }}"}
-  - id: button
-    kind: Rect
-    style: {width: 120, height: 40, background: "#6750A4", corner_radius: 8}
-    handlers: {on_click: "increment"}
-```
-
-Tesserae builds this view itself on `tre`'s building blocks.
-`text: {content: ...}` seeds the initial label;
-`bindings: {text: "{{ label.get() }}"}` keeps it live-bound to a
-`Signal` your `ViewModel` owns; `handlers: {on_click: "increment"}`
-names a method on that `ViewModel` to call on a click. A node with
-`on_click` is also a button for the keyboard and for assistive
-technology: Tab reaches it, Enter or Space clicks it, and it has
-`role="button"`. It also gets MD3's hover tint and press ripple (see
-[Interaction & Accessibility](guide/interaction.md)).
-
-## The ViewModel
-
-```python
-# Counter_ViewModel.py
-from tesserae import Signal, ViewModel
-
-
-class CounterViewModel(ViewModel):
-    def __init__(self, view):
-        self.count = 0
-        self.label = Signal("Count: 0")
-        super().__init__(view)  # must run after the Signals exist --
-                                 # _attach evaluates every binding immediately
-
-    def increment(self):
-        self.count += 1
-        self.label.set(f"Count: {self.count}")
-```
-
-`ViewModel.__init__(view)` (called last, via `super().__init__`) wires
-every declared `bindings:`/`handlers:` entry against `self` -- so every
-`Signal` a binding expression reads must already exist before that
-call.
-
-## The entry point
-
-```python
-# app.py
-from pathlib import Path
-
-from tesserae import App
-from Counter_ViewModel import CounterViewModel
-
-app = App(width=240, height=120, title="My First App")
-app.load(str(Path(__file__).parent / "Counter_View.yaml"), CounterViewModel)
-app.show("Counter")  # inferred name: the file's own "Counter_View.yaml" prefix
-app.run()
-```
-
-```bash
-python app.py
-```
-
-A real window opens; clicking the rect increments the bound label
-through a genuine dispatched click and render loop.
-
 ## Next steps
 
 - [Apps & Screens](guide/apps-and-screens.md) -- more than one screen,
-  switching between them.
+  switching between them, the window's options.
 - [Components & Embedding](guide/components.md) -- reusable,
   independently-stateful pieces of UI.
 - [Repeater](guide/repeater.md) -- a real dynamic list driven by one
   `Signal`.
+- [Themes & Fonts](guide/themes-and-fonts.md) -- colours, light and dark,
+  and your own fonts.
+- [Custom Title Bars](guide/custom-title-bars.md) -- drawing the window's
+  own title bar.

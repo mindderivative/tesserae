@@ -1,0 +1,3 @@
+id: root
+kind: Container
+style: {flex_direction: vertical, width: 360, height: 160, gap: 12, padding: 16, background: "#1C1B1F"}
