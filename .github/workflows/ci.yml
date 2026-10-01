@@ -7,7 +7,7 @@ name: CI
 
 on:
   push:
-    branches: [main, "0.3.0"]  # the 0.3 line's branch, until the user merges it
+    branches: [main, "0.3.0", "0.3.1"]  # a line's branch, until the user merges it
   pull_request:
     branches: [main]
 
