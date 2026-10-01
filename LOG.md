@@ -2098,4 +2098,19 @@ GitHub project.
     0.5.0.1 (`tre` #51), the user re-checked, and the floor is
     `tesserae-engine>=0.5.0.1,<0.6`.
   - Not checked by hand: Wayland, Windows, macOS. The changelog says so.
-- M6 (#44), the release: in progress.
+- M6 (#44), the release: the version and docs (#64), `0.3.0` fast-forwarded
+  into `main` (#65), and the GitHub pre-release `v0.3.0` (#66).
+  - CI on `main` failed twice on Windows in a live hot-reload test: four
+    tests rewrote their files every 20 ms, so the #39 settle logic never
+    settled. They save once and retry after half a second now (`045d2a5`);
+    CI is green on `main` and `0.3.0`.
+  - `release.yml` run 36821967058: the build passed, the user approved the
+    `pypi` deployment, and the upload to `tesserae-ui` succeeded.
+  - Checked from PyPI in a fresh Python 3.14 venv, wheels only:
+    `pip install "tesserae-ui[build]==0.3.0"` brought `tesserae-engine`
+    0.5.0.1 (its requirement is `>=0.5.0.1,<0.6`) and PyInstaller 6.22.3.
+    A `tesserae new notes --shell --custom-title-bar` app ran (30 frames)
+    and built into one executable (`--check`: 30 frames, exited cleanly);
+    `--custom-title-bar` without `--shell` is a one-line error. pip's
+    index took a few minutes to list 0.3.0 after PyPI's own page did.
+  - 0.3.0 was hand-checked on Linux, under X11, only.
