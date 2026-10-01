@@ -2069,3 +2069,33 @@ User: "push and release", then "approved, check PyPI".
 - On GitHub: #37, #29 and the 0.2.1 umbrella #23 are closed, and so is the
   repository's `0.2.1` milestone (14 issues). Next is 0.3.0 (#24), which
   starts when the user says so.
+
+## 0.3.0: custom windowing (#24)
+
+User: "commit CLAUDE.md, push and start 0.3.0", then "approved" for each
+milestone. Built on the `0.3.0` branch, on `tre` 0.5.0, tracked in the
+GitHub project.
+
+- M1 (#30), the design (`docs/design/custom-windowing.md`): nine
+  questions, decided as recommended; Q9, a window border, is the user's
+  addition ("yes, add the border to M4").
+- M2 (#40), the window on `App`: the options, the actions, `maximized`
+  and `active`, `pointer_cancel` clearing every pressed state.
+- M3 (#41), title bars in YAML: `window_region`, the `window.*` handlers,
+  `kind: TitleBar`, its theme (the user asked whether it follows light and
+  dark, and whether its height can change: it does, and it can), macOS's
+  inset.
+- M4 (#42), the shell and scaffolding: the shell's top bar as the title
+  bar, the window border, `tesserae new --custom-title-bar`,
+  `examples/custom_title_bar`, hot reload (it needed no code).
+- M5 (#43), docs and checks: the Custom Title Bars guide; CI builds a
+  custom-title-bar app on every platform; a hand check on Linux, X11 (the
+  user has no other machine).
+  - It found the example's hand-built bar overlapping the text above it
+    (#62; a Text wider than its box wraps when drawn but lays out one line
+    tall), and a panic on any real click in a text field (#63): `tre`
+    0.4.4 and 0.5.0 held a `Ref` through a `borrow_mut`. `tre` fixed it in
+    0.5.0.1 (`tre` #51), the user re-checked, and the floor is
+    `tesserae-engine>=0.5.0.1,<0.6`.
+  - Not checked by hand: Wayland, Windows, macOS. The changelog says so.
+- M6 (#44), the release: in progress.

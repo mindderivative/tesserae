@@ -498,6 +498,60 @@ from the recording. So the whole suite passes with `tre`'s
 are retired; `test_tesserae_runs_on_a_tre_without_the_removed_api` checks
 it.
 
+## Custom windowing (0.3.0)
+
+On `tre` 0.5.0.1. `App(decorations=False)` takes the OS's title bar away
+and the app draws its own (design: `docs/design/custom-windowing.md`;
+guide: `docs/guide/custom-title-bars.md`).
+
+- **The window on `App`** (`app.py`). The options (`decorations`,
+  `resize_border`, `min_width`/`min_height`, `fullscreen`, `system_menu`,
+  `icon`, `window_border`) are `App` arguments and live properties; the
+  actions (`minimize`, `maximize`, `restore`, `toggle_maximized`, `close`)
+  call the `tre` window. The state is read-only `Computed`s over private
+  Signals that `window.on` sets from tre's events: `maximized`, `active`,
+  `titlebar_inset`, and `native_controls` (read from the window). An action
+  taken before `run()` updates `maximized` itself, since no event comes.
+- **`window_region`** is a node property (`spec/build.py`, applied for
+  primitives, controls and graph widgets, on create and patch). `drag`
+  makes a press on the node, and on what is in it that isn't interactive,
+  move the window; the OS takes the press, so the node gets
+  `pointer_cancel` and no `pointer_up`.
+- **`pointer_cancel`.** Every pressed-state release (state layers, the
+  split button, splitters, dock tabs, sliders and the other drags) listens
+  for it as for `pointer_up`; `tests/test_pointer_cancel.py` scans the
+  source so a new `pointer_up` listener can't be added without it.
+- **The `window.*` handlers.** `View._wire_handler` sends a handler named
+  `window.<action>` to `app_of(window).<action>()`, so a node needs no
+  ViewModel method to minimize or close.
+- **`kind: TitleBar`** (`spec/title_bar.py`) is expanded into plain nodes by
+  `expand_title_bars`, called when a `View` is built and at the start of
+  `reconcile`, so hot reload expands it again. The parts are `<id>.inset`
+  (macOS's traffic lights), `.icon`, `.title`, `.content` (the app's
+  children) and `.buttons`, which are bound to `app.active` (the fade),
+  `app.maximized` (the maximize glyph swap), `app.titlebar_inset` and
+  `app.native_controls` (`visible`, which takes the buttons out of layout
+  and hit-testing). Its look is classes in a built-in first layer of the
+  cascade (`title_bar.STYLES`, under the default theme), so every theme and
+  stylesheet can change it and an app's own `default_theme` doesn't lose it.
+- **The shell's top bar** (`widgets/navigation.py`): `top_app_bar` gets
+  `window_controls`, on when the app is undecorated, and then adds the
+  drag region, the inset and the buttons to the same bar. Shell files get
+  it through `top_app_bar`, so a reload rebuilds it the same way.
+- **The window border** (`App._build_border`): a full-window `Rect` over
+  the screens (`z_index` 1000, neither hit-testable nor in the
+  accessibility tree), shown by an `Effect` while the window is undecorated,
+  not maximized, not fullscreen and not on macOS, and styled by the
+  `window_border` class.
+- **Scaffolding.** `tesserae new --shell --custom-title-bar` makes an app
+  with `decorations=False, min_width=640, min_height=400`;
+  `examples/custom_title_bar` shows a `TitleBar` and a bar made by hand.
+
+Tests run headless: tre's `simulate` delivers the presses, `maximized`,
+`active` and `titlebar_inset`; a real mouse press (moving, resizing,
+snapping, and a click in a text field) goes through tre's own window code
+and was checked by hand, on X11 (see the changelog).
+
 ## Components
 
 ```python

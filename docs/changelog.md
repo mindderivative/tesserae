@@ -1,11 +1,10 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.3.0
 
 Custom windowing on `tre` 0.5.0.1: Tesserae draws the window's title bar and
 borders ([#24](https://github.com/mindderivative/tesserae/issues/24)).
-Built on the `0.3.0` branch, following the
-[design](design/custom-windowing.md).
+Following the [design](design/custom-windowing.md).
 
 ### Requirements
 
