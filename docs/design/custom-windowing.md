@@ -128,6 +128,17 @@ dragged would keep its pressed state layer, which today clears only on
   platforms. Moving and resizing the window is the OS's, so it's checked
   by hand, as `tre` does.
 
+**Q9. A window border.** Added by the user (2026-09-30): "yes, add the
+border to M4". An undecorated window otherwise has no visible edge on
+Linux (Windows keeps its shadow; macOS keeps its frame).
+
+- **(decided)** When the window is undecorated, a 1 px border around it
+  in `outline_variant`, with a stylesheet class to restyle or remove it.
+  It's hidden while maximized or fullscreen, and on macOS. It's an `App`
+  option, on by default for undecorated windows, so apps without the
+  shell get it too. Rounded corners and a drawn shadow are out of reach:
+  they'd need transparent windows from `tre`.
+
 ## Milestones
 
 Each is an issue in the GitHub project, under [#24](https://github.com/mindderivative/tesserae/issues/24):
@@ -137,9 +148,9 @@ Each is an issue in the GitHub project, under [#24](https://github.com/mindderiv
   icon, and `pointer_cancel` clearing every pressed state.
 - **M3 — Title bars in YAML** (Q2, Q5, Q6): `window_region`, the window
   handlers, the `TitleBar` kind, its theme, and macOS's inset.
-- **M4 — The app shell and scaffolding** (Q3, Q7, Q8): the shell's top bar
-  as the title bar, `tesserae new --custom-title-bar`, the example, and
-  hot reload.
+- **M4 — The app shell and scaffolding** (Q3, Q7, Q8, Q9): the shell's top
+  bar as the title bar, `tesserae new --custom-title-bar`, the example,
+  hot reload, and the window border.
 - **M5 — Docs and checks:** a "Custom Title Bars" guide, the changelog,
   CI building a custom-title-bar app on every platform, and the hand checks.
 - **M6 — Release 0.3.0:** merge `0.3.0` into `main` when the user approves,
