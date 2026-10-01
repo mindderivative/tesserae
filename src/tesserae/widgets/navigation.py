@@ -9,7 +9,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from tesserae import a11y
-from tesserae.reactive import Effect, Signal
+from tesserae.follow import app_of
+from tesserae.reactive import Effect, Signal, ViewModel
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget
 from tesserae.widgets.buttons import _borders, _hex, _variant, icon_button
@@ -452,13 +453,26 @@ def top_app_bar(
     border_width: float | None = None,
     *,
     theme: "Theme | None" = None,
+    window_controls: bool | None = None,
 ) -> Widget:
     """MD3's small top app bar (M41: built from its fragment): 64 px of
     `surface`, a `title_large` title, an optional leading icon button
     (`on_surface`) and trailing ones (`on_surface_variant`), each 48 px.
     Parts: `title`, `leading`, `trailing0`, ...; wire them with
-    `on_click(fn, part="leading")`."""
+    `on_click(fn, part="leading")`.
+
+    `window_controls` (0.3.0 M4) makes it the window's title bar: a drag
+    region, with the window buttons after its trailing icons and, on
+    macOS, room for the traffic lights -- a `TitleBar`'s
+    (`tesserae.spec.title_bar.window_parts`). It defaults to whether the
+    app's window is undecorated, so an app shell's top bar is the title
+    bar of an `App(decorations=False)`."""
     name = "top_app_bar"
+    app = app_of(window)
+    if window_controls is None:
+        window_controls = app is not None and not app.decorations
+    if window_controls and app is None:
+        raise ValueError("top_app_bar: window_controls needs the window to be an App's")
     trailing = list(trailing_icons or [])
 
     def button(node_id: str, glyph: str, ink: str) -> dict[str, Any]:
@@ -476,6 +490,15 @@ def top_app_bar(
             spec["children"][1]["style"]["margin"] = {"left": 4, "right": 0, "top": 0, "bottom": 0}
         for i, glyph in enumerate(trailing):
             spec["children"].append(button(f"{name}.trailing{i}", glyph, "on_surface_variant"))
+        if window_controls:
+            from tesserae.spec.title_bar import _DIM, window_parts
+
+            inset, controls = window_parts(name)
+            spec["window_region"] = "drag"
+            spec["children"].insert(0, inset)
+            spec["children"].append(controls)
+            title = next(c for c in spec["children"] if c.get("id") == f"{name}.title")
+            title.setdefault("bindings", {})["opacity"] = _DIM
         if border is not None:
             border(spec)
 
@@ -486,6 +509,8 @@ def top_app_bar(
         node = widget.part(part)
         node.set(focusable=True, role="button", cursor="pointer")
         a11y.describe(node, label=leading_icon if part == "leading" else trailing[int(part[8:])])
+    if window_controls:
+        widget.viewmodel = ViewModel(widget.view)  # wires the window parts' bindings and handlers to the app
     return widget
 
 

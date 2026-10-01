@@ -41,7 +41,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-__all__ = ["BUTTONS", "STYLES", "TitleBarError", "expand_title_bars"]
+__all__ = ["BUTTONS", "STYLES", "TitleBarError", "expand_title_bars", "window_parts"]
 
 #: The window buttons a title bar can have, in the order they're laid out.
 BUTTONS = ("minimize", "maximize", "close")
@@ -103,11 +103,8 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
     buttons = node.get("buttons", list(BUTTONS))
     if not isinstance(buttons, list) or any(b not in BUTTONS for b in buttons) or len(set(buttons)) != len(buttons):
         raise TitleBarError(f"{where}'s buttons are some of {', '.join(BUTTONS)}, each once; got {buttons!r}")
-    # macOS: room for the traffic lights, as wide as `titlebar_inset` says
-    # (0 elsewhere).
-    parts: list[dict[str, Any]] = [{"id": f"{bar_id}.inset", "kind": "Container", "classes": ["title_bar_inset"],
-                                    "style": {"width": 0, "height": "100%", "flex_shrink": 0},
-                                    "bindings": {"width": "{{ app.titlebar_inset.get()[1] }}"}}]
+    inset, controls = window_parts(bar_id, buttons)
+    parts: list[dict[str, Any]] = [inset]
     if icon is not None:
         parts.append({"id": f"{bar_id}.icon", "kind": "Icon", "icon": {"name": icon}, "classes": ["title_bar_icon"],
                       "style": {"width": 20, "height": 20, "flex_shrink": 0}, "bindings": {"opacity": _DIM}})
@@ -118,12 +115,8 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
     parts.append({"id": f"{bar_id}.content", "kind": "Container", "classes": ["title_bar_content"],
                   "style": {"flex_grow": 1, "height": "100%", "align_items": "center", "gap": 8},
                   "children": list(node.get("children") or [])})
-    if buttons:  # flush together at the right, as desktops set them
-        parts.append({"id": f"{bar_id}.buttons", "kind": "Container", "classes": ["title_bar_buttons"],
-                      "style": {"height": "100%", "flex_shrink": 0},
-                      # hidden where the OS's own controls show (macOS's traffic lights)
-                      "bindings": {"opacity": _DIM, "visible": "{{ not app.native_controls.get() }}"},
-                      "children": [_button(bar_id, name) for name in BUTTONS if name in buttons]})
+    if controls is not None:
+        parts.append(controls)
     return {
         "id": bar_id, "kind": "Container", "window_region": "drag",
         "classes": ["title_bar", *(node.get("classes") or [])],
@@ -132,6 +125,26 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
                   "padding": {"left": 12, "right": 0, "top": 0, "bottom": 0}, **(node.get("style") or {})},
         "children": parts,
     }
+
+
+def window_parts(bar_id: str, buttons: Any = BUTTONS) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    """A title bar's window parts, for a bar's start and end: `<id>.inset`,
+    room for macOS's traffic lights (as wide as `app.titlebar_inset`
+    says, 0 elsewhere), and `<id>.buttons`, the window buttons flush
+    together (`None` for none), hidden while the OS's own controls show
+    and faded while the window isn't focused. A `TitleBar` has them, and
+    so does an app shell's top bar on an undecorated window (0.3.0 M4).
+    Their bindings and handlers reach the app, so the view they're in
+    needs a ViewModel on the app's window."""
+    inset = {"id": f"{bar_id}.inset", "kind": "Container", "classes": ["title_bar_inset"],
+             "style": {"width": 0, "height": "100%", "flex_shrink": 0},
+             "bindings": {"width": "{{ app.titlebar_inset.get()[1] }}"}}
+    if not buttons:
+        return inset, None
+    return inset, {"id": f"{bar_id}.buttons", "kind": "Container", "classes": ["title_bar_buttons"],
+                   "style": {"height": "100%", "flex_shrink": 0},
+                   "bindings": {"opacity": _DIM, "visible": "{{ not app.native_controls.get() }}"},
+                   "children": [_button(bar_id, name) for name in BUTTONS if name in buttons]}
 
 
 def _glyph(button_id: str, name: str, **extra: Any) -> dict[str, Any]:
