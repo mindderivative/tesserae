@@ -241,7 +241,9 @@ change `app.run()` to `app.run(hot_reload=True)`, then edit
 `Counter_View.yaml` (the button's colour, say) while the app is open. It
 changes at once, and the count stays. Hot reload watches the view file
 the screen was built from; the imperative version has no file, so there
-you edit and run again.
+you edit and run again. While it is on, the window ticks about 50 times a
+second so the edit can reach it even if you aren't touching the window
+(see [Hot Reload](guide/hot-reload.md)).
 
 ## Which to use, and both together
 

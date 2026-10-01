@@ -24,6 +24,14 @@ change and it appears in the window straight away, the screen's
 ViewModel and bindings kept. A screen built from a spec dict has no file,
 so it isn't watched; the log says so when hot reload starts.
 
+While `hot_reload=True`, `run()` also keeps the window ticking about 50
+times a second (`keepalive`, 0.3.1). `tre`'s window, left idle, doesn't let
+other Python threads run, so without the tick the watcher couldn't hand a
+reload over until something else woke the window: an edit would sit there
+while you dragged, resized and clicked. The tick costs about half a
+percent of one core, and `run(hot_reload=True, keepalive=False)` turns it
+off. See [`run`](../api/app.md#keepalive).
+
 Behind the scenes each screen gets a `ViewWatcher` on a background
 thread. It listens for file-change events (using
 [`watchfiles`](https://watchfiles.helpmanual.io/)), rebuilds the view

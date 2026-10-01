@@ -137,21 +137,27 @@ class _FakeTre:
     """tre's App, so `run()` can be called without a GPU or a display."""
 
     ran = []
+    queued = []  # what `thread_handle().call_soon` was given, in order
+    on_run = None  # called while the loop "runs", as the loop would run what was queued
 
     def add_window(self, window):
         pass
 
     def thread_handle(self):
-        return type("Handle", (), {"call_soon": staticmethod(lambda fn: None)})()
+        return type("Handle", (), {"call_soon": staticmethod(lambda fn: _FakeTre.queued.append(fn))})()
 
     def run(self, max_frames=None):
         self.ran.append(max_frames)
+        if _FakeTre.on_run is not None:
+            _FakeTre.on_run()
 
 
 @pytest.fixture
 def fake_tre(monkeypatch):
     monkeypatch.setattr("tesserae.app._TreApp", _FakeTre)
     _FakeTre.ran.clear()
+    _FakeTre.queued.clear()
+    _FakeTre.on_run = None
     return _FakeTre
 
 
@@ -313,3 +319,73 @@ def test_load_genuinely_expands_component_usage(tmp_path):
     app = App()
     with pytest.raises(ValueError, match="unknown color identifier"):
         app.load(view_path, vm_cls)
+
+
+def _ticks(fake_tre):
+    return [fn for fn in fake_tre.queued if getattr(fn, "__name__", "") == "tick"]
+
+
+def test_the_keepalive_follows_hot_reload_by_default(fake_tre):
+    """0.3.1 (#77): tre's idle window starves other threads, so a watcher needs the tick."""
+    App().run()
+    assert _ticks(fake_tre) == []  # no hot reload, no keepalive
+    App().run(hot_reload=True)
+    assert len(_ticks(fake_tre)) == 1
+
+
+def test_a_bounded_run_never_idles_so_the_default_does_not_tick(fake_tre, monkeypatch):
+    """Frames are drawn continuously up to `max_frames`, and a tick would slow each one
+    (the live hot-reload tests, with 2000 frames each, went from 1 s to 41 s)."""
+    App().run(max_frames=5, hot_reload=True)
+    assert _ticks(fake_tre) == []
+    monkeypatch.setenv("TESSERAE_MAX_FRAMES", "5")  # CI's `tesserae build --check` bounds a run this way
+    App().run(hot_reload=True)
+    assert _ticks(fake_tre) == []
+    App().run(max_frames=5, hot_reload=True, keepalive=True)  # but asked for, it ticks
+    assert len(_ticks(fake_tre)) == 1
+
+
+@pytest.mark.parametrize("kwargs, ticks", [
+    ({"keepalive": True}, 1),                      # on its own, for an IDE or anything else needing threads
+    ({"keepalive": False, "hot_reload": True}, 0),  # off, even with hot reload
+    ({"keepalive": 0.5}, 1),
+    ({"keepalive": None}, 0),
+])
+def test_the_keepalive_can_be_chosen(fake_tre, kwargs, ticks):
+    App().run(**kwargs)
+    assert len(_ticks(fake_tre)) == ticks
+
+
+@pytest.mark.parametrize("bad", [0, -1, 0.0, "yes", [1]])
+def test_a_wrong_keepalive_is_a_one_line_error(fake_tre, bad):
+    with pytest.raises(ValueError, match=r"keepalive must be True, False, None or a positive number of seconds"):
+        App().run(keepalive=bad)
+
+
+def test_a_tick_sleeps_queues_the_next_and_stops_when_the_run_ends(fake_tre, monkeypatch):
+    slept = []
+    monkeypatch.setattr("tesserae.app.time.sleep", slept.append)
+    fake_tre.on_run = lambda: _ticks(fake_tre)[0]()  # the loop runs the first tick
+    App().run(keepalive=0.25)
+    assert slept == [0.25]  # it slept (letting other threads run) ...
+    assert len(_ticks(fake_tre)) == 2  # ... and queued the next
+    after_the_run = _ticks(fake_tre)[1]
+    slept.clear()
+    fake_tre.queued.clear()
+    after_the_run()  # a tick that reaches a loop that is over does nothing
+    assert slept == [] and fake_tre.queued == []
+
+
+def test_the_interval_rules():
+    from tesserae.app import KEEPALIVE_INTERVAL, _keepalive_interval
+
+    assert KEEPALIVE_INTERVAL == 0.02
+    assert _keepalive_interval(None, True) == 0.02 and _keepalive_interval(None, False) is None
+    assert _keepalive_interval(True, False) == 0.02 and _keepalive_interval(False, True) is None
+    assert _keepalive_interval(0.25, False) == 0.25 and _keepalive_interval(2, True) == 2.0
+
+
+def test_a_built_app_has_no_hot_reload_and_so_no_keepalive(fake_tre, monkeypatch):
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    App().run(hot_reload=True)
+    assert _ticks(fake_tre) == []

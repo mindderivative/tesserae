@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import os
 import sys
+import time
 import weakref
 from dataclasses import dataclass
 from pathlib import Path
@@ -37,6 +38,28 @@ from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
 from tesserae.shell_file import load_shell_spec
 from tesserae.spec.watch import ComponentWatcher, FileWatcher
+
+#: How often `run(keepalive=True)` ticks, in seconds: about 50 times a second,
+#: which costs about half a percent of one core while a window is idle.
+KEEPALIVE_INTERVAL = 0.02
+
+
+def _keepalive_interval(keepalive: bool | float | None, hot_reload: bool) -> float | None:
+    """Seconds between keepalive ticks for `run(keepalive=, hot_reload=)`, or
+    `None` for no keepalive (0.3.1, #77). `None` follows `hot_reload`: while
+    `tre`'s idle window starves other Python threads, a hot-reload watcher
+    can't hand a reload over without it. (`run` passes `hot_reload` as false
+    for a run bounded by `max_frames`, which never idles.) When `tre` fixes
+    that, make the default here `False`."""
+    if keepalive is None:
+        keepalive = hot_reload
+    if keepalive is True:
+        return KEEPALIVE_INTERVAL
+    if keepalive is False:
+        return None
+    if isinstance(keepalive, (int, float)) and keepalive > 0:
+        return float(keepalive)
+    raise ValueError(f"keepalive must be True, False, None or a positive number of seconds, got {keepalive!r}")
 
 @dataclass
 class _Route:
@@ -1114,7 +1137,8 @@ class App:
         files = ", ".join(str(f) for f in self._theme_files.values() if f is not None)
         logger.info("re-themed the app from {}", files)
 
-    def run(self, max_frames: int | None = None, *, hot_reload: bool = False) -> None:
+    def run(self, max_frames: int | None = None, *, hot_reload: bool = False,
+            keepalive: bool | float | None = None) -> None:
         """The one blocking call -- opens the real `Window` and runs `tre`'s
         own real render loop, showing the screen `show()` made current and
         any nodes added to `app.window.root` by calls. Since 0.3.1 an app
@@ -1149,6 +1173,18 @@ class App:
         `set_stylesheet_spec`, to every screen using it) and each screen's
         own `stylesheet=` file (re-applied to the screens built with it).
 
+        `keepalive` (0.3.1, #77) keeps the window ticking about 50 times a
+        second (a number is the seconds between ticks), because `tre`'s
+        window stops other Python threads from running while it sits idle:
+        a hot-reload watcher can't hand a reload over, and nor can any
+        thread of yours that calls `thread_handle().call_soon`. `None`, the
+        default, follows `hot_reload`: on with it, off without, and off for a
+        run bounded by `max_frames`, which draws continuously and never idles
+        (each tick would only slow it). `True`, `False` and a number choose,
+        with or without hot reload. Each tick sleeps on the
+        loop thread, so input can wait up to a tick, and an idle window
+        costs about half a percent of one core.
+
         M77: `TESSERAE_MAX_FRAMES=n` in the environment stops a run with no
         `max_frames` after `n` frames -- how `tesserae build --check` and CI
         run a built executable and see it exit. A frozen app (one
@@ -1169,6 +1205,8 @@ class App:
         if hot_reload and getattr(sys, "frozen", False):
             logger.info("hot reload is off in a built app: there are no source files to watch")
             hot_reload = False
+        # A run bounded by `max_frames` draws frames continuously and never idles, so the default doesn't tick.
+        interval = _keepalive_interval(keepalive, hot_reload and max_frames is None)
         if self._tre_app is None:
             self._tre_app = _TreApp()
         tre_app = self._tre_app
@@ -1184,11 +1222,22 @@ class App:
                 handle.call_soon(count)
 
             handle.call_soon(count)
+        ticking = [interval is not None]
         try:
+            if interval is not None:
+                tick_handle = tre_app.thread_handle()
+
+                def tick() -> None:  # the sleep lets other threads take the GIL; each call queues the next
+                    if ticking[0]:
+                        time.sleep(interval)
+                        tick_handle.call_soon(tick)
+
+                tick_handle.call_soon(tick)
             if hot_reload:
                 self._start_watchers(tre_app.thread_handle())
             tre_app.run(max_frames=max_frames)
         finally:
+            ticking[0] = False
             self._stop_watchers()
             if report:
                 Path(report).write_text(str(drawn[0]), encoding="utf-8")

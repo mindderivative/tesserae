@@ -237,7 +237,7 @@ call.
 
 ## `run`
 
-**`run(max_frames=None, *, hot_reload=False) -> None`**
+**`run(max_frames=None, *, hot_reload=False, keepalive=None) -> None`**
 
 The one blocking call -- opens the real window and runs `tre`'s own real
 render loop, showing the screen `show()` made current and any nodes you
@@ -262,6 +262,29 @@ instances, including ones added while the app runs (M51; see
 shell file from `load_shell` is watched too, and an edit is applied in
 place where it can be; a structural one is logged as needing a restart
 (M52; see [Hot Reload](../guide/hot-reload.md#the-shell-file)).
+
+### `keepalive`
+
+*0.3.1.* `tre`'s window stops other Python threads from running while it
+sits idle waiting for input, so a thread of yours (a hot-reload watcher,
+say) can't hand work to the loop with `thread_handle().call_soon` until
+something wakes the window. `keepalive` keeps the window ticking:
+
+| `keepalive` | |
+| --- | --- |
+| `None` (the default) | follows `hot_reload`: on with it, off without; and off for a run bounded by `max_frames`, which draws continuously and never idles |
+| `True` | on, ticking every 0.02 s (`tesserae.app.KEEPALIVE_INTERVAL`), whatever `hot_reload` is |
+| a number | on, ticking every that many seconds |
+| `False` | off, even with `hot_reload=True` |
+
+It is for anything that needs threads to run in an idle window, so an
+IDE, say, can use it without hot reload. Each tick sleeps on the loop
+thread (that sleep is what lets other threads run), so input can wait up
+to a tick, and an idle window costs about half a percent of one core at
+the default. Anything else is a `ValueError`. It stops when `run()`
+returns, and a built app (`tesserae build`) has no hot reload and so no
+keepalive unless you ask for one. This works around a limit in `tre`; the
+default will become off once `tre` lets threads run while idle.
 
 ## `thread_handle`
 

@@ -19,6 +19,16 @@ into ([#72](https://github.com/mindderivative/tesserae/issues/72)).
   `tre` names it. Before, the key was silently ignored. A wrong value is
   an error naming the widget, and a `TextField` doesn't take it.
 
+- **`run(keepalive=)`, on by default with `hot_reload=True`** ([#77](https://github.com/mindderivative/tesserae/issues/77)).
+  `tre`'s window, left idle, stops other Python threads from running, so a
+  hot-reload watcher couldn't hand a reload over until something else woke
+  the window: an edit to a view could sit unseen while the window was
+  dragged, resized and clicked. `keepalive` keeps the window ticking (every
+  0.02 s, or the seconds you give). `None`, the default, follows
+  `hot_reload`; `True` and `False` choose, so anything else that needs
+  threads to run in an idle window (an IDE, say) can use it without hot
+  reload. A work-around for `tre`: once `tre` is fixed the default becomes
+  off. Found by a user trying Getting Started.
 - **A closest-match hint on a misspelt name** (#76): a misspelt style
   field, node field, `kind` or `a11y` field now says what was probably
   meant, as in `unknown style field(s) ['foregorund'] -- did you mean
