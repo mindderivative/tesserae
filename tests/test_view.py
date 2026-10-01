@@ -242,6 +242,47 @@ def test_reconcile_patches_in_place_and_keeps_bound_values():
     assert view.node("label").get("text") == "still live"
 
 
+def _aligned(align=None, kind="Text", node_id="t"):
+    text = {"content": "Hi", "font_family": "Roboto", "font_size": 14}
+    if align is not None:
+        text["text_align"] = align
+    node = {"id": node_id, "kind": kind, "text": text, "style": {"width": 100, "height": 20}}
+    node["style"]["foreground" if kind in ("Text", "Link") else "background"] = "#000000" if kind != "TextField" else "#222222"
+    return node
+
+
+def test_text_align_places_the_text_in_its_node():
+    """0.3.1: `text: {text_align: start | center | end}`, as `tre` names it."""
+    assert _view(_root(_aligned(None))).node("t").get("text_align") == "start"  # the default
+    for align in ("start", "center", "end"):
+        assert _view(_root(_aligned(align))).node("t").get("text_align") == align
+
+
+def test_a_links_text_takes_the_alignment():
+    view = _view(_root(_aligned("end", "Link")))
+    assert any(child.get("text_align") == "end" for child in view.node("t").children())
+
+
+def test_text_align_follows_a_reload_and_an_edit_that_removes_it_goes_back():
+    view = _view(_root(_aligned("center")))
+    label = view.node("t")
+    view.reconcile(_root(_aligned("end")))
+    assert view.node("t") == label and label.get("text_align") == "end"  # patched in place
+    view.reconcile(_root(_aligned(None)))
+    assert label.get("text_align") == "start"
+
+
+def test_a_wrong_text_align_is_one_line_naming_the_widget():
+    with pytest.raises(ValueError, match=r'widget "t": text\.text_align must be one of start, center, end, got \'middle\''):
+        _view(_root(_aligned("middle")))
+
+
+def test_a_text_field_has_no_text_align():
+    with pytest.raises(ValueError, match=r'widget "t": a TextField has no text\.text_align'):
+        _view(_root(_aligned("center", "TextField")))
+    assert _view(_root(_aligned(None, "TextField"))).node("t") is not None  # without it, as before
+
+
 def test_reconcile_adds_removes_and_orders_children_as_the_new_spec_does():
     view = _view(_root(_rect("a"), _rect("b"), _rect("c")))
     a, c = view.node("a"), view.node("c")

@@ -47,6 +47,21 @@ size, or stretched), or a percentage of the parent (`"50%"`).
 ways, and `aspect_ratio` (width over height) gives the missing side from
 the one that's set (M71).
 
+### Text in a box
+
+A `Text` or `Link` with no `width` or `height` is measured to fit its
+text. Give it a `width` and `text:`'s `text_align` places the text inside
+it: `start` (the default), `center` or `end` (0.3.1).
+
+```yaml
+- id: heading
+  kind: Text
+  text: {content: "Settings", typography_role: title_large, text_align: center}
+  style: {width: 240, foreground: on_surface}
+```
+
+A `TextField` has no `text_align`: what is typed starts at the left.
+
 ## Flexible sizing
 
 `flex_grow` shares the space left over (`1` on two children splits it

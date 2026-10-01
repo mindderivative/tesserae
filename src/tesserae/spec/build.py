@@ -352,6 +352,10 @@ def _required_foreground(ctx: _Context, node: dict[str, Any], style: dict[str, A
     return _color(ctx, node["id"], "foreground", style["foreground"])
 
 
+#: What `text.text_align` can be (0.3.1): `tre`'s own values, where the text
+#: sits in its node's width.
+_TEXT_ALIGNS = ("start", "center", "end")
+
 #: The kinds whose `typography_role` follows the theme's `typography:`:
 #: display text. Text inputs keep their own font (M38 Q1).
 _THEMED_TEXT = frozenset({"Text", "Link"})
@@ -379,6 +383,11 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         raise SpecBuildError(f'widget {_q(node["id"])}: {kind} requires text.font_size (or text.typography_role), none given')
     weight = text.get("font_weight") if text.get("font_weight") is not None else (role_style.font_weight if role_style else 400.0)
     line_height = text.get("line_height") if text.get("line_height") is not None else (role_style.line_height if role_style else None)
+    align = text.get("text_align", "start")
+    if align not in _TEXT_ALIGNS:
+        raise SpecBuildError(
+            f'widget {_q(node["id"])}: text.text_align must be one of {", ".join(_TEXT_ALIGNS)}, got {align!r}'
+        )
     content = text.get("content", "")
     if not isinstance(content, str):
         raise SpecBuildError(
@@ -390,6 +399,7 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         "font_size": float(size),
         "font_weight": float(weight),
         "line_height": line_height,
+        "text_align": align,
     }
 
 
@@ -479,8 +489,11 @@ def _link_props(ctx, node, style):
 
 def _text_field_props(ctx, node, style):
     background = _required_background(ctx, node, style, "TextField")
+    if "text_align" in node["text"]:
+        raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.text_align (its text starts at the left)')
     text = _text_style(ctx, node, "TextField")
     text.pop("line_height")
+    text.pop("text_align")
     outer = {**_layout(style), **_paint(ctx, node["id"], style), "fill": background}
     # `tre`'s TextField draws its text in MD3's baseline on_surface, not a theme role.
     inner = {**text, "fill": _TEXT_FIELD_GLYPH, "flex_grow": 1.0, "align_self": "stretch", "role": "textbox", "focusable": True}
