@@ -144,12 +144,12 @@ Linux (Windows keeps its shadow; macOS keeps its frame).
 
 Each is an issue in the GitHub project, under [#24](https://github.com/mindderivative/tesserae/issues/24):
 
-- **M2 — The window on `App`** (Q1, Q4): `decorations` and the other
+- **M2 — The window on `App`** (Q1, Q4; done, [#40](https://github.com/mindderivative/tesserae/issues/40)): `decorations` and the other
   window options, the actions, `maximized`/`active` as Signals, the PNG
   icon, and `pointer_cancel` clearing every pressed state.
-- **M3 — Title bars in YAML** (Q2, Q5, Q6): `window_region`, the window
+- **M3 — Title bars in YAML** (Q2, Q5, Q6; done, [#41](https://github.com/mindderivative/tesserae/issues/41)): `window_region`, the window
   handlers, the `TitleBar` kind, its theme, and macOS's inset.
-- **M4 — The app shell and scaffolding** (Q3, Q7, Q8, Q9): the shell's top
+- **M4 — The app shell and scaffolding** (Q3, Q7, Q8, Q9; done, [#42](https://github.com/mindderivative/tesserae/issues/42)): the shell's top
   bar as the title bar, `tesserae new --custom-title-bar`, the example,
   hot reload, and the window border.
 - **M5 — Docs and checks:** a "Custom Title Bars" guide, the changelog,
