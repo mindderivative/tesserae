@@ -8,9 +8,9 @@ children:
     style: {width: 160, height: 28, foreground: "#FFFFFF"}
   - id: button
     kind: Rect
-    style: {width: 96, height: 40, background: "#6750A4", corner_radius: 20, align_items: center, justify_content: center}
+    style: {width: 96, height: 40, background: "#6750A4", corner_radius: 20, align_items: center}
     children:
       - id: button_label
         kind: Text
-        text: {content: Count, font_family: Roboto, font_size: 16}
-        style: {width: 44, height: 20, foreground: "#FFFFFF"}
+        text: {content: Count, font_family: Roboto, font_size: 16, text_align: center}
+        style: {width: 96, height: 20, foreground: "#FFFFFF"}

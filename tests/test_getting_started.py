@@ -59,7 +59,7 @@ def _box(node):
 def test_each_step_builds_and_the_window_grows(kind, run_step):
     for step in (1, 2, 3, 4):
         app, names = run_step(kind, step)
-        assert app.current == "Counter"
+        assert app.current == ("Counter" if kind == "declarative" else None)  # in code, no screen
         if step >= 2:
             assert _node(kind, app, names, "label").get("text") == "Count: 0"
         if step >= 3:

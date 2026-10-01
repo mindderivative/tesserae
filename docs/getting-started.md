@@ -14,6 +14,7 @@ You need:
 
 - **Python 3.12 or newer**, already installed. Check with
   `python3 --version`.
+- **Tesserae 0.3.1 or newer**, which `pip install tesserae-ui` below gets.
 - **A Linux desktop session**, X11 or Wayland, on x86-64. (Tesserae also
   runs on macOS with Apple silicon and on Windows; see
   [Installation](installation.md).)
@@ -61,9 +62,9 @@ active (`source .venv/bin/activate` in a new terminal).
 
 ## 1. A window
 
-An `App` owns the window and shows named **screens** in it. A screen is a
-`View`, so even the emptiest app has one. Make an empty screen, 360 by
-160 with a dark background, and open the window on it.
+An `App` owns the window. Make one 360 by 160 with a dark background and
+open it. The dark background keeps the white text we add next readable
+whatever the desktop's light or dark theme is.
 
 === "Declarative"
 
@@ -82,11 +83,12 @@ An `App` owns the window and shows named **screens** in it. A screen is a
     ```
 
 
-In the declarative version the screen is a file, `Counter_View.yaml`:
-`app.build_view` reads it and `app.register` names it. The `None` is its
-ViewModel, which it doesn't need yet. In the imperative version the
-screen is built in the program from a small dictionary, and you will put
-nodes in it by calling functions.
+In the declarative version the window shows a **screen**, a view in a
+file: `app.build_view` reads `Counter_View.yaml` and `app.register` names
+it. The `None` is its ViewModel, which it doesn't need yet. In the
+imperative version there is no file: `window.root` is the box every node
+goes in, and you set its layout (a column with 16 px of padding and 12
+between nodes) and its background with one call.
 
 Run it:
 
@@ -121,7 +123,7 @@ A **node** is one thing on screen. Add a label: text that says
 Declaratively, a node is an entry in `children:`. `kind: Text` makes a
 label, and `text:` holds what it says (a `Text` needs a `font_family`).
 Imperatively, `window.create("text", ...)` makes the node and
-`screen.root.add_child(...)` puts it in the screen. Both give the text node
+`window.root.add_child(...)` puts it in the window. Both give the text node
 a size, and its colour is `foreground` in YAML and `fill=` in code.
 
 Run `python app.py` again: the window now says "Count: 0".
@@ -149,7 +151,8 @@ Add a button. It is a purple, rounded box with a text node in it, centred.
 
 A button is nothing special: a `Rect` (a coloured box) with a `Text` in
 it. In code the box is `window.create("box", ...)`, and the text goes
-inside it with `add_child` before the box goes in the screen.
+inside it with `add_child` before the box goes in the window. The text is
+as wide as the button, and `text_align: center` centres it there.
 
 The two ways name things a little differently:
 
@@ -159,6 +162,7 @@ The two ways name things a little differently:
 | `style: {width: 96, ...}` | `width=96` |
 | `foreground` and `background` (`"#RRGGBB"`) | `fill=(r, g, b, a)` |
 | `text: {content: "...", font_size: 20}` | `text="..."`, `font_size=20` |
+| `text: {text_align: center}` | `text_align="center"` |
 | `children:` | `node.add_child(other)` |
 
 Run it again to see the button. It doesn't do anything yet.

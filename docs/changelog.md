@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.3.1 (unreleased)
+
+Two things the new [Getting Started](getting-started.md) walk-through ran
+into ([#72](https://github.com/mindderivative/tesserae/issues/72)).
+
+### Added
+
+- **`App.run()` needs no screen** ([#73](https://github.com/mindderivative/tesserae/issues/73)).
+  It starts when the window has something to show: a screen `show()` made
+  current, or nodes added to `app.window.root` by calls. An app built
+  entirely in Python no longer has to make an empty `View` first, and an
+  empty window runs. Registering screens and showing none is still a
+  `RuntimeError`, now saying both ways out (an undecorated window's border
+  doesn't count as content).
+- **`text_align` in a YAML `text:` block** ([#74](https://github.com/mindderivative/tesserae/issues/74)):
+  `start` (the default), `center` or `end`, on a `Text` and a `Link`, as
+  `tre` names it. Before, the key was silently ignored. A wrong value is
+  an error naming the widget, and a `TextField` doesn't take it.
+
+### Documentation
+
+- The Getting Started page walks from a fresh Linux install to a first
+  window and node, declaratively and imperatively, with runnable programs
+  in `examples/getting_started/`; the API page lists `App`'s window
+  options, routing members and `App.of`; the index, README and
+  installation pages are brought up to 0.3.
+
 ## 0.3.0
 
 Custom windowing on `tre` 0.5.0.1: Tesserae draws the window's title bar and
