@@ -164,6 +164,21 @@ jobs:
           $RUN "$BIN/tesserae" build --check
           ls -l dist
 
+      # 0.3.0 M5: the same for an app whose window is undecorated, so the
+      # shell's top bar is the title bar (and its window border is drawn):
+      # it must build, open its window without the OS's title bar, draw
+      # frames and exit cleanly on every platform.
+      - name: Make a custom-title-bar app and build it, checked
+        shell: bash
+        run: |
+          cd work
+          "$BIN/tesserae" new demo_bar --shell --custom-title-bar
+          cd demo_bar
+          grep -q "decorations=False" app.py
+          if [ "$RUNNER_OS" = "Linux" ]; then RUN="xvfb-run -a"; else RUN=""; fi
+          $RUN "$BIN/tesserae" build --check
+          ls -l dist
+
       # M78: the installer. On macOS, a .app in a .dmg: mount it, check the
       # .app's details and signature, copy it out as a user would, run it.
       - name: Build the installer (macOS), and install and run it from the .dmg
