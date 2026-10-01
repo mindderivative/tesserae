@@ -242,8 +242,9 @@ call.
 The one blocking call -- opens the real window and runs `tre`'s own real
 render loop, showing the screen `show()` made current and any nodes you
 added to `app.window.root` by calls. `max_frames` caps it (headless/
-CI-safe); omit it for a real, interactive run. Raises `RuntimeError` if
-the window has neither (before 0.3.1, if `show()` hadn't been called).
+CI-safe); omit it for a real, interactive run. An app needs no screen
+(since 0.3.1 an empty window runs, for an app built in Python), but
+registering screens and showing none raises `RuntimeError`.
 
 `hot_reload=True` reloads every screen built from a file while the app
 runs -- one `load()` made, or one built with `build_view()` and given to

@@ -117,17 +117,19 @@ def test_show_switches_the_same_live_window_on_the_second_call(tmp_path):
     assert app.current == "b"
 
 
-def test_run_with_nothing_to_show_raises_a_clear_runtime_error():
+def test_run_with_screens_registered_but_none_shown_raises_a_clear_runtime_error(tmp_path):
     app = App()
-    with pytest.raises(RuntimeError, match=r"nothing to display: show\(\) a screen, or add nodes to app\.window\.root"):
+    app.register("a", View(write_view(tmp_path, SIMPLE_VIEW)), None)
+    with pytest.raises(RuntimeError, match=r"called before show\(\): screens are registered but none is showing"):
         app.run()
 
 
-def test_an_undecorated_apps_border_is_not_something_to_show():
+def test_an_undecorated_apps_border_is_not_something_to_show(tmp_path):
     """The window border is a child of the window's root, but not content."""
     app = App(decorations=False)
+    app.register("a", View(write_view(tmp_path, SIMPLE_VIEW)), None)
     assert app._border is not None and len(app.window.root.children()) == 1
-    with pytest.raises(RuntimeError, match="nothing to display"):
+    with pytest.raises(RuntimeError, match="none is showing"):
         app.run()
 
 
@@ -146,56 +148,70 @@ class _FakeTre:
         self.ran.append(max_frames)
 
 
-def test_run_starts_for_a_window_with_nodes_added_by_calls(monkeypatch):
-    """0.3.1: an app built in Python needs no screen: nodes on the window will do."""
+@pytest.fixture
+def fake_tre(monkeypatch):
     monkeypatch.setattr("tesserae.app._TreApp", _FakeTre)
     _FakeTre.ran.clear()
+    return _FakeTre
+
+
+def test_an_empty_window_runs(fake_tre):
+    """0.3.1: an app built in Python starts empty, so a window with no screens is allowed."""
+    App(width=200, height=100).run(max_frames=2)
+    App(decorations=False).run(max_frames=3)  # and its border alone is no reason to refuse
+    assert fake_tre.ran == [2, 3]
+
+
+def test_run_starts_for_a_window_with_nodes_added_by_calls(fake_tre):
     app = App(width=200, height=100)
     app.window.root.add_child(app.window.create("text", text="Hi", font_size=16, width=40, height=20,
                                                 fill=(255, 255, 255, 255)))
     app.run(max_frames=3)
-    assert _FakeTre.ran == [3]
+    assert fake_tre.ran == [3]
 
 
-def test_run_starts_for_an_undecorated_app_with_nodes_added_by_calls(monkeypatch):
-    monkeypatch.setattr("tesserae.app._TreApp", _FakeTre)
-    _FakeTre.ran.clear()
+def test_nodes_added_by_calls_are_content_even_with_a_screen_registered(fake_tre, tmp_path):
     app = App(decorations=False)  # its border is a second child, not the reason it runs
+    app.register("a", View(write_view(tmp_path, SIMPLE_VIEW)), None)
     app.window.root.add_child(app.window.create("box", width=10, height=10, fill=(0, 0, 0, 255)))
     app.run(max_frames=1)
-    assert _FakeTre.ran == [1]
+    assert fake_tre.ran == [1]
 
 
-def test_run_starts_for_a_shell_before_any_screen(monkeypatch):
+def test_run_starts_for_a_shell_before_any_screen(fake_tre):
     from tesserae.shell import AppShell
     from tesserae.widgets import top_app_bar
 
-    monkeypatch.setattr("tesserae.app._TreApp", _FakeTre)
-    _FakeTre.ran.clear()
     app = App(width=400, height=300)
     app.use_shell(AppShell(app.window, top_bar=top_app_bar(app.window, "Studio", width=400)))
-    app.run(max_frames=1)  # nothing shown yet, but the shell is on the window
-    assert _FakeTre.ran == [1]
+    app.run(max_frames=1)
+    assert fake_tre.ran == [1]
 
 
-def test_a_code_only_app_draws_frames_in_a_real_window(tmp_path):
+@pytest.mark.parametrize("with_a_node", [True, False])
+def test_a_code_only_app_draws_frames_in_a_real_window(tmp_path, with_a_node):
     """The real thing, in a subprocess (a second real `App.run()` in one pytest
-    process can break unrelated tests); skipped where no frame renders."""
+    process can break unrelated tests); skipped where no frame renders. Empty
+    is the walk-through's first step, so it is run for real too."""
+    import os
     import subprocess
     import textwrap
 
     script = tmp_path / "code_only.py"
     script.write_text(textwrap.dedent("""
+        import sys
         from tesserae import App
 
         app = App(width=200, height=100, title="code only")
-        app.window.root.add_child(app.window.create("text", text="Hi", font_size=16, width=40, height=20,
-                                                    fill=(255, 255, 255, 255)))
+        if sys.argv[1] == "node":
+            app.window.root.add_child(app.window.create("text", text="Hi", font_size=16, width=40, height=20,
+                                                        fill=(255, 255, 255, 255)))
         app.run()
     """))
     report = tmp_path / "frames.txt"
-    env = {**__import__("os").environ, "TESSERAE_MAX_FRAMES": "5", "TESSERAE_FRAMES_REPORT": str(report)}
-    result = subprocess.run([sys.executable, str(script)], env=env, capture_output=True, text=True, timeout=60)
+    env = {**os.environ, "TESSERAE_MAX_FRAMES": "5", "TESSERAE_FRAMES_REPORT": str(report)}
+    result = subprocess.run([sys.executable, str(script), "node" if with_a_node else "empty"], env=env,
+                            capture_output=True, text=True, timeout=60)
     assert result.returncode == 0, result.stderr
     if report.read_text() == "0":
         pytest.skip("no display reachable -- App.run() rendered no frames")
