@@ -23,6 +23,9 @@ def _app_with(tmp_path, bar, **app_kwargs):
     path = tmp_path / "Home_View.yaml"
     path.write_text(yaml.safe_dump(_page(bar)), encoding="utf-8")
     app = App(width=600, height=400, theme_seed=SEED, decorations=False, **app_kwargs)
+    # The bar as Windows and Linux show it, with its own buttons: on macOS
+    # the OS's traffic lights show instead and they hide (test_title_bar_macos).
+    app._native_controls.set(False)
     view = app.build_view(path)
     app.register("Home", view, None)
     app.show("Home")

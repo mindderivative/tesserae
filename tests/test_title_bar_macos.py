@@ -6,6 +6,8 @@ buttons while the OS's show. Off macOS the inset is `(0, 0)`, so the
 same app runs everywhere; here macOS is simulated.
 """
 
+import sys
+
 import pytest
 import yaml
 
@@ -42,12 +44,20 @@ def _app_with(tmp_path):
     return app, view
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="on macOS the traffic lights show: the test below")
 def test_the_inset_and_native_controls_off_macos(tmp_path):
     app, view = _app_with(tmp_path)
     assert app.titlebar_inset.get() == (0.0, 0.0) and app.native_controls.get() is False
     assert not hasattr(app.titlebar_inset, "set") and not hasattr(app.native_controls, "set")  # read-only
     assert view.node("bar.inset").get("layout_width") == 0.0
     assert view.node("bar.buttons").get("visible") is True
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="macOS's own answer, on a Mac (CI's macOS job)")
+def test_on_a_real_mac_the_traffic_lights_show_and_the_buttons_hide(tmp_path):
+    app, view = _app_with(tmp_path)
+    assert app.native_controls.get() is True  # tre's, for an undecorated window on macOS
+    assert view.node("bar.buttons").get("visible") is False
 
 
 def test_on_macos_the_bar_makes_room_and_its_buttons_hide(tmp_path, monkeypatch):
