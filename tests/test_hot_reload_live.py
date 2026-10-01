@@ -11,8 +11,9 @@ Timing is deterministic rather than raced: idle frames take
 microseconds, so a background edit could land after `max_frames` ran
 out. Instead a callable queued before `run()` makes the edit on the
 first frame and re-queues itself (20 ms per frame) until the new text
-shows up, re-applying the same edit in case the watcher wasn't listening
-yet.
+shows up, re-applying the same edit every half second in case the watcher
+wasn't listening yet (not every frame: a file rewritten that often never
+settles, so the watcher keeps waiting for the save to finish, #39).
 """
 
 import subprocess
@@ -25,6 +26,19 @@ import pytest
 SCRIPT = textwrap.dedent(
     '''
     import sys, time
+
+    # An editor saves once. A watcher waits for a save to settle (two
+    # readings 50 ms apart that agree, #39), so a file rewritten on every
+    # frame never settles: save again only if the reload hasn't shown up
+    # after half a second.
+    _saved = [0.0]
+
+    def save_due():
+        now = time.monotonic()
+        if now - _saved[0] < 0.5:
+            return False
+        _saved[0] = now
+        return True
     from pathlib import Path
 
     work = Path(sys.argv[1])
@@ -59,7 +73,8 @@ SCRIPT = textwrap.dedent(
             state["seen"] = "Goodbye"
             return
         if time.monotonic() < deadline:
-            view_path.write_text(view_text("Goodbye"))  # the "editor save"
+            if save_due():
+                view_path.write_text(view_text("Goodbye"))  # the "editor save"
             time.sleep(0.02)
             handle.call_soon(check)
 
@@ -92,6 +107,19 @@ def test_app_run_hot_reload_updates_the_live_view(tmp_path: Path, how):
 STYLE_SCRIPT = textwrap.dedent(
     '''
     import sys, time
+
+    # An editor saves once. A watcher waits for a save to settle (two
+    # readings 50 ms apart that agree, #39), so a file rewritten on every
+    # frame never settles: save again only if the reload hasn't shown up
+    # after half a second.
+    _saved = [0.0]
+
+    def save_due():
+        now = time.monotonic()
+        if now - _saved[0] < 0.5:
+            return False
+        _saved[0] = now
+        return True
     from pathlib import Path
 
     work = Path(sys.argv[1])
@@ -127,8 +155,9 @@ STYLE_SCRIPT = textwrap.dedent(
             state["seen"] = "restyled"
             return
         if time.monotonic() < deadline:
-            theme.write_text(new_theme)  # the "editor saves"
-            sheet.write_text(rule("corner_radius", 9))
+            if save_due():
+                theme.write_text(new_theme)  # the "editor saves"
+                sheet.write_text(rule("corner_radius", 9))
             time.sleep(0.02)
             handle.call_soon(check)
         else:
@@ -163,6 +192,19 @@ def test_app_run_hot_reload_restyles_on_theme_and_stylesheet_edits(tmp_path: Pat
 COMPONENT_SCRIPT = textwrap.dedent(
     '''
     import sys, time
+
+    # An editor saves once. A watcher waits for a save to settle (two
+    # readings 50 ms apart that agree, #39), so a file rewritten on every
+    # frame never settles: save again only if the reload hasn't shown up
+    # after half a second.
+    _saved = [0.0]
+
+    def save_due():
+        now = time.monotonic()
+        if now - _saved[0] < 0.5:
+            return False
+        _saved[0] = now
+        return True
     from pathlib import Path
 
     work = Path(sys.argv[1])
@@ -197,7 +239,7 @@ COMPONENT_SCRIPT = textwrap.dedent(
             state["seen"] = "Goodbye"
             return
         if time.monotonic() < deadline:
-            if state["frames"] > 2:
+            if state["frames"] > 2 and save_due():
                 row_path.write_text(row_text("Goodbye"))  # the "editor save"
             time.sleep(0.02)
             handle.call_soon(check)
@@ -235,6 +277,19 @@ def test_app_run_hot_reload_updates_components_added_before_and_during_the_run(t
 SHELL_SCRIPT = textwrap.dedent(
     '''
     import sys, time
+
+    # An editor saves once. A watcher waits for a save to settle (two
+    # readings 50 ms apart that agree, #39), so a file rewritten on every
+    # frame never settles: save again only if the reload hasn't shown up
+    # after half a second.
+    _saved = [0.0]
+
+    def save_due():
+        now = time.monotonic()
+        if now - _saved[0] < 0.5:
+            return False
+        _saved[0] = now
+        return True
     from pathlib import Path
 
     work = Path(sys.argv[1])
@@ -262,7 +317,8 @@ SHELL_SCRIPT = textwrap.dedent(
             state["seen"] = "Saved"
             return
         if time.monotonic() < deadline:
-            shell_path.write_text("status_bar: {text: Saved}\\nzones: {left: 160}\\n")  # the "editor save"
+            if save_due():
+                shell_path.write_text("status_bar: {text: Saved}\\nzones: {left: 160}\\n")  # the "editor save"
             time.sleep(0.02)
             handle.call_soon(check)
         else:
