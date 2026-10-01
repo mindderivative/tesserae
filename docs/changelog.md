@@ -31,6 +31,8 @@ Built on the `0.3.0` branch, following the
   `window.toggle_maximized` and `window.close`; `app.titlebar_inset` and
   `app.native_controls`. Three window glyphs in the icon set, and
   `visible` can be bound.
+  A TitleBar, and a shell file's top bar in an undecorated app,
+  hot-reload ([#57](https://github.com/mindderivative/tesserae/issues/57)).
 
 ### Changed
 

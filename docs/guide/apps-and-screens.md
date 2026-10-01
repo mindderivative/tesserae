@@ -235,7 +235,9 @@ It's a bar, 40 px high unless its `style: {height: ...}` says otherwise (every p
 but its buttons and the app's own controls) and maximizes on a
 double-click; the icon and title at its start; the app's children in
 the middle; and minimize, maximize and close at the right. Maximize
-shows the restore glyph while the window is maximized. Its colours are
+shows the restore glyph while the window is maximized. Like any view, it
+hot-reloads: an edit to its title, buttons or content shows while the
+app runs, and the buttons keep working. Its colours are
 Material 3 roles (`surface`, `on_surface`), so it needs a themed app;
 the title, icon and buttons fade while the window isn't the focused
 one, and close's hover is red. Each part has a class, so a stylesheet
