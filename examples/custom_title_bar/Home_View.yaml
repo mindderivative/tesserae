@@ -30,7 +30,7 @@ children:
         style: {foreground: on_surface}
       - id: about
         kind: Text
-        text: {content: "Drag a bar to move the window; double-click it to maximize. The bar below is built by hand.",
+        text: {content: "Drag a bar to move the window; double-click to maximize.",
                typography_role: body_medium}
         style: {foreground: on_surface_variant, width: 520}
 
