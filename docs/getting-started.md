@@ -128,6 +128,20 @@ a size, and its colour is `foreground` in YAML and `fill=` in code.
 
 Run `python app.py` again: the window now says "Count: 0".
 
+!!! tip "If Python prints an error"
+    A mistake in the view file ends in a long traceback, and the **last
+    line** is the one to read. It names the file, the widget and the
+    problem, and for a misspelt word it says what you probably meant:
+
+    ```text
+    ValueError: .../Counter_View.yaml: widget "label": unknown style field(s) ['foregorund'] -- did you mean 'foreground'?
+    ```
+
+    Fix the word in the file and run it again. (With hot reload on, see
+    [Run it](#5-run-it), a mistake saved while the app is open is logged
+    instead, the window keeps its last good version, and saving the fix
+    brings it in. See [Hot Reload](guide/hot-reload.md#when-an-edit-is-broken).)
+
 ## 3. A second node
 
 Add a button. It is a purple, rounded box with a text node in it, centred.
@@ -225,7 +239,9 @@ and behaviour, the hover tint, ripple and focus ring aside.
 To see a declarative edit without restarting, run it with hot reload:
 change `app.run()` to `app.run(hot_reload=True)`, then edit
 `Counter_View.yaml` (the button's colour, say) while the app is open. It
-changes at once, and the count stays.
+changes at once, and the count stays. Hot reload watches the view file
+the screen was built from; the imperative version has no file, so there
+you edit and run again.
 
 ## Which to use, and both together
 

@@ -23,6 +23,7 @@ use `tre`'s wording. Bindings, handlers and `two_way:` aren't wired here
 
 from __future__ import annotations
 
+import difflib
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -194,21 +195,40 @@ def shipped_default_theme() -> dict[str, Any]:
     return _shipped
 
 
+def _did_you_mean(unknown: Any, known: Any) -> str:
+    """` -- did you mean 'foreground'?` for names that are a slip away from
+    a known one (0.3.1), or nothing: a name that resembles none is left
+    for the reader, not guessed at."""
+    pairs = []
+    for name in sorted(unknown, key=str):
+        close = difflib.get_close_matches(str(name), sorted(known), n=1, cutoff=0.7)
+        if close:
+            pairs.append((name, close[0]))
+    if not pairs:
+        return ""
+    if len(pairs) == 1:
+        return f" -- did you mean {pairs[0][1]!r}?"
+    return " -- did you mean " + ", ".join(f"{good!r} for {bad!r}" for bad, good in pairs) + "?"
+
+
 def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     node_id, kind = node.get("id"), node.get("kind")
     if not isinstance(node_id, str):
         raise SpecBuildError(f"every widget needs an `id:`, got {node!r}")
     if kind not in _KINDS:
-        raise SpecBuildError(f"widget {_q(node_id)}: unknown kind {kind!r}")
+        raise SpecBuildError(f"widget {_q(node_id)}: unknown kind {kind!r}"
+                             + _did_you_mean([kind] if isinstance(kind, str) else [], _KINDS))
     unknown = set(node) - _NODE_KEYS
     if unknown:
-        raise SpecBuildError(f"widget {_q(node_id)}: unknown field(s) {sorted(unknown)}")
+        raise SpecBuildError(f"widget {_q(node_id)}: unknown field(s) {sorted(unknown)}"
+                             + _did_you_mean(unknown, _NODE_KEYS))
     style = resolve_style(node, ctx.layers)
     _check_interaction(node)
     _a11y_fields(node)
     unknown_style = set(style) - STYLE_FIELDS
     if unknown_style:
-        raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}")
+        raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}"
+                             + _did_you_mean(unknown_style, STYLE_FIELDS))
 
     try:
         outer, inner = _create(ctx, node, style, built)
@@ -603,7 +623,8 @@ def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
         raise SpecBuildError(f"{where}: `a11y:` takes a mapping of {', '.join(_A11Y_YAML)}, got {value!r}")
     unknown = set(value) - set(_A11Y_YAML)
     if unknown:
-        raise SpecBuildError(f"{where}: unknown a11y field(s) {sorted(unknown)} (known: {', '.join(_A11Y_YAML)})")
+        raise SpecBuildError(f"{where}: unknown a11y field(s) {sorted(unknown)} (known: {', '.join(_A11Y_YAML)})"
+                             + _did_you_mean(unknown, _A11Y_YAML))
     if "role" in value and node["kind"] in _OWN_ROLE:
         raise SpecBuildError(f"{where}: a {node['kind']} has its own role; `a11y:` can't set `role`")
     bound = [k for k, v in value.items() if is_binding(v)]

@@ -283,6 +283,34 @@ def test_a_text_field_has_no_text_align():
     assert _view(_root(_aligned(None, "TextField"))).node("t") is not None  # without it, as before
 
 
+def _misspelt(**changes):
+    node = _text(binding=None)
+    node.update({k: v for k, v in changes.items() if k != "style"})
+    node["style"] = {**node["style"], **changes.get("style", {})}
+    return _view(_root(node))
+
+
+@pytest.mark.parametrize("change, message", [
+    ({"style": {"foregorund": "#FFFFFF"}},
+     r"unknown style field\(s\) \['foregorund'\] -- did you mean 'foreground'\?"),
+    ({"childrens": []}, r"unknown field\(s\) \['childrens'\] -- did you mean 'children'\?"),
+    ({"kind": "text"}, r"unknown kind 'text' -- did you mean 'Text'\?"),
+    ({"a11y": {"lable": "x"}}, r"unknown a11y field\(s\) \['lable'\].* -- did you mean 'label'\?"),
+    ({"style": {"foregorund": "#FFFFFF", "heigth": 5}},
+     r"-- did you mean 'foreground' for 'foregorund', 'height' for 'heigth'\?"),
+])
+def test_a_misspelt_name_gets_a_closest_match_hint(change, message):
+    """0.3.1: the typo a first-time reader makes (`foregorund`) says what was meant."""
+    with pytest.raises(ValueError, match=message):
+        _misspelt(**change)
+
+
+def test_a_name_that_resembles_nothing_is_not_guessed_at():
+    with pytest.raises(ValueError) as caught:
+        _misspelt(style={"zzzzqq": 1})
+    assert "unknown style field(s) ['zzzzqq']" in str(caught.value) and "did you mean" not in str(caught.value)
+
+
 def test_reconcile_adds_removes_and_orders_children_as_the_new_spec_does():
     view = _view(_root(_rect("a"), _rect("b"), _rect("c")))
     a, c = view.node("a"), view.node("c")

@@ -148,3 +148,39 @@ def test_a_hot_reload_edit_keeps_the_count(tmp_path, run_step, monkeypatch):
     app.window.advance(16)
     assert view.node("button").get("fill") == (0x14, 0x6C, 0x2E, 255)  # the edit shows
     assert view.node("label").get("text") == "Count: 2"  # and the count stays
+
+
+def test_a_typo_in_the_view_is_named_and_hot_reload_keeps_the_last_good_version(tmp_path, monkeypatch):
+    """The page's error note: the last line names the widget, the misspelt key and what
+    was meant; with hot reload on, the window keeps what it had, and fixing the file
+    brings the edit in."""
+    folder = tmp_path / "counter"
+    shutil.copytree(STEPS / "declarative" / "step4", folder)
+    seen = {}
+    monkeypatch.setattr(tesserae.App, "run", lambda self, *a, **k: seen.setdefault("app", self))
+    monkeypatch.syspath_prepend(str(folder))
+    runpy.run_path(str(folder / "app.py"), run_name="__main__")
+    sys.modules.pop("Counter_ViewModel", None)
+    view = seen["app"].screen("Counter")[0]
+    seen["app"].window.advance(16)
+    seen["app"].window.simulate("click", node=view.node("button"))
+    path = folder / "Counter_View.yaml"
+    good = path.read_text(encoding="utf-8")
+    watcher = ViewWatcher(view, path)
+
+    def save(text, bump):
+        path.write_text(text, encoding="utf-8")
+        later = path.stat().st_mtime_ns + bump * 10**9
+        os.utime(path, ns=(later, later))
+
+    save(good.replace("foreground", "foregorund", 1).replace("#6750A4", "#146C2E"), 1)
+    with pytest.raises(ValueError, match=r"widget \"label\": unknown style field\(s\) \['foregorund'\] -- did you mean 'foreground'\?"):
+        watcher.poll()
+    assert view.node("button").get("fill") == (0x67, 0x50, 0xA4, 255)  # nothing half-applied
+    assert view.node("label").get("text") == "Count: 1"
+
+    save(good.replace("#6750A4", "#146C2E"), 2)  # fixed: the edit comes in
+    assert watcher.poll() is True
+    seen["app"].window.advance(16)
+    assert view.node("button").get("fill") == (0x14, 0x6C, 0x2E, 255)
+    assert view.node("label").get("text") == "Count: 1"

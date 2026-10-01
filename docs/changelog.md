@@ -2,7 +2,7 @@
 
 ## 0.3.1 (unreleased)
 
-Two things the new [Getting Started](getting-started.md) walk-through ran
+Things the new [Getting Started](getting-started.md) walk-through ran
 into ([#72](https://github.com/mindderivative/tesserae/issues/72)).
 
 ### Added
@@ -18,6 +18,12 @@ into ([#72](https://github.com/mindderivative/tesserae/issues/72)).
   `start` (the default), `center` or `end`, on a `Text` and a `Link`, as
   `tre` names it. Before, the key was silently ignored. A wrong value is
   an error naming the widget, and a `TextField` doesn't take it.
+
+- **A closest-match hint on a misspelt name** (#76): a misspelt style
+  field, node field, `kind` or `a11y` field now says what was probably
+  meant, as in `unknown style field(s) ['foregorund'] -- did you mean
+  'foreground'?`. A name that resembles nothing is not guessed at. Hot
+  reload logs it the same way.
 
 ### Documentation
 
