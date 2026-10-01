@@ -124,6 +124,7 @@ def test_run_with_screens_registered_but_none_shown_raises_a_clear_runtime_error
         app.run()
 
 
+@pytest.mark.skipif(sys.platform == "darwin", reason="no drawn border on macOS: the OS draws the frame")
 def test_an_undecorated_apps_border_is_not_something_to_show(tmp_path):
     """The window border is a child of the window's root, but not content."""
     app = App(decorations=False)
