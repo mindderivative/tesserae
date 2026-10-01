@@ -239,10 +239,11 @@ call.
 
 **`run(max_frames=None, *, hot_reload=False) -> None`**
 
-The one blocking call -- opens the real window `show()` already built
-and runs `tre`'s own real render loop. `max_frames` caps it (headless/
-CI-safe); omit it for a real, interactive run. Raises `RuntimeError`
-if called before `show()`.
+The one blocking call -- opens the real window and runs `tre`'s own real
+render loop, showing the screen `show()` made current and any nodes you
+added to `app.window.root` by calls. `max_frames` caps it (headless/
+CI-safe); omit it for a real, interactive run. Raises `RuntimeError` if
+the window has neither (before 0.3.1, if `show()` hadn't been called).
 
 `hot_reload=True` reloads every screen built from a file while the app
 runs -- one `load()` made, or one built with `build_view()` and given to

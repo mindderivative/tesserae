@@ -117,10 +117,89 @@ def test_show_switches_the_same_live_window_on_the_second_call(tmp_path):
     assert app.current == "b"
 
 
-def test_run_before_show_raises_a_clear_runtime_error():
+def test_run_with_nothing_to_show_raises_a_clear_runtime_error():
     app = App()
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match=r"nothing to display: show\(\) a screen, or add nodes to app\.window\.root"):
         app.run()
+
+
+def test_an_undecorated_apps_border_is_not_something_to_show():
+    """The window border is a child of the window's root, but not content."""
+    app = App(decorations=False)
+    assert app._border is not None and len(app.window.root.children()) == 1
+    with pytest.raises(RuntimeError, match="nothing to display"):
+        app.run()
+
+
+class _FakeTre:
+    """tre's App, so `run()` can be called without a GPU or a display."""
+
+    ran = []
+
+    def add_window(self, window):
+        pass
+
+    def thread_handle(self):
+        return type("Handle", (), {"call_soon": staticmethod(lambda fn: None)})()
+
+    def run(self, max_frames=None):
+        self.ran.append(max_frames)
+
+
+def test_run_starts_for_a_window_with_nodes_added_by_calls(monkeypatch):
+    """0.3.1: an app built in Python needs no screen: nodes on the window will do."""
+    monkeypatch.setattr("tesserae.app._TreApp", _FakeTre)
+    _FakeTre.ran.clear()
+    app = App(width=200, height=100)
+    app.window.root.add_child(app.window.create("text", text="Hi", font_size=16, width=40, height=20,
+                                                fill=(255, 255, 255, 255)))
+    app.run(max_frames=3)
+    assert _FakeTre.ran == [3]
+
+
+def test_run_starts_for_an_undecorated_app_with_nodes_added_by_calls(monkeypatch):
+    monkeypatch.setattr("tesserae.app._TreApp", _FakeTre)
+    _FakeTre.ran.clear()
+    app = App(decorations=False)  # its border is a second child, not the reason it runs
+    app.window.root.add_child(app.window.create("box", width=10, height=10, fill=(0, 0, 0, 255)))
+    app.run(max_frames=1)
+    assert _FakeTre.ran == [1]
+
+
+def test_run_starts_for_a_shell_before_any_screen(monkeypatch):
+    from tesserae.shell import AppShell
+    from tesserae.widgets import top_app_bar
+
+    monkeypatch.setattr("tesserae.app._TreApp", _FakeTre)
+    _FakeTre.ran.clear()
+    app = App(width=400, height=300)
+    app.use_shell(AppShell(app.window, top_bar=top_app_bar(app.window, "Studio", width=400)))
+    app.run(max_frames=1)  # nothing shown yet, but the shell is on the window
+    assert _FakeTre.ran == [1]
+
+
+def test_a_code_only_app_draws_frames_in_a_real_window(tmp_path):
+    """The real thing, in a subprocess (a second real `App.run()` in one pytest
+    process can break unrelated tests); skipped where no frame renders."""
+    import subprocess
+    import textwrap
+
+    script = tmp_path / "code_only.py"
+    script.write_text(textwrap.dedent("""
+        from tesserae import App
+
+        app = App(width=200, height=100, title="code only")
+        app.window.root.add_child(app.window.create("text", text="Hi", font_size=16, width=40, height=20,
+                                                    fill=(255, 255, 255, 255)))
+        app.run()
+    """))
+    report = tmp_path / "frames.txt"
+    env = {**__import__("os").environ, "TESSERAE_MAX_FRAMES": "5", "TESSERAE_FRAMES_REPORT": str(report)}
+    result = subprocess.run([sys.executable, str(script)], env=env, capture_output=True, text=True, timeout=60)
+    assert result.returncode == 0, result.stderr
+    if report.read_text() == "0":
+        pytest.skip("no display reachable -- App.run() rendered no frames")
+    assert int(report.read_text()) >= 5
 
 
 def test_load_registers_a_valid_pair_under_the_inferred_prefix(tmp_path):

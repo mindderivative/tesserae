@@ -953,6 +953,15 @@ class App:
             raise ValueError(f"App: icon {str(path)!r} isn't an image file ({exc})") from None
         self._window.set(icon=(rgba.tobytes(), rgba.width, rgba.height))
 
+    def _has_content(self) -> bool:
+        """Whether the window has anything to show (0.3.1): a screen
+        `show()` made current, or nodes added to its root by calls. The
+        window border an undecorated app draws is a child of the root too,
+        and doesn't count."""
+        if self._current is not None:
+            return True
+        return len(self._window.root.children()) > (1 if self._border is not None else 0)
+
     def thread_handle(self) -> Any:
         """`tre`'s thread-safe `LoopHandle` for this app (tre M87): the one
         object that may cross threads. `handle.call_soon(fn)` runs `fn`
@@ -1105,8 +1114,10 @@ class App:
         logger.info("re-themed the app from {}", files)
 
     def run(self, max_frames: int | None = None, *, hot_reload: bool = False) -> None:
-        """The one blocking call -- opens the real `Window` `show()` has
-        already built and runs `tre`'s own real render loop. `max_frames`
+        """The one blocking call -- opens the real `Window` and runs `tre`'s
+        own real render loop, showing the screen `show()` made current and
+        any nodes added to `app.window.root` by calls (0.3.1: a window with
+        neither raises `RuntimeError`, as before). `max_frames`
         is the identical headless-CI-safe convention `tre`'s own examples
         already use (TRE v1 finding #261) -- omit it for a real,
         interactive run that exits only when the window closes. With no
@@ -1144,8 +1155,8 @@ class App:
         writes how many frames the run drew to that file, so a check can
         tell a run that drew from one that found no display and returned.
         """
-        if self._current is None:
-            raise RuntimeError("App.run() called before show() -- nothing to display yet")
+        if not self._has_content():
+            raise RuntimeError("App.run() has nothing to display: show() a screen, or add nodes to app.window.root")
         if max_frames is None and os.environ.get("TESSERAE_MAX_FRAMES"):
             try:
                 max_frames = int(os.environ["TESSERAE_MAX_FRAMES"])
