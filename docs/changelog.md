@@ -2,15 +2,26 @@
 
 ## 0.3.0 (unreleased)
 
-Custom windowing on `tre` 0.5.0: Tesserae draws the window's title bar and
+Custom windowing on `tre` 0.5.0.1: Tesserae draws the window's title bar and
 borders ([#24](https://github.com/mindderivative/tesserae/issues/24)).
 Built on the `0.3.0` branch, following the
 [design](design/custom-windowing.md).
 
 ### Requirements
 
-- **`tre` 0.5.0 or newer, below 0.6** (0.2.x needed 0.4.4 or newer, below
-  0.5).
+- **`tre` 0.5.0.1 or newer, below 0.6** (0.2.x needed 0.4.4 or newer, below
+  0.5). 0.5.0.1 rather than 0.5.0: a real click in a text field panicked
+  (`RefCell already borrowed`) in `tre` 0.4.4 and 0.5.0, and 0.5.0.1 fixes
+  it ([#63](https://github.com/mindderivative/tesserae/issues/63), `tre` #51).
+
+### Checked by hand
+
+Moving, resizing, maximizing, the buttons and the window border were tried
+by hand on Linux, under X11 (it found the text-field panic above and an
+example's overlapping text, [#62](https://github.com/mindderivative/tesserae/issues/62)).
+Wayland, Windows and macOS were checked by the headless tests and by CI,
+which builds and runs a custom-title-bar app on each, but not by hand:
+tell us if a title bar misbehaves on one of them.
 
 ### Added
 
