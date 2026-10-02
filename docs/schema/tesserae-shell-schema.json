@@ -1,0 +1,196 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindderivative.github.io/tesserae/schema/tesserae-shell-schema.json",
+  "title": "Tesserae app shell",
+  "description": "An app shell: `*_Shell.yaml`. A top bar, a navigation rail, a status bar and docked zones around the screens.",
+  "definitions": {},
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "top_bar": {
+      "type": "object",
+      "required": [
+        "title"
+      ],
+      "additionalProperties": false,
+      "description": "The bar across the top.",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "leading_icon": {
+          "enum": [
+            "add",
+            "arrow_back",
+            "arrow_forward",
+            "check",
+            "chevron_right",
+            "close",
+            "expand_more",
+            "home",
+            "menu",
+            "remove",
+            "search",
+            "settings",
+            "window_maximize",
+            "window_minimize",
+            "window_restore"
+          ],
+          "description": "An icon name."
+        },
+        "trailing_icons": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "add",
+              "arrow_back",
+              "arrow_forward",
+              "check",
+              "chevron_right",
+              "close",
+              "expand_more",
+              "home",
+              "menu",
+              "remove",
+              "search",
+              "settings",
+              "window_maximize",
+              "window_minimize",
+              "window_restore"
+            ],
+            "description": "An icon name."
+          }
+        }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "additionalProperties": false,
+      "description": "A navigation rail of screens.",
+      "properties": {
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "screen",
+              "icon"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "screen": {
+                "type": "string",
+                "description": "A registered screen's name."
+              },
+              "icon": {
+                "enum": [
+                  "add",
+                  "arrow_back",
+                  "arrow_forward",
+                  "check",
+                  "chevron_right",
+                  "close",
+                  "expand_more",
+                  "home",
+                  "menu",
+                  "remove",
+                  "search",
+                  "settings",
+                  "window_maximize",
+                  "window_minimize",
+                  "window_restore"
+                ],
+                "description": "An icon name."
+              }
+            }
+          }
+        },
+        "on_navigate": {
+          "type": "string",
+          "description": "A ViewModel method to call instead of showing the screen."
+        }
+      }
+    },
+    "status_bar": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false,
+      "description": "The bar across the bottom.",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "zones": {
+      "type": "object",
+      "description": "Docked areas around the content, with their sizes in pixels.",
+      "properties": {
+        "left": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "right": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "top": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "bottom": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "center": {
+      "type": "boolean",
+      "description": "Whether the middle is a dock zone too, with the screens as its tabs."
+    },
+    "panels": {
+      "type": "object",
+      "description": "Which panels (screens) sit in which zone.",
+      "properties": {
+        "left": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "right": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "top": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bottom": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "center": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

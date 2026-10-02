@@ -43,7 +43,7 @@ Repository = "https://github.com/mindderivative/tesserae"
 
 [project.optional-dependencies]
 build = ["pyinstaller>=6.10"]
-dev = ["pytest>=8.0", "pyinstaller>=6.10"]
+dev = ["pytest>=8.0", "pyinstaller>=6.10", "jsonschema>=4.17"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/tesserae"]

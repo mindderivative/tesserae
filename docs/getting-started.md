@@ -338,3 +338,5 @@ adjust it; [Releasing Your App](guide/releasing.md) has the details.
   and your own fonts.
 - [Custom Title Bars](guide/custom-title-bars.md) -- drawing the window's
   own title bar.
+- [Editor Support](guide/editor-support.md) -- completion and typo
+  checking for your YAML files in VS Code.

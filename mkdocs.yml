@@ -65,6 +65,7 @@ nav:
       - Overlays: guide/overlays.md
       - App Shell & Docking: guide/app-shell.md
       - Custom Title Bars: guide/custom-title-bars.md
+      - Editor Support: guide/editor-support.md
       - Repeater (Lists): guide/repeater.md
       - Reactivity: guide/reactivity.md
       - Binding Expressions: guide/bindings.md

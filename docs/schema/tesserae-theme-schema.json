@@ -1,0 +1,1021 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindderivative.github.io/tesserae/schema/tesserae-theme-schema.json",
+  "title": "Tesserae theme or stylesheet",
+  "description": "A theme or stylesheet file: `styles:` rules, and for a theme also a `seed`, `dark`, `colors`, `typography` and `components`.",
+  "definitions": {
+    "color": {
+      "anyOf": [
+        {
+          "enum": [
+            "background",
+            "error",
+            "error_container",
+            "inverse_on_surface",
+            "inverse_primary",
+            "inverse_surface",
+            "on_background",
+            "on_error",
+            "on_error_container",
+            "on_primary",
+            "on_primary_container",
+            "on_primary_fixed",
+            "on_primary_fixed_variant",
+            "on_secondary",
+            "on_secondary_container",
+            "on_secondary_fixed",
+            "on_secondary_fixed_variant",
+            "on_surface",
+            "on_surface_variant",
+            "on_tertiary",
+            "on_tertiary_container",
+            "on_tertiary_fixed",
+            "on_tertiary_fixed_variant",
+            "outline",
+            "outline_variant",
+            "primary",
+            "primary_container",
+            "primary_fixed",
+            "primary_fixed_dim",
+            "scrim",
+            "secondary",
+            "secondary_container",
+            "secondary_fixed",
+            "secondary_fixed_dim",
+            "shadow",
+            "surface",
+            "surface_bright",
+            "surface_container",
+            "surface_container_high",
+            "surface_container_highest",
+            "surface_container_low",
+            "surface_container_lowest",
+            "surface_dim",
+            "surface_tint",
+            "surface_variant",
+            "tertiary",
+            "tertiary_container",
+            "tertiary_fixed",
+            "tertiary_fixed_dim"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`."
+    },
+    "style": {
+      "type": "object",
+      "description": "How a node looks and lays out its children.",
+      "properties": {
+        "align_content": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "stretch",
+            "space_between",
+            "space_around",
+            "space_evenly"
+          ],
+          "description": "How wrapped rows, or grid tracks, are spaced."
+        },
+        "align_items": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where its children sit across the layout axis."
+        },
+        "align_self": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Overrides its parent's `align_items` for this node."
+        },
+        "aspect_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Width over height: gives the missing side from the one set."
+        },
+        "background": {
+          "$ref": "#/definitions/color",
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour."
+        },
+        "border_color": {
+          "$ref": "#/definitions/color",
+          "description": "The colour of its border."
+        },
+        "border_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The width of its border, in pixels."
+        },
+        "clip_children": {
+          "type": "boolean",
+          "description": "Whether children are cut off at its edge."
+        },
+        "column_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between columns (defaults to `gap`)."
+        },
+        "corner_radius": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "extra_large",
+                "extra_small",
+                "large",
+                "medium",
+                "none",
+                "small"
+              ]
+            }
+          ],
+          "description": "Pixels, or a shape token (`none` to `full`)."
+        },
+        "display": {
+          "enum": [
+            "flex",
+            "grid"
+          ],
+          "description": "`flex` (the default) or `grid`."
+        },
+        "elevation": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "level_0",
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5"
+              ]
+            }
+          ],
+          "description": "A shadow level, 0 to 5."
+        },
+        "flex_basis": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Its size along the main axis before it grows or shrinks."
+        },
+        "flex_direction": {
+          "enum": [
+            "horizontal",
+            "vertical"
+          ],
+          "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
+        },
+        "flex_grow": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How much of the spare room it takes, relative to its siblings."
+        },
+        "flex_shrink": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How much it gives up when there is too little room."
+        },
+        "flex_wrap": {
+          "enum": [
+            "no_wrap",
+            "wrap"
+          ],
+          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one."
+        },
+        "foreground": {
+          "$ref": "#/definitions/color",
+          "description": "Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour."
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between its children."
+        },
+        "grid_auto_columns": {
+          "type": "string",
+          "description": "The size of columns the template doesn't name."
+        },
+        "grid_auto_flow": {
+          "enum": [
+            "row",
+            "column",
+            "row dense",
+            "column dense",
+            "dense"
+          ],
+          "description": "How grid children fill the cells."
+        },
+        "grid_auto_rows": {
+          "type": "string",
+          "description": "The size of rows the template doesn't name."
+        },
+        "grid_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid column it takes: `2`, or `1 / 3`."
+        },
+        "grid_row": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid row it takes: `2`, or `1 / 3`."
+        },
+        "grid_template_columns": {
+          "type": "string",
+          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`."
+        },
+        "grid_template_rows": {
+          "type": "string",
+          "description": "The grid's rows, as in CSS."
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+        },
+        "justify_content": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "stretch",
+            "space_between",
+            "space_around",
+            "space_evenly"
+          ],
+          "description": "Where its children sit along the layout axis."
+        },
+        "justify_items": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where grid children sit across their cell's width."
+        },
+        "justify_self": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where this node sits across its grid cell's width."
+        },
+        "margin": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space outside it: one number, or `{left, right, top, bottom}`."
+        },
+        "max_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most height it can take."
+        },
+        "max_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most width it can take."
+        },
+        "min_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least height it can take."
+        },
+        "min_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least width it can take."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "From 0 (clear) to 1 (opaque)."
+        },
+        "padding": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space inside it: one number, or `{left, right, top, bottom}`."
+        },
+        "position": {
+          "enum": [
+            "relative",
+            "absolute"
+          ],
+          "description": "`absolute` takes it out of the flow and places it at `x` and `y`."
+        },
+        "row_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between rows (defaults to `gap`)."
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the left."
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the top."
+        },
+        "z_index": {
+          "type": "integer",
+          "description": "Stacking order: higher is in front."
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "description": "Styles for the nodes it matches: by `kind`, by `classes`, or by `id`. With none of the three, for every node.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "Checkbox",
+            "CircularProgress",
+            "Container",
+            "GraphNode",
+            "Icon",
+            "Image",
+            "LinearProgress",
+            "Link",
+            "LoadingIndicator",
+            "NodeGraph",
+            "RadioButton",
+            "Rect",
+            "ScrollView",
+            "Slider",
+            "SpinBox",
+            "Switch",
+            "Text",
+            "TextField",
+            "TimePickerDial"
+          ],
+          "description": "Every node of this kind."
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Nodes with all of these classes."
+        },
+        "id": {
+          "type": "string",
+          "description": "The node with this id."
+        },
+        "style": {
+          "$ref": "#/definitions/style"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "seed": {
+      "$ref": "#/definitions/color",
+      "description": "The colour the theme's palette is made from."
+    },
+    "dark": {
+      "type": "boolean",
+      "description": "Whether it is the dark scheme."
+    },
+    "colors": {
+      "type": "object",
+      "description": "Colour roles to replace: a role name and a colour.",
+      "properties": {
+        "background": {
+          "$ref": "#/definitions/color"
+        },
+        "error": {
+          "$ref": "#/definitions/color"
+        },
+        "error_container": {
+          "$ref": "#/definitions/color"
+        },
+        "inverse_on_surface": {
+          "$ref": "#/definitions/color"
+        },
+        "inverse_primary": {
+          "$ref": "#/definitions/color"
+        },
+        "inverse_surface": {
+          "$ref": "#/definitions/color"
+        },
+        "on_background": {
+          "$ref": "#/definitions/color"
+        },
+        "on_error": {
+          "$ref": "#/definitions/color"
+        },
+        "on_error_container": {
+          "$ref": "#/definitions/color"
+        },
+        "on_primary": {
+          "$ref": "#/definitions/color"
+        },
+        "on_primary_container": {
+          "$ref": "#/definitions/color"
+        },
+        "on_primary_fixed": {
+          "$ref": "#/definitions/color"
+        },
+        "on_primary_fixed_variant": {
+          "$ref": "#/definitions/color"
+        },
+        "on_secondary": {
+          "$ref": "#/definitions/color"
+        },
+        "on_secondary_container": {
+          "$ref": "#/definitions/color"
+        },
+        "on_secondary_fixed": {
+          "$ref": "#/definitions/color"
+        },
+        "on_secondary_fixed_variant": {
+          "$ref": "#/definitions/color"
+        },
+        "on_surface": {
+          "$ref": "#/definitions/color"
+        },
+        "on_surface_variant": {
+          "$ref": "#/definitions/color"
+        },
+        "on_tertiary": {
+          "$ref": "#/definitions/color"
+        },
+        "on_tertiary_container": {
+          "$ref": "#/definitions/color"
+        },
+        "on_tertiary_fixed": {
+          "$ref": "#/definitions/color"
+        },
+        "on_tertiary_fixed_variant": {
+          "$ref": "#/definitions/color"
+        },
+        "outline": {
+          "$ref": "#/definitions/color"
+        },
+        "outline_variant": {
+          "$ref": "#/definitions/color"
+        },
+        "primary": {
+          "$ref": "#/definitions/color"
+        },
+        "primary_container": {
+          "$ref": "#/definitions/color"
+        },
+        "primary_fixed": {
+          "$ref": "#/definitions/color"
+        },
+        "primary_fixed_dim": {
+          "$ref": "#/definitions/color"
+        },
+        "scrim": {
+          "$ref": "#/definitions/color"
+        },
+        "secondary": {
+          "$ref": "#/definitions/color"
+        },
+        "secondary_container": {
+          "$ref": "#/definitions/color"
+        },
+        "secondary_fixed": {
+          "$ref": "#/definitions/color"
+        },
+        "secondary_fixed_dim": {
+          "$ref": "#/definitions/color"
+        },
+        "shadow": {
+          "$ref": "#/definitions/color"
+        },
+        "surface": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_bright": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_container": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_container_high": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_container_highest": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_container_low": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_container_lowest": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_dim": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_tint": {
+          "$ref": "#/definitions/color"
+        },
+        "surface_variant": {
+          "$ref": "#/definitions/color"
+        },
+        "tertiary": {
+          "$ref": "#/definitions/color"
+        },
+        "tertiary_container": {
+          "$ref": "#/definitions/color"
+        },
+        "tertiary_fixed": {
+          "$ref": "#/definitions/color"
+        },
+        "tertiary_fixed_dim": {
+          "$ref": "#/definitions/color"
+        }
+      },
+      "additionalProperties": false
+    },
+    "typography": {
+      "type": "object",
+      "description": "Changes to Material 3's type styles, by role.",
+      "properties": {
+        "body_large": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "body_medium": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "body_small": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "display_large": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "display_medium": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "display_small": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "headline_large": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "headline_medium": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "headline_small": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "label_large": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "label_medium": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "label_small": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "title_large": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "title_medium": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        "title_small": {
+          "type": "object",
+          "properties": {
+            "font_family": {
+              "type": "string"
+            },
+            "font_size": {
+              "type": "number"
+            },
+            "font_weight": {
+              "type": "number"
+            },
+            "line_height": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "components": {
+      "type": "object",
+      "description": "Per-component shape and elevation."
+    },
+    "styles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/rule"
+      },
+      "description": "Style rules, in order."
+    }
+  }
+}

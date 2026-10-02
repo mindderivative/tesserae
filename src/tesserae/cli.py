@@ -3,6 +3,7 @@
     tesserae new <name> [--shell [--custom-title-bar]] [--dir PARENT]
     tesserae add screen <Name> [--dir DIR]
     tesserae build [app.py] [--name N] [--icon F] [--console] [--include G] [--exclude G] [--check]
+    tesserae schema [--settings]
 
 `new` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair
 following the naming convention, runnable at once; `--shell` adds an app
@@ -10,6 +11,8 @@ shell file and a `Settings` screen. `add screen` adds a pair and, at the
 marker comments `new` leaves in `app.py`, its import, `load()` and route.
 Neither overwrites a file. The templates are in `tesserae/templates/`.
 `build` (M77) makes the app one executable: see `tesserae.build`.
+`schema` (0.3.2) says where the YAML schemas for Red Hat's YAML language
+server are, and with `--settings` prints the `yaml.schemas` setting for them.
 """
 
 from __future__ import annotations
@@ -25,6 +28,16 @@ TEMPLATES = Path(__file__).parent / "templates"
 #: The lines `tesserae new` leaves in `app.py`; `add screen` inserts above them.
 IMPORT_MARKER = "# (tesserae add screen adds each new screen's import above this line)"
 LOAD_MARKER = "# (tesserae add screen adds each new screen's load and route above this line)"
+SCHEMAS = Path(__file__).parent / "schema"
+#: Each YAML schema and the files it is for, as `yaml.schemas` globs (a `!` leaves files out).
+SCHEMA_FILES = {
+    "tesserae-yaml-schema.json": ["**/*_View.yaml"],
+    "tesserae-shell-schema.json": ["**/*_Shell.yaml"],
+    "tesserae-component-schema.json": ["**/*_Component.yaml"],
+    # Themes and stylesheets have no naming convention: these are a guess at yours.
+    "tesserae-theme-schema.json": ["**/*theme*.yaml", "**/*stylesheet*.yaml", "!**/*_View.yaml",
+                                   "!**/*_Shell.yaml", "!**/*_Component.yaml"],
+}
 
 
 class CliError(Exception):
@@ -134,6 +147,9 @@ def _parser() -> argparse.ArgumentParser:
     screen_cmd = what.add_parser("screen", help="add a screen: a View/ViewModel pair")
     screen_cmd.add_argument("name", help="the screen's CamelCase name, e.g. Settings")
     screen_cmd.add_argument("--dir", type=Path, default=Path("."), help="the app's folder (default: here)")
+    schema_cmd = commands.add_parser("schema", help="where the YAML schemas for editors are")
+    schema_cmd.add_argument("--settings", action="store_true",
+                            help="print the `yaml.schemas` setting for Red Hat's YAML language server")
     build_cmd = commands.add_parser("build", help="build the app into one executable (needs tesserae-ui[build])")
     build_cmd.add_argument("app", nargs="?", type=Path, default=Path("app.py"),
                            help="the app's entry point (default: app.py)")
@@ -152,6 +168,23 @@ def _parser() -> argparse.ArgumentParser:
     build_cmd.add_argument("--publisher", default="", help="who makes the app")
     build_cmd.add_argument("--description", default="", help="a line about the app")
     return parser
+
+
+def _schema(args: argparse.Namespace) -> int:
+    """Prints the schemas' places, or the setting that maps them to their files."""
+    import json
+
+    missing = [name for name in SCHEMA_FILES if not (SCHEMAS / name).is_file()]
+    if missing:
+        raise CliError(f"this install has no {', '.join(missing)}")
+    if args.settings:
+        print(json.dumps({"yaml.schemas": {str(SCHEMAS / name): globs for name, globs in SCHEMA_FILES.items()}}, indent=2))
+        return 0
+    for name, globs in SCHEMA_FILES.items():
+        print(f"{SCHEMAS / name}\n    for {', '.join(g for g in globs if not g.startswith('!'))}")
+    print("\nFor Red Hat's YAML language server, `tesserae schema --settings` prints the setting. See "
+          "https://mindderivative.github.io/tesserae/guide/editor-support/")
+    return 0
 
 
 def _build(args: argparse.Namespace) -> int:
@@ -193,6 +226,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         if args.command == "build":
             return _build(args)
+        if args.command == "schema":
+            return _schema(args)
         if args.command == "new":
             folder = new(args.name, args.dir, shell=args.shell, custom_title_bar=args.custom_title_bar)
             print(f"made {folder}; run it with\n\n    cd {folder}\n    python app.py\n")

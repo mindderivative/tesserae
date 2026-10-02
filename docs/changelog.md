@@ -15,6 +15,21 @@
   Tesserae sets none of those on a kind that used to ignore them, so
   nothing in its views changes.
 
+### Added
+
+- **YAML schemas for Red Hat's YAML language server** ([#79](https://github.com/mindderivative/tesserae/issues/79)):
+  `tesserae-yaml-schema.json` (a view), and
+  `tesserae-shell-schema.json`, `tesserae-component-schema.json` and
+  `tesserae-theme-schema.json`, JSON Schema draft-07. An editor suggests
+  node kinds, style fields, colour roles, layout values and a built-in
+  fragment's parameters, shows what each means, and flags a typo. They come
+  with the package, are published at
+  `https://mindderivative.github.io/tesserae/schema/`, and are written by
+  `tools/generate_yaml_schema.py` from Tesserae's own code. New command:
+  `tesserae schema` says where they are, and `tesserae schema --settings`
+  prints the `yaml.schemas` setting. See
+  [Editor Support](guide/editor-support.md).
+
 ### Changed
 
 - **`run(keepalive=)` is off by default**, where 0.3.1 turned it on with

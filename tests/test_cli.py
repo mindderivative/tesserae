@@ -165,3 +165,18 @@ def test_the_command_and_python_m_run(tmp_path):
     assert made.returncode == 0 and (tmp_path / "app" / "app.py").is_file()
     bad = subprocess.run([sys.executable, "-m", "tesserae", "new", "9"], capture_output=True, text=True, cwd=tmp_path)
     assert bad.returncode == 2 and bad.stderr.startswith("tesserae: ")
+
+
+def test_schema_says_where_the_yaml_schemas_are_and_prints_the_setting(capsys):
+    """0.3.2 (#79): `tesserae schema` and `--settings`, for Red Hat's YAML language server."""
+    assert cli.main(["schema"]) == 0
+    listing = capsys.readouterr().out
+    for name in cli.SCHEMA_FILES:
+        assert str(cli.SCHEMAS / name) in listing and (cli.SCHEMAS / name).is_file()
+    assert "**/*_View.yaml" in listing and "editor-support" in listing
+
+    assert cli.main(["schema", "--settings"]) == 0
+    setting = json.loads(capsys.readouterr().out)["yaml.schemas"]
+    assert setting[str(cli.SCHEMAS / "tesserae-yaml-schema.json")] == ["**/*_View.yaml"]
+    assert setting[str(cli.SCHEMAS / "tesserae-shell-schema.json")] == ["**/*_Shell.yaml"]
+    assert set(setting) == {str(cli.SCHEMAS / name) for name in cli.SCHEMA_FILES}
