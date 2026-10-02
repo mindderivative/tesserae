@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.1 (unreleased)
+## 0.3.1
 
 Things the new [Getting Started](getting-started.md) walk-through ran
 into ([#72](https://github.com/mindderivative/tesserae/issues/72)).
