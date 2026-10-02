@@ -32,7 +32,7 @@ from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 
-__all__ = [
+__all__ = ["style_props", 
     "A11Y_BINDABLE", "Built", "Layers", "SpecBuildError", "a11y_bindings", "build", "control_shape", "focus_ring_color",
     "interaction_tint", "is_binding", "natural_size", "patch",
     "prepare_layers",
@@ -350,6 +350,50 @@ def _token(node_id: str, field_name: str, value: Any, lookup: Callable[[str], Op
             raise SpecBuildError(f'widget {_q(node_id)}: unknown style.{field_name} token "{value}"')
         return resolved
     return float(value)
+
+
+#: The style fields that are a node property of the same name (0.3.3, #81).
+_STYLE_PASSTHROUGH = frozenset({
+    "width", "height", "min_width", "max_width", "min_height", "max_height", "flex_basis", "flex_direction",
+    "align_items", "justify_content", "align_self", "justify_items", "justify_self", "align_content", "flex_wrap",
+    "position", "display", "aspect_ratio", "x", "y", "z_index", "clip_children", "grid_template_columns",
+    "grid_template_rows", "grid_auto_columns", "grid_auto_rows", "grid_auto_flow", "grid_column", "grid_row",
+})
+_STYLE_FLOATS = frozenset({"gap", "row_gap", "column_gap", "flex_grow", "flex_shrink"})
+
+
+def style_props(style: dict[str, Any], scheme: Optional[dict[str, RGBA]], where: str = "a style") -> dict[str, Any]:
+    """The node properties a `style:` sets, only those it gives, for a box that isn't a spec node (a part
+    of an app shell, 0.3.3 #81): `background` is the `fill`, a role resolved by `scheme` (MD3's baseline
+    without one), `border_color` the `stroke_color`, `elevation` the `shadows`. `foreground` has nothing to
+    colour in a box, so it is an error. Raises `SpecBuildError`, naming `where`."""
+    ctx = _Context(window=None, layers=(), scheme=scheme, frames={})
+    props: dict[str, Any] = {}
+    for key, value in style.items():
+        if key in _STYLE_PASSTHROUGH:
+            props[key] = value
+        elif key in _STYLE_FLOATS:
+            props[key] = float(value)
+        elif key in ("padding", "margin"):
+            props.update(_spacing(value, key))
+        elif key == "background":
+            props["fill"] = _color(ctx, where, "background", value)
+        elif key == "border_color":
+            props["stroke_color"] = _color(ctx, where, "border_color", value)
+        elif key == "border_width":
+            props["stroke_width"] = float(value)
+        elif key == "corner_radius":
+            props["corner_radius"] = _token(where, "corner_radius", value, tokens.shape)
+        elif key == "opacity":
+            props["opacity"] = float(value)
+        elif key == "elevation":
+            props["shadows"] = tokens.elevation_shadows(_token(where, "elevation", value, tokens.elevation))
+        elif key == "foreground":
+            raise SpecBuildError(f"{where}: style.foreground has nothing to colour here (a box with no text); "
+                                 "use style.background")
+        else:
+            raise SpecBuildError(f"{where}: unknown style field {key!r}" + _did_you_mean([key], STYLE_FIELDS))
+    return props
 
 
 def _paint(ctx: _Context, node_id: str, style: dict[str, Any], *, corner_radius: bool = True) -> dict[str, Any]:

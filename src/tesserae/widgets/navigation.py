@@ -165,11 +165,13 @@ def navigation_rail(
     border_width: float | None = None,
     *,
     theme: "Theme | None" = None,
+    style: dict[str, Any] | None = None,
 ) -> Widget:
     """MD3's navigation rail (M41): 80 px wide on `surface`, each item a
     24 px icon over a `label_medium` label; the selected item's icon sits
     in a 56x32 `secondary_container` pill, in `on_secondary_container`.
-    `.selected`, `.on_change(fn)`; the up and down arrows move it."""
+    `.selected`, `.on_change(fn)`; the up and down arrows move it.
+    `style` (0.3.3) is laid over its own: `{width: 96}`, `background`, ..."""
     count = len(labels)
     if count == 0 or len(icons) != count:
         raise ValueError(f"a navigation rail needs a label and an icon per item, got {count} and {len(icons)}")
@@ -196,7 +198,7 @@ def navigation_rail(
             "children": items}
     widget = Widget(window, spec=spec, theme=theme, x=x, y=y,
                     interactive={f"item{i}.pill": "on_surface" for i in range(count)},
-                    edit=_borders([None], border_color, border_width), name=name)
+                    edit=_styled(_borders([None], border_color, border_width), style), name=name)
     a11y.describe(widget.node, role="tablist")
 
     def paint(i: int, on: bool) -> None:
@@ -441,6 +443,20 @@ def toolbar(
     return widget
 
 
+def _styled(edit: Any, style: dict[str, Any] | None) -> Any:
+    """`edit` (a widget's edit of its spec, or none) followed by `style` laid over the root's own, so a
+    bar's height, background, padding and so on can be set (0.3.3, #81). A theme role in it follows the theme."""
+    if not style:
+        return edit
+
+    def run(spec: dict[str, Any]) -> None:
+        if edit is not None:
+            edit(spec)
+        spec["style"] = {**spec["style"], **style}
+
+    return run
+
+
 def top_app_bar(
     window: "Window",
     title: str,
@@ -454,6 +470,7 @@ def top_app_bar(
     *,
     theme: "Theme | None" = None,
     window_controls: bool | None = None,
+    style: dict[str, Any] | None = None,
 ) -> Widget:
     """MD3's small top app bar (M41: built from its fragment): 64 px of
     `surface`, a `title_large` title, an optional leading icon button
@@ -466,7 +483,11 @@ def top_app_bar(
     macOS, room for the traffic lights -- a `TitleBar`'s
     (`tesserae.spec.title_bar.window_parts`). It defaults to whether the
     app's window is undecorated, so an app shell's top bar is the title
-    bar of an `App(decorations=False)`."""
+    bar of an `App(decorations=False)`.
+
+    `style` (0.3.3) is laid over the bar's own: `{height: 40}` makes a slimmer
+    one (its icon buttons shrink to fit under 56 px), and `background`,
+    `padding`, `gap`, `corner_radius` and the rest of a node's style work too."""
     name = "top_app_bar"
     app = app_of(window)
     if window_controls is None:
@@ -475,9 +496,13 @@ def top_app_bar(
         raise ValueError("top_app_bar: window_controls needs the window to be an App's")
     trailing = list(trailing_icons or [])
 
+    # A bar slimmer than MD3's 64 px gets smaller icon buttons, so they fit (0.3.3).
+    height = (style or {}).get("height")
+    size = min(48.0, float(height)) if isinstance(height, (int, float)) and not isinstance(height, bool) else 48.0
+
     def button(node_id: str, glyph: str, ink: str) -> dict[str, Any]:
         return {"id": node_id, "kind": "Rect",
-                "style": {"width": 48, "height": 48, "corner_radius": 24, "background": "transparent",
+                "style": {"width": size, "height": size, "corner_radius": size / 2, "background": "transparent",
                           "align_items": "center", "justify_content": "center"},
                 "children": [{"id": f"{node_id}.icon", "kind": "Icon", "icon": {"name": glyph},
                               "style": {"width": 24, "height": 24, "foreground": ink}}]}
@@ -504,7 +529,7 @@ def top_app_bar(
 
     parts = (["leading"] if leading_icon else []) + [f"trailing{i}" for i in range(len(trailing))]
     widget = Widget(window, "TopAppBar", {"title": title, "width": width if width is not None else 360},
-                    theme=theme, x=x, y=y, interactive={p: None for p in parts}, edit=edit, name=name)
+                    theme=theme, x=x, y=y, interactive={p: None for p in parts}, edit=_styled(edit, style), name=name)
     widget.node.set(flex_shrink=0.0)  # a fixed-height bar: a short window must not squeeze it (0.3.3, #80)
     for part in parts:
         node = widget.part(part)
@@ -523,12 +548,14 @@ def status_bar(
     border_width: float | None = None,
     *,
     theme: "Theme | None" = None,
+    style: dict[str, Any] | None = None,
 ) -> Widget:
     """A window-bottom status strip (M41: built from its fragment): 24 px
     of `surface_container` with `label_small` text in
-    `on_surface_variant`, announced politely when its text changes."""
+    `on_surface_variant`, announced politely when its text changes.
+    `style` (0.3.3) is laid over its own: `{height: 32}`, `background`, ..."""
     widget = Widget(window, "StatusBar", {"text": text, "width": width if width is not None else 360},
-                    theme=theme, edit=_borders([None], border_color, border_width), name="status_bar")
+                    theme=theme, edit=_styled(_borders([None], border_color, border_width), style), name="status_bar")
     widget.node.set(flex_shrink=0.0)  # as the top bar's: a short window must not squeeze it (0.3.3, #80)
     a11y.describe(widget.node, live="polite")
     return widget

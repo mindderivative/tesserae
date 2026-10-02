@@ -220,3 +220,56 @@ def test_use_shell_with_center_docks_a_screen_already_showing():
     shell = AppShell(app.window, center=True)
     app.use_shell(shell)
     assert shell.dock.titles("center") == ["Home"] and shell.dock.shown(("center")) == home.root
+
+
+def test_the_bars_take_a_style_and_their_icon_buttons_fit_it():
+    """0.3.3 (#81): `style=` on `top_app_bar`, `status_bar` and `navigation_rail`."""
+    w = App(width=800, height=400, theme_seed=(0x67, 0x50, 0xA4, 0xFF)).window
+    slim = top_app_bar(w, "Studio", leading_icon="menu", trailing_icons=["settings"], width=800, style={"height": 40})
+    tall = top_app_bar(w, "Studio", leading_icon="menu", width=800, style={"height": 96})
+    plain = top_app_bar(w, "Studio", leading_icon="menu", width=800)
+    w.advance(16)
+    assert slim.node.get("layout_height") == 40.0 and slim.part("leading").get("layout_width") == 40.0
+    assert tall.node.get("layout_height") == 96.0 and tall.part("leading").get("layout_width") == 48.0  # never bigger
+    assert plain.node.get("layout_height") == 64.0 and plain.part("leading").get("layout_width") == 48.0
+    assert status_bar(w, "x", width=800, style={"height": 40, "corner_radius": 6}).node.get("corner_radius") == 6.0
+    assert navigation_rail(w, ["A"], ["home"], style={"width": 100}).node.get("width") == 100.0
+
+
+def test_an_app_shell_styles_its_own_parts_and_puts_back_what_it_had():
+    app = App(width=900, height=500, theme_seed=(0x67, 0x50, 0xA4, 0xFF), dark=False)
+    shell = AppShell(app.window, zones={"left": 200}, center=False,
+                     styles={"frame": {"padding": 8}, "content": {"corner_radius": 10, "background": "surface_container"}})
+    app.window.advance(16)
+    assert shell.node.get("padding_left") == 8.0 and shell.content.get("corner_radius") == 10.0
+    assert shell.content.get("flex_grow") == 1.0
+    shell.set_style("content", {"flex_grow": 0.0})  # a key the shell itself relies on, set and taken out
+    assert shell.content.get("flex_grow") == 0.0
+    shell.set_style("content", None)
+    assert shell.content.get("flex_grow") == 1.0 and shell.content.get("corner_radius") == 0.0
+    shell.set_style("left", {"background": "tertiary_container", "padding": 4})
+    zone = shell.dock._zones["left"]
+    assert zone.node.get("fill") == zone.strip.get("fill") == app.theme.role("tertiary_container")  # the tab strip too
+    app.set_dark(True)
+    assert zone.node.get("fill") == zone.strip.get("fill") == app.theme.role("tertiary_container")
+
+
+def test_a_shells_style_mistakes_are_one_line_errors_and_change_nothing():
+    app = App(width=900, height=500, theme_seed=(0x67, 0x50, 0xA4, 0xFF))
+    shell = AppShell(app.window, zones={"left": 200})
+    with pytest.raises(ValueError, match="parts to style are frame, content and its zones"):
+        shell.set_style("sidebar", {"gap": 1})
+    with pytest.raises(ValueError, match="left zone can't set a width or height"):
+        shell.set_style("left", {"width": 10})
+    with pytest.raises(ValueError, match="unknown style field 'gapp' -- did you mean 'gap'"):
+        shell.set_style("frame", {"gapp": 1})
+    with pytest.raises(ValueError, match="style.foreground has nothing to colour"):
+        shell.set_style("frame", {"foreground": "primary"})
+    with pytest.raises(ValueError, match="must be a mapping"):
+        shell.set_style("frame", 5)
+    shell.set_style("frame", {"padding": 3})
+    with pytest.raises(ValueError):
+        shell.set_style("frame", {"background": "notacolor"})
+    assert shell._styles["frame"] == {"padding": 3}  # the refused one left the last good style
+    with pytest.raises(ValueError, match="parts to style"):
+        AppShell(app.window, styles={"bottom": {"gap": 1}})  # a zone the shell doesn't have

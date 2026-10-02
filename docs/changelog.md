@@ -5,6 +5,17 @@
 Three things a user found testing: the shell's bars, theme roles without a
 theme, and styling the shell's parts.
 
+### Added
+
+- **Every part of a shell takes a `style:`**
+  ([#81](https://github.com/mindderivative/tesserae/issues/81)): the shell
+  itself, `top_bar`, `navigation`, `status_bar`, `content` and each zone
+  (`{size, style}`), in a `*_Shell.yaml` and in code (`style=` on
+  `top_app_bar`, `status_bar` and `navigation_rail`; `AppShell(styles=)`;
+  `shell.set_style`). The top bar's height was impossible to set before.
+  Hot reload applies a changed style and puts back the shell's own values
+  when one is removed. The shell schema knows them.
+
 ### Fixed
 
 - **A shell's top bar and status bar no longer shrink when the window is

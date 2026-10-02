@@ -394,21 +394,36 @@ def _shell() -> dict[str, Any]:
 
     edges = list(shell_file._EDGES)
     icon = {"enum": sorted(icons.ICONS), "description": "An icon name."}
+    # A shell part's style (0.3.3): a node's, but a box with no text to colour has no `foreground`, and a
+    # zone's size is its `size`, so its style has no width or height.
+    defs = _only(_definitions(fragment=False), "style", "color")
+    full = defs["style"]
+    part_style = {**full, "properties": {k: v for k, v in full["properties"].items() if k != "foreground"}}
+    zone_style = {**part_style, "properties": {k: v for k, v in part_style["properties"].items() if k not in ("width", "height")}}
+    definitions = {"color": defs["color"], "style": part_style, "zone_style": zone_style}
+    style_ref = {"$ref": "#/definitions/style", "description": "A node's `style:`: `height`, `background`, `padding`, ..."}
+    size = {"type": "number", "exclusiveMinimum": 0, "description": "The zone's size in pixels."}
     body = {"type": "object", "additionalProperties": False, "properties": {
+        "style": {**style_ref, "description": "The whole shell's style."},
         "top_bar": {"type": "object", "required": ["title"], "additionalProperties": False, "description": "The bar across the top.",
                     "properties": {"title": {"type": "string"}, "leading_icon": icon,
-                                   "trailing_icons": {"type": "array", "items": icon}}},
+                                   "trailing_icons": {"type": "array", "items": icon}, "style": style_ref}},
         "navigation": {"type": "object", "required": ["items"], "additionalProperties": False,
                        "description": "A navigation rail of screens.",
                        "properties": {"items": {"type": "array", "minItems": 1, "items": {
                            "type": "object", "required": ["screen", "icon"], "additionalProperties": False,
                            "properties": {"screen": {"type": "string", "description": "A registered screen's name."}, "icon": icon}}},
                                       "on_navigate": {"type": "string",
-                                                      "description": "A ViewModel method to call instead of showing the screen."}}},
+                                                      "description": "A ViewModel method to call instead of showing the screen."},
+                                      "style": style_ref}},
         "status_bar": {"type": "object", "required": ["text"], "additionalProperties": False,
-                       "description": "The bar across the bottom.", "properties": {"text": {"type": "string"}}},
-        "zones": {"type": "object", "description": "Docked areas around the content, with their sizes in pixels.",
-                  "properties": {edge: {"type": "number", "exclusiveMinimum": 0} for edge in edges},
+                       "description": "The bar across the bottom.", "properties": {"text": {"type": "string"}, "style": style_ref}},
+        "content": {"type": "object", "additionalProperties": False, "description": "Where the screens show.",
+                    "properties": {"style": style_ref}},
+        "zones": {"type": "object", "description": "Docked areas around the content: a size in pixels, or `{size, style}`.",
+                  "properties": {edge: {"anyOf": [size, {"type": "object", "required": ["size"], "additionalProperties": False,
+                                                          "properties": {"size": size, "style": {"$ref": "#/definitions/zone_style"}}}]}
+                                 for edge in edges},
                   "additionalProperties": False},
         "center": {"type": "boolean", "description": "Whether the middle is a dock zone too, with the screens as its tabs."},
         "panels": {"type": "object", "description": "Which panels (screens) sit in which zone.",
@@ -416,7 +431,7 @@ def _shell() -> dict[str, Any]:
                    "additionalProperties": False}}}
     return _root("tesserae-shell-schema.json", "Tesserae app shell",
                  "An app shell: `*_Shell.yaml`. A top bar, a navigation rail, a status bar and docked zones around the screens.",
-                 {}, body)
+                 definitions, body)
 
 
 def schemas() -> dict[str, dict[str, Any]]:

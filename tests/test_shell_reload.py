@@ -231,3 +231,36 @@ def test_hot_reload_watches_the_shell_file(studio):
         raise AssertionError("the shell file's edit was never queued")
     reload()
     assert shell.status_bar.part("text").get("text") == "Watched"
+
+
+def test_a_bars_style_rebuilds_it_and_a_shell_partss_style_is_set_in_place(studio):
+    """0.3.3 (#81): editing a `style:` applies without a restart, and taking one out puts the shell's own back."""
+    app, shell, path = studio
+    styled = SHELL.replace("top_bar: {title: Studio, trailing_icons: [settings]}",
+                           "top_bar: {title: Studio, trailing_icons: [settings], style: {height: 40}}"
+                           ).replace("status_bar: {text: Ready}", "status_bar: {text: Ready, style: {height: 32}}"
+                                     ).replace("zones: {left: 220, bottom: 160}",
+                                               "zones: {left: {size: 220, style: {background: tertiary_container}}, bottom: 160}"
+                                               ) + "content: {style: {corner_radius: 12}}\nstyle: {padding: 8}\n"
+    old_bar, old_status = shell.top_bar, shell.status_bar
+    _edit(app, path, styled)
+    assert shell.top_bar is not old_bar and shell.top_bar.node.get("layout_height") == 40.0
+    assert shell.status_bar is not old_status and shell.status_bar.node.get("layout_height") == 32.0
+    left = shell._zone_nodes["left"]
+    assert left.get("fill") == Theme.resolve(theme_seed=SEED, dark=False).role("tertiary_container")
+    assert shell.content.get("corner_radius") == 12.0 and shell.node.get("padding_left") == 8.0
+    assert shell.size("left") == 220
+
+    _edit(app, path, SHELL)  # all of it taken out again
+    assert shell.top_bar.node.get("layout_height") == 64.0 and shell.status_bar.node.get("layout_height") == 24.0
+    assert shell.content.get("corner_radius") == 0.0 and shell.content.get("flex_grow") == 1.0  # the shell's own
+    assert shell.node.get("padding_left") == 0.0
+    assert left.get("fill") == Theme.resolve(theme_seed=SEED, dark=False).role("surface_container_low")
+
+
+def test_a_style_edit_that_doesnt_fit_is_refused_and_leaves_the_shell_as_it_was(studio):
+    app, shell, path = studio
+    path.write_text(SHELL + "content: {style: {background: notacolor}}\n")
+    with pytest.raises(ValueError, match="the shell's content"):
+        app._reload_shell(load_shell_spec(path))
+    assert shell._styles.get("content") in ({}, None) and shell.content.get("fill") == (0, 0, 0, 0)  # as the shell made it

@@ -145,6 +145,31 @@ its `text`. `zones` gives each side zone's size, and `center: true` makes
 screens center tabs. The bars stretch across the window as it resizes,
 and everything follows the app's theme.
 
+**Every part takes a `style:`** (0.3.3), the same fields as a node's
+(`height`, `background`, `padding`, `corner_radius`, ...), and theme roles
+work in it. The frame is the shell as a whole; a zone is a number or
+`{size, style}` (its size is `size`, so its style has no `width`/`height`).
+None takes a `foreground`: a bar's colours come from the theme.
+
+```yaml
+style: {background: surface}
+top_bar: {title: Studio, style: {height: 48, background: primary_container}}
+navigation:
+  items: [{screen: Home, icon: home}]
+  style: {width: 96}
+status_bar: {text: Ready, style: {height: 32}}
+content: {style: {padding: 8}}
+zones:
+  left: {size: 220, style: {background: surface_container}}
+```
+
+A top bar's icon buttons shrink to fit a `height` under 48. In code,
+`top_app_bar`, `status_bar` and `navigation_rail` take `style=`, and
+`AppShell(styles={...})` and `shell.set_style(part, style)` style the
+rest. Taking a style out of the file puts back what the shell had, on
+hot reload. A mistake names the key (`top_bar.style.hieght: unknown field
+(did you mean 'height'?)`).
+
 **Panels are named like screens.** `panels:` lists each zone's panels by
 name. A name is the screen already registered under it, or else
 `<Name>_View.yaml` next to the shell file, with `<Name>_ViewModel.py`'s

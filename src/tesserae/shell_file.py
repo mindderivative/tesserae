@@ -13,6 +13,12 @@ instead of assembling it in Python (M52 Q1):
     center: true
     panels: {left: [Files, Outline], right: [Properties]}
 
+Each part can take a `style:` (0.3.3), a node's: `top_bar: {title: Studio,
+style: {height: 40}}`, and the same on `navigation` and `status_bar`; at the
+top of the file, `style:` is the whole shell's; `content: {style: ...}` is
+where the screens show; and a zone is `left: {size: 220, style: {...}}`
+(`left: 220` still works). A zone's size is its `size`, not a style's.
+
 It's a small schema, not a widget tree: Python builds it through the
 existing `AppShell`, `Dock` and `tesserae.widgets`, so the view pipeline
 is untouched. Every key is optional. A mistake raises `ShellSpecError`
@@ -43,7 +49,7 @@ __all__ = ["SHELL_SUFFIX", "ShellSpecError", "bind_navigation", "build_shell", "
            "parse_shell_spec", "place_panels", "reload_shell"]
 
 SHELL_SUFFIX = "_Shell.yaml"
-_KEYS = {"top_bar", "navigation", "status_bar", "zones", "center", "panels"}
+_KEYS = {"top_bar", "navigation", "status_bar", "zones", "center", "panels", "style", "content"}
 _EDGES = ("left", "right", "top", "bottom")
 
 
@@ -76,15 +82,27 @@ def parse_shell_spec(raw: Any, where: str = "shell") -> dict[str, Any]:
     if unknown:
         raise fail(unknown[0], f"unknown key (a shell has {', '.join(sorted(_KEYS))})")
 
-    top_bar = _mapping(raw.get("top_bar"), "top_bar", {"title", "leading_icon", "trailing_icons"}, fail)
+    styles: dict[str, dict[str, Any]] = {}
+    frame_style = _style(raw.get("style"), "style", fail)
+    if frame_style:
+        styles["frame"] = frame_style
+    content = _mapping(raw.get("content"), "content", {"style"}, fail)
+    if content is not None:
+        content_style = _style(content.get("style"), "content.style", fail)
+        if content_style:
+            styles["content"] = content_style
+
+    top_bar = _mapping(raw.get("top_bar"), "top_bar", {"title", "leading_icon", "trailing_icons", "style"}, fail)
     if top_bar is not None:
         if not isinstance(top_bar.get("title"), str):
             raise fail("top_bar.title", "a top bar needs a title (text)")
         _optional_text(top_bar, "leading_icon", "top_bar", fail)
         top_bar["trailing_icons"] = _texts(top_bar.get("trailing_icons") or [], "top_bar.trailing_icons", fail)
+        top_bar["style"] = _style(top_bar.get("style"), "top_bar.style", fail)
 
-    navigation = _mapping(raw.get("navigation"), "navigation", {"items", "on_navigate"}, fail)
+    navigation = _mapping(raw.get("navigation"), "navigation", {"items", "on_navigate", "style"}, fail)
     if navigation is not None:
+        navigation["style"] = _style(navigation.get("style"), "navigation.style", fail)
         items = navigation.get("items")
         if not isinstance(items, list) or not items:
             raise fail("navigation.items", "a list of {screen, icon}, at least one")
@@ -95,18 +113,31 @@ def parse_shell_spec(raw: Any, where: str = "shell") -> dict[str, Any]:
                 raise fail(key, "needs a screen name and an icon (text)")
         _optional_text(navigation, "on_navigate", "navigation", fail)
 
-    status_bar = _mapping(raw.get("status_bar"), "status_bar", {"text"}, fail)
+    status_bar = _mapping(raw.get("status_bar"), "status_bar", {"text", "style"}, fail)
     if status_bar is not None and not isinstance(status_bar.get("text"), str):
         raise fail("status_bar.text", "a status bar needs its text")
+    if status_bar is not None:
+        status_bar["style"] = _style(status_bar.get("style"), "status_bar.style", fail)
 
     zones = raw.get("zones") or {}
     if not isinstance(zones, dict):
         raise fail("zones", f"a mapping of side to size, sides from {', '.join(_EDGES)}")
+    sizes: dict[str, Any] = {}
     for side, size in zones.items():
         if side not in _EDGES:
             raise fail(f"zones.{side}", f"not a side (zones are {', '.join(_EDGES)})")
+        if isinstance(size, dict):  # `{size: 220, style: {...}}`, for a zone with a style (0.3.3)
+            zone = _mapping(size, f"zones.{side}", {"size", "style"}, fail)
+            zone_style = _style(zone.get("style"), f"zones.{side}.style", fail)
+            if zone_style and {"width", "height"} & set(zone_style):
+                raise fail(f"zones.{side}.style", "a zone's size is its `size:`, so its style has no width or height")
+            if zone_style:
+                styles[side] = zone_style
+            size = zone.get("size")
         if isinstance(size, bool) or not isinstance(size, (int, float)) or size <= 0:
             raise fail(f"zones.{side}", f"a size in pixels, more than 0, got {size!r}")
+        sizes[side] = size
+    zones = sizes
 
     center = raw.get("center", False)
     if not isinstance(center, bool):
@@ -127,7 +158,24 @@ def parse_shell_spec(raw: Any, where: str = "shell") -> dict[str, Any]:
 
     return {"top_bar": top_bar, "navigation": navigation, "status_bar": status_bar,
             "zones": {side: float(size) for side, size in zones.items()}, "center": center,
-            "panels": {side: list(names) for side, names in panels.items()}}
+            "panels": {side: list(names) for side, names in panels.items()}, "styles": styles}
+
+
+def _style(value: Any, key: str, fail: Any) -> Optional[dict[str, Any]]:
+    """A part's `style:` (0.3.3): a mapping of a node's style fields, or nothing."""
+    from tesserae.spec.build import _did_you_mean
+    from tesserae.spec.cascade import STYLE_FIELDS
+
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise fail(key, "a mapping of style fields (`height: 40`, `background: surface`, ...)")
+    for field in value:
+        if field not in STYLE_FIELDS:
+            raise fail(f"{key}.{field}", f"unknown style field{_did_you_mean([field], STYLE_FIELDS)}")
+        if field == "foreground":
+            raise fail(f"{key}.{field}", "a bar or area has no text of its own to colour: use `background`")
+    return dict(value)
 
 
 def _mapping(value: Any, key: str, allowed: set[str], fail: Any) -> Optional[dict[str, Any]]:
@@ -157,20 +205,16 @@ def build_shell(app: Any, spec: dict[str, Any]) -> Any:
     across the window, its rail lists the navigation items' screens, and
     it takes the app's theme and follows it (M50)."""
     from tesserae.shell import AppShell
-    from tesserae.widgets import status_bar
-
     window = app.window
-    width = float(app._width)
     bar = rail = status = None
     if spec["top_bar"] is not None:
         bar = _top_bar(app, spec["top_bar"])
     if spec["navigation"] is not None:
         rail = _rail(app, spec["navigation"], 0)
     if spec["status_bar"] is not None:
-        status = status_bar(window, spec["status_bar"]["text"], width=width)
-        status.node.set(width="100%")
+        status = _status_bar(app, spec["status_bar"])
     return AppShell(window, top_bar=bar, navigation=rail, status_bar=status, zones=spec["zones"],
-                    center=spec["center"])
+                    center=spec["center"], styles=spec["styles"])
 
 
 def check_references(app: Any, spec: dict[str, Any], path: Path, viewmodel: Any = None) -> None:
@@ -279,10 +323,16 @@ def reload_shell(app: Any, shell: Any, old: dict[str, Any], new: dict[str, Any],
         bar = _swap(shell.top_bar, lambda: _top_bar(app, top))
         shell.top_bar = bar
     if shell.status_bar is not None and new["status_bar"] is not None and new["status_bar"] != old["status_bar"]:
-        shell.status_bar.part("text").set(text=new["status_bar"]["text"])
+        if new["status_bar"].get("style") != old["status_bar"].get("style"):
+            shell.status_bar = _swap(shell.status_bar, lambda: _status_bar(app, new["status_bar"]))
+        else:
+            shell.status_bar.part("text").set(text=new["status_bar"]["text"])
     for side, size in new["zones"].items():
         if side in shell._zone_nodes and size != old["zones"].get(side):
             shell.set_size(side, size)
+    for part in sorted({*old["styles"], *new["styles"]}):  # the shell's own parts: its frame, content and zones
+        if old["styles"].get(part) != new["styles"].get(part) and (part in ("frame", "content") or part in shell._zone_nodes):
+            shell.set_style(part, new["styles"].get(part))
     if shell.navigation is not None and new["navigation"] is not None and new["navigation"] != old["navigation"]:
         screens = [item["screen"] for item in new["navigation"]["items"]]
         selected = screens.index(app.current) if app.current in screens else 0
@@ -308,9 +358,21 @@ def _placed(spec: dict[str, Any]) -> dict[str, str]:
 def _top_bar(app: Any, top: dict[str, Any]) -> Any:
     from tesserae.widgets import top_app_bar
 
+    style = top.get("style")
     bar = top_app_bar(app.window, top["title"], leading_icon=top.get("leading_icon"),
-                      trailing_icons=top["trailing_icons"], width=float(app._width))
-    bar.node.set(width="100%")  # across the window as it resizes
+                      trailing_icons=top["trailing_icons"], width=float(app._width), style=style)
+    if "width" not in (style or {}):
+        bar.node.set(width="100%")  # across the window as it resizes
+    return bar
+
+
+def _status_bar(app: Any, status: dict[str, Any]) -> Any:
+    from tesserae.widgets import status_bar
+
+    style = status.get("style")
+    bar = status_bar(app.window, status["text"], width=float(app._width), style=style)
+    if "width" not in (style or {}):
+        bar.node.set(width="100%")
     return bar
 
 
@@ -318,7 +380,8 @@ def _rail(app: Any, navigation: dict[str, Any], selected: int) -> Any:
     from tesserae.widgets import navigation_rail
 
     items = navigation["items"]
-    return navigation_rail(app.window, [i["screen"] for i in items], [i["icon"] for i in items], selected=selected)
+    return navigation_rail(app.window, [i["screen"] for i in items], [i["icon"] for i in items], selected=selected,
+                           style=navigation.get("style"))
 
 
 def _swap(old: Any, make: Any) -> Any:

@@ -3,10 +3,940 @@
   "$id": "https://mindderivative.github.io/tesserae/schema/tesserae-shell-schema.json",
   "title": "Tesserae app shell",
   "description": "An app shell: `*_Shell.yaml`. A top bar, a navigation rail, a status bar and docked zones around the screens.",
-  "definitions": {},
+  "definitions": {
+    "color": {
+      "anyOf": [
+        {
+          "enum": [
+            "background",
+            "error",
+            "error_container",
+            "inverse_on_surface",
+            "inverse_primary",
+            "inverse_surface",
+            "on_background",
+            "on_error",
+            "on_error_container",
+            "on_primary",
+            "on_primary_container",
+            "on_primary_fixed",
+            "on_primary_fixed_variant",
+            "on_secondary",
+            "on_secondary_container",
+            "on_secondary_fixed",
+            "on_secondary_fixed_variant",
+            "on_surface",
+            "on_surface_variant",
+            "on_tertiary",
+            "on_tertiary_container",
+            "on_tertiary_fixed",
+            "on_tertiary_fixed_variant",
+            "outline",
+            "outline_variant",
+            "primary",
+            "primary_container",
+            "primary_fixed",
+            "primary_fixed_dim",
+            "scrim",
+            "secondary",
+            "secondary_container",
+            "secondary_fixed",
+            "secondary_fixed_dim",
+            "shadow",
+            "surface",
+            "surface_bright",
+            "surface_container",
+            "surface_container_high",
+            "surface_container_highest",
+            "surface_container_low",
+            "surface_container_lowest",
+            "surface_dim",
+            "surface_tint",
+            "surface_variant",
+            "tertiary",
+            "tertiary_container",
+            "tertiary_fixed",
+            "tertiary_fixed_dim"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`."
+    },
+    "style": {
+      "type": "object",
+      "description": "How a node looks and lays out its children.",
+      "properties": {
+        "align_content": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "stretch",
+            "space_between",
+            "space_around",
+            "space_evenly"
+          ],
+          "description": "How wrapped rows, or grid tracks, are spaced."
+        },
+        "align_items": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where its children sit across the layout axis."
+        },
+        "align_self": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Overrides its parent's `align_items` for this node."
+        },
+        "aspect_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Width over height: gives the missing side from the one set."
+        },
+        "background": {
+          "$ref": "#/definitions/color",
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour."
+        },
+        "border_color": {
+          "$ref": "#/definitions/color",
+          "description": "The colour of its border."
+        },
+        "border_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The width of its border, in pixels."
+        },
+        "clip_children": {
+          "type": "boolean",
+          "description": "Whether children are cut off at its edge."
+        },
+        "column_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between columns (defaults to `gap`)."
+        },
+        "corner_radius": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "extra_large",
+                "extra_small",
+                "large",
+                "medium",
+                "none",
+                "small"
+              ]
+            }
+          ],
+          "description": "Pixels, or a shape token (`none` to `full`)."
+        },
+        "display": {
+          "enum": [
+            "flex",
+            "grid"
+          ],
+          "description": "`flex` (the default) or `grid`."
+        },
+        "elevation": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "level_0",
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5"
+              ]
+            }
+          ],
+          "description": "A shadow level, 0 to 5."
+        },
+        "flex_basis": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Its size along the main axis before it grows or shrinks."
+        },
+        "flex_direction": {
+          "enum": [
+            "horizontal",
+            "vertical"
+          ],
+          "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
+        },
+        "flex_grow": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How much of the spare room it takes, relative to its siblings."
+        },
+        "flex_shrink": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How much it gives up when there is too little room."
+        },
+        "flex_wrap": {
+          "enum": [
+            "no_wrap",
+            "wrap"
+          ],
+          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one."
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between its children."
+        },
+        "grid_auto_columns": {
+          "type": "string",
+          "description": "The size of columns the template doesn't name."
+        },
+        "grid_auto_flow": {
+          "enum": [
+            "row",
+            "column",
+            "row dense",
+            "column dense",
+            "dense"
+          ],
+          "description": "How grid children fill the cells."
+        },
+        "grid_auto_rows": {
+          "type": "string",
+          "description": "The size of rows the template doesn't name."
+        },
+        "grid_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid column it takes: `2`, or `1 / 3`."
+        },
+        "grid_row": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid row it takes: `2`, or `1 / 3`."
+        },
+        "grid_template_columns": {
+          "type": "string",
+          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`."
+        },
+        "grid_template_rows": {
+          "type": "string",
+          "description": "The grid's rows, as in CSS."
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+        },
+        "justify_content": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "stretch",
+            "space_between",
+            "space_around",
+            "space_evenly"
+          ],
+          "description": "Where its children sit along the layout axis."
+        },
+        "justify_items": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where grid children sit across their cell's width."
+        },
+        "justify_self": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where this node sits across its grid cell's width."
+        },
+        "margin": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space outside it: one number, or `{left, right, top, bottom}`."
+        },
+        "max_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most height it can take."
+        },
+        "max_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most width it can take."
+        },
+        "min_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least height it can take."
+        },
+        "min_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least width it can take."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "From 0 (clear) to 1 (opaque)."
+        },
+        "padding": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space inside it: one number, or `{left, right, top, bottom}`."
+        },
+        "position": {
+          "enum": [
+            "relative",
+            "absolute"
+          ],
+          "description": "`absolute` takes it out of the flow and places it at `x` and `y`."
+        },
+        "row_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between rows (defaults to `gap`)."
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the left."
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the top."
+        },
+        "z_index": {
+          "type": "integer",
+          "description": "Stacking order: higher is in front."
+        }
+      },
+      "additionalProperties": false
+    },
+    "zone_style": {
+      "type": "object",
+      "description": "How a node looks and lays out its children.",
+      "properties": {
+        "align_content": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "stretch",
+            "space_between",
+            "space_around",
+            "space_evenly"
+          ],
+          "description": "How wrapped rows, or grid tracks, are spaced."
+        },
+        "align_items": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where its children sit across the layout axis."
+        },
+        "align_self": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Overrides its parent's `align_items` for this node."
+        },
+        "aspect_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Width over height: gives the missing side from the one set."
+        },
+        "background": {
+          "$ref": "#/definitions/color",
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour."
+        },
+        "border_color": {
+          "$ref": "#/definitions/color",
+          "description": "The colour of its border."
+        },
+        "border_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The width of its border, in pixels."
+        },
+        "clip_children": {
+          "type": "boolean",
+          "description": "Whether children are cut off at its edge."
+        },
+        "column_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between columns (defaults to `gap`)."
+        },
+        "corner_radius": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "extra_large",
+                "extra_small",
+                "large",
+                "medium",
+                "none",
+                "small"
+              ]
+            }
+          ],
+          "description": "Pixels, or a shape token (`none` to `full`)."
+        },
+        "display": {
+          "enum": [
+            "flex",
+            "grid"
+          ],
+          "description": "`flex` (the default) or `grid`."
+        },
+        "elevation": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "level_0",
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5"
+              ]
+            }
+          ],
+          "description": "A shadow level, 0 to 5."
+        },
+        "flex_basis": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Its size along the main axis before it grows or shrinks."
+        },
+        "flex_direction": {
+          "enum": [
+            "horizontal",
+            "vertical"
+          ],
+          "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
+        },
+        "flex_grow": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How much of the spare room it takes, relative to its siblings."
+        },
+        "flex_shrink": {
+          "type": "number",
+          "minimum": 0,
+          "description": "How much it gives up when there is too little room."
+        },
+        "flex_wrap": {
+          "enum": [
+            "no_wrap",
+            "wrap"
+          ],
+          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one."
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between its children."
+        },
+        "grid_auto_columns": {
+          "type": "string",
+          "description": "The size of columns the template doesn't name."
+        },
+        "grid_auto_flow": {
+          "enum": [
+            "row",
+            "column",
+            "row dense",
+            "column dense",
+            "dense"
+          ],
+          "description": "How grid children fill the cells."
+        },
+        "grid_auto_rows": {
+          "type": "string",
+          "description": "The size of rows the template doesn't name."
+        },
+        "grid_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid column it takes: `2`, or `1 / 3`."
+        },
+        "grid_row": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid row it takes: `2`, or `1 / 3`."
+        },
+        "grid_template_columns": {
+          "type": "string",
+          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`."
+        },
+        "grid_template_rows": {
+          "type": "string",
+          "description": "The grid's rows, as in CSS."
+        },
+        "justify_content": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "stretch",
+            "space_between",
+            "space_around",
+            "space_evenly"
+          ],
+          "description": "Where its children sit along the layout axis."
+        },
+        "justify_items": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where grid children sit across their cell's width."
+        },
+        "justify_self": {
+          "enum": [
+            "start",
+            "end",
+            "flex_start",
+            "flex_end",
+            "center",
+            "baseline",
+            "stretch"
+          ],
+          "description": "Where this node sits across its grid cell's width."
+        },
+        "margin": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space outside it: one number, or `{left, right, top, bottom}`."
+        },
+        "max_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most height it can take."
+        },
+        "max_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most width it can take."
+        },
+        "min_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least height it can take."
+        },
+        "min_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least width it can take."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "From 0 (clear) to 1 (opaque)."
+        },
+        "padding": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space inside it: one number, or `{left, right, top, bottom}`."
+        },
+        "position": {
+          "enum": [
+            "relative",
+            "absolute"
+          ],
+          "description": "`absolute` takes it out of the flow and places it at `x` and `y`."
+        },
+        "row_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between rows (defaults to `gap`)."
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the left."
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the top."
+        },
+        "z_index": {
+          "type": "integer",
+          "description": "Stacking order: higher is in front."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "style": {
+      "$ref": "#/definitions/style",
+      "description": "The whole shell's style."
+    },
     "top_bar": {
       "type": "object",
       "required": [
@@ -60,6 +990,10 @@
             ],
             "description": "An icon name."
           }
+        },
+        "style": {
+          "$ref": "#/definitions/style",
+          "description": "A node's `style:`: `height`, `background`, `padding`, ..."
         }
       }
     },
@@ -112,6 +1046,10 @@
         "on_navigate": {
           "type": "string",
           "description": "A ViewModel method to call instead of showing the screen."
+        },
+        "style": {
+          "$ref": "#/definitions/style",
+          "description": "A node's `style:`: `height`, `background`, `padding`, ..."
         }
       }
     },
@@ -125,28 +1063,131 @@
       "properties": {
         "text": {
           "type": "string"
+        },
+        "style": {
+          "$ref": "#/definitions/style",
+          "description": "A node's `style:`: `height`, `background`, `padding`, ..."
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Where the screens show.",
+      "properties": {
+        "style": {
+          "$ref": "#/definitions/style",
+          "description": "A node's `style:`: `height`, `background`, `padding`, ..."
         }
       }
     },
     "zones": {
       "type": "object",
-      "description": "Docked areas around the content, with their sizes in pixels.",
+      "description": "Docked areas around the content: a size in pixels, or `{size, style}`.",
       "properties": {
         "left": {
-          "type": "number",
-          "exclusiveMinimum": 0
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "The zone's size in pixels."
+            },
+            {
+              "type": "object",
+              "required": [
+                "size"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "size": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "The zone's size in pixels."
+                },
+                "style": {
+                  "$ref": "#/definitions/zone_style"
+                }
+              }
+            }
+          ]
         },
         "right": {
-          "type": "number",
-          "exclusiveMinimum": 0
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "The zone's size in pixels."
+            },
+            {
+              "type": "object",
+              "required": [
+                "size"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "size": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "The zone's size in pixels."
+                },
+                "style": {
+                  "$ref": "#/definitions/zone_style"
+                }
+              }
+            }
+          ]
         },
         "top": {
-          "type": "number",
-          "exclusiveMinimum": 0
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "The zone's size in pixels."
+            },
+            {
+              "type": "object",
+              "required": [
+                "size"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "size": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "The zone's size in pixels."
+                },
+                "style": {
+                  "$ref": "#/definitions/zone_style"
+                }
+              }
+            }
+          ]
         },
         "bottom": {
-          "type": "number",
-          "exclusiveMinimum": 0
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "The zone's size in pixels."
+            },
+            {
+              "type": "object",
+              "required": [
+                "size"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "size": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "The zone's size in pixels."
+                },
+                "style": {
+                  "$ref": "#/definitions/zone_style"
+                }
+              }
+            }
+          ]
         }
       },
       "additionalProperties": false

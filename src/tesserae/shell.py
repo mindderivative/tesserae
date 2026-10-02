@@ -114,11 +114,19 @@ class AppShell:
     zones -- `zones={side: size}`, from left, right, top and bottom --
     sit around `content`, where `App.use_shell` shows screens; with
     `center=True`, `content` is the dock's center zone and screens are its
-    tabs. `size`, `set_size`, `layout`, `restore`, `set_theme`."""
+    tabs. `size`, `set_size`, `layout`, `restore`, `set_theme`.
+
+    `styles` (0.3.3) styles the shell's own parts, by name: `frame` (all of
+    it), `content` (where screens show), and each zone's side. A part's
+    style is a node's `style:` (`background`, `padding`, `gap`,
+    `corner_radius`, ...), a theme role in it follows the theme, and
+    `set_style(part, style)` changes it later. The bars take `style=`
+    themselves (`top_app_bar(..., style=)`); a zone's size is its `size`,
+    so a zone's style can't set a width or height."""
 
     def __init__(self, window: Any, *, top_bar: Any = None, navigation: Any = None, status_bar: Any = None,
                  zones: Optional[dict[str, float]] = None, dock: Optional[Dock] = None, center: bool = False,
-                 theme: Optional[Theme] = None) -> None:
+                 theme: Optional[Theme] = None, styles: Optional[dict[str, dict[str, Any]]] = None) -> None:
         zones = dict(zones or {})
         unknown = sorted(set(zones) - set(_EDGE))
         if unknown:
@@ -160,6 +168,12 @@ class AppShell:
         self.centre.add_child(self.content)
         self._place("bottom", self.centre)
         window.root.add_child(self.node)
+        self._styles: dict[str, dict[str, Any]] = {}
+        self._style_base: dict[str, dict[str, Any]] = {}  # the shell's own value of each property a style has set
+        self._style_set: dict[str, set[str]] = {}
+        for part, part_style in (styles or {}).items():
+            self._check_style_part(part, part_style)
+            self._styles[part] = dict(part_style)
         self._paint()
 
     def _place(self, side: str, parent: Any) -> None:
@@ -265,14 +279,67 @@ class AppShell:
             self.dock.set_theme(theme)
         self._paint()
 
+    def _scheme(self) -> dict[str, Any]:
+        return self.theme.roles if self.theme.roles is not None else tokens.baseline_scheme()
+
     def _color(self, role: str) -> tuple[int, int, int, int]:
-        scheme = self.theme.roles if self.theme.roles is not None else tokens.baseline_scheme()
-        return scheme[role]
+        return self._scheme()[role]
 
     def _paint(self) -> None:
         self.node.set(fill=self._color("surface"))
         for handle in self._handles.values():
             handle.paint()
+        for part in {*self._styles, *self._style_set}:  # last, so a style's colours win over the theme's
+            self._apply_style(part)
+
+    # -- styles (0.3.3, #81) ---------------------------------------------------
+
+    def _style_node(self, part: str) -> Any:
+        return {"frame": self.node, "content": self.content}.get(part) or self._zone_nodes[part]
+
+    def _check_style_part(self, part: str, style: Any) -> None:
+        if part not in ("frame", "content", *self._zone_nodes):
+            raise ValueError(f"an app shell's parts to style are frame, content and its zones "
+                             f"({', '.join(self._zone_nodes) or 'none here'}), got {part!r}")
+        if not isinstance(style, dict):
+            raise ValueError(f"the style of {part!r} must be a mapping, got {type(style).__name__}")
+        if part in self._zone_nodes and ({"width", "height"} & set(style)):
+            raise ValueError(f"the style of the {part} zone can't set a width or height: its size is `zones: {{{part}: ...}}`")
+
+    def set_style(self, part: str, style: Optional[dict[str, Any]]) -> None:
+        """Styles `part` (`frame`, `content`, or a zone's side) with a node's `style:`; `None` or `{}` puts back
+        what the shell itself had. Raises `ValueError` for a style field or value that doesn't fit."""
+        if style is not None and not isinstance(style, dict):
+            raise ValueError(f"the style of {part!r} must be a mapping, got {type(style).__name__}")
+        style = dict(style or {})
+        self._check_style_part(part, style)
+        before = self._styles.get(part)
+        self._styles[part] = style
+        try:
+            self._apply_style(part)
+        except Exception:
+            self._styles[part] = before if before is not None else {}
+            raise
+
+    def _apply_style(self, part: str) -> None:
+        from tesserae.spec.build import SpecBuildError, style_props
+
+        node = self._style_node(part)
+        try:
+            props = style_props(self._styles.get(part) or {}, self._scheme(), f"the shell's {part}")
+        except SpecBuildError as exc:
+            raise ValueError(str(exc)) from None
+        base = self._style_base.setdefault(part, {})
+        for prop in props:
+            if prop not in base:
+                base[prop] = node.get(prop)  # what the shell had, to put back
+        for prop in self._style_set.get(part, set()) - set(props):
+            node.set(**{prop: base[prop]})
+        if props:
+            node.set(**props)
+        if part in self._zone_nodes and "fill" in props:  # a zone's tab strip is part of its background
+            self.dock._zones[part].strip.set(fill=props["fill"])
+        self._style_set[part] = set(props)
 
 
 def _take(part: Any) -> Any:

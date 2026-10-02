@@ -142,3 +142,68 @@ def test_a_mistake_is_named_by_file_and_key(text, message):
 def test_center_panels_are_allowed_when_center_is_on():
     spec = parse_shell_spec({"center": True, "panels": {"center": ["Files"]}})
     assert spec["panels"] == {"center": ["Files"]} and spec["zones"] == {}
+
+
+STYLED = """
+style: {padding: 6}
+top_bar: {title: Studio, leading_icon: menu, trailing_icons: [settings], style: {height: 40, background: primary_container}}
+navigation:
+  items:
+    - {screen: Home, icon: home}
+  style: {width: 96}
+status_bar: {text: Ready, style: {height: 32, corner_radius: 8}}
+zones: {left: {size: 180, style: {background: tertiary_container}}, right: 200}
+content: {style: {background: surface_container_low, corner_radius: 12}}
+"""
+
+
+def test_every_part_of_a_shell_file_takes_a_style(tmp_path):
+    """0.3.3 (#81): the file itself, the bars, the content area and each zone."""
+    app = App(width=900, height=500, theme_seed=SEED, dark=False)
+    shell = app.load_shell(_file(tmp_path, STYLED))
+    app.window.advance(16)
+    theme = Theme.resolve(theme_seed=SEED, dark=False)
+    assert shell.top_bar.node.get("layout_height") == 40.0  # a slimmer top bar ...
+    assert shell.top_bar.part("leading").get("layout_height") == 40.0  # ... with icon buttons that fit it
+    assert shell.top_bar.node.get("fill") == theme.role("primary_container")
+    assert shell.navigation.node.get("layout_width") == 96.0
+    assert shell.status_bar.node.get("layout_height") == 32.0 and shell.status_bar.node.get("corner_radius") == 8.0
+    assert shell.node.get("padding_left") == 6.0  # the frame
+    assert shell.content.get("corner_radius") == 12.0 and shell.content.get("fill") == theme.role("surface_container_low")
+    assert shell.size("left") == 180 and shell.size("right") == 200  # `left: {size, style}` and `right: 200`
+    assert shell._zone_nodes["left"].get("fill") == theme.role("tertiary_container")
+    app.set_dark(True)  # a role in a style follows the theme
+    dark = Theme.resolve(theme_seed=SEED, dark=True)
+    assert shell.top_bar.node.get("fill") == dark.role("primary_container")
+    assert shell._zone_nodes["left"].get("fill") == dark.role("tertiary_container")
+    assert shell.content.get("fill") == dark.role("surface_container_low")
+
+
+def test_a_shell_file_with_no_styles_is_as_it_was(tmp_path):
+    spec = parse_shell_spec(yaml.safe_load(STUDIO), "Studio_Shell.yaml")
+    assert spec["styles"] == {} and spec["top_bar"]["style"] is None
+
+
+@pytest.mark.parametrize("text, message", [
+    ("top_bar: {title: S, style: {hieght: 40}}", r"top_bar.style.hieght: unknown style field -- did you mean 'height'\?"),
+    ("top_bar: {title: S, style: {foreground: red}}", "top_bar.style.foreground: a bar or area has no text"),
+    ("top_bar: {title: S, style: 40}", "top_bar.style: a mapping of style fields"),
+    ("navigation: {items: [{screen: Home, icon: home}], style: {widht: 90}}", r"navigation.style.widht: unknown style field -- did you mean 'width'\?"),
+    ("status_bar: {text: S, style: {colour: red}}", "status_bar.style.colour: unknown style field"),
+    ("style: 5", "style: a mapping of style fields"),
+    ("style: {paddin: 4}", r"style.paddin: unknown style field -- did you mean 'padding'\?"),
+    ("content: {color: red}", "content.color: unknown key"),
+    ("content: {style: {backgrund: red}}", "content.style.backgrund: unknown style field"),
+    ("zones: {left: {size: 100, sizee: 3}}", "zones.left.sizee: unknown key"),
+    ("zones: {left: {style: {gap: 2}}}", "zones.left: a size in pixels"),
+    ("zones: {left: {size: 100, style: {width: 5}}}", "zones.left.style: a zone's size is its `size:`"),
+])
+def test_a_mistake_in_a_style_is_named_by_file_and_key(text, message):
+    with pytest.raises(ShellSpecError, match=f"Studio_Shell.yaml: {message}"):
+        parse_shell_spec(yaml.safe_load(text), "Studio_Shell.yaml")
+
+
+def test_a_bad_style_value_is_an_error_naming_the_part(tmp_path):
+    app = App(width=900, height=500, theme_seed=SEED)
+    with pytest.raises(ValueError, match="the shell's content"):
+        app.load_shell(_file(tmp_path, "content: {style: {background: notacolor}}"))
