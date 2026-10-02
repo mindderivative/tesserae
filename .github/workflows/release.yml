@@ -60,7 +60,7 @@ jobs:
       # user's `pip install tesserae-ui` would get them. The installed wheel
       # is tested, not the checkout.
       - name: Install the built wheel
-        run: pip install tesserae/dist/*.whl pytest
+        run: pip install tesserae/dist/*.whl pytest jsonschema  # jsonschema: tests/test_yaml_schema.py (0.3.2)
 
       # tre's source, only for the real font file tests/test_themes.py reads.
       - uses: actions/checkout@v4
