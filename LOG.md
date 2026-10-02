@@ -2153,3 +2153,51 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.3.2 released (#78, #79)
+
+User: "approved, do all of #78 and push it with 0.3.1 release", then "sorry
+0.3.2 release" (0.3.1 was already on PyPI, and PyPI never lets a version be
+replaced, so it is 0.3.2), then #79 added to it, and "approved, check PyPI".
+
+- #78: `tre` 0.5.1 is the floor (`tesserae-engine>=0.5.1,<0.6`; CI and the
+  release workflow check out `tre` v0.5.1) and `run(keepalive=)` is off by
+  default, now that `tre` lets other Python threads run in an idle window.
+  `main`'s CI had gone red on macOS and Windows the day `tre` published
+  0.5.1: the two tests that held an idle window with no keepalive were
+  written to fail once `tre` was fixed, and CI installs the newest allowed
+  engine. They are gone; `test_keepalive_idle.py` checks that a thread and
+  a hot-reload edit reach an idle window by default, and fails on 0.5.0.1.
+- #79, the user's issue: YAML schemas for Red Hat's YAML language server.
+  Four draft-07 files (a view, a shell, a component fragment, a theme or
+  stylesheet), written by `tools/generate_yaml_schema.py` from Tesserae's own
+  code and from `tre`'s error messages (which list the valid layout values).
+  They ship in the wheel, are served at
+  `https://mindderivative.github.io/tesserae/schema/`, and `tesserae schema
+  [--settings]` finds them and prints the setting. Checked with a generic
+  validator (every YAML file in the repository, and 15 mistakes rejected)
+  and with Red Hat's real `yaml-language-server` 1.24.0, driven over the
+  Language Server Protocol (`tools/check_schema_in_language_server.py`): all
+  97 files open clean, completions and diagnostics as intended. Both ways
+  of checking found things the other couldn't: the fragment format's
+  `params` defaults, `repeat` parameters and `{if, then, else}` values (22
+  of 77 fragments failed at first), and `kind:` completing only `TitleBar`.
+  Not run inside VS Code itself, only the server it uses.
+- The first release run failed and published nothing: the release
+  workflow's "Test the built wheel" installs the wheel and `pytest`, not the
+  dev extras, so the new tests couldn't import `jsonschema`. It installs
+  `jsonschema` now, and the pre-release and its tag were recreated on the
+  fixed commit (run 36956069222).
+- `tre` asked, through its own session, for a check of its 0.5.1 build and
+  then of its fix for the idle-window problem (`tre` #92). Both were built
+  into a scratch folder (never into `tre`'s tree) and reported: nothing in
+  Tesserae relied on `padding` or paint properties being ignored.
+- Checked from PyPI in a fresh Python 3.14 venv: `tesserae-ui[build]==0.3.2`
+  brought `tesserae-engine` 0.5.1 (requirement `>=0.5.1,<0.6`); the four
+  schemas are in the install and byte-identical to the docs site's; a
+  scaffolded app's YAML validates against the installed schemas; `run()`'s
+  `keepalive` defaults to `False`; the user's hot-reload scenario (a root's
+  `width` from `auto` to `100%` and back, on an idle window, no keepalive)
+  applied both edits; the eight Getting Started programs ran; and
+  `tesserae new --shell --custom-title-bar` built and `--check` drew 30
+  frames. The simple index lagged by a few minutes.
+
