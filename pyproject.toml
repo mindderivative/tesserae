@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tesserae-ui"  # on PyPI; `tesserae` there is an unrelated project. The import name stays `tesserae`.
-version = "0.3.1"
+version = "0.3.2.dev0"
 description = "A pyCopper-style declarative Python GUI framework, powered by the Tesserae Render Engine (tre)."
 readme = "README.md"
 license = "MIT"
@@ -27,7 +27,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "tesserae-engine>=0.5.0.1,<0.6",  # tre, on PyPI (still `import tre`); PyPI's own `tre` is an unrelated regex library. 0.5.0.1 fixes a click in a text field panicking (tre#51). <0.6: a new tre line is a new Tesserae line
+    "tesserae-engine>=0.5.1,<0.6",  # tre, on PyPI (still `import tre`); PyPI's own `tre` is an unrelated regex library. 0.5.0.1 fixed a click in a text field panicking (tre#51), and 0.5.1 lets other Python threads run while a window is idle (tre#92). <0.6: a new tre line is a new Tesserae line
     "pyyaml>=6.0",
     "Pillow>=10.0",
     "watchfiles>=1.0",

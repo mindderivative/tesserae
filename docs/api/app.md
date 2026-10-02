@@ -32,7 +32,7 @@ no theme: nothing `tre` draws reads one.
 
 ## The window
 
-*0.3.0, on `tre` 0.5.0.1.* Each option is also a property, and can change
+*0.3.0, on `tre` 0.5.x.* Each option is also a property, and can change
 while the app runs. The [Custom Title Bars](../guide/custom-title-bars.md)
 guide and [The window](../guide/apps-and-screens.md#the-window) explain
 them; here is the reference.
@@ -265,26 +265,25 @@ place where it can be; a structural one is logged as needing a restart
 
 ### `keepalive`
 
-*0.3.1.* `tre`'s window stops other Python threads from running while it
-sits idle waiting for input, so a thread of yours (a hot-reload watcher,
-say) can't hand work to the loop with `thread_handle().call_soon` until
-something wakes the window. `keepalive` keeps the window ticking:
+*0.3.1; off by default since 0.3.2.* Keeps the window ticking about 50
+times a second, for code that wants the loop woken regularly:
 
 | `keepalive` | |
 | --- | --- |
-| `None` (the default) | follows `hot_reload`: on with it, off without; and off for a run bounded by `max_frames`, which draws continuously and never idles |
-| `True` | on, ticking every 0.02 s (`tesserae.app.KEEPALIVE_INTERVAL`), whatever `hot_reload` is |
-| a number | on, ticking every that many seconds |
-| `False` | off, even with `hot_reload=True` |
+| `False` (the default; `None` is accepted as the same) | no ticking |
+| `True` | ticking every 0.02 s (`tesserae.app.KEEPALIVE_INTERVAL`) |
+| a number | ticking every that many seconds |
 
-It is for anything that needs threads to run in an idle window, so an
-IDE, say, can use it without hot reload. Each tick sleeps on the loop
-thread (that sleep is what lets other threads run), so input can wait up
-to a tick, and an idle window costs about half a percent of one core at
-the default. Anything else is a `ValueError`. It stops when `run()`
-returns, and a built app (`tesserae build`) has no hot reload and so no
-keepalive unless you ask for one. This works around a limit in `tre`; the
-default will become off once `tre` lets threads run while idle.
+Anything else is a `ValueError`. Each tick sleeps on the loop thread, so
+input can wait up to a tick, and an idle window costs about half a
+percent of one core at the default. It stops when `run()` returns.
+
+**It is no longer needed for hot reload or for threads.** Before `tre`
+0.5.1 its window stopped other Python threads from running while it sat
+idle, so a hot-reload watcher couldn't hand a reload over until something
+woke the window, and 0.3.1 ticked by default with `hot_reload=True`
+(`tre` #92). Tesserae 0.3.2 requires `tre` 0.5.1, which lets threads run
+while the window waits, so the default is off.
 
 ## `thread_handle`
 
@@ -295,7 +294,9 @@ the app itself may only be used from the thread that created them; a
 background thread calls `handle.call_soon(fn)` instead, and `fn` (no
 arguments) runs on the event-loop thread at the next frame, waking the
 loop if it's idle. Callables run in the order they were queued, and one
-queued before `run()` runs on the first frame.
+queued before `run()` runs on the first frame. A thread that is itself
+busy running Python can delay a wake-up by up to about 5 ms (CPython's GIL
+switch interval), since the loop takes the GIL back when it wakes.
 
 ```python
 handle = app.thread_handle()

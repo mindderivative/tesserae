@@ -500,7 +500,7 @@ it.
 
 ## Custom windowing (0.3.0)
 
-On `tre` 0.5.0.1. `App(decorations=False)` takes the OS's title bar away
+On `tre` 0.5. `App(decorations=False)` takes the OS's title bar away
 and the app draws its own (design: `docs/design/custom-windowing.md`;
 guide: `docs/guide/custom-title-bars.md`).
 

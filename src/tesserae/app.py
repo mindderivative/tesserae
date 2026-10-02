@@ -44,22 +44,21 @@ from tesserae.spec.watch import ComponentWatcher, FileWatcher
 KEEPALIVE_INTERVAL = 0.02
 
 
-def _keepalive_interval(keepalive: bool | float | None, hot_reload: bool) -> float | None:
-    """Seconds between keepalive ticks for `run(keepalive=, hot_reload=)`, or
-    `None` for no keepalive (0.3.1, #77). `None` follows `hot_reload`: while
-    `tre`'s idle window starves other Python threads, a hot-reload watcher
-    can't hand a reload over without it. (`run` passes `hot_reload` as false
-    for a run bounded by `max_frames`, which never idles.) When `tre` fixes
-    that, make the default here `False`."""
-    if keepalive is None:
-        keepalive = hot_reload
+def _keepalive_interval(keepalive: bool | float | None) -> float | None:
+    """Seconds between keepalive ticks for `run(keepalive=)`, or `None` for
+    none. Off by default since 0.3.2: before `tre` 0.5.1 its idle window
+    starved other Python threads (so a hot-reload watcher couldn't hand a
+    reload over without a tick: 0.3.1 ticked by default), and Tesserae now
+    requires a `tre` that doesn't. `None` is accepted as `False`, for code
+    that passed 0.3.1's "follow hot_reload"."""
+    if keepalive is None or keepalive is False:
+        return None
     if keepalive is True:
         return KEEPALIVE_INTERVAL
-    if keepalive is False:
-        return None
     if isinstance(keepalive, (int, float)) and keepalive > 0:
         return float(keepalive)
-    raise ValueError(f"keepalive must be True, False, None or a positive number of seconds, got {keepalive!r}")
+    raise ValueError(f"keepalive must be True, False or a positive number of seconds, got {keepalive!r}")
+
 
 @dataclass
 class _Route:
@@ -1138,7 +1137,7 @@ class App:
         logger.info("re-themed the app from {}", files)
 
     def run(self, max_frames: int | None = None, *, hot_reload: bool = False,
-            keepalive: bool | float | None = None) -> None:
+            keepalive: bool | float = False) -> None:
         """The one blocking call -- opens the real `Window` and runs `tre`'s
         own real render loop, showing the screen `show()` made current and
         any nodes added to `app.window.root` by calls. Since 0.3.1 an app
@@ -1174,16 +1173,14 @@ class App:
         own `stylesheet=` file (re-applied to the screens built with it).
 
         `keepalive` (0.3.1, #77) keeps the window ticking about 50 times a
-        second (a number is the seconds between ticks), because `tre`'s
-        window stops other Python threads from running while it sits idle:
-        a hot-reload watcher can't hand a reload over, and nor can any
-        thread of yours that calls `thread_handle().call_soon`. `None`, the
-        default, follows `hot_reload`: on with it, off without, and off for a
-        run bounded by `max_frames`, which draws continuously and never idles
-        (each tick would only slow it). `True`, `False` and a number choose,
-        with or without hot reload. Each tick sleeps on the
-        loop thread, so input can wait up to a tick, and an idle window
-        costs about half a percent of one core.
+        second (a number is the seconds between ticks), for code that wants
+        the loop woken regularly. It is off by default since 0.3.2:
+        `tre` 0.5.1 lets other Python threads run while the window sits
+        idle, so a hot-reload watcher, or any thread calling
+        `thread_handle().call_soon`, needs no tick (0.3.1 ticked by default
+        with `hot_reload`, for `tre` 0.5.0.x). Each tick sleeps on the loop
+        thread, so input can wait up to a tick, and an idle window costs
+        about half a percent of one core.
 
         M77: `TESSERAE_MAX_FRAMES=n` in the environment stops a run with no
         `max_frames` after `n` frames -- how `tesserae build --check` and CI
@@ -1205,8 +1202,7 @@ class App:
         if hot_reload and getattr(sys, "frozen", False):
             logger.info("hot reload is off in a built app: there are no source files to watch")
             hot_reload = False
-        # A run bounded by `max_frames` draws frames continuously and never idles, so the default doesn't tick.
-        interval = _keepalive_interval(keepalive, hot_reload and max_frames is None)
+        interval = _keepalive_interval(keepalive)
         if self._tre_app is None:
             self._tre_app = _TreApp()
         tre_app = self._tre_app

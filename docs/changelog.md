@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.3.2
+
+`tre` 0.5.1, and the work-around for the bug it fixed is off by default
+([#78](https://github.com/mindderivative/tesserae/issues/78)).
+
+### Requirements
+
+- **`tre` 0.5.1 or newer, below 0.6** (0.3.1 needed 0.5.0.1). 0.5.1 lets
+  other Python threads run while a window sits idle (`tre`
+  [#92](https://github.com/mindderivative/tre/issues/92)), the cause of the
+  hot-reload stall 0.3.1 worked around. It also adds `tre.Shader` and
+  paints `fill`, borders and `corner_radius` on more node kinds than before;
+  Tesserae sets none of those on a kind that used to ignore them, so
+  nothing in its views changes.
+
+### Changed
+
+- **`run(keepalive=)` is off by default**, where 0.3.1 turned it on with
+  `hot_reload=True`. A hot-reload watcher, or any thread calling
+  `thread_handle().call_soon`, now reaches an idle window without a tick.
+  `True` and a number still tick, for code that wants the loop woken
+  regularly; `None` is accepted as `False`. A thread busy running Python
+  can delay a wake-up by up to about 5 ms (the GIL's switch interval).
+
+### Tests
+
+- The two tests that held an idle window with no keepalive, written to
+  fail once `tre` was fixed, are gone; `test_keepalive_idle.py` now checks
+  that threads and hot reload reach an idle window with the default.
+
 ## 0.3.1
 
 Things the new [Getting Started](getting-started.md) walk-through ran

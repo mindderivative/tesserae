@@ -74,7 +74,7 @@ certificates, and the rest, is in [Releasing Your App](https://mindderivative.gi
 
 ## Install (development)
 
-Tesserae needs **`tre` 0.5.0.1 or newer, below 0.6**, which is on PyPI as
+Tesserae needs **`tre` 0.5.1 or newer, below 0.6**, which is on PyPI as
 [`tesserae-engine`](https://pypi.org/project/tesserae-engine/) (still
 `import tre`). Installing Tesserae installs it:
 
