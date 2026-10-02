@@ -2153,6 +2153,28 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.3.3 released (#80, #81, #82)
+
+User: the three findings in Documents/Issues.md, then "approved, do #80 and
+#82 as 0.3.3, but all shell elements should have `style:`", "approved, push
+and release it, promote 0.3.2" and "approved, check PyPI".
+
+- #80: a shell's top bar and status bar shrank in a short window (`tre`'s
+  default `flex_shrink` is 1). They are `flex_shrink=0` at the widget, so
+  code, shell files and reload swaps are all covered. The navigation rail
+  never shrank (I had said it did, from one item; the user corrected me).
+- #81: `style:` on every part of a shell (the shell, `top_bar`, `navigation`,
+  `status_bar`, `content`, each zone as `{size, style}`), in a file and in
+  code. Hot reload applies a changed style and restores the shell's own
+  values when one is removed. A top bar's icon buttons fit a `height` under
+  48. The shell schema knows them.
+- #82: theme roles (and `kind: TitleBar`) work with no `theme_seed`, from the
+  baseline palette, with a did-you-mean hint on a misspelt role.
+- Released: 2971 tests passed, strict docs clean, CI green on `0.3.3` and
+  `main`. `v0.3.3` is a pre-release on GitHub; `v0.3.2` was promoted to
+  Latest. PyPI had `tesserae-ui` 0.3.3 after a retry (the index lags), and
+  a fresh venv installs it with `tesserae-engine` 0.5.1.
+
 ## Tesserae 0.3.2 released (#78, #79)
 
 User: "approved, do all of #78 and push it with 0.3.1 release", then "sorry
