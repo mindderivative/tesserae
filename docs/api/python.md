@@ -363,7 +363,7 @@ The scheme a view resolves roles against, by `tre`'s `View` rules: the seed is `
 shape(name: str) -> Optional[float]
 ```
 
-The corner radius of the MD3 shape token `name` (`"medium"`, `"full"`, ...), or `None` if it isn't one.
+The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ...), or `None` if it isn't one.
 
 ### `type_style`
 
