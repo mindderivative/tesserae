@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tesserae-ui"  # on PyPI; `tesserae` there is an unrelated project. The import name stays `tesserae`.
-version = "0.3.2.dev0"
+version = "0.3.2"
 description = "A pyCopper-style declarative Python GUI framework, powered by the Tesserae Render Engine (tre)."
 readme = "README.md"
 license = "MIT"

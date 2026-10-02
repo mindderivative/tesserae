@@ -2,7 +2,8 @@
 
 ## 0.3.2
 
-`tre` 0.5.1, and the work-around for the bug it fixed is off by default
+YAML schemas for editors ([#79](https://github.com/mindderivative/tesserae/issues/79)),
+`tre` 0.5.1, and the work-around for the bug it fixed off by default
 ([#78](https://github.com/mindderivative/tesserae/issues/78)).
 
 ### Requirements
