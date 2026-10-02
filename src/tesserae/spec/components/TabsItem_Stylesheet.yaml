@@ -1,0 +1,55 @@
+# TabsItem: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height:
+        if: "{{ icon }}"
+        then: 64
+        else: 48
+      background: surface
+      flex_direction: vertical
+      align_items: center
+      justify_content: center
+  - id: tab
+    style:
+      height:
+        if: "{{ icon }}"
+        then: 64
+        else: 48
+      flex_direction: vertical
+      align_items: stretch
+  - id: top
+    style:
+      height: 3
+      background: transparent
+  - id: content
+    style:
+      flex_grow: 1
+      flex_direction: vertical
+      align_items: center
+      justify_content: center
+      gap: 2
+  - id: icon
+    style:
+      width: 24
+      height: 24
+      foreground:
+        if: "{{ selected }}"
+        then: primary
+        else: on_surface_variant
+  - id: label
+    style:
+      foreground:
+        if: "{{ selected }}"
+        then: primary
+        else: on_surface_variant
+  - id: indicator
+    style:
+      height: 3
+      corner_radius: 3
+      background:
+        if: "{{ selected }}"
+        then: primary
+        else: transparent

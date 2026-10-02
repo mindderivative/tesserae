@@ -1,21 +1,15 @@
-# `add_fab(variant="primary")`'s declarative counterpart -- see
-# `FabSurface_Component.yaml` for the shared real design. Colors match
-# `resolve_fab_colors`'s "primary" exactly: container=primary_container,
-# icon glyph=on_primary_container.
-params: [icon, size, corner_radius, {fab_size: default}]  # default, small or large: its theme `components:` entry (M57)
+# A floating action button in the primary colour: the screen's main action.
+# Structure only: its look is in FabPrimary_Stylesheet.yaml.
+params:
+  - icon
+  - size
+  - corner_radius
+  - {fab_size: default}
 id: root
 component_of: "fab.{{ fab_size }}"
 kind: Rect
-style:
-  width: "{{ size }}"
-  height: "{{ size }}"
-  align_items: center
-  justify_content: center
-  background: primary_container
-  corner_radius: "{{ corner_radius }}"
-  elevation: level_3
 children:
   - id: icon
     kind: Icon
-    icon: {name: "{{ icon }}"}
-    style: {width: 24, height: 24, foreground: on_primary_container}
+    icon:
+      name: "{{ icon }}"

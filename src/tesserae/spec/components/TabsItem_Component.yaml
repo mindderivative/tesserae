@@ -1,48 +1,28 @@
-# One of MD3's primary tabs (M56, #9): `tesserae.widgets.tabs`' item, with
-# its selected state declared per item (`selected: true`). A 48 px item
-# (64 with an icon); a `title_small` label, `primary` when selected and
-# `on_surface_variant` otherwise; a 3 px `primary` indicator at the bottom
-# of the selected tab, spanning its label. Repeat it with `Tabs_Component.yaml`, or
-# yourself.
-params: [label, width, {icon: null}, {selected: false}]
+# One tab: a label, and an icon if you want one, with an indicator when selected.
+# Structure only: its look is in TabsItem_Stylesheet.yaml.
+params:
+  - label
+  - width
+  - {icon: null}
+  - {selected: false}
 id: root
 kind: Rect
-style:
-  width: "{{ width }}"
-  height: {if: "{{ icon }}", then: 64, else: 48}
-  background: surface
-  flex_direction: vertical
-  align_items: center
-  justify_content: center
 children:
-  # a column as wide as the label: a 3 px spacer, the content centred, and
-  # the 3 px indicator, so it spans the label and the label stays centred
   - id: tab
     kind: Container
-    style:
-      height: {if: "{{ icon }}", then: 64, else: 48}
-      flex_direction: vertical
-      align_items: stretch
     children:
-      - id: top
-        kind: Rect
-        style: {height: 3, background: transparent}
+      - {id: top, kind: Rect}
       - id: content
         kind: Container
-        style: {flex_grow: 1, flex_direction: vertical, align_items: center, justify_content: center, gap: 2}
         children:
           - id: icon
             when: "{{ icon }}"
             kind: Icon
-            icon: {name: "{{ icon }}"}
-            style: {width: 24, height: 24, foreground: {if: "{{ selected }}", then: primary, else: on_surface_variant}}
+            icon:
+              name: "{{ icon }}"
           - id: label
             kind: Text
-            text: {content: "{{ label }}", typography_role: title_small}
-            style: {foreground: {if: "{{ selected }}", then: primary, else: on_surface_variant}}
-      - id: indicator
-        kind: Rect
-        style:
-          height: 3
-          corner_radius: 3
-          background: {if: "{{ selected }}", then: primary, else: transparent}
+            text:
+              content: "{{ label }}"
+              typography_role: title_small
+      - {id: indicator, kind: Rect}

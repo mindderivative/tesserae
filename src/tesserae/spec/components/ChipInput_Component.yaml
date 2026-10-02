@@ -1,24 +1,11 @@
-# `add_chip(variant="input")`'s declarative counterpart -- see
-# `ChipAssist_Component.yaml` for the shared real design/scope
-# boundary. Colors match `resolve_chip_colors`'s "input" exactly --
-# identical resolved colors to unselected "filter"
-# (`ChipFilter_Component.yaml`), but a real, distinct MD3 variant name
-# in its own right, kept as its own fragment for that reason.
+# An input chip: a piece of information the user entered, such as a tag.
+# Structure only: its look is in ChipInput_Stylesheet.yaml.
 params: [label, width]
 id: root
 kind: Rect
-style:
-  width: "{{ width }}"
-  height: 32
-  align_items: center
-  padding: {left: 16, right: 16, top: 0, bottom: 0}
-  gap: 8
-  background: transparent
-  corner_radius: small
-  border_color: outline
-  border_width: 1.0
 children:
   - id: label
     kind: Text
-    text: {content: "{{ label }}", typography_role: label_large}
-    style: {foreground: on_surface_variant}
+    text:
+      content: "{{ label }}"
+      typography_role: label_large

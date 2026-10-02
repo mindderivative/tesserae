@@ -1,22 +1,10 @@
-# `add_icon_button(variant="filled")`'s declarative counterpart -- a
-# square Rect container with one centered Icon glyph. Reuses `resolve_
-# button_colors`'s own "filled" colors exactly (icon_button shares that
-# function with button, confirmed directly in window_factory.rs):
-# container=primary, icon glyph=on_primary. `corner_radius` is a
-# required param, same real reason `ButtonFilled_Component.yaml` states
-# (no arithmetic in `{{ }}` substitution, no MD3 "full/pill" token).
+# A filled icon button: a high-emphasis action shown as an icon.
+# Structure only: its look is in IconButtonFilled_Stylesheet.yaml.
 params: [icon, size, corner_radius]
 id: root
 kind: Rect
-style:
-  width: "{{ size }}"
-  height: "{{ size }}"
-  align_items: center
-  justify_content: center
-  background: primary
-  corner_radius: "{{ corner_radius }}"
 children:
   - id: icon
     kind: Icon
-    icon: {name: "{{ icon }}"}
-    style: {width: 24, height: 24, foreground: on_primary}
+    icon:
+      name: "{{ icon }}"

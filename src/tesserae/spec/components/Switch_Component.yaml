@@ -1,12 +1,6 @@
-# MD3's switch (Tesserae's `controls.Switch`, M40): `selected` is its
-# state; `width`/`height` its touch target (MD3's track is 52x32).
-# Named `selected`, never a bare `on`: PyYAML's default loader reads an
-# unquoted `on`/`off` as a YAML 1.1 boolean, so a `with:` key named `on`
-# never matched its placeholder (a real bug, fixed in M32).
+# A switch: a setting that is on or off, and takes effect at once.
+# Structure only: its look is in Switch_Stylesheet.yaml.
 params: [width, height, selected]
 id: root
 kind: Switch
 selected: "{{ selected }}"
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"

@@ -1,0 +1,14 @@
+# ButtonText: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: "{{ height }}"
+      align_items: center
+      justify_content: center
+      background: transparent
+      corner_radius: "{{ corner_radius }}"
+  - id: label
+    style:
+      foreground: primary

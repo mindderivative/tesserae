@@ -4,6 +4,25 @@
   "title": "Tesserae theme or stylesheet",
   "description": "A theme or stylesheet file: `styles:` rules, and for a theme also a `seed`, `dark`, `colors`, `typography` and `components`.",
   "definitions": {
+    "parameter": {
+      "type": "string",
+      "pattern": "^\\s*\\{\\{.*\\}\\}\\s*$",
+      "description": "A fragment parameter: filled in where the fragment is used."
+    },
+    "conditional": {
+      "type": "object",
+      "required": [
+        "if",
+        "then"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "if": {},
+        "then": {},
+        "else": {}
+      },
+      "description": "A value chosen by a parameter: `{if: \"{{ flag }}\", then: a, else: b}`."
+    },
     "color": {
       "anyOf": [
         {
@@ -70,109 +89,229 @@
       "description": "How a node looks and lays out its children.",
       "properties": {
         "align_content": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "stretch",
-            "space_between",
-            "space_around",
-            "space_evenly"
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex_start",
+                "flex_end",
+                "center",
+                "stretch",
+                "space_between",
+                "space_around",
+                "space_evenly"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "How wrapped rows, or grid tracks, are spaced."
         },
         "align_items": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "baseline",
-            "stretch"
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex_start",
+                "flex_end",
+                "center",
+                "baseline",
+                "stretch"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "Where its children sit across the layout axis."
         },
         "align_self": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "baseline",
-            "stretch"
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex_start",
+                "flex_end",
+                "center",
+                "baseline",
+                "stretch"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "Overrides its parent's `align_items` for this node."
         },
         "aspect_ratio": {
-          "type": "number",
-          "exclusiveMinimum": 0,
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Width over height: gives the missing side from the one set."
         },
         "background": {
-          "$ref": "#/definitions/color",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour."
         },
         "border_color": {
-          "$ref": "#/definitions/color",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "The colour of its border."
         },
         "border_width": {
-          "type": "number",
-          "minimum": 0,
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "The width of its border, in pixels."
         },
         "clip_children": {
-          "type": "boolean",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Whether children are cut off at its edge."
         },
         "column_gap": {
-          "type": "number",
-          "minimum": 0,
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Space between columns (defaults to `gap`)."
         },
         "corner_radius": {
           "anyOf": [
             {
-              "type": "number"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "extra_large",
+                    "extra_small",
+                    "large",
+                    "medium",
+                    "none",
+                    "small"
+                  ]
+                }
+              ]
             },
             {
-              "enum": [
-                "extra_large",
-                "extra_small",
-                "large",
-                "medium",
-                "none",
-                "small"
-              ]
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Pixels, or a shape token (`none` to `extra_large`)."
         },
         "display": {
-          "enum": [
-            "flex",
-            "grid"
+          "anyOf": [
+            {
+              "enum": [
+                "flex",
+                "grid"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "`flex` (the default) or `grid`."
         },
         "elevation": {
           "anyOf": [
             {
-              "type": "number"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "level_0",
+                    "level_1",
+                    "level_2",
+                    "level_3",
+                    "level_4",
+                    "level_5"
+                  ]
+                }
+              ]
             },
             {
-              "enum": [
-                "level_0",
-                "level_1",
-                "level_2",
-                "level_3",
-                "level_4",
-                "level_5"
-              ]
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "A shadow level, 0 to 5."
@@ -180,78 +319,188 @@
         "flex_basis": {
           "anyOf": [
             {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
               ]
             },
             {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Its size along the main axis before it grows or shrinks."
         },
         "flex_direction": {
-          "enum": [
-            "horizontal",
-            "vertical"
+          "anyOf": [
+            {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
         },
         "flex_grow": {
-          "type": "number",
-          "minimum": 0,
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "How much of the spare room it takes, relative to its siblings."
         },
         "flex_shrink": {
-          "type": "number",
-          "minimum": 0,
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "How much it gives up when there is too little room."
         },
         "flex_wrap": {
-          "enum": [
-            "no_wrap",
-            "wrap"
+          "anyOf": [
+            {
+              "enum": [
+                "no_wrap",
+                "wrap"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one."
         },
         "foreground": {
-          "$ref": "#/definitions/color",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/color"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour."
         },
         "gap": {
-          "type": "number",
-          "minimum": 0,
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Space between its children."
         },
         "grid_auto_columns": {
-          "type": "string",
-          "description": "The size of columns the template doesn't name."
-        },
-        "grid_auto_flow": {
-          "enum": [
-            "row",
-            "column",
-            "row dense",
-            "column dense",
-            "dense"
-          ],
-          "description": "How grid children fill the cells."
-        },
-        "grid_auto_rows": {
-          "type": "string",
-          "description": "The size of rows the template doesn't name."
-        },
-        "grid_column": {
           "anyOf": [
             {
               "type": "string"
             },
             {
-              "type": "integer"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "The size of columns the template doesn't name."
+        },
+        "grid_auto_flow": {
+          "anyOf": [
+            {
+              "enum": [
+                "row",
+                "column",
+                "row dense",
+                "column dense",
+                "dense"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "How grid children fill the cells."
+        },
+        "grid_auto_rows": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "The size of rows the template doesn't name."
+        },
+        "grid_column": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Which grid column it takes: `2`, or `1 / 3`."
@@ -259,99 +508,229 @@
         "grid_row": {
           "anyOf": [
             {
-              "type": "string"
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
             },
             {
-              "type": "integer"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Which grid row it takes: `2`, or `1 / 3`."
         },
         "grid_template_columns": {
-          "type": "string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "The grid's columns, as in CSS: `1fr 2fr 100px`."
         },
         "grid_template_rows": {
-          "type": "string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "The grid's rows, as in CSS."
         },
         "height": {
           "anyOf": [
             {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
               ]
             },
             {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
         },
         "justify_content": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "stretch",
-            "space_between",
-            "space_around",
-            "space_evenly"
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex_start",
+                "flex_end",
+                "center",
+                "stretch",
+                "space_between",
+                "space_around",
+                "space_evenly"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "Where its children sit along the layout axis."
         },
         "justify_items": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "baseline",
-            "stretch"
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex_start",
+                "flex_end",
+                "center",
+                "baseline",
+                "stretch"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "Where grid children sit across their cell's width."
         },
         "justify_self": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "baseline",
-            "stretch"
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "end",
+                "flex_start",
+                "flex_end",
+                "center",
+                "baseline",
+                "stretch"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "Where this node sits across its grid cell's width."
         },
         "margin": {
           "anyOf": [
             {
-              "type": "number"
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "$ref": "#/definitions/parameter"
+                    },
+                    {
+                      "$ref": "#/definitions/conditional"
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "top": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    },
+                    "right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    },
+                    "bottom": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    },
+                    "left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
             },
             {
-              "type": "object",
-              "properties": {
-                "top": {
-                  "type": "number"
-                },
-                "right": {
-                  "type": "number"
-                },
-                "bottom": {
-                  "type": "number"
-                },
-                "left": {
-                  "type": "number"
-                }
-              },
-              "additionalProperties": false
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Space outside it: one number, or `{left, right, top, bottom}`."
@@ -359,16 +738,26 @@
         "max_height": {
           "anyOf": [
             {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
               ]
             },
             {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "The most height it can take."
@@ -376,16 +765,26 @@
         "max_width": {
           "anyOf": [
             {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
               ]
             },
             {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "The most width it can take."
@@ -393,16 +792,26 @@
         "min_height": {
           "anyOf": [
             {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
               ]
             },
             {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "The least height it can take."
@@ -410,77 +819,187 @@
         "min_width": {
           "anyOf": [
             {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
               ]
             },
             {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "The least width it can take."
         },
         "opacity": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1,
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "From 0 (clear) to 1 (opaque)."
         },
         "padding": {
           "anyOf": [
             {
-              "type": "number"
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "$ref": "#/definitions/parameter"
+                    },
+                    {
+                      "$ref": "#/definitions/conditional"
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "top": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    },
+                    "right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    },
+                    "bottom": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    },
+                    "left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "$ref": "#/definitions/parameter"
+                        },
+                        {
+                          "$ref": "#/definitions/conditional"
+                        }
+                      ]
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
             },
             {
-              "type": "object",
-              "properties": {
-                "top": {
-                  "type": "number"
-                },
-                "right": {
-                  "type": "number"
-                },
-                "bottom": {
-                  "type": "number"
-                },
-                "left": {
-                  "type": "number"
-                }
-              },
-              "additionalProperties": false
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Space inside it: one number, or `{left, right, top, bottom}`."
         },
         "position": {
-          "enum": [
-            "relative",
-            "absolute"
+          "anyOf": [
+            {
+              "enum": [
+                "relative",
+                "absolute"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
           ],
           "description": "`absolute` takes it out of the flow and places it at `x` and `y`."
         },
         "row_gap": {
-          "type": "number",
-          "minimum": 0,
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Space between rows (defaults to `gap`)."
         },
         "width": {
           "anyOf": [
             {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
               ]
             },
             {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
@@ -488,12 +1007,22 @@
         "x": {
           "anyOf": [
             {
-              "type": "number"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                }
+              ]
             },
             {
-              "enum": [
-                "auto"
-              ]
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Where an `absolute` node sits from the left."
@@ -501,18 +1030,38 @@
         "y": {
           "anyOf": [
             {
-              "type": "number"
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                }
+              ]
             },
             {
-              "enum": [
-                "auto"
-              ]
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
             }
           ],
           "description": "Where an `absolute` node sits from the top."
         },
         "z_index": {
-          "type": "integer",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
           "description": "Stacking order: higher is in front."
         }
       },

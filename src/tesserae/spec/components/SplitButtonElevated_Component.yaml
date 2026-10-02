@@ -1,43 +1,20 @@
-# `add_split_button(variant="elevated")`'s declarative counterpart --
-# see `SplitButtonFilled_Component.yaml` for the shared real design and
-# stated scope boundary. Colors match `resolve_button_colors`'s
-# "elevated" exactly: container=surface_container_low, label=primary,
-# `elevation: level_1` (the real, fixed MD3 token, same reasoning
-# `ButtonElevated_Component.yaml` states).
+# An elevated split button: an action, and a menu of related ones.
+# Structure only: its look is in SplitButtonElevated_Stylesheet.yaml.
 params: [label, width, height, corner_radius]
 id: root
 kind: Container
-style:
-  flex_direction: horizontal
-  gap: 2
 children:
   - id: leading
     kind: Rect
-    style:
-      width: "{{ width }}"
-      height: "{{ height }}"
-      align_items: center
-      justify_content: center
-      background: surface_container_low
-      corner_radius: "{{ corner_radius }}"
-      elevation: level_1
     children:
       - id: label
         kind: Text
-        text: {content: "{{ label }}", typography_role: label_large}
-        style: {foreground: primary}
+        text:
+          content: "{{ label }}"
+          typography_role: label_large
   - id: trailing
     kind: Rect
-    style:
-      width: "{{ height }}"
-      height: "{{ height }}"
-      align_items: center
-      justify_content: center
-      background: surface_container_low
-      corner_radius: "{{ corner_radius }}"
-      elevation: level_1
     children:
       - id: chevron
         kind: Icon
         icon: {name: expand_more}
-        style: {width: 22, height: 22, foreground: primary}

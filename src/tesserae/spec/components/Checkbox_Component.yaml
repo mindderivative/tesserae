@@ -1,11 +1,6 @@
-# MD3's checkbox (Tesserae's `controls.Checkbox`, M40): `checked` is its
-# state, `background` its checked colour (it replaces `primary`), and
-# `width`/`height` its touch target. A click, Space or Enter toggles it.
+# A checkbox: one choice, on or off.
+# Structure only: its look is in Checkbox_Stylesheet.yaml.
 params: [background, width, height, checked]
 id: root
 kind: Checkbox
 checked: "{{ checked }}"
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"
-  background: "{{ background }}"

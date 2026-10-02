@@ -1,9 +1,6 @@
-# MD3's circular progress indicator (Tesserae's
-# `controls.CircularProgress`, M40): `value` in 0..1, `size` its box.
+# A circular progress indicator: determinate with a value, indeterminate without.
+# Structure only: its look is in CircularProgress_Stylesheet.yaml.
 params: [size, value]
 id: root
 kind: CircularProgress
 value: "{{ value }}"
-style:
-  width: "{{ size }}"
-  height: "{{ size }}"

@@ -1,0 +1,27 @@
+# Dialog: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ scrim_width }}"
+      height: "{{ scrim_height }}"
+      background: '#00000052'
+      justify_content: center
+      align_items: center
+  - id: panel
+    style:
+      flex_direction: vertical
+      width: "{{ width }}"
+      height: "{{ height }}"
+      background: surface_container_high
+      corner_radius: extra_large
+      elevation: level_3
+      padding: 24
+      gap: 16
+  - id: headline
+    style:
+      foreground: on_surface
+  - id: body
+    style:
+      foreground: on_surface_variant
+      flex_grow: 1

@@ -1,9 +1,6 @@
-# MD3's linear progress indicator (Tesserae's `controls.LinearProgress`,
-# M40): `value` in 0..1, `width`/`height` its track.
+# A linear progress indicator: determinate with a value, indeterminate without.
+# Structure only: its look is in LinearProgress_Stylesheet.yaml.
 params: [width, height, value]
 id: root
 kind: LinearProgress
 value: "{{ value }}"
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"

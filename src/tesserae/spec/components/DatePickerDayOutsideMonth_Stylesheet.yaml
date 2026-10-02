@@ -1,0 +1,14 @@
+# DatePickerDayOutsideMonth: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: 48
+      height: 48
+      background: transparent
+      corner_radius: 24
+      justify_content: center
+      align_items: center
+  - id: label
+    style:
+      foreground: on_surface_variant

@@ -1,9 +1,6 @@
-# MD3's radio button (Tesserae's `controls.RadioButton`, M40): `selected`
-# is its state and `size` its touch target. A click selects it.
+# A radio button: one choice among several.
+# Structure only: its look is in RadioButton_Stylesheet.yaml.
 params: [size, selected]
 id: root
 kind: RadioButton
 selected: "{{ selected }}"
-style:
-  width: "{{ size }}"
-  height: "{{ size }}"

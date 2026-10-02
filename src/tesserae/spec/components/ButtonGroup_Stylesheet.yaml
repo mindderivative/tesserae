@@ -1,0 +1,7 @@
+# ButtonGroup: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      flex_direction: horizontal
+      gap: 8

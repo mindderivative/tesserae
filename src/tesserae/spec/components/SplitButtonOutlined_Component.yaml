@@ -1,44 +1,20 @@
-# `add_split_button(variant="outlined")`'s declarative counterpart --
-# see `SplitButtonFilled_Component.yaml` for the shared real design and
-# stated scope boundary. Colors match `resolve_button_colors`'s
-# "outlined" exactly: container=transparent, label=primary,
-# border_color=outline, border_width=1.0.
+# An outlined split button: an action, and a menu of related ones.
+# Structure only: its look is in SplitButtonOutlined_Stylesheet.yaml.
 params: [label, width, height, corner_radius]
 id: root
 kind: Container
-style:
-  flex_direction: horizontal
-  gap: 2
 children:
   - id: leading
     kind: Rect
-    style:
-      width: "{{ width }}"
-      height: "{{ height }}"
-      align_items: center
-      justify_content: center
-      background: transparent
-      corner_radius: "{{ corner_radius }}"
-      border_color: outline
-      border_width: 1.0
     children:
       - id: label
         kind: Text
-        text: {content: "{{ label }}", typography_role: label_large}
-        style: {foreground: primary}
+        text:
+          content: "{{ label }}"
+          typography_role: label_large
   - id: trailing
     kind: Rect
-    style:
-      width: "{{ height }}"
-      height: "{{ height }}"
-      align_items: center
-      justify_content: center
-      background: transparent
-      corner_radius: "{{ corner_radius }}"
-      border_color: outline
-      border_width: 1.0
     children:
       - id: chevron
         kind: Icon
         icon: {name: expand_more}
-        style: {width: 22, height: 22, foreground: primary}

@@ -1,0 +1,23 @@
+# TopAppBar: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 64
+      background: surface
+      align_items: center
+      padding:
+        left: 4
+        right: 4
+        top: 0
+        bottom: 0
+  - id: title
+    style:
+      foreground: on_surface
+      flex_grow: 1
+      margin:
+        left: 16
+        right: 0
+        top: 0
+        bottom: 0

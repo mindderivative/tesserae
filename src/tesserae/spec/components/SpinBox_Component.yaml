@@ -1,10 +1,9 @@
-# A spin box (M58, #5): the `SpinBox` control kind, which the compiler
-# builds with `tesserae.controls.SpinBox` -- a number field between - and +
-# buttons that step `value` by `step`, kept between `min` and `max`. Before
-# M58 this was a composition of Rects and a TextField with no behaviour;
-# `kind: SpinBox` can be used directly too, with `value` bindable and
-# `two_way:`.
-params: [value, {min: null}, {max: null}, {step: 1}]
+# A number field between minus and plus buttons.
+params:
+  - value
+  - {min: null}
+  - {max: null}
+  - {step: 1}
 id: root
 kind: SpinBox
 value: "{{ value }}"

@@ -1,0 +1,35 @@
+# NavigationRailItem: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: 80
+      height: 56
+      flex_direction: vertical
+      align_items: center
+      gap: 4
+  - id: pill
+    style:
+      width: 56
+      height: 32
+      corner_radius: 16
+      background:
+        if: "{{ selected }}"
+        then: secondary_container
+        else: transparent
+      align_items: center
+      justify_content: center
+  - id: icon
+    style:
+      width: 24
+      height: 24
+      foreground:
+        if: "{{ selected }}"
+        then: on_secondary_container
+        else: on_surface_variant
+  - id: label
+    style:
+      foreground:
+        if: "{{ selected }}"
+        then: on_surface
+        else: on_surface_variant

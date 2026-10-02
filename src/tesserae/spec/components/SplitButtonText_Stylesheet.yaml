@@ -1,0 +1,31 @@
+# SplitButtonText: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      flex_direction: horizontal
+      gap: 2
+  - id: leading
+    style:
+      width: "{{ width }}"
+      height: "{{ height }}"
+      align_items: center
+      justify_content: center
+      background: transparent
+      corner_radius: "{{ corner_radius }}"
+  - id: label
+    style:
+      foreground: primary
+  - id: trailing
+    style:
+      width: "{{ height }}"
+      height: "{{ height }}"
+      align_items: center
+      justify_content: center
+      background: transparent
+      corner_radius: "{{ corner_radius }}"
+  - id: chevron
+    style:
+      width: 22
+      height: 22
+      foreground: primary

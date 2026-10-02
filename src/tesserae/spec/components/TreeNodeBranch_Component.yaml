@@ -1,25 +1,14 @@
-# `add_tree_node(leaf=false)`'s declarative counterpart -- the real,
-# collapsed rest state (see `AccordionHeader_Component.yaml` for the
-# real reasoning: `expanded=true`'s chevron flip is a runtime `paint.
-# transform` animation, not a structural difference, out of scope for
-# a fragment's own static initial pose). See `TreeNodeLeaf_Component
-# .yaml` for `left_padding`'s own real reasoning (required, not
-# `depth`, since `{{ }}` has no multiplication).
+# A tree row that can be expanded: a title and a chevron, indented by its depth.
+# Structure only: its look is in TreeNodeBranch_Stylesheet.yaml.
 params: [title, width, left_padding]
 id: root
 kind: Container
-style:
-  width: "{{ width }}"
-  height: 56
-  align_items: center
-  padding: {left: "{{ left_padding }}", right: 16, top: 0, bottom: 0}
-  gap: 12
 children:
   - id: title
     kind: Text
-    text: {content: "{{ title }}", typography_role: label_large}
-    style: {foreground: on_surface, flex_grow: 1}
+    text:
+      content: "{{ title }}"
+      typography_role: label_large
   - id: chevron
     kind: Icon
     icon: {name: expand_more}
-    style: {width: 24, height: 24, foreground: on_surface_variant}

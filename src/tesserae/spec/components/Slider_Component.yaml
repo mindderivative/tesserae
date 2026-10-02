@@ -1,11 +1,6 @@
-# MD3's slider (Tesserae's `controls.Slider`, M40): `value` in 0..1,
-# `background` the active track's and handle's colour, `width` the
-# track's length and `height` the touch target's. Drag or the arrow keys set it.
+# A slider: picks a value from a range by dragging.
+# Structure only: its look is in Slider_Stylesheet.yaml.
 params: [background, width, height, value]
 id: root
 kind: Slider
 value: "{{ value }}"
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"
-  background: "{{ background }}"

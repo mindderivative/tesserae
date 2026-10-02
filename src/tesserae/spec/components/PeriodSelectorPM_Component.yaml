@@ -1,34 +1,17 @@
-# `add_period_selector(selected="PM")`'s declarative counterpart -- see
-# `PeriodSelectorAM_Component.yaml` for the shared real design.
+# A time picker's AM / PM selector, with PM selected.
+# Structure only: its look is in PeriodSelectorPM_Stylesheet.yaml.
 id: root
 kind: Container
-style: {flex_direction: vertical, width: 52, height: 72}
 children:
   - id: am
     kind: Container
-    style:
-      width: 52
-      height: 36
-      background: transparent
-      corner_radius: small
-      justify_content: center
-      align_items: center
     children:
       - id: am_label
         kind: Text
         text: {content: AM, typography_role: label_large}
-        style: {foreground: on_surface}
   - id: pm
     kind: Container
-    style:
-      width: 52
-      height: 36
-      background: tertiary_container
-      corner_radius: small
-      justify_content: center
-      align_items: center
     children:
       - id: pm_label
         kind: Text
         text: {content: PM, typography_role: label_large}
-        style: {foreground: on_tertiary_container}

@@ -1,0 +1,17 @@
+# FabTertiary: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ size }}"
+      height: "{{ size }}"
+      align_items: center
+      justify_content: center
+      background: tertiary_container
+      corner_radius: "{{ corner_radius }}"
+      elevation: level_3
+  - id: icon
+    style:
+      width: 24
+      height: 24
+      foreground: on_tertiary_container

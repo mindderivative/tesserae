@@ -1,0 +1,9 @@
+# BadgeDot: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: 6
+      height: 6
+      background: error
+      corner_radius: 3

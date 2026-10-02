@@ -1,0 +1,34 @@
+# NavigationDrawerItem: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 56
+      corner_radius: 28
+      background:
+        if: "{{ selected }}"
+        then: secondary_container
+        else: transparent
+      flex_direction: horizontal
+      align_items: center
+      gap: 12
+      padding:
+        left: 16
+        right: 24
+        top: 0
+        bottom: 0
+  - id: icon
+    style:
+      width: 24
+      height: 24
+      foreground:
+        if: "{{ selected }}"
+        then: on_secondary_container
+        else: on_surface_variant
+  - id: label
+    style:
+      foreground:
+        if: "{{ selected }}"
+        then: on_secondary_container
+        else: on_surface_variant

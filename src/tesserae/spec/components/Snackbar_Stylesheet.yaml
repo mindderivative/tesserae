@@ -1,0 +1,20 @@
+# Snackbar: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 48
+      background: inverse_surface
+      corner_radius: extra_small
+      elevation: level_3
+      align_items: center
+      padding:
+        left: 16
+        right: 16
+        top: 0
+        bottom: 0
+  - id: text
+    style:
+      foreground: inverse_on_surface
+      flex_grow: 1

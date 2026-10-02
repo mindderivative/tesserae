@@ -1,25 +1,11 @@
-# `add_tree_node(leaf=true)`'s declarative counterpart -- the real,
-# structurally distinct leaf shape (no chevron Icon at all, confirmed
-# directly: `chevron_path` is `None` when `leaf`, `window_factory.rs`).
-# `left_padding` is a required param, not `depth` -- `add_tree_node`
-# itself computes `leading_padding = MENU_ITEM_LEADING_SPACE + depth *
-# TREE_NODE_INDENT_WIDTH` (`TREE_NODE_INDENT_WIDTH=24.0`), real
-# multiplication `{{ }}` substitution can't do; a caller passes the
-# already-computed padding for its own real tree depth (the same real
-# "require the final computed value" precedent `ButtonFilled_Component
-# .yaml`'s own `corner_radius` param already established for a
-# different real arithmetic gap). See `TreeNodeBranch_Component.yaml`
-# for the real, distinct non-leaf shape (with chevron).
+# A tree row with nothing under it: a title, indented by its depth.
+# Structure only: its look is in TreeNodeLeaf_Stylesheet.yaml.
 params: [title, width, left_padding]
 id: root
 kind: Container
-style:
-  width: "{{ width }}"
-  height: 56
-  align_items: center
-  padding: {left: "{{ left_padding }}", right: 16, top: 0, bottom: 0}
 children:
   - id: title
     kind: Text
-    text: {content: "{{ title }}", typography_role: label_large}
-    style: {foreground: on_surface}
+    text:
+      content: "{{ title }}"
+      typography_role: label_large

@@ -1,0 +1,10 @@
+# SearchView: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: "{{ height }}"
+      background: surface_container_high
+      corner_radius: extra_large
+      elevation: level_3

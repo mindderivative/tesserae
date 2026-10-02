@@ -1,0 +1,15 @@
+# Menu: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      flex_direction: vertical
+      background: surface_container
+      corner_radius: extra_small
+      elevation: level_2
+      padding:
+        left: 0
+        right: 0
+        top: 8
+        bottom: 8

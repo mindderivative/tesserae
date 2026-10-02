@@ -1,0 +1,14 @@
+# BadgeLabeled: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 16
+      background: error
+      corner_radius: small
+      justify_content: center
+      align_items: center
+  - id: label
+    style:
+      foreground: on_error

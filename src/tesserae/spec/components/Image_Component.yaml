@@ -1,25 +1,8 @@
-# `add_image(path=..., width=..., height=..., fit=...)`'s declarative
-# counterpart, using `tre`'s own real `kind: Image` primitive directly
-# (`ImageSpec { src, fit }`, `engine-spec/src/spec.rs`) -- no
-# composition needed. Real, useful note for anyone using this fragment:
-# `src` resolves relative to the *calling* `*_View.yaml`'s own
-# directory (the same base directory `include:`/every other `image.
-# src:` already resolves against), not this fragment file's own
-# directory -- the natural, correct behavior for an app referencing its
-# own image assets. M29 Phase 2: `tre` never loads that file -- Tesserae
-# removes `src:` after expansion, decodes it with Pillow, and pushes the
-# pixels onto this node (`spec/images.py`); the fragment itself is
-# unchanged. No `background` param -- an image has no
-# meaningful "behind it" fill, the identical real reasoning `docs/
-# guide/components.md` already states for `add_image` itself.
-#
-# `fit` takes lowercase `cover`/`contain`/`fill` -- the same values as
-# `add_image`'s `fit=` since `tre` 0.3.3 lowercased declarative enums
-# (M90). Before M32 this fragment needed PascalCase (`Cover`).
+# A picture from a file, fitted to its box.
+# Structure only: its look is in Image_Stylesheet.yaml.
 params: [src, width, height, fit]
 id: root
 kind: Image
-image: {src: "{{ src }}", fit: "{{ fit }}"}
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"
+image:
+  src: "{{ src }}"
+  fit: "{{ fit }}"

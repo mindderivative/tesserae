@@ -207,13 +207,70 @@ def _namespace_ids(node: Any, prefix: str) -> Any:
     return out
 
 
-def _find_component_file(name: str, component_dirs: list[Path]) -> Path:
-    for directory in component_dirs:
+def _find_component_file(name: str, component_dirs: list[Path]) -> tuple[Path, int]:
+    """The fragment's file, and the index of the folder it was found in."""
+    for index, directory in enumerate(component_dirs):
         candidate = directory / f"{name}_Component.yaml"
         if candidate.is_file():
-            return candidate
+            return candidate, index
     searched = ", ".join(str(d) for d in component_dirs)
     raise ComponentError(f"unknown component {name!r} -- searched {searched}")
+
+
+def _parts_of(node: Any) -> set[str]:
+    """Every `id:` in a fragment: its parts."""
+    found: set[str] = set()
+    if isinstance(node, dict):
+        if isinstance(node.get(_ID_KEY), str):
+            found.add(node[_ID_KEY])
+        for child in node.get(_CHILDREN_KEY) or []:
+            found |= _parts_of(child)
+    return found
+
+
+def _component_sheet(name: str, component_dirs: list[Path], found_in: int, deps: set[Path]) -> dict[str, dict[str, Any]]:
+    """A component's stylesheet: `<name>_Stylesheet.yaml` rules, `{part id: style}`.
+
+    The look of a component lives in its stylesheet, the fragment holding only
+    its structure. The sheet is read from the fragment's own folder and from
+    each folder searched before it, so an app's own `ButtonFilled_Stylesheet.yaml`
+    next to its views restyles the built-in one, field by field. A folder
+    after the fragment's (the built-ins, under an app's own fragment) is not
+    read: the app's fragment shadows the whole component."""
+    rules: dict[str, dict[str, Any]] = {}
+    for directory in reversed(component_dirs[: found_in + 1]):
+        path = directory / f"{name}{STYLESHEET_SUFFIX}"
+        if not path.is_file():
+            continue
+        deps.add(path.resolve())
+        try:
+            raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except yaml.YAMLError as exc:
+            raise ComponentError(f"{path}: invalid YAML: {exc}") from exc
+        except OSError as exc:
+            raise ComponentError(f"cannot read {path}: {exc}") from exc
+        listed = raw.get("styles") if isinstance(raw, dict) and set(raw) <= {"styles"} else None
+        if not isinstance(listed, list):
+            raise ComponentError(f"{path}: a component's stylesheet is `styles:`, a list of `{{id: <part>, style: {{...}}}}` rules")
+        for rule in listed:
+            if not (isinstance(rule, dict) and set(rule) == {"id", "style"} and isinstance(rule["id"], str)
+                    and isinstance(rule["style"], dict)):
+                raise ComponentError(f"{path}: each rule is `{{id: <part>, style: {{...}}}}`, got {rule!r}")
+            rules[rule["id"]] = {**rules.get(rule["id"], {}), **rule["style"]}
+    return rules
+
+
+def _apply_sheet(node: Any, rules: dict[str, dict[str, Any]], where: str) -> None:
+    """Puts each part's stylesheet rule under the style the fragment gives it itself."""
+    if not isinstance(node, dict):
+        return
+    part = node.get(_ID_KEY)
+    if part in rules:
+        if _COMPONENT_KEY in node:
+            raise ComponentError(f"{where}: {part!r} is a `component:` call: style it through its own `with:`")
+        node["style"] = {**rules[part], **(node.get("style") or {})}
+    for child in node.get(_CHILDREN_KEY) or []:
+        _apply_sheet(child, rules, where)
 
 
 def _load_fragment(path: Path) -> dict[str, Any]:
@@ -380,9 +437,14 @@ def _expand_component(
             "(used to namespace the fragment's own internal ids)"
         )
 
-    path = _find_component_file(name, component_dirs)
+    path, found_in = _find_component_file(name, component_dirs)
     deps.add(path.resolve())
     fragment_template = _load_fragment(path)
+    sheet = _component_sheet(name, component_dirs, found_in, deps)
+    unknown_parts = set(sheet) - _parts_of(fragment_template)
+    if unknown_parts:
+        raise ComponentError(f"{_chain_text((*chain, name))}: {name}{STYLESHEET_SUFFIX} styles "
+                             f"{sorted(unknown_parts)}, which {name} has no part of (its parts are {sorted(_parts_of(fragment_template))})")
     declared, defaults = _declared_params(fragment_template.pop(_PARAMS_KEY, []) or [], path)
 
     with_supplied = node.get(_WITH_KEY) or {}
@@ -446,6 +508,9 @@ def _expand_component(
             )
 
         fragment = _resolve_conditionals(_substitute(fragment_template, supplied), f"{path.name} ({local_call_id!r})")
+        if sheet:  # the component's stylesheet, with the same parameters filled in
+            _apply_sheet(fragment, _resolve_conditionals(_substitute(sheet, supplied), f"{name}{STYLESHEET_SUFFIX}"),
+                         f"{name}{STYLESHEET_SUFFIX}")
 
         # Resolve any `component:` usage inside the fragment itself
         # before namespacing -- a nested fragment's own ids get
@@ -547,10 +612,10 @@ def expand_components_to_spec(
     none, and any `include:` is a clear `ComponentError`, the same
     contract `tre`'s own `include:` has.
 
-    `component_dirs` defaults to Tesserae's own built-in
-    `spec/components/` directory; a caller may pass additional
-    directories (searched in order) to add or shadow components with
-    an app's own -- not yet exercised by any real caller.
+    `component_dirs` defaults to the folder `base_dir` names (the view's
+    own: an app's own fragments and component stylesheets live next to its
+    views), then Tesserae's built-in `spec/components/`. A caller may pass
+    its own list instead (searched in order).
     """
     spec, _ = expand_with_dependencies(yaml_text, component_dirs=component_dirs, base_dir=base_dir)
     return spec
@@ -566,7 +631,11 @@ def expand_with_dependencies(
     the expansion read -- each `include:`d file and each
     `*_Component.yaml` fragment used (M29 Phase 3: what `ViewWatcher`
     watches). Not the view file itself, which the caller already has."""
-    dirs = component_dirs if component_dirs is not None else [Path(__file__).parent / "components"]
+    builtin = Path(__file__).parent / "components"
+    if component_dirs is not None:
+        dirs = component_dirs
+    else:  # a fragment (or a component stylesheet) next to the view, then Tesserae's own
+        dirs = [base_dir, builtin] if base_dir is not None and base_dir.resolve() != builtin.resolve() else [builtin]
     deps: set[Path] = set()
     data = _expand_includes(yaml.safe_load(yaml_text), base_dir, [], deps)
     return _normalize_scalars(_walk(data, dirs, (), deps)), deps

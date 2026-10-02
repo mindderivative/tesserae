@@ -1,11 +1,5 @@
-# MD3's loading indicator (Tesserae's `controls.LoadingIndicator`, M40):
-# a shape morphing forever, `size` its box. `background` is the shape's
-# colour (a role such as `primary`, or a literal colour); `params:` has
-# no defaults, so it's always given.
+# A loading indicator: a shape that morphs while something loads.
+# Structure only: its look is in LoadingIndicator_Stylesheet.yaml.
 params: [size, background]
 id: root
 kind: LoadingIndicator
-style:
-  width: "{{ size }}"
-  height: "{{ size }}"
-  foreground: "{{ background }}"

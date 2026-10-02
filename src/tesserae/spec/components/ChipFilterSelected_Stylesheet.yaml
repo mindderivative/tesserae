@@ -1,0 +1,24 @@
+# ChipFilterSelected: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 32
+      align_items: center
+      padding:
+        left: 16
+        right: 16
+        top: 0
+        bottom: 0
+      gap: 8
+      background: secondary_container
+      corner_radius: small
+  - id: check
+    style:
+      width: 18
+      height: 18
+      foreground: on_secondary_container
+  - id: label
+    style:
+      foreground: on_secondary_container

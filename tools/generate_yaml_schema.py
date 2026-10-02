@@ -358,7 +358,9 @@ def _theme() -> dict[str, Any]:
     from tesserae import tokens
     from tesserae.spec import build
 
-    defs = _only(_definitions(fragment=False), "style", "color")
+    # A component's stylesheet (`<Name>_Stylesheet.yaml`, 0.3.4) is a stylesheet whose values may be the
+    # component's `{{ parameters }}`, so a stylesheet's styles are as loose as a fragment's.
+    defs = _only(_definitions(fragment=True), "style", "color")
     defs["rule"] = {
         "type": "object",
         "description": "Styles for the nodes it matches: by `kind`, by `classes`, or by `id`. With none of the three, for every node.",

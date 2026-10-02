@@ -1,0 +1,37 @@
+# ExtendedFabTertiary: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      flex_direction: horizontal
+      width: "{{ width }}"
+      height: 56
+      background: tertiary_container
+      corner_radius: large
+      elevation: level_3
+      align_items: center
+      padding:
+        if: "{{ icon }}"
+        then:
+          left: 16
+          right: 20
+          top: 0
+          bottom: 0
+        else:
+          left: 20
+          right: 20
+          top: 0
+          bottom: 0
+      justify_content:
+        if: "{{ icon }}"
+        then: flex_start
+        else: center
+      gap: 8
+  - id: icon
+    style:
+      width: 24
+      height: 24
+      foreground: on_tertiary_container
+  - id: label
+    style:
+      foreground: on_tertiary_container

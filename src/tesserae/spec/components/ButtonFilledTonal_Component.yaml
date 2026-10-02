@@ -1,22 +1,11 @@
-# `add_button(variant="filled_tonal")`'s declarative counterpart -- see
-# `ButtonFilled_Component.yaml` for the full real design/limitations.
-# Colors match `resolve_button_colors` exactly: container=
-# secondary_container, label=on_secondary_container, no border/elevation.
+# A filled tonal button: a medium-emphasis button in the secondary container colour.
+# Structure only: its look is in ButtonFilledTonal_Stylesheet.yaml.
 params: [label, width, height, corner_radius]
 id: root
 kind: Rect
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"
-  align_items: center
-  justify_content: center
-  background: secondary_container
-  corner_radius: "{{ corner_radius }}"
 children:
   - id: label
     kind: Text
     text:
       content: "{{ label }}"
       typography_role: label_large
-    style:
-      foreground: on_secondary_container

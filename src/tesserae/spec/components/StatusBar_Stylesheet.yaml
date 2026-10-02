@@ -1,0 +1,17 @@
+# StatusBar: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 24
+      background: surface_container
+      align_items: center
+      padding:
+        left: 8
+        right: 8
+        top: 0
+        bottom: 0
+  - id: text
+    style:
+      foreground: on_surface_variant

@@ -1,21 +1,11 @@
-# `add_tooltip`'s declarative counterpart -- a single Rect + centered
-# Text. Colors match exactly: container=inverse_surface, label=
-# inverse_on_surface. `corner_radius: extra_small` is a real, fixed MD3
-# token (confirmed `TOOLTIP_CORNER_RADIUS=4.0 == SHAPE_EXTRA_SMALL`,
-# the same real value `Snackbar_Component.yaml`'s own fragment uses).
+# A tooltip: a short label that appears beside what the pointer rests on.
+# Structure only: its look is in Tooltip_Stylesheet.yaml.
 params: [text, width]
 id: root
 kind: Container
-style:
-  width: "{{ width }}"
-  height: 24
-  background: inverse_surface
-  corner_radius: extra_small
-  justify_content: center
-  align_items: center
-  padding: {left: 8, right: 8, top: 0, bottom: 0}
 children:
   - id: text
     kind: Text
-    text: {content: "{{ text }}", typography_role: body_small}
-    style: {foreground: inverse_on_surface}
+    text:
+      content: "{{ text }}"
+      typography_role: body_small

@@ -1,0 +1,21 @@
+# ChipSuggestion: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 32
+      align_items: center
+      padding:
+        left: 16
+        right: 16
+        top: 0
+        bottom: 0
+      gap: 8
+      background: transparent
+      corner_radius: small
+      border_color: outline
+      border_width: 1.0
+  - id: label
+    style:
+      foreground: on_surface_variant

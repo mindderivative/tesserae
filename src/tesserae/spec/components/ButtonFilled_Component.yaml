@@ -1,34 +1,11 @@
-# Tesserae's own declarative counterpart to `tesserae.widgets.button(...)`
-# / `tre`'s own `window.add_button(..., variant="filled")` -- a Rect
-# container with a centered Text label, faithful to `add_button`'s real
-# "filled" variant colors (`resolve_button_colors`, `window_factory.rs`):
-# container = primary, label = on_primary.
-#
-# One fragment per real MD3 variant (`ButtonElevated`/`ButtonFilled`/
-# `ButtonFilledTonal`/`ButtonOutlined`/`ButtonText`) -- `{{ }}`
-# substitution has no conditional branching, so a `variant` param
-# can't pick between them the way `add_button(variant=...)` does.
-#
-# Real, honest limitation, not silently glossed over: `{{ }}` parameter
-# substitution is also purely textual (no arithmetic), so a true MD3
-# pill shape (corner_radius = height / 2, `add_button`'s own real
-# unthemed fallback) can't be *derived* from `height` here --
-# `corner_radius` is its own required param instead.
+# A filled button: the highest-emphasis button, for a screen's main action.
+# Structure only: its look is in ButtonFilled_Stylesheet.yaml.
 params: [label, width, height, corner_radius]
 id: root
 kind: Rect
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"
-  align_items: center
-  justify_content: center
-  background: primary
-  corner_radius: "{{ corner_radius }}"
 children:
   - id: label
     kind: Text
     text:
       content: "{{ label }}"
       typography_role: label_large
-    style:
-      foreground: on_primary

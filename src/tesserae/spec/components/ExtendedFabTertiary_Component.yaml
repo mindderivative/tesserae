@@ -1,29 +1,19 @@
-# `add_extended_fab(variant="tertiary", icon=<given>)`'s declarative
-# counterpart -- see `ExtendedFabSurface_Component.yaml` for the shared
-# real design/scope boundary. Colors match `resolve_fab_colors`'s
-# "tertiary" exactly.
-params: [label, width, {icon: null}]  # no icon: MD3's text-only shape (M55, #8)
+# An extended floating action button in the tertiary colour.
+# Structure only: its look is in ExtendedFabTertiary_Stylesheet.yaml.
+params:
+  - label
+  - width
+  - {icon: null}
 id: root
 kind: Container
-style:
-  flex_direction: horizontal
-  width: "{{ width }}"
-  height: 56
-  background: tertiary_container
-  corner_radius: large
-  elevation: level_3
-  align_items: center
-  # with an icon: 16 before it, 20 after the label; text only: 20 either side, centred (M55)
-  padding: {if: "{{ icon }}", then: {left: 16, right: 20, top: 0, bottom: 0}, else: {left: 20, right: 20, top: 0, bottom: 0}}
-  justify_content: {if: "{{ icon }}", then: flex_start, else: center}
-  gap: 8
 children:
   - id: icon
-    when: "{{ icon }}"  # left out when there's no icon (M55)
+    when: "{{ icon }}"
     kind: Icon
-    icon: {name: "{{ icon }}"}
-    style: {width: 24, height: 24, foreground: on_tertiary_container}
+    icon:
+      name: "{{ icon }}"
   - id: label
     kind: Text
-    text: {content: "{{ label }}", typography_role: label_large}
-    style: {foreground: on_tertiary_container}
+    text:
+      content: "{{ label }}"
+      typography_role: label_large

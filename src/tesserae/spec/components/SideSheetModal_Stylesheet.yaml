@@ -1,0 +1,16 @@
+# SideSheetModal: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ scrim_width }}"
+      height: "{{ scrim_height }}"
+      background: '#00000052'
+      justify_content: flex_end
+  - id: panel
+    style:
+      width: "{{ width }}"
+      height: "{{ height }}"
+      background: surface_container_low
+      corner_radius: large
+      elevation: level_1

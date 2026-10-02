@@ -1,0 +1,12 @@
+# ListItem: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: "{{ width }}"
+      height: 56
+      align_items: center
+      padding: 16
+  - id: headline
+    style:
+      foreground: on_surface

@@ -1,0 +1,30 @@
+# PeriodSelectorAM: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      flex_direction: vertical
+      width: 52
+      height: 72
+  - id: am
+    style:
+      width: 52
+      height: 36
+      background: tertiary_container
+      corner_radius: small
+      justify_content: center
+      align_items: center
+  - id: am_label
+    style:
+      foreground: on_tertiary_container
+  - id: pm
+    style:
+      width: 52
+      height: 36
+      background: transparent
+      corner_radius: small
+      justify_content: center
+      align_items: center
+  - id: pm_label
+    style:
+      foreground: on_surface

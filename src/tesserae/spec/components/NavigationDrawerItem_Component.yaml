@@ -1,26 +1,19 @@
-# One navigation drawer destination (M56, #9): `tesserae.widgets.navigation_drawer`'s
-# item, its selected state declared per item. 56 px, a 24 px icon and a
-# `label_large` label; selected, a full-width `secondary_container` pill
-# with `on_secondary_container` content; otherwise clear, with
-# `on_surface_variant` content.
-params: [label, icon, width, {selected: false}]
+# One destination in a navigation drawer: an icon and a label, highlighted when selected.
+# Structure only: its look is in NavigationDrawerItem_Stylesheet.yaml.
+params:
+  - label
+  - icon
+  - width
+  - {selected: false}
 id: root
 kind: Rect
-style:
-  width: "{{ width }}"
-  height: 56
-  corner_radius: 28
-  background: {if: "{{ selected }}", then: secondary_container, else: transparent}
-  flex_direction: horizontal
-  align_items: center
-  gap: 12
-  padding: {left: 16, right: 24, top: 0, bottom: 0}
 children:
   - id: icon
     kind: Icon
-    icon: {name: "{{ icon }}"}
-    style: {width: 24, height: 24, foreground: {if: "{{ selected }}", then: on_secondary_container, else: on_surface_variant}}
+    icon:
+      name: "{{ icon }}"
   - id: label
     kind: Text
-    text: {content: "{{ label }}", typography_role: label_large}
-    style: {foreground: {if: "{{ selected }}", then: on_secondary_container, else: on_surface_variant}}
+    text:
+      content: "{{ label }}"
+      typography_role: label_large

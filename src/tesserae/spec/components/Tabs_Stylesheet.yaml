@@ -1,0 +1,15 @@
+# Tabs: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      flex_direction: vertical
+      background: surface
+  - id: row
+    style:
+      flex_direction: horizontal
+  - id: divider
+    style:
+      width: 100%
+      height: 1
+      background: surface_variant

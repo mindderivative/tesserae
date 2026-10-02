@@ -1,49 +1,7 @@
-# `add_side_sheet(modal=true)`'s declarative counterpart -- the real,
-# structurally distinct modal shape (a full-window scrim, right-
-# justified, wrapping the panel -- confirmed directly, the returned
-# node in the modal branch is `scrim`, not `panel`). `scrim_width`/
-# `scrim_height` are required params, same real reason `Dialog_
-# Component.yaml` states (`self.width.get()`/`height.get()` has no
-# declarative equivalent). `elevation: level_1` matches `SIDE_SHEET_
-# MODAL_ELEVATION=1.0` exactly, confirmed by direct readback.
-#
-# Real, honest gap, not fixed here, and a real, subtle finding worth
-# stating precisely: `add_side_sheet` applies a per-corner `corner_
-# radii_override` (only the sheet's own inner edge is rounded,
-# `[corner_radius, 0.0, 0.0, corner_radius]`) -- `StyleSpec.corner_
-# radius` has no per-corner concept declaratively at all. **The
-# imperative factory's own base `paint.corner_radius` is a literal
-# `0.0`** (the real visual rounding comes entirely from the override,
-# which `Node.get("corner_radius")` never reads back) -- so a
-# corner_radius cross-check against the imperative call is not
-# meaningful here, unlike every other fragment in this catalog. This
-# fragment uses a uniform `corner_radius: large`
-# (`SIDE_SHEET_CORNER_RADIUS=16.0 == SHAPE_LARGE`) as the closer real
-# visual approximation (some rounding, matching the sheet's own real
-# intent) rather than matching the imperative's own literal `0.0`
-# (which would render as a fully square panel, visually wrong).
-# M33 (`tre` 0.3.4): the scrim is `background: "#00000052"` with no
-# `opacity`. `opacity` is group opacity on 0.3.4 and the panel is the
-# scrim's child, so `opacity: 0.32` would fade the panel too. `tre`'s own
-# scrim moved the 32% into its color (`scrim_fill`, `window_factory.rs`),
-# and reads back `(0, 0, 0, 82)`, exactly what `"#00000052"` gives. A
-# spec color can't be "a theme role at 32%", so this is literal black:
-# MD3's `scrim` role is black in every generated scheme, but a custom
-# theme's `colors: {scrim: ...}` override doesn't reach this fragment.
+# A modal side sheet: a panel at the side of the window, over a scrim.
+# Structure only: its look is in SideSheetModal_Stylesheet.yaml.
 params: [width, height, scrim_width, scrim_height]
 id: root
 kind: Container
-style:
-  width: "{{ scrim_width }}"
-  height: "{{ scrim_height }}"
-  background: "#00000052"
-  justify_content: flex_end
 children:
-  - id: panel
-    kind: Rect
-    style:
-      width: "{{ width }}"
-      height: "{{ height }}"
-      background: surface_container_low
-      corner_radius: large
-      elevation: level_1
+  - {id: panel, kind: Rect}
