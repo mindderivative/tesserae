@@ -34,6 +34,10 @@ from tesserae.naming import check_naming_convention
 
 
 class Repeater:
+    """Keeps one component and ViewModel alive for each item of a list `Signal`, adding and removing them as the list changes.
+
+    `key` says which items are the same one, and `args` makes each ViewModel's arguments from its item."""
+
     def __init__(
         self,
         parent: Any,

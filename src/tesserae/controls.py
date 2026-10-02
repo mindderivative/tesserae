@@ -245,6 +245,7 @@ class RadioGroup:
 
     @property
     def selected(self) -> Optional["RadioButton"]:
+        """The radio button that is selected, or `None`."""
         return next((b for b in self.buttons if b.selected.get()), None)
 
     def _add(self, button: "RadioButton") -> None:
@@ -661,13 +662,16 @@ class SpinBox:
     # -- for app code -------------------------------------------------------------
 
     def on_change(self, fn: Callable[[Any], None]) -> Callable[[], None]:
+        """Calls `fn(value)` after each change the user makes. Returns the function that stops it."""
         self._changes.append(fn)
         return lambda: self._changes.remove(fn) if fn in self._changes else None
 
     def color(self, role: str) -> RGBA:
+        """A colour role of this control's theme, or MD3's baseline."""
         return self.theme.role(role) or tokens.BASELINE[role]
 
     def set_theme(self, theme: Theme) -> None:
+        """Re-tints the spin box for `theme`, at once."""
         self.theme = theme
         for it in (self._dec_it, self._inc_it):
             it.retint(self.color("on_surface_variant"), self.color("secondary"))
@@ -686,6 +690,7 @@ class SpinBox:
             it.detach()
 
     def destroy(self) -> None:
+        """Stops the spin box and frees its nodes."""
         self.dispose()
         self.node.destroy()
 

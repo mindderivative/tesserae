@@ -79,6 +79,7 @@ class Overlay:
 
     @property
     def is_open(self) -> bool:
+        """Whether it is showing."""
         return self._open
 
     def on_close(self, fn: Callable[[], Any]) -> Callable[[], None]:
@@ -87,6 +88,7 @@ class Overlay:
         return lambda: self._closes.remove(fn) if fn in self._closes else None
 
     def open(self, anchor: Any = None, placement: str = "below") -> None:
+        """Shows it, next to `anchor` (a node) on the `placement` side, or centred if there is none. Does nothing if it is open."""
         if self._open:
             return
         self._fit(*self._window_size())
@@ -99,6 +101,7 @@ class Overlay:
         self._after_open()
 
     def close(self) -> None:
+        """Hides it and calls the `on_close` functions. Does nothing if it is closed."""
         if not self._open:
             return
         self._unresize()
@@ -109,6 +112,7 @@ class Overlay:
             fn()
 
     def set_theme(self, theme: Theme) -> None:
+        """Re-tints it for `theme`, at once."""
         self.widget.set_theme(theme)
 
     def _window_size(self) -> tuple[float, float]:

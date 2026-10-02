@@ -167,10 +167,12 @@ class Signal(_Notifiable):
         self._value = value
 
     def get(self) -> Any:
+        """The value. Reading it inside a `Computed` or `Effect` makes that depend on it."""
         _record_read(self)
         return self._value
 
     def set(self, value: Any) -> None:
+        """Replaces the value, and tells everything that depends on it if it changed."""
         if value == self._value:
             return
         self._value = value
@@ -209,6 +211,7 @@ class Computed(_Notifiable):
         self._recompute()
 
     def get(self) -> Any:
+        """The derived value, recomputed only when something it read has changed."""
         _record_read(self)
         return self._value
 
@@ -253,6 +256,7 @@ class Effect:
             dependency._subscribe(self._run)
 
     def dispose(self) -> None:
+        """Stops the effect: it no longer runs when what it read changes."""
         for dependency in self._dependencies:
             dependency._unsubscribe(self._run)
         self._dependencies = []

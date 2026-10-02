@@ -229,10 +229,12 @@ ELEVATION_LEVELS = {f"level_{n}": float(n) for n in range(6)}
 
 
 def shape(name: str) -> Optional[float]:
+    """The corner radius of the MD3 shape token `name` (`"medium"`, `"full"`, ...), or `None` if it isn't one."""
     return SHAPES.get(name)
 
 
 def elevation(name: str) -> Optional[float]:
+    """The level (0 to 5) of the MD3 elevation token `name`, or `None` if it isn't one."""
     return ELEVATION_LEVELS.get(name)
 
 
@@ -295,4 +297,5 @@ TYPE_SCALE = {
 
 
 def type_style(role: str) -> Optional[TypeStyle]:
+    """The font size, weight, line height and tracking of the MD3 type role `role`, or `None` if it isn't one."""
     return TYPE_SCALE.get(role)

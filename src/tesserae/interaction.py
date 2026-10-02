@@ -112,6 +112,7 @@ class Interaction:
 
     @property
     def enabled(self) -> bool:
+        """Whether the node shows state feedback (hover, focus, press); set it to turn that on or off."""
         return self._enabled
 
     @enabled.setter
@@ -139,6 +140,7 @@ class Interaction:
 
     @property
     def ring_visible(self) -> bool:
+        """Whether the focus ring is showing."""
         return bool(self.ring.get("visible"))
 
     def retint(self, tint: RGBA, ring_color: RGBA) -> None:

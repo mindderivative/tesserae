@@ -155,6 +155,7 @@ class Dock:
         return [p.title for p in self._zone(side).panels]
 
     def shown_title(self, side: str) -> Optional[str]:
+        """The title of the panel showing in the `side` zone, or `None` if none is."""
         shown = self.shown(side)
         entry = self._find(shown) if shown is not None else None
         return entry.title if entry else None
@@ -164,6 +165,7 @@ class Dock:
         return next((p.node for z in self._zones.values() for p in z.panels if p.title == title), None)
 
     def side_of(self, panel: Any) -> Optional[str]:
+        """The side `panel` is docked on, or `None` if it isn't docked."""
         entry = self._find(getattr(panel, "node", panel))
         return entry.side if entry else None
 

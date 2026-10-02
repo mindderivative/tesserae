@@ -195,6 +195,7 @@ class View:
 
     @property
     def spec(self) -> dict[str, Any]:
+        """The expanded spec the view was built from: every `component:` and `include:` resolved."""
         return self._spec
 
     @property
