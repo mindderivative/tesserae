@@ -1,0 +1,846 @@
+# What the component pages say, by hand: the one thing in them a tool can't read from the code.
+# `tools/generate_component_docs.py` adds each fragment's YAML and its stylesheet, and the parts and
+# parameters, from the files themselves.
+#
+# groups:        the collapsing tree, in order.
+# components:    one page each: slug, title, group, fragments (the *_Component.yaml it is built from, or none
+#                for a widget that is Python only), md3 (what it is in Material Design 3), built (how Tesserae
+#                makes it), usage (an example in a view), python (the same in code), see (guide pages).
+groups:
+  - Actions
+  - Communication
+  - Containment
+  - Navigation
+  - Selection and input
+  - Content
+  - Beyond MD3
+
+components:
+  # -- Actions -----------------------------------------------------------------------------------
+  - slug: buttons
+    title: Buttons
+    group: Actions
+    fragments: [ButtonFilled, ButtonFilledTonal, ButtonElevated, ButtonOutlined, ButtonText]
+    md3: |
+      Buttons let people take an action with one tap. Material Design 3 has five, in order of emphasis: **filled**
+      for a screen's one main action, **filled tonal** and **elevated** for important but secondary ones,
+      **outlined** for medium emphasis, and **text** for the lowest: dialogs, cards and toolbars. A button is 40dp
+      high and fully rounded, and its label is in the *label large* type style.
+    built: |
+      Each type is its own fragment: `component:` can't branch on a name, so a `variant` can't pick between them
+      the way `button(variant=)` does in Python. A fragment's `corner_radius` is a parameter because `{{ }}` can't
+      do arithmetic: a pill is half the height, and `button()` works that out for you.
+    usage: |
+      - id: save
+        component: ButtonFilled
+        with: {label: Save, width: 120, height: 40, corner_radius: 20}
+        handlers: {on_click: save}
+    python: |
+      from tesserae.widgets import button
+
+      save = button(app.window, "Save", 120, 40, variant="filled", on_click=viewmodel.save)
+    see: [guide/widget-catalog.md, guide/interaction.md]
+
+  - slug: button-groups
+    title: Button groups
+    group: Actions
+    fragments: [ButtonGroup]
+    md3: |
+      A button group lays related buttons side by side, with an even gap, so they read as one set of choices.
+    built: |
+      A row of buttons, each made from the fragment named by `button` (filled by default), one for each entry of
+      `items`.
+    usage: |
+      - id: choices
+        component: ButtonGroup
+        with:
+          items: [{label: Day}, {label: Week}, {label: Month}]
+          width: 90
+          height: 40
+          corner_radius: 20
+    python: |
+      from tesserae.widgets import button_group
+
+      group = button_group(app.window, ["Day", "Week", "Month"], 90, 40, on_click=viewmodel.pick)
+
+  - slug: split-buttons
+    title: Split buttons
+    group: Actions
+    fragments: [SplitButtonFilled, SplitButtonFilledTonal, SplitButtonElevated, SplitButtonOutlined, SplitButtonText]
+    md3: |
+      A split button joins a main action to a menu of related ones: the leading part does the usual thing, and the
+      trailing chevron opens the others.
+    built: |
+      One container with a leading and a trailing part; the two parts are separate click targets.
+    usage: |
+      - id: send
+        component: SplitButtonFilled
+        with: {label: Send, width: 160, height: 40, corner_radius: 20}
+    python: |
+      from tesserae.widgets import split_button
+
+      send = split_button(app.window, "Send", 160, 40, variant="filled")
+
+  - slug: icon-buttons
+    title: Icon buttons
+    group: Actions
+    fragments: [IconButtonStandard, IconButtonFilled, IconButtonFilledTonal, IconButtonOutlined]
+    md3: |
+      An icon button is an action shown as a glyph alone. Like buttons it has four emphases: standard (no
+      container), filled, filled tonal and outlined. It is 40dp, with a 48dp touch target.
+    built: |
+      A round `Rect` with an `Icon` inside. `corner_radius` is half the `size`.
+    usage: |
+      - id: settings
+        component: IconButtonStandard
+        with: {icon: settings, size: 40, corner_radius: 20}
+        handlers: {on_click: open_settings}
+    python: |
+      from tesserae.widgets import icon_button
+
+      settings = icon_button(app.window, "settings", 40, variant="standard")
+
+  - slug: fabs
+    title: Floating action buttons
+    group: Actions
+    fragments: [FabPrimary, FabSecondary, FabTertiary, FabSurface]
+    md3: |
+      A floating action button (FAB) is the screen's most important action, as an icon in a prominent container.
+      There are four colours (primary, secondary, tertiary and surface) and three sizes: small (40dp), the
+      default (56dp) and large (96dp).
+    built: |
+      The size is a parameter, and `fab_size` names it (`small`, `default` or `large`) so a theme's
+      `components:` entry can shape each.
+    usage: |
+      - id: add
+        component: FabPrimary
+        with: {icon: add, size: 56, corner_radius: 16}
+        handlers: {on_click: add_item}
+    python: |
+      from tesserae.widgets import fab
+
+      add = fab(app.window, "add", size="default", variant="primary")
+
+  - slug: extended-fabs
+    title: Extended FABs
+    group: Actions
+    fragments: [ExtendedFabPrimary, ExtendedFabSecondary, ExtendedFabTertiary, ExtendedFabSurface]
+    md3: |
+      An extended FAB is a FAB with a text label, for a main action that an icon alone wouldn't explain.
+    built: |
+      A container with an optional icon and a label; give no `icon` for a text-only one.
+    usage: |
+      - id: new
+        component: ExtendedFabPrimary
+        with: {label: New, icon: add, width: 120}
+    python: |
+      from tesserae.widgets import extended_fab
+
+      new = extended_fab(app.window, "New", 120, icon="add", variant="primary")
+
+  # -- Communication -----------------------------------------------------------------------------
+  - slug: badges
+    title: Badges
+    group: Communication
+    fragments: [BadgeDot, BadgeLabeled]
+    md3: |
+      A badge shows that something has news. The small one is a dot, and the large one carries a short count or
+      text. It sits on the corner of what it describes.
+    built: |
+      The dot is a small `Rect`; the labelled badge is a pill with `label_small` text.
+    usage: |
+      - id: unread
+        component: BadgeLabeled
+        with: {label: "3", width: 20}
+    python: |
+      from tesserae.widgets import badge
+
+      unread = badge(app.window, "3")
+
+  - slug: progress-indicators
+    title: Progress indicators
+    group: Communication
+    fragments: [LinearProgress, CircularProgress, LoadingIndicator]
+    md3: |
+      Progress indicators show that something is happening. **Determinate** ones fill as a value from 0 to 1
+      grows; **indeterminate** ones keep moving when there's no value to show. The loading indicator is MD3's
+      shape-morphing one, for short waits.
+    built: |
+      Each is a Tesserae control (`tesserae.controls`), not a drawing of `tre`'s: the node kinds `LinearProgress`,
+      `CircularProgress` and `LoadingIndicator`. Leave `value` out for the indeterminate form.
+    usage: |
+      - id: upload
+        component: LinearProgress
+        with: {width: 240, height: 4, value: 0.4}
+    python: |
+      from tesserae.widgets import linear_progress
+
+      upload = linear_progress(app.window, 240, value=0.4)
+      upload.value.set(0.8)
+    see: [guide/controls.md]
+
+  - slug: snackbars
+    title: Snackbars
+    group: Communication
+    fragments: [Snackbar]
+    md3: |
+      A snackbar briefly tells the user about a process that has happened or will happen, at the bottom of the
+      window, and may offer one action. It goes away by itself.
+    built: |
+      The fragment is its look; `tesserae.overlays.Snackbar` shows it on a layer above the window, with the
+      action and the close button.
+    usage: |
+      - id: saved
+        component: Snackbar
+        with: {text: Saved, width: 280}
+    python: |
+      from tesserae.widgets import snackbar
+
+      bar = snackbar(app.window, "Saved", 280, action_label="Undo", on_action=viewmodel.undo)
+      bar.open()
+    see: [guide/overlays.md]
+
+  - slug: tooltips
+    title: Tooltips
+    group: Communication
+    fragments: [Tooltip]
+    md3: |
+      A tooltip names or explains a control when the pointer rests on it, or it has keyboard focus.
+    built: |
+      The fragment is a small inverse surface with `body_small` text; `tesserae.overlays.Tooltip` places it next
+      to its anchor.
+    usage: |
+      - id: hint
+        component: Tooltip
+        with: {text: Save the file, width: 120}
+    python: |
+      from tesserae.widgets import tooltip
+
+      tip = tooltip(app.window, "Save the file", anchor=save.node)
+    see: [guide/overlays.md]
+
+  # -- Containment -------------------------------------------------------------------------------
+  - slug: cards
+    title: Cards
+    group: Containment
+    fragments: [CardElevated, CardFilled, CardOutlined]
+    md3: |
+      A card holds content and actions about one subject. It comes **elevated** (a shadow), **filled** (a
+      higher surface) or **outlined** (a border). All have a medium (12dp) corner radius.
+    built: |
+      A content-free `Rect`: add children inside it in your view, or with `.node.add_child` in Python.
+    usage: |
+      - id: summary
+        component: CardElevated
+        with: {width: 240, height: 120}
+    python: |
+      from tesserae.widgets import card
+
+      summary = card(app.window, 240, 120, variant="elevated")
+
+  - slug: dialogs
+    title: Dialogs
+    group: Containment
+    fragments: [Dialog]
+    md3: |
+      A dialog interrupts to ask for a decision or give needed information. It has a headline, supporting text and
+      up to two actions, on a raised surface over a scrim, and blocks what is behind it.
+    built: |
+      The fragment draws the scrim and the panel; `tesserae.overlays.Dialog` shows it as a modal layer, with
+      Escape and a click on the scrim closing it.
+    usage: |
+      - id: confirm
+        component: Dialog
+        with: {headline: "Discard changes?", text: "Your edits will be lost.", width: 320, height: 200, scrim_width: 800, scrim_height: 600}
+    python: |
+      from tesserae.widgets import dialog
+
+      confirm = dialog(app.window, "Discard changes?", "Your edits will be lost.", 320, 200,
+                       actions=[("Cancel", None), ("Discard", viewmodel.discard)])
+      confirm.open()
+    see: [guide/overlays.md]
+
+  - slug: dividers
+    title: Dividers
+    group: Containment
+    fragments: [Divider]
+    md3: |
+      A divider is a thin line that groups and separates content in lists and containers.
+    built: |
+      A one-pixel `Rect` in the `outline_variant` colour.
+    usage: |
+      - id: rule
+        component: Divider
+        with: {width: 240, height: 1}
+    python: |
+      from tesserae.widgets import divider
+
+      rule = divider(app.window, 240)
+
+  - slug: lists
+    title: Lists
+    group: Containment
+    fragments: [ListItem]
+    md3: |
+      A list is a column of rows, each a headline with optional leading and trailing content and supporting text.
+    built: |
+      One fragment for the row; a list is a container of them. For a list that changes while the app runs, use a
+      [Repeater](../guide/repeater.md).
+    usage: |
+      - id: first
+        component: ListItem
+        with: {headline: Inbox, width: 320}
+    python: |
+      from tesserae.widgets import list_, list_item
+
+      rows = list_(app.window, [list_item(app.window, name) for name in ("Inbox", "Sent", "Drafts")], width=320)
+    see: [guide/repeater.md]
+
+  - slug: side-sheets
+    title: Side sheets
+    group: Containment
+    fragments: [SideSheetStandard, SideSheetModal]
+    md3: |
+      A side sheet holds secondary content beside the main content. A **standard** one shares the window with it;
+      a **modal** one covers it over a scrim and must be dismissed.
+    built: |
+      The standard sheet is a `Rect`; the modal one adds the scrim. `tesserae.overlays.SideSheet` shows either.
+    usage: |
+      - id: filters
+        component: SideSheetStandard
+        with: {width: 280, height: 400}
+    python: |
+      from tesserae.widgets import side_sheet
+
+      sheet = side_sheet(app.window, 280, modal=True)
+      sheet.open()
+    see: [guide/overlays.md]
+
+  - slug: accordions
+    title: Accordions
+    group: Containment
+    fragments: [AccordionHeader]
+    md3: |
+      Material Design 3 has no accordion of its own. Tesserae's is built in MD3's terms: a list row with a chevron
+      that turns when the section opens.
+    built: |
+      The header only; the section under it is yours to show and hide, usually with a binding.
+    usage: |
+      - id: details
+        component: AccordionHeader
+        with: {title: Details, width: 320}
+    python: |
+      from tesserae.widgets import accordion_header
+
+      details = accordion_header(app.window, "Details", expanded=False, width=320)
+
+  - slug: trees
+    title: Trees
+    group: Containment
+    fragments: [TreeNodeBranch, TreeNodeLeaf]
+    md3: |
+      Material Design 3 has no tree view; this is MD3's list row, indented by depth, with a chevron on the rows
+      that open.
+    built: |
+      Two fragments, a branch (with the chevron) and a leaf. `left_padding` is the indent for the row's depth.
+    usage: |
+      - id: folder
+        component: TreeNodeBranch
+        with: {title: src, width: 280, left_padding: 8}
+      - id: file
+        component: TreeNodeLeaf
+        with: {title: app.py, width: 280, left_padding: 32}
+    python: |
+      from tesserae.widgets import tree_node
+
+      folder = tree_node(app.window, "src", depth=0, expanded=True)
+      file = tree_node(app.window, "app.py", depth=1, leaf=True)
+
+  # -- Navigation --------------------------------------------------------------------------------
+  - slug: navigation-rail
+    title: Navigation rail
+    group: Navigation
+    fragments: [NavigationRail, NavigationRailItem]
+    md3: |
+      A navigation rail puts three to seven destinations in a narrow column beside the content, on medium and
+      large windows. Each is an icon in a pill with a label; the selected one's pill is filled.
+    built: |
+      The rail is a column of `NavigationRailItem`s, one for each entry of `items`. A [shell file](../guide/app-shell.md)'s
+      `navigation:` builds one for you.
+    usage: |
+      - id: rail
+        component: NavigationRail
+        with:
+          items:
+            - {label: Home, icon: home, selected: true}
+            - {label: Search, icon: search}
+    python: |
+      from tesserae.widgets import navigation_rail
+
+      rail = navigation_rail(app.window, ["Home", "Search"], ["home", "search"], selected=0)
+    see: [guide/app-shell.md]
+
+  - slug: navigation-drawer
+    title: Navigation drawer
+    group: Navigation
+    fragments: [NavigationDrawer, NavigationDrawerItem]
+    md3: |
+      A navigation drawer holds more destinations than a rail, as a vertical list of icon-and-label items. It can
+      be permanent (standard) or slide over the content (modal).
+    built: |
+      A column of `NavigationDrawerItem`s. `tesserae.overlays.NavigationDrawer` shows the modal form.
+    usage: |
+      - id: drawer
+        component: NavigationDrawer
+        with:
+          width: 280
+          item_width: 256
+          items:
+            - {label: Inbox, icon: home, selected: true}
+            - {label: Search, icon: search}
+    python: |
+      from tesserae.widgets import navigation_drawer
+
+      drawer = navigation_drawer(app.window, ["Inbox", "Search"], ["home", "search"], selected=0)
+    see: [guide/overlays.md]
+
+  - slug: top-app-bar
+    title: Top app bar
+    group: Navigation
+    fragments: [TopAppBar]
+    md3: |
+      A top app bar sits along the top of a screen with its title and the actions for it: a navigation icon at the
+      start and up to a few action icons at the end.
+    built: |
+      The fragment is the bar and its title; `top_app_bar()` adds the icon buttons, and keeps the bar's height
+      when the window is short. With `App(decorations=False)` it can also be the window's own title bar.
+    usage: |
+      - id: bar
+        component: TopAppBar
+        with: {title: Notes, width: 640}
+    python: |
+      from tesserae.widgets import top_app_bar
+
+      bar = top_app_bar(app.window, "Notes", leading_icon="menu", trailing_icons=["settings"])
+    see: [guide/custom-title-bars.md, guide/app-shell.md]
+
+  - slug: tabs
+    title: Tabs
+    group: Navigation
+    fragments: [Tabs, TabsItem]
+    md3: |
+      Tabs organise content at one level of hierarchy, with the selected tab marked by an indicator. Primary tabs
+      may carry an icon above the label.
+    built: |
+      A row of `TabsItem`s over a divider, one for each entry of `items`. Give an item an `icon` and it is taller.
+    usage: |
+      - id: tabs
+        component: Tabs
+        with:
+          item_width: 120
+          items:
+            - {label: Videos, selected: true}
+            - {label: Photos}
+    python: |
+      from tesserae.widgets import tabs
+
+      bar = tabs(app.window, ["Videos", "Photos"], selected=0)
+
+  - slug: menus
+    title: Menus
+    group: Navigation
+    fragments: [Menu, MenuItem]
+    md3: |
+      A menu shows a list of choices on a temporary surface, opened by a button, a right click or a keyboard
+      shortcut.
+    built: |
+      A column of `MenuItem`s; `tesserae.overlays.Menu` opens it next to an anchor, at a point, or as a context
+      menu, and handles the arrow keys.
+    usage: |
+      - id: actions
+        component: Menu
+        with:
+          width: 200
+          items: [{label: Cut}, {label: Copy}, {label: Paste}]
+    python: |
+      from tesserae.widgets import menu
+
+      actions = menu(app.window, [("Cut", viewmodel.cut), ("Copy", viewmodel.copy)], width=200)
+      actions.open(save.node)
+    see: [guide/overlays.md]
+
+  - slug: search
+    title: Search
+    group: Navigation
+    fragments: [SearchBar, SearchView]
+    md3: |
+      A search bar is a rounded field that starts a search; the search view is the full-size surface that shows
+      suggestions and results once it is focused.
+    built: |
+      The bar is a container around a `TextField`; the view is a surface that `tesserae.overlays.SearchView` shows.
+    usage: |
+      - id: search
+        component: SearchBar
+        with: {placeholder: Search notes, width: 360, corner_radius: 28}
+    python: |
+      from tesserae.widgets import search_bar
+
+      search = search_bar(app.window, "Search notes", 360)
+
+  - slug: toolbars
+    title: Toolbars
+    group: Navigation
+    fragments: [ToolbarDocked, ToolbarFloating]
+    md3: |
+      A toolbar groups the actions for the content around it. A **docked** one is fixed to an edge; a **floating**
+      one is a rounded bar over the content.
+    built: |
+      Containers whose children are yours: put buttons or icon buttons inside.
+    usage: |
+      - id: tools
+        component: ToolbarFloating
+        with: {background: surface_container, width: 240, corner_radius: 28}
+    python: |
+      from tesserae.widgets import toolbar
+
+      tools = toolbar(app.window, variant="floating", width=240)
+
+  - slug: links
+    title: Links
+    group: Navigation
+    fragments: [Link]
+    md3: |
+      A link takes the user somewhere else, or opens a related page. It is text, in the primary colour.
+    built: |
+      The `Link` node kind: text that takes focus, and that Enter or a click activates.
+    usage: |
+      - id: help
+        component: Link
+        with: {text: Read the docs, width: 160, height: 24}
+        handlers: {on_click: open_docs}
+    python: |
+      from tesserae.widgets import link
+
+      help_link = link(app.window, "Read the docs", 160, on_click=viewmodel.open_docs)
+
+  # -- Selection and input -----------------------------------------------------------------------
+  - slug: checkboxes
+    title: Checkbox
+    group: Selection and input
+    fragments: [Checkbox]
+    md3: |
+      A checkbox lets the user select one or more items from a set, or turn an option on or off. It has a 40dp
+      state layer around an 18dp box.
+    built: |
+      The `Checkbox` kind is one of Tesserae's controls (`tesserae.controls.Checkbox`), whose `checked` is a
+      signal, so a binding can read and write it.
+    usage: |
+      - id: agree
+        component: Checkbox
+        with: {background: surface, width: 48, height: 48, checked: false}
+        handlers: {on_change: toggled}
+    python: |
+      from tesserae.widgets import checkbox
+
+      agree = checkbox(app.window, (0xFF, 0xFF, 0xFF, 0xFF), 48, 48, checked=False)
+      agree.checked.get()
+    see: [guide/controls.md]
+
+  - slug: radio-buttons
+    title: Radio button
+    group: Selection and input
+    fragments: [RadioButton]
+    md3: |
+      A radio button lets the user choose one option from a set. Radio buttons in one group exclude each other,
+      and the arrow keys move between them.
+    built: |
+      The `RadioButton` kind, a Tesserae control. Radio buttons with one `group:` name share a `RadioGroup`.
+    usage: |
+      - id: small
+        component: RadioButton
+        with: {size: 48, selected: true}
+    python: |
+      from tesserae.controls import RadioGroup
+      from tesserae.widgets import radio_button
+
+      group = RadioGroup()
+      small = radio_button(app.window, 48, selected=True, group=group)
+    see: [guide/controls.md]
+
+  - slug: switches
+    title: Switch
+    group: Selection and input
+    fragments: [Switch]
+    md3: |
+      A switch toggles one setting on or off, and takes effect at once. It has a track and a thumb that grows when
+      it is on.
+    built: |
+      The `Switch` kind, a Tesserae control, with a `selected` signal.
+    usage: |
+      - id: dark
+        component: Switch
+        with: {width: 52, height: 32, selected: false}
+    python: |
+      from tesserae.widgets import switch
+
+      dark = switch(app.window, selected=False)
+    see: [guide/controls.md]
+
+  - slug: sliders
+    title: Slider
+    group: Selection and input
+    fragments: [Slider]
+    md3: |
+      A slider lets the user pick a value from a range by dragging a handle, or with the keyboard.
+    built: |
+      The `Slider` kind, a Tesserae control with `value`, `min`, `max` and `step`.
+    usage: |
+      - id: volume
+        component: Slider
+        with: {background: surface, width: 240, height: 44, value: 0.5}
+    python: |
+      from tesserae.widgets import slider
+
+      volume = slider(app.window, (0xFF, 0xFF, 0xFF, 0xFF), 240, 44, value=0.5)
+      volume.on_change(print)
+    see: [guide/controls.md]
+
+  - slug: chips
+    title: Chips
+    group: Selection and input
+    fragments: [ChipAssist, ChipFilter, ChipFilterSelected, ChipInput, ChipSuggestion]
+    md3: |
+      Chips are compact elements for an action, a filter, a piece of input, or a suggestion. **Assist** chips
+      start an action, **filter** chips narrow results (and show a check when selected), **input** chips are
+      things the user entered, and **suggestion** chips offer a reply or next step.
+    built: |
+      A rounded `Rect` with a label. The selected filter chip is its own fragment because a fragment's structure
+      can't change with a parameter: it adds the check mark.
+    usage: |
+      - id: shipped
+        component: ChipFilterSelected
+        with: {label: Shipped, width: 96}
+    python: |
+      from tesserae.widgets import chip
+
+      shipped = chip(app.window, "Shipped", 96, variant="filter", selected=True)
+
+  - slug: spin-boxes
+    title: Spin box
+    group: Selection and input
+    fragments: [SpinBox]
+    md3: |
+      Material Design 3 has no spin box. Tesserae's is built from MD3's parts: a number field between two 40dp
+      icon buttons.
+    built: |
+      The `SpinBox` kind, a Tesserae control. Typing, the arrow keys and the buttons change `value`; `min`, `max`
+      and `step` bound it.
+    usage: |
+      - id: quantity
+        component: SpinBox
+        with: {value: 1, min: 0, max: 10, step: 1}
+    python: |
+      from tesserae.widgets import spin_box
+
+      quantity = spin_box(app.window, 1, min=0, max=10)
+    see: [guide/controls.md]
+
+  - slug: date-pickers
+    title: Date picker
+    group: Selection and input
+    fragments: [DatePickerDay, DatePickerDayToday, DatePickerDaySelected, DatePickerDayOutsideMonth]
+    md3: |
+      A date picker lets the user pick a date from a month grid. Today is outlined, the chosen day is a filled
+      circle, and days of the neighbouring months are dimmed.
+    built: |
+      The day cell only, in its four states; you lay the grid out (a `display: grid` container is the natural
+      fit).
+    usage: |
+      - id: d7
+        component: DatePickerDaySelected
+        with: {day: "7"}
+    python: |
+      from tesserae.widgets import date_picker_day
+
+      day = date_picker_day(app.window, 7, selected=True)
+
+  - slug: time-pickers
+    title: Time picker
+    group: Selection and input
+    fragments: [TimePickerDial, PeriodSelectorAM, PeriodSelectorPM]
+    md3: |
+      A time picker lets the user choose an hour and a minute on a dial, with an AM/PM selector in a 12-hour
+      format.
+    built: |
+      The dial is a Tesserae control (`TimePickerDial`): drag or use the keys to point the hand at the hour, then
+      the minute. The AM and PM selectors are two fragments, one for each selected state.
+    usage: |
+      - id: dial
+        component: TimePickerDial
+        with: {size: 256, hour: 9, minute: 30}
+    python: |
+      from tesserae.widgets import time_picker_dial
+
+      dial = time_picker_dial(app.window, hour=9, minute=30)
+    see: [guide/controls.md]
+
+  - slug: segmented-buttons
+    title: Segmented buttons
+    group: Selection and input
+    fragments: []
+    md3: |
+      A segmented button is a row of two to five connected options, for one choice or several.
+    built: |
+      Python only: there is no `component:` fragment, because the number of segments changes its structure.
+    python: |
+      from tesserae.widgets import segmented_button
+
+      view = segmented_button(app.window, ["Day", "Week", "Month"], selected=0)
+      many = segmented_button(app.window, ["Bold", "Italic"], multi=True, selected=[0])
+
+  - slug: time-input
+    title: Time input
+    group: Selection and input
+    fragments: []
+    md3: |
+      A time input field is a numeric field for the hour or the minute, used in the time picker's keyboard mode.
+    built: |
+      Python only.
+    python: |
+      from tesserae.widgets import time_input_field
+
+      hour = time_input_field(app.window, 9, unit="hour")
+
+  # -- Content -----------------------------------------------------------------------------------
+  - slug: text
+    title: Text
+    group: Content
+    fragments: [Text]
+    md3: |
+      Text is set in Material Design 3's type scale: 15 styles in five groups (display, headline, title, body and
+      label), each large, medium or small, with a font, size, weight and line height.
+    built: |
+      The `Text` kind. Name a `typography_role` and Tesserae fills in the rest; a theme's `typography:` can change
+      what a role means.
+    usage: |
+      - id: heading
+        component: Text
+        with: {text: Notes, typography_role: headline_medium, color: on_surface}
+    python: |
+      from tesserae.widgets import text
+
+      heading = text(app.window, "Notes", typography_role="headline_medium")
+    see: [themes/index.md]
+
+  - slug: images
+    title: Images
+    group: Content
+    fragments: [Image]
+    md3: |
+      An image shows a picture, fitted to its box. Material Design 3 describes how to crop and round it in a
+      container.
+    built: |
+      The `Image` kind: Tesserae reads and decodes the file, and `fit` says how it fills the box.
+    usage: |
+      - id: photo
+        component: Image
+        with: {src: cat.png, width: 200, height: 150, fit: cover}
+    python: |
+      from tesserae.widgets import image
+
+      photo = image(app.window, "cat.png", 200, 150, fit="cover")
+
+  - slug: video
+    title: Video
+    group: Content
+    fragments: [Video]
+    md3: |
+      Video is content, not a component, in Material Design 3; Tesserae shows frames you supply.
+    built: |
+      An `Image` node whose frame is pushed to it, from a binding.
+    usage: |
+      - id: clip
+        component: Video
+        with: {width: 320, height: 180, fit: contain}
+    python: |
+      from tesserae.widgets import video
+
+      clip = video(app.window, 320, 180, fit="contain")
+
+  - slug: carousel
+    title: Carousel
+    group: Content
+    fragments: []
+    md3: |
+      A carousel shows a row of items that scroll, with the focused one largest. MD3 has multi-browse, uncontained,
+      hero and full-screen layouts.
+    built: |
+      Python only.
+    python: |
+      from tesserae.widgets import carousel
+
+      gallery = carousel(app.window, 480, 180, layout="multi_browse", items=[])
+
+  - slug: pagination
+    title: Pagination
+    group: Content
+    fragments: []
+    md3: |
+      Pagination shows where the user is among pages: a row of dots or numbers.
+    built: |
+      Python only.
+    python: |
+      from tesserae.widgets import pagination
+
+      pages = pagination(app.window, 10, current=0)
+
+  # -- Beyond MD3 --------------------------------------------------------------------------------
+  - slug: status-bar
+    title: Status bar
+    group: Beyond MD3
+    fragments: [StatusBar]
+    md3: |
+      Material Design 3 has no status bar. A desktop app often wants one, so this is a thin strip in MD3's
+      surface and *label* style.
+    built: |
+      A container with one `Text`. It keeps its height when the window is short, and takes a `style`.
+    usage: |
+      - id: status
+        component: StatusBar
+        with: {text: Ready, width: 640}
+    python: |
+      from tesserae.widgets import status_bar
+
+      status = status_bar(app.window, "Ready", style={"height": 32})
+    see: [guide/app-shell.md]
+
+  - slug: node-graph
+    title: Node graph
+    group: Beyond MD3
+    fragments: [NodeGraph]
+    md3: |
+      Material Design 3 has no node graph. This is a pannable canvas of titled boxes joined by edges, for tools.
+    built: |
+      The `NodeGraph` kind, with `GraphNode` children.
+    usage: |
+      - id: graph
+        component: NodeGraph
+        with: {width: 480, height: 320}
+    python: |
+      from tesserae.widgets import graph_node, node_graph
+
+      graph = node_graph(app.window, 480, 320)
+      source = graph_node(app.window, graph, "Source", 40, 40, 120, 60)
+
+  - slug: splitter
+    title: Splitter
+    group: Beyond MD3
+    fragments: []
+    md3: |
+      Material Design 3 has no splitter. It divides the window into two panes with a bar the user drags.
+    built: |
+      Python only.
+    python: |
+      from tesserae.widgets import splitter
+
+      panes = splitter(app.window, left.node, right.node, 640, 400, orientation="horizontal", position=0.3)

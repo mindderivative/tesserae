@@ -80,6 +80,182 @@ nav:
       - Repeater: api/repeater.md
       - spec (load_view/expand_components): api/spec.md
   - Architecture: architecture.md
+  # >>> components (written by tools/generate_component_docs.py)
+  - Components:
+      - Overview: components/index.md
+      - Actions:
+          - Buttons: components/buttons.md
+          - Button groups: components/button-groups.md
+          - Split buttons: components/split-buttons.md
+          - Icon buttons: components/icon-buttons.md
+          - Floating action buttons: components/fabs.md
+          - Extended FABs: components/extended-fabs.md
+      - Communication:
+          - Badges: components/badges.md
+          - Progress indicators: components/progress-indicators.md
+          - Snackbars: components/snackbars.md
+          - Tooltips: components/tooltips.md
+      - Containment:
+          - Cards: components/cards.md
+          - Dialogs: components/dialogs.md
+          - Dividers: components/dividers.md
+          - Lists: components/lists.md
+          - Side sheets: components/side-sheets.md
+          - Accordions: components/accordions.md
+          - Trees: components/trees.md
+      - Navigation:
+          - Navigation rail: components/navigation-rail.md
+          - Navigation drawer: components/navigation-drawer.md
+          - Top app bar: components/top-app-bar.md
+          - Tabs: components/tabs.md
+          - Menus: components/menus.md
+          - Search: components/search.md
+          - Toolbars: components/toolbars.md
+          - Links: components/links.md
+      - Selection and input:
+          - Checkbox: components/checkboxes.md
+          - Radio button: components/radio-buttons.md
+          - Switch: components/switches.md
+          - Slider: components/sliders.md
+          - Chips: components/chips.md
+          - Spin box: components/spin-boxes.md
+          - Date picker: components/date-pickers.md
+          - Time picker: components/time-pickers.md
+          - Segmented buttons: components/segmented-buttons.md
+          - Time input: components/time-input.md
+      - Content:
+          - Text: components/text.md
+          - Images: components/images.md
+          - Video: components/video.md
+          - Carousel: components/carousel.md
+          - Pagination: components/pagination.md
+      - Beyond MD3:
+          - Status bar: components/status-bar.md
+          - Node graph: components/node-graph.md
+          - Splitter: components/splitter.md
+  - Stylesheets:
+      - Overview: stylesheets/index.md
+      - Actions:
+          - Buttons:
+              - ButtonFilled: stylesheets/buttons/button-filled.md
+              - ButtonFilledTonal: stylesheets/buttons/button-filled-tonal.md
+              - ButtonElevated: stylesheets/buttons/button-elevated.md
+              - ButtonOutlined: stylesheets/buttons/button-outlined.md
+              - ButtonText: stylesheets/buttons/button-text.md
+          - Button groups:
+              - ButtonGroup: stylesheets/button-groups/button-group.md
+          - Split buttons:
+              - SplitButtonFilled: stylesheets/split-buttons/split-button-filled.md
+              - SplitButtonFilledTonal: stylesheets/split-buttons/split-button-filled-tonal.md
+              - SplitButtonElevated: stylesheets/split-buttons/split-button-elevated.md
+              - SplitButtonOutlined: stylesheets/split-buttons/split-button-outlined.md
+              - SplitButtonText: stylesheets/split-buttons/split-button-text.md
+          - Icon buttons:
+              - IconButtonStandard: stylesheets/icon-buttons/icon-button-standard.md
+              - IconButtonFilled: stylesheets/icon-buttons/icon-button-filled.md
+              - IconButtonFilledTonal: stylesheets/icon-buttons/icon-button-filled-tonal.md
+              - IconButtonOutlined: stylesheets/icon-buttons/icon-button-outlined.md
+          - Floating action buttons:
+              - FabPrimary: stylesheets/fabs/fab-primary.md
+              - FabSecondary: stylesheets/fabs/fab-secondary.md
+              - FabTertiary: stylesheets/fabs/fab-tertiary.md
+              - FabSurface: stylesheets/fabs/fab-surface.md
+          - Extended FABs:
+              - ExtendedFabPrimary: stylesheets/extended-fabs/extended-fab-primary.md
+              - ExtendedFabSecondary: stylesheets/extended-fabs/extended-fab-secondary.md
+              - ExtendedFabTertiary: stylesheets/extended-fabs/extended-fab-tertiary.md
+              - ExtendedFabSurface: stylesheets/extended-fabs/extended-fab-surface.md
+      - Communication:
+          - Badges:
+              - BadgeDot: stylesheets/badges/badge-dot.md
+              - BadgeLabeled: stylesheets/badges/badge-labeled.md
+          - Progress indicators:
+              - LinearProgress: stylesheets/progress-indicators/linear-progress.md
+              - CircularProgress: stylesheets/progress-indicators/circular-progress.md
+              - LoadingIndicator: stylesheets/progress-indicators/loading-indicator.md
+          - Snackbars:
+              - Snackbar: stylesheets/snackbars/snackbar.md
+          - Tooltips:
+              - Tooltip: stylesheets/tooltips/tooltip.md
+      - Containment:
+          - Cards:
+              - CardElevated: stylesheets/cards/card-elevated.md
+              - CardFilled: stylesheets/cards/card-filled.md
+              - CardOutlined: stylesheets/cards/card-outlined.md
+          - Dialogs:
+              - Dialog: stylesheets/dialogs/dialog.md
+          - Dividers:
+              - Divider: stylesheets/dividers/divider.md
+          - Lists:
+              - ListItem: stylesheets/lists/list-item.md
+          - Side sheets:
+              - SideSheetStandard: stylesheets/side-sheets/side-sheet-standard.md
+              - SideSheetModal: stylesheets/side-sheets/side-sheet-modal.md
+          - Accordions:
+              - AccordionHeader: stylesheets/accordions/accordion-header.md
+          - Trees:
+              - TreeNodeBranch: stylesheets/trees/tree-node-branch.md
+              - TreeNodeLeaf: stylesheets/trees/tree-node-leaf.md
+      - Navigation:
+          - Navigation rail:
+              - NavigationRail: stylesheets/navigation-rail/navigation-rail.md
+              - NavigationRailItem: stylesheets/navigation-rail/navigation-rail-item.md
+          - Navigation drawer:
+              - NavigationDrawer: stylesheets/navigation-drawer/navigation-drawer.md
+              - NavigationDrawerItem: stylesheets/navigation-drawer/navigation-drawer-item.md
+          - Top app bar:
+              - TopAppBar: stylesheets/top-app-bar/top-app-bar.md
+          - Tabs:
+              - Tabs: stylesheets/tabs/tabs.md
+              - TabsItem: stylesheets/tabs/tabs-item.md
+          - Menus:
+              - Menu: stylesheets/menus/menu.md
+              - MenuItem: stylesheets/menus/menu-item.md
+          - Search:
+              - SearchBar: stylesheets/search/search-bar.md
+              - SearchView: stylesheets/search/search-view.md
+          - Toolbars:
+              - ToolbarDocked: stylesheets/toolbars/toolbar-docked.md
+              - ToolbarFloating: stylesheets/toolbars/toolbar-floating.md
+          - Links:
+              - Link: stylesheets/links/link.md
+      - Selection and input:
+          - Checkbox:
+              - Checkbox: stylesheets/checkboxes/checkbox.md
+          - Radio button:
+              - RadioButton: stylesheets/radio-buttons/radio-button.md
+          - Switch:
+              - Switch: stylesheets/switches/switch.md
+          - Slider:
+              - Slider: stylesheets/sliders/slider.md
+          - Chips:
+              - ChipAssist: stylesheets/chips/chip-assist.md
+              - ChipFilter: stylesheets/chips/chip-filter.md
+              - ChipFilterSelected: stylesheets/chips/chip-filter-selected.md
+              - ChipInput: stylesheets/chips/chip-input.md
+              - ChipSuggestion: stylesheets/chips/chip-suggestion.md
+          - Date picker:
+              - DatePickerDay: stylesheets/date-pickers/date-picker-day.md
+              - DatePickerDayToday: stylesheets/date-pickers/date-picker-day-today.md
+              - DatePickerDaySelected: stylesheets/date-pickers/date-picker-day-selected.md
+              - DatePickerDayOutsideMonth: stylesheets/date-pickers/date-picker-day-outside-month.md
+          - Time picker:
+              - TimePickerDial: stylesheets/time-pickers/time-picker-dial.md
+              - PeriodSelectorAM: stylesheets/time-pickers/period-selector-am.md
+              - PeriodSelectorPM: stylesheets/time-pickers/period-selector-pm.md
+      - Content:
+          - Text:
+              - Text: stylesheets/text/text.md
+          - Images:
+              - Image: stylesheets/images/image.md
+          - Video:
+              - Video: stylesheets/video/video.md
+      - Beyond MD3:
+          - Status bar:
+              - StatusBar: stylesheets/status-bar/status-bar.md
+          - Node graph:
+              - NodeGraph: stylesheets/node-graph/node-graph.md
+  # <<< components
   - Design:
       - Custom Windowing (0.3.0): design/custom-windowing.md
   - Changelog: changelog.md
