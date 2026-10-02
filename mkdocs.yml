@@ -73,6 +73,7 @@ nav:
       - Releasing Your App: guide/releasing.md
   - API Reference:
       - Python API: api/python.md
+      - YAML Reference: api/yaml.md
       - Overview: api/index.md
       - App: api/app.md
       - instantiate: api/instantiate.md

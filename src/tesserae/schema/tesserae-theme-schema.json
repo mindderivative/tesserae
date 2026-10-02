@@ -150,7 +150,7 @@
               ]
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `full`)."
+          "description": "Pixels, or a shape token (`none` to `extra_large`)."
         },
         "display": {
           "enum": [
@@ -580,151 +580,200 @@
       "description": "Colour roles to replace: a role name and a colour.",
       "properties": {
         "background": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `background` colour."
         },
         "error": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `error` colour."
         },
         "error_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `error_container` colour."
         },
         "inverse_on_surface": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `inverse_on_surface` colour."
         },
         "inverse_primary": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `inverse_primary` colour."
         },
         "inverse_surface": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `inverse_surface` colour."
         },
         "on_background": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_background` colour."
         },
         "on_error": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_error` colour."
         },
         "on_error_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_error_container` colour."
         },
         "on_primary": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_primary` colour."
         },
         "on_primary_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_primary_container` colour."
         },
         "on_primary_fixed": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_primary_fixed` colour."
         },
         "on_primary_fixed_variant": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_primary_fixed_variant` colour."
         },
         "on_secondary": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_secondary` colour."
         },
         "on_secondary_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_secondary_container` colour."
         },
         "on_secondary_fixed": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_secondary_fixed` colour."
         },
         "on_secondary_fixed_variant": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_secondary_fixed_variant` colour."
         },
         "on_surface": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_surface` colour."
         },
         "on_surface_variant": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_surface_variant` colour."
         },
         "on_tertiary": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_tertiary` colour."
         },
         "on_tertiary_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_tertiary_container` colour."
         },
         "on_tertiary_fixed": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_tertiary_fixed` colour."
         },
         "on_tertiary_fixed_variant": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `on_tertiary_fixed_variant` colour."
         },
         "outline": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `outline` colour."
         },
         "outline_variant": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `outline_variant` colour."
         },
         "primary": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `primary` colour."
         },
         "primary_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `primary_container` colour."
         },
         "primary_fixed": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `primary_fixed` colour."
         },
         "primary_fixed_dim": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `primary_fixed_dim` colour."
         },
         "scrim": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `scrim` colour."
         },
         "secondary": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `secondary` colour."
         },
         "secondary_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `secondary_container` colour."
         },
         "secondary_fixed": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `secondary_fixed` colour."
         },
         "secondary_fixed_dim": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `secondary_fixed_dim` colour."
         },
         "shadow": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `shadow` colour."
         },
         "surface": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface` colour."
         },
         "surface_bright": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_bright` colour."
         },
         "surface_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_container` colour."
         },
         "surface_container_high": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_container_high` colour."
         },
         "surface_container_highest": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_container_highest` colour."
         },
         "surface_container_low": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_container_low` colour."
         },
         "surface_container_lowest": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_container_lowest` colour."
         },
         "surface_dim": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_dim` colour."
         },
         "surface_tint": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_tint` colour."
         },
         "surface_variant": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `surface_variant` colour."
         },
         "tertiary": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `tertiary` colour."
         },
         "tertiary_container": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `tertiary_container` colour."
         },
         "tertiary_fixed": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `tertiary_fixed` colour."
         },
         "tertiary_fixed_dim": {
-          "$ref": "#/definitions/color"
+          "$ref": "#/definitions/color",
+          "description": "The `tertiary_fixed_dim` colour."
         }
       },
       "additionalProperties": false
@@ -737,16 +786,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -755,16 +808,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -773,16 +830,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -791,16 +852,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -809,16 +874,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -827,16 +896,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -845,16 +918,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -863,16 +940,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -881,16 +962,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -899,16 +984,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -917,16 +1006,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -935,16 +1028,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -953,16 +1050,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -971,16 +1072,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false
@@ -989,16 +1094,20 @@
           "type": "object",
           "properties": {
             "font_family": {
-              "type": "string"
+              "type": "string",
+              "description": "A font family."
             },
             "font_size": {
-              "type": "number"
+              "type": "number",
+              "description": "Pixels."
             },
             "font_weight": {
-              "type": "number"
+              "type": "number",
+              "description": "1 to 1000."
             },
             "line_height": {
-              "type": "number"
+              "type": "number",
+              "description": "A multiple of the size."
             }
           },
           "additionalProperties": false

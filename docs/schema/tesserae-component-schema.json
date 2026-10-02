@@ -269,7 +269,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `full`)."
+          "description": "Pixels, or a shape token (`none` to `extra_large`)."
         },
         "display": {
           "anyOf": [

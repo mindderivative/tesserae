@@ -135,7 +135,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "foreground": ({"$ref": "#/definitions/color"}, "Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour."),
         "border_color": ({"$ref": "#/definitions/color"}, "The colour of its border."),
         "border_width": ({"type": "number", "minimum": 0}, "The width of its border, in pixels."),
-        "corner_radius": ({"anyOf": [number, {"enum": sorted(tokens.SHAPES)}]}, "Pixels, or a shape token (`none` to `full`)."),
+        "corner_radius": ({"anyOf": [number, {"enum": sorted(tokens.SHAPES)}]}, "Pixels, or a shape token (`none` to `extra_large`)."),
         "opacity": ({"type": "number", "minimum": 0, "maximum": 1}, "From 0 (clear) to 1 (opaque)."),
         "elevation": ({"anyOf": [number, {"enum": sorted(tokens.ELEVATION_LEVELS)}]}, "A shadow level, 0 to 5."),
         "aspect_ratio": ({"type": "number", "exclusiveMinimum": 0}, "Width over height: gives the missing side from the one set."),
@@ -370,13 +370,15 @@ def _theme() -> dict[str, Any]:
     typography = {
         "type": "object", "description": "Changes to Material 3's type styles, by role.",
         "properties": {role: {"type": "object",
-                              "properties": {"font_family": {"type": "string"}, "font_size": {"type": "number"},
-                                             "font_weight": {"type": "number"}, "line_height": {"type": "number"}},
+                              "properties": {"font_family": {"type": "string", "description": "A font family."},
+                                             "font_size": {"type": "number", "description": "Pixels."},
+                                             "font_weight": {"type": "number", "description": "1 to 1000."},
+                                             "line_height": {"type": "number", "description": "A multiple of the size."}},
                               "additionalProperties": False}
                        for role in sorted(tokens.TYPE_SCALE)},
         "additionalProperties": False}
     colors = {"type": "object", "description": "Colour roles to replace: a role name and a colour.",
-              "properties": {role: {"$ref": "#/definitions/color"}
+              "properties": {role: {"$ref": "#/definitions/color", "description": f"The `{role}` colour."}
                              for role in sorted(tokens.color_scheme((0x67, 0x50, 0xA4, 0xFF)))},
               "additionalProperties": False}
     return _root("tesserae-theme-schema.json", "Tesserae theme or stylesheet",
@@ -406,28 +408,34 @@ def _shell() -> dict[str, Any]:
     body = {"type": "object", "additionalProperties": False, "properties": {
         "style": {**style_ref, "description": "The whole shell's style."},
         "top_bar": {"type": "object", "required": ["title"], "additionalProperties": False, "description": "The bar across the top.",
-                    "properties": {"title": {"type": "string"}, "leading_icon": icon,
-                                   "trailing_icons": {"type": "array", "items": icon}, "style": style_ref}},
+                    "properties": {"title": {"type": "string", "description": "The title shown in the bar."},
+                                   "leading_icon": {**icon, "description": "An icon before the title, such as a menu."},
+                                   "trailing_icons": {"type": "array", "items": icon, "description": "Icons after the title, as icon buttons."},
+                                   "style": style_ref}},
         "navigation": {"type": "object", "required": ["items"], "additionalProperties": False,
                        "description": "A navigation rail of screens.",
-                       "properties": {"items": {"type": "array", "minItems": 1, "items": {
+                       "properties": {"items": {"type": "array", "minItems": 1, "description": "The screens, in order.", "items": {
                            "type": "object", "required": ["screen", "icon"], "additionalProperties": False,
                            "properties": {"screen": {"type": "string", "description": "A registered screen's name."}, "icon": icon}}},
                                       "on_navigate": {"type": "string",
                                                       "description": "A ViewModel method to call instead of showing the screen."},
                                       "style": style_ref}},
         "status_bar": {"type": "object", "required": ["text"], "additionalProperties": False,
-                       "description": "The bar across the bottom.", "properties": {"text": {"type": "string"}, "style": style_ref}},
+                       "description": "The bar across the bottom.",
+                       "properties": {"text": {"type": "string", "description": "The text shown in the bar."}, "style": style_ref}},
         "content": {"type": "object", "additionalProperties": False, "description": "Where the screens show.",
                     "properties": {"style": style_ref}},
         "zones": {"type": "object", "description": "Docked areas around the content: a size in pixels, or `{size, style}`.",
                   "properties": {edge: {"anyOf": [size, {"type": "object", "required": ["size"], "additionalProperties": False,
-                                                          "properties": {"size": size, "style": {"$ref": "#/definitions/zone_style"}}}]}
+                                                          "properties": {"size": size, "style": {"$ref": "#/definitions/zone_style"}}}],
+                                        "description": f"The {edge} zone: its size in pixels, or `{{size, style}}`."}
                                  for edge in edges},
                   "additionalProperties": False},
         "center": {"type": "boolean", "description": "Whether the middle is a dock zone too, with the screens as its tabs."},
         "panels": {"type": "object", "description": "Which panels (screens) sit in which zone.",
-                   "properties": {edge: {"type": "array", "items": {"type": "string"}} for edge in [*edges, "center"]},
+                   "properties": {edge: {"type": "array", "items": {"type": "string"},
+                                         "description": f"The panels docked {'in the middle' if edge == 'center' else 'on the ' + edge}, in tab order."}
+                                  for edge in [*edges, "center"]},
                    "additionalProperties": False}}}
     return _root("tesserae-shell-schema.json", "Tesserae app shell",
                  "An app shell: `*_Shell.yaml`. A top bar, a navigation rail, a status bar and docked zones around the screens.",

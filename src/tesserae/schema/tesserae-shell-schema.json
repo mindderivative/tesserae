@@ -150,7 +150,7 @@
               ]
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `full`)."
+          "description": "Pixels, or a shape token (`none` to `extra_large`)."
         },
         "display": {
           "enum": [
@@ -599,7 +599,7 @@
               ]
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `full`)."
+          "description": "Pixels, or a shape token (`none` to `extra_large`)."
         },
         "display": {
           "enum": [
@@ -946,7 +946,8 @@
       "description": "The bar across the top.",
       "properties": {
         "title": {
-          "type": "string"
+          "type": "string",
+          "description": "The title shown in the bar."
         },
         "leading_icon": {
           "enum": [
@@ -966,7 +967,7 @@
             "window_minimize",
             "window_restore"
           ],
-          "description": "An icon name."
+          "description": "An icon before the title, such as a menu."
         },
         "trailing_icons": {
           "type": "array",
@@ -989,7 +990,8 @@
               "window_restore"
             ],
             "description": "An icon name."
-          }
+          },
+          "description": "Icons after the title, as icon buttons."
         },
         "style": {
           "$ref": "#/definitions/style",
@@ -1008,6 +1010,7 @@
         "items": {
           "type": "array",
           "minItems": 1,
+          "description": "The screens, in order.",
           "items": {
             "type": "object",
             "required": [
@@ -1062,7 +1065,8 @@
       "description": "The bar across the bottom.",
       "properties": {
         "text": {
-          "type": "string"
+          "type": "string",
+          "description": "The text shown in the bar."
         },
         "style": {
           "$ref": "#/definitions/style",
@@ -1109,7 +1113,8 @@
                 }
               }
             }
-          ]
+          ],
+          "description": "The left zone: its size in pixels, or `{size, style}`."
         },
         "right": {
           "anyOf": [
@@ -1135,7 +1140,8 @@
                 }
               }
             }
-          ]
+          ],
+          "description": "The right zone: its size in pixels, or `{size, style}`."
         },
         "top": {
           "anyOf": [
@@ -1161,7 +1167,8 @@
                 }
               }
             }
-          ]
+          ],
+          "description": "The top zone: its size in pixels, or `{size, style}`."
         },
         "bottom": {
           "anyOf": [
@@ -1187,7 +1194,8 @@
                 }
               }
             }
-          ]
+          ],
+          "description": "The bottom zone: its size in pixels, or `{size, style}`."
         }
       },
       "additionalProperties": false
@@ -1204,31 +1212,36 @@
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "The panels docked on the left, in tab order."
         },
         "right": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "The panels docked on the right, in tab order."
         },
         "top": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "The panels docked on the top, in tab order."
         },
         "bottom": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "The panels docked on the bottom, in tab order."
         },
         "center": {
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "description": "The panels docked in the middle, in tab order."
         }
       },
       "additionalProperties": false

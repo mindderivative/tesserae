@@ -229,7 +229,7 @@ ELEVATION_LEVELS = {f"level_{n}": float(n) for n in range(6)}
 
 
 def shape(name: str) -> Optional[float]:
-    """The corner radius of the MD3 shape token `name` (`"medium"`, `"full"`, ...), or `None` if it isn't one."""
+    """The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ...), or `None` if it isn't one."""
     return SHAPES.get(name)
 
 
