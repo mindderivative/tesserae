@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.3 (unreleased)
+## 0.3.3
 
 Three things a user found testing: the shell's bars, theme roles without a
 theme, and styling the shell's parts.
