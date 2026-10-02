@@ -52,11 +52,16 @@ def test_load_view_forwards_theme_kwargs_to_tre_view(tmp_path: Path):
     view_path = tmp_path / "Save_View.yaml"
     view_path.write_text(BUTTON_VIEW_YAML)
 
-    # No theme_seed given -- style: {background: primary} should fail to
-    # resolve, proving the kwarg genuinely reaches tre.View rather than
-    # being silently dropped.
-    with pytest.raises(ValueError, match="unknown color identifier"):
-        load_view(view_path)
+    # `primary` is MD3's baseline when no theme_seed is given (0.3.3: a role in an unthemed
+    # view used to fail), and the seed's own when one is: the fill changing proves the kwarg
+    # genuinely reaches the build rather than being silently dropped.
+    from tesserae import tokens
+
+    seed = (0x12, 0x80, 0x40, 0xFF)
+    bare = load_view(view_path).node("save_button").get("fill")
+    seeded = load_view(view_path, theme_seed=seed, dark=False).node("save_button").get("fill")
+    assert bare == tokens.baseline_scheme()["primary"]
+    assert seeded == tokens.color_scheme(seed)["primary"] != bare
 
 
 # M29 Phase 1: `load_view` hands `tre` a dict via `spec=`, and resolves

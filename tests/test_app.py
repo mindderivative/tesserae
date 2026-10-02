@@ -318,8 +318,11 @@ def test_load_genuinely_expands_component_usage(tmp_path):
     vm_cls = load_viewmodel_class(tmp_path, "Save_ViewModel.py", "SaveViewModel")
 
     app = App()
-    with pytest.raises(ValueError, match="unknown color identifier"):
-        app.load(view_path, vm_cls)
+    view, _ = app.load(view_path, vm_cls)
+    # Expanded: the fragment's own nodes are there with the call's `with:` applied. (A role in an
+    # unthemed view used to fail, which this test once took as its proof; since 0.3.3 it resolves.)
+    assert view.node("save_button").get("corner_radius") == 20.0
+    assert view.node("save_button.label").get("text") == "Save"
 
 
 def _ticks(fake_tre):

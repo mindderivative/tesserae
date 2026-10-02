@@ -59,8 +59,8 @@ after the bar's: `bar.title`, `bar.close` and so on.
 
 It's 40 px high unless its `style: {height: ...}` says otherwise, and
 every part follows, its glyphs staying centred. Its colours are Material
-3 roles (`surface`, `on_surface`), so it needs a themed app, and it
-follows the theme, light and dark. The title, icon and buttons fade
+3 roles (`surface`, `on_surface`): with a `theme_seed=` it follows the theme,
+light and dark, and an app with no theme gets MD3's baseline palette (light). The title, icon and buttons fade
 while the window isn't the focused one, and close's hover is red
 (`error`). Each part has a class, so a stylesheet or theme restyles it:
 

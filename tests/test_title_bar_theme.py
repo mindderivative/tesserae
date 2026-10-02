@@ -84,3 +84,23 @@ def test_a_theme_restyles_it_too(tmp_path):
     theme = {"styles": [{"classes": ["title_bar_title"], "style": {"foreground": "#123456"}}]}
     app, view = _app_with(tmp_path, default_theme_spec=theme)
     assert view.node("bar.title").get("fill") == (0x12, 0x34, 0x56, 255)
+
+
+def test_a_title_bar_works_in_an_app_with_no_theme_seed(tmp_path):
+    """0.3.3 (#82): a bare `App(decorations=False)` failed with "unknown color identifier"; the bar's
+    roles are MD3's baseline palette now, and close is still red."""
+    from tesserae import tokens
+
+    path = tmp_path / "Home_View.yaml"
+    path.write_text(yaml.safe_dump({"id": "root", "kind": "Container", "style": {"width": 600, "height": 400},
+                                    "children": [BAR]}), encoding="utf-8")
+    app = App(width=600, height=400, decorations=False)
+    view = app.build_view(path)
+    app.register("Home", view, None)
+    app.show("Home")
+    ViewModel(view)
+    app.window.advance(16)
+    baseline = tokens.baseline_scheme()
+    assert view.node("bar").get("fill") == baseline["surface"]
+    assert view.node("bar.title").get("fill") == baseline["on_surface"]
+    assert view.interaction("bar.close").tint == baseline["error"]

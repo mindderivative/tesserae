@@ -24,6 +24,7 @@ use `tre`'s wording. Bindings, handlers and `two_way:` aren't wired here
 from __future__ import annotations
 
 import difflib
+import functools
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -324,13 +325,22 @@ def _layout(style: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+@functools.lru_cache(maxsize=1)
+def _baseline_roles() -> dict[str, RGBA]:
+    """MD3's baseline roles, for a view with no theme (0.3.3, #82): what an unthemed widget already uses."""
+    return tokens.baseline_scheme()
+
+
 def _color(ctx: _Context, node_id: str, field_name: str, raw: Any) -> RGBA:
-    if ctx.scheme is not None and isinstance(raw, str) and raw in ctx.scheme:
-        return ctx.scheme[raw]
+    """A style colour: a theme role (the view's theme, or MD3's baseline when it has none), or a CSS colour."""
+    roles = ctx.scheme if ctx.scheme is not None else _baseline_roles()
+    if isinstance(raw, str) and raw in roles:
+        return roles[raw]
     try:
         return tokens.parse_color(str(raw))
     except ValueError as exc:
-        raise SpecBuildError(f'widget {_q(node_id)}: invalid style.{field_name} "{raw}": {exc}') from None
+        hint = _did_you_mean([raw], roles) if isinstance(raw, str) else ""
+        raise SpecBuildError(f'widget {_q(node_id)}: invalid style.{field_name} "{raw}": {exc}{hint}') from None
 
 
 def _token(node_id: str, field_name: str, value: Any, lookup: Callable[[str], Optional[float]]) -> float:

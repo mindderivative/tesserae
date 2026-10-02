@@ -505,6 +505,7 @@ def top_app_bar(
     parts = (["leading"] if leading_icon else []) + [f"trailing{i}" for i in range(len(trailing))]
     widget = Widget(window, "TopAppBar", {"title": title, "width": width if width is not None else 360},
                     theme=theme, x=x, y=y, interactive={p: None for p in parts}, edit=edit, name=name)
+    widget.node.set(flex_shrink=0.0)  # a fixed-height bar: a short window must not squeeze it (0.3.3, #80)
     for part in parts:
         node = widget.part(part)
         node.set(focusable=True, role="button", cursor="pointer")
@@ -528,5 +529,6 @@ def status_bar(
     `on_surface_variant`, announced politely when its text changes."""
     widget = Widget(window, "StatusBar", {"text": text, "width": width if width is not None else 360},
                     theme=theme, edit=_borders([None], border_color, border_width), name="status_bar")
+    widget.node.set(flex_shrink=0.0)  # as the top bar's: a short window must not squeeze it (0.3.3, #80)
     a11y.describe(widget.node, live="polite")
     return widget

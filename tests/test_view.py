@@ -311,6 +311,37 @@ def test_a_name_that_resembles_nothing_is_not_guessed_at():
     assert "unknown style field(s) ['zzzzqq']" in str(caught.value) and "did you mean" not in str(caught.value)
 
 
+def _unthemed(**style):
+    return View({"id": "r", "kind": "Rect", "style": {"width": 10, "height": 10, **style}})
+
+
+def test_a_theme_role_works_in_a_view_with_no_theme():
+    """0.3.3 (#82): `background: surface` in an app with no `theme_seed` was "unknown color identifier";
+    it is MD3's baseline palette now, what an unthemed widget already uses."""
+    baseline = tesserae.tokens.baseline_scheme()
+    view = _unthemed(background="surface", border_color="outline", border_width=2)
+    assert view.node("r").get("fill") == baseline["surface"] and view.node("r").get("stroke_color") == baseline["outline"]
+    text = View({"id": "t", "kind": "Text", "text": {"content": "x", "font_family": "Roboto", "font_size": 14},
+                 "style": {"foreground": "on_surface"}})
+    assert text.node("t").get("fill") == baseline["on_surface"]
+
+
+def test_a_themed_view_still_uses_its_own_roles():
+    seed = (0x12, 0x80, 0x40, 0xFF)
+    themed = View({"id": "r", "kind": "Rect", "style": {"width": 10, "height": 10, "background": "primary"}},
+                  theme_seed=seed, dark=False)
+    assert themed.node("r").get("fill") == tesserae.tokens.color_scheme(seed)["primary"]
+    assert themed.node("r").get("fill") != tesserae.tokens.baseline_scheme()["primary"]
+
+
+def test_a_misspelt_role_says_what_was_meant_and_a_name_that_is_no_role_keeps_tres_wording():
+    with pytest.raises(ValueError, match=r'invalid style\.background "surfce": unknown color identifier -- did you mean \'surface\'\?'):
+        _unthemed(background="surfce")
+    with pytest.raises(ValueError) as caught:
+        _unthemed(background="notacolor")
+    assert str(caught.value).endswith('invalid style.background "notacolor": unknown color identifier')  # tre's, as before
+
+
 def test_reconcile_adds_removes_and_orders_children_as_the_new_spec_does():
     view = _view(_root(_rect("a"), _rect("b"), _rect("c")))
     a, c = view.node("a"), view.node("c")

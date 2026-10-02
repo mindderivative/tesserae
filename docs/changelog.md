@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.3.3 (unreleased)
+
+Three things a user found testing: the shell's bars, theme roles without a
+theme, and styling the shell's parts.
+
+### Fixed
+
+- **A shell's top bar and status bar no longer shrink when the window is
+  short** ([#80](https://github.com/mindderivative/tesserae/issues/80)). They
+  kept `tre`'s default `flex_shrink` of 1, so a short window squeezed the top
+  bar from 64 px down to its title's height (28) and the status bar from 24
+  to 16. They are fixed-height bars now, wherever they are placed. (The
+  navigation rail never shrank.)
+
+### Changed
+
+- **Theme roles work in an app with no `theme_seed`**
+  ([#82](https://github.com/mindderivative/tesserae/issues/82)).
+  `background: surface`, and the built-in `kind: TitleBar`, failed there with
+  "unknown color identifier". A view with no theme resolves roles from MD3's
+  baseline palette (the light one), as an unthemed widget already did; a
+  `theme_seed=` still themes the app and lets it follow light and dark. A
+  misspelt role now says what was meant (`did you mean 'surface'?`); a name
+  that is no role keeps `tre`'s wording.
+
 ## 0.3.2
 
 YAML schemas for editors ([#79](https://github.com/mindderivative/tesserae/issues/79)),

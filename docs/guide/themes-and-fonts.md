@@ -21,6 +21,13 @@ app.load("Home_View.yaml", HomeViewModel)
 app.load("Settings_View.yaml", SettingsViewModel, stylesheet="styles/Settings.yaml")
 ```
 
+An app with no theme at all still resolves a theme role (`surface`,
+`on_surface`, `primary`, ...) in a view: from MD3's baseline palette, the
+light one, as its widgets already do (0.3.3). A `theme_seed=` is what makes
+the colours your own and lets them follow the OS's light and dark. A role
+that isn't one, or is misspelt, is an error that says so (`unknown color
+identifier -- did you mean 'surface'?`).
+
 The theme is app-wide: every screen gets it, switching screens never
 changes it, and `app.theme` is it resolved (the seed: `theme_seed=`
 first, then the custom theme's `seed:`, then the default theme's; both

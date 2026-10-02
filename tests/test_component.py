@@ -165,8 +165,11 @@ def test_instantiate_genuinely_expands_component_usage(tmp_path):
     view = View(parent_path)
     container = view.node("item_list")
 
-    with pytest.raises(ValueError, match="unknown color identifier"):
-        instantiate(view, item_path, vm_cls, container)
+    component, _ = instantiate(view, item_path, vm_cls, container)
+    # Expanded: the fragment's own nodes are there with the call's `with:` applied. (A role in an
+    # unthemed view used to fail, which this test once took as its proof; since 0.3.3 it resolves.)
+    assert component.node("action_button").get("corner_radius") == 16.0
+    assert component.node("action_button.label").get("text") == "Go"
 
 
 BOGUS_ITEM_VIEW = """

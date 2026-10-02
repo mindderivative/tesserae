@@ -73,6 +73,29 @@ def test_the_shell_follows_the_window_as_it_resizes():
     assert shell.content.get("layout_width") == 1200 - 80 - 240 - 16 - 16 - 260  # the content takes the rest
 
 
+@pytest.mark.parametrize("decorations", [True, False])
+def test_the_bars_keep_their_height_when_the_window_is_short(decorations):
+    """0.3.3 (#80): a top bar is 64 px and a status bar 24, whatever the window's height. (They kept
+    `tre`'s default `flex_shrink` of 1, so a short window squeezed them, the top bar down to its title's height.)"""
+    app = App(width=1000, height=600, decorations=decorations)
+    app._native_controls.set(False)
+    w = app.window
+    shell = AppShell(w, top_bar=top_app_bar(w, "Studio", width=1000), status_bar=status_bar(w, "Ready", width=1000),
+                     navigation=navigation_rail(w, ["Home", "Files", "Notes", "More", "Even more", "Last"],
+                                                ["home", "search", "home", "search", "home", "search"]))
+    for height in (600, 400, 250, 150, 60):
+        w.resize(1000, height)
+        w.advance(16)
+        w.advance(16)
+        assert shell.top_bar.node.get("layout_height") == 64.0, height
+        assert shell.status_bar.node.get("layout_height") == 24.0, height
+
+
+def test_a_bar_does_not_shrink_even_by_itself():
+    w = App(width=300, height=200).window
+    assert top_app_bar(w, "x").node.get("flex_shrink") == 0.0 and status_bar(w, "x").node.get("flex_shrink") == 0.0
+
+
 @pytest.mark.parametrize("side, dx, dy, grows", [
     ("left", 60, 0, 60), ("right", -60, 0, 60), ("bottom", 0, -40, 40), ("right", 30, 0, -30),
 ])
