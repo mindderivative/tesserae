@@ -2114,3 +2114,42 @@ GitHub project.
     `--custom-title-bar` without `--shell` is a one-line error. pip's
     index took a few minutes to list 0.3.0 after PyPI's own page did.
   - 0.3.0 was hand-checked on Linux, under X11, only.
+
+## Tesserae 0.3.1 released (#72)
+
+User: a Getting Started walk-through for a fresh Linux install, declarative
+and imperative; then "release 0.3.1", and "approved, check PyPI".
+
+- The walk-through (#68-#71): `examples/getting_started/` (eight step
+  programs the page includes as they are) and `tests/test_getting_started.py`.
+  Running it for real found what writing it hadn't: a YAML `Text` needs a
+  `font_family`, `text_align` wasn't a YAML key, and `App.run()` refused an
+  empty window, which is the first step of an app built in Python.
+- 0.3.1 (#73-#77): `App.run()` needs no screen, `text_align` in a YAML
+  `text:` block, a closest-match hint on a misspelt name, and
+  `run(keepalive=)`.
+- The user's own trial found the last two. A typo in `foreground` got no
+  hint. Then an edit to a view didn't reload even after dragging, resizing
+  and clicking the window: `tre`'s idle window starved other Python
+  threads (reproduced in pure `tre`; its run loop wasn't detached from the
+  GIL), so the watcher couldn't hand the reload over. `keepalive`, on by
+  default with `hot_reload`, ticks the window (0.5% of a core). A first
+  version also ticked runs bounded by `max_frames` and slowed five live
+  tests from 1 s to 41 s each; found from the suite's run time.
+- `tre` fixed it (its #92), the user sent the report, and `tre` 0.5.1
+  shipped it. Checked here on both Wayland and X11, and Tesserae passed
+  against 0.5.1 (no `padding` or paint use of the kinds that changed).
+- Release: CI on `0.3.1` first failed on macOS (my test assumed a border
+  there) and once on Fedora's registry (503), both fixed or re-run; `main`
+  fast-forwarded to `c862078`; pre-release `v0.3.1`; the user approved the
+  `pypi` deployment (run 36946332567).
+- Checked from PyPI in a fresh venv: `pip install "tesserae-ui[build]==0.3.1"`
+  brought `tesserae-engine` **0.5.1** (the requirement is `>=0.5.0.1,<0.6`).
+  The eight walk-through programs ran (10 frames each), the hint and
+  `text_align` work, `tesserae new --shell --custom-title-bar` built and
+  drew 30 frames with `--check`, and the idle-window script runs with no
+  keepalive on the released engine. PyPI's unversioned JSON lagged the
+  simple index by several minutes.
+- Next: with `tre` 0.5.1 out, the keepalive default can go off and the
+  floor rise to 0.5.1 (a 0.3.2, the user's call).
+
