@@ -24,6 +24,8 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "docs" / "api" / "python.md"
+THEMES = ROOT / "docs" / "themes" / "index.md"
+THEME_MARKS = ("<!-- api:begin (written by tools/generate_api_docs.py) -->", "<!-- api:end -->")
 
 #: (module, heading, one line on what it is[, the names to list, if not the module's `__all__`]), in page order.
 SECTIONS = (
@@ -232,22 +234,95 @@ def render() -> tuple[str, list[str]]:
     return "\n".join(out + contents + [""] + body).rstrip() + "\n", missing
 
 
+def _members(cls: type, names: tuple[str, ...], missing: list[str]) -> list[str]:
+    """Bullets for the named members of `cls`, found where the class or a base defines them."""
+    out = []
+    for name in names:
+        value = next(vars(k)[name] for k in cls.__mro__ if name in vars(k))
+        kind = _kind(value)
+        doc = _paragraph(inspect.getdoc(getattr(cls, name)) if kind != "property" else inspect.getdoc(value))
+        if not doc:
+            missing.append(f"{cls.__name__}.{name}")
+        sig = name if kind == "property" else _signature(_func_of(value), name)
+        for lead in ("self", "cls"):
+            sig = sig.replace(f"({lead}, ", "(").replace(f"({lead})", "()")
+        out.append(f"- `{cls.__name__}.{sig}`" + (" *(property)*" if kind == "property" else "") + f": {doc}")
+    return out
+
+
+def theme_block() -> tuple[str, list[str]]:
+    """The theme API, for the end of the Themes page: what reads and changes a theme."""
+    from tesserae import fonts, tokens
+    from tesserae.app import App
+    from tesserae.spec import load_stylesheet, load_theme
+    from tesserae.theme import Theme
+    from tesserae.view import View
+
+    missing: list[str] = []
+    out = ["### On the app", ""]
+    out += _members(App, ("theme", "dark", "dark_mode", "set_dark", "set_theme_specs", "set_stylesheet_spec", "build_view"), missing)
+    out += ["", "### On a view", ""] + _members(View, ("theme", "set_theme", "set_stylesheet"), missing) + [""]
+    out += _describe_class(Theme, "tesserae.Theme", missing)
+    out += ["### Loading files", ""]
+    for fn, name in ((load_theme, "load_theme"), (load_stylesheet, "load_stylesheet")):
+        doc = _paragraph(fn.__doc__)
+        if not doc:
+            missing.append(f"tesserae.spec.{name}")
+        out.append(f"- `{_signature(fn, name)}`: {doc}")
+    out.append("")
+    out += ["### Tokens", "", "`tesserae.tokens`: Material Design 3's tokens as Python values.", ""]
+    for name in ("shape", "elevation", "type_style", "color_scheme", "baseline_scheme", "resolve_scheme", "parse_color", "elevation_shadows"):
+        fn = getattr(tokens, name)
+        doc = _paragraph(fn.__doc__)
+        if not doc:
+            missing.append(f"tesserae.tokens.{name}")
+        out.append(f"- `{_signature(fn, name)}`: {doc}")
+    out += [""] + [_describe_constant(getattr(tokens, name), f"tokens.{name}") + "" for name in ("ROLES", "SHAPES", "ELEVATION_LEVELS", "TYPE_SCALE", "BASELINE")]
+    out += ["### Fonts", ""]
+    for name in ("register_font", "available_families"):
+        fn = getattr(fonts, name)
+        doc = _paragraph(fn.__doc__)
+        if not doc:
+            missing.append(f"tesserae.fonts.{name}")
+        out.append(f"- `{_signature(fn, name)}`: {doc}")
+    out.append(f"- `FontFallbackWarning`: {_paragraph(fonts.FontFallbackWarning.__doc__)}")
+    out.append(f"- `BUNDLED_FAMILIES` = `{sorted(fonts.BUNDLED_FAMILIES)!r}`")
+    return "\n".join(out).rstrip() + "\n", missing
+
+
+def themes_page() -> tuple[str, list[str]]:
+    """The Themes page, with the API between its markers written from the code."""
+    text = THEMES.read_text(encoding="utf-8")
+    start, end = THEME_MARKS
+    if start not in text or end not in text:
+        raise SystemExit(f"{THEMES.relative_to(ROOT)} needs the lines {start} and {end}")
+    block, missing = theme_block()
+    head, rest = text.split(start, 1)
+    tail = rest.split(end, 1)[1]
+    return f"{head}{start}\n\n{block}\n{end}{tail}", missing
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument("--check", action="store_true", help="exit 1 if the page is out of date or anything has no description")
     args = parser.parse_args()
     text, missing = render()
+    themes, theme_missing = themes_page()
+    missing += theme_missing
     if args.check:
         bad = False
-        if not OUTPUT.exists() or OUTPUT.read_text(encoding="utf-8") != text:
-            print(f"{OUTPUT.relative_to(ROOT)} is out of date: run `python tools/generate_api_docs.py`")
-            bad = True
+        for path, wanted in ((OUTPUT, text), (THEMES, themes)):
+            if not path.exists() or path.read_text(encoding="utf-8") != wanted:
+                print(f"{path.relative_to(ROOT)} is out of date: run `python tools/generate_api_docs.py`")
+                bad = True
         if missing:
             print("no docstring:\n  " + "\n  ".join(missing))
             bad = True
         return 1 if bad else 0
     OUTPUT.write_text(text, encoding="utf-8")
-    print(f"wrote {OUTPUT.relative_to(ROOT)}: {len(text.splitlines())} lines; {len(missing)} without a docstring")
+    THEMES.write_text(themes, encoding="utf-8")
+    print(f"wrote {OUTPUT.relative_to(ROOT)}: {len(text.splitlines())} lines, and the API of {THEMES.relative_to(ROOT)}; "
+          f"{len(missing)} without a docstring")
     print("\n".join(f"  {name}" for name in missing))
     return 0
 

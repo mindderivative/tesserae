@@ -22,13 +22,19 @@ def _generator():
     return module
 
 
-def test_the_page_is_what_the_generator_writes():
-    text, _ = _generator().render()
+def test_the_pages_are_what_the_generator_writes():
+    generator = _generator()
+    text, _ = generator.render()
     assert PAGE.read_text(encoding="utf-8") == text, "docs/api/python.md is out of date: run `python tools/generate_api_docs.py`"
+    themes, _ = generator.themes_page()
+    assert generator.THEMES.read_text(encoding="utf-8") == themes, \
+        "the API at the end of docs/themes/index.md is out of date: run `python tools/generate_api_docs.py`"
 
 
 def test_every_public_name_has_a_description():
-    _, missing = _generator().render()
+    generator = _generator()
+    _, missing = generator.render()
+    missing += generator.themes_page()[1]
     assert not missing, "no docstring: " + ", ".join(missing)
 
 
