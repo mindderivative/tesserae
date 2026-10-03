@@ -7,8 +7,7 @@ styles:
       height: 48
       background: transparent
       corner_radius: 24
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: label
     style:
       foreground: on_surface

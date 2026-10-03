@@ -14,8 +14,7 @@ styles:
     style:
       width: "{{ size }}"
       height: "{{ size }}"
-      align_items: center
-      justify_content: center
+      align_content: center
       background: transparent
       corner_radius: "{{ corner_radius }}"
       border_color: outline
@@ -39,8 +38,7 @@ styles:
 | --- | --- | --- |
 | `width` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
 | `border_color` | `outline` | The colour of its border. |
@@ -59,8 +57,8 @@ styles:
 With `icon: home, size: 40, corner_radius: 20`, each part's style is:
 
 ```yaml
-root: {width: 40, height: 40, align_items: center, justify_content: center, background: transparent, corner_radius: 20,
-  border_color: outline, border_width: 1.0}
+root: {width: 40, height: 40, align_content: center, background: transparent, corner_radius: 20, border_color: outline,
+  border_width: 1.0}
 icon: {width: 24, height: 24, foreground: on_surface_variant}
 ```
 

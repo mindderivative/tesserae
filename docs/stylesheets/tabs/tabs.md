@@ -58,19 +58,17 @@ With `item_width: 100`, and a list of items, each part's style is:
 ```yaml
 root: {flex_direction: vertical, background: surface}
 row: {flex_direction: horizontal}
-item.0: {width: 100, height: 48, background: surface, flex_direction: vertical, align_items: center, justify_content: center}
-item.0.tab: {height: 48, flex_direction: vertical, align_items: stretch}
+item.0: {width: 100, height: 48, background: surface, flex_direction: vertical, align_content: center}
+item.0.tab: {height: 48, flex_direction: vertical}
 item.0.top: {height: 3, background: transparent}
-item.0.content: {flex_grow: 1, flex_direction: vertical, align_items: center, justify_content: center,
-  gap: 2}
-item.0.label: {foreground: primary, flex_shrink: 0}
+item.0.content: {flex: expand_vertical, flex_direction: vertical, align_content: center, gap: 2}
+item.0.label: {foreground: primary}
 item.0.indicator: {height: 3, corner_radius: 3, background: primary}
-item.1: {width: 100, height: 48, background: surface, flex_direction: vertical, align_items: center, justify_content: center}
-item.1.tab: {height: 48, flex_direction: vertical, align_items: stretch}
+item.1: {width: 100, height: 48, background: surface, flex_direction: vertical, align_content: center}
+item.1.tab: {height: 48, flex_direction: vertical}
 item.1.top: {height: 3, background: transparent}
-item.1.content: {flex_grow: 1, flex_direction: vertical, align_items: center, justify_content: center,
-  gap: 2}
-item.1.label: {foreground: on_surface_variant, flex_shrink: 0}
+item.1.content: {flex: expand_vertical, flex_direction: vertical, align_content: center, gap: 2}
+item.1.label: {foreground: on_surface_variant}
 item.1.indicator: {height: 3, corner_radius: 3, background: transparent}
 divider: {width: 100%, height: 1, background: surface_variant}
 ```

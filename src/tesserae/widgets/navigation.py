@@ -102,14 +102,13 @@ def tabs(
     for i, label in enumerate(labels):
         children = [{"id": f"{name}.item{i}.label", "kind": "Text",
                      "text": {"content": label, "typography_role": "title_small", "wrap": "none"},
-                     "style": {"foreground": "on_surface_variant", "flex_shrink": 0}}]
+                     "style": {"foreground": "on_surface_variant"}}]
         if icons:
             children.insert(0, {"id": f"{name}.item{i}.icon", "kind": "Icon", "icon": {"name": icons[i]},
                                 "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}})
         items.append({"id": f"{name}.item{i}", "kind": "Rect",
                       "style": {"width": item_width, "height": height, "background": "surface",
-                                "flex_direction": "vertical", "align_items": "center",
-                                "justify_content": "center", "gap": 2},
+                                "flex_direction": "vertical", "align_content": "center", "gap": 2},
                       "children": children})
     spec = {"id": name, "kind": "Container",
             "style": {"width": total, "height": height, "flex_direction": "vertical", "background": "surface"},
@@ -180,20 +179,20 @@ def navigation_rail(
     items = []
     for i, (label, glyph) in enumerate(zip(labels, icons)):
         items.append({"id": f"{name}.item{i}", "kind": "Container",
-                      "style": {"width": 80, "height": 56, "flex_direction": "vertical", "align_items": "center",
+                      "style": {"width": 80, "height": 56, "flex_direction": "vertical", "align_content": "top",
                                 "gap": 4},
                       "children": [
                           {"id": f"{name}.item{i}.pill", "kind": "Rect",
                            "style": {"width": 56, "height": 32, "corner_radius": 16, "background": "transparent",
-                                     "align_items": "center", "justify_content": "center"},
+                                     "align_content": "center"},
                            "children": [{"id": f"{name}.item{i}.icon", "kind": "Icon", "icon": {"name": glyph},
                                          "style": {"width": 24, "height": 24,
                                                    "foreground": "on_surface_variant"}}]},
                           {"id": f"{name}.item{i}.label", "kind": "Text",
                            "text": {"content": label, "typography_role": "label_medium", "wrap": "none"},
-                           "style": {"foreground": "on_surface_variant", "flex_shrink": 0}}]})
+                           "style": {"foreground": "on_surface_variant"}}]})
     spec = {"id": name, "kind": "Container",
-            "style": {"width": 80, "flex_direction": "vertical", "align_items": "center", "gap": 12,
+            "style": {"width": 80, "flex_direction": "vertical", "align_content": "top", "gap": 12,
                       "padding": {"left": 0, "right": 0, "top": 12, "bottom": 12}, "background": "surface"},
             "children": items}
     widget = Widget(window, spec=spec, theme=theme, x=x, y=y,
@@ -239,14 +238,14 @@ def navigation_drawer(
     inner = float(width) - 24.0
     items = [{"id": f"{name}.item{i}", "kind": "Rect",
               "style": {"width": inner, "height": 56, "corner_radius": 28, "background": "transparent",
-                        "flex_direction": "horizontal", "align_items": "center", "gap": 12,
+                        "flex_direction": "horizontal", "align_content": "left", "gap": 12,
                         "padding": {"left": 16, "right": 24, "top": 0, "bottom": 0}},
               "children": [
                   {"id": f"{name}.item{i}.icon", "kind": "Icon", "icon": {"name": glyph},
                    "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}},
                   {"id": f"{name}.item{i}.label", "kind": "Text",
                    "text": {"content": label, "typography_role": "label_large", "wrap": "none", "overflow": "ellipsis"},
-                   "style": {"foreground": "on_surface_variant", "flex_grow": 1, "min_width": 0}}]}
+                   "style": {"foreground": "on_surface_variant", "flex": "expand_horizontal", "min_width": 0}}]}
              for i, (label, glyph) in enumerate(zip(labels, icons))]
     style = {"width": float(width), "flex_direction": "vertical", "padding": 12, "background": "surface_container_low"}
     if height is not None:
@@ -315,7 +314,7 @@ def pagination(
     def circle(part: str, child: dict[str, Any]) -> dict[str, Any]:
         return {"id": f"{name}.{part}", "kind": "Rect",
                 "style": {"width": 40, "height": 40, "corner_radius": 20, "background": "transparent",
-                          "align_items": "center", "justify_content": "center"},
+                          "align_content": "center"},
                 "children": [child]}
 
     def arrow(part: str) -> dict[str, Any]:  # `chevron_right`, turned for previous
@@ -326,7 +325,7 @@ def pagination(
                                    "text": {"content": str(i + 1), "typography_role": "label_large"},
                                    "style": {"foreground": "on_surface_variant"}}) for i in range(slots)]
     spec = {"id": name, "kind": "Container",
-            "style": {"flex_direction": "horizontal", "align_items": "center", "gap": 4},
+            "style": {"flex_direction": "horizontal", "align_content": "left", "gap": 4},
             "children": [arrow("previous"), *pages, arrow("next")]}
     parts = ["previous", *(f"{slot}{i}" for i in range(slots)), "next"]
     widget = Widget(window, spec=spec, theme=theme, x=x, y=y,
@@ -503,7 +502,7 @@ def top_app_bar(
     def button(node_id: str, glyph: str, ink: str) -> dict[str, Any]:
         return {"id": node_id, "kind": "Rect",
                 "style": {"width": size, "height": size, "corner_radius": size / 2, "background": "transparent",
-                          "align_items": "center", "justify_content": "center"},
+                          "align_content": "center"},
                 "children": [{"id": f"{node_id}.icon", "kind": "Icon", "icon": {"name": glyph},
                               "style": {"width": 24, "height": 24, "foreground": ink}}]}
 
@@ -530,7 +529,6 @@ def top_app_bar(
     parts = (["leading"] if leading_icon else []) + [f"trailing{i}" for i in range(len(trailing))]
     widget = Widget(window, "TopAppBar", {"title": title, "width": width if width is not None else 360},
                     theme=theme, x=x, y=y, interactive={p: None for p in parts}, edit=_styled(edit, style), name=name)
-    widget.node.set(flex_shrink=0.0)  # a fixed-height bar: a short window must not squeeze it (0.3.3, #80)
     for part in parts:
         node = widget.part(part)
         node.set(focusable=True, role="button", cursor="pointer")
@@ -556,6 +554,5 @@ def status_bar(
     `style` is laid over its own: `{height: 32}`, `background`, ..."""
     widget = Widget(window, "StatusBar", {"text": text, "width": width if width is not None else 360},
                     theme=theme, edit=_styled(_borders([None], border_color, border_width), style), name="status_bar")
-    widget.node.set(flex_shrink=0.0)  # as the top bar's: a short window must not squeeze it (0.3.3, #80)
     a11y.describe(widget.node, live="polite")
     return widget

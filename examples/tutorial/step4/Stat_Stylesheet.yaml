@@ -3,7 +3,7 @@ styles:
   - id: root
     style:
       flex_direction: vertical
-      align_items: center
+      align_content: top
       width: 96
       padding: 12
       background: secondary_container

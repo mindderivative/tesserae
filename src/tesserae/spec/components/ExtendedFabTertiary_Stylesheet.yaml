@@ -9,7 +9,6 @@ styles:
       background: tertiary_container
       corner_radius: large
       elevation: level_3
-      align_items: center
       padding:
         if: "{{ icon }}"
         then:
@@ -22,9 +21,9 @@ styles:
           right: 20
           top: 0
           bottom: 0
-      justify_content:
+      align_content:
         if: "{{ icon }}"
-        then: flex_start
+        then: left
         else: center
       gap: 8
   - id: icon
@@ -35,4 +34,3 @@ styles:
   - id: label
     style:
       foreground: on_tertiary_container
-      flex_shrink: 0

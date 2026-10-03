@@ -110,13 +110,13 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
     parts: list[dict[str, Any]] = [inset]
     if icon is not None:
         parts.append({"id": f"{bar_id}.icon", "kind": "Icon", "icon": {"name": icon}, "classes": ["title_bar_icon"],
-                      "style": {"width": 20, "height": 20, "flex_shrink": 0}, "bindings": {"opacity": _DIM}})
+                      "style": {"width": 20, "height": 20}, "bindings": {"opacity": _DIM}})
     if title is not None:
         parts.append({"id": f"{bar_id}.title", "kind": "Text", "classes": ["title_bar_title"],
                       "text": {"content": title, "typography_role": "title_small"},
-                      "style": {"flex_shrink": 0}, "bindings": {"opacity": _DIM}})
+                      "style": {}, "bindings": {"opacity": _DIM}})
     parts.append({"id": f"{bar_id}.content", "kind": "Container", "classes": ["title_bar_content"],
-                  "style": {"flex_grow": 1, "height": "100%", "align_items": "center", "gap": 8},
+                  "style": {"flex": "expand_horizontal", "height": "100%", "align_content": "left", "gap": 8},
                   "children": list(node.get("children") or [])})
     if controls is not None:
         parts.append(controls)
@@ -124,7 +124,7 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
         "id": bar_id, "kind": "Container", "window_region": "drag",
         "classes": ["title_bar", *(node.get("classes") or [])],
         **({"a11y": node["a11y"]} if "a11y" in node else {}),
-        "style": {"height": HEIGHT, "flex_shrink": 0, "align_items": "center", "gap": 8,
+        "style": {"height": HEIGHT, "align_content": "left", "gap": 8,
                   "padding": {"left": 12, "right": 0, "top": 0, "bottom": 0}, **(node.get("style") or {})},
         "children": parts,
     }
@@ -140,12 +140,12 @@ def window_parts(bar_id: str, buttons: Any = BUTTONS) -> tuple[dict[str, Any], d
     Their bindings and handlers reach the app, so the view they're in
     needs a ViewModel on the app's window."""
     inset = {"id": f"{bar_id}.inset", "kind": "Container", "classes": ["title_bar_inset"],
-             "style": {"width": 0, "height": "100%", "flex_shrink": 0},
+             "style": {"width": 0, "height": "100%"},
              "bindings": {"width": "{{ app.titlebar_inset.get()[1] }}"}}
     if not buttons:
         return inset, None
     return inset, {"id": f"{bar_id}.buttons", "kind": "Container", "classes": ["title_bar_buttons"],
-                   "style": {"height": "100%", "flex_shrink": 0},
+                   "style": {"height": "100%"},
                    "bindings": {"opacity": _DIM, "visible": "{{ not app.native_controls.get() }}"},
                    "children": [_button(bar_id, name) for name in BUTTONS if name in buttons]}
 
@@ -164,7 +164,7 @@ def _button(bar_id: str, name: str) -> dict[str, Any]:
         # any height: restore shows while the window is maximized.
         at = {"position": "absolute", "x": 0, "y": 0}
         glyphs = [{"id": f"{button_id}.glyphs", "kind": "Container",
-                   "style": {"width": GLYPH, "height": GLYPH, "flex_shrink": 0},
+                   "style": {"width": GLYPH, "height": GLYPH},
                    "children": [_glyph(button_id, "window_maximize", style=dict(at),
                                        bindings={"opacity": "{{ 1 - (app.maximized.get() and 1 or 0) }}"}),
                                 _glyph(button_id, "window_restore", style=dict(at),
@@ -176,6 +176,5 @@ def _button(bar_id: str, name: str) -> dict[str, Any]:
     tint = {"interaction": {"color": "error"}} if name == "close" else {}
     return {"id": button_id, "kind": "Container", "classes": classes, **tint,
             "handlers": {"on_click": _ACTIONS[name]}, "a11y": {"label": _LABELS[name]},
-            "style": {"width": BUTTON_WIDTH, "height": "100%", "flex_shrink": 0, "align_items": "center",
-                      "justify_content": "center"},
+            "style": {"width": BUTTON_WIDTH, "height": "100%", "align_content": "center"},
             "children": glyphs}

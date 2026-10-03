@@ -6,7 +6,7 @@ styles:
       width: "{{ scrim_width }}"
       height: "{{ scrim_height }}"
       background: '#00000052'
-      justify_content: flex_end
+      align_content: top_right
   - id: panel
     style:
       width: "{{ width }}"

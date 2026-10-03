@@ -6,8 +6,7 @@ styles:
       width: "{{ scrim_width }}"
       height: "{{ scrim_height }}"
       background: '#00000052'
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: panel
     style:
       flex_direction: vertical
@@ -24,4 +23,4 @@ styles:
   - id: body
     style:
       foreground: on_surface_variant
-      flex_grow: 1
+      flex: expand_vertical

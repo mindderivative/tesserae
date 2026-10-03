@@ -14,8 +14,7 @@ styles:
     style:
       width: "{{ size }}"
       height: "{{ size }}"
-      align_items: center
-      justify_content: center
+      align_content: center
       background: primary
       corner_radius: "{{ corner_radius }}"
   - id: icon
@@ -37,8 +36,7 @@ styles:
 | --- | --- | --- |
 | `width` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `background` | `primary` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
 
@@ -55,7 +53,7 @@ styles:
 With `icon: home, size: 40, corner_radius: 20`, each part's style is:
 
 ```yaml
-root: {width: 40, height: 40, align_items: center, justify_content: center, background: primary, corner_radius: 20}
+root: {width: 40, height: 40, align_content: center, background: primary, corner_radius: 20}
 icon: {width: 24, height: 24, foreground: on_primary}
 ```
 

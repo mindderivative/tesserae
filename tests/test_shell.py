@@ -243,7 +243,7 @@ def test_an_app_shell_styles_its_own_parts_and_puts_back_what_it_had():
     app.window.advance(16)
     assert shell.node.get("padding_left") == 8.0 and shell.content.get("corner_radius") == 10.0
     assert shell.content.get("flex_grow") == 1.0
-    shell.set_style("content", {"flex_grow": 0.0})  # a key the shell itself relies on, set and taken out
+    shell.set_style("content", {"flex": "none"})  # a key the shell itself relies on, set and taken out
     assert shell.content.get("flex_grow") == 0.0
     shell.set_style("content", None)
     assert shell.content.get("flex_grow") == 1.0 and shell.content.get("corner_radius") == 0.0

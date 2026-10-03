@@ -45,22 +45,22 @@ item.0:
   corner_radius: 28
   background: secondary_container
   flex_direction: horizontal
-  align_items: center
+  align_content: left
   gap: 12
   padding: {left: 16, right: 24, top: 0, bottom: 0}
 item.0.icon: {width: 24, height: 24, foreground: on_secondary_container}
-item.0.label: {foreground: on_secondary_container, flex_grow: 1, min_width: 0}
+item.0.label: {foreground: on_secondary_container, flex: expand_horizontal, min_width: 0}
 item.1:
   width: 100
   height: 56
   corner_radius: 28
   background: transparent
   flex_direction: horizontal
-  align_items: center
+  align_content: left
   gap: 12
   padding: {left: 16, right: 24, top: 0, bottom: 0}
 item.1.icon: {width: 24, height: 24, foreground: on_surface_variant}
-item.1.label: {foreground: on_surface_variant, flex_grow: 1, min_width: 0}
+item.1.label: {foreground: on_surface_variant, flex: expand_horizontal, min_width: 0}
 ```
 
 ## Changing it

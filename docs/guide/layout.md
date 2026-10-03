@@ -23,7 +23,7 @@ children:
     style: {foreground: on_surface}
   - id: row
     kind: Container
-    style: {flex_direction: horizontal, gap: 8, align_items: center}
+    style: {flex_direction: horizontal, gap: 8, align_content: left}
     children:
       - id: swatch
         kind: Rect
@@ -34,11 +34,47 @@ children:
         style: {foreground: on_surface}
 ```
 
-`align_items` places children across the direction (`flex_start`,
-`center`, `flex_end`, `stretch`, `baseline`); `justify_content` along it
-(`flex_start`, `center`, `flex_end`, `space_between`, `space_around`,
-`space_evenly`). A child overrides its parent's `align_items` with
-`align_self`.
+## Placing children: `align_content`
+
+`align_content` says where a node's children sit in it, as one of nine positions:
+
+| | | |
+| --- | --- | --- |
+| `top_left` | `top` | `top_right` |
+| `left` | `center` | `right` |
+| `bottom_left` | `bottom` | `bottom_right` |
+
+It means the same in a row or a column: `left` is the left edge, `bottom` the bottom, `center` the middle.
+Not set, children start at the top left and stretch across the layout, so a column of text fills the width.
+
+```yaml
+style: {flex_direction: vertical, width: 240, height: 120, align_content: center}   # a column, centred
+```
+
+`spread` shares out the room that is left along the layout: `between` puts it between the children,
+`around` around each, `evenly` everywhere. `align_content` still places them across.
+
+```yaml
+style: {flex_direction: horizontal, width: 320, spread: between, align_content: left}
+```
+
+A child puts itself somewhere else than its parent says with `align_self`, which takes the same nine
+positions and acts across the layout.
+
+## How a node takes room: `flex`
+
+`flex` is a node's own sizing in its parent:
+
+| Value | What it does |
+| --- | --- |
+| `none` (the default) | As big as its `width` and `height`, or its content, and never squeezed. |
+| `expand_horizontal` | Takes the room left over, horizontally. |
+| `expand_vertical` | Takes the room left over, vertically. |
+| `fill` | Both. |
+
+In a row, `expand_horizontal` takes what the other children leave (two of them split it), and
+`expand_vertical` stretches the node to the row's height; in a column it is the other way round. An
+explicit `width` is the size it starts from, and `expand_*` overrides it across the layout.
 
 ## Sizes
 
@@ -78,19 +114,17 @@ and `overflow: ellipsis` ends a line that doesn't fit with an ellipsis instead o
   style: {width: 160, foreground: on_surface}
 ```
 
-Give the text a width (a number, or `flex_grow: 1` in a row with `min_width: 0`) for the ellipsis to have
+Give the text a width (a number, or `flex: expand_horizontal` in a row with `min_width: 0`) for the ellipsis to have
 something to truncate to. A `TextField` has neither key.
 
 The labels of the built-in [components](../components/index.md) are single lines that end in an
 ellipsis when they don't fit. A `Text` component takes `wrap` and `overflow` as parameters, and a `Link`
 too, if you want them to wrap.
 
-## Flexible sizing
+## Sharing a row
 
-`flex_grow` shares the space left over (`1` on two children splits it
-evenly), `flex_shrink` gives space back when there isn't enough (`1`, the
-default, shrinks; `0` doesn't), and `flex_basis` is the size to start
-from.
+`flex: expand_horizontal` shares the space left over (it on two children splits it evenly); the other
+children keep their sizes.
 
 ```yaml
 id: root
@@ -99,17 +133,18 @@ style: {flex_direction: horizontal, width: 400, height: 48, gap: 8}
 children:
   - id: sidebar
     kind: Rect
-    style: {width: 120, flex_shrink: 0, background: surface_container}
+    style: {width: 120, background: surface_container}
   - id: main
     kind: Rect
-    style: {flex_grow: 1, max_width: 400, background: surface_container_high}
+    style: {flex: expand_horizontal, max_width: 400, background: surface_container_high}
 ```
 
 ## Wrapping
 
 `flex_wrap: wrap` starts a new row (or column) when the children don't
-fit. With a fixed `flex_basis` or `width` it gives a gallery of
-equal tiles:
+fit. With a fixed `width` it gives a gallery of
+equal tiles. `align_wrapped` (`start`, `center`, `end`, `stretch`, `between`, `around`, `evenly`) says how
+the lines share the room left across the layout.
 
 ```yaml
 id: root
@@ -172,9 +207,10 @@ children:
   (`"1 / 3"`).
 - `row_gap` and `column_gap` space the tracks; `gap` sets both, and
   either one wins over it.
-- `justify_items` (on the grid) and `justify_self` (on a child) place
-  children across their cells; `align_items` and `align_self` down them;
-  `align_content` places the tracks in a grid bigger than they are.
+- `align_cells` (on the grid) places the items in their cells, as one of the nine positions, and
+  `align_self` (on a child) places one; `align_tracks` (`start`, `center`, `end`, `stretch`, `between`,
+  `around`, `evenly`) places the tracks in a grid bigger than they are. A grid uses these instead of
+  `align_content` and `spread`.
 
 A dashboard of tiles, one spanning two columns:
 

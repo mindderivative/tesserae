@@ -18,7 +18,6 @@ styles:
       background: primary_container
       corner_radius: large
       elevation: level_3
-      align_items: center
       padding:
         if: "{{ icon }}"
         then:
@@ -31,9 +30,9 @@ styles:
           right: 20
           top: 0
           bottom: 0
-      justify_content:
+      align_content:
         if: "{{ icon }}"
-        then: flex_start
+        then: left
         else: center
       gap: 8
   - id: icon
@@ -44,7 +43,6 @@ styles:
   - id: label
     style:
       foreground: on_primary_container
-      flex_shrink: 0
 ```
 
 ## How it is tied to the component
@@ -63,9 +61,8 @@ styles:
 | `background` | `primary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | `large` | Pixels, or a shape token (`none` to `extra_large`). |
 | `elevation` | `level_3` | A shadow level, 0 to 5. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
 | `padding` | left `16`, right `20`, top `0`, bottom `0` if `icon`, else left `20`, right `20`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
-| `justify_content` | `flex_start` if `icon`, else `center` | Where its children sit along the layout axis. |
+| `align_content` | `left` if `icon`, else `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `gap` | `8` | Space between its children. |
 
 ### `icon` (Icon)
@@ -81,7 +78,6 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_primary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_shrink` | `0` | How much it gives up when there is too little room. |
 
 ## What it makes
 
@@ -95,12 +91,11 @@ root:
   background: primary_container
   corner_radius: large
   elevation: level_3
-  align_items: center
   padding: {left: 16, right: 20, top: 0, bottom: 0}
-  justify_content: flex_start
+  align_content: left
   gap: 8
 icon: {width: 24, height: 24, foreground: on_primary_container}
-label: {foreground: on_primary_container, flex_shrink: 0}
+label: {foreground: on_primary_container}
 ```
 
 ## Changing it

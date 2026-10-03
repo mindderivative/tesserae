@@ -5,10 +5,10 @@ styles:
     style:
       width: "{{ width }}"
       height: "{{ height }}"
-      align_items: center
+      align_content: left
       padding: "{{ padding }}"
   - id: label
     style:
       foreground: on_surface
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0

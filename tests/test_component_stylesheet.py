@@ -81,7 +81,7 @@ def test_an_apps_own_stylesheet_restyles_a_built_in_field_by_field(tmp_path):
     assert _node(spec, "b.label")["style"]["foreground"] == "tertiary"
     root = _node(spec, "b")["style"]
     assert root["background"] == "secondary"
-    assert root["corner_radius"] == 20 and root["align_items"] == "center"  # the rest is the built-in's
+    assert root["corner_radius"] == 20 and root["align_content"] == "center"  # the rest is the built-in's
 
 
 def test_a_built_in_is_unchanged_by_a_stylesheet_for_another_component(tmp_path):

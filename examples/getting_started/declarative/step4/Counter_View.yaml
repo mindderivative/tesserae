@@ -10,7 +10,7 @@ children:
   - id: button
     kind: Rect
     handlers: {on_click: increment}
-    style: {width: 96, height: 40, background: "#6750A4", corner_radius: 20, align_items: center}
+    style: {width: 96, height: 40, background: "#6750A4", corner_radius: 20, align_content: left}
     children:
       - id: button_label
         kind: Text

@@ -42,7 +42,7 @@ def search_bar(
         size = 48 if button else 24
         return {"id": node_id, "kind": "Rect",
                 "style": {"width": size, "height": size, "corner_radius": size / 2, "background": "transparent",
-                          "align_items": "center", "justify_content": "center"},
+                          "align_content": "center"},
                 "children": [{"id": f"{node_id}.icon", "kind": "Icon", "icon": {"name": glyph},
                               "style": {"width": 24, "height": 24, "foreground": ink}}]}
 

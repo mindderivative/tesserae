@@ -10,8 +10,7 @@ styles:
         else: 48
       background: surface
       flex_direction: vertical
-      align_items: center
-      justify_content: center
+      align_content: center
   - id: tab
     style:
       height:
@@ -19,17 +18,15 @@ styles:
         then: 64
         else: 48
       flex_direction: vertical
-      align_items: stretch
   - id: top
     style:
       height: 3
       background: transparent
   - id: content
     style:
-      flex_grow: 1
+      flex: expand_vertical
       flex_direction: vertical
-      align_items: center
-      justify_content: center
+      align_content: center
       gap: 2
   - id: icon
     style:
@@ -45,7 +42,6 @@ styles:
         if: "{{ selected }}"
         then: primary
         else: on_surface_variant
-      flex_shrink: 0
   - id: indicator
     style:
       height: 3

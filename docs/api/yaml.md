@@ -122,9 +122,11 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 
 | Field | Values | What it does |
 | --- | --- | --- |
-| `align_content` | `start` \| `end` \| `flex_start` \| `flex_end` \| `center` \| `stretch` \| `space_between` \| `space_around` \| `space_evenly` | How wrapped rows, or grid tracks, are spaced. |
-| `align_items` | `start` \| `end` \| `flex_start` \| `flex_end` \| `center` \| `baseline` \| `stretch` | Where its children sit across the layout axis. |
-| `align_self` | `start` \| `end` \| `flex_start` \| `flex_end` \| `center` \| `baseline` \| `stretch` | Overrides its parent's `align_items` for this node. |
+| `align_cells` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | In a grid: where each item sits in its cell. |
+| `align_content` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
+| `align_self` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | Its own place in its parent, over the parent's `align_content`. |
+| `align_tracks` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | In a grid: how the tracks share the room left over. |
+| `align_wrapped` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | With `flex_wrap: wrap`: how the lines share the room left over. |
 | `aspect_ratio` | a number | Width over height: gives the missing side from the one set. |
 | `background` | a color | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `border_color` | a color | The colour of its border. |
@@ -134,10 +136,8 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` | Pixels, or a shape token (`none` to `extra_large`). |
 | `display` | `flex` \| `grid` | `flex` (the default) or `grid`. |
 | `elevation` | a number or `level_0` \| `level_1` \| `level_2` \| `level_3` \| `level_4` \| `level_5` | A shadow level, 0 to 5. |
-| `flex_basis` | a number or `auto` or a percentage such as `50%` | Its size along the main axis before it grows or shrinks. |
+| `flex` | `none` \| `expand_horizontal` \| `expand_vertical` \| `fill` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `flex_direction` | `horizontal` \| `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `flex_grow` | a number | How much of the spare room it takes, relative to its siblings. |
-| `flex_shrink` | a number | How much it gives up when there is too little room. |
 | `flex_wrap` | `no_wrap` \| `wrap` | `wrap` lets children flow onto more lines; `no_wrap` keeps one. |
 | `foreground` | a color | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
 | `gap` | a number | Space between its children. |
@@ -149,9 +149,6 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `grid_template_columns` | text | The grid's columns, as in CSS: `1fr 2fr 100px`. |
 | `grid_template_rows` | text | The grid's rows, as in CSS. |
 | `height` | a number or `auto` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `justify_content` | `start` \| `end` \| `flex_start` \| `flex_end` \| `center` \| `stretch` \| `space_between` \| `space_around` \| `space_evenly` | Where its children sit along the layout axis. |
-| `justify_items` | `start` \| `end` \| `flex_start` \| `flex_end` \| `center` \| `baseline` \| `stretch` | Where grid children sit across their cell's width. |
-| `justify_self` | `start` \| `end` \| `flex_start` \| `flex_end` \| `center` \| `baseline` \| `stretch` | Where this node sits across its grid cell's width. |
 | `margin` | a number or a mapping | Space outside it: one number, or `{left, right, top, bottom}`. |
 | `margin.top` | a number | Space on the top side. |
 | `margin.right` | a number | Space on the right side. |
@@ -169,6 +166,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `padding.left` | a number | Space on the left side. |
 | `position` | `relative` \| `absolute` | `absolute` takes it out of the flow and places it at `x` and `y`. |
 | `row_gap` | a number | Space between rows (defaults to `gap`). |
+| `spread` | `none` \| `between` \| `around` \| `evenly` | Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`. |
 | `width` | a number or `auto` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `x` | a number or `auto` | Where an `absolute` node sits from the left. |
 | `y` | a number or `auto` | Where an `absolute` node sits from the top. |

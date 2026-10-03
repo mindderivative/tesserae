@@ -8,7 +8,7 @@ children:
     style: {width: 160, height: 28, foreground: "#FFFFFF"}
   - id: button
     kind: Rect
-    style: {width: 96, height: 40, background: "#6750A4", corner_radius: 20, align_items: center}
+    style: {width: 96, height: 40, background: "#6750A4", corner_radius: 20, align_content: left}
     children:
       - id: button_label
         kind: Text

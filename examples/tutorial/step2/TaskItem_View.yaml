@@ -1,6 +1,6 @@
 id: root
 kind: Container
-style: {flex_direction: horizontal, align_items: center, gap: 8, width: 100%}
+style: {flex_direction: horizontal, align_content: left, gap: 8, width: 100%}
 children:
   - id: done
     kind: Checkbox
@@ -10,7 +10,7 @@ children:
   - id: label
     kind: Text
     text: {content: Task, typography_role: body_large}
-    style: {flex_grow: 1, foreground: on_surface}
+    style: {flex: expand_horizontal, foreground: on_surface}
     bindings: {text: "{{ text.get() }}"}
   - id: remove
     component: IconButtonStandard

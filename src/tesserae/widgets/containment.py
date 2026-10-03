@@ -310,7 +310,7 @@ def splitter(
 
     def pane(part: str) -> dict[str, Any]:
         return {"id": f"{name}.{part}", "kind": "Container",
-                "style": {main: available / 2, cross: across, "flex_shrink": 0}}
+                "style": {main: available / 2, cross: across}}
 
     spec = {"id": name, "kind": "Container",
             "style": {"width": width, "height": height,
@@ -318,8 +318,7 @@ def splitter(
             "children": [
                 pane("first"),
                 {"id": f"{name}.handle", "kind": "Rect",
-                 "style": {main: HANDLE_SPAN, cross: across, "background": "transparent", "flex_shrink": 0,
-                           "align_items": "center", "justify_content": "center"},
+                 "style": {main: HANDLE_SPAN, cross: across, "background": "transparent", "align_content": "center"},
                  "children": [{"id": f"{name}.handle.grip", "kind": "Rect",
                                "style": {"width": grip_w, "height": grip_h, "corner_radius": 2,
                                          "background": "outline"}}]},

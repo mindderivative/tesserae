@@ -14,7 +14,7 @@ styles:
     style:
       width: "{{ width }}"
       height: 32
-      align_items: center
+      align_content: left
       padding:
         left: 16
         right: 16
@@ -42,7 +42,7 @@ styles:
 | --- | --- | --- |
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `32` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | left `16`, right `16`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `gap` | `8` | Space between its children. |
 | `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
@@ -64,7 +64,7 @@ With `label: Go, width: 120`, each part's style is:
 root:
   width: 120
   height: 32
-  align_items: center
+  align_content: left
   padding: {left: 16, right: 16, top: 0, bottom: 0}
   gap: 8
   background: transparent

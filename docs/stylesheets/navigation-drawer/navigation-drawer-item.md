@@ -20,7 +20,7 @@ styles:
         then: secondary_container
         else: transparent
       flex_direction: horizontal
-      align_items: center
+      align_content: left
       gap: 12
       padding:
         left: 16
@@ -41,7 +41,7 @@ styles:
         if: "{{ selected }}"
         then: on_secondary_container
         else: on_surface_variant
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0
 ```
 
@@ -60,7 +60,7 @@ styles:
 | `corner_radius` | `28` | Pixels, or a shape token (`none` to `extra_large`). |
 | `background` | `secondary_container` if `selected`, else `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `flex_direction` | `horizontal` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `gap` | `12` | Space between its children. |
 | `padding` | left `16`, right `24`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
@@ -77,7 +77,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_secondary_container` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `min_width` | `0` | The least width it can take. |
 
 ## What it makes
@@ -91,11 +91,11 @@ root:
   corner_radius: 28
   background: transparent
   flex_direction: horizontal
-  align_items: center
+  align_content: left
   gap: 12
   padding: {left: 16, right: 24, top: 0, bottom: 0}
 icon: {width: 24, height: 24, foreground: on_surface_variant}
-label: {foreground: on_surface_variant, flex_grow: 1, min_width: 0}
+label: {foreground: on_surface_variant, flex: expand_horizontal, min_width: 0}
 ```
 
 ## Changing it

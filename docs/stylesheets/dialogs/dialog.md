@@ -15,8 +15,7 @@ styles:
       width: "{{ scrim_width }}"
       height: "{{ scrim_height }}"
       background: '#00000052'
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: panel
     style:
       flex_direction: vertical
@@ -33,7 +32,7 @@ styles:
   - id: body
     style:
       foreground: on_surface_variant
-      flex_grow: 1
+      flex: expand_vertical
 ```
 
 ## How it is tied to the component
@@ -49,8 +48,7 @@ styles:
 | `width` | the `scrim_width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `scrim_height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `#00000052` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `panel` (Container)
 
@@ -76,18 +74,18 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `flex` | `expand_vertical` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 
 ## What it makes
 
 With `headline: Headline, text: Hello, width: 120, height: 40, scrim_width: 400, scrim_height: 300`, each part's style is:
 
 ```yaml
-root: {width: 400, height: 300, background: '#00000052', justify_content: center, align_items: center}
+root: {width: 400, height: 300, background: '#00000052', align_content: center}
 panel: {flex_direction: vertical, width: 120, height: 40, background: surface_container_high, corner_radius: extra_large,
   elevation: level_3, padding: 24, gap: 16}
 headline: {foreground: on_surface}
-body: {foreground: on_surface_variant, flex_grow: 1}
+body: {foreground: on_surface_variant, flex: expand_vertical}
 ```
 
 ## Changing it

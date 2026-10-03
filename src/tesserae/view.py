@@ -57,7 +57,7 @@ from tesserae.spec.title_bar import expand_title_bars
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
     focus_ring_color,
-    interaction_tint, natural_size, patch, prepare_layers, resting_focus,
+    interaction_tint, layout_of, natural_size, patch, prepare_layers, resting_focus,
 )
 from tesserae.spec.cascade import resolve_style
 from tesserae.spec.cascade import check_stylesheet, check_theme
@@ -356,8 +356,14 @@ class View:
             self._built.layout_keys[node_id] = patch(
                 self.window, node_spec, self._built.outer[node_id], self._built.nodes[node_id],
                 scheme=scheme, layers=layers, frames=self._frames, state=False,
-                control=self._built.controls.get(node_id), before=self._built.layout_keys.get(node_id, frozenset()))
+                control=self._built.controls.get(node_id), before=self._built.layout_keys.get(node_id, frozenset()),
+                parent=self._parent_layout(node_id, layers))
         self._sync_interactions(scheme)
+
+    def _parent_layout(self, node_id: str, layers: Any) -> tuple[str, str]:
+        """The `(flex_direction, display)` of a node's parent: what the node's own `flex` and `align_self` mean."""
+        parent = self._built.specs.get(self._built.parent_ids.get(node_id) or "")
+        return layout_of(parent, layers) if parent is not None else ("horizontal", "flex")
 
     def _sync_interactions(self, scheme: Any = None) -> None:
         """Gives every node that should have a state layer and ripple one,
@@ -440,7 +446,7 @@ class View:
             self._built.layout_keys[node_id] = patch(
                 self.window, new, outer, self._built.nodes[node_id], scheme=self._scheme, layers=self._layers,
                 frames=self._frames, control=self._built.controls.get(node_id),
-                before=self._built.layout_keys.get(node_id, frozenset()))
+                before=self._built.layout_keys.get(node_id, frozenset()), parent=self._parent_layout(node_id, self._layers))
         self._built.specs[node_id] = new
         if new.get("kind") == "NodeGraph":
             self._reconcile_graph(old, new)
@@ -461,7 +467,8 @@ class View:
                     self._forget(previous)
                     self._built.outer.get(child["id"]) and self._built.outer[child["id"]].destroy()
                 child_node = build_with(self.window, child, scheme=self._scheme, layers=self._layers,
-                                        frames=self._frames, into=self._built, listen=self._events.listen)
+                                        frames=self._frames, into=self._built, listen=self._events.listen,
+                                        parent=node_id)
             # a tre Node is a fresh handle on each call, so compare with ==, not `is`
             if child_node.parent() != outer or _child_index(outer, child_node) != index:
                 outer.insert_child(index, child_node)
@@ -876,7 +883,7 @@ def _arity_adapter(method: Callable[..., Any]) -> Callable[[Any], Any]:
 def _remeasure(window: Any, node: Any, style: dict[str, Any], kind: str) -> None:
     props = {name: node.get(name) for name in ("text", "font_family", "font_size", "font_weight", "line_height")}
     size = natural_size(window, props, style)
-    if size and "width" in size and kind == "Text" and node.get("text_align") != "start":
+    if size and "width" in size and kind == "Text" and node.get("width") == "100%":
         size["min_width"] = size.pop("width")  # a centred or right aligned Text fills its parent: this is its least
     if size:
         node.set(**size)

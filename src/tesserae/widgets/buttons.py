@@ -370,8 +370,7 @@ def segmented_button(
                              "style": {"width": 1, "height": inner, "background": "outline"}})
         children.append({"id": f"{name}.s{i}", "kind": "Rect",
                          "style": {"width": segment, "height": inner, "background": "transparent",
-                                   "flex_direction": "horizontal", "align_items": "center",
-                                   "justify_content": "center"},
+                                   "flex_direction": "horizontal", "align_content": "center"},
                          "children": [
                              {"id": f"{name}.s{i}.check", "kind": "Icon", "icon": {"name": "check"},
                               "style": {"width": SEGMENT_CHECK, "height": SEGMENT_CHECK,

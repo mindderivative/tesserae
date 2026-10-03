@@ -21,8 +21,7 @@ styles:
       height: 36
       background: transparent
       corner_radius: small
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: am_label
     style:
       foreground: on_surface
@@ -32,8 +31,7 @@ styles:
       height: 36
       background: tertiary_container
       corner_radius: small
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: pm_label
     style:
       foreground: on_tertiary_container
@@ -61,8 +59,7 @@ styles:
 | `height` | `36` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | `small` | Pixels, or a shape token (`none` to `extra_large`). |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `am_label` (Text)
 
@@ -78,8 +75,7 @@ styles:
 | `height` | `36` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `tertiary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | `small` | Pixels, or a shape token (`none` to `extra_large`). |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `pm_label` (Text)
 
@@ -93,10 +89,9 @@ With ``, each part's style is:
 
 ```yaml
 root: {flex_direction: vertical, width: 52, height: 72}
-am: {width: 52, height: 36, background: transparent, corner_radius: small, justify_content: center, align_items: center}
+am: {width: 52, height: 36, background: transparent, corner_radius: small, align_content: center}
 am_label: {foreground: on_surface}
-pm: {width: 52, height: 36, background: tertiary_container, corner_radius: small, justify_content: center,
-  align_items: center}
+pm: {width: 52, height: 36, background: tertiary_container, corner_radius: small, align_content: center}
 pm_label: {foreground: on_tertiary_container}
 ```
 

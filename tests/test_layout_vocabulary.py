@@ -16,6 +16,13 @@ from tesserae.spec.build import SpecBuildError
 SEED = (0x67, 0x50, 0xA4, 0xFF)
 BOX = ("layout_x", "layout_y", "layout_width", "layout_height")
 
+@pytest.fixture(autouse=True)
+def _the_engines_own_names(monkeypatch):
+    """These tests compare Tesserae with answers recorded from the engine, in the engine's own layout names."""
+    from tesserae.spec import layout
+
+    monkeypatch.setattr(layout, "LEGACY_ENGINE_NAMES", True)
+
 
 def _rect(node_id, **style):
     return {"id": node_id, "kind": "Rect", "style": {"background": "#000000", **style}}

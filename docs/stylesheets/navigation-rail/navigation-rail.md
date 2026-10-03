@@ -14,7 +14,7 @@ styles:
     style:
       width: 80
       flex_direction: vertical
-      align_items: center
+      align_content: top
       gap: 12
       padding:
         left: 0
@@ -36,7 +36,7 @@ styles:
 | --- | --- | --- |
 | `width` | `80` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `top` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `gap` | `12` | Space between its children. |
 | `padding` | left `0`, right `0`, top `12`, bottom `12` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `background` | `surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
@@ -49,20 +49,18 @@ With ``, and a list of items, each part's style is:
 root:
   width: 80
   flex_direction: vertical
-  align_items: center
+  align_content: top
   gap: 12
   padding: {left: 0, right: 0, top: 12, bottom: 12}
   background: surface
-item.0: {width: 80, height: 56, flex_direction: vertical, align_items: center, gap: 4}
-item.0.pill: {width: 56, height: 32, corner_radius: 16, background: secondary_container, align_items: center,
-  justify_content: center}
+item.0: {width: 80, height: 56, flex_direction: vertical, align_content: top, gap: 4}
+item.0.pill: {width: 56, height: 32, corner_radius: 16, background: secondary_container, align_content: center}
 item.0.icon: {width: 24, height: 24, foreground: on_secondary_container}
-item.0.label: {foreground: on_surface, flex_shrink: 0}
-item.1: {width: 80, height: 56, flex_direction: vertical, align_items: center, gap: 4}
-item.1.pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_items: center,
-  justify_content: center}
+item.0.label: {foreground: on_surface}
+item.1: {width: 80, height: 56, flex_direction: vertical, align_content: top, gap: 4}
+item.1.pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_content: center}
 item.1.icon: {width: 24, height: 24, foreground: on_surface_variant}
-item.1.label: {foreground: on_surface_variant, flex_shrink: 0}
+item.1.label: {foreground: on_surface_variant}
 ```
 
 ## Changing it

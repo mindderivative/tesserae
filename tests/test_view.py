@@ -436,14 +436,14 @@ def test_reconcile_keeps_focus_on_an_unchanged_field():
 def test_a_node_that_sets_its_alignment_can_be_restyled():
     """A re-theme, re-style or reconcile patched every node with the
     alignment defaults and its own props as two `**` expansions, so one
-    whose style set `align_items`/`justify_content` raised TypeError
-    (from M37 Phase 4, found in M41)."""
-    spec = {"id": "root", "kind": "Container", "style": {"align_items": "center", "justify_content": "flex_end"},
+    whose style set `align_content`/`spread` raised TypeError."""
+    spec = {"id": "root", "kind": "Container", "style": {"align_content": "center", "spread": "between"},
             "children": []}
     view = View(spec)
     view.set_theme(theme_seed=(0x67, 0x50, 0xA4, 0xFF))
-    view.reconcile(dict(spec, style={"align_items": "flex_end"}))
-    assert view.root.get("align_items") == "flex_end" and view.root.get("justify_content") == "flex_start"
+    assert (view.root.get("align_items"), view.root.get("justify_content")) == ("center", "space_between")
+    view.reconcile(dict(spec, style={"align_content": "bottom"}))
+    assert (view.root.get("align_items"), view.root.get("justify_content")) == ("end", "center")
 
 
 def test_text_is_sized_to_its_content_and_bound_text_is_measured_again():

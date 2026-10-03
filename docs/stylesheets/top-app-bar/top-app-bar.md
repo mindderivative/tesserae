@@ -15,7 +15,7 @@ styles:
       width: "{{ width }}"
       height: 64
       background: surface
-      align_items: center
+      align_content: left
       padding:
         left: 4
         right: 4
@@ -24,7 +24,7 @@ styles:
   - id: title
     style:
       foreground: on_surface
-      flex_grow: 1
+      flex: expand_horizontal
       margin:
         left: 16
         right: 0
@@ -46,7 +46,7 @@ styles:
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `64` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | left `4`, right `4`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ### `title` (Text)
@@ -54,7 +54,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `margin` | left `16`, right `0`, top `0`, bottom `0` | Space outside it: one number, or `{left, right, top, bottom}`. |
 | `min_width` | `0` | The least width it can take. |
 
@@ -67,11 +67,11 @@ root:
   width: 120
   height: 64
   background: surface
-  align_items: center
+  align_content: left
   padding: {left: 4, right: 4, top: 0, bottom: 0}
 title:
   foreground: on_surface
-  flex_grow: 1
+  flex: expand_horizontal
   margin: {left: 16, right: 0, top: 0, bottom: 0}
   min_width: 0
 ```

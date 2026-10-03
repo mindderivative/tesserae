@@ -9,8 +9,7 @@ styles:
     style:
       width: "{{ width }}"
       height: "{{ height }}"
-      align_items: center
-      justify_content: center
+      align_content: center
       background: primary
       corner_radius: "{{ corner_radius }}"
       padding:
@@ -25,8 +24,7 @@ styles:
     style:
       width: "{{ height }}"
       height: "{{ height }}"
-      align_items: center
-      justify_content: center
+      align_content: center
       background: primary
       corner_radius: "{{ corner_radius }}"
   - id: chevron

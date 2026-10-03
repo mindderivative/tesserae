@@ -6,7 +6,7 @@ styles:
       width: "{{ width }}"
       height: 24
       background: surface_container
-      align_items: center
+      align_content: left
       padding:
         left: 8
         right: 8
@@ -15,5 +15,5 @@ styles:
   - id: text
     style:
       foreground: on_surface_variant
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0

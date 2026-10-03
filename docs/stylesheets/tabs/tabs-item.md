@@ -19,8 +19,7 @@ styles:
         else: 48
       background: surface
       flex_direction: vertical
-      align_items: center
-      justify_content: center
+      align_content: center
   - id: tab
     style:
       height:
@@ -28,17 +27,15 @@ styles:
         then: 64
         else: 48
       flex_direction: vertical
-      align_items: stretch
   - id: top
     style:
       height: 3
       background: transparent
   - id: content
     style:
-      flex_grow: 1
+      flex: expand_vertical
       flex_direction: vertical
-      align_items: center
-      justify_content: center
+      align_content: center
       gap: 2
   - id: icon
     style:
@@ -54,7 +51,6 @@ styles:
         if: "{{ selected }}"
         then: primary
         else: on_surface_variant
-      flex_shrink: 0
   - id: indicator
     style:
       height: 3
@@ -79,8 +75,7 @@ styles:
 | `height` | `64` if `icon`, else `48` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `tab` (Container)
 
@@ -88,7 +83,6 @@ styles:
 | --- | --- | --- |
 | `height` | `64` if `icon`, else `48` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_items` | `stretch` | Where its children sit across the layout axis. |
 
 ### `top` (Rect)
 
@@ -101,10 +95,9 @@ styles:
 
 | Field | Value | What it does |
 | --- | --- | --- |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `flex` | `expand_vertical` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `gap` | `2` | Space between its children. |
 
 ### `icon` (Icon)
@@ -120,7 +113,6 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `primary` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_shrink` | `0` | How much it gives up when there is too little room. |
 
 ### `indicator` (Rect)
 
@@ -135,12 +127,12 @@ styles:
 With `label: Go, width: 120, icon: home, selected: False`, each part's style is:
 
 ```yaml
-root: {width: 120, height: 64, background: surface, flex_direction: vertical, align_items: center, justify_content: center}
-tab: {height: 64, flex_direction: vertical, align_items: stretch}
+root: {width: 120, height: 64, background: surface, flex_direction: vertical, align_content: center}
+tab: {height: 64, flex_direction: vertical}
 top: {height: 3, background: transparent}
-content: {flex_grow: 1, flex_direction: vertical, align_items: center, justify_content: center, gap: 2}
+content: {flex: expand_vertical, flex_direction: vertical, align_content: center, gap: 2}
 icon: {width: 24, height: 24, foreground: on_surface_variant}
-label: {foreground: on_surface_variant, flex_shrink: 0}
+label: {foreground: on_surface_variant}
 indicator: {height: 3, corner_radius: 3, background: transparent}
 ```
 

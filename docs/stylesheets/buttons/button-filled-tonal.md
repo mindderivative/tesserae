@@ -14,8 +14,7 @@ styles:
     style:
       width: "{{ width }}"
       height: "{{ height }}"
-      align_items: center
-      justify_content: center
+      align_content: center
       background: secondary_container
       corner_radius: "{{ corner_radius }}"
       padding:
@@ -40,8 +39,7 @@ styles:
 | --- | --- | --- |
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `background` | `secondary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
 | `padding` | left `12`, right `12`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
@@ -60,8 +58,7 @@ With `label: Go, width: 120, height: 40, corner_radius: 20`, each part's style i
 root:
   width: 120
   height: 40
-  align_items: center
-  justify_content: center
+  align_content: center
   background: secondary_container
   corner_radius: 20
   padding: {left: 12, right: 12, top: 0, bottom: 0}

@@ -32,6 +32,8 @@ from typing import Any, Callable, Optional
 from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
+from tesserae.spec import layout
+from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED, LayoutError, engine_style
 
 __all__ = ["style_props", 
     "A11Y_BINDABLE", "Built", "Layers", "SpecBuildError", "a11y_bindings", "build", "control_shape", "focus_ring_color",
@@ -86,6 +88,8 @@ class Built:
     radio_groups: dict[str, Any] = field(default_factory=dict)
     #: The M71 layout keys each node's style gave, for `patch`'s `before`.
     layout_keys: dict[str, frozenset[str]] = field(default_factory=dict)
+    #: Each node's parent's id: its `flex_direction` and `display` say what the node's own `flex` means.
+    parent_ids: dict[str, Optional[str]] = field(default_factory=dict)
 
 
 @dataclass
@@ -98,6 +102,8 @@ class _Context:
     listen: Optional[Callable[..., Any]] = None
     #: The NodeGraph widget whose GraphNodes are being built (M60).
     graph: Any = None
+    #: The `(flex_direction, display)` of the node whose children are being built.
+    parent: tuple[str, str] = ("horizontal", "flex")
 
 
 def build(
@@ -172,6 +178,7 @@ def build_with(
     into: Optional[Built] = None,
     listen: Optional[Callable[..., Any]] = None,
     graph: Any = None,
+    parent: Optional[str] = None,
 ) -> Any:
     """Builds `spec` with already-prepared layers, recording its nodes in
     `into` (a new `Built` if none); returns the subtree's outer root.
@@ -179,7 +186,9 @@ def build_with(
     `graph`, the NodeGraph widget a GraphNode `spec` belongs to."""
     ctx = _Context(window, layers, scheme, frames or {}, listen, graph)
     built = into if into is not None else Built(root=None)
-    return _build(ctx, spec, built)
+    if parent is not None and parent in built.specs:  # a subtree added under a node that is already built
+        ctx.parent = layout_of(built.specs[parent], layers)
+    return _build(ctx, spec, built, parent)
 
 
 _shipped: Optional[dict[str, Any]] = None
@@ -213,7 +222,21 @@ def _did_you_mean(unknown: Any, known: Any) -> str:
     return " -- did you mean " + ", ".join(f"{good!r} for {bad!r}" for bad, good in pairs) + "?"
 
 
-def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
+def _engine(node_id: str, style: dict[str, Any], parent: tuple[str, str]) -> dict[str, Any]:
+    """`style` with the layout fields turned into the engine's (`tesserae.spec.layout`)."""
+    try:
+        return engine_style(node_id, style, parent)
+    except LayoutError as exc:
+        raise SpecBuildError(str(exc)) from None
+
+
+def layout_of(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> tuple[str, str]:
+    """The `(flex_direction, display)` a node's style gives its children."""
+    style = resolve_style(node, layers)
+    return style.get("flex_direction", "horizontal"), style.get("display", "flex")
+
+
+def _build(ctx: _Context, node: dict[str, Any], built: Built, parent_id: Optional[str] = None) -> Any:
     node_id, kind = node.get("id"), node.get("kind")
     if not isinstance(node_id, str):
         raise SpecBuildError(f"every widget needs an `id:`, got {node!r}")
@@ -227,10 +250,12 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     style = resolve_style(node, ctx.layers)
     _check_interaction(node)
     _a11y_fields(node)
-    unknown_style = set(style) - STYLE_FIELDS
+    engine = _engine(node_id, style, ctx.parent)  # first: it says what replaces an engine name
+    unknown_style = set(style) - STYLE_FIELDS - (set(REPLACED) | {"align_content", "align_self"} if layout.LEGACY_ENGINE_NAMES else set())
     if unknown_style:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}"
                              + _did_you_mean(unknown_style, STYLE_FIELDS))
+    style = engine
 
     try:
         outer, inner = _create(ctx, node, style, built)
@@ -242,6 +267,7 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
     built.nodes[node_id] = inner
     built.outer[node_id] = outer
     built.specs[node_id] = node
+    built.parent_ids[node_id] = parent_id
     if kind == "NodeGraph":  # its GraphNodes place themselves in the graph's content (M60)
         graph, ctx.graph = ctx.graph, built.controls[node_id]
         try:
@@ -249,15 +275,19 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built) -> Any:
                 if child.get("kind") != "GraphNode":
                     raise SpecBuildError(f"widget {_q(node_id)}: a NodeGraph's children are GraphNodes, "
                                          f"got {child.get('kind')!r} ({child.get('id')!r})")
-                _build(ctx, child, built)
+                _build(ctx, child, built, node_id)
         finally:
             ctx.graph = graph
         connect_edges(built.controls[node_id], node, built)
         return outer
     # a GraphNode's content goes in its body, a ScrollView's in its content box (M71)
     parent = inner if kind in ("GraphNode", "ScrollView") else outer
-    for child in node.get("children") or []:
-        parent.add_child(_build(ctx, child, built))
+    above, ctx.parent = ctx.parent, (style.get("flex_direction", "horizontal"), style.get("display", "flex"))
+    try:
+        for child in node.get("children") or []:
+            parent.add_child(_build(ctx, child, built, node_id))
+    finally:
+        ctx.parent = above
     return outer
 
 
@@ -355,12 +385,13 @@ def _token(node_id: str, field_name: str, value: Any, lookup: Callable[[str], Op
 
 #: The style fields that are a node property of the same name (0.3.3, #81).
 _STYLE_PASSTHROUGH = frozenset({
-    "width", "height", "min_width", "max_width", "min_height", "max_height", "flex_basis", "flex_direction",
-    "align_items", "justify_content", "align_self", "justify_items", "justify_self", "align_content", "flex_wrap",
+    "width", "height", "min_width", "max_width", "min_height", "max_height", "flex_direction", "flex_wrap",
     "position", "display", "aspect_ratio", "x", "y", "z_index", "clip_children", "grid_template_columns",
     "grid_template_rows", "grid_auto_columns", "grid_auto_rows", "grid_auto_flow", "grid_column", "grid_row",
 })
-_STYLE_FLOATS = frozenset({"gap", "row_gap", "column_gap", "flex_grow", "flex_shrink"})
+_STYLE_FLOATS = frozenset({"gap", "row_gap", "column_gap"})
+#: What `tesserae.spec.layout` turns into, for a box that isn't a spec node.
+_LAYOUT_PROPS = ("align_items", "justify_content", "align_content", "justify_items", "justify_self", "align_self")
 
 
 def style_props(style: dict[str, Any], scheme: Optional[dict[str, RGBA]], where: str = "a style") -> dict[str, Any]:
@@ -370,7 +401,15 @@ def style_props(style: dict[str, Any], scheme: Optional[dict[str, RGBA]], where:
     colour in a box, so it is an error. Raises `SpecBuildError`, naming `where`."""
     ctx = _Context(window=None, layers=(), scheme=scheme, frames={})
     props: dict[str, Any] = {}
+    laid = {k for k in style if k in LAYOUT_FIELDS or k in REPLACED}
+    if laid:  # where its children go, how it takes room: the engine's names for them
+        engine = _engine(where, style, ctx.parent)
+        props.update({k: engine[k] for k in _LAYOUT_PROPS if k in engine})
+        if "flex" in style:
+            props.update(flex_grow=engine["flex_grow"], flex_shrink=engine["flex_shrink"])
     for key, value in style.items():
+        if key in laid:
+            continue
         if key in _STYLE_PASSTHROUGH:
             props[key] = value
         elif key in _STYLE_FLOATS:
@@ -556,7 +595,7 @@ def _text_props(ctx, node, style):
     fill = _required_foreground(ctx, node, style, node["kind"])
     props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(ctx, node, node["kind"]), "fill": fill}
     props.update(natural_size(ctx.window, props, style))
-    if node["kind"] == "Text" and props["text_align"] != "start" and style.get("width") is None:
+    if node["kind"] == "Text" and style.get("width") is None and (props["text_align"] != "start" or style.get("_fill_x")):
         # The engine aligns text within the width it is laid out in, so a centred or right aligned Text with no
         # width fills its parent's, and keeps its own as the least (a parent with no width yet gives 100% nothing).
         props["min_width"] = max(props["width"], float(style.get("min_width") or 0.0))
@@ -831,6 +870,7 @@ def patch(
     state: bool = True,
     control: Any = None,
     before: frozenset[str] = frozenset(),
+    parent: tuple[str, str] = ("horizontal", "flex"),
 ) -> frozenset[str]:
     """Sets `node`'s properties on its existing nodes, in place -- what
     `tre`'s `patch_node` does. The node keeps its identity, focus and
@@ -844,7 +884,7 @@ def patch(
     built or patched (`Built.layout_keys`): one it no longer gives is reset.
     Returns the keys it gives now."""
     ctx = _Context(window, layers, scheme, frames or {})
-    style = resolve_style(node, layers)
+    style = _engine(node["id"], resolve_style(node, layers), parent)
     kind = node["kind"]
     given = layout_keys(style)
     resets = _resets(style, before - given)

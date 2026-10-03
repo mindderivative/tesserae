@@ -117,7 +117,7 @@ def menu_item(
 
     def edit(spec: dict[str, Any]) -> None:
         spec["style"].update(height=48, gap=12, padding={"left": 12, "right": 12, "top": 0, "bottom": 0})
-        spec["children"][0].setdefault("style", {})["flex_grow"] = 1
+        spec["children"][0].setdefault("style", {})["flex"] = "expand_horizontal"
         glyph = lambda node_id, n: {"id": node_id, "kind": "Icon", "icon": {"name": n},
                                     "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}}
         if icon is not None:

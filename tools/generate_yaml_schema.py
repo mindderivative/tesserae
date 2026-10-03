@@ -38,8 +38,7 @@ SITE = "https://mindderivative.github.io/tesserae/schema/"
 DRAFT = "http://json-schema.org/draft-07/schema#"
 
 #: The style fields whose valid values `tre` lists in its errors.
-TRE_ENUMS = ("flex_direction", "align_items", "justify_content", "align_self", "justify_items", "justify_self",
-             "align_content", "flex_wrap", "position", "display", "grid_auto_flow")
+TRE_ENUMS = ("flex_direction", "flex_wrap", "position", "display", "grid_auto_flow")
 
 
 # -- what Tesserae and tre say ---------------------------------------------------------------
@@ -85,7 +84,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     when the fragment is used, so there they may also be that."""
     from tesserae import a11y, icons, tokens
     from tesserae import view as view_module
-    from tesserae.spec import build, cascade, expand, title_bar
+    from tesserae.spec import build, cascade, expand, layout, title_bar
 
     roles = sorted(tokens.color_scheme((0x67, 0x50, 0xA4, 0xFF)))
     param = {"type": "string", "pattern": r"^\s*\{\{.*\}\}\s*$",
@@ -112,21 +111,25 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "width": (dimension, size_text), "height": (dimension, size_text),
         "min_width": (dimension, "The least width it can take."), "max_width": (dimension, "The most width it can take."),
         "min_height": (dimension, "The least height it can take."), "max_height": (dimension, "The most height it can take."),
-        "flex_basis": (dimension, "Its size along the main axis before it grows or shrinks."),
         "flex_direction": (enums["flex_direction"], "How its children are laid out: `horizontal` (the default) or `vertical`."),
         "padding": (spacing, "Space inside it: one number, or `{left, right, top, bottom}`."),
         "margin": (spacing, "Space outside it: one number, or `{left, right, top, bottom}`."),
         "gap": ({"type": "number", "minimum": 0}, "Space between its children."),
         "row_gap": ({"type": "number", "minimum": 0}, "Space between rows (defaults to `gap`)."),
         "column_gap": ({"type": "number", "minimum": 0}, "Space between columns (defaults to `gap`)."),
-        "flex_grow": ({"type": "number", "minimum": 0}, "How much of the spare room it takes, relative to its siblings."),
-        "flex_shrink": ({"type": "number", "minimum": 0}, "How much it gives up when there is too little room."),
-        "align_items": (enums["align_items"], "Where its children sit across the layout axis."),
-        "justify_content": (enums["justify_content"], "Where its children sit along the layout axis."),
-        "align_self": (enums["align_self"], "Overrides its parent's `align_items` for this node."),
-        "justify_items": (enums["justify_items"], "Where grid children sit across their cell's width."),
-        "justify_self": (enums["justify_self"], "Where this node sits across its grid cell's width."),
-        "align_content": (enums["align_content"], "How wrapped rows, or grid tracks, are spaced."),
+        "align_content": ({"enum": list(layout.POSITIONS)},
+                          "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, "
+                          "`bottom` or `bottom_right`. Not set, they fill the space across the layout."),
+        "spread": ({"enum": list(layout.SPREADS)},
+                   "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`."),
+        "flex": ({"enum": list(layout.FLEXES)},
+                 "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, "
+                 "`expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both."),
+        "align_self": ({"enum": list(layout.POSITIONS)}, "Its own place in its parent, over the parent's `align_content`."),
+        "align_wrapped": ({"enum": list(layout.ALIGN_TRACKS)},
+                          "With `flex_wrap: wrap`: how the lines share the room left over."),
+        "align_tracks": ({"enum": list(layout.ALIGN_TRACKS)}, "In a grid: how the tracks share the room left over."),
+        "align_cells": ({"enum": list(layout.POSITIONS)}, "In a grid: where each item sits in its cell."),
         "flex_wrap": (enums["flex_wrap"], "`wrap` lets children flow onto more lines; `no_wrap` keeps one."),
         "position": (enums["position"], "`absolute` takes it out of the flow and places it at `x` and `y`."),
         "display": (enums["display"], "`flex` (the default) or `grid`."),

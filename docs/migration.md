@@ -3,6 +3,51 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.0
+
+Where a node's children go, and how a node takes room, have new names. The engine's names are refused with
+a message saying what replaces them (`style.align_items is now align_content ...`), so a view that uses
+one fails to load and tells you.
+
+| Was | Is |
+| --- | --- |
+| `align_items`, `justify_content` | `align_content`: one of nine positions (`top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom`, `bottom_right`) |
+| `justify_content: space_between` / `space_around` / `space_evenly` | `spread: between` / `around` / `evenly` |
+| `flex_grow: 1` | `flex: expand_horizontal` (in a row) or `expand_vertical` (in a column) |
+| `flex_shrink: 0` | nothing: it is the default now |
+| `flex_basis` | `width` or `height`, with `flex` |
+| `align_self`, `justify_self` | `align_self`, one of the nine positions |
+| `justify_items` | `align_cells` (a grid) |
+| `align_content` on a wrapping node | `align_wrapped` |
+| `align_content` and `justify_content` on a grid | `align_tracks` |
+
+What an old pair becomes, in a row (`flex_direction: horizontal`, the default):
+
+| Was | Is |
+| --- | --- |
+| `align_items: center` | `align_content: left` |
+| `align_items: center`, `justify_content: center` | `align_content: center` |
+| `justify_content: flex_end` | `align_content: top_right` |
+| `align_items: flex_end` | `align_content: bottom_left` |
+| `align_items: center`, `justify_content: space_between` | `spread: between`, `align_content: left` |
+
+In a column the same words name the same places: `align_items: center` (across a column is horizontal)
+is `align_content: top`.
+
+Things that change with them:
+
+- **A node is never squeezed by default.** Its size is its `width` and `height`, or its content. `flex_shrink` was 1,
+  so a crowded parent shrank its children; now they keep their sizes and overflow. A `Text` that used to wrap
+  because its parent was narrow now needs `flex: expand_horizontal` (or a `width`) to wrap.
+- **Not setting `align_content` still stretches** children across the layout and starts them at the start.
+  Setting it places them, so children that were stretched (`align_items: stretch`, the default) and a position
+  that means centred along the other axis are not the same: use `flex: expand_vertical` (or `expand_horizontal`)
+  on the children that should fill.
+- **`baseline` is gone.** Nothing replaces it.
+- **`flex` overrides the size** across the parent's layout: `flex: expand_vertical` in a row drops the node's `height`.
+- **Python:** a style given to a widget (`top_app_bar(style=...)`) and `AppShell(styles=...)` take the new names too.
+  Direct engine calls (`window.create(..., align_items=...)`) are the engine's, and unchanged.
+
 ## To 0.3.4
 
 Nothing in your code has to change.

@@ -16,8 +16,7 @@ styles:
       height: 48
       background: primary
       corner_radius: 24
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: label
     style:
       foreground: on_primary
@@ -37,8 +36,7 @@ styles:
 | `height` | `48` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `primary` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | `24` | Pixels, or a shape token (`none` to `extra_large`). |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `label` (Text)
 
@@ -51,7 +49,7 @@ styles:
 With `day: 7`, each part's style is:
 
 ```yaml
-root: {width: 48, height: 48, background: primary, corner_radius: 24, justify_content: center, align_items: center}
+root: {width: 48, height: 48, background: primary, corner_radius: 24, align_content: center}
 label: {foreground: on_primary}
 ```
 

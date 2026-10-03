@@ -12,8 +12,7 @@ styles:
       height: 36
       background: transparent
       corner_radius: small
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: am_label
     style:
       foreground: on_surface
@@ -23,8 +22,7 @@ styles:
       height: 36
       background: tertiary_container
       corner_radius: small
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: pm_label
     style:
       foreground: on_tertiary_container

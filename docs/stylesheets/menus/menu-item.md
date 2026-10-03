@@ -14,12 +14,12 @@ styles:
     style:
       width: "{{ width }}"
       height: "{{ height }}"
-      align_items: center
+      align_content: left
       padding: "{{ padding }}"
   - id: label
     style:
       foreground: on_surface
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0
 ```
 
@@ -35,7 +35,7 @@ styles:
 | --- | --- | --- |
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | the `padding` parameter | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ### `label` (Text)
@@ -43,7 +43,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `min_width` | `0` | The least width it can take. |
 
 ## What it makes
@@ -51,8 +51,8 @@ styles:
 With `label: Go, width: 120, height: 40`, each part's style is:
 
 ```yaml
-root: {width: 120, height: 40, align_items: center, padding: 16}
-label: {foreground: on_surface, flex_grow: 1, min_width: 0}
+root: {width: 120, height: 40, align_content: left, padding: 16}
+label: {foreground: on_surface, flex: expand_horizontal, min_width: 0}
 ```
 
 ## Changing it

@@ -50,16 +50,14 @@ def check_stylesheet(spec: Any) -> None:
 
 #: Every field a `style:` can hold, as in `tre`'s `StyleSpec`.
 STYLE_FIELDS = frozenset({
-    "width", "height", "flex_direction", "padding", "margin", "gap", "flex_grow", "flex_shrink",
-    "flex_basis", "align_items", "justify_content", "background", "foreground", "corner_radius",
+    "width", "height", "flex_direction", "padding", "margin", "gap", "background", "foreground", "corner_radius",
     "opacity", "border_width", "border_color", "elevation",
-    # M71: the rest of `tre`'s flexbox
-    "flex_wrap", "align_self", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
+    # where children go, and how a node takes room: `tesserae.spec.layout`
+    "align_content", "spread", "flex", "align_self", "align_wrapped", "align_tracks", "align_cells",
+    "flex_wrap", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
     "position", "x", "y", "z_index", "clip_children",
-    # M74: CSS Grid (`tre` 0.4.2)
     "display", "grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows",
-    "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap", "justify_items", "justify_self",
-    "align_content",
+    "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap",
 })
 
 

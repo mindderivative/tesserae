@@ -5,7 +5,7 @@ styles:
     style:
       width: "{{ width }}"
       height: 32
-      align_items: center
+      align_content: left
       padding:
         left: 16
         right: 16

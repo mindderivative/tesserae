@@ -18,8 +18,7 @@ styles:
       corner_radius: 24
       border_color: primary
       border_width: 1.0
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: label
     style:
       foreground: primary
@@ -41,8 +40,7 @@ styles:
 | `corner_radius` | `24` | Pixels, or a shape token (`none` to `extra_large`). |
 | `border_color` | `primary` | The colour of its border. |
 | `border_width` | `1.0` | The width of its border, in pixels. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `label` (Text)
 
@@ -56,7 +54,7 @@ With `day: 7`, each part's style is:
 
 ```yaml
 root: {width: 48, height: 48, background: transparent, corner_radius: 24, border_color: primary, border_width: 1.0,
-  justify_content: center, align_items: center}
+  align_content: center}
 label: {foreground: primary}
 ```
 

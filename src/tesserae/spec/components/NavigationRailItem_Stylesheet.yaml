@@ -6,7 +6,7 @@ styles:
       width: 80
       height: 56
       flex_direction: vertical
-      align_items: center
+      align_content: top
       gap: 4
   - id: pill
     style:
@@ -17,8 +17,7 @@ styles:
         if: "{{ selected }}"
         then: secondary_container
         else: transparent
-      align_items: center
-      justify_content: center
+      align_content: center
   - id: icon
     style:
       width: 24
@@ -33,4 +32,3 @@ styles:
         if: "{{ selected }}"
         then: on_surface
         else: on_surface_variant
-      flex_shrink: 0

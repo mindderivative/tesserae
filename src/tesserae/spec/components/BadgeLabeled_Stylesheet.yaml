@@ -7,8 +7,7 @@ styles:
       height: 16
       background: error
       corner_radius: small
-      justify_content: center
-      align_items: center
+      align_content: center
   - id: label
     style:
       foreground: on_error

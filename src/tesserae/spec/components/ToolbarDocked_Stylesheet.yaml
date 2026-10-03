@@ -7,7 +7,6 @@ styles:
       width: "{{ width }}"
       height: 64
       background: "{{ background }}"
-      align_items: center
-      justify_content: center
+      align_content: center
       padding: 16
       gap: 32

@@ -266,12 +266,12 @@ def graph_node(
                       "border_color": "outline_variant", "border_width": 1.0},
             "children": [
                 {"id": f"{name}.title", "kind": "Container",
-                 "style": {"height": 32, "background": "surface_container_highest", "align_items": "center",
+                 "style": {"height": 32, "background": "surface_container_highest", "align_content": "left",
                            "padding": {"left": 12, "right": 12, "top": 0, "bottom": 0}},
                  "children": [{"id": f"{name}.label", "kind": "Text",
                                "text": {"content": label, "typography_role": "title_small"},
                                "style": {"foreground": "on_surface"}}]},
-                {"id": f"{name}.body", "kind": "Container", "style": {"flex_grow": 1}},
+                {"id": f"{name}.body", "kind": "Container", "style": {"flex": "expand_vertical"}},
             ]}
     widget = Widget(window, spec=spec, theme=theme if theme is not None else graph.theme, name=name, attach=False,
                     edit=_borders([None], border_color, border_width), interactive={None: "on_surface"})

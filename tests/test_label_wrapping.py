@@ -143,7 +143,7 @@ def _laid_out(spec):
 
 
 def _centred(parent_style):
-    return {"id": "r", "kind": "Container", "style": {"height": 60, "align_items": "center", "padding": 12, **parent_style},
+    return {"id": "r", "kind": "Container", "style": {"height": 60, "align_content": "left", "padding": 12, **parent_style},
             "children": [{"id": "t", "kind": "Text", "text": {"content": "Add a task", "typography_role": "label_large",
                                                               "text_align": "center"}, "style": {"foreground": "#FFFFFF"}}]}
 

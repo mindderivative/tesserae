@@ -46,7 +46,7 @@ def date_picker_day(
         label = spec["children"][0]
         spec["children"] = [{"id": f"{name}.indicator", "kind": "Rect",
                              "style": {"width": 40, "height": 40, "corner_radius": 20, "background": "transparent",
-                                       "align_items": "center", "justify_content": "center"},
+                                       "align_content": "center"},
                              "children": [label]}]
         if border is not None:
             border(spec)

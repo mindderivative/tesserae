@@ -17,7 +17,7 @@ styles:
       background: surface_container_high
       corner_radius: "{{ corner_radius }}"
       elevation: level_3
-      align_items: center
+      align_content: left
       padding:
         left: 4
         right: 4
@@ -26,7 +26,7 @@ styles:
   - id: field
     style:
       background: transparent
-      flex_grow: 1
+      flex: expand_horizontal
 ```
 
 ## How it is tied to the component
@@ -44,7 +44,7 @@ styles:
 | `background` | `surface_container_high` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
 | `elevation` | `level_3` | A shadow level, 0 to 5. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | left `4`, right `4`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ### `field` (TextField)
@@ -52,7 +52,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 
 ## What it makes
 
@@ -65,9 +65,9 @@ root:
   background: surface_container_high
   corner_radius: 20
   elevation: level_3
-  align_items: center
+  align_content: left
   padding: {left: 4, right: 4, top: 0, bottom: 0}
-field: {background: transparent, flex_grow: 1}
+field: {background: transparent, flex: expand_horizontal}
 ```
 
 ## Changing it

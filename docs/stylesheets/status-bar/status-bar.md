@@ -15,7 +15,7 @@ styles:
       width: "{{ width }}"
       height: 24
       background: surface_container
-      align_items: center
+      align_content: left
       padding:
         left: 8
         right: 8
@@ -24,7 +24,7 @@ styles:
   - id: text
     style:
       foreground: on_surface_variant
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0
 ```
 
@@ -41,7 +41,7 @@ styles:
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `surface_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | left `8`, right `8`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ### `text` (Text)
@@ -49,7 +49,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `min_width` | `0` | The least width it can take. |
 
 ## What it makes
@@ -61,9 +61,9 @@ root:
   width: 120
   height: 24
   background: surface_container
-  align_items: center
+  align_content: left
   padding: {left: 8, right: 8, top: 0, bottom: 0}
-text: {foreground: on_surface_variant, flex_grow: 1, min_width: 0}
+text: {foreground: on_surface_variant, flex: expand_horizontal, min_width: 0}
 ```
 
 ## Changing it

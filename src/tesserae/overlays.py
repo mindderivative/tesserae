@@ -157,7 +157,7 @@ class Dialog(Overlay):
                 buttons = [fragment("ButtonText", {"label": label, "width": 72, "height": 40, "corner_radius": 20},
                                     f"{name}.panel.action{i}") for i, (label, _) in enumerate(self.actions)]
                 panel["children"].append({"id": f"{name}.panel.actions", "kind": "Container",
-                                          "style": {"flex_direction": "horizontal", "justify_content": "flex_end",
+                                          "style": {"flex_direction": "horizontal", "align_content": "top_right",
                                                     "gap": 8}, "children": buttons})
 
         widget = Widget(window, "Dialog", {"headline": headline, "text": text, "width": width, "height": height,
@@ -281,8 +281,7 @@ class Snackbar(Overlay):
             if closable:
                 spec["children"].append({"id": f"{name}.close", "kind": "Rect",
                                          "style": {"width": 40, "height": 40, "corner_radius": 20,
-                                                   "background": "transparent", "align_items": "center",
-                                                   "justify_content": "center"},
+                                                   "background": "transparent", "align_content": "center"},
                                          "children": [{"id": f"{name}.close.icon", "kind": "Icon",
                                                        "icon": {"name": "close"},
                                                        "style": {"width": 24, "height": 24,
@@ -524,7 +523,7 @@ class SearchView(Overlay):
         name = "search_view"
         self.bar = bar
         rows = [{"id": f"{name}.row{i}", "kind": "Container",
-                 "style": {"width": width, "height": self.ROW, "align_items": "center",
+                 "style": {"width": width, "height": self.ROW, "align_content": "left",
                            "padding": {"left": 16, "right": 16, "top": 0, "bottom": 0}},
                  "children": [{"id": f"{name}.row{i}.label", "kind": "Text",
                                "text": {"content": " ", "typography_role": "body_large"},

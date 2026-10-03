@@ -101,13 +101,13 @@ def list_item(
         if supporting_text is not None:
             spec["style"]["height"] = 72
             text_part = {"id": f"{name}.text", "kind": "Container",
-                         "style": {"flex_direction": "vertical", "flex_grow": 1},
+                         "style": {"flex_direction": "vertical", "flex": "expand_horizontal"},
                          "children": [headline_spec, {
                              "id": f"{name}.supporting", "kind": "Text",
                              "text": {"content": supporting_text, "typography_role": "body_medium"},
                              "style": {"foreground": "on_surface_variant"}}]}
         else:
-            headline_spec.setdefault("style", {})["flex_grow"] = 1
+            headline_spec.setdefault("style", {})["flex"] = "expand_horizontal"
         children = [text_part]
         if leading_icon is not None:
             children.insert(0, _icon_spec(f"{name}.leading", leading_icon))
@@ -171,8 +171,7 @@ def chip(
         if removable:
             spec["children"].append({"id": f"{name}.remove", "kind": "Rect",
                                      "style": {"width": 18, "height": 18, "background": "transparent",
-                                               "corner_radius": 9, "align_items": "center",
-                                               "justify_content": "center"},
+                                               "corner_radius": 9, "align_content": "center"},
                                      "children": [_icon_spec(f"{name}.remove.icon", "close", 18.0, ink)]})
         if icon is not None or variant == "filter":
             spec["style"]["padding"] = {"left": 8, "right": 8 if removable else 16, "top": 0, "bottom": 0}

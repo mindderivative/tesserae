@@ -5,10 +5,10 @@ styles:
     style:
       width: "{{ width }}"
       height: 56
-      align_items: center
+      align_content: left
       padding: 16
   - id: headline
     style:
       foreground: on_surface
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0

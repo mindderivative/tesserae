@@ -8,7 +8,7 @@ styles:
       background: inverse_surface
       corner_radius: extra_small
       elevation: level_3
-      align_items: center
+      align_content: left
       padding:
         left: 16
         right: 16
@@ -17,4 +17,4 @@ styles:
   - id: text
     style:
       foreground: inverse_on_surface
-      flex_grow: 1
+      flex: expand_horizontal

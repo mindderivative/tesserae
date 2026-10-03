@@ -18,8 +18,7 @@ styles:
       background: "{{ background }}"
       corner_radius: "{{ corner_radius }}"
       elevation: level_3
-      align_items: center
-      justify_content: center
+      align_content: center
       padding: 16
       gap: 32
 ```
@@ -40,8 +39,7 @@ styles:
 | `background` | the `background` parameter | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
 | `elevation` | `level_3` | A shadow level, 0 to 5. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | `16` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `gap` | `32` | Space between its children. |
 
@@ -51,7 +49,7 @@ With `background: primary, width: 120, corner_radius: 20`, each part's style is:
 
 ```yaml
 root: {flex_direction: horizontal, width: 120, height: 64, background: primary, corner_radius: 20, elevation: level_3,
-  align_items: center, justify_content: center, padding: 16, gap: 32}
+  align_content: center, padding: 16, gap: 32}
 ```
 
 ## Changing it

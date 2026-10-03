@@ -15,7 +15,7 @@ styles:
       width: "{{ scrim_width }}"
       height: "{{ scrim_height }}"
       background: '#00000052'
-      justify_content: flex_end
+      align_content: top_right
   - id: panel
     style:
       width: "{{ width }}"
@@ -38,7 +38,7 @@ styles:
 | `width` | the `scrim_width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `scrim_height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `#00000052` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
-| `justify_content` | `flex_end` | Where its children sit along the layout axis. |
+| `align_content` | `top_right` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `panel` (Rect)
 
@@ -55,7 +55,7 @@ styles:
 With `width: 120, height: 40, scrim_width: 400, scrim_height: 300`, each part's style is:
 
 ```yaml
-root: {width: 400, height: 300, background: '#00000052', justify_content: flex_end}
+root: {width: 400, height: 300, background: '#00000052', align_content: top_right}
 panel: {width: 120, height: 40, background: surface_container_low, corner_radius: large, elevation: level_1}
 ```
 

@@ -57,6 +57,13 @@ ITEMS = {
     "NavigationDrawer": [{"label": "One", "icon": "home"}, {"label": "Two", "icon": "search"}],
 }
 
+@pytest.fixture(autouse=True)
+def _the_engines_own_names(monkeypatch):
+    """These tests compare Tesserae with answers recorded from the engine, in the engine's own layout names."""
+    from tesserae.spec import layout
+
+    monkeypatch.setattr(layout, "LEGACY_ENGINE_NAMES", True)
+
 
 def _fragment_calls():
     for path in sorted(COMPONENTS.glob("*_Component.yaml")):

@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.4.0 (unreleased)
+
+A simpler layout vocabulary ([#86](https://github.com/mindderivative/tesserae/issues/86)). Breaking: see
+[Migrating](migration.md#to-040).
+
+### Changed
+
+- **`align_content` places a node's children** as one of nine positions (`top_left` to `bottom_right`),
+  replacing `align_items` and `justify_content`; **`spread`** (`between`, `around`, `evenly`) shares out the
+  room along the layout; **`flex`** (`none`, `expand_horizontal`, `expand_vertical`, `fill`) is a node's own
+  sizing, replacing `flex_grow`, `flex_shrink` and `flex_basis`; `align_self` takes the nine positions.
+  `align_wrapped` (a wrapping node's lines), and `align_tracks` and `align_cells` (a grid's tracks, and where
+  items sit in their cells) are for the nodes that have them; they replace the old `align_content`,
+  `justify_content` and `justify_items` there. The engine's names are refused, with what replaces each.
+- **A node is never squeezed unless it says so** (`flex: none` is the default). Every hand-made
+  `flex_shrink: 0` is gone from the built-in components, bars and widgets. Two built-in components that
+  were being squeezed look right now: a selected filter chip's check mark is 18 px, not 14, and a dialog's
+  headline has its height.
+- The 77 built-in components, the title bar, the tutorial, the examples and the guide use the new names.
+  `tesserae.spec.layout` turns them into the engine's in one place.
+
 ## 0.3.6
 
 `text_align` on the built-in labels ([#85](https://github.com/mindderivative/tesserae/issues/85)).

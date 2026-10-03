@@ -88,19 +88,43 @@
       "type": "object",
       "description": "How a node looks and lays out its children.",
       "properties": {
+        "align_cells": {
+          "anyOf": [
+            {
+              "enum": [
+                "top_left",
+                "top",
+                "top_right",
+                "left",
+                "center",
+                "right",
+                "bottom_left",
+                "bottom",
+                "bottom_right"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "In a grid: where each item sits in its cell."
+        },
         "align_content": {
           "anyOf": [
             {
               "enum": [
-                "start",
-                "end",
-                "flex_start",
-                "flex_end",
+                "top_left",
+                "top",
+                "top_right",
+                "left",
                 "center",
-                "stretch",
-                "space_between",
-                "space_around",
-                "space_evenly"
+                "right",
+                "bottom_left",
+                "bottom",
+                "bottom_right"
               ]
             },
             {
@@ -110,41 +134,21 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "How wrapped rows, or grid tracks, are spaced."
-        },
-        "align_items": {
-          "anyOf": [
-            {
-              "enum": [
-                "start",
-                "end",
-                "flex_start",
-                "flex_end",
-                "center",
-                "baseline",
-                "stretch"
-              ]
-            },
-            {
-              "$ref": "#/definitions/parameter"
-            },
-            {
-              "$ref": "#/definitions/conditional"
-            }
-          ],
-          "description": "Where its children sit across the layout axis."
+          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout."
         },
         "align_self": {
           "anyOf": [
             {
               "enum": [
-                "start",
-                "end",
-                "flex_start",
-                "flex_end",
+                "top_left",
+                "top",
+                "top_right",
+                "left",
                 "center",
-                "baseline",
-                "stretch"
+                "right",
+                "bottom_left",
+                "bottom",
+                "bottom_right"
               ]
             },
             {
@@ -154,7 +158,51 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Overrides its parent's `align_items` for this node."
+          "description": "Its own place in its parent, over the parent's `align_content`."
+        },
+        "align_tracks": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch",
+                "between",
+                "around",
+                "evenly"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "In a grid: how the tracks share the room left over."
+        },
+        "align_wrapped": {
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch",
+                "between",
+                "around",
+                "evenly"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "With `flex_wrap: wrap`: how the lines share the room left over."
         },
         "aspect_ratio": {
           "anyOf": [
@@ -316,22 +364,14 @@
           ],
           "description": "A shadow level, 0 to 5."
         },
-        "flex_basis": {
+        "flex": {
           "anyOf": [
             {
-              "anyOf": [
-                {
-                  "type": "number"
-                },
-                {
-                  "enum": [
-                    "auto"
-                  ]
-                },
-                {
-                  "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
-                }
+              "enum": [
+                "none",
+                "expand_horizontal",
+                "expand_vertical",
+                "fill"
               ]
             },
             {
@@ -341,7 +381,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Its size along the main axis before it grows or shrinks."
+          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both."
         },
         "flex_direction": {
           "anyOf": [
@@ -359,36 +399,6 @@
             }
           ],
           "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
-        },
-        "flex_grow": {
-          "anyOf": [
-            {
-              "type": "number",
-              "minimum": 0
-            },
-            {
-              "$ref": "#/definitions/parameter"
-            },
-            {
-              "$ref": "#/definitions/conditional"
-            }
-          ],
-          "description": "How much of the spare room it takes, relative to its siblings."
-        },
-        "flex_shrink": {
-          "anyOf": [
-            {
-              "type": "number",
-              "minimum": 0
-            },
-            {
-              "$ref": "#/definitions/parameter"
-            },
-            {
-              "$ref": "#/definitions/conditional"
-            }
-          ],
-          "description": "How much it gives up when there is too little room."
         },
         "flex_wrap": {
           "anyOf": [
@@ -580,74 +590,6 @@
             }
           ],
           "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
-        },
-        "justify_content": {
-          "anyOf": [
-            {
-              "enum": [
-                "start",
-                "end",
-                "flex_start",
-                "flex_end",
-                "center",
-                "stretch",
-                "space_between",
-                "space_around",
-                "space_evenly"
-              ]
-            },
-            {
-              "$ref": "#/definitions/parameter"
-            },
-            {
-              "$ref": "#/definitions/conditional"
-            }
-          ],
-          "description": "Where its children sit along the layout axis."
-        },
-        "justify_items": {
-          "anyOf": [
-            {
-              "enum": [
-                "start",
-                "end",
-                "flex_start",
-                "flex_end",
-                "center",
-                "baseline",
-                "stretch"
-              ]
-            },
-            {
-              "$ref": "#/definitions/parameter"
-            },
-            {
-              "$ref": "#/definitions/conditional"
-            }
-          ],
-          "description": "Where grid children sit across their cell's width."
-        },
-        "justify_self": {
-          "anyOf": [
-            {
-              "enum": [
-                "start",
-                "end",
-                "flex_start",
-                "flex_end",
-                "center",
-                "baseline",
-                "stretch"
-              ]
-            },
-            {
-              "$ref": "#/definitions/parameter"
-            },
-            {
-              "$ref": "#/definitions/conditional"
-            }
-          ],
-          "description": "Where this node sits across its grid cell's width."
         },
         "margin": {
           "anyOf": [
@@ -976,6 +918,25 @@
             }
           ],
           "description": "Space between rows (defaults to `gap`)."
+        },
+        "spread": {
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "between",
+                "around",
+                "evenly"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`."
         },
         "width": {
           "anyOf": [

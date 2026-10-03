@@ -14,7 +14,7 @@ children:
     a11y: {live: polite}
   - id: open_notes
     kind: Rect
-    style: {width: 140, height: 40, background: primary, corner_radius: 20, align_items: center, justify_content: center}
+    style: {width: 140, height: 40, background: primary, corner_radius: 20, align_content: center}
     handlers: {on_click: "open_notes"}
     a11y: {label: "Open notes"}
     interaction: {color: on_primary}

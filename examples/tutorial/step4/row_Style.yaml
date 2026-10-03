@@ -1,4 +1,4 @@
 flex_direction: horizontal
-align_items: center
+align_content: left
 gap: 8
 width: 100%

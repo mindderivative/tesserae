@@ -5,7 +5,7 @@ styles:
     style:
       width: "{{ width }}"
       height: 56
-      align_items: center
+      align_content: left
       padding:
         left: "{{ left_padding }}"
         right: 16
@@ -14,5 +14,5 @@ styles:
   - id: title
     style:
       foreground: on_surface
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0

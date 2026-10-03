@@ -22,7 +22,7 @@ children:
 
   - id: body
     kind: Container
-    style: {flex_grow: 1, flex_direction: vertical, gap: 12, padding: 24}
+    style: {flex: expand_vertical, flex_direction: vertical, gap: 12, padding: 24}
     children:
       - id: heading
         kind: Text
@@ -39,18 +39,16 @@ children:
       - id: own_bar
         kind: Container
         window_region: drag
-        style: {width: 520, height: 36, align_items: center, gap: 8, background: surface_container,
-                corner_radius: 8, padding: {left: 12, right: 4, top: 0, bottom: 0}}
+        style: {width: 520, height: 36, align_content: left, gap: 8, background: surface_container, corner_radius: 8, padding: {left: 12, right: 4, top: 0, bottom: 0}}
         children:
           - id: own_label
             kind: Text
             text: {content: "A bar of my own: drag me", typography_role: label_large}
-            style: {foreground: on_surface, flex_grow: 1}
+            style: {foreground: on_surface, flex: expand_horizontal}
           - id: own_close
             kind: Rect
             handlers: {on_click: window.close}
             a11y: {label: Close}
-            style: {width: 28, height: 28, corner_radius: 14, background: transparent, align_items: center,
-                    justify_content: center}
+            style: {width: 28, height: 28, corner_radius: 14, background: transparent, align_content: center}
             children:
               - {id: own_close_icon, kind: Icon, icon: {name: close}, style: {width: 16, height: 16, foreground: on_surface}}

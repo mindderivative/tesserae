@@ -8,4 +8,4 @@ styles:
   - classes: [rows]
     style: {flex_direction: vertical, gap: 4, width: 100%}
   - classes: [task]
-    style: {flex_grow: 1, foreground: on_surface}
+    style: {flex: expand_horizontal, foreground: on_surface}

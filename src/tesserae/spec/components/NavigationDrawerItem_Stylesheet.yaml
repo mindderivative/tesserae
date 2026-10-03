@@ -11,7 +11,7 @@ styles:
         then: secondary_container
         else: transparent
       flex_direction: horizontal
-      align_items: center
+      align_content: left
       gap: 12
       padding:
         left: 16
@@ -32,5 +32,5 @@ styles:
         if: "{{ selected }}"
         then: on_secondary_container
         else: on_surface_variant
-      flex_grow: 1
+      flex: expand_horizontal
       min_width: 0

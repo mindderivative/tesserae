@@ -56,15 +56,15 @@ root:
 item.0:
   width: 120
   height: 48
-  align_items: center
+  align_content: left
   padding: {left: 12, right: 12, top: 0, bottom: 0}
-item.0.label: {foreground: on_surface, flex_grow: 1, min_width: 0}
+item.0.label: {foreground: on_surface, flex: expand_horizontal, min_width: 0}
 item.1:
   width: 120
   height: 48
-  align_items: center
+  align_content: left
   padding: {left: 12, right: 12, top: 0, bottom: 0}
-item.1.label: {foreground: on_surface, flex_grow: 1, min_width: 0}
+item.1.label: {foreground: on_surface, flex: expand_horizontal, min_width: 0}
 ```
 
 ## Changing it

@@ -15,7 +15,7 @@ styles:
       width: 80
       height: 56
       flex_direction: vertical
-      align_items: center
+      align_content: top
       gap: 4
   - id: pill
     style:
@@ -26,8 +26,7 @@ styles:
         if: "{{ selected }}"
         then: secondary_container
         else: transparent
-      align_items: center
-      justify_content: center
+      align_content: center
   - id: icon
     style:
       width: 24
@@ -42,7 +41,6 @@ styles:
         if: "{{ selected }}"
         then: on_surface
         else: on_surface_variant
-      flex_shrink: 0
 ```
 
 ## How it is tied to the component
@@ -58,7 +56,7 @@ styles:
 | `width` | `80` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `56` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
+| `align_content` | `top` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `gap` | `4` | Space between its children. |
 
 ### `pill` (Rect)
@@ -69,8 +67,7 @@ styles:
 | `height` | `32` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `corner_radius` | `16` | Pixels, or a shape token (`none` to `extra_large`). |
 | `background` | `secondary_container` if `selected`, else `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
-| `align_items` | `center` | Where its children sit across the layout axis. |
-| `justify_content` | `center` | Where its children sit along the layout axis. |
+| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 
 ### `icon` (Icon)
 
@@ -85,17 +82,16 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_shrink` | `0` | How much it gives up when there is too little room. |
 
 ## What it makes
 
 With `label: Go, icon: home, selected: False`, each part's style is:
 
 ```yaml
-root: {width: 80, height: 56, flex_direction: vertical, align_items: center, gap: 4}
-pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_items: center, justify_content: center}
+root: {width: 80, height: 56, flex_direction: vertical, align_content: top, gap: 4}
+pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_content: center}
 icon: {width: 24, height: 24, foreground: on_surface_variant}
-label: {foreground: on_surface_variant, flex_shrink: 0}
+label: {foreground: on_surface_variant}
 ```
 
 ## Changing it

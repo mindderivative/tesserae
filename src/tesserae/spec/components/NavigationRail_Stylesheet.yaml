@@ -5,7 +5,7 @@ styles:
     style:
       width: 80
       flex_direction: vertical
-      align_items: center
+      align_content: top
       gap: 12
       padding:
         left: 0

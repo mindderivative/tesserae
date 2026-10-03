@@ -69,43 +69,71 @@
       "type": "object",
       "description": "How a node looks and lays out its children.",
       "properties": {
+        "align_cells": {
+          "enum": [
+            "top_left",
+            "top",
+            "top_right",
+            "left",
+            "center",
+            "right",
+            "bottom_left",
+            "bottom",
+            "bottom_right"
+          ],
+          "description": "In a grid: where each item sits in its cell."
+        },
         "align_content": {
           "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
+            "top_left",
+            "top",
+            "top_right",
+            "left",
             "center",
-            "stretch",
-            "space_between",
-            "space_around",
-            "space_evenly"
+            "right",
+            "bottom_left",
+            "bottom",
+            "bottom_right"
           ],
-          "description": "How wrapped rows, or grid tracks, are spaced."
-        },
-        "align_items": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "baseline",
-            "stretch"
-          ],
-          "description": "Where its children sit across the layout axis."
+          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout."
         },
         "align_self": {
           "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
+            "top_left",
+            "top",
+            "top_right",
+            "left",
             "center",
-            "baseline",
-            "stretch"
+            "right",
+            "bottom_left",
+            "bottom",
+            "bottom_right"
           ],
-          "description": "Overrides its parent's `align_items` for this node."
+          "description": "Its own place in its parent, over the parent's `align_content`."
+        },
+        "align_tracks": {
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch",
+            "between",
+            "around",
+            "evenly"
+          ],
+          "description": "In a grid: how the tracks share the room left over."
+        },
+        "align_wrapped": {
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch",
+            "between",
+            "around",
+            "evenly"
+          ],
+          "description": "With `flex_wrap: wrap`: how the lines share the room left over."
         },
         "aspect_ratio": {
           "type": "number",
@@ -177,22 +205,14 @@
           ],
           "description": "A shadow level, 0 to 5."
         },
-        "flex_basis": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "enum": [
-                "auto"
-              ]
-            },
-            {
-              "type": "string",
-              "pattern": "^-?\\d+(\\.\\d+)?%$"
-            }
+        "flex": {
+          "enum": [
+            "none",
+            "expand_horizontal",
+            "expand_vertical",
+            "fill"
           ],
-          "description": "Its size along the main axis before it grows or shrinks."
+          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both."
         },
         "flex_direction": {
           "enum": [
@@ -200,16 +220,6 @@
             "vertical"
           ],
           "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
-        },
-        "flex_grow": {
-          "type": "number",
-          "minimum": 0,
-          "description": "How much of the spare room it takes, relative to its siblings."
-        },
-        "flex_shrink": {
-          "type": "number",
-          "minimum": 0,
-          "description": "How much it gives up when there is too little room."
         },
         "flex_wrap": {
           "enum": [
@@ -291,44 +301,6 @@
             }
           ],
           "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
-        },
-        "justify_content": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "stretch",
-            "space_between",
-            "space_around",
-            "space_evenly"
-          ],
-          "description": "Where its children sit along the layout axis."
-        },
-        "justify_items": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "baseline",
-            "stretch"
-          ],
-          "description": "Where grid children sit across their cell's width."
-        },
-        "justify_self": {
-          "enum": [
-            "start",
-            "end",
-            "flex_start",
-            "flex_end",
-            "center",
-            "baseline",
-            "stretch"
-          ],
-          "description": "Where this node sits across its grid cell's width."
         },
         "margin": {
           "anyOf": [
@@ -467,6 +439,15 @@
           "type": "number",
           "minimum": 0,
           "description": "Space between rows (defaults to `gap`)."
+        },
+        "spread": {
+          "enum": [
+            "none",
+            "between",
+            "around",
+            "evenly"
+          ],
+          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`."
         },
         "width": {
           "anyOf": [
