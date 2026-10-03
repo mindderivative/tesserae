@@ -1,6 +1,7 @@
-"""M67 (#14): `tesserae new` and `tesserae add screen`. Each test makes an
-app in `tmp_path` and runs it for real, in a subprocess: a small wrapper
-swaps `App.run` for a check that clicks Home's button, follows a route
+"""`tesserae new` and `tesserae add screen`. Each test makes a project in
+`tmp_path` (with `--no-venv`: the virtual environment is tested apart) and runs
+it for real, in a subprocess: a small wrapper swaps `App.run` for a check that
+clicks Main's button, follows a route
 and renders a few frames, as the examples run on CI.
 """
 
@@ -27,10 +28,10 @@ RUNNER = textwrap.dedent('''
     def run(app, max_frames=None, **kwargs):
         report["start"] = app.current
         report["location"] = app.location
-        home = app._registered["Home"].view
+        home = app._registered["Main"].view
         report["greeting"] = home.node("greeting").get("text")
         report["button"] = [home.node("button").get(k) for k in ("role", "label")]
-        if app.current == "Home":
+        if app.current == "Main":
             app.window.simulate("click", node=home.node("button"))
             report["count"] = home.node("count").get("text")
         report["screens"] = sorted(app._registered)
@@ -41,7 +42,7 @@ RUNNER = textwrap.dedent('''
         report["decorations"] = app.decorations
         report["title_bar"] = app._shell.top_bar.node.get("window_region") if app._shell is not None else None
         for name in report["screens"]:
-            if name == "Home":
+            if name == "Main":
                 continue
             app.navigate(name)
             app.window.simulate("click", node=app._registered[name].view.node("back"))  # its Back button
@@ -64,50 +65,53 @@ def _run(project, *args):
 
 
 def test_new_makes_a_runnable_app(tmp_path):
-    assert cli.main(["new", "my-notes", "--dir", str(tmp_path)]) == 0
+    assert cli.main(["new", "my-notes", "--no-venv", "--dir", str(tmp_path)]) == 0
     project = tmp_path / "my-notes"
-    assert sorted(p.name for p in project.iterdir()) == ["Home_View.yaml", "Home_ViewModel.py", "app.py"]
+    assert sorted(p.name for p in project.iterdir()) == ["Components", "Styles", "Themes", "ViewModels", "Views", "app.py"]
+    assert (project / "Views" / "Main_View.yaml").is_file() and (project / "ViewModels" / "Main_ViewModel.py").is_file()
+    assert (project / "Components" / ".gitkeep").is_file()
     report = _run(project)
-    assert report["start"] == "Home" and report["location"] == "" and report["ran"]
+    assert report["start"] == "Main" and report["location"] == "" and report["ran"]
     assert report["greeting"] == "Hello from My Notes" and report["count"] == "Clicked 1 times"
     assert report["button"] == ["button", "Click me"]  # a ButtonFilled fragment, named (M69)
-    assert report["screens"] == ["Home"] and not report["shell"] and report["size"] == [480, 320]
+    assert report["screens"] == ["Main"] and not report["shell"] and report["size"] == [480, 320]
 
 
 def test_add_screen_adds_a_pair_and_loads_and_routes_it(tmp_path, capsys):
-    cli.main(["new", "notes", "--dir", str(tmp_path)])
+    cli.main(["new", "notes", "--no-venv", "--dir", str(tmp_path)])
     project = tmp_path / "notes"
     assert cli.main(["add", "screen", "UserProfile", "--dir", str(project)]) == 0
     assert "with the route 'user-profile'" in capsys.readouterr().out
-    assert (project / "UserProfile_View.yaml").is_file() and (project / "UserProfile_ViewModel.py").is_file()
+    assert (project / "Views" / "UserProfile_View.yaml").is_file()
+    assert (project / "ViewModels" / "UserProfile_ViewModel.py").is_file()
     lines = (project / "app.py").read_text().splitlines()
-    marker = lines.index(cli.IMPORT_MARKER)  # each line goes just above its marker, as it says
-    assert lines[marker - 1] == "from UserProfile_ViewModel import UserProfileViewModel"
-    assert lines[lines.index(cli.LOAD_MARKER) - 1] == 'app.route("user-profile", "UserProfile")'
+    marker = lines.index(cli.LOAD_MARKER)  # the lines go just above the marker, as it says; found by name, so no import
+    assert lines[marker - 2:marker] == ['app.load("UserProfile")', 'app.route("user-profile", "UserProfile")']
+    assert "UserProfile_ViewModel" not in "\n".join(lines)
     report = _run(project)
-    assert report["screens"] == ["Home", "UserProfile"] and report["routes"] == ["", "user-profile"]
-    assert report["back_from"] == [["UserProfile", "Home"]]  # its Back button goes back
+    assert report["screens"] == ["Main", "UserProfile"] and report["routes"] == ["", "user-profile"]
+    assert report["back_from"] == [["UserProfile", "Main"]]  # its Back button goes back
     deep = _run(project, "user-profile")  # a deep link from the command line
     assert deep["start"] == "UserProfile" and deep["location"] == "user-profile"
 
 
 def test_new_with_a_shell(tmp_path):
-    assert cli.main(["new", "studio", "--shell", "--dir", str(tmp_path)]) == 0
+    assert cli.main(["new", "studio", "--shell", "--no-venv", "--dir", str(tmp_path)]) == 0
     project = tmp_path / "studio"
-    assert (project / "Studio_Shell.yaml").is_file() and (project / "Settings_View.yaml").is_file()
+    assert (project / "Views" / "Studio_Shell.yaml").is_file() and (project / "Views" / "Settings_View.yaml").is_file()
     report = _run(project)
-    assert report["shell"] and report["screens"] == ["Home", "Settings"] and report["routes"] == ["", "settings"]
-    assert report["rail"] == ["Home", "Settings"] and report["size"] == [960, 600]
-    assert report["back_from"] == [["Settings", "Home"]]
+    assert report["shell"] and report["screens"] == ["Main", "Settings"] and report["routes"] == ["", "settings"]
+    assert report["rail"] == ["Main", "Settings"] and report["size"] == [960, 600]
+    assert report["back_from"] == [["Settings", "Main"]]
 
 
 def test_new_with_a_custom_title_bar(tmp_path, capsys):
     """0.3.0 M4: an undecorated shell app, its top bar the title bar."""
-    assert cli.main(["new", "studio", "--shell", "--custom-title-bar", "--dir", str(tmp_path)]) == 0
+    assert cli.main(["new", "studio", "--shell", "--custom-title-bar", "--no-venv", "--dir", str(tmp_path)]) == 0
     report = _run(tmp_path / "studio")
     assert report["decorations"] is False and report["title_bar"] == "drag" and report["shell"]
     assert "min_width=640, min_height=400" in (tmp_path / "studio" / "app.py").read_text()
-    plain = cli.main(["new", "plain", "--shell", "--dir", str(tmp_path)])
+    plain = cli.main(["new", "plain", "--shell", "--no-venv", "--dir", str(tmp_path)])
     assert plain == 0 and _run(tmp_path / "plain")["decorations"] is True
     assert cli.main(["new", "lonely", "--custom-title-bar", "--dir", str(tmp_path)]) == 2
     assert "--custom-title-bar goes with --shell" in capsys.readouterr().err
@@ -141,13 +145,13 @@ def test_nothing_is_overwritten(tmp_path, capsys):
     assert cli.main(["new", "busy", "--dir", str(tmp_path)]) == 2
     assert "isn't empty" in capsys.readouterr().err
     (tmp_path / "empty").mkdir()
-    assert cli.main(["new", "empty", "--dir", str(tmp_path)]) == 0  # an empty folder is fine
+    assert cli.main(["new", "empty", "--no-venv", "--dir", str(tmp_path)]) == 0  # an empty folder is fine
     project = tmp_path / "empty"
-    (project / "Settings_ViewModel.py").write_text("# mine")
+    (project / "ViewModels" / "Settings_ViewModel.py").write_text("# mine")
     before = (project / "app.py").read_text()
     assert cli.main(["add", "screen", "Settings", "--dir", str(project)]) == 2
     assert "already exists" in capsys.readouterr().err
-    assert not (project / "Settings_View.yaml").exists() and (project / "app.py").read_text() == before
+    assert not (project / "Views" / "Settings_View.yaml").exists() and (project / "app.py").read_text() == before
     assert cli.main(["add", "screen", "Settings", "--dir", str(tmp_path / "missing")]) == 2
     assert "isn't a folder" in capsys.readouterr().err
 
@@ -160,7 +164,7 @@ def test_routes_and_words():
 def test_the_command_and_python_m_run(tmp_path):
     version = subprocess.run([sys.executable, "-m", "tesserae", "--version"], capture_output=True, text=True)
     assert version.returncode == 0 and version.stdout.startswith("tesserae ")
-    made = subprocess.run([sys.executable, "-m", "tesserae", "new", "app", "--dir", str(tmp_path)],
+    made = subprocess.run([sys.executable, "-m", "tesserae", "new", "app", "--no-venv", "--dir", str(tmp_path)],
                           capture_output=True, text=True)
     assert made.returncode == 0 and (tmp_path / "app" / "app.py").is_file()
     bad = subprocess.run([sys.executable, "-m", "tesserae", "new", "9"], capture_output=True, text=True, cwd=tmp_path)
@@ -180,3 +184,38 @@ def test_schema_says_where_the_yaml_schemas_are_and_prints_the_setting(capsys):
     assert setting[str(cli.SCHEMAS / "tesserae-yaml-schema.json")] == ["**/*_View.yaml"]
     assert setting[str(cli.SCHEMAS / "tesserae-shell-schema.json")] == ["**/*_Shell.yaml"]
     assert set(setting) == {str(cli.SCHEMAS / name) for name in cli.SCHEMA_FILES}
+
+
+def _fake_run(monkeypatch, fail=False):
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        if fail and "pip" in command:
+            raise subprocess.CalledProcessError(1, command, stderr=b"ERROR: no network\n")
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(cli.subprocess, "run", run)
+    return calls
+
+
+def test_new_makes_a_virtual_environment_with_tesserae_in_it(tmp_path, monkeypatch):
+    calls = _fake_run(monkeypatch)
+    assert cli.main(["new", "notes", "--dir", str(tmp_path)]) == 0
+    venv, install = calls
+    assert venv[1:3] == ["-m", "venv"] and venv[3] == str(tmp_path / "notes" / ".venv")
+    assert install[1:4] == ["-m", "pip", "install"] and install[-1].startswith("tesserae-ui")
+    assert str(tmp_path / "notes" / ".venv") in install[0]
+
+
+def test_no_venv_makes_none(tmp_path, monkeypatch):
+    calls = _fake_run(monkeypatch)
+    assert cli.main(["new", "notes", "--no-venv", "--dir", str(tmp_path)]) == 0 and calls == []
+
+
+def test_a_failed_install_keeps_the_project_and_says_how_to_finish(tmp_path, monkeypatch, capsys):
+    _fake_run(monkeypatch, fail=True)
+    assert cli.main(["new", "notes", "--dir", str(tmp_path)]) == 2
+    err = capsys.readouterr().err
+    assert err.startswith("tesserae: made the project, but its virtual environment failed (ERROR: no network)")
+    assert "pip install tesserae-ui" in err and (tmp_path / "notes" / "app.py").is_file()

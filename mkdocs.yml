@@ -53,6 +53,7 @@ nav:
   - Getting Started: getting-started.md
   - Tutorial: tutorial.md
   - Guide:
+      - Projects: guide/projects.md
       - Apps & Screens: guide/apps-and-screens.md
       - Layout: guide/layout.md
       - Bindings: guide/bindings.md

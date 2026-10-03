@@ -114,6 +114,7 @@ class View:
         default_theme_spec: Optional[dict[str, Any]] = None,
         custom_theme_spec: Optional[dict[str, Any]] = None,
         stylesheet_spec: Optional[dict[str, Any]] = None,
+        project: Any = None,
     ) -> None:
         self.path: Optional[Path] = None
         app = None
@@ -128,7 +129,9 @@ class View:
             from tesserae.spec.load import build_view_spec
 
             self.path = Path(source)
-            spec, file_frames, _ = build_view_spec(self.path)
+            if project is None and window is not None and (found := app_of(window)) is not None:
+                project = found.project  # the app's files, found by name
+            spec, file_frames, _ = build_view_spec(self.path, project=project)
             frames = {**{node_id: (rgba, w, h) for node_id, rgba, w, h in file_frames}, **(frames or {})}
         else:
             spec = source

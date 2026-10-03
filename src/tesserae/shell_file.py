@@ -223,9 +223,9 @@ def check_references(app: Any, spec: dict[str, Any], path: Path, viewmodel: Any 
     a mistake leaves the app as it was."""
     for side, names in spec["panels"].items():
         for name in names:
-            if name not in app._registered and not (path.parent / f"{name}_View.yaml").exists():
+            if name not in app._registered and _panel_file(app, name, path, "view") is None:
                 raise ShellSpecError(f"{path}: panels.{side}: no screen is registered as {name!r}, "
-                                     f"and there's no {name}_View.yaml next to the shell file")
+                                     f"and there's no {name}_View.yaml next to the shell file or in the project")
     navigation = spec["navigation"]
     method = navigation.get("on_navigate") if navigation is not None else None
     if method is not None:
@@ -253,12 +253,21 @@ def place_panels(app: Any, shell: Any, spec: dict[str, Any], path: Path) -> None
             shell.dock.add_panel(side, root, name)  # `dock_panel` takes it from wherever it is
 
 
+def _panel_file(app: Any, name: str, shell: Path, kind: str) -> Any:
+    """A panel's view or viewmodel file: next to the shell file, else in the app's project."""
+    suffix = "_View.yaml" if kind == "view" else "_ViewModel.py"
+    beside = shell.parent / f"{name}{suffix}"
+    if beside.exists():
+        return beside
+    return app.project.index(kind).get(name)
+
+
 def _load_panel(app: Any, name: str, side: str, path: Path) -> Any:
-    view_file = path.parent / f"{name}_View.yaml"  # there: `check_references` saw it
+    view_file = _panel_file(app, name, path, "view")  # there: `check_references` saw it
     view = app.build_view(view_file)
     viewmodel = None
-    vm_file = path.parent / f"{name}_ViewModel.py"
-    if vm_file.exists():
+    vm_file = _panel_file(app, name, path, "viewmodel")
+    if vm_file is not None:
         cls = getattr(_import(vm_file), f"{name}ViewModel", None)
         if cls is None:
             raise ShellSpecError(f"{path}: panels.{side}: {vm_file.name} has no class {name}ViewModel")

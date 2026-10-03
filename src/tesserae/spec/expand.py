@@ -55,6 +55,7 @@ whole-value substitution reproduces it exactly, for `tre`'s own
 
 from __future__ import annotations
 
+import contextvars
 import datetime
 import re
 from pathlib import Path
@@ -311,8 +312,20 @@ def _style_file(owner: str, path: Any) -> str:
     return path
 
 
+#: The project whose files are being expanded, for a `style:` file that isn't next to the file naming it.
+_PROJECT: contextvars.ContextVar[Any] = contextvars.ContextVar("tesserae_project", default=None)
+
+
 def _style_from_file(owner: str, path: Any, base_dir: Path | None, visited: list[Path], deps: set[Path]) -> Any:
-    style = _expand_includes({_INCLUDE_KEY: _style_file(owner, path)}, base_dir, visited, deps)
+    name = _style_file(owner, path)
+    project = _PROJECT.get()
+    if project is not None and (base_dir is None or not (base_dir / name).exists()):
+        found = [d / name for d in project.style_dirs() if (d / name).is_file()]
+        if len(found) > 1:
+            raise ComponentError(f"{owner}: {name} is in two places, {found[0]} and {found[1]}: keep one")
+        if found:
+            base_dir = found[0].parent
+    style = _expand_includes({_INCLUDE_KEY: name}, base_dir, visited, deps)
     if not isinstance(style, dict):
         raise ComponentError(f"{owner}: {path}: a style file holds a mapping of style fields, "
                              f"got {type(style).__name__}")
@@ -601,6 +614,7 @@ def expand_components_to_spec(
     *,
     component_dirs: list[Path] | None = None,
     base_dir: Path | None = None,
+    project: Any = None,
 ) -> Any:
     """Resolves every `include:` and expands every `component:` entry in
     `yaml_text`, returning the finished `WidgetSpec`-shaped dict with no
@@ -617,7 +631,7 @@ def expand_components_to_spec(
     views), then Tesserae's built-in `spec/components/`. A caller may pass
     its own list instead (searched in order).
     """
-    spec, _ = expand_with_dependencies(yaml_text, component_dirs=component_dirs, base_dir=base_dir)
+    spec, _ = expand_with_dependencies(yaml_text, component_dirs=component_dirs, base_dir=base_dir, project=project)
     return spec
 
 
@@ -626,6 +640,7 @@ def expand_with_dependencies(
     *,
     component_dirs: list[Path] | None = None,
     base_dir: Path | None = None,
+    project: Any = None,
 ) -> tuple[Any, set[Path]]:
     """`expand_components_to_spec`, plus the resolved path of every file
     the expansion read -- each `include:`d file and each
@@ -634,11 +649,17 @@ def expand_with_dependencies(
     builtin = Path(__file__).parent / "components"
     if component_dirs is not None:
         dirs = component_dirs
-    else:  # a fragment (or a component stylesheet) next to the view, then Tesserae's own
-        dirs = [base_dir, builtin] if base_dir is not None and base_dir.resolve() != builtin.resolve() else [builtin]
+    else:  # a fragment (or a component stylesheet) next to the view, in the project's folders, then Tesserae's own
+        dirs = [base_dir] if base_dir is not None and base_dir.resolve() != builtin.resolve() else []
+        dirs += [d for d in (project.component_dirs() if project is not None else []) if d not in dirs]
+        dirs.append(builtin)
     deps: set[Path] = set()
-    data = _expand_includes(yaml.safe_load(yaml_text), base_dir, [], deps)
-    return _normalize_scalars(_walk(data, dirs, (), deps)), deps
+    token = _PROJECT.set(project)
+    try:
+        data = _expand_includes(yaml.safe_load(yaml_text), base_dir, [], deps)
+        return _normalize_scalars(_walk(data, dirs, (), deps)), deps
+    finally:
+        _PROJECT.reset(token)
 
 
 def expand_components(

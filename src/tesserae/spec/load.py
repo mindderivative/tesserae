@@ -47,7 +47,7 @@ _FILE_ARGS = {
 
 
 def build_view_spec(
-    path: str | Path, *, component_dirs: list[Path] | None = None
+    path: str | Path, *, component_dirs: list[Path] | None = None, project: Any = None
 ) -> tuple[Any, list[Frame], set[Path]]:
     """Reads `path` and runs the whole Tesserae-side pipeline --
     `include:`, `component:`, then image extraction and decoding --
@@ -56,7 +56,7 @@ def build_view_spec(
     the way (the view itself included), resolved."""
     path = Path(path)
     spec, deps = expand_with_dependencies(
-        path.read_text(encoding="utf-8"), component_dirs=component_dirs, base_dir=path.parent
+        path.read_text(encoding="utf-8"), component_dirs=component_dirs, base_dir=path.parent, project=project
     )
     deps.add(path.resolve())
     spec, frames = extract_images(spec, path.parent, dependencies=deps)

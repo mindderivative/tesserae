@@ -138,10 +138,12 @@ class ViewWatcher:
     Or, in a loop the app controls itself, call `poll()` regularly.
     """
 
-    def __init__(self, view: Any, path: str | Path, *, component_dirs: list[Path] | None = None) -> None:
+    def __init__(self, view: Any, path: str | Path, *, component_dirs: list[Path] | None = None,
+                 project: Any = None) -> None:
         self._view = view
         self._path = Path(path)
         self._component_dirs = component_dirs
+        self._project = project
         _, _, deps = self._rebuild()
         self._stamps: dict[Path, _Stamp] = {p: _stamp(p) for p in deps}
         self._stop = threading.Event()
@@ -159,7 +161,7 @@ class ViewWatcher:
 
     def _rebuild(self) -> tuple[Any, list[Frame], set[Path]]:
         """All the file work -- safe on any thread."""
-        return build_view_spec(self._path, component_dirs=self._component_dirs)
+        return build_view_spec(self._path, component_dirs=self._component_dirs, project=self._project)
 
     def _apply(self, spec: Any, frames: list[Frame]) -> None:
         """The `tre` part -- only on the thread that owns the view: the
@@ -270,9 +272,9 @@ class ComponentWatcher(ViewWatcher):
     """
 
     def __init__(self, path: str | Path, instances: Callable[[], list[Any]], *,
-                 component_dirs: list[Path] | None = None) -> None:
+                 component_dirs: list[Path] | None = None, project: Any = None) -> None:
         self._instances = instances
-        super().__init__(None, path, component_dirs=component_dirs)
+        super().__init__(None, path, component_dirs=component_dirs, project=project)
 
     def _apply(self, spec: Any, frames: list[Frame]) -> None:
         images = {node_id: (rgba, w, h) for node_id, rgba, w, h in frames}

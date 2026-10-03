@@ -3,15 +3,18 @@
 
 Run it with `python app.py`, or `python app.py <route>` to open on a
 screen by its route. Add a screen with `tesserae add screen <Name>`.
+
+The project's files are found by name in its folders: `Views/Main_View.yaml`
+and `ViewModels/Main_ViewModel.py` are `app.load("Main")`, a component in
+`Components/` is `component: Name`, a theme in `Themes/` is
+`App(custom_theme="Name")`, and a stylesheet in `Styles/` is
+`App(stylesheet="Name")`.
 """
 
 import sys
 from pathlib import Path
 
 from tesserae import App, Signal, configure_logging
-
-from Home_ViewModel import HomeViewModel
-# (tesserae add screen adds each new screen's import above this line)
 
 configure_logging()
 
@@ -25,11 +28,12 @@ class AppState:
         self.greeting = Signal("Hello from ${title}")
 
 
-app = App(width=${width}, height=${height}, title="${title}", theme_seed=(0x67, 0x50, 0xA4, 0xFF), state=AppState()${window})
+app = App(width=${width}, height=${height}, title="${title}", root=HERE, theme_seed=(0x67, 0x50, 0xA4, 0xFF),
+          state=AppState()${window})
 
-app.load(HERE / "Home_View.yaml", HomeViewModel)
-app.route("", "Home")
+app.load("Main")  # Views/Main_View.yaml and ViewModels/Main_ViewModel.py
+app.route("", "Main")
 # (tesserae add screen adds each new screen's load and route above this line)
 
-app.navigate_to(sys.argv[1] if len(sys.argv) > 1 else "")  # a route, or "" for Home
+app.navigate_to(sys.argv[1] if len(sys.argv) > 1 else "")  # a route, or "" for Main
 ${shell}app.run()

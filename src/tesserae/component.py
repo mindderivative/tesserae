@@ -54,7 +54,9 @@ def instantiate(
     """
     check_naming_convention(path, viewmodel_cls)
     path = Path(path)
-    spec = expand_components_to_spec(path.read_text(encoding="utf-8"), base_dir=path.parent)
+    host = app_of(getattr(parent, "window", None))
+    spec = expand_components_to_spec(path.read_text(encoding="utf-8"), base_dir=path.parent,
+                                     project=host.project if host is not None else None)
     spec, frames = extract_images(spec, path.parent)
     try:
         # M37: Tesserae builds it, in the host's window with the host's theme and stylesheet

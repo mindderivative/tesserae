@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.1 (unreleased)
+
+Projects ([#87](https://github.com/mindderivative/tesserae/issues/87)).
+
+### Added
+
+- **A project's files are found by name.** `Views/`, `ViewModels/`, `Components/`, `Themes/` and `Styles/` under
+  the app's root are the standard places: `app.load("Main")` finds `Views/Main_View.yaml` and
+  `ViewModels/Main_ViewModel.py` (class `MainViewModel`), `component: Name`, `App(custom_theme="Name")`,
+  `stylesheet="Name"`, `app.load_shell("Name")`, a shell panel's view and a `style: x_Style.yaml` find theirs.
+  `App(root=)` is the root (the script's folder by default), `search=[...]` adds folders, `recursive=True` looks
+  through the whole project, and a name in two places is an error naming both. Paths still work. `app.project` is
+  the `tesserae.project.Project`.
+- `app.load(view)` takes the ViewModel class from the view's name when it isn't given.
+
+### Changed
+
+- **`tesserae new <name>` makes a project**: a `.venv` with Tesserae installed in it (`--no-venv` skips it),
+  the five folders, `app.py`, and a `Main` screen in `Views/` and `ViewModels/`. `tesserae add screen` writes
+  into those folders and loads the screen by name. An app laid out the old way still works, and `add screen`
+  follows its layout.
+
 ## 0.4.0
 
 A simpler layout vocabulary ([#86](https://github.com/mindderivative/tesserae/issues/86)). Breaking: see

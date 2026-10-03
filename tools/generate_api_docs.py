@@ -34,6 +34,7 @@ SECTIONS = (
     ("tesserae.view", "Views and components", "A loaded `*_View.yaml`, and an embedded instance of one."),
     ("tesserae.component", "Embedding", "A component with a ViewModel of its own, inside a view.", ("instantiate",)),
     ("tesserae.repeater", "Repeater", "A list signal kept in step with a list of components.", ("Repeater",)),
+    ("tesserae.project", "Projects", "A project's files, found by name.", ("Project", "ProjectError")),
     ("tesserae.theme", "Themes", "A resolved MD3 theme, read from code."),
     ("tesserae.tokens", "Tokens", "MD3's colour, type, shape and motion tokens."),
     ("tesserae.widgets", "Widgets", "One function per MD3 widget, called against a window."),

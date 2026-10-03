@@ -3,6 +3,13 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.1
+
+Nothing in your code has to change. `tesserae new` makes a [project](guide/projects.md) with files in `Views/`,
+`ViewModels/`, `Components/`, `Themes/` and `Styles/`, found by name, and its first screen is `Main`, not `Home`.
+An app with its files beside `app.py` keeps working, and `tesserae add screen` follows whichever layout it
+finds.
+
 ## To 0.4.0
 
 Where a node's children go, and how a node takes room, have new names. The engine's names are refused with

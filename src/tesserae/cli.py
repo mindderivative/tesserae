@@ -18,7 +18,9 @@ server are, and with `--settings` prints the `yaml.schemas` setting for them.
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import subprocess
 import sys
 from pathlib import Path
 from string import Template
@@ -65,9 +67,28 @@ def _write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def new(name: str, parent: Path, shell: bool = False, custom_title_bar: bool = False) -> Path:
-    """Makes the app `name` in `parent` and returns its folder.
-    `custom_title_bar` (0.3.0, with `shell`) makes its window undecorated,
+#: The folders a project keeps its files in, found by name: see `tesserae.project`.
+PROJECT_FOLDERS = ("Views", "ViewModels", "Components", "Themes", "Styles")
+
+
+def _make_venv(folder: Path) -> None:
+    """`.venv` in `folder`, with Tesserae installed in it."""
+    try:
+        subprocess.run([sys.executable, "-m", "venv", str(folder / ".venv")], check=True, capture_output=True)
+        python = folder / ".venv" / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
+        version = _version()
+        requirement = f"tesserae-ui>={version}" if version != "unknown" else "tesserae-ui"
+        subprocess.run([str(python), "-m", "pip", "install", "-q", requirement], check=True, capture_output=True)
+    except (subprocess.CalledProcessError, OSError) as exc:
+        detail = (getattr(exc, "stderr", b"") or b"").decode(errors="replace").strip().splitlines()[-1:] or [str(exc)]
+        raise CliError(f"made the project, but its virtual environment failed ({detail[0]}); in {folder} run "
+                       "`python -m venv .venv`, then `.venv/bin/pip install tesserae-ui`") from None
+
+
+def new(name: str, parent: Path, shell: bool = False, custom_title_bar: bool = False, venv: bool = True) -> Path:
+    """Makes the project `name` in `parent` and returns its folder: its virtual environment (unless
+    `venv=False`), the folders its files are found in, `app.py`, and a `Main` screen.
+    `custom_title_bar` (with `shell`) makes its window undecorated,
     so the shell's top bar is its title bar."""
     if custom_title_bar and not shell:
         raise CliError("--custom-title-bar goes with --shell: the shell's top bar is the title bar "
@@ -78,20 +99,26 @@ def new(name: str, parent: Path, shell: bool = False, custom_title_bar: bool = F
     if folder.exists() and any(folder.iterdir()):
         raise CliError(f"{folder} isn't empty")
     folder.mkdir(parents=True, exist_ok=True)
+    for sub in PROJECT_FOLDERS:
+        (folder / sub).mkdir(exist_ok=True)
+        if sub not in ("Views", "ViewModels"):
+            (folder / sub / ".gitkeep").touch()  # an empty folder is kept by git
     words = _words(name)
     title = " ".join(w.capitalize() for w in words)
     camel = "".join(w.capitalize() for w in words)
-    load_shell = f'app.load_shell(HERE / "{camel}_Shell.yaml")  # the frame: a top bar, the rail, a status bar\n'
+    load_shell = f'app.load_shell("{camel}")  # Views/{camel}_Shell.yaml: a top bar, the rail, a status bar\n'
     size = {"width": "960", "height": "600"} if shell else {"width": "480", "height": "320"}
     window = (",\n          decorations=False, min_width=640, min_height=400"  # the shell's top bar is the title bar
               if custom_title_bar else "")
     _write(folder / "app.py", _render("app.py.tmpl", title=title, shell=load_shell if shell else "", window=window,
                                       **size))
-    _write(folder / "Home_View.yaml", _render("Home_View.yaml.tmpl"))
-    _write(folder / "Home_ViewModel.py", _render("Home_ViewModel.py.tmpl"))
+    _write(folder / "Views" / "Main_View.yaml", _render("Main_View.yaml.tmpl"))
+    _write(folder / "ViewModels" / "Main_ViewModel.py", _render("Main_ViewModel.py.tmpl"))
     if shell:
-        _write(folder / f"{camel}_Shell.yaml", _render("Shell.yaml.tmpl", title=title))
+        _write(folder / "Views" / f"{camel}_Shell.yaml", _render("Shell.yaml.tmpl", title=title))
         add_screen("Settings", folder)
+    if venv:
+        _make_venv(folder)
     return folder
 
 
@@ -103,20 +130,27 @@ def add_screen(name: str, folder: Path) -> list[str]:
         raise CliError(f"{name!r} isn't a screen name: CamelCase, starting with a capital (Settings, UserProfile)")
     if not folder.is_dir():
         raise CliError(f"{folder} isn't a folder")
-    view, viewmodel = folder / f"{name}_View.yaml", folder / f"{name}_ViewModel.py"
+    laid_out = (folder / "Views").is_dir() and (folder / "ViewModels").is_dir()  # a project, or the flat layout
+    view = folder / "Views" / f"{name}_View.yaml" if laid_out else folder / f"{name}_View.yaml"
+    viewmodel = folder / "ViewModels" / f"{name}_ViewModel.py" if laid_out else folder / f"{name}_ViewModel.py"
     for path in (view, viewmodel):  # both checked first, so a refusal writes neither
         if path.exists():
             raise CliError(f"{path} already exists; nothing was overwritten")
     title = " ".join(w.capitalize() for w in _words(name))
     _write(view, _render("Screen_View.yaml.tmpl", name=name, title=title))
     _write(viewmodel, _render("Screen_ViewModel.py.tmpl", name=name))
-    import_line = f"from {name}_ViewModel import {name}ViewModel"
-    load_lines = [f'app.load(HERE / "{name}_View.yaml", {name}ViewModel)', f'app.route("{screen_route(name)}", "{name}")']
+    route = f'app.route("{screen_route(name)}", "{name}")'
     app = folder / "app.py"
     text = app.read_text(encoding="utf-8") if app.is_file() else ""
-    if IMPORT_MARKER not in text or LOAD_MARKER not in text:
-        return [import_line, *load_lines]
-    text = text.replace(IMPORT_MARKER, f"{import_line}\n{IMPORT_MARKER}", 1)
+    if laid_out:  # found by name: no import, no path
+        imports, load_lines = [], [f'app.load("{name}")', route]
+    else:
+        imports = [f"from {name}_ViewModel import {name}ViewModel"]
+        load_lines = [f'app.load(HERE / "{name}_View.yaml", {name}ViewModel)', route]
+    if LOAD_MARKER not in text or (imports and IMPORT_MARKER not in text):
+        return [*imports, *load_lines]
+    if imports:
+        text = text.replace(IMPORT_MARKER, f"{imports[0]}\n{IMPORT_MARKER}", 1)
     text = text.replace(LOAD_MARKER, "\n".join([*load_lines, LOAD_MARKER]), 1)
     app.write_text(text, encoding="utf-8")
     return []
@@ -140,6 +174,7 @@ def _parser() -> argparse.ArgumentParser:
     new_cmd.add_argument("--shell", action="store_true",
                          help="add an app shell (top bar, rail, status bar) and a Settings screen")
     new_cmd.add_argument("--dir", type=Path, default=Path("."), help="where to make it (default: here)")
+    new_cmd.add_argument("--no-venv", action="store_true", help="don't make a virtual environment in the project")
     new_cmd.add_argument("--custom-title-bar", action="store_true",
                          help="with --shell: no OS title bar; the shell's top bar is the title bar")
     add_cmd = commands.add_parser("add", help="add to an app")
@@ -229,8 +264,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.command == "schema":
             return _schema(args)
         if args.command == "new":
-            folder = new(args.name, args.dir, shell=args.shell, custom_title_bar=args.custom_title_bar)
-            print(f"made {folder}; run it with\n\n    cd {folder}\n    python app.py\n")
+            folder = new(args.name, args.dir, shell=args.shell, custom_title_bar=args.custom_title_bar,
+                         venv=not args.no_venv)
+            activate = "source .venv/bin/activate" if os.name != "nt" else r".venv\Scripts\activate"
+            steps = f"cd {folder}\n    " + (f"{activate}\n    " if not args.no_venv else "") + "python app.py"
+            print(f"made {folder}; run it with\n\n    {steps}\n")
         else:
             missing = add_screen(args.name, args.dir)
             if missing:

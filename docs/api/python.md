@@ -9,6 +9,7 @@ Every public class, function and constant, with its signature and what it does. 
 - [Views and components](#views-and-components): A loaded `*_View.yaml`, and an embedded instance of one.
 - [Embedding](#embedding): A component with a ViewModel of its own, inside a view.
 - [Repeater](#repeater): A list signal kept in step with a list of components.
+- [Projects](#projects): A project's files, found by name.
 - [Themes](#themes): A resolved MD3 theme, read from code.
 - [Tokens](#tokens): MD3's colour, type, shape and motion tokens.
 - [Widgets](#widgets): One function per MD3 widget, called against a window.
@@ -46,6 +47,9 @@ class App(
     stylesheet: str | Path | None = None,
     stylesheet_spec: dict[str, Any] | None = None,
     state: Any = None,
+    root: str | Path | None = None,
+    search: Any = (),
+    recursive: bool = False,
     decorations: bool = True,
     resize_border: int | None = None,
     min_width: int = 0,
@@ -68,7 +72,7 @@ class App(
 - `decorations` *(property)*: Whether the OS draws the title bar and borders.
 - `forward() -> bool`: Shows the entry `back()` left, if any.
 - `fullscreen` *(property)*: Whether the window fills its monitor, borderless.
-- `load(view_path: str | Path, viewmodel_cls: type, name: str | None = None, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> tuple[Any, Any]`: Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it -- the real, enforced-at-runtime counterpart to `README.md`'s own documented naming convention (previously convention-only, not checked).
+- `load(view_path: str | Path, viewmodel_cls: type | None = None, name: str | None = None, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> tuple[Any, Any]`: Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it.
 - `load_shell(path: str | Path, viewmodel: Any = None) -> Any`: Builds the app shell a `*_Shell.yaml` describes -- its top bar, navigation rail, status bar, docked zones, center tabs and panels -- and shows screens in it, as `use_shell` does.
 - `location` *(property)*: The screen showing, as a route string (for saving where the user was): from the first route of its screen that reads its params back exactly, or `None` if none does.
 - `maximize() -> None`: Maximizes the window (before `run()`, it opens maximized).
@@ -195,7 +199,8 @@ class View(
     dark: Optional[bool] = None,
     default_theme_spec: Optional[dict[str, Any]] = None,
     custom_theme_spec: Optional[dict[str, Any]] = None,
-    stylesheet_spec: Optional[dict[str, Any]] = None
+    stylesheet_spec: Optional[dict[str, Any]] = None,
+    project: Any = None
 ) -> None
 ```
 
@@ -254,6 +259,38 @@ class Repeater(
 Keeps one component and ViewModel alive for each item of a list `Signal`, adding and removing them as the list changes.
 
 - `remove() -> None`: Real, structural teardown -- removes every currently-tracked instance and unsubscribes from `items_signal`, mirroring `Component.remove()`'s own "unsubscribe before tearing down" ordering.
+
+## Projects
+
+`tesserae.project`: A project's files, found by name.
+
+### `Project`
+
+```python
+class Project(
+    root: str | Path,
+    search: Iterable[str | Path] = (),
+    recursive: bool = False
+) -> None
+```
+
+The files under `root`, found by name. See the module docstring.
+
+- `component_dirs() -> list[Path]`: The folders the components are in (each once), for `component:` to look in.
+- `find(kind: str, name: str) -> Path`: The file of `kind` called `name`; `ProjectError` if there is none, or two.
+- `folders(kind: str) -> list[Path]`: The folders that exist where `kind` is looked for, in order; with `recursive`, every folder under the root.
+- `index(kind: str) -> dict[str, Path]`: Every name of `kind` and its file.
+- `resolve(kind: str, ref: str | Path) -> Path`: `ref` as a file: a path is used as it is, a bare name is found.
+- `style_dirs() -> list[Path]`: The folders that have `*_Style.yaml` files, for a node's `style:` that names one.
+- `viewmodel(name: str) -> type`: The class `NameViewModel` in `Name_ViewModel.py`, imported.
+
+### `ProjectError`
+
+```python
+class ProjectError
+```
+
+A name that is nowhere, or in two places.
 
 ## Themes
 
@@ -2086,7 +2123,8 @@ class ViewWatcher(
     view: Any,
     path: str | Path,
     *,
-    component_dirs: list[Path] | None = None
+    component_dirs: list[Path] | None = None,
+    project: Any = None
 ) -> None
 ```
 
@@ -2118,7 +2156,8 @@ expand_components_to_spec(
     yaml_text: str,
     *,
     component_dirs: list[Path] | None = None,
-    base_dir: Path | None = None
+    base_dir: Path | None = None,
+    project: Any = None
 ) -> Any
 ```
 

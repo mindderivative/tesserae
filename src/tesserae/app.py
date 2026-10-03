@@ -32,6 +32,7 @@ from tre import Window
 from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.listeners import Listeners
 from tesserae.naming import check_naming_convention
+from tesserae.project import Project, is_name, load_viewmodel
 from tesserae import tokens
 from tesserae.reactive import Computed, Effect, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
@@ -177,6 +178,12 @@ def _file_or_spec(owner: str, file_arg: str, file: Any, spec: Any, loader: Any) 
     return loader(file) if file is not None else spec
 
 
+def _script_folder() -> Path:
+    """The folder of the script that runs (`app.py`), or the current folder."""
+    script = getattr(sys.modules.get("__main__"), "__file__", None)
+    return Path(script).resolve().parent if script else Path.cwd()
+
+
 class App:
     """`width`/`height`/`title` describe the one real `Window` this
     `App` opens the first time `show()` is called -- every registered
@@ -217,6 +224,9 @@ class App:
         stylesheet: str | Path | None = None,
         stylesheet_spec: dict[str, Any] | None = None,
         state: Any = None,
+        root: str | Path | None = None,
+        search: Any = (),
+        recursive: bool = False,
         decorations: bool = True,
         resize_border: int | None = None,
         min_width: int = 0,
@@ -230,6 +240,13 @@ class App:
         #: `Signal`s every screen reads. A ViewModel reaches it as
         #: `self.state`, and a binding as `{{ state.<name>.get() }}`.
         self.state = state
+        #: The project's files, found by name: `Views/`, `ViewModels/`, `Components/`, `Themes/` and `Styles/`
+        #: under `root` (the folder of the script that runs, by default), and the folders in `search`; with
+        #: `recursive`, the whole project. See `tesserae.project`.
+        self.project = Project(root if root is not None else _script_folder(), search, recursive)
+        default_theme = self._named("theme", default_theme)
+        custom_theme = self._named("theme", custom_theme)
+        stylesheet = self._named("stylesheet", stylesheet)
         self._width = width
         self._height = height
         self._title = title
@@ -491,6 +508,8 @@ class App:
         `stylesheet_spec=` replace the app's default stylesheet for this
         view. `load()` builds its views through this too.
         """
+        view_path = self._named("view", view_path)
+        stylesheet = self._named("stylesheet", stylesheet)
         sheet = _file_or_spec("App.build_view", "stylesheet", stylesheet, stylesheet_spec, load_stylesheet)
         built = _Built(None, own_stylesheet=sheet is not None)
         if stylesheet is not None:
@@ -502,7 +521,7 @@ class App:
         if sheet is not None:
             kwargs["stylesheet_spec"] = sheet
         try:
-            built.view = TesseraeView(Path(view_path), window=self._window, **kwargs)
+            built.view = TesseraeView(Path(view_path), window=self._window, project=self.project, **kwargs)
         except ValueError:
             raise
         self._built.append(built)
@@ -532,47 +551,40 @@ class App:
         view.move_to(self._window)  # a view built on its own is rebuilt in this app's window
         self._registered[name] = _Registered(view, viewmodel)
 
+    def _named(self, kind: str, ref: Any) -> Any:
+        """`ref` as a path: a bare name (`"Main"`) is found in the project, a path is left as it is."""
+        return self.project.find(kind, ref) if is_name(ref) else ref
+
     def load(
         self,
         view_path: str | Path,
-        viewmodel_cls: type,
+        viewmodel_cls: type | None = None,
         name: str | None = None,
         *,
         stylesheet: str | Path | None = None,
         stylesheet_spec: dict[str, Any] | None = None,
     ) -> tuple[Any, Any]:
-        """Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it
-        -- the real, enforced-at-runtime counterpart to `README.md`'s own
-        documented naming convention (previously convention-only, not
-        checked). Mirrors pyCopper's own real, validated design (see
-        `ARCHITECTURE.md`): a `ViewModel` is scoped one-per-view-file, so
-        catching a mismatched pair immediately, at load time, is worth
-        more than a cryptic failure much later when a handler name
-        doesn't resolve.
+        """Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it.
 
-        `tre.View` doesn't expose its own source path back to Python
-        (confirmed by reading `view.rs` before writing this -- `path` is
-        a private Rust field), so this takes `view_path` directly rather
-        than trying to recover it from an already-constructed `View` --
-        the caller already has it (it's what they'd otherwise pass to
-        `View(...)` themselves).
+        `view_path` is a path, or a name found in the project (`app.load("Main")` is `Views/Main_View.yaml`).
+        `viewmodel_cls` is the ViewModel class; left out, it is found by the view's name (`Main_ViewModel.py`,
+        class `MainViewModel`, beside the view or in `ViewModels/`). The pair must follow the
+        [naming convention](naming-convention.md): the same prefix, checked here, so a mismatch fails at load
+        and not later when a handler name doesn't resolve.
 
-        `name` defaults to the shared prefix (e.g. `"Counter"` for
-        `Counter_View.yaml`/`Counter_ViewModel.py`) -- only needed
-        explicitly if two different pairs would otherwise collide on it.
+        `name` defaults to that prefix (`"Main"`); it is only needed if two pairs would share it. The view is
+        built with `build_view`, with the app's theme and its default stylesheet, or this screen's own
+        `stylesheet=` / `stylesheet_spec=` (a path or a name).
 
-        Built with `build_view` -- `tesserae.spec.load_view` under the
-        hood, so `include:`/`component:`/images are handled by Tesserae --
-        using the app's theme and its default stylesheet, or this
-        screen's own `stylesheet=`/`stylesheet_spec=` if given.
-
-        Returns the constructed `(view, viewmodel)` pair -- most real
-        `app.py` scripts won't need it (everything from here on happens
-        through `show()`/registered handlers), but a caller that wants a
-        `Node` handle to dispatch a synthetic click/test against, or the
-        `ViewModel` itself to read a `Signal` back, still can.
+        Returns the `(view, viewmodel)` pair, for code that wants a node to click in a test or a Signal to
+        read back.
         """
-        view_path = Path(view_path)
+        view_path = Path(self._named("view", view_path))
+        if viewmodel_cls is None:  # its `Name_ViewModel.py`: next to the view, or in the project
+            prefix = view_path.name.removesuffix("_View.yaml")
+            beside = view_path.with_name(f"{prefix}_ViewModel.py")
+            viewmodel_cls = (load_viewmodel(beside, prefix) if beside.is_file() and view_path.name.endswith("_View.yaml")
+                             else self.project.viewmodel(prefix))
         prefix = check_naming_convention(view_path, viewmodel_cls)
 
         view = self.build_view(view_path, stylesheet=stylesheet, stylesheet_spec=stylesheet_spec)
@@ -767,7 +779,7 @@ class App:
         file and key for a mistake."""
         from tesserae.shell_file import bind_navigation, build_shell, check_references, load_shell_spec, place_panels
 
-        path = Path(path)
+        path = Path(self._named("shell", path))
         spec = load_shell_spec(path)
         check_references(self, spec, path, viewmodel)  # before anything is built
         shell = build_shell(self, spec)
@@ -1007,7 +1019,7 @@ class App:
             # then `register()` -- keeps that file as `view.path`
             path = getattr(registered.view, "path", None)
             if path is not None:
-                watchers.append(ViewWatcher(registered.view, path))
+                watchers.append(ViewWatcher(registered.view, path, project=self.project))
             else:
                 logger.info("hot reload: screen {!r} isn't watched -- it was built from a spec, not a file", name)
         if self._stylesheet_file is not None:
@@ -1110,7 +1122,7 @@ class App:
         path = Path(path).resolve()
         if path in self._component_watchers:
             return
-        watcher = ComponentWatcher(path, lambda path=path: self._live_components(path))
+        watcher = ComponentWatcher(path, lambda path=path: self._live_components(path), project=self.project)
         watcher.start(self._hot_handle)
         self._component_watchers[path] = watcher
         self._watchers.append(watcher)
