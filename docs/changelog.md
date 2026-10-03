@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.5 (unreleased)
+## 0.3.5
 
 Text that wrapped when it shouldn't ([#84](https://github.com/mindderivative/tesserae/issues/84)).
 
