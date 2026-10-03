@@ -2153,6 +2153,26 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.4.1 released (#87)
+
+User: issue #87 (scaffolding), my triage and three questions ("Just use the current tesserae new <name> but add
+the scaffolding parts", "Folders by name, recursive opt-in", "Yes, with --no-venv"), "approved, do #87 as 0.4.1,
+and move #85 to Done", "approved, push and release 0.4.1", "approved, check PyPI".
+
+- `tesserae.project.Project` finds views, viewmodels, shells, components (and their stylesheets), themes,
+  stylesheets and style files by name in `Views/`, `ViewModels/`, `Components/`, `Themes/` and `Styles/`, in
+  `App(search=[...])` folders, or recursively; a name in two places is an error naming both. `App(root=)` and
+  `app.project`; `app.load("Main")` takes the ViewModel from the view's name; the project reaches `View`,
+  `build_view_spec`, `expand_with_dependencies` (style dirs by a contextvar), the watchers, `instantiate` and shell
+  panels. `tesserae new` makes the layout with a `.venv` (`--no-venv` skips it) and a `Main` screen;
+  `add screen` follows the layout or the old flat one.
+- Release run: CI on the release commit failed because CI made projects with a real venv and asked for
+  `tesserae-ui>=0.4.1`, not yet on PyPI. Fixed: the venv installs `tesserae-ui` unpinned, tests, CI and the smoke
+  script use `--no-venv`, and the smoke script runs `Main`. The tag is on the fix commit.
+- Released: 4605 tests passed, CI green; `tesserae-ui` 0.4.1 is on PyPI. From that install, a real
+  `tesserae new notes` made the venv with `tesserae-ui` 0.4.1 and `tesserae-engine` 0.5.3 in it, and the
+  generated app ran: Main, "Hello from Notes", a click counted. `v0.4.1` is a pre-release.
+
 ## Tesserae 0.4.0 released (#86)
 
 User: issue #86 (merge align_items and justify_content into align_content, add flex), my triage and three
