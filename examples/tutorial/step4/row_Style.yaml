@@ -1,0 +1,4 @@
+flex_direction: horizontal
+align_items: center
+gap: 8
+width: 100%

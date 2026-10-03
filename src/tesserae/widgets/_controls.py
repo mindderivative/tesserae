@@ -1,5 +1,5 @@
 """Placing a `tesserae.controls` control the way `tre`'s `add_*` placed
-its widget (M40): attached to the window's root, and at `x`/`y` when given."""
+its widget: attached to the window's root, and at `x`/`y` when given."""
 
 from __future__ import annotations
 

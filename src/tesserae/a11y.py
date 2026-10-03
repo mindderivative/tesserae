@@ -1,4 +1,4 @@
-"""Accessibility on `tre` 0.3.4's nodes (M39): what a node tells assistive
+"""Accessibility on `tre` 0.3.4's nodes: what a node tells assistive
 technology, checked here so a mistake names the field, and requests
 coming back from it (`a11y_action`).
 
@@ -10,9 +10,9 @@ an `a11y_action` event, one of `ACTIONS`; activating (clicking) isn't
 one of them in 0.3.4.
 
 `tre`'s `disabled` is only what's announced: a disabled node still takes
-focus and clicks. Tesserae's widgets (M40) make it behave.
+focus and clicks. Tesserae's widgets make it behave.
 
-`bind` (M47) keeps a node's `label`, `hidden` or `level` following a
+`bind` keeps a node's `label`, `hidden` or `level` following a
 `Signal`, a `Computed` or a function, as a YAML `a11y:` binding does.
 """
 
@@ -106,7 +106,7 @@ BINDABLE = ("label", "hidden", "level")
 
 
 def bind(node: Any, **fields: Any) -> Callable[[], None]:
-    """Keeps `node`'s `label`, `hidden` or `level` up to date (M47): each
+    """Keeps `node`'s `label`, `hidden` or `level` up to date: each
     is a `Signal` or `Computed` (anything with `.get()`), a function of no
     arguments, or a plain value, and it's set now and again whenever what
     it read changes, checked as `describe` checks it (a wrong value raises,

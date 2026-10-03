@@ -1,4 +1,4 @@
-"""Tesserae's `View` (M37 Phase 4): a view spec built onto `tre` 0.3.4's
+"""Tesserae's `View`: a view spec built onto `tre` 0.3.4's
 building blocks by Tesserae's compiler, kept up to date by Tesserae's
 reconciler, with bindings, `handlers:` and `two_way:` wired by Tesserae --
 the job `tre`'s `View` does today and 0.3.5 removes.
@@ -15,7 +15,7 @@ reads) and sets the property. A value that hasn't changed isn't set
 again. On `tre` 0.3.4's building blocks a programmatic `set` fires no
 `change` event, so a declared `on_change` runs only for the user's own
 edits (`tre` issue #12 doesn't happen here). The eight MD3 control kinds
-are Tesserae's controls (M40, `tesserae.controls`): their `checked`/
+are Tesserae's controls: their `checked`/
 `selected`/`value`/`hour`/`minute` and `disabled` bindings set the
 control's `Signal`s, and `on_change` and `two_way:` hear the control's
 `on_change`, which fires for the user's changes only.
@@ -99,9 +99,9 @@ class View:
 
     `window` is the `tre.Window` to build into. Without one, the view
     makes its own and mounts its root there. It doesn't theme that window:
-    everything a view builds takes the view's theme (M40). Built on an
+    everything a view builds takes the view's theme. Built on an
     `App`'s window with no theme argument at all, it takes the app's theme
-    and follows it (M50); any theme argument pins it."""
+    and follows it; any theme argument pins it."""
 
     def __init__(
         self,
@@ -176,7 +176,7 @@ class View:
             app._followers[self] = None
 
     def _follow_theme(self, theme: Any, view_theme: dict[str, Any]) -> None:
-        """Following its app (M50): re-themed with the app's arguments."""
+        """Following its app: re-themed with the app's arguments."""
         self.set_theme(**view_theme)
 
     def _follow_alive(self) -> bool:
@@ -217,7 +217,7 @@ class View:
 
     def control(self, widget_id: str) -> Any:
         """The MD3 control (`tesserae.controls`) behind `widget_id`, one of
-        the eight control kinds (M40); its `.node` is `node(widget_id)`."""
+        the eight control kinds; its `.node` is `node(widget_id)`."""
         self.node(widget_id)
         try:
             return self._built.controls[widget_id]
@@ -225,7 +225,7 @@ class View:
             raise ValueError(f"widget {widget_id!r} isn't a control kind") from None
 
     def interaction(self, widget_id: str) -> Optional[Interaction]:
-        """The state layer and ripple on `widget_id`'s node (M39), or `None`
+        """The state layer and ripple on `widget_id`'s node, or `None`
         when it has none."""
         self.node(widget_id)
         return self._interactions.get(widget_id)
@@ -269,7 +269,7 @@ class View:
 
     def _prune_components(self) -> None:
         """Forgets the components whose nodes a reload destroyed (their
-        `into` node, say): unwired, so their bindings stop (M51)."""
+        `into` node, say): unwired, so their bindings stop."""
         for component in list(self._components):
             if not component._follow_alive():
                 component._forget_dead()
@@ -347,7 +347,7 @@ class View:
 
     def _use_scheme(self, scheme: Any) -> None:
         """Re-colours every node from `scheme` (a resolved `Theme`'s roles),
-        for a composed widget given a `tesserae.Theme` (M41)."""
+        for a composed widget given a `tesserae.Theme`."""
         self._repatch(scheme, self._layers)
         self._scheme = scheme
 
@@ -361,7 +361,7 @@ class View:
 
     def _sync_interactions(self, scheme: Any = None) -> None:
         """Gives every node that should have a state layer and ripple one,
-        in its current tint, and removes the rest (M39)."""
+        in its current tint, and removes the rest."""
         scheme = self._scheme if scheme is None else scheme
         wanted: dict[str, Any] = {}
         for node_id, node_spec in self._built.specs.items():
@@ -386,7 +386,7 @@ class View:
         self._sync_disabled()
 
     def _sync_disabled(self) -> None:
-        """Shows every node disabled that its `disabled:` key says is (M70),
+        """Shows every node disabled that its `disabled:` key says is,
         and enabled again those that no longer are -- after each build and
         patch, which would otherwise make them focusable and opaque again.
         A `disabled` binding is applied again right after, as every binding
@@ -414,7 +414,7 @@ class View:
             self._disabled_on.discard(node_id)
 
     def _sync_scrolls(self) -> None:
-        """Gives every ScrollView its `Scroller` (M71), and stops those whose
+        """Gives every ScrollView its `Scroller`, and stops those whose
         node is gone or was rebuilt."""
         for node_id, current in list(self._scrollers.items()):
             spec = self._built.specs.get(node_id) or {}
@@ -473,7 +473,7 @@ class View:
                     node.destroy()
 
     def _reconcile_graph(self, old: dict[str, Any], new: dict[str, Any]) -> None:
-        """A NodeGraph's GraphNodes, matched by id (M60): a kept one is
+        """A NodeGraph's GraphNodes, matched by id: a kept one is
         patched in place (so a place the user dragged it to stays, unless
         the file moves it), a new one is built into the graph, a gone one
         is removed; then the edges are drawn again."""
@@ -707,7 +707,7 @@ class View:
         self._frames[node_id] = (data, width, height)
 
     def _wire_a11y(self, node_spec: dict[str, Any], field_name: str, raw: str) -> None:
-        """A bound `a11y:` field (M47): `label`, `hidden` or `level`, set on
+        """A bound `a11y:` field: `label`, `hidden` or `level`, set on
         the node that carries the widget's accessibility (a Link's box, a
         TextField's input, a control's target) and kept up to date."""
         node_id = node_spec["id"]
@@ -800,7 +800,7 @@ class Component(View):
             component._host_restyled(self)
 
     def _forget_dead(self) -> None:
-        """Unwires a component whose nodes are already gone (M51), and the
+        """Unwires a component whose nodes are already gone, and the
         components inside it; its `Signal`s stop reaching it. (`tre`'s
         `off` on a destroyed node is harmless, so unwiring is safe.)"""
         for component in list(self._components):
@@ -812,7 +812,7 @@ class Component(View):
     def remove(self) -> None:
         """Unwires this component (its `Signal`s stop reaching it) and frees
         its nodes, and any components inside it. A component a host's
-        reload already destroyed (M51) is simply forgotten."""
+        reload already destroyed is simply forgotten."""
         if not self._follow_alive():
             self._forget_dead()
             if self in self._host._components:

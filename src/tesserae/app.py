@@ -7,7 +7,7 @@ view/viewModel."
 Owns a registry of named `(View, ViewModel)` pairs -- each `*_View.yaml`
 + `*_ViewModel.py` file pair a real app registers once, up front -- and
 exactly one live `tre.Window`, created with the `App`. Screens are built
-into it by Tesserae (M37); `App.show(name)` attaches that screen's root
+into it by Tesserae; `App.show(name)` attaches that screen's root
 to the window and detaches the one shown before. Neither a `View` nor
 its `ViewModel` is ever re-parsed,
 re-attached, or otherwise re-bootstrapped by a later `show()` call --
@@ -62,7 +62,7 @@ def _keepalive_interval(keepalive: bool | float | None) -> float | None:
 
 @dataclass
 class _Route:
-    """A route (M66): its pattern, the screen it names, and its segments,
+    """A route: its pattern, the screen it names, and its segments,
     each a literal or a `(param, converter)`."""
 
     pattern: str
@@ -104,7 +104,7 @@ class _Registered:
 @dataclass
 class _Built:
     """A view `App.build_view()` made -- one a theme or stylesheet reload
-    reaches (M31)."""
+    reaches."""
 
     view: Any
     #: `True` if it was given its own stylesheet (file or dict) instead
@@ -116,9 +116,9 @@ class _Built:
 
 def _os_dark(window: Any) -> bool | None:
     """The OS's appearance: `True` dark, `False` light, or `None` when it
-    can't say (`tre` 0.3.5.2's `window.get("dark")`, `tre` issue #18). On
+    can't say. On
     Linux it answers at once; on macOS and Windows, once the window is open;
-    headless, never. One function, so tests can fix the answer (M53 Q3)."""
+    headless, never. One function, so tests can fix the answer."""
     try:
         value = window.get("dark")
     except ValueError:  # a `tre` before 0.3.5.2
@@ -390,7 +390,7 @@ class App:
 
     def _retheme(self, old: dict[str, Any], new: dict[str, Any]) -> None:
         """Re-themes every view `build_view()` made, then every widget
-        following the app (M50), from the `old` theme arguments to `new`;
+        following the app, from the `old` theme arguments to `new`;
         if one fails, the ones done go back to `old` and it re-raises."""
         from tesserae.theme import Theme
 
@@ -432,7 +432,7 @@ class App:
         return default, custom
 
     def set_theme_specs(self, default_theme_spec: Any, custom_theme_spec: Any) -> None:
-        """Re-themes the running app in place (M31): every view
+        """Re-themes the running app in place: every view
         `build_view()`/`load()` made. Both theme dicts
         are the complete new selection (`None` for none), as in `tre`,
         where each `set_theme` call is a fresh choice, not a patch; the
@@ -450,7 +450,7 @@ class App:
             raise
 
     def set_stylesheet_spec(self, stylesheet_spec: dict[str, Any] | None) -> None:
-        """Replaces the app's default stylesheet in place (M31 Phase 2):
+        """Replaces the app's default stylesheet in place:
         every view `build_view()`/`load()` made with the default -- not
         one given its own `stylesheet=` -- is re-styled, and views built
         later use it too. `None` means no stylesheet. Bound values stay
@@ -517,10 +517,10 @@ class App:
 
         The caller builds `view`, so the caller themes it: build it with
         `app.build_view("Foo_View.yaml")` to give it this app's theme and
-        stylesheet (M30). A view built any other way keeps whatever theme
+        stylesheet. A view built any other way keeps whatever theme
         it was built with. A view built from a file keeps it (`view.path`),
         so `run(hot_reload=True)` watches it as it does a `load()`ed one
-        (M48).
+.
         """
         if name in self._registered:
             raise ValueError(f"a view named {name!r} is already registered")
@@ -564,7 +564,7 @@ class App:
         Built with `build_view` -- `tesserae.spec.load_view` under the
         hood, so `include:`/`component:`/images are handled by Tesserae --
         using the app's theme and its default stylesheet, or this
-        screen's own `stylesheet=`/`stylesheet_spec=` if given (M30).
+        screen's own `stylesheet=`/`stylesheet_spec=` if given.
 
         Returns the constructed `(view, viewmodel)` pair -- most real
         `app.py` scripts won't need it (everything from here on happens
@@ -583,11 +583,11 @@ class App:
 
     def show(self, name: str) -> Window:
         """Shows the view registered under `name` in the app's window: its
-        root is attached, and the previously shown screen's detached (kept
+        root is attached, and the screen shown before it is detached (kept
         alive, with its state and bindings). Returns the window, the same one
         every time.
 
-        A jump, not a step in the history (M66): it pushes nothing and calls
+        A jump, not a step in the history: it pushes nothing and calls
         no `on_navigated`, and it replaces the current history entry, so
         `back()` leaves it for the entry before. `navigate` records a step.
         """
@@ -601,7 +601,7 @@ class App:
 
     def navigate(self, name: str, /, **params: Any) -> Window:
         """Shows the screen registered under `name` as a step in the history
-        (M66): `back()` returns from it. Its ViewModel's `on_navigated(params)`,
+: `back()` returns from it. Its ViewModel's `on_navigated(params)`,
         if it has one, is called first with `params` (a dict). Forward
         entries are dropped, as a browser does; navigating to the entry
         already showing (the same screen and params) does nothing. `name`
@@ -617,7 +617,7 @@ class App:
         return window
 
     def route(self, pattern: str, name: str) -> None:
-        """Adds a route (M66): a pattern like `"notes/{id}"` for the screen
+        """Adds a route: a pattern like `"notes/{id}"` for the screen
         registered (now or later) under `name`. A `{param}` segment is a
         string param, `{param:int}` an `int`; the others must match
         exactly. Routes are tried in the order they were added."""
@@ -738,11 +738,11 @@ class App:
 
     @property
     def window(self) -> Window:
-        """The app's one window (it exists from the start, M37)."""
+        """The app's one window (it exists from the start)."""
         return self._window
 
     def use_shell(self, shell: Any) -> None:
-        """Shows screens inside `shell.content` from now on (M45): an
+        """Shows screens inside `shell.content`: an
         `AppShell` built on this app's window -- a top app bar, navigation,
         docked panels and a status bar around the screens. A screen already
         showing moves into it."""
@@ -758,7 +758,7 @@ class App:
     def load_shell(self, path: str | Path, viewmodel: Any = None) -> Any:
         """Builds the app shell a `*_Shell.yaml` describes -- its top bar,
         navigation rail, status bar, docked zones, center tabs and panels
-        (M52) -- and shows screens in it, as `use_shell` does. A panel is
+ -- and shows screens in it, as `use_shell` does. A panel is
         the screen registered under its name, or else `<Name>_View.yaml`
         (and `<Name>_ViewModel.py`) next to the shell file, registered under
         it. Choosing a rail item shows its screen, or calls `viewmodel`'s
@@ -780,7 +780,7 @@ class App:
 
     def screen(self, name: str) -> tuple[Any, Any]:
         """The `(view, viewmodel)` registered under `name` -- by `register`,
-        `load`, or a shell file's panels (M52), whose ViewModels the app
+        `load`, or a shell file's panels, whose ViewModels the app
         builds; `viewmodel` is `None` for a view with none."""
         registered = self._registered.get(name)
         if registered is None:
@@ -790,7 +790,7 @@ class App:
     @classmethod
     def of(cls, view: Any) -> "App | None":
         """The live app whose window `view` (a view, a component, or a
-        window) is on, or `None` (M65): for a ViewModel's constructor,
+        window) is on, or `None`: for a ViewModel's constructor,
         before `super().__init__(view)` gives it `self.app`."""
         return app_of(getattr(view, "window", view))
 
@@ -986,7 +986,7 @@ class App:
         return len(self._window.root.children()) <= (1 if self._border is not None else 0)
 
     def thread_handle(self) -> Any:
-        """`tre`'s thread-safe `LoopHandle` for this app (tre M87): the one
+        """`tre`'s thread-safe `LoopHandle` for this app: the one
         object that may cross threads. `handle.call_soon(fn)` runs `fn`
         (no arguments) on the event-loop thread at the next frame, waking
         an idle loop -- the way for a background thread to touch a view,
@@ -1074,7 +1074,7 @@ class App:
     def _live_components(self, path: Path | None = None) -> list[Any]:
         """Every live component built from a file (`tesserae.instantiate`)
         in the app's screens and views, nested ones included -- or only
-        those built from `path` (M51) -- and, since M61, in any other view
+        those built from `path` -- and, since M61, in any other view
         on the app's window, as `instantiate` registered them."""
         views = [r.view for r in self._registered.values()] + [b.view for b in self._built]
         views += [f for f in self._followers if isinstance(f, TesseraeView)]
@@ -1101,7 +1101,7 @@ class App:
 
     def watch_component(self, path: str | Path) -> None:
         """While `run(hot_reload=True)` runs, watches a component file and
-        reloads every live instance of it on change (M51);
+        reloads every live instance of it on change;
         `tesserae.instantiate` calls it, so a component first added while
         the app runs is watched too. Once per file; outside hot reload,
         nothing happens."""
@@ -1117,7 +1117,7 @@ class App:
         logger.info("hot reload: watching component {} ({} instance(s))", path.name, len(self._live_components(path)))
 
     def _reload_shell(self, spec: dict[str, Any]) -> None:
-        """Applies an edited shell file (M52 Q4): what can change in place
+        """Applies an edited shell file: what can change in place
         is patched; a structural change is logged as needing a restart.
         A panel or `on_navigate` it can't find fails before anything
         changes."""
@@ -1149,20 +1149,20 @@ class App:
         display it returns at once; a window whose GPU can't be set up
         raises `RuntimeError` (`tre` 0.4.0).
 
-        `hot_reload=True` (M29) watches every screen built from a file --
-        by `load()`, or by `build_view()` and given to `register()` (M48)
+        `hot_reload=True` watches every screen built from a file --
+        by `load()`, or by `build_view()` and given to `register()`
         -- its view file and everything it was built from, and reloads it
         in place while the app runs, its ViewModel and bindings kept. Each
         screen gets a `ViewWatcher` on a background thread (`watchfiles`),
         which hands its reloads to the event loop through `tre`'s
-        thread-safe `App.thread_handle()` (tre M87). A failed reload is
-        logged (M44); the app keeps running. A screen built from a spec
+        thread-safe `App.thread_handle()`. A failed reload is
+        logged; the app keeps running. A screen built from a spec
         dict has no file, so it isn't watched, and the log says so. A
         component built with `tesserae.instantiate` is watched by its file
         too, one watcher for all its live instances, including ones added
-        while the app runs (M51). So is a shell file from `load_shell`:
+        while the app runs. So is a shell file from `load_shell`:
         an edit is patched in place, and a structural one is logged as
-        needing a restart (M52).
+        needing a restart.
 
         M31: the theme files given to `App(default_theme=, custom_theme=)`
         are watched too. An edit re-reads them on the watcher thread and

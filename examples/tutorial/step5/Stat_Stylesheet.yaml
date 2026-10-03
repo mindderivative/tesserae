@@ -1,0 +1,14 @@
+# The look of Stat: one rule for each part.
+styles:
+  - id: root
+    style:
+      flex_direction: vertical
+      align_items: center
+      width: 96
+      padding: 12
+      background: secondary_container
+      corner_radius: medium
+  - id: value
+    style: {foreground: on_secondary_container}
+  - id: label
+    style: {foreground: on_secondary_container}

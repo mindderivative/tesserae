@@ -1,5 +1,5 @@
-"""`Repeater` -- automatic, keyed add/remove diffing on top of TRE M43's
-real `Component`/`instantiate`, driven by one list `Signal` as the
+"""`Repeater` -- automatic, keyed add/remove diffing on top of the real
+`Component`/`instantiate`, driven by one list `Signal` as the
 single source of truth. The declarative-*feeling* half of "the essence
 of MVVM and single page applications": an app writes `items.update(...)`
 once and `Repeater` keeps exactly one `Component`+`ViewModel` alive per
@@ -97,7 +97,7 @@ class Repeater:
         """Real, structural teardown -- removes every currently-tracked
         instance and unsubscribes from `items_signal`, mirroring
         `Component.remove()`'s own "unsubscribe before tearing down"
-        ordering (TRE M43 Phase 2).
+        ordering.
         """
         self._items_signal._unsubscribe(self._sync)
         for component, _viewmodel in self._by_key.values():

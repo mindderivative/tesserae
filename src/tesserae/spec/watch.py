@@ -163,7 +163,7 @@ class ViewWatcher:
 
     def _apply(self, spec: Any, frames: list[Frame]) -> None:
         """The `tre` part -- only on the thread that owns the view: the
-        view reconciles itself with the new spec and images (M37)."""
+        view reconciles itself with the new spec and images."""
         try:
             self._view.reconcile(spec, frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
         except ValueError as exc:
@@ -264,7 +264,7 @@ class ViewWatcher:
 
 class ComponentWatcher(ViewWatcher):
     """Watches a component file and everything it was built from, and
-    reloads every live instance of it on change (M51). `instances()`
+    reloads every live instance of it on change. `instances()`
     returns them at reload time, so rows added or removed since are
     counted as they are then.
     """
@@ -288,7 +288,7 @@ class ComponentWatcher(ViewWatcher):
 
 class FileWatcher:
     """Watches a fixed set of files on a background thread, the way
-    `ViewWatcher.start` does (M31). On a change, `rebuild()` runs on the
+    `ViewWatcher.start` does. On a change, `rebuild()` runs on the
     watcher thread -- the file work -- and `apply(result)` is queued on
     `handle` with `call_soon`, so it runs on the event-loop thread. If
     either raises, the error is logged at ERROR, naming the file, and

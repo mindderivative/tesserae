@@ -1,4 +1,4 @@
-"""The composed MD3 widgets of `tesserae.widgets` (M41): each is built
+"""The composed MD3 widgets of `tesserae.widgets`: each is built
 from its fragment in `spec/components/` by Tesserae's compiler, so a
 `component: ButtonFilled` in a view and `button(window, ...)` in Python
 are one definition.
@@ -6,7 +6,7 @@ are one definition.
 A factory returns a `Widget`: `.node` (its root, attached to the window's
 root), `.part(name)` for a named piece (`"label"`), `on_click(fn)` and
 `set_theme(theme)`. The parts a factory makes interactive get MD3's state
-layer, ripple and focus ring (M39) in their content's colour.
+layer, ripple and focus ring in their content's colour.
 """
 
 from __future__ import annotations
@@ -149,7 +149,7 @@ class Widget:
     def dispose(self) -> None:
         """Stops the widget (its listeners, feedback and controls) but
         leaves its nodes, for a caller about to free the tree it sits in --
-        as a view does with the widgets behind its NodeGraph kinds (M60)."""
+        as a view does with the widgets behind its NodeGraph kinds."""
         unfollow(self.window, self)
         for undo in self._undo:
             undo()

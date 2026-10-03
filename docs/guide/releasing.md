@@ -126,7 +126,7 @@ instead (`Path.home()`, or a per-platform app-data folder, which the
 | `--exclude GLOB` | Leaves more files out. |
 | `--check` | Runs the result for 30 frames from an empty folder. |
 | `--installer` | Makes this platform's installer instead of a single file (see below). |
-| `--app-version 1.2.0` | The installer's version: numbers and dots. Defaults to 0.1.0. |
+| `--app-version 1.2.0` | The installer's version: numbers and dots. Without it the build uses a placeholder starting at zero. |
 | `--identifier ID` | Reverse-DNS, like `com.yourcompany.notes`. macOS keeps the app's settings under it. Defaults to a `com.example` placeholder, which the build points out. |
 | `--publisher NAME` | Who makes the app; shown as its copyright on macOS. |
 | `--description TEXT` | A line about the app. |

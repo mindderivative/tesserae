@@ -1,4 +1,4 @@
-"""One listener per node and event, shared (M40).
+"""One listener per node and event, shared.
 
 `tre`'s `node.on(event, handler)` keeps a single listener per event: a
 second `on` replaces the first. Everything in Tesserae that listens on a
@@ -41,7 +41,7 @@ class Listeners:
 
 def handled(fn: Callable[[Any], Any]) -> Callable[[Any], None]:
     """`fn(event)`, then stop the event going on to the node's ancestors
-    (M49). `tre`'s `click` and `secondary_click` bubble to every
+. `tre`'s `click` and `secondary_click` bubble to every
     ancestor's listener; a clickable inside a clickable -- a button in a
     card, a checkbox in a list row -- takes its click alone, as MD3 (and
     Compose and Flutter) expect. Wraps every activation listener Tesserae

@@ -1,9 +1,7 @@
 # Reactivity
 
 Tesserae's reactivity lives in `tesserae.reactive` and is exported from
-`tesserae` itself. It used to be `tre`'s, re-exported; Tesserae took it
-over in M35, because `tre` 0.3.5 removes it (`tre` D5). The behaviour is
-the same, and app code imports it the same way.
+`tesserae` itself.
 
 `Signal` is the basic reactive cell:
 
@@ -70,9 +68,9 @@ See [Binding Expressions](bindings.md) for what a `{{ }}` expression can contain
   other signals, you get a `RuntimeError` saying so rather than endless
   recursion. Often the fix is `untrack(...)` around a read that shouldn't
   be a dependency.
-- **Use Tesserae's classes, not `tre`'s.** `tesserae.Signal` and friends
-  track only each other. A `tre.Signal` read inside a
+- **Use Tesserae's classes.** `tesserae.Signal` and friends track only
+  each other: a signal from another library read inside a
   `tesserae.Computed` isn't recorded.
-- **Bindings are Tesserae's too** (M36): it evaluates `{{ }}` expressions
-  itself, and a bound node updates when a `Signal` or `Computed` the
-  expression reads changes. See [Binding Expressions](bindings.md).
+- **Bindings use them.** A bound node updates when a `Signal` or
+  `Computed` its `{{ }}` expression reads changes. See
+  [Binding Expressions](bindings.md).

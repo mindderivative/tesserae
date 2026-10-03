@@ -1,4 +1,4 @@
-"""`tesserae.Theme` (M38 Phase 1): one resolved MD3 theme, answering
+"""`tesserae.Theme`: one resolved MD3 theme, answering
 everything `tre`'s `Window.theme` answers today -- colour roles, per-component
 shape and elevation, typography -- plus MD3's motion tokens. `tre` 0.3.5
 removes its theme (D7); Tesserae's widgets (M39–M42) read this one.

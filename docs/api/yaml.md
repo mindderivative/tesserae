@@ -21,7 +21,7 @@ A view is one node, with its children inside it. A node is a widget (`kind:`), a
 id: <text>
 kind: <one of 19 names>
 classes: <a list>
-style: <a style mapping>
+style: <a style mapping or text>
 text: <a mapping>
 checked: <true or false or text>
 selected: <true or false or text>
@@ -58,7 +58,7 @@ children: <a list>
 | `id` *(required)* | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
 | `kind` *(required)* | a [kind](#the-kinds) | What this node is. |
 | `classes` | a list | Style classes a theme or stylesheet rule can match. |
-| `style` | a `style` mapping | How a node looks and lays out its children. |
+| `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
 | `text` | a mapping | What a Text, Link or TextField says, and in what type. |
 | `checked` | `true` or `false` or text | A Checkbox's state. |
 | `selected` | `true` or `false` or text | A Switch's or RadioButton's state. |
@@ -200,7 +200,7 @@ text_align: <start | center | end>
 | `font_size` | a number | Pixels. |
 | `font_weight` | a number | 1 to 1000; 400 is regular, 700 bold. |
 | `line_height` | a number | A multiple of the size. |
-| `text_align` | `start` \| `center` \| `end` | Where the text sits in its node's width (0.3.1). Not for a TextField. |
+| `text_align` | `start` \| `center` \| `end` | Where the text sits in its node's width. Not for a TextField. |
 
 ## Handlers
 
@@ -238,7 +238,7 @@ title: <text>
 icon: <one of 15 names>
 buttons: <a list>
 children: <a list>
-style: <a style mapping>
+style: <a style mapping or text>
 classes: <a list>
 a11y: <a mapping>
 ```
@@ -251,7 +251,7 @@ a11y: <a mapping>
 | `icon` | one of 15 names | An icon name, shown before the title. |
 | `buttons` | a list | Which window buttons, in order: minimize, maximize, close (all by default). |
 | `children` | a list | The nodes inside this one. |
-| `style` | a `style` mapping | How a node looks and lays out its children. |
+| `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
 | `classes` | a list | Style classes a theme or stylesheet rule can match. |
 | `a11y` | a mapping | What assistive technology is told about this node. |
 
@@ -407,7 +407,7 @@ styles:
 | `styles[].kind` | a [kind](#the-kinds) | Every node of this kind. |
 | `styles[].classes` | a list | Nodes with all of these classes. |
 | `styles[].id` | text | The node with this id. |
-| `styles[].style` | a `style` mapping | How a node looks and lays out its children. |
+| `styles[].style` | a `style` mapping or text | How the matching nodes look: a mapping, or the name of a `*_Style.yaml` file. |
 
 **A rule in `styles:`**
 
@@ -416,4 +416,4 @@ styles:
 | `kind` | a [kind](#the-kinds) | Every node of this kind. |
 | `classes` | a list | Nodes with all of these classes. |
 | `id` | text | The node with this id. |
-| `style` | a `style` mapping | How a node looks and lays out its children. |
+| `style` | a `style` mapping or text | How the matching nodes look: a mapping, or the name of a `*_Style.yaml` file. |

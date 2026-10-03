@@ -1,4 +1,4 @@
-"""`python -m tesserae`: the `tesserae` command (M67)."""
+"""`python -m tesserae`: the `tesserae` command."""
 
 import sys
 

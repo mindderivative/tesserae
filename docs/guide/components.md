@@ -3,15 +3,16 @@
 !!! note
     This page covers `tesserae.instantiate` -- embedding a whole,
     independently-stateful `*_View.yaml` + `*_ViewModel.py` pair. For
-    reusing one of Tesserae's 67 built-in MD3 widget shapes
+    reusing one of Tesserae's built-in MD3 components
     (a button, a card, a checkbox, ...) declaratively inside a
     `*_View.yaml`, see
-    [Declarative Component Fragments](component-fragments.md) instead.
+    [Declarative Component Fragments](component-fragments.md) and
+    [Components](../components/index.md) instead.
 
 `tesserae.instantiate(parent, path, viewmodel_cls, into, *args,
-**kwargs)` embeds another view's own YAML as a real, independent
+**kwargs)` (see the [Python API](../api/python.md)) embeds another view's own YAML as a real, independent
 `Component` with its own `ViewModel`, built by Tesserae in the host's
-window (M37), with the same `*_View.yaml`/`*_ViewModel.py` naming check
+window, with the same `*_View.yaml`/`*_ViewModel.py` naming check
 `App.load` makes.
 
 ```python
@@ -23,24 +24,22 @@ component, viewmodel = instantiate(view, "Card_View.yaml", CardViewModel, contai
 - `parent` is a `View` or another `Component` -- they nest, so a
   component can itself hold further nested components the same way.
 - `into` is the `Node` to embed under (e.g. `view.node("item_list")`).
-- Extra positional/keyword args are forwarded to
-  `viewmodel_cls(component, *args, **kwargs)` -- the real, common case
-  for a component that needs its own data, or a callback to notify its
-  parent when it removes itself.
+- Extra positional and keyword args are forwarded to
+  `viewmodel_cls(component, *args, **kwargs)`: for a component that needs
+  its own data, or a callback to notify its parent when it removes itself.
 
 Call `instantiate` once per instance for multiple simultaneous
 instances (a list where each row is its own independent component) --
 each call is fully independent, even reusing the same `path`
-repeatedly. Confirmed (via `tre`'s own investigation): every instance
-gets its own real `NodeId`s, even for widget `id`s repeated identically
-across instances.
+repeatedly. Every instance gets its own `NodeId`s, even when widget `id`s
+repeat across instances.
 
 A component is built in its host's window with the host's theme and
 stylesheet, so the host's `styles:` rules and theme roles style it too.
 When the host is re-themed or re-styled, including by hot reload, the
 component follows. Its own `*_View.yaml` is hot-reloaded too: editing it
 reloads every live instance in place, including ones added while the app
-runs (M51; see [Hot Reload](hot-reload.md#components-added-at-run-time)).
+runs (see [Hot Reload](hot-reload.md#components-added-at-run-time)).
 
 ## Tearing a component down
 
@@ -48,11 +47,11 @@ runs (M51; see [Hot Reload](hot-reload.md#components-added-at-run-time)).
 component.remove()
 ```
 
-Removes the instance for real -- unsubscribing its own `Signal`s
-first, so a later write to a `Signal` it read from can't reach a
-`NodeId` that no longer exists.
+Removes the instance, unsubscribing its own `Signal`s first, so a later
+write to a `Signal` it read from can't reach a `NodeId` that no longer
+exists.
 
-## A real example
+## An example
 
 ```yaml
 # TodoItem_View.yaml
@@ -94,6 +93,6 @@ component, vm = instantiate(
 )
 ```
 
-For a real *dynamic* list -- items added and removed over time, driven
-by one `Signal` -- see [Repeater](repeater.md), which automates this
-add/remove bookkeeping entirely.
+For a dynamic list, with items added and removed over time and driven by
+one `Signal`, see [Repeater](repeater.md), which does this bookkeeping
+for you.

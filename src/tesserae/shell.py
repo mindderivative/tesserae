@@ -1,4 +1,4 @@
-"""The app shell (M45): the frame around an app's screens -- a top app bar,
+"""The app shell: the frame around an app's screens -- a top app bar,
 navigation, docked panels around the content, and a status bar -- what
 `tre` 0.3.4's `build_shell` did, which 0.3.5 leaves to the framework.
 
@@ -217,7 +217,7 @@ class AppShell:
         """Shows a screen's root (`App.show` calls this): in `content`,
         replacing the screen there; or, with `center=True`, as a center tab,
         docked the first time and brought forward after. A root already
-        docked -- a panel registered as a screen (M52) -- has its tab
+        docked -- a panel registered as a screen -- has its tab
         brought forward where it is, and `content` is left alone."""
         if self.dock.side_of(root) is not None:
             self.dock.show(root)
@@ -271,7 +271,7 @@ class AppShell:
         self._paint()
 
     def _follow_theme(self, theme: Theme, view_theme: dict[str, Any]) -> None:
-        """Following its app (M50): the shell and the dock it made. The
+        """Following its app: the shell and the dock it made. The
         widgets and dock it was given follow the app themselves, or keep
         the `theme=` they were pinned to."""
         self.theme = theme

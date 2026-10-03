@@ -2,7 +2,7 @@
 
 An app can turn off the operating system's title bar and draw its own,
 in its theme, with its own controls in it: a search field, tabs, a
-menu. This is Tesserae 0.3.0, on `tre` 0.5.0's custom windowing.
+menu.
 `examples/custom_title_bar/` in the repository shows each way below.
 
 ## An undecorated window
@@ -23,12 +23,14 @@ then draws a title bar, and the window is still:
   marks where it ends.
 
 `min_width` and `min_height` keep the user from resizing it so small
-that the bar's buttons crush. The other window options (`fullscreen`,
-`system_menu`, `icon`), the actions and `app.maximized`/`app.active` are
-in [The window](apps-and-screens.md#the-window).
+that the bar's buttons crush.
+
+The options (`decorations`, `resize_border`, `min_width`, `system_menu`, `icon`, `fullscreen`), the
+window's actions and the `app.maximized` and `app.active` values a binding can follow are in
+[The window](apps-and-screens.md#the-window), and the [Python API](../api/python.md).
 
 `tesserae new notes --shell --custom-title-bar` makes an app like this
-([Getting Started](../getting-started.md)).
+([The `tesserae` command](cli.md)).
 
 ## `kind: TitleBar`
 
@@ -62,7 +64,8 @@ every part follows, its glyphs staying centred. Its colours are Material
 3 roles (`surface`, `on_surface`): with a `theme_seed=` it follows the theme,
 light and dark, and an app with no theme gets MD3's baseline palette (light). The title, icon and buttons fade
 while the window isn't the focused one, and close's hover is red
-(`error`). Each part has a class, so a stylesheet or theme restyles it:
+(`error`). Each part has a class, so a stylesheet or theme restyles it (see
+[Stylesheets](../stylesheets/index.md) and [Themes](../themes/index.md)):
 
 | Class | Part |
 |---|---|
@@ -169,8 +172,8 @@ styles:
     style: {border_color: "#FF0000", border_width: 2}   # 0 hides it too
 ```
 
-Rounded corners and a drawn shadow aren't possible yet: they'd need
-transparent windows from `tre`.
+Rounded corners and a drawn shadow aren't possible: they need
+transparent windows.
 
 ## Hot reload
 

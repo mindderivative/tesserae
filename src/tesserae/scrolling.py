@@ -1,4 +1,4 @@
-"""What a `ScrollView` (M71) adds to `tre`'s `scroll_view`: telling a
+"""What a `ScrollView` adds to `tre`'s `scroll_view`: telling a
 two-way binding when it scrolls.
 
 Since `tre` 0.4.2 (`tre` #24) a `scroll_view` does the rest itself: the

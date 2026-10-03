@@ -1,6 +1,6 @@
 """Tesserae's own namespace for the Navigation & Shell Composition
 category -- `tabs`, `navigation_rail`, `navigation_drawer`, `toolbar`,
-`top_app_bar`, `status_bar` (M41) and `pagination` (M42), built by
+`top_app_bar`, `status_bar` and `pagination`, built by
 Tesserae, the fixed-shape ones from their fragments.
 """
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 class _Selection:
-    """The selected item of tabs, a navigation rail or a drawer (M41):
+    """The selected item of tabs, a navigation rail or a drawer:
     `.selected` is a `Signal` (an index, or `None`), a click or Enter
     selects, the arrow keys move the selection and focus (wrapping), and
     the group is one Tab stop, the selected item (else the first).
@@ -82,7 +82,7 @@ def tabs(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's primary tabs (M41): 48 px tall, or 64 with `icons`; the
+    """MD3's primary tabs: 48 px tall, or 64 with `icons`; the
     labels `title_small`, `primary` when selected and `on_surface_variant`
     otherwise; a 3 px `primary` indicator under the selected label that
     slides to a new one; a 1 px `surface_variant` divider below.
@@ -167,11 +167,11 @@ def navigation_rail(
     theme: "Theme | None" = None,
     style: dict[str, Any] | None = None,
 ) -> Widget:
-    """MD3's navigation rail (M41): 80 px wide on `surface`, each item a
+    """MD3's navigation rail: 80 px wide on `surface`, each item a
     24 px icon over a `label_medium` label; the selected item's icon sits
     in a 56x32 `secondary_container` pill, in `on_secondary_container`.
     `.selected`, `.on_change(fn)`; the up and down arrows move it.
-    `style` (0.3.3) is laid over its own: `{width: 96}`, `background`, ..."""
+    `style` is laid over its own: `{width: 96}`, `background`, ..."""
     count = len(labels)
     if count == 0 or len(icons) != count:
         raise ValueError(f"a navigation rail needs a label and an icon per item, got {count} and {len(icons)}")
@@ -225,7 +225,7 @@ def navigation_drawer(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's navigation drawer (M41): `surface_container_low`, 12 px in,
+    """MD3's navigation drawer: `surface_container_low`, 12 px in,
     each item 56 px with a 24 px icon and a `label_large` label; the
     selected one a full-width `secondary_container` pill. `modal=True` is
     the modal drawer's look (rounded on its end side); open it as an
@@ -288,7 +288,7 @@ def pagination(
     max_visible: int = 7,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """Previous, a numbered button per page, and next (M42): 40 px circles
+    """Previous, a numbered button per page, and next: 40 px circles
     4 px apart, `label_large` numbers in `on_surface_variant`, the current
     page `primary` with an `on_primary` number. `.current` is a `Signal`
     (0-based) and `.on_change(fn)` hears the user's moves. Previous and
@@ -296,7 +296,7 @@ def pagination(
     focusable, announced disabled). Parts `previous`, `page0`, ...,
     `next`.
 
-    More than `max_visible` pages (at least 5) are windowed (M62): that
+    More than `max_visible` pages (at least 5) are windowed: that
     many slots, `slot0`, ..., show the first and last pages, the current
     one amid its neighbours, and an inert `…` for each run left out
     (`1 … 6 7 [8] 9 10 … 42`), redrawn as the page moves. `.shown` is
@@ -385,7 +385,7 @@ def pagination(
 
 
 def _pages_shown(page_count: int, current: int, slots: int) -> list[int | None]:
-    """Each of `slots` slots' page, `None` for an ellipsis (M62): every page
+    """Each of `slots` slots' page, `None` for an ellipsis: every page
     if they fit; else the first and last, the current page centred in a
     run of `slots - 4`, and an ellipsis for each run left out. At either
     end the run joins the first or last page instead, so an ellipsis never
@@ -415,7 +415,7 @@ def toolbar(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's toolbar (M41: built from its fragment), for action icon
+    """MD3's toolbar, for action icon
     buttons: add them to `.node`. `docked` spans its width, 64 px tall;
     `floating` is a pill with elevation, horizontal or vertical. Standard
     `surface_container`, or `vibrant` `primary_container`."""
@@ -472,7 +472,7 @@ def top_app_bar(
     window_controls: bool | None = None,
     style: dict[str, Any] | None = None,
 ) -> Widget:
-    """MD3's small top app bar (M41: built from its fragment): 64 px of
+    """MD3's small top app bar: 64 px of
     `surface`, a `title_large` title, an optional leading icon button
     (`on_surface`) and trailing ones (`on_surface_variant`), each 48 px.
     Parts: `title`, `leading`, `trailing0`, ...; wire them with
@@ -485,7 +485,7 @@ def top_app_bar(
     app's window is undecorated, so an app shell's top bar is the title
     bar of an `App(decorations=False)`.
 
-    `style` (0.3.3) is laid over the bar's own: `{height: 40}` makes a slimmer
+    `style` is laid over the bar's own: `{height: 40}` makes a slimmer
     one (its icon buttons shrink to fit under 56 px), and `background`,
     `padding`, `gap`, `corner_radius` and the rest of a node's style work too."""
     name = "top_app_bar"
@@ -550,10 +550,10 @@ def status_bar(
     theme: "Theme | None" = None,
     style: dict[str, Any] | None = None,
 ) -> Widget:
-    """A window-bottom status strip (M41: built from its fragment): 24 px
+    """A window-bottom status strip: 24 px
     of `surface_container` with `label_small` text in
     `on_surface_variant`, announced politely when its text changes.
-    `style` (0.3.3) is laid over its own: `{height: 32}`, `background`, ..."""
+    `style` is laid over its own: `{height: 32}`, `background`, ..."""
     widget = Widget(window, "StatusBar", {"text": text, "width": width if width is not None else 360},
                     theme=theme, edit=_styled(_borders([None], border_color, border_width), style), name="status_bar")
     widget.node.set(flex_shrink=0.0)  # as the top bar's: a short window must not squeeze it (0.3.3, #80)

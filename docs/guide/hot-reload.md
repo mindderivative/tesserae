@@ -19,23 +19,21 @@ app.run(hot_reload=True)
 
 Every screen built from a file is watched while the app runs: one
 `App.load()` made, and one built with `app.build_view(...)` and given to
-`App.register()` (M48; the view keeps the file it came from). Save a
+`App.register()` (the view keeps the file it came from). Save a
 change and it appears in the window straight away, the screen's
 ViewModel and bindings kept. A screen built from a spec dict has no file,
 so it isn't watched; the log says so when hot reload starts.
 
 An edit reaches a window left alone: the watcher runs on its own thread,
-and `tre` 0.5.1 lets other Python threads run while a window sits idle.
-(With `tre` before 0.5.1 a window left idle never let the watcher through,
-so 0.3.1 ticked the window by default; Tesserae 0.3.2 requires 0.5.1 and
-doesn't. See [`run`'s `keepalive`](../api/app.md#keepalive).)
+and other Python threads run while a window sits idle. See the
+[Python API](../api/python.md) for `App.run`.
 
 Behind the scenes each screen gets a `ViewWatcher` on a background
 thread. It listens for file-change events (using
 [`watchfiles`](https://watchfiles.helpmanual.io/)), rebuilds the view
 there -- so file reading and component expansion never slow the UI --
 and hands only the final update to the event loop through
-[`App.thread_handle()`](../api/app.md#thread_handle).
+`App.thread_handle()` ([Python API](../api/python.md)).
 
 ## When an edit is broken
 
@@ -84,7 +82,7 @@ reload, so a newly added include, fragment or image is picked up.
 ## Components added at run time
 
 A component built with `tesserae.instantiate` (a `Repeater`'s rows, say)
-comes from its own `*_View.yaml`, and that file is watched too (M51).
+comes from its own `*_View.yaml`, and that file is watched too.
 Editing it reloads every live instance in place. Each keeps its nodes,
 its own ViewModel and its bound values, and a list of rows keeps its
 order. One watcher per file serves all its instances, so ten rows cost
@@ -93,7 +91,7 @@ fragments it uses, are watched with it.
 
 A component added while the app runs is watched as well, including the
 first one of a new file. It's found in any view on the app's window,
-even one the app doesn't otherwise know (M61), since `instantiate`
+even one the app doesn't otherwise know, since `instantiate`
 registers it with the app. A row removed before the edit is left alone. A
 broken edit leaves every instance as it was and is logged once for the
 file:
@@ -106,7 +104,7 @@ reloaded /path/to/TodoItem_View.yaml (3 instance(s))
 ## The shell file
 
 A shell loaded with `app.load_shell` from a `*_Shell.yaml` is watched
-too (M52). An edit is applied in place where it can be:
+too. An edit is applied in place where it can be:
 
 | Edit | What happens |
 | --- | --- |
@@ -115,7 +113,7 @@ too (M52). An edit is applied in place where it can be:
 | a zone's size | set, and a zone the file didn't change keeps the size the user dragged it to |
 | navigation items or `on_navigate` | the rail is rebuilt, the current screen still selected |
 | a panel added, or moved to another zone | docked there; a panel the file didn't move stays where the user dragged it |
-| a panel removed | undocked (M53): its tab goes, the zone shows another, and its screen stays registered, so `app.show` can still show it |
+| a panel removed | undocked: its tab goes, the zone shows another, and its screen stays registered, so `app.show` can still show it |
 
 A structural edit is logged at WARNING as needing a restart, and the
 rest of the edit still applies. Structural edits are a bar or the rail
@@ -161,7 +159,7 @@ runs once per reload, even though the value didn't change. The same
 thing happens when a view is first attached and on a view-file reload.
 Write `on_change` handlers so that running one again with the same value
 is harmless: set a `Signal` to the node's current value, don't toggle
-it or append to a list. This is [`tre` issue #12](https://github.com/mindderivative/tre/issues/12).
+it or append to a list. This is a known behaviour of `tre`.
 
 ## Limits
 

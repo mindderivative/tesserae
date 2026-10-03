@@ -1,14 +1,15 @@
 # Controls
 
-Tesserae draws MD3's stateful controls itself (M40), since `tre` 0.3.5
-removes its own: the checkbox, radio button, switch, slider, spin box,
+Tesserae draws MD3's stateful controls itself: the checkbox, radio button, switch, slider, spin box,
 linear and circular progress, loading indicator and time picker dial.
 They work with a mouse, a keyboard and a screen reader, and follow the
-theme, including light and dark.
+theme, including light and dark ([Themes](../themes/index.md)). Each control
+also has a page under [Components](../components/index.md), and the Python
+signatures are in the [Python API](../api/python.md).
 
 ## In a view
 
-In a `*_View.yaml`, the nine control kinds are controls (`SpinBox` since M58):
+In a `*_View.yaml`, the nine control kinds are controls:
 
 ```yaml
 - id: agree
@@ -58,7 +59,7 @@ Every control has `.node` (a `tre` node to put in a tree), its state as
 stops it), `set_theme(theme)` and `destroy()`. On an `App`'s window, a
 control made without `theme=` takes the app's theme and follows it
 through `set_dark`, the OS switching light and dark, and
-`set_theme_specs` (M50). Give `theme=` a `tesserae.Theme` to pin it to
+`set_theme_specs`. Give `theme=` a `tesserae.Theme` to pin it to
 that theme instead. On a window no `App` owns, a control without one uses
 MD3's baseline colours. `tesserae.widgets`' `checkbox`, `slider` and
 so on build these too, attached to the window's root.

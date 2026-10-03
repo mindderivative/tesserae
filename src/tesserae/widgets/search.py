@@ -1,5 +1,5 @@
 """Tesserae's own namespace for the Search category -- `search_bar` and
-`search_view` (an overlay), built by Tesserae (M42)."""
+`search_view` (an overlay), built by Tesserae."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ def search_bar(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's search bar (M42: built from its fragment): a 56 px
+    """MD3's search bar: a 56 px
     `surface_container_high` pill with elevation, a leading icon
     (`on_surface`), a `body_large` field whose `placeholder` is hint text
     in `on_surface_variant`, and trailing icon buttons
@@ -102,7 +102,7 @@ def search_view(
     results: list[tuple[str, Optional[Callable[[], Any]]]] | None = None,
     theme: "Theme | None" = None,
 ) -> "SearchView":
-    """MD3's docked search view (M42: `tesserae.overlays.SearchView`): the
+    """MD3's docked search view (`tesserae.overlays.SearchView`): the
     results panel under a `search_bar`, `height` its most. Give it the
     `bar` and it opens and closes with it; `set_results([(text, fn)])`."""
     from tesserae.overlays import SearchView

@@ -1,0 +1,33 @@
+id: root
+kind: Container
+classes: [page]
+children:
+  - id: title
+    kind: Text
+    classes: [heading]
+    text: {content: Settings, typography_role: headline_medium}
+  - id: name_label
+    kind: Text
+    classes: [muted]
+    text: {content: Your name, typography_role: label_large}
+  - id: name
+    kind: TextField
+    text: {content: "", typography_role: body_large}
+    style: {width: 240, height: 40, foreground: on_surface, background: surface_container_high,
+            corner_radius: 8, padding: {left: 12, right: 12, top: 0, bottom: 0}}
+    bindings: {text: "{{ name.get() }}"}
+    two_way: text
+    a11y: {label: Your name}
+  - id: buttons
+    kind: Container
+    classes: [row]
+    children:
+      - id: theme
+        component: ButtonOutlined
+        with: {label: Light or dark, width: 140, height: 40, corner_radius: 20}
+        handlers: {on_click: toggle_dark}
+      - id: back
+        component: ButtonText
+        with: {label: Back, width: 80, height: 40, corner_radius: 20}
+        handlers: {on_click: go_back}
+        bindings: {disabled: "{{ not app.can_go_back.get() }}"}

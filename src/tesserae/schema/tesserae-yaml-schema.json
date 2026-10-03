@@ -572,7 +572,7 @@
             "center",
             "end"
           ],
-          "description": "Where the text sits in its node's width (0.3.1). Not for a TextField."
+          "description": "Where the text sits in its node's width. Not for a TextField."
         }
       },
       "additionalProperties": false
@@ -707,7 +707,17 @@
           "description": "Style classes a theme or stylesheet rule can match."
         },
         "style": {
-          "$ref": "#/definitions/style"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "type": "string",
+              "pattern": "_Style\\.yaml$",
+              "description": "A `*_Style.yaml` file next to this one."
+            }
+          ],
+          "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
         },
         "text": {
           "$ref": "#/definitions/text"
@@ -1003,7 +1013,17 @@
           "description": "The nodes inside this one."
         },
         "style": {
-          "$ref": "#/definitions/style"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "type": "string",
+              "pattern": "_Style\\.yaml$",
+              "description": "A `*_Style.yaml` file next to this one."
+            }
+          ],
+          "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
         },
         "classes": {
           "type": "array",
@@ -4428,7 +4448,17 @@
           "description": "How far a Slider or SpinBox moves."
         },
         "style": {
-          "$ref": "#/definitions/style"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "type": "string",
+              "pattern": "_Style\\.yaml$",
+              "description": "A `*_Style.yaml` file next to this one."
+            }
+          ],
+          "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
         },
         "text": {
           "$ref": "#/definitions/text"

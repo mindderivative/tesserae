@@ -1,9 +1,8 @@
 # Overlays
 
 `tesserae.overlays` shows MD3's dialogs, menus, snackbars, tooltips,
-side sheets and modal navigation drawers over a window's content (M41).
-They're built from Tesserae's fragments and shown with `tre`'s layers,
-since `tre` 0.3.5 removes its own `open_dialog`, `open_menu` and so on.
+side sheets and modal navigation drawers over a window's content.
+They're built from Tesserae's fragments and shown with `tre`'s layers.
 
 ```python
 from tesserae.overlays import Dialog, Menu, Snackbar, Tooltip
@@ -15,8 +14,12 @@ confirm.on_close(lambda: print("closed"))
 ```
 
 Made on the app's window with no `theme=`, an overlay takes the app's
-theme and follows it, light and dark included (M50). Give `theme=` to pin
+theme and follows it, light and dark included. Give `theme=` to pin
 it to a theme instead.
+
+Components such as dialogs, menus and snackbars have their own pages under
+[Components](../components/index.md); the signatures are in the
+[Python API](../api/python.md). This page covers how they open, close and behave.
 
 Every overlay has `open()`, `close()`, `is_open`, `on_close(fn)` and
 `set_theme(theme)`. When it closes, focus goes back to where it was.
@@ -36,7 +39,7 @@ Every overlay has `open()`, `close()`, `is_open`, `on_close(fn)` and
 
 A modal overlay's scrim (black at 32%) fills the window, even as the
 window resizes while it's open, and edge sheets and snackbars keep to
-their edge (M54). A press
+their edge. A press
 outside the panel lands on the scrim, and Escape is what closes it. A
 modal overlay keeps Tab inside it.
 

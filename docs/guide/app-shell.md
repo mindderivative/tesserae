@@ -25,11 +25,11 @@ shell = AppShell(
     status_bar=status_bar(window, "Ready", width=1100),
     zones={"left": 220, "right": 260, "bottom": 160},
 )
-app.use_shell(shell)  # screens now show in shell.content
+app.use_shell(shell)  # screens show in shell.content
 ```
 
-Everything here is made on the app's window with no `theme=`, so it takes
-the app's theme and follows it (M50): `app.set_dark(True)` re-colours the
+The bars, rail, shell and dock made on the app's window with no `theme=` take
+the app's theme and follow it: `app.set_dark(True)` re-colours the
 bars, rail, shell, dock and screens together, and so does the OS switching
 light and dark. A panel built as `tesserae.View(spec, window=app.window)`
 with no theme argument follows too. Giving any of them `theme=` (or a view
@@ -40,9 +40,8 @@ itself, or keeps the theme it was pinned to.
 The shell fills the window and follows it as it resizes. The top bar,
 navigation and status bar are fixed; `zones=` chooses which docked zones
 there are — any of `left`, `right`, `top` and `bottom`, each its starting
-size in pixels — and they sit around `shell.content`. After
-`app.use_shell(shell)`, `app.show(name)` shows screens there, one at a
-time.
+size in pixels — and they sit around `shell.content`. With the shell in use,
+`app.show(name)` shows screens there, one at a time.
 
 Each zone has a resize handle between it and the content: drag it, or
 focus it and use the arrow keys (16 px a press), Home and End. Its size
@@ -57,7 +56,7 @@ app is undecorated and makes the bar the window's drag region, with
 minimize, maximize and close after its trailing icons, the maximize
 glyph swap, and the fade while the window isn't focused. On macOS it
 leaves room for the traffic lights and hides its own buttons. The
-leading and trailing icons are still buttons and work as before.
+leading and trailing icons are ordinary buttons.
 
 ```python
 app = App(width=1100, height=700, theme_seed=(0x67, 0x50, 0xA4, 0xFF),
@@ -104,7 +103,7 @@ time.
   was). Without a pointer, open the tab's menu — right click, the Menu
   key or Shift+F10 — and choose "Move to …". From code,
   `dock.move(panel, "right")`.
-- **Remove a panel:** `dock.remove_panel(panel)` undocks it (M53). Its
+- **Remove a panel:** `dock.remove_panel(panel)` undocks it. Its
   tab goes, and if it was shown the zone shows the next panel, else the
   previous. The node is kept, so `dock.add_panel` can dock it again.
 - `dock.show(panel)`, `dock.panels(side)`, `dock.titles(side)`,
@@ -118,7 +117,7 @@ since it owns the window's docking events.
 ## From a shell file
 
 The same shell can be described in a `*_Shell.yaml` next to the app's
-views and loaded with `app.load_shell(path)` (M52), with no widgets built
+views and loaded with `app.load_shell(path)`, with no widgets built
 in Python:
 
 ```yaml
@@ -145,7 +144,7 @@ its `text`. `zones` gives each side zone's size, and `center: true` makes
 screens center tabs. The bars stretch across the window as it resizes,
 and everything follows the app's theme.
 
-**Every part takes a `style:`** (0.3.3), the same fields as a node's
+**Every part takes a `style:`**, the same fields as a node's
 (`height`, `background`, `padding`, `corner_radius`, ...), and theme roles
 work in it. The frame is the shell as a whole; a zone is a number or
 `{size, style}` (its size is `size`, so its style has no `width`/`height`).
@@ -166,8 +165,7 @@ zones:
 A top bar's icon buttons shrink to fit a `height` under 48. In code,
 `top_app_bar`, `status_bar` and `navigation_rail` take `style=`, and
 `AppShell(styles={...})` and `shell.set_style(part, style)` style the
-rest. Taking a style out of the file puts back what the shell had, on
-hot reload. A mistake names the key (`top_bar.style.hieght: unknown field
+rest. On hot reload, taking a style out of the file puts back what the shell had. A mistake names the key (`top_bar.style.hieght: unknown field
 (did you mean 'height'?)`).
 
 **Panels are named like screens.** `panels:` lists each zone's panels by
@@ -225,7 +223,7 @@ It's the same `AppShell` a Python-built one is: `app._shell`, its `dock`,
 `shell.layout()` returns where each panel is, which is shown and each
 zone's size, as plain data to save however the app likes;
 `shell.restore(layout)` puts it back. Panels are matched by title, and
-zones or titles that no longer exist are skipped.
+zones or titles that don't exist are skipped.
 
 ```python
 saved = shell.layout()

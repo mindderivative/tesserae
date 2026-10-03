@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.4 (unreleased)
+
+The documentation, rebuilt ([#83](https://github.com/mindderivative/tesserae/issues/83)), and the
+stylesheets of the built-in components.
+
+### Added
+
+- **A stylesheet for each built-in component.** Every `<Name>_Component.yaml` now holds a component's
+  structure, and its look is in `<Name>_Stylesheet.yaml`: a list of `{id: <part>, style: {...}}` rules whose
+  values may be the component's `{{ parameters }}`. What a component expands to is unchanged. A
+  `<Name>_Stylesheet.yaml` next to your views goes over the built-in one, field by field.
+- **Your own fragments are found next to the view.** A `*_Component.yaml` (and its stylesheet) in a view's
+  folder is used by `component:` with no `component_dirs=`.
+- **Documentation:** a generated [Python API](api/python.md) and [YAML reference](api/yaml.md); a page for
+  each of 43 MD3 [components](components/index.md) and 76 [stylesheets](stylesheets/index.md); a
+  [Themes](themes/index.md) page; a [Tutorial](tutorial.md); [Migrating](migration.md); and a guide to the
+  [`tesserae` command](guide/cli.md). Tests keep the generated pages current and run every example on them.
+- The theme schema also covers `*_Stylesheet.yaml` (including a component's) and `*_Theme.yaml` in
+  `tesserae schema --settings`.
+
+### Changed
+
+- Getting Started is shorter; the Guide, Installation and Architecture pages describe what Tesserae is,
+  with no release or milestone history (that is here and in Migrating).
+- Docstrings that appear on the API page are free of history.
+
 ## 0.3.3
 
 Three things a user found testing: the shell's bars, theme roles without a
@@ -129,7 +155,7 @@ into ([#72](https://github.com/mindderivative/tesserae/issues/72)).
 
 Custom windowing on `tre` 0.5.0.1: Tesserae draws the window's title bar and
 borders ([#24](https://github.com/mindderivative/tesserae/issues/24)).
-Following the [design](design/custom-windowing.md).
+Following the custom-windowing design.
 
 ### Requirements
 

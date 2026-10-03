@@ -226,6 +226,50 @@ theme.duration("medium2")              # 300 (ms)
 the widget uses its own MD3 default. MD3's easing and duration tokens are all there; `emphasized` is MD3's
 single-curve form, `(0.2, 0, 0, 1)`.
 
+### Style files
+
+A node's `style:` can name a `*_Style.yaml` file instead of a mapping, so several views can share one:
+
+```yaml
+# Counter_View.yaml
+id: root
+kind: Container
+style: counter_Style.yaml   # or {flex_direction: vertical, width: 240, gap: 12}
+```
+
+```yaml
+# counter_Style.yaml: one node's style, a mapping of style fields
+flex_direction: vertical
+width: 240
+gap: 12
+```
+
+The file is found next to the file that names it, and can't be outside that folder (the same rules as
+`include:`). Hot reload watches it. It is the whole style: a node's `style:` is a file or a mapping, not
+both. To vary one node, give it a class and a stylesheet rule. A stylesheet's or theme's rule can name
+one too (`- {kind: Rect, classes: [card], style: card_Style.yaml}`). A component fragment can't name one:
+its look comes from its parameters and its [stylesheet](../stylesheets/index.md).
+
+### On a single view
+
+Outside an `App`, `load_view` takes the same arguments:
+
+```python
+from tesserae.spec import load_view
+
+view = load_view(
+    "Home_View.yaml",
+    theme_seed=(0x67, 0x50, 0xA4, 0xFF),
+    custom_theme="themes/Brand_Theme.yaml",
+    stylesheet="styles/Home_Stylesheet.yaml",
+)
+```
+
+`stylesheet=`, `default_theme=` and `custom_theme=` take file paths; each also has a `*_spec=` form that
+takes a dict directly (`custom_theme_spec={"colors": {"primary": "#00FF00"}}`). Give one form or the other.
+A mistake in a theme or stylesheet names the file:
+`ValueError: themes/Brand_Theme.yaml: custom_theme_spec=: unknown field 'colours'`.
+
 ## How it is implemented
 
 - **Resolving.** `Theme.resolve(seed, dark, default_theme_spec, custom_theme_spec)` turns the four inputs
@@ -251,8 +295,8 @@ single-curve form, `(0.2, 0, 0, 1)`.
 - `App.dark` *(property)*: Whether the app is showing its dark scheme right now.
 - `App.dark_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True`/`False`.
 - `App.set_dark(dark: bool | str) -> None`: `True`/`False` fixes the app dark or light, re-theming every screen in place; `"system"` goes back to following the OS from its next switch.
-- `App.set_theme_specs(default_theme_spec: Any, custom_theme_spec: Any) -> None`: Re-themes the running app in place (M31): every view `build_view()`/`load()` made.
-- `App.set_stylesheet_spec(stylesheet_spec: dict[str, Any] | None) -> None`: Replaces the app's default stylesheet in place (M31 Phase 2): every view `build_view()`/`load()` made with the default -- not one given its own `stylesheet=` -- is re-styled, and views built later use it too.
+- `App.set_theme_specs(default_theme_spec: Any, custom_theme_spec: Any) -> None`: Re-themes the running app in place: every view `build_view()`/`load()` made.
+- `App.set_stylesheet_spec(stylesheet_spec: dict[str, Any] | None) -> None`: Replaces the app's default stylesheet in place: every view `build_view()`/`load()` made with the default -- not one given its own `stylesheet=` -- is re-styled, and views built later use it too.
 - `App.build_view(view_path: str | Path, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> Any`: Builds a view with this app's theme and stylesheet, without registering it -- for a screen given to `register()`, e.g. one whose `ViewModel` needs the `app` itself.
 
 ### On a view
@@ -299,7 +343,7 @@ A resolved theme. Build one with `Theme.resolve(...)`.
 - `color_scheme(seed: RGBA, dark: bool = False) -> dict[str, RGBA]`: Every MD3 role for `seed`, light or dark, as `tre` computes it.
 - `baseline_scheme() -> dict[str, RGBA]`: Every role, for widgets with no theme: the scheme MD3's baseline seed (#6750A4) generates, with MD3's published `BASELINE` values over it where they differ.
 - `resolve_scheme(theme_seed: Optional[RGBA], dark: bool, default_theme: Optional[dict[str, Any]], custom_theme: Optional[dict[str, Any]]) -> Optional[dict[str, RGBA]]`: The scheme a view resolves roles against, by `tre`'s `View` rules: the seed is `theme_seed`, else the custom theme's `seed:`, else the default theme's; `colors:` overrides apply default theme first, then custom.
-- `parse_color(raw: str) -> RGBA`: A colour string as `tre` parses it: hex (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`), a CSS colour name, `transparent`, or `rgb()`/`rgba()`/`hsl()`/`hsla()` in CSS Color 4's comma or space syntax with an optional alpha, and CSS's wide-gamut functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), clipped into sRGB (M63).
+- `parse_color(raw: str) -> RGBA`: A colour string as `tre` parses it: hex (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`), a CSS colour name, `transparent`, or `rgb()`/`rgba()`/`hsl()`/`hsla()` in CSS Color 4's comma or space syntax with an optional alpha, and CSS's wide-gamut functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), clipped into sRGB.
 - `elevation_shadows(level: float) -> list[Shadow]`: MD3 elevation `level` (0–5, fractional allowed) as a `shadows` list, `(color, offset_x, offset_y, blur, spread)`: `tre`'s key shadow (30% black) first, so it paints on top, then its ambient shadow (15%).
 
 - `tokens.ROLES` = `tuple of 49`

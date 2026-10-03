@@ -1,5 +1,5 @@
 """Tesserae's reactivity: `Signal`, `Computed`, `Effect`, `batch`,
-`untrack` and `ViewModel` (M35).
+`untrack` and `ViewModel`.
 
 Taken over from `tre` (`python/tre/__init__.py` at v0.3.4, MIT, same
 author), which moves reactivity out of the engine (`tre` D5) and removes
@@ -263,7 +263,7 @@ class Effect:
 
 
 class _FromApp:
-    """`ViewModel.app` and `ViewModel.state` (M65): found through the
+    """`ViewModel.app` and `ViewModel.state`: found through the
     view's window, the app that owns it (M50's registry). A non-data
     descriptor, so a ViewModel that sets `self.app` itself keeps its own."""
 

@@ -1,5 +1,5 @@
 """CSS Color 4's wide-gamut functions, `color()`, `lab()`, `lch()`,
-`oklab()`, `oklch()` and `hwb()`, as `tre` 0.3.4 parsed them (M63).
+`oklab()`, `oklch()` and `hwb()`, as `tre` 0.3.4 parsed them.
 
 `tre` 0.3.4 read a colour string with the `color` crate (0.3.3):
 `parse_color(raw).to_alpha_color::<Srgb>()`, stored as 8-bit RGBA by

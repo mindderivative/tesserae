@@ -1,4 +1,4 @@
-"""The style cascade, owned by Tesserae (M37 Phase 2): a port of `tre`'s
+"""The style cascade, owned by Tesserae: a port of `tre`'s
 `engine-spec/src/cascade.rs` at v0.3.4, which `tre` removes in 0.3.5.
 
 Precedence, lowest first:
@@ -174,7 +174,7 @@ def _snake(name: str) -> str:
 
 
 def component_key(fragment: str) -> tuple[str, Optional[str]]:
-    """The `components:` entry a fragment's root reads (M57): its
+    """The `components:` entry a fragment's root reads: its
     component and variant, as a theme names them (`FabPrimary` ->
     `fab.default`, `CardElevated` -> `card.elevated`, `Dialog` ->
     `dialog`)."""

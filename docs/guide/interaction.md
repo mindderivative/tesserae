@@ -2,7 +2,7 @@
 
 A YAML node with an `on_click` handler behaves like an MD3 button,
 whether it's used with a mouse, a keyboard or a screen reader. Tesserae
-draws the feedback itself, since `tre` 0.3.5 doesn't.
+draws the feedback itself.
 
 ```yaml
 - id: save
@@ -13,7 +13,7 @@ draws the feedback itself, since `tre` 0.3.5 doesn't.
 
 A button fragment works the same way: give its `component:` call the
 handler, `component: ButtonFilled` with `handlers: {on_click: "save"}`
-(M69; see [Handlers, bindings and names on a call](component-fragments.md#handlers-bindings-and-names-on-a-call)).
+(see [Handlers, bindings and names on a call](component-fragments.md#handlers-bindings-and-names-on-a-call)).
 
 ## The keyboard and assistive technology
 
@@ -48,8 +48,7 @@ that runs, as MD3 expects: a button in a clickable card, or a checkbox
 in a clickable list row, doesn't open the card or row as well. The
 innermost handler stops the click from going further up the tree. This
 applies to pointer, keyboard (Enter and Space) and simulated clicks, and
-to right clicks, which open only the innermost context menu. Before
-M49, the click also ran every clickable ancestor's handler.
+to right clicks, which open only the innermost context menu.
 
 A child with no handler, such as a label or an icon inside a clickable
 card, doesn't stop the click, so it still reaches the card. A disabled
@@ -82,7 +81,7 @@ over 375 ms.
 
 ## Disabled
 
-Any node can be disabled (M70), with a `disabled:` key or a binding:
+Any node can be disabled, with a `disabled:` key or a binding:
 
 ```yaml
 id: root
@@ -146,11 +145,11 @@ On a TextField, the fields apply to its input; on a control (a
 checkbox, a switch and so on), to the control. A field you remove is
 reset when the view reloads. Anything else is an error that names the
 widget. Widget states such as `checked` belong to Tesserae's own
-controls (M40).
+[controls](controls.md).
 
 ### Bound fields
 
-`label`, `hidden` and `level` can follow the ViewModel (M47): give the
+`label`, `hidden` and `level` can follow the ViewModel: give the
 field a `{{ }}` binding, as in `bindings:`, and it's kept up to date:
 
 ```yaml
@@ -192,15 +191,15 @@ YAML fields above plus `checked`, `selected`, `expanded`, `disabled` and
 `value`/`value_min`/`value_max`/`value_step`. `on_action` routes the
 requests a screen reader can make: `increment`, `decrement`, `expand`,
 `collapse`, `scroll_into_view` and `set_value`. Activating (clicking)
-isn't one of them: `tre` 0.3.4 doesn't route it through `a11y_action`.
+isn't one of them: `tre` doesn't route it through `a11y_action`.
 `ROLES`, `LIVE` and `ACTIONS` are `tre`'s lists.
 
 `tre`'s `disabled` is announced only: a disabled node still takes focus
-and clicks. Tesserae's controls (M40) make it behave: a disabled control
+and clicks. Tesserae's [controls](controls.md) make it behave: a disabled control
 can't be focused or used, and draws in MD3's disabled colours.
 
 `bind` keeps a widget's `label`, `hidden` or `level` up to date, as a
-bound YAML field does (M47). Each is a `Signal`, a `Computed`, a
+bound YAML field does. Each is a `Signal`, a `Computed`, a
 function of no arguments or a plain value:
 
 ```python
@@ -218,6 +217,6 @@ and `live` aren't bindable: set them once with `describe`.
 
 - Among plain YAML nodes, only `Rect` and `Container` get the state
   layer, ripple and focus ring. The MD3 controls (checkbox, switch and
-  so on) have their own, from M40.
+  so on) have their own ([Controls](controls.md)).
 - The ring is placed when focus arrives. A node that resizes while it
   has focus keeps its old ring until focus moves.

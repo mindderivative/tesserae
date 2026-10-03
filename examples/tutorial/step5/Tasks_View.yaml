@@ -1,0 +1,34 @@
+id: root
+kind: Container
+classes: [page]
+children:
+  - id: title
+    kind: Text
+    classes: [heading]
+    text: {content: Tasks, typography_role: headline_medium}
+    bindings: {text: "{{ heading.get() }}"}
+  - id: stats
+    kind: Container
+    classes: [row]
+    children:
+      - id: open
+        component: Stat
+        with: {label: Open, value: "{{ open_text.get() }}"}
+      - id: finished
+        component: Stat
+        with: {label: Done, value: "{{ done_text.get() }}"}
+  - id: buttons
+    kind: Container
+    classes: [row]
+    children:
+      - id: add
+        component: ButtonFilled
+        with: {label: Add a task, width: 140, height: 40, corner_radius: 20}
+        handlers: {on_click: add_task}
+      - id: settings
+        component: ButtonText
+        with: {label: Settings, width: 100, height: 40, corner_radius: 20}
+        handlers: {on_click: open_settings}
+  - id: list
+    kind: Container
+    classes: [rows]

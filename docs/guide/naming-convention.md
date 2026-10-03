@@ -1,8 +1,7 @@
 # Naming Convention
 
-Every real view is a `*_View.yaml` + `*_ViewModel.py` pair, mirroring
-pyCopper's own real, validated MVVM naming -- enforced at **runtime**,
-not just documented, by both `App.load` and `instantiate`:
+Every view is a `*_View.yaml` + `*_ViewModel.py` pair. The naming is
+enforced at **runtime** by both `App.load` and `instantiate`:
 
 ```python
 from tesserae import App
@@ -23,7 +22,7 @@ Raises `ValueError` immediately if:
 
 ## Style, stylesheet and theme files
 
-Three more names say what a YAML file is (M75):
+Three more names say what a YAML file is:
 
 | Suffix | What it holds | Used by |
 |---|---|---|
@@ -34,8 +33,29 @@ Three more names say what a YAML file is (M75):
 A node's `style:` given as a file must be a `*_Style.yaml` one. A file
 named for one kind and loaded as another is refused, naming what its
 name says it is -- `load_theme("card_Style.yaml")`, say. A theme or
-stylesheet file with none of these suffixes (`themes/Brand.yaml`) loads
-as before; the suffixes are recommended, not required.
+stylesheet file with none of these suffixes (`themes/Brand.yaml`) still
+loads; the suffixes are recommended, not required.
+
+## A component's stylesheet
+
+A file named `<Name>_Stylesheet.yaml` next to a view, where `<Name>` is a
+component, is that component's stylesheet. The component is a built-in one
+(`ButtonFilled_Stylesheet.yaml`) or your own (`<Name>_Component.yaml`).
+
+```yaml
+# ButtonFilled_Stylesheet.yaml
+styles:
+  - id: root
+    style: {background: tertiary, corner_radius: "{{ corner_radius }}"}
+```
+
+It is a `styles:` list of `{id: <part>, style: {...}}` rules, and each
+`id` must be a part of the component. Its values may use the component's
+`{{ parameters }}`. It goes over the built-in stylesheet field by field,
+so you restyle only the fields you name. If you write your own
+`<Name>_Component.yaml` for a built-in name, your fragment replaces the
+built-in one whole, and only the sheets from your own folders apply. See
+[Stylesheets](../stylesheets/index.md).
 
 ## Why enforce this at all?
 
@@ -48,7 +68,7 @@ name doesn't resolve against the wrong `ViewModel`.
 
 ## Where it's checked
 
-Both real call sites use the same shared check
+Both call sites use the same shared check
 (`tesserae.naming.check_naming_convention`):
 
 - **`App.load`** -- for top-level screens.
@@ -56,7 +76,7 @@ Both real call sites use the same shared check
   [Components & Embedding](components.md)), so a mismatched component
   pair fails immediately at instantiation time too.
 
-`App.register`/manually-constructed `Component`s bypass this (they
-take an already-constructed `View`/`ViewModel` directly) -- the
-convention is enforced at the two real *construction* entry points,
-not retroactively on whatever you hand `register`.
+`App.register` and manually constructed `Component`s bypass this: they
+take an already-constructed `View` and `ViewModel`. The convention is
+enforced at the two *construction* entry points, not on whatever you hand
+`register`.

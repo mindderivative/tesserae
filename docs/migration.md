@@ -1,0 +1,65 @@
+# Migrating
+
+What to change in an existing app when you upgrade. Each section is the release you are moving to; the
+[changelog](changelog.md) has everything else that changed.
+
+## To 0.3.4
+
+Nothing in your code has to change.
+
+- The built-in components keep their look in `<Name>_Stylesheet.yaml` files and their structure in
+  `<Name>_Component.yaml`. A view that uses `component: ButtonFilled` expands to exactly what it did.
+  If you copied a built-in `*_Component.yaml` to restyle it, you can delete the copy and put just a
+  `<Name>_Stylesheet.yaml` with the fields you change next to your views.
+- A `*_Component.yaml` or `*_Stylesheet.yaml` in a view's own folder is now found. A file there named
+  for a built-in component replaces or restyles it, so check that none is there by accident.
+
+## To 0.3.3
+
+- A view with no `theme_seed` resolves theme roles (`surface`, `primary`, ...) from MD3's baseline palette,
+  where it used to fail. Nothing to change; add a `theme_seed=` to make the colours your own.
+- A shell's top and status bars keep their height when the window is short.
+
+## To 0.3.2
+
+- Tesserae needs `tre` (`tesserae-engine`) 0.5.1 or newer, below 0.6.
+- `app.run(keepalive=)` is off by default. A hot-reload watcher or a thread calling
+  `thread_handle().call_soon` reaches an idle window without it. Pass `True` or a number to tick the loop
+  regularly.
+
+## To 0.3.0
+
+- Tesserae needs `tre` 0.5.0.1 or newer, below 0.6.
+- A shell file's navigation rail `navigate`s (with history) instead of jumping with `show`, so `back()`
+  returns from a rail choice.
+- Window options (`decorations`, `resize_border`, `min_width`, `fullscreen`, `system_menu`, `icon`) are on
+  `App`, and the actions `minimize()`, `maximize()`, `restore()`, `toggle_maximized()` and `close()`.
+
+## To 0.2
+
+The widgets became Tesserae's own: built from `tre`'s building blocks, and returned as Tesserae objects.
+
+- **Controls.** `checkbox`, `radio_button`, `switch`, `slider`, `spin_box`, `circular_progress`,
+  `linear_progress`, `loading_indicator` and `time_picker_dial` return a control, not a `tre.Node`. Where
+  you read `node.get_checked()` or `get_selected()`, read `control.checked.get()` or `control.selected.get()`.
+  Where you called `set_checked(...)`, call `control.checked.set(...)`. Use the control's `.node` where you
+  used the node. A checkbox, switch or radio button toggles itself when clicked, so an `on_click` that
+  toggled it by hand should go. `spin_box` returns one `SpinBox`, not `(field, minus, plus)`. A slider's
+  position is `control.value.get()`.
+- **Composed widgets** return a `Widget`: `.node`, `.part(name)`, `on_click(fn)`, `set_theme(theme)`,
+  `destroy()`.
+- **Renamed arguments.** Old names raise `TypeError`:
+
+    | Function | Was | Is |
+    | --- | --- | --- |
+    | `switch` | `on=` | `selected=` |
+    | `divider` | `vertical=True` | `orientation="vertical"` |
+    | `link` | `text` | `content` |
+    | `dialog` | `text` | `supporting_text` |
+    | `toolbar` | `tone="vibrant"` | `vibrant=True` |
+
+- **Images and video.** `image(window, path, ...)` decodes the file itself, so the engine never receives a
+  path. A missing or undecodable file is an `OSError`. `video(...)` is a blank surface until you call
+  `video.frame(rgba, width, height)`.
+- **Files.** `load_theme` and `load_stylesheet` refuse a file named for another kind (`*_Style.yaml`,
+  `*_Stylesheet.yaml`, `*_Theme.yaml`); other names load as before.

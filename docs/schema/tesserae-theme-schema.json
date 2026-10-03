@@ -1107,7 +1107,17 @@
           "description": "The node with this id."
         },
         "style": {
-          "$ref": "#/definitions/style"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "type": "string",
+              "pattern": "_Style\\.yaml$",
+              "description": "A `*_Style.yaml` file next to this one."
+            }
+          ],
+          "description": "How the matching nodes look: a mapping, or the name of a `*_Style.yaml` file."
         }
       },
       "additionalProperties": false

@@ -1,5 +1,5 @@
 """MD3's stateful controls, built by Tesserae from `tre` 0.3.4's building
-blocks (M40), since `tre` 0.3.5 removes its own.
+blocks, since `tre` 0.3.5 removes its own.
 
 A control is a small object (M34 P6):
 
@@ -680,7 +680,7 @@ class SpinBox:
     def dispose(self) -> None:
         """Stops the spin box (its repainting and listeners) but leaves its
         nodes, for a caller about to free the tree it sits in -- as a view
-        does with its controls (M58)."""
+        does with its controls."""
         unfollow(self.window, self)
         self._effect.dispose()
         for undo in self._undo:

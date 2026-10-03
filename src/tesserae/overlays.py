@@ -1,9 +1,9 @@
-"""MD3's overlays on `tre` 0.3.4's layers (M41): `Dialog`, `Menu` (and a
+"""MD3's overlays on `tre` 0.3.4's layers: `Dialog`, `Menu` (and a
 context menu), `Snackbar`, `Tooltip`, the modal `SideSheet` and the modal
 `NavigationDrawer`, since `tre` 0.3.5 removes its `open_*`/`close_*`;
-then `SearchView` and `Popover` (M42).
+then `SearchView` and `Popover`.
 
-Each is built from its fragment (`tesserae.widgets._composed.Widget`) and
+Each is (`tesserae.widgets._composed.Widget`) and
 shown with `window.show_layer`: `open()` shows it, `close()` hides it (and
 focus goes back to where it was), `on_close(fn)` hears it close. Each
 closes itself on the dismissals `tre`'s legacy overlays allowed:
@@ -19,7 +19,7 @@ closes itself on the dismissals `tre`'s legacy overlays allowed:
 | `SearchView` | below its search bar | closes | closes | no |
 
 A modal overlay's scrim fills the window, and keeps filling it as the
-window resizes while it's open (M54), so an
+window resizes while it's open, so an
 outside press lands on the scrim. MD3's timing, which `tre` never had: a
 snackbar hides itself after 4 s (`duration=None` keeps it), and a tooltip
 opens 500 ms after its anchor is hovered, or at once on keyboard focus.
@@ -124,7 +124,7 @@ class Overlay:
 
     def _fit(self, width: float, height: float) -> None:
         """Size or place it for a `width` x `height` window: on opening, and
-        again whenever the window resizes while it's open (M54)."""
+        again whenever the window resizes while it's open."""
 
     def _before_open(self) -> None:
         """Anything else to do before it shows (after `_fit`)."""
@@ -353,7 +353,7 @@ class Tooltip(Overlay):
 
 
 class Popover(Overlay):
-    """MD3's rich tooltip (M42), `tre`'s popover: a `surface_container`
+    """MD3's rich tooltip, `tre`'s popover: a `surface_container`
     panel, 12 px corners, elevation 2, padded 16, with an optional
     `title_small` `subhead`, `body_medium` supporting text (both in
     `on_surface_variant`, the text wrapped to the width) and optional
@@ -504,7 +504,7 @@ class NavigationDrawer(_EdgeSheet):
 
 
 class SearchView(Overlay):
-    """MD3's docked search view (M42): the results under a search bar, a
+    """MD3's docked search view: the results under a search bar, a
     `surface_container_high` panel with 28 px corners and elevation, of
     56 px `body_large` rows (`role="menuitem"`), at most `max_height` tall.
 

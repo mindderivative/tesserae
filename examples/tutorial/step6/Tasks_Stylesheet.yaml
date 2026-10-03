@@ -1,0 +1,13 @@
+styles:
+  - classes: [page]
+    style: {flex_direction: vertical, width: 100%, height: 100%, gap: 12, padding: 24, background: surface}
+  - classes: [heading]
+    style: {foreground: on_surface}
+  - classes: [muted]
+    style: {foreground: on_surface_variant}
+  - classes: [rows]
+    style: {flex_direction: vertical, gap: 4, width: 100%}
+  - classes: [task]
+    style: {flex_grow: 1, foreground: on_surface}
+  - classes: [row]
+    style: {flex_direction: horizontal, gap: 12}

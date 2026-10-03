@@ -1,4 +1,4 @@
-"""MD3 interaction feedback (M39): a state layer and a ripple, built from
+"""MD3 interaction feedback: a state layer and a ripple, built from
 `tre` 0.3.4's building blocks, since `tre` 0.3.5 draws none (`tre` D7).
 
 A node that gets an `Interaction` holds two extra children, after its
@@ -63,7 +63,7 @@ class Interaction:
     `listen` registers the pointer and focus listeners (see `Listen`).
     `surface`, a child of `node`, is where the layer, ripples and ring are
     drawn and sized, when that isn't the node itself: a selection
-    control's 40 px circle inside its 48 px touch target (M40). Events
+    control's 40 px circle inside its 48 px touch target. Events
     still come from `node`. `ring_around` is where the focus ring goes,
     when that isn't the surface (a switch's track, not its moving handle). `enabled = False` shows no feedback (a
     disabled control). Call `refresh()` after the surface's corners
@@ -134,7 +134,7 @@ class Interaction:
         return [ripple.circle for ripple in self._ripples]
 
     def set_dragged(self, dragged: bool) -> None:
-        """For widgets that drag (M40): MD3's dragged state."""
+        """For widgets that drag: MD3's dragged state."""
         self.dragged = dragged
         self._update()
 

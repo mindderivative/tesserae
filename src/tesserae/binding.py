@@ -1,4 +1,4 @@
-"""Tesserae's `{{ }}` binding expressions (M36): a port of `tre`'s
+"""Tesserae's `{{ }}` binding expressions: a port of `tre`'s
 `engine-spec/src/binding.rs` and `engine-py/src/binding.rs` at v0.3.4,
 which `tre` removes in 0.3.5 (its M98).
 

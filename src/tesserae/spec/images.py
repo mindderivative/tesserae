@@ -78,14 +78,14 @@ def extract_images(
     """Returns `spec` with every `kind: Image`'s `image.src:` removed,
     plus one decoded `Frame` per image removed. `spec` itself is not
     modified. If `dependencies` is given, each image file's resolved
-    path is added to it (M29 Phase 3: `ViewWatcher` watches them)."""
+    path is added to it."""
     frames: list[Frame] = []
     deps = dependencies if dependencies is not None else set()
     return _extract(spec, base_dir, frames, deps), frames
 
 
 def check_frame(rgba: Any, width: Any, height: Any) -> tuple[bytes, int, int]:
-    """A video frame for an Image node (M59): `width*height*4` bytes of
+    """A video frame for an Image node: `width*height*4` bytes of
     RGBA, and its size. Raises `ValueError` for bytes that don't match."""
     width, height = int(width), int(height)
     data = bytes(rgba)

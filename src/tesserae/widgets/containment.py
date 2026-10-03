@@ -1,4 +1,4 @@
-"""The carousel and the splitter (M42 Phase 6): new by M42's Q1, since
+"""The carousel and the splitter: new by M42's Q1, since
 `tre` had them (`add_carousel`, `add_splitter`) and Tesserae never
 wrapped them. Built on `tre` 0.3.4's building blocks, following `tre`'s
 `legacy-behavior.md` (0.3.5) for how they move.
@@ -113,7 +113,7 @@ def carousel(
     label: str = "Carousel",
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's carousel (M42): a clip holding items 16 px in, 8 apart and
+    """MD3's carousel: a clip holding items 16 px in, 8 apart and
     8 above and below, each masked to 28 px corners (`extra_large`) on
     `surface_container_highest`. `hero` and `multi_browse` snap through
     large/medium/small slots (`small` 56, `medium` 112, `large` what's
@@ -287,7 +287,7 @@ def splitter(
     label: str = "Resize panes",
     theme: "Theme | None" = None,
 ) -> Widget:
-    """Two panes and the handle between them (M42): `first` and `second`
+    """Two panes and the handle between them: `first` and `second`
     (nodes or widgets) share `width` (a `horizontal` splitter) or `height`
     (`vertical`) less the 16 px handle, `first` getting `.position` (a
     `Signal`, 0..1) of it. The handle holds MD3's 4x48 `outline` drag

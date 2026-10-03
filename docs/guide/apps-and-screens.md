@@ -9,10 +9,7 @@ view, viewmodel = app.load("Counter_View.yaml", CounterViewModel)
 app.show("Counter")  # registered under the inferred prefix
 ```
 
-`App` is the single real entry point every app owns exactly one of --
-a registry of named `(View, ViewModel)` pairs, plus exactly one live
-`tre.Window`, created with the `App` and themed with the app's theme.
-Screens are built straight into it. `App.show(name)` switches which
+An `App` is the entry point every app has exactly one of: a registry of named `(View, ViewModel)` pairs, and one live window, themed with the app's theme. Screens are built straight into it. `App.show(name)` switches which
 registered screen that window shows: it attaches the screen's root to
 the window and detaches the previous one, which stays alive, with its
 state and its bindings, until it's shown again.
@@ -39,7 +36,7 @@ you built yourself (`app.build_view(...)`, or `tesserae.View(path)`) and
 a ViewModel you constructed.
 
 A ViewModel doesn't need to be handed the app: on the app's window,
-`self.app` is the `App` (M65), so a handler can switch screens with
+`self.app` is the `App`, so a handler can switch screens with
 `load()`'s plain `viewmodel_cls(view)` construction:
 
 ```python
@@ -56,8 +53,7 @@ from the very handler `App.show` itself is dispatching into (see
 
 ## Navigation and history
 
-`show(name)` is a jump. `navigate` is a step the user can come back from
-(M66):
+`show(name)` is a jump. `navigate` is a step the user can come back from:
 
 ```python
 app.navigate("Note", id=42)  # pushes a history entry; forward entries are dropped
@@ -87,15 +83,14 @@ class NoteViewModel(ViewModel):
 - `show(name)` pushes nothing and calls no hook; it replaces the current
   entry, so `back()` leaves it for the entry before.
 - `app.can_go_back` and `app.can_go_forward` are `Signal`s. A back
-  button binds its `disabled` to one (M70), and is greyed out, skipped by
+  button binds its `disabled` to one, and is greyed out, skipped by
   Tab and deaf to clicks while there's nowhere to go:
   `bindings: {disabled: "{{ not app.can_go_back.get() }}"}` (see
   [Disabled](interaction.md#disabled)). `app.back()` itself does nothing,
   and returns `False`, with nowhere to go.
 - **Alt+Left** and **Alt+Right** go back and forward, except in a text
   input, where Option+Left moves by word on macOS. So do the mouse's
-  **back and forward side buttons**, wherever the pointer is (M72, on
-  `tre` 0.4.1); the other buttons don't.
+  **back and forward side buttons**, wherever the pointer is; the other buttons don't.
 - A shell file's navigation rail navigates, so `back()` returns from a
   rail choice, and the rail follows `back()` and `forward()`.
 
@@ -122,7 +117,7 @@ app.location                          # "notes/42": save it, reopen there next t
 ## Shared state
 
 State several screens use -- the signed-in user, settings, an open
-document -- belongs to the app, not to one screen (M65). Give the app
+document -- belongs to the app, not to one screen. Give the app
 any object as `state=`, typically a class of `Signal`s:
 
 ```python
@@ -176,8 +171,7 @@ it the same way.
 
 ## The window
 
-`App` owns the window, and its options are `App`'s (0.3.0, on `tre`
-0.5.0). Each is also a property that can change while the app runs.
+`App` owns the window, and its options are `App`'s. Each is also a property that can change while the app runs.
 
 ```python
 app = App(width=960, height=640, title="Notes",
@@ -188,7 +182,7 @@ app = App(width=960, height=640, title="Notes",
 | Option | What it does |
 |---|---|
 | `decorations` | Whether the OS draws the title bar and borders (default `True`). Without them the app draws its own title bar; on macOS the title bar stays, transparent, with the traffic lights. |
-| `resize_border` | How many pixels along each edge resize an undecorated window. Unless given, 6 while undecorated and 0 otherwise. `tre` turns it off while maximized or fullscreen, and on macOS, where the OS resizes the window. |
+| `resize_border` | How many pixels along each edge resize an undecorated window. Unless given, 6 while undecorated and 0 otherwise. It is off while maximized or fullscreen, and on macOS, where the OS resizes the window. |
 | `min_width`, `min_height` | The smallest the user can resize the window to (0 for no limit), so a title bar's buttons never crush. |
 | `fullscreen` | Borderless, filling the monitor. |
 | `system_menu` | Whether a right-click on the title bar opens the OS's window menu (Windows, and Wayland compositors that have one). Off by default, so the right-click is the app's. |
@@ -228,17 +222,36 @@ traffic lights, is in [Custom Title Bars](custom-title-bars.md).
 app.run(max_frames=None)  # the one blocking call
 ```
 
-Opens the real window `show()` already built and runs `tre`'s own real
-render loop. `max_frames` caps the loop -- useful for headless/CI runs
-that need a real exit condition with no interactive close; omit it for
-a real, interactive run that exits only when the window closes.
+Opens the window and runs the render loop. `max_frames` caps the loop, for headless and CI runs that need an exit with no one to close the window; omit it for an interactive run that exits when the window closes.
 
 With no display reachable, `run()` returns without opening anything. If
 the window's GPU can't be set up (no adapter, device or supported
-surface), it raises `RuntimeError` (since `tre` 0.4.0; before, the
-process exited with status 0). Each window repaints only what changed
-(`tre` 0.4.0's partial redraw, pixel-identical to a full redraw);
-`app.window.set(partial_redraw=False)` turns it off.
+surface), it raises `RuntimeError`. Each window repaints only what changed, with the same result as a full redraw; `app.window.set(partial_redraw=False)` turns that off.
 
 `app.current` (a property) returns the name last passed to `show()`,
 or `None` before the first real call.
+
+An app needs no screen: an empty window runs, for an app built in Python. Registering screens and showing
+none raises `RuntimeError`.
+
+### Options of `run`
+
+| Option | What it does |
+| --- | --- |
+| `max_frames` | Stops after that many frames; for headless and CI runs. |
+| `hot_reload=True` | Reloads every screen built from a file, and the app's theme, stylesheet, component and shell files, when they change on disk. A screen built from a spec dict has no file, so it isn't watched. See [Hot Reload](hot-reload.md). |
+| `keepalive` | `False` (the default) does not tick. `True` wakes the loop every 0.02 s; a number is the interval in seconds. Each tick sleeps on the loop thread, so input can wait up to a tick, and an idle window costs about half a percent of one core. It is for code that wants the loop woken regularly; hot reload and threads don't need it. |
+
+### From another thread
+
+Views, windows and the app may only be used from the thread that created them. A background thread
+hands work over with `app.thread_handle()`: `handle.call_soon(fn)` runs `fn()` on the event-loop thread
+at the next frame, waking the loop if it is idle. Callables run in the order they were queued, and one
+queued before `run()` runs on the first frame.
+
+```python
+handle = app.thread_handle()
+
+def on_download_done(result):          # called on a worker thread
+    handle.call_soon(lambda: viewmodel.status.set(result))
+```

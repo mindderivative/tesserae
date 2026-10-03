@@ -1,9 +1,9 @@
-"""Widgets that follow their app's theme (M50).
+"""Widgets that follow their app's theme.
 
 A `tesserae.widgets` widget or control made with no `theme=` on an
 `App`'s window takes the app's theme and follows it: `App.set_dark`, the
 OS switching light and dark, and `App.set_theme_specs` re-colour it with
-the app's views (M50 Q1). An explicit `theme=` pins it (Q2). On a window
+the app's views (M50 Q1). An explicit `theme=` pins it. On a window
 no `App` owns, it keeps MD3's baseline, as before.
 
 The app is found by its window. `tre`'s `Window` can't be weakly

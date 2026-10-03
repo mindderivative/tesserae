@@ -1,4 +1,4 @@
-"""Docking (M45): panels in zones around an app's content -- a file tree
+"""Docking: panels in zones around an app's content -- a file tree
 on the left, an inspector on the right -- that the user moves between
 zones, on `tre` 0.3.5's bare docking mechanism.
 
@@ -178,8 +178,7 @@ class Dock:
 
     def move(self, panel: Any, side: str) -> None:
         """Moves `panel` to `side`'s zone and shows it there, as a drag
-        would (`tre` 0.3.5.1's `dock_panel` moves a docked panel; 0.3.5's
-        left it listed in its old zone, `tre` issue #14)."""
+        would, moving it between zones."""
         entry = self._require(panel)
         self._zone(side)
         if entry.side == side:
@@ -189,9 +188,8 @@ class Dock:
         self._moved(entry, side)
 
     def remove_panel(self, panel: Any) -> Any:
-        """Undocks `panel` (M53): its tab goes, and if it was shown the zone
-        shows the next panel, else the previous (`tre` 0.3.5.2's
-        `undock_panel`, `tre` issue #16). The node is kept, off the tree, so
+        """Undocks `panel`: its tab goes, and if it was shown the zone
+        shows the next panel, else the previous. The node is kept, off the tree, so
         `add_panel` can dock it again. A drag of it is cancelled. Returns
         the node."""
         entry = self._require(panel)

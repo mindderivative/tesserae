@@ -1,4 +1,4 @@
-"""A declarative app shell (M52): a `*_Shell.yaml` file, loaded with
+"""A declarative app shell: a `*_Shell.yaml` file, loaded with
 `app.load_shell(path)`, describes M45's `AppShell` -- the bars, the
 navigation, the docked zones, center tabs and the panels in them --
 instead of assembling it in Python (M52 Q1):
@@ -30,7 +30,7 @@ shell file, with `Files_ViewModel.py`'s `FilesViewModel` if there is one.
 It's registered under its name, so it's hot-reloaded as screens are, its
 title is its name, and `app.show("Files")` brings its tab forward.
 
-The rail's items name screens (Q3): choosing one calls `app.navigate(screen)` (M66),
+The rail's items name screens: choosing one calls `app.navigate(screen)`,
 and `app.show` from anywhere moves the rail's selection to match. With
 `on_navigate: method`, choosing one calls that method of the `viewmodel`
 given to `load_shell` with the screen's name instead, and it decides.
@@ -203,7 +203,7 @@ def _texts(value: Any, key: str, fail: Any) -> list[str]:
 def build_shell(app: Any, spec: dict[str, Any]) -> Any:
     """Builds `spec`'s `AppShell` on `app`'s window: its bars stretch
     across the window, its rail lists the navigation items' screens, and
-    it takes the app's theme and follows it (M50)."""
+    it takes the app's theme and follows it."""
     from tesserae.shell import AppShell
     window = app.window
     bar = rail = status = None
@@ -238,7 +238,7 @@ def check_references(app: Any, spec: dict[str, Any], path: Path, viewmodel: Any 
 
 
 def place_panels(app: Any, shell: Any, spec: dict[str, Any], path: Path) -> None:
-    """Docks each named panel in its zone (Q2): the screen registered under
+    """Docks each named panel in its zone: the screen registered under
     that name, or else the `<Name>_View.yaml` next to the shell file (with
     its `<Name>_ViewModel.py`, if any), loaded and registered under it."""
     for side, names in spec["panels"].items():
@@ -286,8 +286,8 @@ def _import(file: Path) -> Any:
 
 def bind_navigation(app: Any, shell: Any, spec: dict[str, Any], path: Path, viewmodel: Any = None) -> None:
     """Choosing a rail item navigates to its screen, a step `back()`
-    returns from (M66), or calls the `on_navigate` method of `viewmodel`
-    with the screen's name (Q3)."""
+    returns from, or calls the `on_navigate` method of `viewmodel`
+    with the screen's name."""
     navigation = spec["navigation"]
     if navigation is None:
         return
@@ -300,12 +300,12 @@ def bind_navigation(app: Any, shell: Any, spec: dict[str, Any], path: Path, view
 
 def reload_shell(app: Any, shell: Any, old: dict[str, Any], new: dict[str, Any], path: Path,
                  viewmodel: Any = None) -> list[str]:
-    """Applies an edited shell file in place (M52 Q4) and returns what it
+    """Applies an edited shell file in place and returns what it
     couldn't: the structural changes that need a restart. The bars, the
     rail, the zones and `center` are compared with the live shell; panels
     with the file as it was, so a panel the user dragged stays where it is
     unless the file moved it. A panel the file dropped is undocked, and its
-    screen stays registered (M53, on `tre` 0.3.5.2's `undock_panel`)."""
+    screen stays registered."""
     needs: list[str] = []
     for key, live in (("top_bar", shell.top_bar), ("navigation", shell.navigation),
                       ("status_bar", shell.status_bar)):

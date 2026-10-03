@@ -1,4 +1,4 @@
-"""MD3 design tokens, owned by Tesserae (M37 Phase 1, from M38): the
+"""MD3 design tokens, owned by Tesserae: the
 colour scheme from a seed, the shape and elevation scales, MD3 elevation
 as `shadows`, the type scale, and colour parsing.
 
@@ -159,7 +159,7 @@ def parse_color(raw: str) -> RGBA:
     `rgb()`/`rgba()`/`hsl()`/`hsla()` in CSS Color 4's comma or space
     syntax with an optional alpha, and CSS's wide-gamut functions
     (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), clipped
-    into sRGB (M63). Raises `ValueError`."""
+    into sRGB. Raises `ValueError`."""
     text = raw.strip()
     if text.lower() == "transparent":
         return (0, 0, 0, 0)

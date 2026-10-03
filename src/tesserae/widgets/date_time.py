@@ -1,5 +1,5 @@
 """Tesserae's own namespace for the Date & Time category --
-`date_picker_day`, `period_selector`, `time_input_field` (M42) and
+`date_picker_day`, `period_selector`, `time_input_field` and
 `time_picker_dial` (a control, M40), built by Tesserae. Named
 `date_time.py` (not `datetime.py`) to avoid shadowing the standard
 library module.
@@ -27,7 +27,7 @@ def date_picker_day(
     on_click: Any = None,
     theme: Any = None,
 ) -> Any:
-    """MD3's date-picker day (M42: built from its fragment): a 48 px
+    """MD3's date-picker day: a 48 px
     target holding a 40 px circle with a `body_large` number. Selected,
     the circle is `primary` with `on_primary`; today (unselected) is
     outlined in `primary`; outside the month the number is
@@ -84,7 +84,7 @@ def time_picker_dial(
     y: float | None = None,
     **kwargs: Any,
 ) -> "controls.TimePickerDial":
-    """MD3's time picker dial (a Tesserae control since M40): `.hour`,
+    """MD3's time picker dial (a Tesserae control): `.hour`,
     `.minute` and `.mode` are `Signal`s."""
     from tesserae import controls
     from tesserae.widgets._controls import place
@@ -102,7 +102,7 @@ def period_selector(
     *,
     theme: Any = None,
 ) -> Any:
-    """MD3's AM/PM period selector (M42: built from its fragment): 52x80,
+    """MD3's AM/PM period selector: 52x80,
     two 40 px halves in a 1 px `outline` frame with 8 px corners; the
     selected half `tertiary_container`/`on_tertiary_container`, the other
     `on_surface_variant`. `.period` (`"AM"`/`"PM"`) is a `Signal`; a click,
@@ -174,7 +174,7 @@ def time_input_field(
     label: str | None = None,
     theme: Any = None,
 ) -> Any:
-    """MD3's time input field (M42): 96x72, `surface_container_highest`
+    """MD3's time input field: 96x72, `surface_container_highest`
     with 8 px corners and a centred `display_medium` numeral in
     `on_surface`; focused, `primary_container` with a 2 px `primary`
     outline. `unit` is `"hour"` (0-23) or `"minute"` (0-59). `.value` is a

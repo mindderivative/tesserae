@@ -51,35 +51,28 @@ nav:
   - Overview: index.md
   - Installation: installation.md
   - Getting Started: getting-started.md
+  - Tutorial: tutorial.md
   - Guide:
       - Apps & Screens: guide/apps-and-screens.md
       - Layout: guide/layout.md
+      - Bindings: guide/bindings.md
+      - Reactivity: guide/reactivity.md
       - Components & Embedding: guide/components.md
-      - Declarative Component Fragments: guide/component-fragments.md
-      - Widget Catalog: guide/widget-catalog.md
-      - Hot Reload: guide/hot-reload.md
-      - Logging: guide/logging.md
-      - Themes & Fonts: guide/themes-and-fonts.md
+      - Component Fragments: guide/component-fragments.md
+      - Repeater (Lists): guide/repeater.md
+      - Widgets in Python: guide/widget-catalog.md
       - Interaction & Accessibility: guide/interaction.md
       - Controls: guide/controls.md
       - Overlays: guide/overlays.md
       - App Shell & Docking: guide/app-shell.md
       - Custom Title Bars: guide/custom-title-bars.md
-      - Editor Support: guide/editor-support.md
-      - Repeater (Lists): guide/repeater.md
-      - Reactivity: guide/reactivity.md
-      - Binding Expressions: guide/bindings.md
+      - Hot Reload: guide/hot-reload.md
+      - Logging: guide/logging.md
       - Naming Convention: guide/naming-convention.md
+      - Editor Support: guide/editor-support.md
+      - The tesserae Command: guide/cli.md
       - Releasing Your App: guide/releasing.md
-  - API Reference:
-      - Python API: api/python.md
-      - YAML Reference: api/yaml.md
-      - Overview: api/index.md
-      - App: api/app.md
-      - instantiate: api/instantiate.md
-      - Repeater: api/repeater.md
-      - spec (load_view/expand_components): api/spec.md
-  - Architecture: architecture.md
+  - Themes: themes/index.md
   # >>> components (written by tools/generate_component_docs.py)
   - Components:
       - Overview: components/index.md
@@ -256,8 +249,9 @@ nav:
           - Node graph:
               - NodeGraph: stylesheets/node-graph/node-graph.md
   # <<< components
-  - Design:
-      - Custom Windowing (0.3.0): design/custom-windowing.md
+  - Reference:
+      - Python API: api/python.md
+      - YAML Reference: api/yaml.md
+  - Architecture: architecture.md
+  - Migrating: migration.md
   - Changelog: changelog.md
-  - Design:
-      - Tesserae on tre's Building Blocks: design/building-blocks.md

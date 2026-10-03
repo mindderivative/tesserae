@@ -35,9 +35,8 @@ def image(
     label: str | None = None,
 ) -> "Widget":
     """An image from a file, `width`x`height`, `fit` cover, contain or
-    fill. Tesserae decodes the file (Pillow) and M42 builds the node itself
-    (`window.create("image")` with the pixels), off `tre`'s
-    `add_image_from_bytes`, which 0.3.5 removes. Raises `OSError` if the
+    fill. Tesserae decodes the file (Pillow) and builds the node itself
+    (`window.create("image")` with the pixels). Raises `OSError` if the
     file can't be read or decoded. Decorative unless given `label=`, then
     `role="img"`."""
     from tesserae import a11y
@@ -60,8 +59,7 @@ def video(
     *,
     label: str | None = None,
 ) -> "Widget":
-    """A surface for video frames (M42: an `image` node Tesserae builds,
-    off `tre`'s `add_video`). `video.frame(rgba, width, height)` shows a
+    """A surface for video frames (an `image` node Tesserae builds). `video.frame(rgba, width, height)` shows a
     frame (RGBA bytes, `width*height*4` of them); frames can change size.
     It starts blank. Decorative unless given `label=`."""
     from tesserae import a11y
@@ -91,8 +89,8 @@ def icon(
 ) -> "Widget":
     """One of Tesserae's icons (`tesserae.icons`: home, search, menu,
     close, check, arrow_back, add, settings, expand_more, remove,
-    arrow_forward, chevron_right), `size` square in `foreground`. M41:
-    Tesserae's own Icon, not `tre`'s. An unknown name raises `ValueError`.
+    arrow_forward, chevron_right), `size` square in `foreground`.
+    It is Tesserae's own Icon. An unknown name raises `ValueError`.
     Decorative unless given a `label=`."""
     from tesserae import a11y
     from tesserae.icons import icon_path
@@ -128,8 +126,7 @@ def node_graph(
     *,
     theme: "Theme | None" = None,
 ) -> "Widget":
-    """A node graph's viewport (M42: built from its fragment, off `tre`'s
-    `add_node_graph`): a clipped `surface_container_low` area whose
+    """A node graph's viewport: a clipped `surface_container_low` area whose
     content pans and zooms. Drag the background to pan; the wheel zooms
     about the pointer (`ZOOM_RANGE`). `.offset` (x, y) and `.zoom` are
     `Signal`s. Add nodes with `graph_node(window, graph, ...)` and connect
@@ -250,7 +247,7 @@ def graph_node(
     *,
     theme: "Theme | None" = None,
 ) -> "Widget":
-    """A node in a `node_graph` (M42, off `tre`'s `add_graph_node`): a
+    """A node in a `node_graph`: a
     `surface_container_high` card with 12 px corners and an
     `outline_variant` border, a 32 px `title_small` title bar
     (`surface_container_highest`) over its body, at `x`, `y` in the

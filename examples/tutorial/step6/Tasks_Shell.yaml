@@ -1,0 +1,11 @@
+# The frame around the screens. With no OS title bar, its top bar is the window's title bar.
+top_bar:
+  title: Tasks
+  style: {background: primary_container}
+navigation:
+  items:
+    - {screen: Tasks, icon: home}
+    - {screen: Settings, icon: settings}
+status_bar:
+  text: Ready
+  style: {height: 28}

@@ -1,4 +1,4 @@
-"""Tesserae's spec compiler (M37 Phase 2): builds an expanded view spec
+"""Tesserae's spec compiler: builds an expanded view spec
 (a `WidgetSpec`-shaped dict, from `tesserae.spec.expand`) into `tre`
 0.3.4 nodes with `window.create`/`set`/`add_child`, the job `tre`'s
 `engine-spec/src/build.rs` does today and 0.3.5 removes.
@@ -18,7 +18,7 @@ Each kind maps onto `tre`'s building blocks:
 Styles resolve through `tesserae.spec.cascade`; theme roles, shape
 tokens, elevation levels and type roles through `tesserae.tokens`. Errors
 use `tre`'s wording. Bindings, handlers and `two_way:` aren't wired here
-(M37 Phase 4).
+.
 """
 
 from __future__ import annotations
@@ -124,7 +124,7 @@ def build(
 class Layers(tuple):
     """The cascade's prepared layers (Tesserae's own parts' looks -- a
     TitleBar's, 0.3.0 M3 -- then the default theme, the custom theme and
-    the stylesheet), plus the two themes' `typography:` overrides (M38),
+    the stylesheet), plus the two themes' `typography:` overrides,
     which display text resolves its `typography_role` through."""
 
     typography: dict[str, dict[str, Any]]
@@ -175,7 +175,7 @@ def build_with(
     """Builds `spec` with already-prepared layers, recording its nodes in
     `into` (a new `Built` if none); returns the subtree's outer root.
     `listen` is the listener registrar the controls share with the view;
-    `graph`, the NodeGraph widget a GraphNode `spec` belongs to (M60)."""
+    `graph`, the NodeGraph widget a GraphNode `spec` belongs to."""
     ctx = _Context(window, layers, scheme, frames or {}, listen, graph)
     built = into if into is not None else Built(root=None)
     return _build(ctx, spec, built)
@@ -506,7 +506,7 @@ _CONTENT = frozenset({"flex_direction", "gap", "padding_top", "padding_right", "
 
 
 def _scroll_props(ctx, node, style):
-    """A ScrollView (M71) is `tre`'s `scroll_view` holding one content box,
+    """A ScrollView is `tre`'s `scroll_view` holding one content box,
     which is where its children go: several children straight in a
     `scroll_view` shrink to fit it, and nothing scrolls (it lays its one
     child out unshrunk, and ignores its own padding). The content is
@@ -524,7 +524,7 @@ def _scroll_props(ctx, node, style):
 
 def natural_size(window: Any, props: dict[str, Any], style: dict[str, Any]) -> dict[str, float]:
     """A Text or Link's measured `width`/`height` for whichever its style
-    leaves out (M41): `tre` 0.3.4's text has no intrinsic size, so text
+    leaves out: `tre` 0.3.4's text has no intrinsic size, so text
     without one was 0 px wide -- every fragment's label was invisible."""
     missing = [d for d in ("width", "height") if style.get(d) is None]
     if not missing:
@@ -548,7 +548,7 @@ _PLACED = ("margin_top", "margin_right", "margin_bottom", "margin_left", "flex_g
 
 
 def _link_props(ctx, node, style):
-    """A Link is a box holding its text (M41): `tre` 0.3.4's `text` never
+    """A Link is a box holding its text: `tre` 0.3.4's `text` never
     gets pointer events, so a Link that was a bare `text` could only be
     clicked from the keyboard. The box takes the events, focus, role and
     label (the text's content); the text is only drawn."""
@@ -668,7 +668,7 @@ def a11y_bindings(node: dict[str, Any]) -> dict[str, str]:
 
 def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
     """The node's fixed `a11y:` fields, checked, as `tre` properties. A
-    bound one (M47) is left to the view, and only its field is checked."""
+    bound one is left to the view, and only its field is checked."""
     value = node.get("a11y")
     if value is None:
         return {}
@@ -695,7 +695,7 @@ def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
 def _a11y_props(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:
     """Accessibility properties for the node that carries them (a
     TextField's `text_input`, otherwise the node): the `a11y:` field, and
-    a clickable node's focus and role (M39). On a patch, dropped fields
+    a clickable node's focus and role. On a patch, dropped fields
     reset."""
     fields = _a11y_fields(node)
     bound = {A11Y_BINDABLE[k] for k in a11y_bindings(node)}  # the view sets these; a patch leaves them
@@ -713,7 +713,7 @@ def _a11y_props(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:
 
 
 def resting_focus(node: dict[str, Any]) -> bool:
-    """Whether `node` is focusable when it isn't disabled (M70): a Link and
+    """Whether `node` is focusable when it isn't disabled: a Link and
     a TextField are, a clickable node is (a Tab stop, M39), and otherwise
     it's what its `a11y:` says."""
     if node["kind"] in ("Link", "TextField"):
@@ -722,7 +722,7 @@ def resting_focus(node: dict[str, Any]) -> bool:
 
 
 def interaction_tint(node: dict[str, Any], scheme: Optional[dict[str, RGBA]]) -> Optional[RGBA]:
-    """The state layer and ripple's tint for `node` (M39), or `None` for no
+    """The state layer and ripple's tint for `node`, or `None` for no
     interaction feedback. A clickable Rect or Container gets it in the
     theme's `on_surface` unless it says `interaction: false`;
     `interaction: {color: ...}` picks the colour (a theme role or a hex),
@@ -882,7 +882,7 @@ _INDICATOR_KINDS = frozenset({"CircularProgress", "LinearProgress", "LoadingIndi
 
 
 def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: Built) -> Any:
-    """The MD3 control for one of the eight control kinds (M40)."""
+    """The MD3 control for one of the eight control kinds."""
     from tesserae import controls
 
     kind, width, height = node["kind"], style.get("width"), style.get("height")
@@ -952,7 +952,7 @@ def _spin_number(value: Any, step: Any) -> Any:
 
 def _graph_widget(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) -> Any:
     """A NodeGraph's `node_graph` widget, or a GraphNode's `graph_node` in
-    the NodeGraph being built (M60). Both take their size from `style`."""
+    the NodeGraph being built. Both take their size from `style`."""
     from tesserae.widgets.media import graph_node, node_graph
 
     node_id, kind = node["id"], node["kind"]
@@ -973,7 +973,7 @@ def _graph_widget(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) ->
 
 def connect_edges(graph: Any, node: dict[str, Any], built: Built) -> None:
     """(Re)draws a NodeGraph's `edges:` (`[{from: id, to: id}, ...]`, its
-    GraphNodes' ids), replacing any it had (M60)."""
+    GraphNodes' ids), replacing any it had."""
     for _, _, path in graph.edges:
         path.destroy()
     graph.edges.clear()
@@ -1002,7 +1002,7 @@ def _patch_graph_widget(ctx: _Context, node: dict[str, Any], widget: Any, state:
 
 def _a11y_target(control: Any) -> Any:
     """Where a control's `a11y:` goes: its focus target -- a SpinBox's
-    text input, else the control's node (M58)."""
+    text input, else the control's node."""
     return getattr(control, "input", None) or control.node
 
 

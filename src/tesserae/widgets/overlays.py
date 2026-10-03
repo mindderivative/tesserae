@@ -30,7 +30,7 @@ def dialog(
     actions: list[tuple[str, Optional[Callable[[], Any]]]] | None = None,
     theme: "Theme | None" = None,
 ) -> overlays.Dialog:
-    """MD3's dialog (M41: `tesserae.overlays.Dialog`). `open()` it; Escape
+    """MD3's dialog (`tesserae.overlays.Dialog`). `open()` it; Escape
     or an action closes it."""
     d = overlays.Dialog(window, headline, supporting_text, width=width, height=height, actions=actions, theme=theme)
     border = _borders([None], border_color, border_width)
@@ -54,7 +54,7 @@ def snackbar(
     duration: int | None = 4000,
     theme: "Theme | None" = None,
 ) -> overlays.Snackbar:
-    """MD3's snackbar (M41: `tesserae.overlays.Snackbar`). `open()` it; it
+    """MD3's snackbar (`tesserae.overlays.Snackbar`). `open()` it; it
     hides itself after `duration` ms (`None` keeps it)."""
     s = overlays.Snackbar(window, text, width=width, action=action_label, on_action=on_action, closable=closable,
                           duration=duration, theme=theme)
@@ -78,7 +78,7 @@ def side_sheet(
 ) -> "Widget | overlays.SideSheet":
     """MD3's side sheet. `modal=True` is `tesserae.overlays.SideSheet` (an
     overlay: `open()` it); otherwise a standard sheet, a `surface` panel in
-    the layout, built from its fragment. Put content in `.panel`/`.node`."""
+    the layout. Put content in `.panel`/`.node`."""
     if modal:
         return overlays.SideSheet(window, width=width, theme=theme)
     widget = Widget(window, "SideSheetStandard", {"width": width, "height": height if height is not None else 400},
@@ -89,7 +89,7 @@ def side_sheet(
 
 def menu(window: "Window", items: list[Any], width: float = 200.0, *,
          theme: "Theme | None" = None) -> overlays.Menu:
-    """MD3's menu (M41: `tesserae.overlays.Menu`) of `menu_item(...)`s or
+    """MD3's menu (`tesserae.overlays.Menu`) of `menu_item(...)`s or
     `(label, fn)` pairs. `open(anchor)` below a node, `open_at(x, y)`, or
     `attach_context(node)` for a right-click."""
     return overlays.Menu(window, items, width=width, theme=theme)
@@ -109,7 +109,7 @@ def menu_item(
     on_click: Callable[[], Any] | None = None,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """One of MD3's 48 px menu items (M41: built from its fragment), for
+    """One of MD3's 48 px menu items, for
     `menu(...)`: a `label_large` label, an optional 24 px leading `icon`,
     and a trailing chevron when `submenu`. `on_click` runs when it's
     chosen (the menu closes)."""
@@ -146,7 +146,7 @@ def tooltip(
     anchor: Any = None,
     theme: "Theme | None" = None,
 ) -> overlays.Tooltip:
-    """MD3's plain tooltip (M41: `tesserae.overlays.Tooltip`).
+    """MD3's plain tooltip (`tesserae.overlays.Tooltip`).
     `attach(anchor)` (or `anchor=`) shows it on hover and keyboard focus."""
     t = overlays.Tooltip(window, text, width=width, theme=theme)
     if anchor is not None:
@@ -164,7 +164,7 @@ def popover(
     anchor: Any = None,
     theme: "Theme | None" = None,
 ) -> overlays.Popover:
-    """MD3's rich tooltip, `tre`'s popover (M42: `tesserae.overlays.Popover`).
+    """MD3's rich tooltip, `tre`'s popover (`tesserae.overlays.Popover`).
     `open(anchor)` it, or `attach(anchor)` (or `anchor=`) to open and close
     it on the anchor's click; an outside press, Escape or an action closes it."""
     p = overlays.Popover(window, supporting_text, subhead=subhead, width=width, actions=actions, theme=theme)

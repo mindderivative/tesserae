@@ -1,9 +1,9 @@
 """Tesserae's own namespace for the Buttons & Actions category --
 `button`, `icon_button`, `fab`, `extended_fab`, `split_button`,
-`button_group` (M41) and `segmented_button` (M42).
+`button_group` and `segmented_button`.
 
 Each is built by Tesserae from its fragment (or several) with
-`tesserae.widgets._composed.Widget`, with MD3's feedback (M39) in its
+`tesserae.widgets._composed.Widget`, with MD3's feedback in its
 content's colour. The split button's hover and the button group's press
 morph animate `corner_radius` on the part and its feedback's clip, which
 `tre`'s own factories did in Rust with no public Python API.
@@ -50,7 +50,7 @@ def button(
     theme: "Theme | None" = None,
     on_click: Callable[[], Any] | None = None,
 ) -> Widget:
-    """MD3's button, built from its fragment (M41). `variant`: elevated,
+    """MD3's button. `variant`: elevated,
     filled, filled_tonal, outlined or text. It's a pill (`corner_radius`
     half the height) unless told otherwise. `on_click` makes it a focusable
     button that Enter and Space activate, with MD3's feedback."""
@@ -112,7 +112,7 @@ def icon_button(
     theme: "Theme | None" = None,
     on_click: Callable[[], Any] | None = None,
 ) -> Widget:
-    """MD3's icon button (M41: built from its fragment). `variant`:
+    """MD3's icon button. `variant`:
     standard, filled, filled_tonal or outlined. A circle `size` across.
     Give `label=` so a screen reader can name it."""
     widget = Widget(window, _variant("icon button", variant, _ICON_BUTTONS),
@@ -143,7 +143,7 @@ def fab(
     theme: "Theme | None" = None,
     on_click: Callable[[], Any] | None = None,
 ) -> Widget:
-    """MD3's floating action button (M41: built from its fragment).
+    """MD3's floating action button.
     `size`: small (40), default (56) or large (96, with a 36 px icon).
     `variant`: surface, primary, secondary or tertiary."""
     if size not in _FAB_SIZES:
@@ -182,7 +182,7 @@ def extended_fab(
     theme: "Theme | None" = None,
     on_click: Callable[[], Any] | None = None,
 ) -> Widget:
-    """MD3's extended FAB (M41: built from its fragment): an optional
+    """MD3's extended FAB: an optional
     leading icon and a label, 56 px tall."""
     # icon=None is the fragment's own text-only shape (M55, #8)
     widget = Widget(window, _variant("extended FAB", variant, _EXTENDED_FABS),
@@ -217,7 +217,7 @@ def split_button(
     on_click: Callable[[], Any] | None = None,
     on_menu: Callable[[], Any] | None = None,
 ) -> Widget:
-    """MD3's split button (M41: built from its fragment): a `leading`
+    """MD3's split button: a `leading`
     action and a `trailing` chevron, parts of the returned `Widget`. While
     it's hovered, the corners where the two meet tighten, as `tre`'s did.
     `on_click` is the action, `on_menu` the chevron."""
@@ -269,7 +269,7 @@ def button_group(
     theme: "Theme | None" = None,
     on_click: Callable[[int], Any] | None = None,
 ) -> Widget:
-    """MD3's button group (M41): one button per label, `width`x`height`,
+    """MD3's button group: one button per label, `width`x`height`,
     8 px apart; parts `b0`, `b1`, ... While one is pressed, its corners
     tighten and it grows 12 px, its neighbours sharing the loss, and it
     all comes back on release -- the intent of `tre`'s, whose reflow
@@ -338,7 +338,7 @@ def segmented_button(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's outlined segmented button (M42): equal segments in one 1 px
+    """MD3's outlined segmented button: equal segments in one 1 px
     `outline` pill, 1 px dividers between them, `label_large` labels in
     `on_surface`. A selected segment is `secondary_container` with an 18 px
     check before its `on_secondary_container` label. Single-select (a

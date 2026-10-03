@@ -3,7 +3,8 @@
 A view lays out with flexbox: every node is a box, and a container
 places its children in a row or a column. This page covers the layout
 keys of a node's `style:` (all of them work in a stylesheet too) and the
-`ScrollView` kind.
+`ScrollView` kind. Every style key is listed in the
+[YAML reference](../api/yaml.md).
 
 ## Rows and columns
 
@@ -37,7 +38,7 @@ children:
 `center`, `flex_end`, `stretch`, `baseline`); `justify_content` along it
 (`flex_start`, `center`, `flex_end`, `space_between`, `space_around`,
 `space_evenly`). A child overrides its parent's `align_items` with
-`align_self` (M71).
+`align_self`.
 
 ## Sizes
 
@@ -45,13 +46,13 @@ children:
 size, or stretched), or a percentage of the parent (`"50%"`).
 `min_width`, `max_width`, `min_height` and `max_height` bound it the same
 ways, and `aspect_ratio` (width over height) gives the missing side from
-the one that's set (M71).
+the one that's set.
 
 ### Text in a box
 
 A `Text` or `Link` with no `width` or `height` is measured to fit its
 text. Give it a `width` and `text:`'s `text_align` places the text inside
-it: `start` (the default), `center` or `end` (0.3.1).
+it: `start` (the default), `center` or `end`.
 
 ```yaml
 - id: heading
@@ -85,7 +86,7 @@ children:
 ## Wrapping
 
 `flex_wrap: wrap` starts a new row (or column) when the children don't
-fit (M71). With a fixed `flex_basis` or `width` it gives a gallery of
+fit. With a fixed `flex_basis` or `width` it gives a gallery of
 equal tiles:
 
 ```yaml
@@ -112,9 +113,8 @@ and a tile can't span two columns: for that, use a grid.
 
 ## Grids
 
-`display: grid` lays a container's children out in rows and columns
-(M74, on `tre` 0.4.2). `grid_template_columns` and `grid_template_rows`
-list the tracks: pixels, `auto` (its content), `fr` (a share of what's
+`display: grid` lays a container's children out in rows and columns.
+`grid_template_columns` and `grid_template_rows` list the tracks: pixels, `auto` (its content), `fr` (a share of what's
 left), percentages, `minmax(min, max)` and `repeat(n, ...)`, as a string
 (`"120 1fr"`) or a list (`[120, "1fr"]`). Children fill the cells in
 order.
@@ -182,7 +182,7 @@ own parent.
 ## Placing a node exactly
 
 `position: absolute` takes a node out of the flow, and `x`/`y` place it
-in its parent, in pixels or percentages (M71). `z_index` (an integer)
+in its parent, in pixels or percentages. `z_index` (an integer)
 draws it above or below its siblings, and a container with
 `clip_children: true` cuts its children to its own box.
 
@@ -203,7 +203,7 @@ through a re-theme or a reload.
 ## Scrolling
 
 `kind: ScrollView` scrolls its children vertically when they're taller
-than it (M71). Its `style:` sizes, places and paints the scroll view;
+than it. Its `style:` sizes, places and paints the scroll view;
 `flex_direction` (vertical by default), `gap`, `padding`, alignment and
 wrapping lay out its children inside it.
 
@@ -239,17 +239,16 @@ children:
   inside it focusable.
 - A `ScrollView` inside another passes on what it can't use, as in a
   browser: a wheel or a scroll key over an inner one that's already at
-  that end, or whose content fits, scrolls the one outside it (`tre`
-  0.4.4; M80). One that can move takes the whole wheel or key.
+  that end, or whose content fits, scrolls the one outside it. One that can move takes the whole wheel
+  or key.
 - A child that takes focus is scrolled into view, just as far as needed,
   and so is one assistive technology asks to see (`scroll_into_view`).
-  (`tre` does all of this since 0.4.2; M73.)
 - `scroll_offset` binds (`bindings: {scroll_offset: "{{ pos.get() }}"}`),
   and `two_way: scroll_offset` writes back where the user scrolled, to
   save and restore a position. An offset past the end is held at the end
-  at once, and that is what's written back (`tre` 0.4.3; M79).
+  at once, and that is what's written back.
 - Its scrollbar is the theme's `outline`.
-- It scrolls vertically only, as `tre`'s does.
+- It scrolls vertically only.
 
 For a long list built from data, put a `Repeater`'s container
 (`tesserae.Repeater`) inside a `ScrollView`.

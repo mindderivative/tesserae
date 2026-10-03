@@ -1,4 +1,4 @@
-"""`tesserae build` (M77): an app as one executable, with PyInstaller.
+"""`tesserae build`: an app as one executable, with PyInstaller.
 
     tesserae build [app.py] [--name NAME] [--icon FILE] [--console]
                    [--include GLOB]... [--exclude GLOB]... [--check]
@@ -16,7 +16,7 @@ terminal; its `.app` comes with `--installer`). `--check`
 runs it with `TESSERAE_MAX_FRAMES` set and reports whether it drew
 frames and exited cleanly. An executable is built for the platform it's built on.
 
-`--installer` (M78) makes this platform's installer instead, from a
+`--installer` makes this platform's installer instead, from a
 one-folder build (which starts faster than one file): on macOS a `.app`
 in a `.dmg`. `--app-version`, `--identifier`, `--publisher` and
 `--description` fill in its details, and a PNG `--icon` is made into the

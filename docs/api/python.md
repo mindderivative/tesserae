@@ -69,34 +69,34 @@ class App(
 - `forward() -> bool`: Shows the entry `back()` left, if any.
 - `fullscreen` *(property)*: Whether the window fills its monitor, borderless.
 - `load(view_path: str | Path, viewmodel_cls: type, name: str | None = None, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> tuple[Any, Any]`: Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it -- the real, enforced-at-runtime counterpart to `README.md`'s own documented naming convention (previously convention-only, not checked).
-- `load_shell(path: str | Path, viewmodel: Any = None) -> Any`: Builds the app shell a `*_Shell.yaml` describes -- its top bar, navigation rail, status bar, docked zones, center tabs and panels (M52) -- and shows screens in it, as `use_shell` does.
+- `load_shell(path: str | Path, viewmodel: Any = None) -> Any`: Builds the app shell a `*_Shell.yaml` describes -- its top bar, navigation rail, status bar, docked zones, center tabs and panels -- and shows screens in it, as `use_shell` does.
 - `location` *(property)*: The screen showing, as a route string (for saving where the user was): from the first route of its screen that reads its params back exactly, or `None` if none does.
 - `maximize() -> None`: Maximizes the window (before `run()`, it opens maximized).
 - `min_height` *(property)*: The shortest the user can resize the window to (0 for no limit).
 - `min_width` *(property)*: The narrowest the user can resize the window to (0 for no limit).
 - `minimize() -> None`: Minimizes the window (before `run()`, it opens minimized).
-- `navigate(name: str, **params: Any) -> Window`: Shows the screen registered under `name` as a step in the history (M66): `back()` returns from it.
+- `navigate(name: str, **params: Any) -> Window`: Shows the screen registered under `name` as a step in the history : `back()` returns from it.
 - `navigate_to(route: str) -> Window`: Navigates to the screen the first matching route names, with the params it reads from `route` (a deep link, say `"notes/42"`).
-- `of(view: Any) -> 'App | None'`: The live app whose window `view` (a view, a component, or a window) is on, or `None` (M65): for a ViewModel's constructor, before `super().__init__(view)` gives it `self.app`.
+- `of(view: Any) -> 'App | None'`: The live app whose window `view` (a view, a component, or a window) is on, or `None`: for a ViewModel's constructor, before `super().__init__(view)` gives it `self.app`.
 - `platform` *(property)*: `"windows"`, `"macos"`, `"wayland"` or `"x11"`.
 - `register(name: str, view: Any, viewmodel: Any) -> None`: Registers `view` (already loaded) and its already-`_attach`ed `viewmodel` (e.g. `FooViewModel(view)`) under `name`, for a later `show(name)` to display.
 - `resize_border` *(property)*: How many pixels along each edge resize an undecorated window (`tre` turns it off while maximized or fullscreen, and on macOS).
 - `restore() -> None`: Restores the window from maximized or minimized.
-- `route(pattern: str, name: str) -> None`: Adds a route (M66): a pattern like `"notes/{id}"` for the screen registered (now or later) under `name`.
+- `route(pattern: str, name: str) -> None`: Adds a route: a pattern like `"notes/{id}"` for the screen registered (now or later) under `name`.
 - `run(max_frames: int | None = None, *, hot_reload: bool = False, keepalive: bool | float = False) -> None`: The one blocking call -- opens the real `Window` and runs `tre`'s own real render loop, showing the screen `show()` made current and any nodes added to `app.window.root` by calls.
-- `screen(name: str) -> tuple[Any, Any]`: The `(view, viewmodel)` registered under `name` -- by `register`, `load`, or a shell file's panels (M52), whose ViewModels the app builds; `viewmodel` is `None` for a view with none.
+- `screen(name: str) -> tuple[Any, Any]`: The `(view, viewmodel)` registered under `name` -- by `register`, `load`, or a shell file's panels, whose ViewModels the app builds; `viewmodel` is `None` for a view with none.
 - `set_dark(dark: bool | str) -> None`: `True`/`False` fixes the app dark or light, re-theming every screen in place; `"system"` goes back to following the OS from its next switch.
 - `set_icon(icon: str | Path | None) -> None`: The window's icon, from an image file (a PNG, best square), or `None` for none.
-- `set_stylesheet_spec(stylesheet_spec: dict[str, Any] | None) -> None`: Replaces the app's default stylesheet in place (M31 Phase 2): every view `build_view()`/`load()` made with the default -- not one given its own `stylesheet=` -- is re-styled, and views built later use it too.
-- `set_theme_specs(default_theme_spec: Any, custom_theme_spec: Any) -> None`: Re-themes the running app in place (M31): every view `build_view()`/`load()` made.
-- `show(name: str) -> Window`: Shows the view registered under `name` in the app's window: its root is attached, and the previously shown screen's detached (kept alive, with its state and bindings).
+- `set_stylesheet_spec(stylesheet_spec: dict[str, Any] | None) -> None`: Replaces the app's default stylesheet in place: every view `build_view()`/`load()` made with the default -- not one given its own `stylesheet=` -- is re-styled, and views built later use it too.
+- `set_theme_specs(default_theme_spec: Any, custom_theme_spec: Any) -> None`: Re-themes the running app in place: every view `build_view()`/`load()` made.
+- `show(name: str) -> Window`: Shows the view registered under `name` in the app's window: its root is attached, and the screen shown before it is detached (kept alive, with its state and bindings).
 - `system_menu` *(property)*: Whether a secondary press on the title bar opens the OS's window menu (Windows, and Wayland compositors with one).
 - `theme` *(property)*: The app's resolved theme (`tesserae.Theme`): roles, component shape and elevation, typography, and motion tokens.
-- `thread_handle() -> Any`: `tre`'s thread-safe `LoopHandle` for this app (tre M87): the one object that may cross threads.
+- `thread_handle() -> Any`: `tre`'s thread-safe `LoopHandle` for this app: the one object that may cross threads.
 - `toggle_maximized() -> None`: Maximizes the window, or restores it if it's maximized: a title bar's maximize button.
-- `use_shell(shell: Any) -> None`: Shows screens inside `shell.content` from now on (M45): an `AppShell` built on this app's window -- a top app bar, navigation, docked panels and a status bar around the screens.
-- `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change (M51); `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.
-- `window` *(property)*: The app's one window (it exists from the start, M37).
+- `use_shell(shell: Any) -> None`: Shows screens inside `shell.content`: an `AppShell` built on this app's window -- a top app bar, navigation, docked panels and a status bar around the screens.
+- `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change; `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.
+- `window` *(property)*: The app's one window (it exists from the start).
 - `window_border` *(property)*: Whether an undecorated window gets its 1 px border (on by default): around the window, in the theme's `outline_variant`, a node of class `window_border` a theme or stylesheet can restyle.
 
 ## Reactivity
@@ -202,9 +202,9 @@ class View(
 A built view. `spec` is an expanded view spec (from `tesserae.spec.build_view_spec` or `expand_components_to_spec`); `frames` maps an Image's id to its decoded `(rgba, width, height)`.
 
 - `click(node: Any) -> None`: A synthetic click on `node`, for tests: `window.simulate`.
-- `control(widget_id: str) -> Any`: The MD3 control (`tesserae.controls`) behind `widget_id`, one of the eight control kinds (M40); its `.node` is `node(widget_id)`.
+- `control(widget_id: str) -> Any`: The MD3 control (`tesserae.controls`) behind `widget_id`, one of the eight control kinds; its `.node` is `node(widget_id)`.
 - `instantiate(path: Any, into: Any, spec: Optional[dict[str, Any]] = None, frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> 'Component'`: Builds a component -- a view of its own, with its own ViewModel -- under `into`, a node of this view, in this view's window.
-- `interaction(widget_id: str) -> Optional[Interaction]`: The state layer and ripple on `widget_id`'s node (M39), or `None` when it has none.
+- `interaction(widget_id: str) -> Optional[Interaction]`: The state layer and ripple on `widget_id`'s node, or `None` when it has none.
 - `move_to(window: Any) -> None`: Rebuilds this view in `window`, keeping its spec, theme and ViewModel: bindings and handlers are wired again on the new nodes.
 - `node(widget_id: str) -> Any`: The node `widget_id` names (a TextField's `text_input`; a Link's box, which holds its text).
 - `reconcile(spec: dict[str, Any], frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None`: Brings the live tree in line with `spec`, in place.
@@ -253,7 +253,7 @@ class Repeater(
 
 Keeps one component and ViewModel alive for each item of a list `Signal`, adding and removing them as the list changes.
 
-- `remove() -> None`: Real, structural teardown -- removes every currently-tracked instance and unsubscribes from `items_signal`, mirroring `Component.remove()`'s own "unsubscribe before tearing down" ordering (TRE M43 Phase 2).
+- `remove() -> None`: Real, structural teardown -- removes every currently-tracked instance and unsubscribes from `items_signal`, mirroring `Component.remove()`'s own "unsubscribe before tearing down" ordering.
 
 ## Themes
 
@@ -342,7 +342,7 @@ MD3 elevation `level` (0–5, fractional allowed) as a `shadows` list, `(color, 
 parse_color(raw: str) -> RGBA
 ```
 
-A colour string as `tre` parses it: hex (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`), a CSS colour name, `transparent`, or `rgb()`/`rgba()`/`hsl()`/`hsla()` in CSS Color 4's comma or space syntax with an optional alpha, and CSS's wide-gamut functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), clipped into sRGB (M63). Raises `ValueError`.
+A colour string as `tre` parses it: hex (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`), a CSS colour name, `transparent`, or `rgb()`/`rgba()`/`hsl()`/`hsla()` in CSS Color 4's comma or space syntax with an optional alpha, and CSS's wide-gamut functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), clipped into sRGB. Raises `ValueError`.
 
 ### `resolve_scheme`
 
@@ -402,7 +402,7 @@ accordion_header(
 ) -> Widget
 ```
 
-An accordion header (M41: built from its fragment): a title and a chevron that turns over when `.expanded` (a `Signal`) is on. A click, Enter or Space toggles it; `.on_change(fn)` hears the user's toggles.
+An accordion header: a title and a chevron that turns over when `.expanded` (a `Signal`) is on. A click, Enter or Space toggles it; `.on_change(fn)` hears the user's toggles.
 
 ### `badge`
 
@@ -420,7 +420,7 @@ badge(
 ) -> Widget
 ```
 
-MD3's badge (M41: built from its fragment): a 6 px `error` dot when `label=None`, otherwise a 16 px pill with a `label_small` `on_error` label (`width` defaults to fit it).
+MD3's badge: a 6 px `error` dot when `label=None`, otherwise a 16 px pill with a `label_small` `on_error` label (`width` defaults to fit it).
 
 ### `button`
 
@@ -442,7 +442,7 @@ button(
 ) -> Widget
 ```
 
-MD3's button, built from its fragment (M41). `variant`: elevated, filled, filled_tonal, outlined or text.
+MD3's button. `variant`: elevated, filled, filled_tonal, outlined or text.
 
 ### `button_group`
 
@@ -461,7 +461,7 @@ button_group(
 ) -> Widget
 ```
 
-MD3's button group (M41): one button per label, `width`x`height`, 8 px apart; parts `b0`, `b1`, ... While one is pressed, its corners tighten and it grows 12 px, its neighbours sharing the loss, and it all comes back on release -- the intent of `tre`'s, whose reflow compounded and never restored.
+MD3's button group: one button per label, `width`x`height`, 8 px apart; parts `b0`, `b1`, ... While one is pressed, its corners tighten and it grows 12 px, its neighbours sharing the loss, and it all comes back on release -- the intent of `tre`'s, whose reflow compounded and never restored.
 
 ### `card`
 
@@ -481,7 +481,7 @@ card(
 ) -> Widget
 ```
 
-MD3's card (M41: built from its fragment): elevated, filled or outlined. Content-free: add to `.node`.
+MD3's card: elevated, filled or outlined. Content-free: add to `.node`.
 
 ### `carousel`
 
@@ -500,7 +500,7 @@ carousel(
 ) -> Widget
 ```
 
-MD3's carousel (M42): a clip holding items 16 px in, 8 apart and 8 above and below, each masked to 28 px corners (`extra_large`) on `surface_container_highest`. `hero` and `multi_browse` snap through large/medium/small slots (`small` 56, `medium` 112, `large` what's left), items before the current one small; moving blends the widths.
+MD3's carousel: a clip holding items 16 px in, 8 apart and 8 above and below, each masked to 28 px corners (`extra_large`) on `surface_container_highest`. `hero` and `multi_browse` snap through large/medium/small slots (`small` 56, `medium` 112, `large` what's left), items before the current one small; moving blends the widths.
 
 ### `checkbox`
 
@@ -541,7 +541,7 @@ chip(
 ) -> Widget
 ```
 
-MD3's chip (M41: built from its fragment): assist, filter, input or suggestion, 32 px tall, with an optional leading `icon`.
+MD3's chip: assist, filter, input or suggestion, 32 px tall, with an optional leading `icon`.
 
 ### `circular_progress`
 
@@ -578,7 +578,7 @@ date_picker_day(
 ) -> Any
 ```
 
-MD3's date-picker day (M42: built from its fragment): a 48 px target holding a 40 px circle with a `body_large` number. Selected, the circle is `primary` with `on_primary`; today (unselected) is outlined in `primary`; outside the month the number is `on_surface_variant`.
+MD3's date-picker day: a 48 px target holding a 40 px circle with a `body_large` number. Selected, the circle is `primary` with `on_primary`; today (unselected) is outlined in `primary`; outside the month the number is `on_surface_variant`.
 
 ### `dialog`
 
@@ -597,7 +597,7 @@ dialog(
 ) -> overlays.Dialog
 ```
 
-MD3's dialog (M41: `tesserae.overlays.Dialog`). `open()` it; Escape or an action closes it.
+MD3's dialog (`tesserae.overlays.Dialog`). `open()` it; Escape or an action closes it.
 
 ### `divider`
 
@@ -615,7 +615,7 @@ divider(
 ) -> Widget
 ```
 
-MD3's divider (M41: built from its fragment): a 1 px `outline_variant` line `length` long. `border_color`/`border_width` recolour or thicken it.
+MD3's divider: a 1 px `outline_variant` line `length` long. `border_color`/`border_width` recolour or thicken it.
 
 ### `extended_fab`
 
@@ -636,7 +636,7 @@ extended_fab(
 ) -> Widget
 ```
 
-MD3's extended FAB (M41: built from its fragment): an optional leading icon and a label, 56 px tall.
+MD3's extended FAB: an optional leading icon and a label, 56 px tall.
 
 ### `fab`
 
@@ -657,7 +657,7 @@ fab(
 ) -> Widget
 ```
 
-MD3's floating action button (M41: built from its fragment). `size`: small (40), default (56) or large (96, with a 36 px icon).
+MD3's floating action button. `size`: small (40), default (56) or large (96, with a 36 px icon).
 
 ### `graph_node`
 
@@ -677,7 +677,7 @@ graph_node(
 ) -> 'Widget'
 ```
 
-A node in a `node_graph` (M42, off `tre`'s `add_graph_node`): a `surface_container_high` card with 12 px corners and an `outline_variant` border, a 32 px `title_small` title bar (`surface_container_highest`) over its body, at `x`, `y` in the graph's coordinates. Drag it to move it (its edges follow); focused, the arrow keys move it 8 px.
+A node in a `node_graph`: a `surface_container_high` card with 12 px corners and an `outline_variant` border, a 32 px `title_small` title bar (`surface_container_highest`) over its body, at `x`, `y` in the graph's coordinates. Drag it to move it (its edges follow); focused, the arrow keys move it 8 px.
 
 ### `icon`
 
@@ -695,7 +695,7 @@ icon(
 ) -> 'Widget'
 ```
 
-One of Tesserae's icons (`tesserae.icons`: home, search, menu, close, check, arrow_back, add, settings, expand_more, remove, arrow_forward, chevron_right), `size` square in `foreground`. M41: Tesserae's own Icon, not `tre`'s.
+One of Tesserae's icons (`tesserae.icons`: home, search, menu, close, check, arrow_back, add, settings, expand_more, remove, arrow_forward, chevron_right), `size` square in `foreground`. It is Tesserae's own Icon.
 
 ### `icon_button`
 
@@ -716,7 +716,7 @@ icon_button(
 ) -> Widget
 ```
 
-MD3's icon button (M41: built from its fragment). `variant`: standard, filled, filled_tonal or outlined.
+MD3's icon button. `variant`: standard, filled, filled_tonal or outlined.
 
 ### `image`
 
@@ -734,7 +734,7 @@ image(
 ) -> 'Widget'
 ```
 
-An image from a file, `width`x`height`, `fit` cover, contain or fill. Tesserae decodes the file (Pillow) and M42 builds the node itself (`window.create("image")` with the pixels), off `tre`'s `add_image_from_bytes`, which 0.3.5 removes.
+An image from a file, `width`x`height`, `fit` cover, contain or fill. Tesserae decodes the file (Pillow) and builds the node itself (`window.create("image")` with the pixels).
 
 ### `linear_progress`
 
@@ -768,7 +768,7 @@ link(
 ) -> Widget
 ```
 
-A link (M41: built from its fragment): `body_large` text in `primary`, `role="link"`, a Tab stop that Enter follows (`on_click`).
+A link: `body_large` text in `primary`, `role="link"`, a Tab stop that Enter follows (`on_click`).
 
 ### `list_`
 
@@ -806,7 +806,7 @@ list_item(
 ) -> Widget
 ```
 
-One MD3 list row (M41: built from its fragment): a `body_large` headline, 56 px tall, or 72 with `supporting_text` (`body_medium`, `on_surface_variant`) under it; 24 px `on_surface_variant` icons either side. Parts: `headline`, `supporting`, `leading`, `trailing`.
+One MD3 list row: a `body_large` headline, 56 px tall, or 72 with `supporting_text` (`body_medium`, `on_surface_variant`) under it; 24 px `on_surface_variant` icons either side. Parts: `headline`, `supporting`, `leading`, `trailing`.
 
 ### `loading_indicator`
 
@@ -835,7 +835,7 @@ menu(
 ) -> overlays.Menu
 ```
 
-MD3's menu (M41: `tesserae.overlays.Menu`) of `menu_item(...)`s or `(label, fn)` pairs. `open(anchor)` below a node, `open_at(x, y)`, or `attach_context(node)` for a right-click.
+MD3's menu (`tesserae.overlays.Menu`) of `menu_item(...)`s or `(label, fn)` pairs. `open(anchor)` below a node, `open_at(x, y)`, or `attach_context(node)` for a right-click.
 
 ### `menu_item`
 
@@ -856,7 +856,7 @@ menu_item(
 ) -> Widget
 ```
 
-One of MD3's 48 px menu items (M41: built from its fragment), for `menu(...)`: a `label_large` label, an optional 24 px leading `icon`, and a trailing chevron when `submenu`. `on_click` runs when it's chosen (the menu closes).
+One of MD3's 48 px menu items, for `menu(...)`: a `label_large` label, an optional 24 px leading `icon`, and a trailing chevron when `submenu`. `on_click` runs when it's chosen (the menu closes).
 
 ### `navigation_drawer`
 
@@ -878,7 +878,7 @@ navigation_drawer(
 ) -> Widget
 ```
 
-MD3's navigation drawer (M41): `surface_container_low`, 12 px in, each item 56 px with a 24 px icon and a `label_large` label; the selected one a full-width `secondary_container` pill. `modal=True` is the modal drawer's look (rounded on its end side); open it as an overlay with `tesserae.overlays.NavigationDrawer`.
+MD3's navigation drawer: `surface_container_low`, 12 px in, each item 56 px with a 24 px icon and a `label_large` label; the selected one a full-width `secondary_container` pill. `modal=True` is the modal drawer's look (rounded on its end side); open it as an overlay with `tesserae.overlays.NavigationDrawer`.
 
 ### `navigation_rail`
 
@@ -898,7 +898,7 @@ navigation_rail(
 ) -> Widget
 ```
 
-MD3's navigation rail (M41): 80 px wide on `surface`, each item a 24 px icon over a `label_medium` label; the selected item's icon sits in a 56x32 `secondary_container` pill, in `on_secondary_container`. `.selected`, `.on_change(fn)`; the up and down arrows move it.
+MD3's navigation rail: 80 px wide on `surface`, each item a 24 px icon over a `label_medium` label; the selected item's icon sits in a 56x32 `secondary_container` pill, in `on_secondary_container`. `.selected`, `.on_change(fn)`; the up and down arrows move it.
 
 ### `node_graph`
 
@@ -916,7 +916,7 @@ node_graph(
 ) -> 'Widget'
 ```
 
-A node graph's viewport (M42: built from its fragment, off `tre`'s `add_node_graph`): a clipped `surface_container_low` area whose content pans and zooms. Drag the background to pan; the wheel zooms about the pointer (`ZOOM_RANGE`).
+A node graph's viewport: a clipped `surface_container_low` area whose content pans and zooms. Drag the background to pan; the wheel zooms about the pointer (`ZOOM_RANGE`).
 
 ### `pagination`
 
@@ -933,7 +933,7 @@ pagination(
 ) -> Widget
 ```
 
-Previous, a numbered button per page, and next (M42): 40 px circles 4 px apart, `label_large` numbers in `on_surface_variant`, the current page `primary` with an `on_primary` number. `.current` is a `Signal` (0-based) and `.on_change(fn)` hears the user's moves.
+Previous, a numbered button per page, and next: 40 px circles 4 px apart, `label_large` numbers in `on_surface_variant`, the current page `primary` with an `on_primary` number. `.current` is a `Signal` (0-based) and `.on_change(fn)` hears the user's moves.
 
 ### `period_selector`
 
@@ -950,7 +950,7 @@ period_selector(
 ) -> Any
 ```
 
-MD3's AM/PM period selector (M42: built from its fragment): 52x80, two 40 px halves in a 1 px `outline` frame with 8 px corners; the selected half `tertiary_container`/`on_tertiary_container`, the other `on_surface_variant`. `.period` (`"AM"`/`"PM"`) is a `Signal`; a click, Enter or the arrow keys switch it; `.on_change(fn)` hears the user's switches.
+MD3's AM/PM period selector: 52x80, two 40 px halves in a 1 px `outline` frame with 8 px corners; the selected half `tertiary_container`/`on_tertiary_container`, the other `on_surface_variant`. `.period` (`"AM"`/`"PM"`) is a `Signal`; a click, Enter or the arrow keys switch it; `.on_change(fn)` hears the user's switches.
 
 ### `popover`
 
@@ -967,7 +967,7 @@ popover(
 ) -> overlays.Popover
 ```
 
-MD3's rich tooltip, `tre`'s popover (M42: `tesserae.overlays.Popover`). `open(anchor)` it, or `attach(anchor)` (or `anchor=`) to open and close it on the anchor's click; an outside press, Escape or an action closes it.
+MD3's rich tooltip, `tre`'s popover (`tesserae.overlays.Popover`). `open(anchor)` it, or `attach(anchor)` (or `anchor=`) to open and close it on the anchor's click; an outside press, Escape or an action closes it.
 
 ### `radio_button`
 
@@ -1003,7 +1003,7 @@ search_bar(
 ) -> Widget
 ```
 
-MD3's search bar (M42: built from its fragment): a 56 px `surface_container_high` pill with elevation, a leading icon (`on_surface`), a `body_large` field whose `placeholder` is hint text in `on_surface_variant`, and trailing icon buttons (`on_surface_variant`). `.query` is a `Signal` of what's typed; `.on_query(fn)` hears each change.
+MD3's search bar: a 56 px `surface_container_high` pill with elevation, a leading icon (`on_surface`), a `body_large` field whose `placeholder` is hint text in `on_surface_variant`, and trailing icon buttons (`on_surface_variant`). `.query` is a `Signal` of what's typed; `.on_query(fn)` hears each change.
 
 ### `search_view`
 
@@ -1023,7 +1023,7 @@ search_view(
 ) -> 'SearchView'
 ```
 
-MD3's docked search view (M42: `tesserae.overlays.SearchView`): the results panel under a `search_bar`, `height` its most. Give it the `bar` and it opens and closes with it; `set_results([(text, fn)])`.
+MD3's docked search view (`tesserae.overlays.SearchView`): the results panel under a `search_bar`, `height` its most. Give it the `bar` and it opens and closes with it; `set_results([(text, fn)])`.
 
 ### `segmented_button`
 
@@ -1042,7 +1042,7 @@ segmented_button(
 ) -> Widget
 ```
 
-MD3's outlined segmented button (M42): equal segments in one 1 px `outline` pill, 1 px dividers between them, `label_large` labels in `on_surface`. A selected segment is `secondary_container` with an 18 px check before its `on_secondary_container` label.
+MD3's outlined segmented button: equal segments in one 1 px `outline` pill, 1 px dividers between them, `label_large` labels in `on_surface`. A selected segment is `secondary_container` with an 18 px check before its `on_secondary_container` label.
 
 ### `side_sheet`
 
@@ -1061,7 +1061,7 @@ side_sheet(
 ) -> 'Widget | overlays.SideSheet'
 ```
 
-MD3's side sheet. `modal=True` is `tesserae.overlays.SideSheet` (an overlay: `open()` it); otherwise a standard sheet, a `surface` panel in the layout, built from its fragment.
+MD3's side sheet. `modal=True` is `tesserae.overlays.SideSheet` (an overlay: `open()` it); otherwise a standard sheet, a `surface` panel in the layout.
 
 ### `slider`
 
@@ -1098,7 +1098,7 @@ snackbar(
 ) -> overlays.Snackbar
 ```
 
-MD3's snackbar (M41: `tesserae.overlays.Snackbar`). `open()` it; it hides itself after `duration` ms (`None` keeps it).
+MD3's snackbar (`tesserae.overlays.Snackbar`). `open()` it; it hides itself after `duration` ms (`None` keeps it).
 
 ### `spin_box`
 
@@ -1133,7 +1133,7 @@ splitter(
 ) -> Widget
 ```
 
-Two panes and the handle between them (M42): `first` and `second` (nodes or widgets) share `width` (a `horizontal` splitter) or `height` (`vertical`) less the 16 px handle, `first` getting `.position` (a `Signal`, 0..1) of it. The handle holds MD3's 4x48 `outline` drag handle, shows a `col_resize` (or `row_resize`) cursor, and is a focusable `role="slider"`: dragging it (with pointer capture) puts the split under the pointer, clamped, at once; the arrow keys move it by 5%, Home and End to the ends.
+Two panes and the handle between them: `first` and `second` (nodes or widgets) share `width` (a `horizontal` splitter) or `height` (`vertical`) less the 16 px handle, `first` getting `.position` (a `Signal`, 0..1) of it. The handle holds MD3's 4x48 `outline` drag handle, shows a `col_resize` (or `row_resize`) cursor, and is a focusable `role="slider"`: dragging it (with pointer capture) puts the split under the pointer, clamped, at once; the arrow keys move it by 5%, Home and End to the ends.
 
 ### `split_button`
 
@@ -1155,7 +1155,7 @@ split_button(
 ) -> Widget
 ```
 
-MD3's split button (M41: built from its fragment): a `leading` action and a `trailing` chevron, parts of the returned `Widget`. While it's hovered, the corners where the two meet tighten, as `tre`'s did.
+MD3's split button: a `leading` action and a `trailing` chevron, parts of the returned `Widget`. While it's hovered, the corners where the two meet tighten, as `tre`'s did.
 
 ### `status_bar`
 
@@ -1172,7 +1172,7 @@ status_bar(
 ) -> Widget
 ```
 
-A window-bottom status strip (M41: built from its fragment): 24 px of `surface_container` with `label_small` text in `on_surface_variant`, announced politely when its text changes. `style` (0.3.3) is laid over its own: `{height: 32}`, `background`, ...
+A window-bottom status strip: 24 px of `surface_container` with `label_small` text in `on_surface_variant`, announced politely when its text changes. `style` is laid over its own: `{height: 32}`, `background`, ...
 
 ### `switch`
 
@@ -1208,7 +1208,7 @@ tabs(
 ) -> Widget
 ```
 
-MD3's primary tabs (M41): 48 px tall, or 64 with `icons`; the labels `title_small`, `primary` when selected and `on_surface_variant` otherwise; a 3 px `primary` indicator under the selected label that slides to a new one; a 1 px `surface_variant` divider below. `.selected` (a `Signal`), `.on_change(fn)`; the left and right arrows move the selection.
+MD3's primary tabs: 48 px tall, or 64 with `icons`; the labels `title_small`, `primary` when selected and `on_surface_variant` otherwise; a 3 px `primary` indicator under the selected label that slides to a new one; a 1 px `surface_variant` divider below. `.selected` (a `Signal`), `.on_change(fn)`; the left and right arrows move the selection.
 
 ### `text`
 
@@ -1226,7 +1226,7 @@ text(
 ) -> Widget
 ```
 
-Plain text in a type role and a colour of the theme (M64, from the `Text` fragment): `color` is a colour role (`on_surface` by default) or any colour string. `.content` is a `Signal`; setting it re-measures the text in its resolved font, keeping `width` when one was given.
+Plain text in a type role and a colour of the theme: `color` is a colour role (`on_surface` by default) or any colour string. `.content` is a `Signal`; setting it re-measures the text in its resolved font, keeping `width` when one was given.
 
 ### `time_input_field`
 
@@ -1243,7 +1243,7 @@ time_input_field(
 ) -> Any
 ```
 
-MD3's time input field (M42): 96x72, `surface_container_highest` with 8 px corners and a centred `display_medium` numeral in `on_surface`; focused, `primary_container` with a 2 px `primary` outline. `unit` is `"hour"` (0-23) or `"minute"` (0-59).
+MD3's time input field: 96x72, `surface_container_highest` with 8 px corners and a centred `display_medium` numeral in `on_surface`; focused, `primary_container` with a 2 px `primary` outline. `unit` is `"hour"` (0-23) or `"minute"` (0-59).
 
 ### `time_picker_dial`
 
@@ -1259,7 +1259,7 @@ time_picker_dial(
 ) -> 'controls.TimePickerDial'
 ```
 
-MD3's time picker dial (a Tesserae control since M40): `.hour`, `.minute` and `.mode` are `Signal`s.
+MD3's time picker dial (a Tesserae control): `.hour`, `.minute` and `.mode` are `Signal`s.
 
 ### `toolbar`
 
@@ -1280,7 +1280,7 @@ toolbar(
 ) -> Widget
 ```
 
-MD3's toolbar (M41: built from its fragment), for action icon buttons: add them to `.node`. `docked` spans its width, 64 px tall; `floating` is a pill with elevation, horizontal or vertical.
+MD3's toolbar, for action icon buttons: add them to `.node`. `docked` spans its width, 64 px tall; `floating` is a pill with elevation, horizontal or vertical.
 
 ### `tooltip`
 
@@ -1299,7 +1299,7 @@ tooltip(
 ) -> overlays.Tooltip
 ```
 
-MD3's plain tooltip (M41: `tesserae.overlays.Tooltip`). `attach(anchor)` (or `anchor=`) shows it on hover and keyboard focus.
+MD3's plain tooltip (`tesserae.overlays.Tooltip`). `attach(anchor)` (or `anchor=`) shows it on hover and keyboard focus.
 
 ### `top_app_bar`
 
@@ -1321,7 +1321,7 @@ top_app_bar(
 ) -> Widget
 ```
 
-MD3's small top app bar (M41: built from its fragment): 64 px of `surface`, a `title_large` title, an optional leading icon button (`on_surface`) and trailing ones (`on_surface_variant`), each 48 px. Parts: `title`, `leading`, `trailing0`, ...; wire them with `on_click(fn, part="leading")`.
+MD3's small top app bar: 64 px of `surface`, a `title_large` title, an optional leading icon button (`on_surface`) and trailing ones (`on_surface_variant`), each 48 px. Parts: `title`, `leading`, `trailing0`, ...; wire them with `on_click(fn, part="leading")`.
 
 ### `tree_node`
 
@@ -1342,7 +1342,7 @@ tree_node(
 ) -> Widget
 ```
 
-A tree row (M41: built from its fragment), indented 16 px plus 24 per `depth`, `role="treeitem"` at `level` `depth + 1`. A branch has a chevron (pointing right, down when `.expanded`), toggled by a click, Enter or Space, and set by the right and left arrows.
+A tree row, indented 16 px plus 24 per `depth`, `role="treeitem"` at `level` `depth + 1`. A branch has a chevron (pointing right, down when `.expanded`), toggled by a click, Enter or Space, and set by the right and left arrows.
 
 ### `video`
 
@@ -1359,7 +1359,7 @@ video(
 ) -> 'Widget'
 ```
 
-A surface for video frames (M42: an `image` node Tesserae builds, off `tre`'s `add_video`). `video.frame(rgba, width, height)` shows a frame (RGBA bytes, `width*height*4` of them); frames can change size.
+A surface for video frames (an `image` node Tesserae builds). `video.frame(rgba, width, height)` shows a frame (RGBA bytes, `width*height*4` of them); frames can change size.
 
 ## Controls
 
@@ -1504,7 +1504,7 @@ A number field between − and + buttons, as `tre`'s spin box was (MD3 has no sp
 
 - `color(role: str) -> RGBA`: A colour role of this control's theme, or MD3's baseline.
 - `destroy() -> None`: Stops the spin box and frees its nodes.
-- `dispose() -> None`: Stops the spin box (its repainting and listeners) but leaves its nodes, for a caller about to free the tree it sits in -- as a view does with its controls (M58).
+- `dispose() -> None`: Stops the spin box (its repainting and listeners) but leaves its nodes, for a caller about to free the tree it sits in -- as a view does with its controls.
 - `on_change(fn: Callable[[Any], None]) -> Callable[[], None]`: Calls `fn(value)` after each change the user makes.
 - `set_theme(theme: Theme) -> None`: Re-tints the spin box for `theme`, at once.
 
@@ -1640,7 +1640,7 @@ class Popover(
 ) -> None  # extends Overlay
 ```
 
-MD3's rich tooltip (M42), `tre`'s popover: a `surface_container` panel, 12 px corners, elevation 2, padded 16, with an optional `title_small` `subhead`, `body_medium` supporting text (both in `on_surface_variant`, the text wrapped to the width) and optional text-button `actions` (`(label, fn)`, in `primary`, each closing it after calling `fn`). It opens below its anchor and stays until an outside press, Escape or an action closes it; with actions, focus moves to the first.
+MD3's rich tooltip, `tre`'s popover: a `surface_container` panel, 12 px corners, elevation 2, padded 16, with an optional `title_small` `subhead`, `body_medium` supporting text (both in `on_surface_variant`, the text wrapped to the width) and optional text-button `actions` (`(label, fn)`, in `primary`, each closing it after calling `fn`). It opens below its anchor and stays until an outside press, Escape or an action closes it; with actions, focus moves to the first.
 
 Also has everything `Overlay` has.
 
@@ -1661,7 +1661,7 @@ class SearchView(
 ) -> None  # extends Overlay
 ```
 
-MD3's docked search view (M42): the results under a search bar, a `surface_container_high` panel with 28 px corners and elevation, of 56 px `body_large` rows (`role="menuitem"`), at most `max_height` tall.
+MD3's docked search view: the results under a search bar, a `surface_container_high` panel with 28 px corners and elevation, of 56 px `body_large` rows (`role="menuitem"`), at most `max_height` tall.
 
 Also has everything `Overlay` has.
 
@@ -1783,7 +1783,7 @@ bind_navigation(
 ) -> None
 ```
 
-Choosing a rail item navigates to its screen, a step `back()` returns from (M66), or calls the `on_navigate` method of `viewmodel` with the screen's name (Q3).
+Choosing a rail item navigates to its screen, a step `back()` returns from, or calls the `on_navigate` method of `viewmodel` with the screen's name.
 
 ### `build_shell`
 
@@ -1791,7 +1791,7 @@ Choosing a rail item navigates to its screen, a step `back()` returns from (M66)
 build_shell(app: Any, spec: dict[str, Any]) -> Any
 ```
 
-Builds `spec`'s `AppShell` on `app`'s window: its bars stretch across the window, its rail lists the navigation items' screens, and it takes the app's theme and follows it (M50).
+Builds `spec`'s `AppShell` on `app`'s window: its bars stretch across the window, its rail lists the navigation items' screens, and it takes the app's theme and follows it.
 
 ### `check_references`
 
@@ -1828,7 +1828,7 @@ Checks a shell spec (the parsed YAML); `where` names it in errors.
 place_panels(app: Any, shell: Any, spec: dict[str, Any], path: Path) -> None
 ```
 
-Docks each named panel in its zone (Q2): the screen registered under that name, or else the `<Name>_View.yaml` next to the shell file (with its `<Name>_ViewModel.py`, if any), loaded and registered under it.
+Docks each named panel in its zone: the screen registered under that name, or else the `<Name>_View.yaml` next to the shell file (with its `<Name>_ViewModel.py`, if any), loaded and registered under it.
 
 ### `reload_shell`
 
@@ -1843,7 +1843,7 @@ reload_shell(
 ) -> list[str]
 ```
 
-Applies an edited shell file in place (M52 Q4) and returns what it couldn't: the structural changes that need a restart. The bars, the rail, the zones and `center` are compared with the live shell; panels with the file as it was, so a panel the user dragged stays where it is unless the file moved it.
+Applies an edited shell file in place and returns what it couldn't: the structural changes that need a restart. The bars, the rail, the zones and `center` are compared with the live shell; panels with the file as it was, so a panel the user dragged stays where it is unless the file moved it.
 
 **Constants**
 
@@ -1863,11 +1863,11 @@ The docking of one window (see the module doc). `add_zone(side, size)` returns t
 
 - `add_panel(side: str, panel: Any, title: str) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone, titled `title` on its tab, and shows it.
 - `add_zone(side: str, size: float) -> Any`: Creates `side`'s zone -- a tab strip over the area that shows its selected panel -- `size` px wide (left, right) or tall (top, bottom), or filling what's left (center).
-- `move(panel: Any, side: str) -> None`: Moves `panel` to `side`'s zone and shows it there, as a drag would (`tre` 0.3.5.1's `dock_panel` moves a docked panel; 0.3.5's left it listed in its old zone, `tre` issue #14).
+- `move(panel: Any, side: str) -> None`: Moves `panel` to `side`'s zone and shows it there, as a drag would, moving it between zones.
 - `on_move(fn: Callable[[Any, str], Any]) -> Callable[[], None]`: Calls `fn(node, side)` when a panel moves zone.
 - `panel(title: str) -> Optional[Any]`: The docked panel titled `title`, or `None` (for `AppShell.restore`).
 - `panels(side: str) -> list[Any]`: `side`'s panels, in their tabs' order.
-- `remove_panel(panel: Any) -> Any`: Undocks `panel` (M53): its tab goes, and if it was shown the zone shows the next panel, else the previous (`tre` 0.3.5.2's `undock_panel`, `tre` issue #16).
+- `remove_panel(panel: Any) -> Any`: Undocks `panel`: its tab goes, and if it was shown the zone shows the next panel, else the previous.
 - `set_theme(theme: Theme) -> None`: Re-colours the zones, tabs and highlight for `theme`, at once.
 - `show(panel: Any) -> None`: Shows `panel` in its zone.
 - `shown(side: str) -> Optional[Any]`: The panel `side`'s zone is showing, or `None` if it has none.
@@ -1908,7 +1908,7 @@ The state layer, ripple and focus ring on one `box` node: the layer and ripple t
 - `retint(tint: RGBA, ring_color: RGBA) -> None`: New colours (a theme change), for the layer, live ripples and ring.
 - `ring_visible` *(property)*: Whether the focus ring is showing.
 - `ripples` *(property)*: The live ripples' circle nodes, oldest first.
-- `set_dragged(dragged: bool) -> None`: For widgets that drag (M40): MD3's dragged state.
+- `set_dragged(dragged: bool) -> None`: For widgets that drag: MD3's dragged state.
 
 **Constants**
 
@@ -1927,7 +1927,7 @@ The state layer, ripple and focus ring on one `box` node: the layer and ripple t
 bind(node: Any, **fields: Any) -> Callable[[], None]
 ```
 
-Keeps `node`'s `label`, `hidden` or `level` up to date (M47): each is a `Signal` or `Computed` (anything with `.get()`), a function of no arguments, or a plain value, and it's set now and again whenever what it read changes, checked as `describe` checks it (a wrong value raises, naming the field). `node` is a node, or a widget or control (its `.node`).
+Keeps `node`'s `label`, `hidden` or `level` up to date: each is a `Signal` or `Computed` (anything with `.get()`), a function of no arguments, or a plain value, and it's set now and again whenever what it read changes, checked as `describe` checks it (a wrong value raises, naming the field). `node` is a node, or a widget or control (its `.node`).
 
 ### `check`
 
@@ -2122,7 +2122,7 @@ expand_components_to_spec(
 ) -> Any
 ```
 
-Resolves every `include:` and expands every `component:` entry in `yaml_text`, returning the finished `WidgetSpec`-shaped dict with no `include:`/`component:`/`with:`/`params:`/`repeat:` keys remaining -- ready for `tesserae.View(spec)`, with no YAML-text round-trip (M29).
+Resolves every `include:` and expands every `component:` entry in `yaml_text`, returning the finished `WidgetSpec`-shaped dict with no `include:`/`component:`/`with:`/`params:`/`repeat:` keys remaining -- ready for `tesserae.View(spec)`, with no YAML-text round-trip.
 
 ### `load_stylesheet`
 
@@ -2151,4 +2151,4 @@ load_view(
 ) -> Any
 ```
 
-Reads `path`, resolves its `include:`s and expands its `component:` usage, and builds a Tesserae `View` from the result (M37: Tesserae builds views itself on `tre`'s building blocks).
+Reads `path`, resolves its `include:`s and expands its `component:` usage, and builds a Tesserae `View` from the result .

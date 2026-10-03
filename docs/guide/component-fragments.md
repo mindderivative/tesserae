@@ -1,30 +1,12 @@
-# Declarative Component Fragments
+# Component Fragments
 
-This is a different feature from [Components & Embedding](components.md).
-That page covers `tesserae.instantiate` -- embedding a whole other
-`*_View.yaml` + `*_ViewModel.py` pair as an independent, stateful
-instance. This page covers **`component:` / `with:` / `repeat:`** -- a
-pure, static, text-level macro expansion that runs *before* `tre` ever
-sees a file. It has no `ViewModel` of its own; it exists so a
-`*_View.yaml` (or a `*_Component.yaml` fragment) can reuse one of
-Tesserae's 67 built-in MD3 widget shapes -- a filled button, a card, a
-checkbox -- by name and parameters, instead of hand-writing the same
-`kind: Rect` / `style:` / `children:` block every time.
+A **fragment** is a reusable piece of a view: structure with `{{ parameters }}`, used by name. It is
+a different thing from [Components & Embedding](components.md), which embeds a whole other view and
+ViewModel pair with state of its own. A fragment has no ViewModel and no state: it expands, when the
+file loads, into ordinary nodes. Tesserae ships [77 of them](../components/index.md), one for
+each MD3 widget shape, and you can write your own.
 
-## Why this exists
-
-`tre` renders a real MD3 (Material Design 3) widget catalog
-imperatively, through `Window.add_*` factory calls (`add_button`,
-`add_card`, ...). Those factories resolve theme colors, shape tokens,
-and internal per-state fields correctly, but they're Python function
-calls -- not something a `*_View.yaml` file can reference directly.
-Every fragment in `src/tesserae/spec/components/*.yaml` is a
-declarative, `WidgetSpec`-shaped YAML template that reproduces one of
-those factories' real output, checked directly against its imperative
-counterpart. `component: ButtonFilled` in a view expands, at load time,
-to the exact subtree that template describes.
-
-## Basic usage
+## Using one
 
 ```yaml
 # Some_View.yaml
@@ -34,231 +16,165 @@ style: {flex_direction: horizontal, gap: 8}
 children:
   - id: save_button
     component: ButtonFilled
-    with: {label: "Save", width: 120, height: 40}
+    with: {label: Save, width: 120, height: 40, corner_radius: 20}
 ```
 
-- `component:` names a fragment -- `ButtonFilled` resolves to
-  `spec/components/ButtonFilled_Component.yaml`.
-- `id:` is required on every `component:` node. It's used to namespace
-  every `id:` *inside* the fragment (`save_button.root`,
-  `save_button.label`, ...), so two calls to the same fragment never
-  collide -- the fragment's own root `id:` becomes the call site's
-  `id:` directly, not a doubled-up `save_button.save_button`.
-- `with:` supplies the fragment's declared `params:`. Every declared
-  param must be supplied, and supplying an undeclared key is also a
-  load-time error (`ComponentError`) -- both fail loudly rather than
-  silently doing the wrong thing.
+- `component:` names the fragment: `ButtonFilled` is `ButtonFilled_Component.yaml`.
+- `id:` is required. It namespaces every `id:` inside the fragment (`save_button.label`), so two calls
+  never collide; the fragment's root takes the call's `id:`.
+- `with:` supplies the fragment's parameters. A missing or unknown one is an error at load time.
 
-This expands to something equivalent to:
+### Wiring a call
+
+A call also takes the keys that wire and name the fragment's root: `handlers:`, `bindings:`,
+`two_way:`, `a11y:`, `interaction:`, `classes:` and `window_region:`.
 
 ```yaml
-id: root
-kind: Container
-style: {flex_direction: horizontal, gap: 8}
-children:
-  - id: save_button
-    kind: Rect
-    style: {width: 120, height: 40, background: primary, corner_radius: full}
-    children:
-      - id: save_button.label
-        kind: Text
-        text: {content: "Save", typography_role: label_large}
-```
-
-(The real fragment content is theme-role-driven, not a literal hex
-color -- see any file under `src/tesserae/spec/components/` for the
-genuine shape.)
-
-## Handlers, bindings and names on a call
-
-A call also takes the keys that wire and name the fragment's root
-(M69): `handlers:`, `bindings:`, `two_way:`, `a11y:`, `interaction:` and
-`classes:`. So a button fragment is a button:
-
-```yaml
-id: root
-kind: Container
-style: {flex_direction: horizontal, gap: 8}
-children:
   - id: save
     component: ButtonFilled
-    with: {label: "Save", width: 120, height: 40, corner_radius: 20}
-    handlers: {on_click: "save"}
-    a11y: {label: "Save the note"}
+    with: {label: Save, width: 120, height: 40, corner_radius: 20}
+    handlers: {on_click: save}
+    a11y: {label: Save the note}
 ```
 
-- They go on the fragment's **root** (for a button, its `Rect`), after
-  it's expanded. A root that has its own keeps them: the call's are
-  merged in key by key, and win; `two_way:` replaces the root's, and
-  `classes:` adds to them.
-- They're the view's, not the fragment's: a `{{ }}` in them is one of
-  the ViewModel's bindings (`bindings: {opacity: "{{ fade.get() }}"}`),
-  never one of the fragment's params.
+- They go on the fragment's **root**, after it expands. A root that has its own keeps them: the call's
+  are merged in key by key and win; `two_way:` replaces the root's and `classes:` adds to them.
+- They belong to the view, not the fragment: a `{{ }}` in them is the ViewModel's binding, never one of
+  the fragment's parameters.
 - With `repeat:`, every item gets them.
-- `style:` isn't one of them: a fragment's look is its `with:` params.
-- A clickable root is a button for the keyboard and assistive
-  technology too, with the state layer and ripple (see
-  [Interaction](interaction.md)).
+- A clickable root is a button for the keyboard and assistive technology too, with the state layer and
+  ripple (see [Interaction](interaction.md)).
 
-## Authoring a fragment
+## Where the look is
 
-A `*_Component.yaml` fragment is a plain `WidgetSpec` tree with one
-extra top-level key:
+A fragment holds structure. Its look lives in a **stylesheet** of the same name, a list of rules
+that name the fragment's parts by `id`:
 
 ```yaml
-# spec/components/ButtonFilled_Component.yaml
-params: [label, width, height]
+# ButtonFilled_Component.yaml: the structure
+params: [label, width, height, corner_radius]
 id: root
 kind: Rect
-style:
-  width: "{{ width }}"
-  height: "{{ height }}"
-  background: primary
-  corner_radius: full
 children:
   - id: label
     kind: Text
     text: {content: "{{ label }}", typography_role: label_large}
 ```
 
-- `params:` declares every name the fragment accepts. It's popped off
-  before the fragment is treated as a real node tree, so it never
-  leaks into the expanded output.
-- `{{ name }}` is substituted with the caller's supplied value.
-
-### The whole-value substitution rule
-
-A string that is *exactly* one placeholder (`"{{ width }}"`, optionally
-with surrounding whitespace) is replaced with the supplied value's own
-real Python type -- not stringified. This is load-bearing, not
-cosmetic: PyYAML's dumper quotes a numeric-looking Python `str`, so a
-naive string substitution would turn `width: "{{ width }}"` into
-`width: '120'` -- a quoted string `tre`'s `serde_yaml_ng` parser
-rejects for an `f32` field. Passing `width=120` (a real `int`) instead
-round-trips as an unquoted YAML number.
-
-The same rule is what lets a live `tre` binding expression pass through
-a fragment untouched:
-
 ```yaml
-with: {label: "{{ some_signal.get() }}"}
+# ButtonFilled_Stylesheet.yaml: the look
+styles:
+  - id: root
+    style: {width: "{{ width }}", height: "{{ height }}", background: primary, corner_radius: "{{ corner_radius }}"}
+  - id: label
+    style: {foreground: on_primary}
 ```
 
-The supplied value here is itself the literal string
-`"{{ some_signal.get() }}"` -- a whole-value substitution reproduces it
-exactly, and `tre`'s own `binding.rs` resolves it later, at
-`View._attach()` time, exactly as if it had been written directly into
-a non-fragment node.
+The parameters fill the stylesheet as they fill the fragment, and each rule goes under the style the
+part already has, so a part's own `style:` in the fragment wins. Every built-in
+[stylesheet](../stylesheets/index.md) has a page.
 
-Only a placeholder embedded in a larger string (`"Item {{ n }}"`) falls
-back to plain string interpolation, where stringifying is correct.
+## Writing your own
 
-### A real gotcha: don't name a param `on`/`off`
-
-PyYAML's default loader treats a bare, unquoted `on`/`off` as a YAML
-1.1 boolean literal. A fragment (or `params:` list) with a key
-literally named `on` gets silently coerced to `True` before
-`_substitute` ever runs, and `{{ on }}` is left as unresolved literal
-text in the output for `tre` to reject. That's why `Switch_Component.yaml`
-names its parameter `selected` rather than `on` -- prefer a name that
-isn't a YAML 1.1 boolean keyword (`on`/`off`/`yes`/`no`/`true`/`false`)
-for any boolean-ish param.
-
-## Optional params and conditionals
-
-A `params:` entry can carry a default, as a one-key mapping: the param
-is then optional (M55).
+Put a `<Name>_Component.yaml` in the same folder as the view that uses it, and use it as
+`component: Name`. Add a `<Name>_Stylesheet.yaml` beside it for its look, or give its parts `style:`
+directly; both work, and you can mix them.
 
 ```yaml
-params: [label, width, {icon: null}]
+# Stat_Component.yaml
+params: [label, {unit: ""}]
+id: root
+kind: Container
+children:
+  - id: value
+    kind: Text
+    text: {content: "0", typography_role: title_large}
+    bindings: {text: "{{ value }}"}
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", typography_role: label_medium}
 ```
 
-Two expansion-time conditionals then shape a fragment around the values
-it was given. Both are resolved once the params are substituted, before
-the view is built:
+- `params:` lists every name the fragment takes. A name is required; `{name: default}` is optional.
+- A fragment of your own with a built-in name replaces the built-in one, and its stylesheet.
+- A stylesheet of your own with a built-in component's name goes over the built-in one, field by field.
+- A fragment can't use `include:` or a `style:` file; use a nested `component:`.
+- Hot reload watches the fragment and its stylesheet.
 
-- **`when:` on a child:** the child is kept only when the value is true,
-  and `when:` itself is removed.
-- **`{if: c, then: a, else: b}` as a value:** it becomes `a` when `c` is
-  true, else `b`. With no `else:`, the key is left out.
+### How a parameter is filled in
+
+A string that is exactly one placeholder (`"{{ width }}"`) is replaced by the supplied value with its own
+type, so `width: 120` stays a number. A placeholder inside a larger string (`"Item {{ n }}"`) is
+interpolated as text. The same rule lets a live binding pass through a fragment untouched:
 
 ```yaml
-style:
-  padding: {if: "{{ icon }}", then: {left: 16, right: 20}, else: {left: 20, right: 20}}
+with: {value: "{{ open_text.get() }}"}   # reaches the Text's `bindings:` as written
+```
+
+!!! warning "Don't name a parameter `on`, `off`, `yes` or `no`"
+    YAML reads those bare words as booleans before Tesserae sees them. Name a boolean parameter
+    `selected` or `enabled`.
+
+### Optional parameters and conditionals
+
+Two conditionals shape a fragment around the values it was given, once the parameters are filled in:
+
+- **`when:` on a child** keeps the child only when the value is true.
+- **`{if: c, then: a, else: b}` as a value** becomes `a` when `c` is true, else `b`; with no `else:` the
+  key is left out.
+
+```yaml
+params: [label, {icon: null}]
+id: root
+kind: Container
 children:
   - id: icon
     when: "{{ icon }}"
     kind: Icon
     icon: {name: "{{ icon }}"}
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", typography_role: label_large}
 ```
 
-False values are `null`, `false`, `0`, an empty string, list or
-mapping, and the strings `"false"`, `"no"`, `"null"`, `"none"` and `"0"`,
-in any case. Everything else is true. The `ExtendedFab*` fragments use
-both for MD3's text-only extended FAB. Both work per item in `repeat:`,
-since each item's values are substituted separately.
+```yaml
+styles:
+  - id: root
+    style: {padding: {if: "{{ icon }}", then: {left: 16, right: 20}, else: {left: 20, right: 20}}}
+```
+
+False values are `null`, `false`, `0`, an empty string, list or mapping, and the strings `"false"`,
+`"no"`, `"null"`, `"none"` and `"0"`, in any case. Everything else is true.
 
 ## Nesting
 
-A fragment can itself use `component:` -- the nested fragment's own
-`id:`s get namespaced by the *outer* call site's `id:` too, exactly
-once, not twice. Cycles (a fragment that references itself, directly
-or transitively) are rejected, and nesting past `MAX_DEPTH` (16 --
-generous headroom for real composition, not a limit any legitimate
-tree should approach) is also rejected.
+A fragment can use `component:` itself. The nested fragment's ids are namespaced by the outer call too.
+A fragment that uses itself, directly or through others, is rejected, as is nesting more than 16 deep.
 
-## Repeating a fragment: `repeat:`
+## Repeating: `repeat:`
 
-`repeat:` expands one `component:` entry to N sibling nodes from a
-static, literal list of per-item overrides -- for a list of rows built
-from data you already have at load time, without hand-duplicating N
-near-identical `component:` blocks:
+`repeat:` expands one `component:` entry into several siblings from a list of per-item values:
 
 ```yaml
 id: settings_list
 component: ListItem
 with: {width: 360}
 repeat:
-  - {headline: "Notifications"}
-  - {headline: "Privacy"}
-  - {headline: "Storage"}
+  - {headline: Notifications}
+  - {headline: Privacy}
+  - {headline: Storage}
 ```
 
-Each `repeat:` entry is merged on top of the shared `with:` values.
-Each iteration gets its own `id:`, auto-suffixed `.0`/`.1`/`.2`/...
-(`settings_list.0`, `settings_list.1`, `settings_list.2`), so every
-generated node still has a unique, predictable id.
+Each entry is merged over the shared `with:`. The nodes are `settings_list.0`, `settings_list.1`, and so
+on. A key in both `with:` and an entry is an error: a value that varies belongs in `repeat:`, a shared one
+in `with:`. `repeat:` works only on a `component:` that is an entry of `children:`.
 
-A key given in **both** `with:` and a `repeat:` entry is a load-time
-error, not a "last one wins" resolution -- a value that varies per item
-belongs in `repeat:`; a value shared by every item belongs in `with:`.
-Missing/unknown parameters are still checked per iteration, exactly as
-for a non-repeated call.
+`repeat:` is fixed when the file loads. For a list that changes while the app runs, use a
+[Repeater](repeater.md).
 
-`repeat:` is only valid on a `component:` node that's an entry inside a
-`children:` list -- there's nowhere for a 2nd or 3rd instance to go if
-the `component:` node is a document's single root.
-
-### `repeat:` is not reactive
-
-Everything `repeat:`'s own list expands to is fixed at macro-expansion
-time, before `tre` ever sees the file -- the same "before `tre` ever
-sees the file" framing this whole module is built on. An app that
-needs runtime-changing content (items added/removed, live reordering
-driven by a `Signal`) still uses the existing imperative
-[`Repeater`](repeater.md), not `repeat:`. `repeat:`'s own value *can*
-itself use `{{ param }}` substitution, though -- an outer component's
-own list-typed parameter can be forwarded straight into an inner
-`repeat:`, since the existing substitution pass runs before expansion
-ever descends into a nested `component:` node.
-
-### Selected items, and repeating inside a fragment
-
-A fragment can forward a list param to `repeat:` (`repeat: "{{ items }}"`),
-so a container fragment takes its items as one list. Each item can carry
-per-item values, a `selected: true` say, which the item fragment turns
-into its look with `{if:}` (M56). That's how the five widgets whose
-selected item looks different are declared:
+A fragment can forward a list parameter to `repeat:` (`repeat: "{{ items }}"`), so a container takes its
+items as one list, and an item can carry a `selected: true` that its fragment turns into a look with
+`{if:}`. That is how `Tabs`, `NavigationRail`, `NavigationDrawer`, `Menu` and `ButtonGroup` take theirs:
 
 ```yaml
 - id: tabs
@@ -270,88 +186,5 @@ selected item looks different are declared:
       - {label: Sent, selected: true}
 ```
 
-| Fragment | Its items | Item fields |
-| --- | --- | --- |
-| `Tabs` (`item_width`) | `TabsItem` | `label`, `icon`, `selected` |
-| `NavigationRail` | `NavigationRailItem` | `label`, `icon`, `selected` |
-| `NavigationDrawer` (`width`, `item_width`) | `NavigationDrawerItem` | `label`, `icon`, `selected` |
-| `Menu` (`width`) | `MenuItem` (48 px, as a menu's) | `label` |
-| `ButtonGroup` (`width`, `height`, `corner_radius`, `button`) | any `Button*` (`ButtonFilled` by default) | `label` |
-
-These are static: the selected item is whatever the file says. For
-selection that changes as the user clicks or presses the arrows, a
-menu that opens and closes, or a button group's press morph, use the
-widgets (`tesserae.widgets.tabs`, `tesserae.overlays.Menu` and so on).
-
-## The built-in fragment catalog
-
-67 of ~68 real MD3 widgets have a `*_Component.yaml` fragment today,
-covering every MD3 category:
-
-| Category | Fragments |
-| --- | --- |
-| Buttons & Actions | `ButtonGroup` (M56), `ButtonElevated`/`ButtonFilled`/`ButtonFilledTonal`/`ButtonOutlined`/`ButtonText`, `IconButtonStandard`/`IconButtonFilled`/`IconButtonFilledTonal`/`IconButtonOutlined`, `Fab{Primary,Secondary,Tertiary,Surface}`, `ExtendedFab{Primary,Secondary,Tertiary,Surface}`, `SplitButton{Elevated,Filled,FilledTonal,Outlined,Text}` |
-| Selection & Input | `Checkbox`, `RadioButton`, `Switch`, `Slider`, `SpinBox` |
-| Cards/Lists/Chips/Structural | `CardElevated`/`CardFilled`/`CardOutlined`, `ListItem`, `Chip{Assist,Filter,FilterSelected,Input,Suggestion}`, `Badge{Dot,Labeled}`, `Divider`, `Link`, `AccordionHeader`, `TreeNode{Branch,Leaf}` |
-| Navigation & Shell | `Toolbar{Docked,Floating}`, `TopAppBar`, `StatusBar` (fixed-shape members; see `BUILD_TRACKER_ARCHIVE_0.2.md` M22), `Tabs`/`TabsItem`, `NavigationRail`/`NavigationRailItem`, `NavigationDrawer`/`NavigationDrawerItem` (M56) |
-| Overlays | `Dialog`, `Snackbar`, `Tooltip`, `Menu`/`MenuItem`, `SideSheet{Modal,Standard}` |
-| Search | `SearchBar`, `SearchView` |
-| Progress & Status | `CircularProgress`, `LinearProgress`, `LoadingIndicator` |
-| Media & Graphics | `Image`, `NodeGraph` |
-| Date & Time | `DatePickerDay`/`DatePickerDaySelected`/`DatePickerDayToday`/`DatePickerDayOutsideMonth`, `PeriodSelector{AM,PM}`, `TimePickerDial` |
-
-The Selection & Input, Progress & Status and `TimePickerDial` fragments
-expand to the eight **control kinds** (`Checkbox`, `RadioButton`,
-`Switch`, `Slider`, `CircularProgress`, `LinearProgress`,
-`LoadingIndicator`, `TimePickerDial`). Since M40 these are Tesserae's MD3
-controls, which respond to the pointer and keyboard themselves: a
-checkbox ticks, a slider drags. Their state takes bindings and
-`two_way:` (`checked`, `selected`, `value`, `hour`, `minute`), as does
-`disabled`, and `on_change` runs for the user's changes. Radio buttons
-with the same `group:` name exclude each other and are one Tab stop:
-
-```yaml
-- {id: small, kind: RadioButton, selected: true, group: size, style: {}}
-- {id: large, kind: RadioButton, selected: false, group: size, style: {}}
-```
-
-`view.control("small")` returns a control, whose `Signal`s are its state
-(see [Controls](controls.md)).
-The `SpinBox` fragment is the `SpinBox` control kind (M58), with its
-behaviour; `kind: SpinBox` works directly too.
-
-Since M41 a `Text` or `Link` with no `width` or `height` is sized to its
-content (`tre` 0.3.4's text has no size of its own, so before M41 such a
-label was 0 px wide and didn't show). The button fragments centre their
-label, the chips pad theirs, and a list item's headline is MD3's
-`body_large`. A `Link` is a box holding its text since M41: `tre`'s
-`text` never gets pointer events, so before, only the keyboard could
-follow a link. `view.node(id)` for a Link is the box.
-
-For each fragment's exact `params:` and structure, read the file
-directly under `src/tesserae/spec/components/` -- every one is short
-(typically under 25 lines) and carries its own comment explaining which
-real `tre` factory it matches and any real MD3 token it hardcodes.
-
-### What has no fragment yet, and why
-
-- **`graph_node`** -- a fragment can't express it (a node attaches to
-  its graph's live node), so it's a YAML kind instead: `NodeGraph` and
-  `GraphNode` (M60, see the
-  [Widget Catalog](widget-catalog.md#node-graphs-and-video-in-yaml)).
-
-## Loading a view that uses `component:`
-
-Nothing extra is required at the call site -- `App.load()` (and
-`tesserae.instantiate`) already expand `component:` usage
-automatically, via `tesserae.spec.load_view` /
-`expand_components_to_spec` under the hood, and hand `tre` the finished
-dict -- `tre` never reads the view file itself. See
-[`load_view`](../api/spec.md) if you need to expand a fragment-using
-file manually (e.g. for a tool, or outside `App`), and for the
-[`include:`](../api/spec.md#include) rules, which Tesserae also
-resolves.
-
-A view with zero `component:` usage expands to itself unchanged, so
-this is a safe, no-op-preserving layer under every existing view --
-not an opt-in switch.
+These are static: the selected item is whatever the file says. For selection that changes as the user
+clicks, use the [widgets in Python](widget-catalog.md).

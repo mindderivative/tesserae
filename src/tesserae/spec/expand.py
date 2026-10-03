@@ -123,7 +123,7 @@ def _substitute(node: Any, values: dict[str, Any]) -> Any:
 
 
 def _truthy(value: Any) -> bool:
-    """A condition after substitution (M55): `None`, `""`, `false`, `0`,
+    """A condition after substitution: `None`, `""`, `false`, `0`,
     an empty list or mapping, and the strings "false"/"no"/"null"/"none"
     (any case) are false; everything else is true."""
     if isinstance(value, str):
@@ -169,7 +169,7 @@ _DROP = object()
 
 
 def _declared_params(declared: Any, path: Path) -> tuple[list[str], dict[str, Any]]:
-    """`params:` as names and defaults (M55): each entry is a name (a
+    """`params:` as names and defaults: each entry is a name (a
     required param) or a one-key mapping `{name: default}` (optional)."""
     if not isinstance(declared, list):
         raise ComponentError(f"{path}: `params:` must be a list of names")
@@ -302,7 +302,7 @@ def kind_of_file(name: str) -> str | None:
 
 
 def _style_file(owner: str, path: Any) -> str:
-    """A `style:` given as text (M75): the `*_Style.yaml` file it names."""
+    """A `style:` given as text: the `*_Style.yaml` file it names."""
     if not isinstance(path, str) or not path.endswith(STYLE_SUFFIX):
         kind = kind_of_file(path) if isinstance(path, str) else None
         what = f" ({path!r} is {kind})" if kind else ""
@@ -420,7 +420,7 @@ def _expand_component(
 ) -> list[dict[str, Any]]:
     """Replace one `{component: Name, with: {...}}` node with the
     fragment(s) it names, fully expanded and namespaced -- one element
-    normally, or one per real `repeat:` entry (M28)."""
+    normally, or one per real `repeat:` entry."""
     if len(chain) >= MAX_DEPTH:
         raise ComponentError(f"{_chain_text(chain)}: components nested more than {MAX_DEPTH} deep")
 
@@ -568,7 +568,7 @@ def _apply_call_keys(root: dict[str, Any], keys: dict[str, Any]) -> None:
 
 def _expand_list_item(item: Any, component_dirs: list[Path], chain: tuple[str, ...], deps: set[Path]) -> list[Any]:
     """One `children:` entry expands to 0+ real nodes -- 1 for an
-    ordinary node (component or not), N for a real `repeat:` (M28)."""
+    ordinary node (component or not), N for a real `repeat:`."""
     if isinstance(item, dict) and _COMPONENT_KEY in item:
         return _expand_component(dict(item), component_dirs, chain, deps)
     return [_walk(item, component_dirs, chain, deps)]
@@ -605,7 +605,7 @@ def expand_components_to_spec(
     """Resolves every `include:` and expands every `component:` entry in
     `yaml_text`, returning the finished `WidgetSpec`-shaped dict with no
     `include:`/`component:`/`with:`/`params:`/`repeat:` keys remaining --
-    ready for `tesserae.View(spec)`, with no YAML-text round-trip (M29).
+    ready for `tesserae.View(spec)`, with no YAML-text round-trip.
 
     `base_dir` is the directory `include:` paths resolve against --
     normally the `*_View.yaml`'s own directory. `None` means there is

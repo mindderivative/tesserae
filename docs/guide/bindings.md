@@ -17,7 +17,7 @@ Expressions are a small, safe language, not Python: nothing in a view
 file can run arbitrary code.
 
 A binding can drive text, sizes, colours and other numbers, `checked`
-and `selected`, and `visible` (0.3.0): `False` takes a node out of the
+and `selected`, and `visible`: `False` takes a node out of the
 layout and out of hit-testing, not just out of sight. There's no
 conditional expression; `and`/`or` return their operands, so
 `{{ app.maximized.get() and 'Restore' or 'Maximize' }}` picks a label
@@ -46,7 +46,7 @@ An `a11y:` field can be bound the same way (`label`, `hidden` and
 
 ### Video frames
 
-An `Image` takes a `frame` binding (M59): a value `(rgba, width, height)`,
+An `Image` takes a `frame` binding: a value `(rgba, width, height)`,
 `width * height * 4` bytes of RGBA and the frame's size. Each new value
 is shown as it arrives, and `None` keeps the last one. Decoding the video
 is the app's: a ViewModel sets a `Signal` of the latest frame, and the
@@ -102,13 +102,10 @@ widget "label" binding on "text" ("{{ -1 }}"): failed to parse binding expressio
 
 ## Who evaluates it
 
-Tesserae does, with `tesserae.binding`, a port of `tre`'s evaluator that
-gives the same result or the same error for every expression (tested
-side by side), in a Tesserae `View` (`tesserae.view.View`, M37). A view
-still built by `tre`'s `View` is evaluated by `tre` until Tesserae builds
-every view itself (M37 Phase 6); `tre` removes its evaluator in 0.3.5.
+Tesserae does, with `tesserae.binding`, in a Tesserae `View`
+(`tesserae.view.View`).
 
-In a Tesserae view, a binding that changes a value sets it; one whose
-value hasn't changed does nothing. Setting a value from a binding never
-counts as the user's edit, so `on_change` runs only when the user changes
-the widget: typing in a text field, or toggling a checkbox.
+A binding that changes a value sets it; one whose value hasn't changed
+does nothing. Setting a value from a binding never counts as the user's
+edit, so `on_change` runs only when the user changes the widget: typing in
+a text field, or toggling a checkbox.

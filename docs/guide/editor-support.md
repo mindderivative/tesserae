@@ -12,7 +12,7 @@ what each one means, and underlines a mistake such as `foregorund`.
 | `tesserae-yaml-schema.json` | a view, `*_View.yaml` |
 | `tesserae-shell-schema.json` | an app shell, `*_Shell.yaml` |
 | `tesserae-component-schema.json` | a component fragment, `*_Component.yaml` |
-| `tesserae-theme-schema.json` | a theme or a stylesheet |
+| `tesserae-theme-schema.json` | a theme, a stylesheet, or a component's stylesheet (`<Name>_Stylesheet.yaml`) |
 
 They are JSON Schema draft-07, which Red Hat's server supports, and they
 come with Tesserae (`tesserae schema` says where) and are published on this
@@ -41,10 +41,10 @@ user settings):
 }
 ```
 
-(`tesserae schema --settings` also maps `tesserae-theme-schema.json`. A
-theme or stylesheet has no naming convention, so the globs it uses are a
-guess, `**/*theme*.yaml` and `**/*stylesheet*.yaml`: change them to match
-yours.)
+(`tesserae schema --settings` also maps `tesserae-theme-schema.json`, to
+`**/*theme*.yaml` and `**/*stylesheet*.yaml`. A theme or stylesheet
+needn't follow the [naming convention](naming-convention.md#style-stylesheet-and-theme-files),
+so change the globs to match your files.)
 
 The path changes if you move to a new virtual environment, so rerun the
 command then. To avoid that, use the published URL instead. It needs a
@@ -87,6 +87,11 @@ It can't know what only your app knows:
 - your own theme: a colour accepts any CSS colour, and suggests the theme
   roles.
 
+A component's stylesheet (`<Name>_Stylesheet.yaml`) validates against the
+theme and stylesheet schema, and its style values may be the component's
+`{{ parameters }}`, as in a fragment. See
+[Stylesheets](../stylesheets/index.md).
+
 In a fragment (`*_Component.yaml`), where a value can also be a
 `{{ parameter }}` or chosen by one (`{if: ..., then: ..., else: ...}`), the
 component schema allows that where the view schema does not.
@@ -96,7 +101,7 @@ component schema allows that where the view schema does not.
 The schemas are written by `tools/generate_yaml_schema.py` from Tesserae's
 own code (the kinds, style fields, tokens, icons and fragments), and ask
 `tre` for the layout keywords, so none of it is typed by hand. Run it again
-after changing what a file may hold; the tests check that every YAML file in
+after changing what a file may hold. The tests check that every YAML file in
 the repository validates, that the mistakes above are rejected, and that the
 committed files are what it writes. Run the language-server check
 (below) as well when a file format changes.
@@ -105,12 +110,12 @@ committed files are what it writes. Run the language-server check
     The tests check the schemas with a standard JSON Schema validator
     against every YAML file in the repository. Beyond that,
     `tools/check_schema_in_language_server.py` drives Red Hat's real
-    language server (version 1.24.0 when this was written) over the Language
+    language server over the Language
     Server Protocol, the way VS Code does: every view, shell, fragment and
     theme file in the repository opens with no diagnostics, kinds, style
     fields, handlers, colour roles and a fragment's parameters are suggested,
     and a typo or a wrong value is flagged. It needs node, so CI doesn't run
-    it. It was not run inside VS Code itself, only the server it uses. If
+    it. It doesn't run inside VS Code itself, only the server VS Code uses. If
     completion or a squiggle is wrong in your editor, please
     [open an issue](https://github.com/mindderivative/tesserae/issues) with
     the file.

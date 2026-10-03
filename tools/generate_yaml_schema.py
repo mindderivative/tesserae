@@ -170,7 +170,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                       "description": "1 to 1000; 400 is regular, 700 bold."}),
                 "line_height": loose({"type": "number", "exclusiveMinimum": 0, "description": "A multiple of the size."}),
                 "text_align": loose({"enum": ["start", "center", "end"],
-                                     "description": "Where the text sits in its node's width (0.3.1). Not for a TextField."}),
+                                     "description": "Where the text sits in its node's width. Not for a TextField."}),
             },
             "additionalProperties": False}
     window_actions = ", ".join("`window." + action + "`" for action in view_module.WINDOW_ACTIONS)
@@ -186,13 +186,15 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                   "live": {"enum": sorted(a11y.LIVE), "description": "How changes to it are announced."},
                                   "level": {"type": "integer", "minimum": 1, "description": "A heading's level."}},
                    "additionalProperties": False}
+    style_file = {"type": "string", "pattern": r"_Style\.yaml$", "description": "A `*_Style.yaml` file next to this one."}
     maybe_bool = {"anyOf": [{"type": "boolean"}, {"type": "string"}]}
     maybe_number = {"anyOf": [number, {"type": "string"}]}
     node_props: dict[str, dict[str, Any]] = {
         "id": {"type": "string", "description": "A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it."},
         "kind": {"enum": sorted(build._KINDS), "description": "What this node is."},
         "classes": {"type": "array", "items": {"type": "string"}, "description": "Style classes a theme or stylesheet rule can match."},
-        "style": {"$ref": "#/definitions/style"},
+        "style": {"$ref": "#/definitions/style"} if fragment else {"anyOf": [{"$ref": "#/definitions/style"}, style_file],
+                                                                   "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."},
         "text": {"$ref": "#/definitions/text"},
         "checked": {**maybe_bool, "description": "A Checkbox's state."},
         "selected": {**maybe_bool, "description": "A Switch's or RadioButton's state."},
@@ -367,7 +369,9 @@ def _theme() -> dict[str, Any]:
         "properties": {"kind": {"enum": sorted(build._KINDS), "description": "Every node of this kind."},
                        "classes": {"type": "array", "items": {"type": "string"}, "description": "Nodes with all of these classes."},
                        "id": {"type": "string", "description": "The node with this id."},
-                       "style": {"$ref": "#/definitions/style"}},
+                       "style": {"anyOf": [{"$ref": "#/definitions/style"},
+                                           {"type": "string", "pattern": r"_Style\.yaml$", "description": "A `*_Style.yaml` file next to this one."}],
+                                 "description": "How the matching nodes look: a mapping, or the name of a `*_Style.yaml` file."}},
         "additionalProperties": False}
     typography = {
         "type": "object", "description": "Changes to Material 3's type styles, by role.",

@@ -1,0 +1,20 @@
+id: root
+kind: Container
+classes: [page]
+children:
+  - id: title
+    kind: Text
+    classes: [heading]
+    text: {content: Tasks, typography_role: headline_medium}
+  - id: summary
+    kind: Text
+    classes: [muted]
+    text: {content: 0 tasks, typography_role: body_large}
+    bindings: {text: "{{ summary.get() }}"}
+  - id: add
+    component: ButtonFilled
+    with: {label: Add a task, width: 140, height: 40, corner_radius: 20}
+    handlers: {on_click: add_task}
+  - id: list
+    kind: Container
+    classes: [rows]

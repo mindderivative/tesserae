@@ -19,7 +19,7 @@ first load.
 M29 Phase 4: theme and stylesheet files too. `load_view`'s
 `stylesheet=`/`default_theme=`/`custom_theme=` still take file paths,
 but Tesserae reads them (`themes.py`) and hands `tre` the dicts via
-`stylesheet_spec=`/`default_theme_spec=`/`custom_theme_spec=` (tre M86).
+`stylesheet_spec=`/`default_theme_spec=`/`custom_theme_spec=`.
 Fonts a view or theme names are checked against what `tre` can draw
 (`tesserae.fonts`).
 """
@@ -67,7 +67,7 @@ def build_view_spec(
 def load_view(path: str | Path, *, component_dirs: list[Path] | None = None, **view_kwargs: Any) -> Any:
     """Reads `path`, resolves its `include:`s and expands its
     `component:` usage, and builds a Tesserae `View` from the result
-    (M37: Tesserae builds views itself on `tre`'s building blocks).
+.
 
     `stylesheet=`, `default_theme=` and `custom_theme=` take file paths
     (relative to the current directory, as before); Tesserae reads them

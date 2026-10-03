@@ -1,7 +1,7 @@
 """Tesserae's own namespace for the Cards, Lists, Chips & Structural Rows
 category -- `card`, `list_`, `list_item`, `chip`, `badge`, `divider`,
 `link`, `accordion_header`, `tree_node` -- built by Tesserae from their
-fragments (M41). `list_` (trailing underscore) avoids shadowing the
+fragments. `list_` (trailing underscore) avoids shadowing the
 builtin `list`.
 """
 
@@ -35,7 +35,7 @@ def card(
     theme: "Theme | None" = None,
     on_click: Callable[[], Any] | None = None,
 ) -> Widget:
-    """MD3's card (M41: built from its fragment): elevated, filled or
+    """MD3's card: elevated, filled or
     outlined. Content-free: add to `.node`. `on_click` makes it an
     actionable card, with MD3's feedback."""
     widget = Widget(window, _variant("card", variant, _CARDS), {"width": width, "height": height}, theme=theme,
@@ -87,7 +87,7 @@ def list_item(
     theme: "Theme | None" = None,
     on_click: Callable[[], Any] | None = None,
 ) -> Widget:
-    """One MD3 list row (M41: built from its fragment): a `body_large`
+    """One MD3 list row: a `body_large`
     headline, 56 px tall, or 72 with `supporting_text` (`body_medium`,
     `on_surface_variant`) under it; 24 px `on_surface_variant` icons either
     side. Parts: `headline`, `supporting`, `leading`, `trailing`."""
@@ -150,7 +150,7 @@ def chip(
     on_click: Callable[[], Any] | None = None,
     on_remove: Callable[[], Any] | None = None,
 ) -> Widget:
-    """MD3's chip (M41: built from its fragment): assist, filter, input or
+    """MD3's chip: assist, filter, input or
     suggestion, 32 px tall, with an optional leading `icon`.
 
     A filter chip toggles when clicked: `.selected` is a `Signal`, and
@@ -222,7 +222,7 @@ def badge(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's badge (M41: built from its fragment): a 6 px `error` dot when
+    """MD3's badge: a 6 px `error` dot when
     `label=None`, otherwise a 16 px pill with a `label_small` `on_error`
     label (`width` defaults to fit it)."""
     border = _borders([None], border_color, border_width)
@@ -247,7 +247,7 @@ def divider(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """MD3's divider (M41: built from its fragment): a 1 px `outline_variant`
+    """MD3's divider: a 1 px `outline_variant`
     line `length` long. `border_color`/`border_width` recolour or thicken it."""
     if orientation not in ("horizontal", "vertical"):
         raise ValueError(f"a divider's orientation is 'horizontal' or 'vertical', got {orientation!r}")
@@ -274,7 +274,7 @@ def link(
     theme: "Theme | None" = None,
     on_click: Callable[[], Any] | None = None,
 ) -> Widget:
-    """A link (M41: built from its fragment): `body_large` text in
+    """A link: `body_large` text in
     `primary`, `role="link"`, a Tab stop that Enter follows (`on_click`)."""
     widget = Widget(window, "Link", {"text": content, "width": width, "height": 24}, theme=theme, x=x, y=y,
                     name="link")
@@ -294,8 +294,7 @@ def text(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """Plain text in a type role and a colour of the theme (M64, from the
-    `Text` fragment): `color` is a colour role (`on_surface` by default)
+    """Plain text in a type role and a colour of the theme: `color` is a colour role (`on_surface` by default)
     or any colour string. `.content` is a `Signal`; setting it re-measures
     the text in its resolved font, keeping `width` when one was given.
     It follows the app's theme like the other widgets."""
@@ -373,7 +372,7 @@ def accordion_header(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """An accordion header (M41: built from its fragment): a title and a
+    """An accordion header: a title and a
     chevron that turns over when `.expanded` (a `Signal`) is on. A click,
     Enter or Space toggles it; `.on_change(fn)` hears the user's toggles.
     Show and hide the content yourself, from `.expanded`."""
@@ -398,7 +397,7 @@ def tree_node(
     *,
     theme: "Theme | None" = None,
 ) -> Widget:
-    """A tree row (M41: built from its fragment), indented 16 px plus 24
+    """A tree row, indented 16 px plus 24
     per `depth`, `role="treeitem"` at `level` `depth + 1`. A branch has a
     chevron (pointing right, down when `.expanded`), toggled by a click,
     Enter or Space, and set by the right and left arrows. Build the tree's

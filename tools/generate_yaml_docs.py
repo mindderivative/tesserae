@@ -98,6 +98,15 @@ GROUP = 8
 SIDES = {"top": "the top", "right": "the right", "bottom": "the bottom", "left": "the left"}
 
 
+LEAF_REFS = ("style", "zone_style", "text", "handlers", "a11y")
+
+
+def _is_leaf(sub: dict[str, Any]) -> bool:
+    """A property whose mapping has a section of its own (the style, the text, ...): not spelled out inline."""
+    refs = [sub.get("$ref", ""), *(member.get("$ref", "") for member in sub.get("anyOf", []))]
+    return any(ref.rsplit("/", 1)[-1] in LEAF_REFS for ref in refs if ref)
+
+
 def _item_properties(reader: Reader, schema: dict[str, Any]) -> dict[str, Any]:
     """The properties of a list's entries, when they are a small mapping of their own (not a whole node)."""
     resolved = reader.resolve(schema)
@@ -145,7 +154,7 @@ def _rows(reader: Reader, schema: dict[str, Any], prefix: str = "", depth: int =
         rows.append((prefix + name, values, text, name in required))
         if _item_properties(reader, sub) and depth > 1:
             rows += _rows(reader, resolved["items"], f"{prefix}{name}[].", depth - 1)
-        if depth > 1 and sub.get("$ref", "").rsplit("/", 1)[-1] not in ("style", "zone_style", "text", "handlers", "a11y"):
+        if depth > 1 and not _is_leaf(sub):
             inner = resolved
             if "anyOf" in inner:  # a number or a `{size, style}`: show the mapping's keys
                 inner = next((reader.resolve(s) for s in inner["anyOf"] if reader.resolve(s).get("properties")), inner)
@@ -181,7 +190,7 @@ def _stub(reader: Reader, schema: dict[str, Any], indent: int = 0, depth: int = 
         inner = resolved
         if "anyOf" in inner:
             inner = next((reader.resolve(s) for s in inner["anyOf"] if reader.resolve(s).get("properties")), inner)
-        nested = inner.get("properties") if depth > 1 and sub.get("$ref", "").rsplit("/", 1)[-1] not in ("style", "zone_style", "text", "handlers", "a11y") else None
+        nested = inner.get("properties") if depth > 1 and not _is_leaf(sub) else None
         if nested:
             lines.append(f"{pad}{name}:")
             lines += _stub(reader, inner, indent + 1, depth - 1)
