@@ -2153,6 +2153,24 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.3.5 released (#84)
+
+User: issue #84 (a ButtonFilled label wrapped), their screenshot showing my first measurement was wrong,
+"approved, do #84 as 0.3.5, with ... `wrap:` and `overflow:` in YAML", "Pass to tre, appoved, push, release",
+"approved, check PyPI".
+
+- Cause: Tesserae gave an auto-width Text its measured width as an explicit number (66.43 px for "Add a
+  task"), and tre rounds an explicit width down, so the text wrapped. Measured sizes are rounded up
+  (Text, Link, `widgets.text`, dock tabs). Mutation-checked.
+- `text:` takes `wrap` (word|none) and `overflow` (clip|ellipsis); the Text and Link components take them as
+  parameters; built-in labels are single lines (ellipsis where they have a width; extended FABs, rail items
+  and tabs keep one line without one, to keep their centring). `tests/test_label_wrapping.py` lays out every
+  component with short and long labels. The tree-parity diff allows 2 px of layout slack for auto-sized text.
+- tre was sent the report (explicit widths rounded down; ellipsis and wrap need a pixel of slack).
+- Released: 4495 tests passed, CI green; `tesserae-ui` 0.3.5 is on PyPI and a fresh venv gets
+  `tesserae-engine` 0.5.2 (tre's new release, which Tesserae's range allows) and `Add a task` is 67 px wide.
+  `v0.3.5` is a pre-release.
+
 ## Tesserae 0.3.4 released (#83)
 
 User: the docs rework brief (API pages, MD3 component tree, themes, stylesheets, slim Getting Started,
