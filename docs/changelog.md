@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.4 (unreleased)
+## 0.3.4
 
 The documentation, rebuilt ([#83](https://github.com/mindderivative/tesserae/issues/83)), and the
 stylesheets of the built-in components.
