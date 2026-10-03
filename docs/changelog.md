@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.6 (unreleased)
+## 0.3.6
 
 `text_align` on the built-in labels ([#85](https://github.com/mindderivative/tesserae/issues/85)).
 
