@@ -1,7 +1,7 @@
 """M76: the proof that one `pip install` is enough. Run with the Python of
 a fresh venv that has only Tesserae's wheel installed (CI's clean-install
 job does this on Linux, macOS and Windows): it makes an app with
-`tesserae new`, then runs it headlessly -- builds its views, shows Home,
+`tesserae new`, then runs it headlessly -- builds its views, shows Main,
 clicks its button, lays out a few frames -- without a GPU or a display.
 Exits non-zero, saying why, if anything is missing or wrong.
 """
@@ -25,13 +25,13 @@ def main() -> int:
           f"{sys.platform}")
     home = os.getcwd()
     with tempfile.TemporaryDirectory() as parent:
-        if cli.main(["new", "hello", "--dir", parent]) != 0:
+        if cli.main(["new", "hello", "--no-venv", "--dir", parent]) != 0:
             return 1
         project = Path(parent) / "hello"
         report: dict[str, object] = {}
 
         def run(app, max_frames=None, **kwargs):  # headless: no render loop, so no GPU or display needed
-            home = app._registered["Home"].view
+            home = app._registered["Main"].view
             app.window.simulate("click", node=home.node("button"))
             for _ in range(3):
                 app.window.advance(16)
@@ -47,7 +47,7 @@ def main() -> int:
         finally:
             os.chdir(home)  # Windows can't remove the folder a process is in
         print("the app reported:", report)
-    expected = {"current": "Home", "greeting": "Hello from Hello", "count": "Clicked 1 times"}
+    expected = {"current": "Main", "greeting": "Hello from Hello", "count": "Clicked 1 times"}
     if report != expected:
         print(f"the generated app didn't run as expected: {report} (wanted {expected})", file=sys.stderr)
         return 1

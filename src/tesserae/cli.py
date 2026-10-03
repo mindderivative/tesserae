@@ -76,9 +76,7 @@ def _make_venv(folder: Path) -> None:
     try:
         subprocess.run([sys.executable, "-m", "venv", str(folder / ".venv")], check=True, capture_output=True)
         python = folder / ".venv" / ("Scripts" if os.name == "nt" else "bin") / ("python.exe" if os.name == "nt" else "python")
-        version = _version()
-        requirement = f"tesserae-ui>={version}" if version != "unknown" else "tesserae-ui"
-        subprocess.run([str(python), "-m", "pip", "install", "-q", requirement], check=True, capture_output=True)
+        subprocess.run([str(python), "-m", "pip", "install", "-q", "tesserae-ui"], check=True, capture_output=True)
     except (subprocess.CalledProcessError, OSError) as exc:
         detail = (getattr(exc, "stderr", b"") or b"").decode(errors="replace").strip().splitlines()[-1:] or [str(exc)]
         raise CliError(f"made the project, but its virtual environment failed ({detail[0]}); in {folder} run "

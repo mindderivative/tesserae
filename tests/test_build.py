@@ -150,7 +150,7 @@ def test_a_generated_shell_app_builds_and_runs_from_elsewhere(tmp_path, capsys, 
     The shell's panels import their ViewModels by path, so this fails if
     the app's files aren't in the executable."""
     pytest.importorskip("PyInstaller")
-    folder = cli.new("demo", tmp_path, shell=True)
+    folder = cli.new("demo", tmp_path, shell=True, venv=False)
     monkeypatch.chdir(folder)
     assert cli.main(["build", "--name", "Demo App"]) == 0, capsys.readouterr().err
     executable = build.executable_path(folder / "dist", "Demo App")

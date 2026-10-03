@@ -158,7 +158,7 @@ jobs:
         shell: bash
         run: |
           mkdir work && cd work
-          "$BIN/tesserae" new demo --shell
+          "$BIN/tesserae" new demo --shell --no-venv
           cd demo
           if [ "$RUNNER_OS" = "Linux" ]; then RUN="xvfb-run -a"; else RUN=""; fi
           $RUN "$BIN/tesserae" build --check
@@ -172,7 +172,7 @@ jobs:
         shell: bash
         run: |
           cd work
-          "$BIN/tesserae" new demo_bar --shell --custom-title-bar
+          "$BIN/tesserae" new demo_bar --shell --custom-title-bar --no-venv
           cd demo_bar
           grep -q "decorations=False" app.py
           if [ "$RUNNER_OS" = "Linux" ]; then RUN="xvfb-run -a"; else RUN=""; fi
