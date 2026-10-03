@@ -43,7 +43,7 @@ b.0:
   background: primary
   corner_radius: 20
   padding: {left: 12, right: 12, top: 0, bottom: 0}
-b.0.label: {foreground: on_primary, flex_grow: 1, min_width: 0}
+b.0.label: {foreground: on_primary}
 b.1:
   width: 120
   height: 40
@@ -52,7 +52,7 @@ b.1:
   background: primary
   corner_radius: 20
   padding: {left: 12, right: 12, top: 0, bottom: 0}
-b.1.label: {foreground: on_primary, flex_grow: 1, min_width: 0}
+b.1.label: {foreground: on_primary}
 ```
 
 ## Changing it

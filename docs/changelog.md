@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.6 (unreleased)
+
+`text_align` on the built-in labels ([#85](https://github.com/mindderivative/tesserae/issues/85)).
+
+### Fixed
+
+- **`text_align: center` and `end` work on a `Text` with no width.** The engine aligns text within the
+  width it is laid out in, and a `Text` sized to its text has no room to move in, so a centred label was
+  drawn at the left of its button. A `Text` that is `center` or `end` aligned and has no `width` of its
+  own now fills its parent's width, with its text's width as the least. The built-in centred labels
+  (buttons, chips, split buttons, badges, date and period cells) are plain `text_align: center` again, with
+  no `wrap: none` (0.3.5 gave them it, which stopped the alignment).
+
 ## 0.3.5
 
 Text that wrapped when it shouldn't ([#84](https://github.com/mindderivative/tesserae/issues/84)).

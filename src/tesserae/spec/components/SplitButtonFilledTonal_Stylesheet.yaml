@@ -21,8 +21,6 @@ styles:
   - id: label
     style:
       foreground: on_secondary_container
-      flex_grow: 1
-      min_width: 0
   - id: trailing
     style:
       width: "{{ height }}"

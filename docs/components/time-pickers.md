@@ -55,13 +55,13 @@ children:
     children:
       - id: am_label
         kind: Text
-        text: {content: AM, typography_role: label_large, wrap: none, overflow: ellipsis, text_align: center}
+        text: {content: AM, typography_role: label_large, text_align: center}
   - id: pm
     kind: Container
     children:
       - id: pm_label
         kind: Text
-        text: {content: PM, typography_role: label_large, wrap: none, overflow: ellipsis, text_align: center}
+        text: {content: PM, typography_role: label_large, text_align: center}
 ```
 
 ## Using it

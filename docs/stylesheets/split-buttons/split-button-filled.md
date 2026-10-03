@@ -30,8 +30,6 @@ styles:
   - id: label
     style:
       foreground: on_primary
-      flex_grow: 1
-      min_width: 0
   - id: trailing
     style:
       width: "{{ height }}"
@@ -77,8 +75,6 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_primary` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
-| `min_width` | `0` | The least width it can take. |
 
 ### `trailing` (Rect)
 
@@ -113,7 +109,7 @@ leading:
   background: primary
   corner_radius: 20
   padding: {left: 12, right: 12, top: 0, bottom: 0}
-label: {foreground: on_primary, flex_grow: 1, min_width: 0}
+label: {foreground: on_primary}
 trailing: {width: 40, height: 40, align_items: center, justify_content: center, background: primary, corner_radius: 20}
 chevron: {width: 22, height: 22, foreground: on_primary}
 ```

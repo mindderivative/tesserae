@@ -1163,7 +1163,7 @@
                 "center",
                 "end"
               ],
-              "description": "Where the text sits in its node's width. Not for a TextField."
+              "description": "Where the text sits in its node's width; a `center` or `end` Text with no width fills its parent's. Not for a TextField."
             },
             {
               "$ref": "#/definitions/parameter"

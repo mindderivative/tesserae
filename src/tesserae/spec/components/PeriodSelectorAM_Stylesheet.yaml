@@ -17,8 +17,6 @@ styles:
   - id: am_label
     style:
       foreground: on_tertiary_container
-      flex_grow: 1
-      min_width: 0
   - id: pm
     style:
       width: 52
@@ -30,5 +28,3 @@ styles:
   - id: pm_label
     style:
       foreground: on_surface
-      flex_grow: 1
-      min_width: 0

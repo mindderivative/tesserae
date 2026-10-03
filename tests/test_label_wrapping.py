@@ -132,3 +132,55 @@ def test_a_text_can_be_made_to_wrap_or_not():
 
     assert height() == height(wrap="word")  # wraps by default
     assert height(wrap="none") == 24.0  # one line
+
+
+def _laid_out(spec):
+    app = App(width=600, height=400)
+    view = View(spec, window=app.window, theme_seed=(1, 2, 3, 255))
+    app.window.root.add_child(view.root)
+    app.window.advance(16)
+    return app, view
+
+
+def _centred(parent_style):
+    return {"id": "r", "kind": "Container", "style": {"height": 60, "align_items": "center", "padding": 12, **parent_style},
+            "children": [{"id": "t", "kind": "Text", "text": {"content": "Add a task", "typography_role": "label_large",
+                                                              "text_align": "center"}, "style": {"foreground": "#FFFFFF"}}]}
+
+
+def test_centred_text_fills_its_parent_so_the_engine_has_a_width_to_centre_in():
+    """#85: the engine aligns text within the width it is laid out in; a Text as wide as its text can't be centred."""
+    _, view = _laid_out(_centred({"width": 300}))
+    assert (view.node("t").get("layout_x"), view.node("t").get("layout_width")) == (12.0, 276.0)
+
+
+def test_centred_text_in_a_parent_with_no_width_keeps_its_own():
+    _, view = _laid_out(_centred({"width": "auto"}))
+    assert view.node("t").get("layout_width") == 67.0  # not 0: a percentage of a parent with no width
+
+
+def test_right_aligned_text_fills_too_and_a_given_width_is_kept():
+    spec = _centred({"width": 300})
+    spec["children"][0]["text"]["text_align"] = "end"
+    _, view = _laid_out(spec)
+    assert view.node("t").get("layout_width") == 276.0
+    spec["children"][0]["style"]["width"] = 100
+    _, view = _laid_out(spec)
+    assert view.node("t").get("layout_width") == 100.0
+
+
+def test_changing_centred_text_keeps_it_filling_its_parent():
+    import tesserae
+
+    class Words(tesserae.ViewModel):
+        def __init__(self, view):
+            self.words = tesserae.Signal("Hi")
+            super().__init__(view)
+
+    spec = _centred({"width": 300})
+    spec["children"][0]["bindings"] = {"text": "{{ words.get() }}"}
+    app, view = _laid_out(spec)
+    model = Words(view)
+    model.words.set("Add a task")
+    app.window.advance(16)
+    assert (view.node("t").get("layout_width"), view.node("t").get("min_width")) == (276.0, 67.0)

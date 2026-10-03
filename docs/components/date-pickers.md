@@ -41,8 +41,6 @@ children:
     text:
       content: "{{ day }}"
       typography_role: body_large
-      wrap: none
-      overflow: ellipsis
       text_align: center
 ```
 

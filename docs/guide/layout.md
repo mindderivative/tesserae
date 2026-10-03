@@ -51,8 +51,9 @@ the one that's set.
 ### Text in a box
 
 A `Text` or `Link` with no `width` or `height` is measured to fit its
-text. Give it a `width` and `text:`'s `text_align` places the text inside
-it: `start` (the default), `center` or `end`.
+text. `text:`'s `text_align` places the text inside its width: `start` (the default), `center` or `end`.
+A `Text` that is `center` or `end` aligned and has no `width` of its own fills its parent's width, so
+there is room to align in; its text's width is the least it takes. Give it a `width` to choose another.
 
 ```yaml
 - id: heading
@@ -65,7 +66,8 @@ A `TextField` has no `text_align`: what is typed starts at the left.
 
 #### One line, or an ellipsis
 
-A line too long for its box breaks onto the next (`wrap: word`, the default). `wrap: none` keeps one line,
+A line too long for its box breaks onto the next (`wrap: word`, the default). `wrap: none` keeps one line
+(and the text is then always drawn from the start: `text_align` has nothing to align within),
 and `overflow: ellipsis` ends a line that doesn't fit with an ellipsis instead of cutting it off
 (`overflow: clip`, the default). Together they make a single-line label that truncates:
 

@@ -233,7 +233,7 @@ def badge(
         widget = Widget(window, "BadgeLabeled", {"label": label, "width": width if width is not None else 16.0},
                         theme=theme, x=x, y=y, edit=border, name="badge")
         if width is None:  # fit the label: 4 px either side, at least a circle
-            widget.node.set(width=max(16.0, widget.part("label").get("width") + 8.0))
+            widget.node.set(width=max(16.0, widget.part("label").get("min_width") + 8.0))
     return widget
 
 

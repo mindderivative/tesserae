@@ -44,8 +44,6 @@ children:
     text:
       content: "{{ label }}"
       typography_role: label_large
-      wrap: none
-      overflow: ellipsis
       text_align: center
 ```
 
@@ -71,8 +69,6 @@ children:
     text:
       content: "{{ label }}"
       typography_role: label_large
-      wrap: none
-      overflow: ellipsis
       text_align: center
 ```
 

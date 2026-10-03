@@ -556,6 +556,11 @@ def _text_props(ctx, node, style):
     fill = _required_foreground(ctx, node, style, node["kind"])
     props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(ctx, node, node["kind"]), "fill": fill}
     props.update(natural_size(ctx.window, props, style))
+    if node["kind"] == "Text" and props["text_align"] != "start" and style.get("width") is None:
+        # The engine aligns text within the width it is laid out in, so a centred or right aligned Text with no
+        # width fills its parent's, and keeps its own as the least (a parent with no width yet gives 100% nothing).
+        props["min_width"] = max(props["width"], float(style.get("min_width") or 0.0))
+        props["width"] = "100%"
     return props, None
 
 

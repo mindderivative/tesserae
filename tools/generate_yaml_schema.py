@@ -170,7 +170,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                       "description": "1 to 1000; 400 is regular, 700 bold."}),
                 "line_height": loose({"type": "number", "exclusiveMinimum": 0, "description": "A multiple of the size."}),
                 "text_align": loose({"enum": ["start", "center", "end"],
-                                     "description": "Where the text sits in its node's width. Not for a TextField."}),
+                                     "description": "Where the text sits in its node's width; a `center` or `end` Text with no width fills its parent's. Not for a TextField."}),
                 "wrap": loose({"enum": ["word", "none"],
                                "description": "`word` (the default) breaks a line that is too long for its node onto the next; "
                                               "`none` keeps one line. Not for a TextField."}),

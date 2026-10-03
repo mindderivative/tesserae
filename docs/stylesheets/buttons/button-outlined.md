@@ -28,8 +28,6 @@ styles:
   - id: label
     style:
       foreground: primary
-      flex_grow: 1
-      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -57,8 +55,6 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `primary` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
-| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
-| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -75,7 +71,7 @@ root:
   border_color: outline
   border_width: 1.0
   padding: {left: 12, right: 12, top: 0, bottom: 0}
-label: {foreground: primary, flex_grow: 1, min_width: 0}
+label: {foreground: primary}
 ```
 
 ## Changing it

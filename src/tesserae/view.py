@@ -685,7 +685,7 @@ class View:
             else:
                 _apply(node, kind, prop, value)
                 if measured:
-                    _remeasure(self.window, node, style)
+                    _remeasure(self.window, node, style, kind)
                 if kind == "Link" and prop == "text" and "label" not in (node_spec.get("a11y") or {}):
                     self._built.outer[node_id].set(label=value)  # its name is its text, unless `a11y:` names it
 
@@ -873,9 +873,11 @@ def _arity_adapter(method: Callable[..., Any]) -> Callable[[Any], Any]:
     return lambda event_obj: method()
 
 
-def _remeasure(window: Any, node: Any, style: dict[str, Any]) -> None:
+def _remeasure(window: Any, node: Any, style: dict[str, Any], kind: str) -> None:
     props = {name: node.get(name) for name in ("text", "font_family", "font_size", "font_weight", "line_height")}
     size = natural_size(window, props, style)
+    if size and "width" in size and kind == "Text" and node.get("text_align") != "start":
+        size["min_width"] = size.pop("width")  # a centred or right aligned Text fills its parent: this is its least
     if size:
         node.set(**size)
 
