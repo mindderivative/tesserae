@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.1 (unreleased)
+## 0.4.1
 
 Projects ([#87](https://github.com/mindderivative/tesserae/issues/87)).
 
