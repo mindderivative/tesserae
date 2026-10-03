@@ -2153,6 +2153,27 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.4.0 released (#86)
+
+User: issue #86 (merge align_items and justify_content into align_content, add flex), my triage and three
+questions, "Replace the old names", "A `spread:` property", "Separate them, `align_wrapped:` and
+`align_tracks:`", "approved, release 0.3.6 first, then do #86 as 0.4.0", "approved, push and release
+0.4.0", "approved, check PyPI".
+
+- `tesserae/spec/layout.py` turns `align_content` (nine positions), `spread`, `flex` (none, expand_horizontal,
+  expand_vertical, fill), `align_self`, `align_wrapped`, `align_tracks` and `align_cells` into the engine's
+  names; the engine's names are refused naming what replaces them. A node is never squeezed unless it says
+  so. The compiler tracks each node's parent layout (`_Context.parent`, `Built.parent_ids`,
+  `View._parent_layout`) because `flex` and `align_self` mean different things in a row and a column.
+- 77 components, title bar, widgets, examples, tutorial and guide migrated. A scratch comparison laid out every
+  component under the 0.3.6 and the new fragments: two differences, both squeezes the old default caused.
+- `layout.LEGACY_ENGINE_NAMES` is a test-only switch that keeps the recorded-engine parity tests (tree parity,
+  layout vocabulary, grid) on the engine's names. No migration tool is shipped for users; the table is in
+  `docs/migration.md`.
+- Released: 4571 tests passed, CI green; `tesserae-ui` 0.4.0 is on PyPI, a fresh venv resolves
+  `tesserae-engine` 0.5.3 (tre's rounding fix) and works: `align_content: center` puts a 40x20 rect at
+  (130, 40) in a 300x100 box, and `align_items` is refused with the replacement named. `v0.4.0` is a pre-release.
+
 ## Tesserae 0.3.6 released (#85)
 
 User: the screenshot of ButtonFilled's label drawn at the left ("text_align does nothing"), "just have it look at
