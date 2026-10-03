@@ -23,6 +23,8 @@ styles:
   - id: label
     style:
       foreground: primary
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -49,6 +51,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `primary` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -57,7 +61,7 @@ With `day: 7`, each part's style is:
 ```yaml
 root: {width: 48, height: 48, background: transparent, corner_radius: 24, border_color: primary, border_width: 1.0,
   justify_content: center, align_items: center}
-label: {foreground: primary}
+label: {foreground: primary, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

@@ -1172,6 +1172,40 @@
               "$ref": "#/definitions/conditional"
             }
           ]
+        },
+        "wrap": {
+          "anyOf": [
+            {
+              "enum": [
+                "word",
+                "none"
+              ],
+              "description": "`word` (the default) breaks a line that is too long for its node onto the next; `none` keeps one line. Not for a TextField."
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
+        },
+        "overflow": {
+          "anyOf": [
+            {
+              "enum": [
+                "clip",
+                "ellipsis"
+              ],
+              "description": "What happens to a line that doesn't fit its node: `clip` (the default) cuts it off, `ellipsis` ends it with an ellipsis. Not for a TextField."
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
         }
       },
       "additionalProperties": false
@@ -3759,7 +3793,13 @@
                 "properties": {
                   "text": {},
                   "width": {},
-                  "height": {}
+                  "height": {},
+                  "wrap": {
+                    "default": "none"
+                  },
+                  "overflow": {
+                    "default": "ellipsis"
+                  }
                 },
                 "additionalProperties": false
               },
@@ -3772,7 +3812,13 @@
                       "properties": {
                         "text": {},
                         "width": {},
-                        "height": {}
+                        "height": {},
+                        "wrap": {
+                          "default": "none"
+                        },
+                        "overflow": {
+                          "default": "ellipsis"
+                        }
                       },
                       "additionalProperties": false
                     }
@@ -5132,6 +5178,12 @@
                   },
                   "color": {
                     "default": "on_surface"
+                  },
+                  "wrap": {
+                    "default": "word"
+                  },
+                  "overflow": {
+                    "default": "clip"
                   }
                 },
                 "additionalProperties": false
@@ -5149,6 +5201,12 @@
                         },
                         "color": {
                           "default": "on_surface"
+                        },
+                        "wrap": {
+                          "default": "word"
+                        },
+                        "overflow": {
+                          "default": "clip"
                         }
                       },
                       "additionalProperties": false

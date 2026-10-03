@@ -33,3 +33,4 @@ styles:
         if: "{{ selected }}"
         then: on_surface
         else: on_surface_variant
+      flex_shrink: 0

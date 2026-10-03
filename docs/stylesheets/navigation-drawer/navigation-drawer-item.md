@@ -41,6 +41,8 @@ styles:
         if: "{{ selected }}"
         then: on_secondary_container
         else: on_surface_variant
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -75,6 +77,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_secondary_container` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -91,7 +95,7 @@ root:
   gap: 12
   padding: {left: 16, right: 24, top: 0, bottom: 0}
 icon: {width: 24, height: 24, foreground: on_surface_variant}
-label: {foreground: on_surface_variant}
+label: {foreground: on_surface_variant, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

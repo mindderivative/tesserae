@@ -10,6 +10,13 @@ styles:
       background: surface_container_low
       corner_radius: "{{ corner_radius }}"
       elevation: level_1
+      padding:
+        left: 12
+        right: 12
+        top: 0
+        bottom: 0
   - id: label
     style:
       foreground: primary
+      flex_grow: 1
+      min_width: 0

@@ -19,6 +19,8 @@ styles:
   - id: headline
     style:
       foreground: on_surface
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -41,6 +43,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -48,7 +52,7 @@ With `headline: Headline, width: 120`, each part's style is:
 
 ```yaml
 root: {width: 120, height: 56, align_items: center, padding: 16}
-headline: {foreground: on_surface}
+headline: {foreground: on_surface, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

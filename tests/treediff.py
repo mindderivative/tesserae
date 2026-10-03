@@ -114,6 +114,10 @@ def diff(spec, frames=None, stylesheet=None, theirs=None):
     if theirs is None:
         theirs = tre_dump(spec, frames, stylesheet)
     built = build_ours(spec, frames, stylesheet)
+    # Tesserae rounds a text's measured size up to whole pixels (the engine rounds an explicit width down, which
+    # wrapped text that fit), so layout that follows an auto-sized text is up to a pixel or two larger than the
+    # recording made when it was not.
+    slack = 2.0 if any(n.get("kind") in ("Text", "Link") and "width" not in (n.get("style") or {}) for _, n in ids(spec)) else 0.0
     out = []
     for node_id, node_spec in ids(spec):
         kind = node_spec.get("kind")
@@ -133,5 +137,7 @@ def diff(spec, frames=None, stylesheet=None, theirs=None):
             ours_node = inner if (kind in ("TextField", "Link") and (prop in TEXT or prop == "fill")) else outer
             b = _get(ours_node, prop)
             if a != b:
+                if slack and prop in LAYOUT and isinstance(a, (int, float)) and isinstance(b, (int, float)) and abs(a - b) <= slack:
+                    continue
                 out.append((node_id, prop, a, b))
     return out

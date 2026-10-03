@@ -31,6 +31,8 @@ styles:
   - id: label
     style:
       foreground: on_secondary_container
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -64,6 +66,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -79,7 +83,7 @@ root:
   background: secondary_container
   corner_radius: small
 check: {width: 18, height: 18, foreground: on_secondary_container}
-label: {foreground: on_secondary_container}
+label: {foreground: on_secondary_container, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

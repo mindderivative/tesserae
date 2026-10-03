@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.3.5 (unreleased)
+
+Text that wrapped when it shouldn't ([#84](https://github.com/mindderivative/tesserae/issues/84)).
+
+### Fixed
+
+- **A label no longer wraps onto a second line when it fits.** A `Text` or `Link` with no `width` is
+  measured to fit its text, and the engine rounds an explicit width down to a whole pixel, so a label a
+  fraction of a pixel wider than its box wrapped: `ButtonFilled` with `label: Add a task` showed
+  "Add a / task" at any button width. Measured sizes are rounded up now, for every `kind: Text`, `Link`,
+  `tesserae.widgets.text` and dock tab.
+
+### Added
+
+- **`text: {wrap: word | none, overflow: clip | ellipsis}`** on `Text` and `Link`. `wrap: none` keeps one
+  line, `overflow: ellipsis` ends a line that doesn't fit with an ellipsis. In the schema, the YAML
+  reference and the layout guide. The `Text` and `Link` components take them as parameters.
+
+### Changed
+
+- **The labels of the built-in components are single lines.** Buttons, chips, split buttons, badges,
+  tooltips, list, menu, tree and drawer items, date and period cells, and the accordion, top and status bars
+  end a label that doesn't fit with an ellipsis; extended FABs, rail items and tabs keep one line without
+  one. A dialog's words and a snackbar's message still wrap. A test lays every component out with short and
+  long labels and fails if one wraps.
+- A button's or chip's stylesheet has 12 px of padding either side of the label.
+
 ## 0.3.4
 
 The documentation, rebuilt ([#83](https://github.com/mindderivative/tesserae/issues/83)), and the

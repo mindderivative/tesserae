@@ -39,6 +39,8 @@ children:
     text:
       content: "{{ title }}"
       typography_role: title_large
+      wrap: none
+      overflow: ellipsis
 ```
 
 ## Using it

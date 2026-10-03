@@ -14,3 +14,5 @@ styles:
   - id: title
     style:
       foreground: on_surface
+      flex_grow: 1
+      min_width: 0

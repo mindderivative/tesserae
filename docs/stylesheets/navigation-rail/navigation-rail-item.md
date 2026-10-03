@@ -42,6 +42,7 @@ styles:
         if: "{{ selected }}"
         then: on_surface
         else: on_surface_variant
+      flex_shrink: 0
 ```
 
 ## How it is tied to the component
@@ -84,6 +85,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_shrink` | `0` | How much it gives up when there is too little room. |
 
 ## What it makes
 
@@ -93,7 +95,7 @@ With `label: Go, icon: home, selected: False`, each part's style is:
 root: {width: 80, height: 56, flex_direction: vertical, align_items: center, gap: 4}
 pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_items: center, justify_content: center}
 icon: {width: 24, height: 24, foreground: on_surface_variant}
-label: {foreground: on_surface_variant}
+label: {foreground: on_surface_variant, flex_shrink: 0}
 ```
 
 ## Changing it

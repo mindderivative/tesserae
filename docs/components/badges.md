@@ -49,6 +49,9 @@ children:
     text:
       content: "{{ label }}"
       typography_role: label_small
+      wrap: none
+      overflow: ellipsis
+      text_align: center
 ```
 
 ## Using it

@@ -53,9 +53,10 @@ def test_the_label_is_sized_to_its_text_and_centred():
     # label_large: Roboto 14/20, 500; tre's line_height is a multiple of the font size
     width, height = window.measure_text("Save", font_family="Roboto", font_size=14.0, font_weight=500.0,
                                         line_height=20.0 / 14.0)
-    assert (label.get("width"), label.get("height")) == pytest.approx((width, 20.0), abs=0.01)
+    # sized to its text, rounded up to whole pixels (the engine rounds a width down, which wrapped text that fit)
+    assert (label.get("width"), label.get("height")) == (float(math.ceil(width)), 20.0)
     x = label.get("layout_x") - b.node.get("layout_x")
-    assert x == pytest.approx((120 - width) / 2, abs=1.0)  # centred (layout rounds to whole pixels)
+    assert x + label.get("layout_width") / 2 == pytest.approx(60, abs=1.0)  # its middle is the button's middle
 
 
 def test_on_click_makes_it_a_keyboard_button():

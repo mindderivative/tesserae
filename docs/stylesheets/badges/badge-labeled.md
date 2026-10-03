@@ -21,6 +21,8 @@ styles:
   - id: label
     style:
       foreground: on_error
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -45,6 +47,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_error` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -52,7 +56,7 @@ With `label: Go, width: 120`, each part's style is:
 
 ```yaml
 root: {width: 120, height: 16, background: error, corner_radius: small, justify_content: center, align_items: center}
-label: {foreground: on_error}
+label: {foreground: on_error, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

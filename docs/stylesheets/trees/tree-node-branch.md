@@ -25,6 +25,7 @@ styles:
     style:
       foreground: on_surface
       flex_grow: 1
+      min_width: 0
   - id: chevron
     style:
       width: 24
@@ -54,6 +55,7 @@ styles:
 | --- | --- | --- |
 | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
 | `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ### `chevron` (Icon)
 
@@ -74,7 +76,7 @@ root:
   align_items: center
   padding: {left: 16, right: 16, top: 0, bottom: 0}
   gap: 12
-title: {foreground: on_surface, flex_grow: 1}
+title: {foreground: on_surface, flex_grow: 1, min_width: 0}
 chevron: {width: 24, height: 24, foreground: on_surface_variant}
 ```
 

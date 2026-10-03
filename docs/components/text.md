@@ -29,17 +29,23 @@ Text in one of MD3's type styles and a colour. Its look: [`Text_Stylesheet.yaml`
 | `text` | required |  |
 | `typography_role` | optional | `body_medium` |
 | `color` | optional | `on_surface` |
+| `wrap` | optional | `word` |
+| `overflow` | optional | `clip` |
 
 ```yaml
 params:
   - text
   - {typography_role: body_medium}
   - {color: on_surface}
+  - {wrap: word}
+  - {overflow: clip}
 id: root
 kind: Text
 text:
   content: "{{ text }}"
   typography_role: "{{ typography_role }}"
+  wrap: "{{ wrap }}"
+  overflow: "{{ overflow }}"
 ```
 
 ## Using it

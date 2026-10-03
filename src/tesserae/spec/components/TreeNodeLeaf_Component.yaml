@@ -9,3 +9,5 @@ children:
     text:
       content: "{{ title }}"
       typography_role: label_large
+      wrap: none
+      overflow: ellipsis

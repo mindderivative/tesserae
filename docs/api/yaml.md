@@ -190,6 +190,8 @@ font_size: <a number>
 font_weight: <a number>
 line_height: <a number>
 text_align: <start | center | end>
+wrap: <word | none>
+overflow: <clip | ellipsis>
 ```
 
 | Key | Values | What it does |
@@ -201,6 +203,8 @@ text_align: <start | center | end>
 | `font_weight` | a number | 1 to 1000; 400 is regular, 700 bold. |
 | `line_height` | a number | A multiple of the size. |
 | `text_align` | `start` \| `center` \| `end` | Where the text sits in its node's width. Not for a TextField. |
+| `wrap` | `word` \| `none` | `word` (the default) breaks a line that is too long for its node onto the next; `none` keeps one line. Not for a TextField. |
+| `overflow` | `clip` \| `ellipsis` | What happens to a line that doesn't fit its node: `clip` (the default) cuts it off, `ellipsis` ends it with an ellipsis. Not for a TextField. |
 
 ## Handlers
 

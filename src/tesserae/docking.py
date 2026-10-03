@@ -24,6 +24,7 @@ keeps one listener per event), so a window has one `Dock`.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -233,6 +234,7 @@ class Dock:
         text_width, text_height = self.window.measure_text(
             entry.title, font_family=style.font_family, font_size=style.font_size,
             font_weight=style.font_weight, line_height=style.line_height)
+        text_width, text_height = math.ceil(text_width), math.ceil(text_height)  # the engine rounds a width down
         node = self.window.create("box", height=TAB_HEIGHT, width=text_width + 2 * TAB_PADDING, flex_shrink=0.0,
                                   align_items="center", justify_content="center", focusable=True, role="tab",
                                   label=entry.title, cursor="pointer")

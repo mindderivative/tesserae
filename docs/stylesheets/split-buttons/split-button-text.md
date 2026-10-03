@@ -22,9 +22,16 @@ styles:
       justify_content: center
       background: transparent
       corner_radius: "{{ corner_radius }}"
+      padding:
+        left: 12
+        right: 12
+        top: 0
+        bottom: 0
   - id: label
     style:
       foreground: primary
+      flex_grow: 1
+      min_width: 0
   - id: trailing
     style:
       width: "{{ height }}"
@@ -63,12 +70,15 @@ styles:
 | `justify_content` | `center` | Where its children sit along the layout axis. |
 | `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
+| `padding` | left `12`, right `12`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ### `label` (Text)
 
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `primary` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ### `trailing` (Rect)
 
@@ -95,9 +105,15 @@ With `label: Go, width: 120, height: 40, corner_radius: 20`, each part's style i
 
 ```yaml
 root: {flex_direction: horizontal, gap: 2}
-leading: {width: 120, height: 40, align_items: center, justify_content: center, background: transparent,
-  corner_radius: 20}
-label: {foreground: primary}
+leading:
+  width: 120
+  height: 40
+  align_items: center
+  justify_content: center
+  background: transparent
+  corner_radius: 20
+  padding: {left: 12, right: 12, top: 0, bottom: 0}
+label: {foreground: primary, flex_grow: 1, min_width: 0}
 trailing: {width: 40, height: 40, align_items: center, justify_content: center, background: transparent,
   corner_radius: 20}
 chevron: {width: 22, height: 22, foreground: primary}

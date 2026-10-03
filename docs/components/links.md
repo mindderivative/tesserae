@@ -27,14 +27,23 @@ Text that opens something when it is clicked. Its look: [`Link_Stylesheet.yaml`]
 | `text` | required |  |
 | `width` | required |  |
 | `height` | required |  |
+| `wrap` | optional | `none` |
+| `overflow` | optional | `ellipsis` |
 
 ```yaml
-params: [text, width, height]
+params:
+  - text
+  - width
+  - height
+  - {wrap: none}
+  - {overflow: ellipsis}
 id: root
 kind: Link
 text:
   content: "{{ text }}"
   typography_role: body_large
+  wrap: "{{ wrap }}"
+  overflow: "{{ overflow }}"
 ```
 
 ## Using it

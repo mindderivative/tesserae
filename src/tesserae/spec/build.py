@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import difflib
 import functools
+import math
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
@@ -426,9 +427,13 @@ def _required_foreground(ctx: _Context, node: dict[str, Any], style: dict[str, A
     return _color(ctx, node["id"], "foreground", style["foreground"])
 
 
-#: What `text.text_align` can be (0.3.1): `tre`'s own values, where the text
+#: What `text.text_align` can be: `tre`'s own values, where the text
 #: sits in its node's width.
 _TEXT_ALIGNS = ("start", "center", "end")
+#: `text.wrap`: `word` breaks a line that is too long for its node; `none` never does.
+_TEXT_WRAPS = ("word", "none")
+#: `text.overflow`: what happens to a line that doesn't fit its node: `clip` cuts it off, `ellipsis` ends it with an ellipsis.
+_TEXT_OVERFLOWS = ("clip", "ellipsis")
 
 #: The kinds whose `typography_role` follows the theme's `typography:`:
 #: display text. Text inputs keep their own font (M38 Q1).
@@ -462,6 +467,14 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         raise SpecBuildError(
             f'widget {_q(node["id"])}: text.text_align must be one of {", ".join(_TEXT_ALIGNS)}, got {align!r}'
         )
+    wrap = text.get("wrap", "word")
+    if wrap not in _TEXT_WRAPS:
+        raise SpecBuildError(f'widget {_q(node["id"])}: text.wrap must be one of {", ".join(_TEXT_WRAPS)}, got {wrap!r}')
+    overflow = text.get("overflow", "clip")
+    if overflow not in _TEXT_OVERFLOWS:
+        raise SpecBuildError(
+            f'widget {_q(node["id"])}: text.overflow must be one of {", ".join(_TEXT_OVERFLOWS)}, got {overflow!r}'
+        )
     content = text.get("content", "")
     if not isinstance(content, str):
         raise SpecBuildError(
@@ -474,6 +487,8 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         "font_weight": float(weight),
         "line_height": line_height,
         "text_align": align,
+        "wrap": wrap,
+        "overflow": overflow,
     }
 
 
@@ -532,7 +547,9 @@ def natural_size(window: Any, props: dict[str, Any], style: dict[str, Any]) -> d
     width, height = window.measure_text(props["text"], font_family=props["font_family"],
                                         font_size=props["font_size"], font_weight=props["font_weight"],
                                         line_height=props.get("line_height"))
-    return {d: float(v) for d, v in (("width", width), ("height", height)) if d in missing}
+    # Whole pixels, rounded up: the engine rounds an explicit width down, and text a fraction of a pixel
+    # wider than its node wraps ("Add a / task").
+    return {d: float(math.ceil(v)) for d, v in (("width", width), ("height", height)) if d in missing}
 
 
 def _text_props(ctx, node, style):
@@ -565,9 +582,14 @@ def _text_field_props(ctx, node, style):
     background = _required_background(ctx, node, style, "TextField")
     if "text_align" in node["text"]:
         raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.text_align (its text starts at the left)')
+    for key in ("wrap", "overflow"):
+        if key in node["text"]:
+            raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.{key} (it is a single line that scrolls)')
     text = _text_style(ctx, node, "TextField")
     text.pop("line_height")
     text.pop("text_align")
+    text.pop("wrap")
+    text.pop("overflow")
     outer = {**_layout(style), **_paint(ctx, node["id"], style), "fill": background}
     # `tre`'s TextField draws its text in MD3's baseline on_surface, not a theme role.
     inner = {**text, "fill": _TEXT_FIELD_GLYPH, "flex_grow": 1.0, "align_self": "stretch", "role": "textbox", "focusable": True}

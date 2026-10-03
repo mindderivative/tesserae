@@ -7,6 +7,7 @@ builtin `list`.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from tesserae import a11y
@@ -312,8 +313,8 @@ def text(
         measured_width, measured_height = window.measure_text(
             now, font_family=node.get("font_family"), font_size=node.get("font_size"),
             font_weight=node.get("font_weight"), line_height=node.get("line_height"))
-        node.set(text=now, height=float(measured_height),
-                 **({} if width is not None else {"width": float(measured_width)}))
+        node.set(text=now, height=float(math.ceil(measured_height)),
+                 **({} if width is not None else {"width": float(math.ceil(measured_width))}))
 
     effect = Effect(fit)
     widget._undo.append(effect.dispose)

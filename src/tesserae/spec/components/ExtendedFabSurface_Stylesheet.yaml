@@ -35,3 +35,4 @@ styles:
   - id: label
     style:
       foreground: primary
+      flex_shrink: 0

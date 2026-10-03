@@ -38,6 +38,8 @@ children:
     text:
       content: "{{ text }}"
       typography_role: body_small
+      wrap: none
+      overflow: ellipsis
 ```
 
 ## Using it

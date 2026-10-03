@@ -82,6 +82,7 @@ children:
             text:
               content: "{{ label }}"
               typography_role: title_small
+              wrap: none
       - {id: indicator, kind: Rect}
 ```
 

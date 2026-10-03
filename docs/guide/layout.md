@@ -63,6 +63,26 @@ it: `start` (the default), `center` or `end`.
 
 A `TextField` has no `text_align`: what is typed starts at the left.
 
+#### One line, or an ellipsis
+
+A line too long for its box breaks onto the next (`wrap: word`, the default). `wrap: none` keeps one line,
+and `overflow: ellipsis` ends a line that doesn't fit with an ellipsis instead of cutting it off
+(`overflow: clip`, the default). Together they make a single-line label that truncates:
+
+```yaml
+- id: title
+  kind: Text
+  text: {content: "A very long note title", typography_role: body_large, wrap: none, overflow: ellipsis}
+  style: {width: 160, foreground: on_surface}
+```
+
+Give the text a width (a number, or `flex_grow: 1` in a row with `min_width: 0`) for the ellipsis to have
+something to truncate to. A `TextField` has neither key.
+
+The labels of the built-in [components](../components/index.md) are single lines that end in an
+ellipsis when they don't fit. A `Text` component takes `wrap` and `overflow` as parameters, and a `Link`
+too, if you want them to wrap.
+
 ## Flexible sizing
 
 `flex_grow` shares the space left over (`1` on two children splits it

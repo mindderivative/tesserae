@@ -26,6 +26,8 @@ styles:
   - id: am_label
     style:
       foreground: on_tertiary_container
+      flex_grow: 1
+      min_width: 0
   - id: pm
     style:
       width: 52
@@ -37,6 +39,8 @@ styles:
   - id: pm_label
     style:
       foreground: on_surface
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -69,6 +73,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_tertiary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ### `pm` (Container)
 
@@ -86,6 +92,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -95,9 +103,9 @@ With ``, each part's style is:
 root: {flex_direction: vertical, width: 52, height: 72}
 am: {width: 52, height: 36, background: tertiary_container, corner_radius: small, justify_content: center,
   align_items: center}
-am_label: {foreground: on_tertiary_container}
+am_label: {foreground: on_tertiary_container, flex_grow: 1, min_width: 0}
 pm: {width: 52, height: 36, background: transparent, corner_radius: small, justify_content: center, align_items: center}
-pm_label: {foreground: on_surface}
+pm_label: {foreground: on_surface, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

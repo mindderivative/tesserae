@@ -44,6 +44,7 @@ styles:
   - id: label
     style:
       foreground: on_tertiary_container
+      flex_shrink: 0
 ```
 
 ## How it is tied to the component
@@ -80,6 +81,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_tertiary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_shrink` | `0` | How much it gives up when there is too little room. |
 
 ## What it makes
 
@@ -98,7 +100,7 @@ root:
   justify_content: flex_start
   gap: 8
 icon: {width: 24, height: 24, foreground: on_tertiary_container}
-label: {foreground: on_tertiary_container}
+label: {foreground: on_tertiary_container, flex_shrink: 0}
 ```
 
 ## Changing it

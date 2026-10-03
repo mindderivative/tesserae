@@ -12,6 +12,7 @@ styles:
     style:
       foreground: on_surface
       flex_grow: 1
+      min_width: 0
   - id: chevron
     style:
       width: 24

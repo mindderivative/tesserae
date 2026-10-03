@@ -4,8 +4,12 @@ params:
   - text
   - {typography_role: body_medium}
   - {color: on_surface}
+  - {wrap: word}
+  - {overflow: clip}
 id: root
 kind: Text
 text:
   content: "{{ text }}"
   typography_role: "{{ typography_role }}"
+  wrap: "{{ wrap }}"
+  overflow: "{{ overflow }}"

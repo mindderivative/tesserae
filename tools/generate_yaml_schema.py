@@ -171,6 +171,12 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                 "line_height": loose({"type": "number", "exclusiveMinimum": 0, "description": "A multiple of the size."}),
                 "text_align": loose({"enum": ["start", "center", "end"],
                                      "description": "Where the text sits in its node's width. Not for a TextField."}),
+                "wrap": loose({"enum": ["word", "none"],
+                               "description": "`word` (the default) breaks a line that is too long for its node onto the next; "
+                                              "`none` keeps one line. Not for a TextField."}),
+                "overflow": loose({"enum": ["clip", "ellipsis"],
+                                   "description": "What happens to a line that doesn't fit its node: `clip` (the default) cuts it off, "
+                                                  "`ellipsis` ends it with an ellipsis. Not for a TextField."}),
             },
             "additionalProperties": False}
     window_actions = ", ".join("`window." + action + "`" for action in view_module.WINDOW_ACTIONS)

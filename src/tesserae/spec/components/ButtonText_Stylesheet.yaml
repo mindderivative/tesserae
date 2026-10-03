@@ -9,6 +9,13 @@ styles:
       justify_content: center
       background: transparent
       corner_radius: "{{ corner_radius }}"
+      padding:
+        left: 12
+        right: 12
+        top: 0
+        bottom: 0
   - id: label
     style:
       foreground: primary
+      flex_grow: 1
+      min_width: 0

@@ -8,6 +8,7 @@ deliberate differences: `on_change` fires only for the user's own edits
 (`tre` issue #12), and a reconcile puts children in the new spec's order.
 """
 
+import math
 import pytest
 import tre
 
@@ -463,7 +464,7 @@ def test_text_is_sized_to_its_content_and_bound_text_is_measured_again():
     vm = Greeting(view)
     node = view.node("hi")
     short = node.get("width")
-    assert short == view.window.measure_text("Al", font_family="Roboto", font_size=16.0)[0] > 0
+    assert short == float(math.ceil(view.window.measure_text("Al", font_family="Roboto", font_size=16.0)[0])) > 0  # whole pixels, up
     vm.name.set("Alexandra")
     assert node.get("width") > short
     assert view.node("fixed").get("width") == 12.0  # a given width is kept

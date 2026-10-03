@@ -5,6 +5,7 @@ theme's type scale, which every widget now gets (`Widget` hands its
 theme's `typography:` to its view, as it does `components:`).
 """
 
+import math
 import pytest
 import tre
 import yaml
@@ -24,8 +25,11 @@ def _window():
 
 
 def _measure(window, node, content):
-    return window.measure_text(content, font_family=node.get("font_family"), font_size=node.get("font_size"),
-                               font_weight=node.get("font_weight"), line_height=node.get("line_height"))
+    """The size a Text is given: its measured size, rounded up to whole pixels (the engine rounds a width down,
+    which wrapped text that fit)."""
+    width, height = window.measure_text(content, font_family=node.get("font_family"), font_size=node.get("font_size"),
+                                        font_weight=node.get("font_weight"), line_height=node.get("line_height"))
+    return float(math.ceil(width)), float(math.ceil(height))
 
 
 def test_text_is_body_medium_on_surface_and_its_own_size():

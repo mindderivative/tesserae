@@ -49,6 +49,7 @@ children:
     text:
       content: "{{ label }}"
       typography_role: label_large
+      wrap: none
 ```
 
 ## Using it

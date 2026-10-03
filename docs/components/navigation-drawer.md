@@ -71,6 +71,8 @@ children:
     text:
       content: "{{ label }}"
       typography_role: label_large
+      wrap: none
+      overflow: ellipsis
 ```
 
 ## Using it

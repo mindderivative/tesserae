@@ -54,6 +54,7 @@ styles:
         if: "{{ selected }}"
         then: primary
         else: on_surface_variant
+      flex_shrink: 0
   - id: indicator
     style:
       height: 3
@@ -119,6 +120,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `primary` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_shrink` | `0` | How much it gives up when there is too little room. |
 
 ### `indicator` (Rect)
 
@@ -138,7 +140,7 @@ tab: {height: 64, flex_direction: vertical, align_items: stretch}
 top: {height: 3, background: transparent}
 content: {flex_grow: 1, flex_direction: vertical, align_items: center, justify_content: center, gap: 2}
 icon: {width: 24, height: 24, foreground: on_surface_variant}
-label: {foreground: on_surface_variant}
+label: {foreground: on_surface_variant, flex_shrink: 0}
 indicator: {height: 3, corner_radius: 3, background: transparent}
 ```
 

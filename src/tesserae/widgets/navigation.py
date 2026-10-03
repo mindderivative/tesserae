@@ -101,8 +101,8 @@ def tabs(
     items = []
     for i, label in enumerate(labels):
         children = [{"id": f"{name}.item{i}.label", "kind": "Text",
-                     "text": {"content": label, "typography_role": "title_small"},
-                     "style": {"foreground": "on_surface_variant"}}]
+                     "text": {"content": label, "typography_role": "title_small", "wrap": "none"},
+                     "style": {"foreground": "on_surface_variant", "flex_shrink": 0}}]
         if icons:
             children.insert(0, {"id": f"{name}.item{i}.icon", "kind": "Icon", "icon": {"name": icons[i]},
                                 "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}})
@@ -190,8 +190,8 @@ def navigation_rail(
                                          "style": {"width": 24, "height": 24,
                                                    "foreground": "on_surface_variant"}}]},
                           {"id": f"{name}.item{i}.label", "kind": "Text",
-                           "text": {"content": label, "typography_role": "label_medium"},
-                           "style": {"foreground": "on_surface_variant"}}]})
+                           "text": {"content": label, "typography_role": "label_medium", "wrap": "none"},
+                           "style": {"foreground": "on_surface_variant", "flex_shrink": 0}}]})
     spec = {"id": name, "kind": "Container",
             "style": {"width": 80, "flex_direction": "vertical", "align_items": "center", "gap": 12,
                       "padding": {"left": 0, "right": 0, "top": 12, "bottom": 12}, "background": "surface"},
@@ -245,8 +245,8 @@ def navigation_drawer(
                   {"id": f"{name}.item{i}.icon", "kind": "Icon", "icon": {"name": glyph},
                    "style": {"width": 24, "height": 24, "foreground": "on_surface_variant"}},
                   {"id": f"{name}.item{i}.label", "kind": "Text",
-                   "text": {"content": label, "typography_role": "label_large"},
-                   "style": {"foreground": "on_surface_variant"}}]}
+                   "text": {"content": label, "typography_role": "label_large", "wrap": "none", "overflow": "ellipsis"},
+                   "style": {"foreground": "on_surface_variant", "flex_grow": 1, "min_width": 0}}]}
              for i, (label, glyph) in enumerate(zip(labels, icons))]
     style = {"width": float(width), "flex_direction": "vertical", "padding": 12, "background": "surface_container_low"}
     if height is not None:

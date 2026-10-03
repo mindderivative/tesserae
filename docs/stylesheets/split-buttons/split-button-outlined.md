@@ -24,9 +24,16 @@ styles:
       corner_radius: "{{ corner_radius }}"
       border_color: outline
       border_width: 1.0
+      padding:
+        left: 12
+        right: 12
+        top: 0
+        bottom: 0
   - id: label
     style:
       foreground: primary
+      flex_grow: 1
+      min_width: 0
   - id: trailing
     style:
       width: "{{ height }}"
@@ -69,12 +76,15 @@ styles:
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
 | `border_color` | `outline` | The colour of its border. |
 | `border_width` | `1.0` | The width of its border, in pixels. |
+| `padding` | left `12`, right `12`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ### `label` (Text)
 
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `primary` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ### `trailing` (Rect)
 
@@ -103,9 +113,17 @@ With `label: Go, width: 120, height: 40, corner_radius: 20`, each part's style i
 
 ```yaml
 root: {flex_direction: horizontal, gap: 2}
-leading: {width: 120, height: 40, align_items: center, justify_content: center, background: transparent,
-  corner_radius: 20, border_color: outline, border_width: 1.0}
-label: {foreground: primary}
+leading:
+  width: 120
+  height: 40
+  align_items: center
+  justify_content: center
+  background: transparent
+  corner_radius: 20
+  border_color: outline
+  border_width: 1.0
+  padding: {left: 12, right: 12, top: 0, bottom: 0}
+label: {foreground: primary, flex_grow: 1, min_width: 0}
 trailing: {width: 40, height: 40, align_items: center, justify_content: center, background: transparent,
   corner_radius: 20, border_color: outline, border_width: 1.0}
 chevron: {width: 22, height: 22, foreground: primary}

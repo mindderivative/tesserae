@@ -45,6 +45,7 @@ styles:
         if: "{{ selected }}"
         then: primary
         else: on_surface_variant
+      flex_shrink: 0
   - id: indicator
     style:
       height: 3

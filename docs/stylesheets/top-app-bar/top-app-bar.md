@@ -30,6 +30,7 @@ styles:
         right: 0
         top: 0
         bottom: 0
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -55,6 +56,7 @@ styles:
 | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
 | `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
 | `margin` | left `16`, right `0`, top `0`, bottom `0` | Space outside it: one number, or `{left, right, top, bottom}`. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -71,6 +73,7 @@ title:
   foreground: on_surface
   flex_grow: 1
   margin: {left: 16, right: 0, top: 0, bottom: 0}
+  min_width: 0
 ```
 
 ## Changing it

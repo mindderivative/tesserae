@@ -24,6 +24,8 @@ styles:
   - id: text
     style:
       foreground: on_surface_variant
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -47,6 +49,8 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
@@ -59,7 +63,7 @@ root:
   background: surface_container
   align_items: center
   padding: {left: 8, right: 8, top: 0, bottom: 0}
-text: {foreground: on_surface_variant}
+text: {foreground: on_surface_variant, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

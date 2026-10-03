@@ -19,3 +19,5 @@ styles:
   - id: label
     style:
       foreground: on_surface_variant
+      flex_grow: 1
+      min_width: 0

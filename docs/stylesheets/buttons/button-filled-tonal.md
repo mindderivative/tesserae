@@ -18,9 +18,16 @@ styles:
       justify_content: center
       background: secondary_container
       corner_radius: "{{ corner_radius }}"
+      padding:
+        left: 12
+        right: 12
+        top: 0
+        bottom: 0
   - id: label
     style:
       foreground: on_secondary_container
+      flex_grow: 1
+      min_width: 0
 ```
 
 ## How it is tied to the component
@@ -39,21 +46,30 @@ styles:
 | `justify_content` | `center` | Where its children sit along the layout axis. |
 | `background` | `secondary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
+| `padding` | left `12`, right `12`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ### `label` (Text)
 
 | Field | Value | What it does |
 | --- | --- | --- |
 | `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `flex_grow` | `1` | How much of the spare room it takes, relative to its siblings. |
+| `min_width` | `0` | The least width it can take. |
 
 ## What it makes
 
 With `label: Go, width: 120, height: 40, corner_radius: 20`, each part's style is:
 
 ```yaml
-root: {width: 120, height: 40, align_items: center, justify_content: center, background: secondary_container,
-  corner_radius: 20}
-label: {foreground: on_secondary_container}
+root:
+  width: 120
+  height: 40
+  align_items: center
+  justify_content: center
+  background: secondary_container
+  corner_radius: 20
+  padding: {left: 12, right: 12, top: 0, bottom: 0}
+label: {foreground: on_secondary_container, flex_grow: 1, min_width: 0}
 ```
 
 ## Changing it

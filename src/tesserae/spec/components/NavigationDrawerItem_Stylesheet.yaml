@@ -32,3 +32,5 @@ styles:
         if: "{{ selected }}"
         then: on_secondary_container
         else: on_surface_variant
+      flex_grow: 1
+      min_width: 0

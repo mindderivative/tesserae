@@ -15,9 +15,16 @@ styles:
       corner_radius: "{{ corner_radius }}"
       border_color: outline
       border_width: 1.0
+      padding:
+        left: 12
+        right: 12
+        top: 0
+        bottom: 0
   - id: label
     style:
       foreground: primary
+      flex_grow: 1
+      min_width: 0
   - id: trailing
     style:
       width: "{{ height }}"

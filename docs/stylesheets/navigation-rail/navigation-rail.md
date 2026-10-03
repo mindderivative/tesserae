@@ -57,12 +57,12 @@ item.0: {width: 80, height: 56, flex_direction: vertical, align_items: center, g
 item.0.pill: {width: 56, height: 32, corner_radius: 16, background: secondary_container, align_items: center,
   justify_content: center}
 item.0.icon: {width: 24, height: 24, foreground: on_secondary_container}
-item.0.label: {foreground: on_surface}
+item.0.label: {foreground: on_surface, flex_shrink: 0}
 item.1: {width: 80, height: 56, flex_direction: vertical, align_items: center, gap: 4}
 item.1.pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_items: center,
   justify_content: center}
 item.1.icon: {width: 24, height: 24, foreground: on_surface_variant}
-item.1.label: {foreground: on_surface_variant}
+item.1.label: {foreground: on_surface_variant, flex_shrink: 0}
 ```
 
 ## Changing it

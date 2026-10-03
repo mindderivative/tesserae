@@ -38,6 +38,8 @@ children:
     text:
       content: "{{ title }}"
       typography_role: label_large
+      wrap: none
+      overflow: ellipsis
   - id: chevron
     kind: Icon
     icon: {name: expand_more}
