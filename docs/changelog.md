@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.0 (unreleased)
+## 0.4.0
 
 A simpler layout vocabulary ([#86](https://github.com/mindderivative/tesserae/issues/86)). Breaking: see
 [Migrating](migration.md#to-040).
