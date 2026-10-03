@@ -2153,6 +2153,22 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.3.6 released (#85)
+
+User: the screenshot of ButtonFilled's label drawn at the left ("text_align does nothing"), "just have it look at
+its parent width and align the glyphs based off that", "release 0.3.6 first, then do #86 as 0.4.0", "approved,
+check PyPI".
+
+- Cause: my 0.3.5 `wrap: none` on centred labels. The engine aligns text within the width it wraps to, so
+  `wrap: none` and a Text as wide as its own text have nothing to align in. The headless layout looked right,
+  so 0.3.5's tests could not see it.
+- Fix (the user's simpler design, no new key): a `Text` with `text_align: center` or `end` and no `width` gets
+  `width: 100%` and `min_width` = its text's width (a percentage of a parent with no width is 0). Bound text
+  keeps it; the badge widget reads `min_width`. Built-in centred labels are plain `text_align: center`.
+- Released: 4499 tests passed, CI green; `tesserae-ui` 0.3.6 is on PyPI (fresh venv: ButtonFilled's label is
+  276 px wide at x=12 in a 300 px button). `v0.3.6` is a pre-release. The user was asked to check the glyph
+  position by eye.
+
 ## Tesserae 0.3.5 released (#84)
 
 User: issue #84 (a ButtonFilled label wrapped), their screenshot showing my first measurement was wrong,
