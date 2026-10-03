@@ -2153,6 +2153,25 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.3.4 released (#83)
+
+User: the docs rework brief (API pages, MD3 component tree, themes, stylesheets, slim Getting Started,
+tutorial, no old-version references), "approved, push 0.3.4", "approved, merge and release 0.3.4",
+"release failed", "approved, check PyPI".
+
+- Generated Python API and YAML reference pages, 43 component pages and 76 stylesheet pages (tree in the
+  nav), a Themes page, a six-step tutorial (`examples/tutorial`), Migrating, and the `tesserae` command
+  guide. Tests keep generated pages current, run every example, and ban version, milestone and issue
+  numbers outside the changelog and Migrating.
+- The user chose real per-component stylesheets: the 77 fragments hold structure, `<Name>_Stylesheet.yaml`
+  holds the look (expansion verified unchanged), and an app's own fragments and stylesheets next to a view
+  are found (they weren't before).
+- Release run 1 failed in "Test the built wheel": a test I added named the built-in stylesheet by the
+  checkout's path, not the installed package's. Fixed, and the pre-release and tag recreated on the fixed
+  commit (it had not published).
+- Released: 4445 tests passed, strict docs clean, CI green. `tesserae-ui` 0.3.4 is on PyPI (76 stylesheets
+  in the wheel; a fresh venv installs it with `tesserae-engine` 0.5.1). `v0.3.4` is a pre-release.
+
 ## Tesserae 0.3.3 released (#80, #81, #82)
 
 User: the three findings in Documents/Issues.md, then "approved, do #80 and
