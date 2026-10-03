@@ -133,7 +133,8 @@ def test_the_stylesheets_are_dependencies_so_hot_reload_watches_them(tmp_path):
     text = "id: root\nkind: Container\nchildren:\n  - {id: b, component: ButtonFilled, with: {label: Go, width: 1, height: 1, corner_radius: 1}}\n"
     _, deps = expand_with_dependencies(text, base_dir=tmp_path)
     assert (tmp_path / "ButtonFilled_Stylesheet.yaml").resolve() in deps
-    assert (BUILTIN / "ButtonFilled_Stylesheet.yaml").resolve() in deps
+    installed = Path(expand_with_dependencies.__code__.co_filename).parent / "components"  # the package under test, not the checkout
+    assert (installed / "ButtonFilled_Stylesheet.yaml").resolve() in deps
 
 
 def test_a_view_built_from_a_file_uses_the_apps_own_component_and_stylesheet(tmp_path):
