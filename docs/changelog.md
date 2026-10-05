@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.2 (unreleased)
+## 0.4.2
 
 Names for lists and embedded components ([#89](https://github.com/mindderivative/tesserae/issues/89)), SVG
 ([#88](https://github.com/mindderivative/tesserae/issues/88)), and what the engine's 0.5.4 adds
