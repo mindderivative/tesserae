@@ -18,6 +18,7 @@ from tesserae import a11y
 from tesserae.reactive import Effect, Signal
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget
+from tesserae import motion
 
 if TYPE_CHECKING:
     from tre import Window
@@ -167,7 +168,7 @@ def carousel(
         index = widget.index.get()
         if snapping and float(index) != target[0]:
             target[0] = float(index)
-            driver.animate("stroke_width", target[0], MOVE_MS, easing=Theme.easing("standard"))
+            driver.animate("stroke_width", target[0], motion.duration(window, MOVE_MS), easing=Theme.easing("standard"))
             ticker.start()
 
     def follow_scroll() -> None:

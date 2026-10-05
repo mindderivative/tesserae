@@ -14,6 +14,7 @@ from tesserae import a11y
 from tesserae.reactive import Effect, Signal
 from tesserae.widgets._composed import Widget, fragment
 from tesserae.widgets.buttons import _borders, _hex, _variant
+from tesserae import motion
 
 if TYPE_CHECKING:
     from tesserae.theme import Theme
@@ -345,7 +346,7 @@ class _Expandable:
             on = widget.expanded.get()
             widget.node.set(expanded=on)
             if chevron is not None:
-                chevron.animate("rotation_deg", open_deg if on else closed_deg, 150 if painted[0] else 0)
+                chevron.animate("rotation_deg", open_deg if on else closed_deg, motion.duration(widget.window, 150) if painted[0] else 0)
             painted[0] = True
 
         effect = Effect(paint)

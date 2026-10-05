@@ -14,6 +14,7 @@ from tesserae.reactive import Effect, Signal, ViewModel
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget
 from tesserae.widgets.buttons import _borders, _hex, _variant, icon_button
+from tesserae import motion
 
 if TYPE_CHECKING:
     from tre import Node, Window
@@ -143,7 +144,7 @@ def tabs(
         offset = chosen * item_width + (item_width - span) / 2
         indicator.set(width=span)
         if moved[0]:
-            indicator.animate("translate_x", offset, Theme.duration("medium2"), easing=Theme.easing("emphasized"))
+            indicator.animate("translate_x", offset, motion.duration(window, Theme.duration("medium2")), easing=Theme.easing("emphasized"))
         else:
             indicator.stop_animation("translate_x")
             indicator.set(translate_x=offset)

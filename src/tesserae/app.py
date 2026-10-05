@@ -235,6 +235,15 @@ class App:
         system_menu: bool = False,
         icon: str | Path | None = None,
         window_border: bool = True,
+        dpi_scaling: bool = True,
+        present_mode: str = "vsync",
+        transparent: bool = False,
+        blur_behind: bool = False,
+        click_through: bool = False,
+        glyph_cache: bool = False,
+        system_fonts: bool = False,
+        reduced_motion: bool | str = "system",
+        high_contrast: bool | str = "system",
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
@@ -315,6 +324,16 @@ class App:
         self.titlebar_inset = Computed(self._titlebar_inset.get)
         self.native_controls = Computed(self._native_controls.get)
         self._window.on("titlebar_inset", self._on_titlebar_inset)
+        # what the user asked the OS for: less motion, more contrast. "system" follows it; True or False fixes it
+        for name, value in (("reduced_motion", reduced_motion), ("high_contrast", high_contrast)):
+            if value not in (True, False, "system"):
+                raise ValueError(f'App: {name} must be True, False or "system", got {value!r}')
+        self._reduced_motion_mode: bool | str = reduced_motion
+        self._high_contrast_mode: bool | str = high_contrast
+        self._reduced_motion: bool = self._wanted("reduced_motion", reduced_motion)
+        self._high_contrast: bool = self._wanted("high_contrast", high_contrast)
+        self._window.on("reduced_motion", self._on_reduced_motion)
+        self._window.on("high_contrast", self._on_high_contrast)
         # 0.3.0 M4 (the design's Q9): an undecorated window's 1 px border,
         # built the first time it shows, and shown while undecorated,
         # neither maximized nor fullscreen, and not on macOS (its frame).
@@ -354,6 +373,188 @@ class App:
         #: view (M61); weakly held, so removed ones drop out.
         self._instances: weakref.WeakSet[Any] = weakref.WeakSet()
         self._window.on("color_scheme", self._on_color_scheme)
+        # the window's display options: the engine's (`tre` 0.5.4)
+        self._set_window(dpi_scaling=bool(dpi_scaling), present_mode=present_mode, glyph_cache=bool(glyph_cache))
+        if transparent:  # before the window opens: the OS fixes it then
+            self._set_window(transparent=True)
+            self._window.root.set(fill=(0, 0, 0, 0))
+        if blur_behind:
+            self._set_window(blur_behind=True)
+        if click_through:
+            self._set_window(click_through=True)
+        if system_fonts:
+            from tesserae.fonts import set_system_fonts
+
+            set_system_fonts(True)
+        self._transparent = bool(transparent)
+
+    def _set_window(self, **options: Any) -> None:
+        """Sets window options, naming the option and the app when the platform can't do it."""
+        for name, value in options.items():
+            try:
+                self._window.set(**{name: value})
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f"App: {name}={value!r} isn't available here: {exc}") from None
+
+    def _wanted(self, name: str, mode: bool | str) -> bool:
+        """The preference `name`: the app's own choice, or, following the OS, what it says (no, where it can't)."""
+        if mode != "system":
+            return bool(mode)
+        try:
+            return bool(self._window.get(name))
+        except (ValueError, TypeError):
+            return False
+
+    # -- the window's display (tre 0.5.4) -------------------------------------------
+
+    @property
+    def scale_factor(self) -> float:
+        """The display's scale (2.0 on a 2x screen); 1.0 until the window opens."""
+        return float(self._window.get("scale_factor"))
+
+    @property
+    def dpi_scaling(self) -> bool:
+        """Whether the window lays out in logical pixels and draws at the display's scale (on by default), so it is
+        sharp on a HiDPI screen. Sizes you give are logical either way."""
+        return bool(self._window.get("dpi_scaling"))
+
+    @dpi_scaling.setter
+    def dpi_scaling(self, on: bool) -> None:
+        self._set_window(dpi_scaling=bool(on))
+
+    @property
+    def present_mode(self) -> str:
+        """How frames are paced: `"vsync"` (one a display refresh, the default: an animating window uses a few percent
+        of a core) or `"low_latency"` (the newest frame at once, and a whole core while something animates)."""
+        return str(self._window.get("present_mode"))
+
+    @present_mode.setter
+    def present_mode(self, mode: str) -> None:
+        self._set_window(present_mode=mode)
+
+    @property
+    def glyph_cache(self) -> bool:
+        """Whether text is drawn from a glyph cache: about four times cheaper a label, with slightly different
+        edge pixels. Off by default."""
+        return bool(self._window.get("glyph_cache"))
+
+    @glyph_cache.setter
+    def glyph_cache(self, on: bool) -> None:
+        self._set_window(glyph_cache=bool(on))
+
+    @property
+    def transparent(self) -> bool:
+        """Whether the window was made see-through (`App(transparent=True)`); `transparent_active` says whether it took."""
+        return self._transparent
+
+    @property
+    def transparent_active(self) -> bool | None:
+        """Whether the window really is see-through (the platform may not allow it); `None` until it opens."""
+        return self._window.get("transparent_active")
+
+    @property
+    def click_through(self) -> bool:
+        """Whether the whole window ignores the pointer, so clicks reach what is behind it. Give the app another way to
+        turn it off: the window can no longer be clicked."""
+        return bool(self._window.get("click_through"))
+
+    @click_through.setter
+    def click_through(self, on: bool) -> None:
+        self._set_window(click_through=bool(on))
+
+    @property
+    def blur_behind(self) -> bool:
+        """Whether the compositor blurs what is behind a see-through window (Wayland with KDE, macOS; ignored elsewhere)."""
+        return bool(self._window.get("blur_behind"))
+
+    @blur_behind.setter
+    def blur_behind(self, on: bool) -> None:
+        self._set_window(blur_behind=bool(on))
+
+    # -- what the frames cost ---------------------------------------------------------
+
+    def frame_stats(self, reset: bool = False) -> dict[str, Any]:
+        """What the window's frames cost: `frames`, `skipped`, `last` (the last frame's stage times in milliseconds)
+        and `recent` (the last 240 frames: `fps`, and the mean, 95th percentile and maximum of the total and the CPU
+        time). `reset=True` clears the history after reading it. Nothing is recorded before the window opens."""
+        return self._window.frame_stats(reset=reset)
+
+    @property
+    def profile_nodes(self) -> bool:
+        """Whether each node's drawing time is measured, so `frame_stats()["profile"]` says where it went."""
+        return bool(self._window.get("profile_nodes"))
+
+    @profile_nodes.setter
+    def profile_nodes(self, on: bool) -> None:
+        self._set_window(profile_nodes=bool(on))
+
+    def start_trace(self, path: str | Path) -> None:
+        """Writes every frame drawn from now on to `path`, for ui.perfetto.dev or chrome://tracing, until `stop_trace()`."""
+        self._window.start_trace(str(path))
+
+    def stop_trace(self) -> int:
+        """Ends the trace `start_trace` began and returns how many frames it holds."""
+        return int(self._window.stop_trace())
+
+    def stats_handle(self) -> Any:
+        """An object any thread can read the frame stats from: `handle.read()` is `frame_stats()` without the profile."""
+        return self._window.stats_handle()
+
+    # -- less motion, more contrast ---------------------------------------------------
+
+    @property
+    def reduced_motion(self) -> bool:
+        """Whether the app is to reduce motion: the user asked the OS for it (or the app says so). Animations then take no time."""
+        return self._reduced_motion
+
+    @property
+    def reduced_motion_mode(self) -> bool | str:
+        """`"system"` (following the OS), or the app's fixed `True` or `False`."""
+        return self._reduced_motion_mode
+
+    def set_reduced_motion(self, value: bool | str) -> None:
+        """`True` or `False` fixes the app's motion; `"system"` goes back to following the OS."""
+        if value not in (True, False, "system"):
+            raise ValueError(f'App.set_reduced_motion: must be True, False or "system", got {value!r}')
+        self._reduced_motion_mode = value
+        self._reduced_motion = self._wanted("reduced_motion", value)
+
+    def _on_reduced_motion(self, event: Any) -> None:
+        if self._reduced_motion_mode == "system":
+            self._reduced_motion = bool(event.reduced_motion)
+
+    @property
+    def high_contrast(self) -> bool:
+        """Whether the app uses MD3's highest-contrast colours: the user asked the OS for more contrast (or the app says so)."""
+        return self._high_contrast
+
+    @property
+    def high_contrast_mode(self) -> bool | str:
+        """`"system"` (following the OS), or the app's fixed `True` or `False`."""
+        return self._high_contrast_mode
+
+    def set_high_contrast(self, value: bool | str) -> None:
+        """`True` or `False` fixes the app's contrast, re-theming every screen in place; `"system"` follows the OS."""
+        if value not in (True, False, "system"):
+            raise ValueError(f'App.set_high_contrast: must be True, False or "system", got {value!r}')
+        self._high_contrast_mode = value
+        self._apply_contrast(self._wanted("high_contrast", value))
+
+    def _on_high_contrast(self, event: Any) -> None:
+        if self._high_contrast_mode == "system":
+            self._apply_contrast(bool(event.high_contrast))
+
+    def _apply_contrast(self, on: bool) -> None:
+        if on == self._high_contrast:
+            return
+        old_theme = self._view_theme()
+        self._high_contrast = on
+        try:
+            self._retheme(old_theme, self._view_theme())
+        except Exception:
+            self._high_contrast = not on
+            raise
+        logger.info("switched to {} contrast", "high" if on else "standard")
 
     # -- light and dark (M38) ---------------------------------------------------
 
@@ -391,6 +592,10 @@ class App:
             os_dark = _os_dark(self._window)
             if os_dark is not None:
                 self._apply_dark(os_dark)
+        if self._reduced_motion_mode == "system":
+            self._reduced_motion = self._wanted("reduced_motion", "system")
+        if self._high_contrast_mode == "system":
+            self._apply_contrast(self._wanted("high_contrast", "system"))
 
     def _apply_dark(self, dark: bool) -> None:
         if dark == self._dark:
@@ -423,7 +628,7 @@ class App:
 
     def _view_theme(self) -> dict[str, Any]:
         """The app's theme as `View(...)`/`View.set_theme` arguments."""
-        theme: dict[str, Any] = {"dark": self._dark}
+        theme: dict[str, Any] = {"dark": self._dark, "contrast": 1.0 if self._high_contrast else 0.0}
         if self._theme_seed is not None:
             theme["theme_seed"] = self._theme_seed
         if self._default_theme_spec is not None:

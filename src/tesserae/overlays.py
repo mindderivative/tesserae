@@ -33,6 +33,7 @@ from tesserae import a11y
 from tesserae.listeners import handled, listen_window
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget, fragment
+from tesserae import motion
 
 __all__ = ["Dialog", "Menu", "NavigationDrawer", "Overlay", "Popover", "SearchView", "SideSheet", "Snackbar",
            "Tooltip"]
@@ -447,7 +448,7 @@ class _EdgeSheet(Overlay):
         self.panel.set(translate_x=travel if self.end else -travel)
 
     def _after_open(self) -> None:
-        self.panel.animate("translate_x", 0.0, Theme.duration(self.SLIDE_MS),
+        self.panel.animate("translate_x", 0.0, motion.duration(self.window, Theme.duration(self.SLIDE_MS)),
                            easing=Theme.easing("emphasized_decelerate"))
         if self.panel.get("focusable"):
             self.panel.focus()

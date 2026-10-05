@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import math
 from typing import Any, Callable
+from tesserae import motion
 
 __all__ = ["DRAGGED", "FOCUSED", "HOVERED", "Interaction", "PRESSED"]
 
@@ -180,7 +181,7 @@ class Interaction:
             _INTERACTIVE.remove(self.node)
 
     def _update(self) -> None:
-        self.layer.animate("opacity", self.opacity, HOVER_MS)
+        self.layer.animate("opacity", self.opacity, motion.duration(self.window, HOVER_MS))
 
     # -- events ------------------------------------------------------------
 
@@ -262,8 +263,8 @@ class _Ripple:
             corner_radius=radius, fill=owner.tint, opacity=0.0, scale=start, hit_testable=False,
             a11y_hidden=True)
         owner.clip.add_child(self.circle)
-        self.circle.animate("scale", 1.0, PRESS_GROW_MS, easing=STANDARD)
-        self.circle.animate("opacity", PRESSED, PRESS_FADE_IN_MS)
+        self.circle.animate("scale", 1.0, motion.duration(owner.window, PRESS_GROW_MS), easing=STANDARD)
+        self.circle.animate("opacity", PRESSED, motion.duration(owner.window, PRESS_FADE_IN_MS))
         # `tre` has no timers; an invisible animation of the circle's
         # stroke width stands in for one, so a quick tap still shows.
         self.circle.animate("stroke_width", 0.001, MINIMUM_PRESS_MS, on_complete=self._held)
@@ -281,7 +282,7 @@ class _Ripple:
             self._fade()
 
     def _fade(self) -> None:
-        self.circle.animate("opacity", 0.0, RELEASE_FADE_MS, on_complete=self._done)
+        self.circle.animate("opacity", 0.0, motion.duration(self.owner.window, RELEASE_FADE_MS), on_complete=self._done)
 
     def _done(self) -> None:
         if self in self.owner._ripples:

@@ -57,21 +57,37 @@ class App(
     fullscreen: bool = False,
     system_menu: bool = False,
     icon: str | Path | None = None,
-    window_border: bool = True
+    window_border: bool = True,
+    dpi_scaling: bool = True,
+    present_mode: str = 'vsync',
+    transparent: bool = False,
+    blur_behind: bool = False,
+    click_through: bool = False,
+    glyph_cache: bool = False,
+    system_fonts: bool = False,
+    reduced_motion: bool | str = 'system',
+    high_contrast: bool | str = 'system'
 ) -> None
 ```
 
 `width`/`height`/`title` describe the one real `Window` this `App` opens the first time `show()` is called -- every registered view is shown inside that same window, at whatever size it already is, not its own independent size (matching `Window.show_view`'s own real, stated scope: only the *currently* active view's `width`/ `height` are kept in sync with the window).
 
 - `back() -> bool`: Shows the history's previous entry, calling its ViewModel's `on_navigated` with that entry's params.
+- `blur_behind` *(property)*: Whether the compositor blurs what is behind a see-through window (Wayland with KDE, macOS; ignored elsewhere).
 - `build_view(view_path: str | Path, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> Any`: Builds a view with this app's theme and stylesheet, without registering it -- for a screen given to `register()`, e.g. one whose `ViewModel` needs the `app` itself.
+- `click_through` *(property)*: Whether the whole window ignores the pointer, so clicks reach what is behind it.
 - `close() -> None`: Closes the window as the user's close would: `close_requested` fires first, so an app's "save changes?" check still runs and can cancel it.
 - `current` *(property)*: The name last passed to `show()`, or `None` before the first real call -- lets a registered handler ask "which screen is this, anyway" without the app keeping its own separate bookkeeping.
 - `dark` *(property)*: Whether the app is showing its dark scheme right now.
 - `dark_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True`/`False`.
 - `decorations` *(property)*: Whether the OS draws the title bar and borders.
+- `dpi_scaling` *(property)*: Whether the window lays out in logical pixels and draws at the display's scale (on by default), so it is sharp on a HiDPI screen.
 - `forward() -> bool`: Shows the entry `back()` left, if any.
+- `frame_stats(reset: bool = False) -> dict[str, Any]`: What the window's frames cost: `frames`, `skipped`, `last` (the last frame's stage times in milliseconds) and `recent` (the last 240 frames: `fps`, and the mean, 95th percentile and maximum of the total and the CPU time).
 - `fullscreen` *(property)*: Whether the window fills its monitor, borderless.
+- `glyph_cache` *(property)*: Whether text is drawn from a glyph cache: about four times cheaper a label, with slightly different edge pixels.
+- `high_contrast` *(property)*: Whether the app uses MD3's highest-contrast colours: the user asked the OS for more contrast (or the app says so).
+- `high_contrast_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True` or `False`.
 - `load(view_path: str | Path, viewmodel_cls: type | None = None, name: str | None = None, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> tuple[Any, Any]`: Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it.
 - `load_shell(path: str | Path, viewmodel: Any = None) -> Any`: Builds the app shell a `*_Shell.yaml` describes -- its top bar, navigation rail, status bar, docked zones, center tabs and panels -- and shows screens in it, as `use_shell` does.
 - `location` *(property)*: The screen showing, as a route string (for saving where the user was): from the first route of its screen that reads its params back exactly, or `None` if none does.
@@ -83,21 +99,33 @@ class App(
 - `navigate_to(route: str) -> Window`: Navigates to the screen the first matching route names, with the params it reads from `route` (a deep link, say `"notes/42"`).
 - `of(view: Any) -> 'App | None'`: The live app whose window `view` (a view, a component, or a window) is on, or `None`: for a ViewModel's constructor, before `super().__init__(view)` gives it `self.app`.
 - `platform` *(property)*: `"windows"`, `"macos"`, `"wayland"` or `"x11"`.
+- `present_mode` *(property)*: How frames are paced: `"vsync"` (one a display refresh, the default: an animating window uses a few percent of a core) or `"low_latency"` (the newest frame at once, and a whole core while something animates).
+- `profile_nodes` *(property)*: Whether each node's drawing time is measured, so `frame_stats()["profile"]` says where it went.
+- `reduced_motion` *(property)*: Whether the app is to reduce motion: the user asked the OS for it (or the app says so).
+- `reduced_motion_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True` or `False`.
 - `register(name: str, view: Any, viewmodel: Any) -> None`: Registers `view` (already loaded) and its already-`_attach`ed `viewmodel` (e.g. `FooViewModel(view)`) under `name`, for a later `show(name)` to display.
 - `resize_border` *(property)*: How many pixels along each edge resize an undecorated window (`tre` turns it off while maximized or fullscreen, and on macOS).
 - `restore() -> None`: Restores the window from maximized or minimized.
 - `route(pattern: str, name: str) -> None`: Adds a route: a pattern like `"notes/{id}"` for the screen registered (now or later) under `name`.
 - `run(max_frames: int | None = None, *, hot_reload: bool = False, keepalive: bool | float = False) -> None`: The one blocking call -- opens the real `Window` and runs `tre`'s own real render loop, showing the screen `show()` made current and any nodes added to `app.window.root` by calls.
+- `scale_factor` *(property)*: The display's scale (2.0 on a 2x screen); 1.0 until the window opens.
 - `screen(name: str) -> tuple[Any, Any]`: The `(view, viewmodel)` registered under `name` -- by `register`, `load`, or a shell file's panels, whose ViewModels the app builds; `viewmodel` is `None` for a view with none.
 - `set_dark(dark: bool | str) -> None`: `True`/`False` fixes the app dark or light, re-theming every screen in place; `"system"` goes back to following the OS from its next switch.
+- `set_high_contrast(value: bool | str) -> None`: `True` or `False` fixes the app's contrast, re-theming every screen in place; `"system"` follows the OS.
 - `set_icon(icon: str | Path | None) -> None`: The window's icon, from an image file (a PNG, best square), or `None` for none.
+- `set_reduced_motion(value: bool | str) -> None`: `True` or `False` fixes the app's motion; `"system"` goes back to following the OS.
 - `set_stylesheet_spec(stylesheet_spec: dict[str, Any] | None) -> None`: Replaces the app's default stylesheet in place: every view `build_view()`/`load()` made with the default -- not one given its own `stylesheet=` -- is re-styled, and views built later use it too.
 - `set_theme_specs(default_theme_spec: Any, custom_theme_spec: Any) -> None`: Re-themes the running app in place: every view `build_view()`/`load()` made.
 - `show(name: str) -> Window`: Shows the view registered under `name` in the app's window: its root is attached, and the screen shown before it is detached (kept alive, with its state and bindings).
+- `start_trace(path: str | Path) -> None`: Writes every frame drawn from now on to `path`, for ui.perfetto.dev or chrome://tracing, until `stop_trace()`.
+- `stats_handle() -> Any`: An object any thread can read the frame stats from: `handle.read()` is `frame_stats()` without the profile.
+- `stop_trace() -> int`: Ends the trace `start_trace` began and returns how many frames it holds.
 - `system_menu` *(property)*: Whether a secondary press on the title bar opens the OS's window menu (Windows, and Wayland compositors with one).
 - `theme` *(property)*: The app's resolved theme (`tesserae.Theme`): roles, component shape and elevation, typography, and motion tokens.
 - `thread_handle() -> Any`: `tre`'s thread-safe `LoopHandle` for this app: the one object that may cross threads.
 - `toggle_maximized() -> None`: Maximizes the window, or restores it if it's maximized: a title bar's maximize button.
+- `transparent` *(property)*: Whether the window was made see-through (`App(transparent=True)`); `transparent_active` says whether it took.
+- `transparent_active` *(property)*: Whether the window really is see-through (the platform may not allow it); `None` until it opens.
 - `use_shell(shell: Any) -> None`: Shows screens inside `shell.content`: an `AppShell` built on this app's window -- a top app bar, navigation, docked panels and a status bar around the screens.
 - `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change; `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.
 - `window` *(property)*: The app's one window (it exists from the start).
@@ -200,7 +228,8 @@ class View(
     default_theme_spec: Optional[dict[str, Any]] = None,
     custom_theme_spec: Optional[dict[str, Any]] = None,
     stylesheet_spec: Optional[dict[str, Any]] = None,
-    project: Any = None
+    project: Any = None,
+    contrast: float = 0.0
 ) -> None
 ```
 
@@ -215,7 +244,7 @@ A built view. `spec` is an expanded view spec (from `tesserae.spec.build_view_sp
 - `reconcile(spec: dict[str, Any], frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None`: Brings the live tree in line with `spec`, in place.
 - `root` *(property)*: The root node of this view's tree.
 - `set_stylesheet(stylesheet_spec: Optional[dict[str, Any]] = None) -> None`: Replaces the stylesheet and re-styles every node in place; `None` clears it.
-- `set_theme(theme_seed: Optional[tuple[int, int, int, int]] = None, dark: bool = False, default_theme_spec: Optional[dict[str, Any]] = None, custom_theme_spec: Optional[dict[str, Any]] = None) -> None`: Re-themes every node in place.
+- `set_theme(theme_seed: Optional[tuple[int, int, int, int]] = None, dark: bool = False, default_theme_spec: Optional[dict[str, Any]] = None, custom_theme_spec: Optional[dict[str, Any]] = None, contrast: float = 0.0) -> None`: Re-themes every node in place.
 - `spec` *(property)*: The expanded spec the view was built from: every `component:` and `include:` resolved.
 - `theme` *(property)*: This view's resolved theme (`tesserae.Theme`).
 
@@ -304,7 +333,8 @@ class Theme(
     dark: bool,
     roles: Optional[dict[str, RGBA]],
     components: dict[str, _Component] = <factory>,
-    type_overrides: dict[str, dict[str, Any]] = <factory>
+    type_overrides: dict[str, dict[str, Any]] = <factory>,
+    contrast: float = 0.0
 ) -> None
 ```
 
@@ -314,7 +344,7 @@ A resolved theme. Build one with `Theme.resolve(...)`.
 - `easing(name: str) -> Easing`: An MD3 easing token, as `animate(easing=...)` takes it.
 - `elevation(component: str, variant: Optional[str] = None) -> Optional[float]`: A component's elevation level from `components:`, or `None`.
 - `is_set` *(property)*: Whether there's a colour scheme (a seed was given somewhere).
-- `resolve(theme_seed: Optional[RGBA] = None, dark: bool = False, default_theme_spec: Optional[dict[str, Any]] = None, custom_theme_spec: Optional[dict[str, Any]] = None) -> 'Theme'`: Resolves a theme; raises `ValueError` for an unknown role, an unknown token in `components:` or an unknown `typography:` field.
+- `resolve(theme_seed: Optional[RGBA] = None, dark: bool = False, default_theme_spec: Optional[dict[str, Any]] = None, custom_theme_spec: Optional[dict[str, Any]] = None, contrast: float = 0.0) -> 'Theme'`: Resolves a theme; raises `ValueError` for an unknown role, an unknown token in `components:` or an unknown `typography:` field.
 - `role(name: str) -> Optional[RGBA]`: An MD3 colour role, or `None` without a scheme or for an unknown name.
 - `shape(component: str, variant: Optional[str] = None) -> Optional[float]`: A component's corner radius from `components:`, or `None` when the theme doesn't say (the widget uses its own MD3 default).
 - `typography(role: str) -> Optional[tokens.TypeStyle]`: An MD3 type role with the theme's `typography:` overrides, or `None` for an unknown role.
@@ -352,10 +382,10 @@ Every role, for widgets with no theme: the scheme MD3's baseline seed (#6750A4) 
 ### `color_scheme`
 
 ```python
-color_scheme(seed: RGBA, dark: bool = False) -> dict[str, RGBA]
+color_scheme(seed: RGBA, dark: bool = False, contrast: float = 0.0) -> dict[str, RGBA]
 ```
 
-Every MD3 role for `seed`, light or dark, as `tre` computes it.
+Every MD3 role for `seed`, light or dark. `contrast` is MD3's contrast level, from -1 (less) through 0 (the standard) to 1 (the most): the roles for a user who asked the OS for more contrast.
 
 ### `elevation`
 
@@ -388,7 +418,8 @@ resolve_scheme(
     theme_seed: Optional[RGBA],
     dark: bool,
     default_theme: Optional[dict[str, Any]],
-    custom_theme: Optional[dict[str, Any]]
+    custom_theme: Optional[dict[str, Any]],
+    contrast: float = 0.0
 ) -> Optional[dict[str, RGBA]]
 ```
 

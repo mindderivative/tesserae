@@ -30,6 +30,7 @@ from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.reactive import Effect, Signal, untrack
 from tesserae.theme import Theme
+from tesserae import motion
 
 __all__ = [
     "DISABLED_CONTAINER", "DISABLED_CONTENT", "Checkbox", "Control", "RadioButton", "RadioGroup", "STATE_LAYER_SIZE",
@@ -151,7 +152,7 @@ class Control:
             fn(value)
 
     def _ms(self, animate: bool, token: str) -> int:
-        return Theme.duration(token) if animate else 0
+        return Theme.duration(token) if animate and not motion.reduced(self.window) else 0
 
     @staticmethod
     def _to(node: Any, prop: str, value: Any, ms: int, easing: Any = None) -> None:
@@ -902,6 +903,9 @@ class LinearProgress(Indicator):
     def _loop(self, generation: int) -> None:
         if not self._alive(generation):
             return
+        if motion.reduced(self.window):  # no sweep: a still bar across the middle
+            self.bar.set(width=self.SWEEP * self.width, translate_x=(1.0 - self.SWEEP) * self.width / 2)
+            return
         self.bar.set(width=self.SWEEP * self.width)
         self.bar.stop_animation("translate_x")
         self.bar.set(translate_x=-self.SWEEP * self.width)
@@ -945,6 +949,9 @@ class CircularProgress(Indicator):
                         Theme.duration("medium1") if animate else 0, Theme.easing("standard"))
 
     def _loop(self, generation: int) -> None:
+        if motion.reduced(self.window):  # no spinning: a still arc
+            self.arc.set(rotation_deg=0.0, trim_end=0.75)
+            return
         self._spin(generation)
         self._stretch(generation, longer=True)
 
@@ -1008,6 +1015,8 @@ class LoadingIndicator(Indicator):
 
     def _loop(self, generation: int) -> None:
         if not self._alive(generation):
+            return
+        if motion.reduced(self.window):  # no morphing: the first shape, still
             return
         self._step = (self._step + 1) % len(self.SHAPES)
         self.shape.animate("data", self.SHAPES[self._step], self.STEP_MS, on_complete=lambda: self._loop(generation))

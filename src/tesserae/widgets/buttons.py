@@ -15,6 +15,7 @@ import math
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from tesserae.widgets._composed import Widget, fragment
+from tesserae import motion
 
 if TYPE_CHECKING:
     from tesserae.theme import Theme
@@ -236,7 +237,7 @@ def split_button(
         for part, (resting, tightened) in corners.items():
             radius = tightened if hovered else resting
             for node in (widget.part(part), widget.interaction(part).clip):
-                node.animate("corner_radius", radius, MORPH_MS)
+                node.animate("corner_radius", radius, motion.duration(window, MORPH_MS))
 
     widget._undo.append(widget.view._listen(widget.node, "pointer_enter", lambda e: morph(True)))
     widget._undo.append(widget.view._listen(widget.node, "pointer_leave", lambda e: morph(False)))
@@ -300,7 +301,7 @@ def button_group(
         for i, w in widths.items():
             widget.part(f"b{i}").set(width=w)
         for node in (widget.part(f"b{index}"), widget.interaction(f"b{index}").clip):
-            node.animate("corner_radius", tight, MORPH_MS)
+            node.animate("corner_radius", tight, motion.duration(window, MORPH_MS))
 
     def release() -> None:
         while pressed:
@@ -308,7 +309,7 @@ def button_group(
             for i in range(count):
                 widget.part(f"b{i}").set(width=float(width))
             for node in (widget.part(f"b{index}"), widget.interaction(f"b{index}").clip):
-                node.animate("corner_radius", rest, MORPH_MS)
+                node.animate("corner_radius", rest, motion.duration(window, MORPH_MS))
 
     for i in range(count):
         part = widget.part(f"b{i}")

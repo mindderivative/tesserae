@@ -115,6 +115,7 @@ class View:
         custom_theme_spec: Optional[dict[str, Any]] = None,
         stylesheet_spec: Optional[dict[str, Any]] = None,
         project: Any = None,
+        contrast: float = 0.0,
     ) -> None:
         self.path: Optional[Path] = None
         app = None
@@ -122,7 +123,7 @@ class View:
             app = app_of(window)  # no theme given: the app's, followed (M50)
             if app is not None:
                 given = app._view_theme()
-                theme_seed, dark = given.get("theme_seed"), given["dark"]
+                theme_seed, dark, contrast = given.get("theme_seed"), given["dark"], given.get("contrast", 0.0)
                 default_theme_spec, custom_theme_spec = given.get("default_theme_spec"), given.get("custom_theme_spec")
         dark = bool(dark)
         if isinstance(source, (str, Path)):
@@ -142,12 +143,12 @@ class View:
                 check(value)
             except ValueError as exc:
                 raise ValueError(f"{arg}=: {exc}") from None
-        self._theme = dict(theme_seed=theme_seed, dark=dark, default_theme_spec=default_theme_spec,
+        self._theme = dict(theme_seed=theme_seed, dark=dark, contrast=contrast, default_theme_spec=default_theme_spec,
                            custom_theme_spec=custom_theme_spec)
         self._stylesheet_spec = stylesheet_spec
         self._frames = dict(frames or {})
         self._components: list["Component"] = []
-        self._scheme = tokens.resolve_scheme(theme_seed, dark, default_theme_spec, custom_theme_spec)
+        self._scheme = tokens.resolve_scheme(theme_seed, dark, default_theme_spec, custom_theme_spec, contrast)
         self._layers = prepare_layers(default_theme_spec, custom_theme_spec, stylesheet_spec)
         self._owns_window = window is None
         if window is None:
@@ -286,14 +287,15 @@ class View:
         dark: bool = False,
         default_theme_spec: Optional[dict[str, Any]] = None,
         custom_theme_spec: Optional[dict[str, Any]] = None,
+        contrast: float = 0.0,
     ) -> None:
         """Re-themes every node in place. Each call is a complete
         selection, as in `tre`: an omitted argument means its default."""
-        scheme = tokens.resolve_scheme(theme_seed, dark, default_theme_spec, custom_theme_spec)
+        scheme = tokens.resolve_scheme(theme_seed, dark, default_theme_spec, custom_theme_spec, contrast)
         layers = prepare_layers(default_theme_spec, custom_theme_spec, self._stylesheet_spec)
         self._repatch(scheme, layers)
         self._scheme, self._layers = scheme, layers
-        self._theme = dict(theme_seed=theme_seed, dark=dark, default_theme_spec=default_theme_spec,
+        self._theme = dict(theme_seed=theme_seed, dark=dark, contrast=contrast, default_theme_spec=default_theme_spec,
                            custom_theme_spec=custom_theme_spec)
         self._rewire()
         for component in list(self._components):

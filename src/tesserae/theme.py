@@ -74,6 +74,8 @@ class Theme:
     roles: Optional[dict[str, RGBA]]
     components: dict[str, _Component] = field(default_factory=dict)
     type_overrides: dict[str, dict[str, Any]] = field(default_factory=dict)
+    #: MD3's contrast level the roles were made at: 0 (the standard) or 1 (the user asked for more contrast).
+    contrast: float = 0.0
 
     @classmethod
     def resolve(
@@ -82,6 +84,7 @@ class Theme:
         dark: bool = False,
         default_theme_spec: Optional[dict[str, Any]] = None,
         custom_theme_spec: Optional[dict[str, Any]] = None,
+        contrast: float = 0.0,
     ) -> "Theme":
         """Resolves a theme; raises `ValueError` for an unknown role, an
         unknown token in `components:` or an unknown `typography:` field."""
@@ -94,7 +97,7 @@ class Theme:
                 check_theme(spec)
             except ValueError as exc:
                 raise ValueError(f"{arg}=: {exc}") from None
-        roles = tokens.resolve_scheme(theme_seed, dark, default, custom_theme_spec)
+        roles = tokens.resolve_scheme(theme_seed, dark, default, custom_theme_spec, contrast)
         components: dict[str, _Component] = {}
         type_overrides: dict[str, dict[str, Any]] = {}
         for spec in (default, custom_theme_spec):
@@ -103,7 +106,7 @@ class Theme:
             for role, raw in ((spec or {}).get("typography") or {}).items():
                 type_overrides[role] = _type_override(role, raw)
         seed = theme_seed or _seed(custom_theme_spec) or _seed(default)
-        return cls(seed, dark, roles, components, type_overrides)
+        return cls(seed, dark, roles, components, type_overrides, float(contrast))
 
     # -- colour ----------------------------------------------------------------
 

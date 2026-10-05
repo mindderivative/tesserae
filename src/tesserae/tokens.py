@@ -104,14 +104,15 @@ def _camel(role: str) -> str:
     return head + "".join(word.capitalize() for word in rest)
 
 
-def color_scheme(seed: RGBA, dark: bool = False) -> dict[str, RGBA]:
-    """Every MD3 role for `seed`, light or dark, as `tre` computes it."""
+def color_scheme(seed: RGBA, dark: bool = False, contrast: float = 0.0) -> dict[str, RGBA]:
+    """Every MD3 role for `seed`, light or dark. `contrast` is MD3's contrast level, from -1 (less) through 0 (the
+    standard) to 1 (the most): the roles for a user who asked the OS for more contrast."""
     r, g, b = seed[0], seed[1], seed[2]
     argb = 0xFF000000 | (r << 16) | (g << 8) | b
-    scheme = SchemeTonalSpot(Hct.from_int(argb), dark, 0.0, spec_version="2021")
+    scheme = SchemeTonalSpot(Hct.from_int(argb), dark, float(contrast), spec_version="2021")
     roles: dict[str, RGBA] = {}
     for role in ROLES:
-        if not dark and role in _TONE_10_LIGHT:
+        if not dark and contrast == 0.0 and role in _TONE_10_LIGHT:
             roles[role] = _argb_to_rgba(getattr(scheme, _TONE_10_LIGHT[role]).tone(10))
             continue
         dynamic = getattr(MaterialDynamicColors, role, None) or getattr(MaterialDynamicColors, _camel(role))
@@ -202,6 +203,7 @@ def resolve_scheme(
     dark: bool,
     default_theme: Optional[dict[str, Any]],
     custom_theme: Optional[dict[str, Any]],
+    contrast: float = 0.0,
 ) -> Optional[dict[str, RGBA]]:
     """The scheme a view resolves roles against, by `tre`'s `View` rules:
     the seed is `theme_seed`, else the custom theme's `seed:`, else the
@@ -211,7 +213,7 @@ def resolve_scheme(
     seed = theme_seed or _seed_of(custom_theme) or _seed_of(default_theme)
     if seed is None:
         return None
-    roles = color_scheme(seed, dark)
+    roles = color_scheme(seed, dark, contrast)
     for theme in (default_theme, custom_theme):
         for role, raw in ((theme or {}).get("colors") or {}).items():
             if role not in roles:

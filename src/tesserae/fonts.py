@@ -26,6 +26,7 @@ __all__ = [
     "available_families",
     "check_font_families",
     "register_font",
+    "set_system_fonts",
 ]
 
 #: The families of `tre`'s four vendored faces (Roboto Regular/Medium,
@@ -60,6 +61,19 @@ def register_font(path: str | Path) -> list[str]:
     return families
 
 
+_system_fonts = False
+
+
+def set_system_fonts(enabled: bool = True) -> None:
+    """Lets text fall back to the fonts installed on the system (CJK, Hebrew, Indic, Thai, colour emoji), as the engine
+    does when it is on. Off by default, so text looks the same on every machine. Process-wide."""
+    global _system_fonts
+    import tre
+
+    tre.set_system_fonts(bool(enabled))
+    _system_fonts = bool(enabled)
+
+
 def available_families() -> frozenset[str]:
     """Every family `tre` can draw right now: its bundled ones plus any
     registered through `register_font`."""
@@ -70,7 +84,7 @@ def check_font_families(families: Iterable[str], source: str) -> None:
     """Warns once, naming `source`, about any of `families` that
     `tre` would silently replace with a bundled face."""
     missing = sorted(set(families) - available_families())
-    if missing:
+    if missing and not _system_fonts:  # with system fonts on, an installed family may be there
         warnings.warn(
             f"{source}: font_family {', '.join(map(repr, missing))} is not bundled or registered -- "
             f"tre will fall back to a bundled face. Register it first with "
