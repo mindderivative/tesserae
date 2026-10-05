@@ -2153,6 +2153,27 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.4.2 released (#88, #89, #90)
+
+User: issues #88 (SVG), #89 (names for `Repeater` and `instantiate`) and #90 (tre 0.5.4 adoption), "approved, do #88
+and #89 as 0.4.2", "I want them all implemented for 0.4.2", "approved, push and release 0.4.2", "approved, check PyPI".
+
+- #88 `kind: Svg` with the pictures in a document decoded for the engine; #89 `Repeater` and `instantiate` find
+  views and ViewModels by name through one `resolve_view`; #90 every item: window options (`dpi_scaling` on by
+  default, `present_mode`, `transparent`, `blur_behind`, `click_through`, `glyph_cache`, `system_fonts`),
+  `reduced_motion` and `high_contrast` (animations at 0 ms, indeterminate loops still, theme at contrast 1.0),
+  gradients and the `blur`, `backdrop_blur`, `blend_mode`, `filter`, `sticky`, `cursor` style keys
+  (`spec/effects.py`), `text.runs`/`selectable` and `on_link` (`spec/richtext.py`), the gesture, touch and
+  file-drop handlers, spring easing, frame stats with an overlay, four guide pages. Pin `tesserae-engine>=0.5.4,<0.6`.
+- Release run: CI on the release commit failed on Windows (a path with a leading slash is not absolute there, so an
+  SVG/image `src: /x` was read as relative) and macOS (that runner's OS asks for reduced motion; two tests assumed
+  it didn't). Fixed in `1323e79`; the tag is on it. Findings kept in #90: weights above 500 draw as 500, trailing
+  spaces drop out of a measured width, a sticky node needs a section inside the ScrollView.
+- Released: 4737 tests passed, CI green on all platforms; `tesserae-ui` 0.4.2 is on PyPI with `tesserae-engine`
+  0.5.4. From that install in a clean venv: a gradient with `backdrop_blur` drew red at the left edge, rich text
+  runs produced their spans, `Theme.spring` worked, and `tesserae new smoke --no-venv` made a project.
+  `v0.4.2` is a pre-release.
+
 ## Tesserae 0.4.1 released (#87)
 
 User: issue #87 (scaffolding), my triage and three questions ("Just use the current tesserae new <name> but add
