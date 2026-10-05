@@ -22,6 +22,7 @@ from urllib.parse import unquote_to_bytes
 
 from PIL import Image
 
+from tesserae.spec.images import is_absolute
 from tesserae.spec.expand import ComponentError
 
 __all__ = ["MAX_SIDE", "load_svg"]
@@ -72,7 +73,7 @@ def _data_url(href: str, where: str) -> Optional[Pixels]:
 
 
 def _file(href: str, svg_dir: Path, root: Path, where: str) -> tuple[Path, Pixels]:
-    if Path(href).is_absolute():
+    if is_absolute(href):
         raise ComponentError(f"{where}: {href!r} must be a relative path")
     try:
         found = (svg_dir / href).resolve(strict=True)

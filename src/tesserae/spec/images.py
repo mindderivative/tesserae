@@ -30,11 +30,17 @@ __all__ = ["Frame", "check_frame", "extract_images"]
 Frame = tuple[str, bytes, int, int]
 
 
+def is_absolute(path: str) -> bool:
+    """Whether `path` is absolute on any platform: a drive or root on this one, or a leading slash or backslash
+    (which Windows reads as relative to the current drive, not to the view)."""
+    return Path(path).is_absolute() or path.startswith(("/", "\\"))
+
+
 def _resolve_src(base_dir: Path | None, src: str, node_id: str) -> Path:
     where = f"widget {node_id!r}: image.src: {src!r}"
     if base_dir is None:
         raise ComponentError(f"{where} has no base directory to resolve against")
-    if Path(src).is_absolute():
+    if is_absolute(src):
         raise ComponentError(f"{where} must be a relative path")
     try:
         canon_base = base_dir.resolve(strict=True)

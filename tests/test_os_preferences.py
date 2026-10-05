@@ -31,7 +31,7 @@ def test_a_transparent_app_asks_before_it_runs():
 
 
 def test_reduced_motion_is_off_unless_asked_or_the_os_says():
-    assert _app().reduced_motion is False
+    assert _app(reduced_motion=False).reduced_motion is False  # (the default follows the OS, which may ask)
     assert _app(reduced_motion=True).reduced_motion is True
 
 
@@ -85,7 +85,7 @@ def test_an_indeterminate_progress_does_not_sweep_when_motion_is_reduced():
 def test_an_indeterminate_progress_sweeps_otherwise():
     from tesserae import controls
 
-    app = _app()
+    app = _app(reduced_motion=False)
     bar = controls.LinearProgress(app.window, value=None)
     app.window.advance(200)
     assert bar.bar.get("translate_x") != pytest.approx((1.0 - bar.SWEEP) * bar.width / 2)
