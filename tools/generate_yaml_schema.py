@@ -217,6 +217,11 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                   "properties": {"src": {"type": "string", "description": "An image file, relative to this one."},
                                  "fit": {"type": "string", "description": "How it fills its box: `cover` (the default), `contain`, ..."}},
                   "additionalProperties": True},
+        "svg": {"type": "object", "description": "An Svg's document: a file, or its text.",
+                "properties": {"src": {"type": "string", "description": "An SVG file (`.svg` or `.svgz`), relative to this view. "
+                                                                          "The pictures it refers to are decoded and found next to it."},
+                               "content": {"type": "string", "description": "The SVG document itself, as text."}},
+                "additionalProperties": False},
         "icon": {"type": "object", "description": "An Icon's glyph.",
                  "properties": {"name": {**loose({"enum": sorted(icons.ICONS)}), "description": "An icon in Tesserae's set."}},
                  "required": ["name"], "additionalProperties": False},

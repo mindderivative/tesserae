@@ -120,6 +120,7 @@ nav:
       - Content:
           - Text: components/text.md
           - Images: components/images.md
+          - SVG: components/svg.md
           - Video: components/video.md
           - Carousel: components/carousel.md
           - Pagination: components/pagination.md

@@ -19,7 +19,7 @@ A view is one node, with its children inside it. A node is a widget (`kind:`), a
 
 ```yaml
 id: <text>
-kind: <one of 19 names>
+kind: <one of 20 names>
 classes: <a list>
 style: <a style mapping or text>
 text: <a mapping>
@@ -34,6 +34,9 @@ step: <a number or text>
 image:
   src: <text>
   fit: <text>
+svg:
+  src: <text>
+  content: <text>
 icon:
   name: <one of 15 names>
 bindings: <a mapping>
@@ -71,6 +74,9 @@ children: <a list>
 | `image` | a mapping | An Image's source and fit. |
 | `image.src` | text | An image file, relative to this one. |
 | `image.fit` | text | How it fills its box: `cover` (the default), `contain`, ... |
+| `svg` | a mapping | An Svg's document: a file, or its text. |
+| `svg.src` | text | An SVG file (`.svg` or `.svgz`), relative to this view. The pictures it refers to are decoded and found next to it. |
+| `svg.content` | text | The SVG document itself, as text. |
 | `icon` | a mapping | An Icon's glyph. |
 | `icon.name` *(required)* | one of 15 names | An icon in Tesserae's set. |
 | `bindings` | a mapping | Properties kept live from the ViewModel: `{{ expression }}`. |
@@ -102,6 +108,7 @@ children: <a list>
 | `Link` | Text that is clickable, with focus and a keyboard activation. | `text:`, `handlers: {on_click}` |
 | `TextField` | A single-line text input in a box. | `text:`, `two_way:`, `handlers: {on_change}` |
 | `Image` | A picture from a file. | `image:` |
+| `Svg` | An SVG document, drawn by the engine: shapes, gradients, text, clips and masks. `style.foreground` is what `currentColor` means, so an icon follows the theme. | `svg:` |
 | `Icon` | A glyph from Tesserae's icon set, coloured by `style.foreground`. | `icon:` |
 | `Checkbox` | MD3's checkbox. | `checked:`, `disabled:`, `handlers: {on_change}` |
 | `RadioButton` | MD3's radio button; the ones with one `group:` exclude each other. | `selected:`, `group:`, `disabled:` |

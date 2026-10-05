@@ -687,6 +687,7 @@
             "ScrollView",
             "Slider",
             "SpinBox",
+            "Svg",
             "Switch",
             "Text",
             "TextField",
@@ -819,6 +820,21 @@
             }
           },
           "additionalProperties": true
+        },
+        "svg": {
+          "type": "object",
+          "description": "An Svg's document: a file, or its text.",
+          "properties": {
+            "src": {
+              "type": "string",
+              "description": "An SVG file (`.svg` or `.svgz`), relative to this view. The pictures it refers to are decoded and found next to it."
+            },
+            "content": {
+              "type": "string",
+              "description": "The SVG document itself, as text."
+            }
+          },
+          "additionalProperties": false
         },
         "icon": {
           "type": "object",
@@ -4392,6 +4408,7 @@
             "ScrollView",
             "Slider",
             "SpinBox",
+            "Svg",
             "Switch",
             "Text",
             "TextField",
@@ -4478,6 +4495,21 @@
             }
           ],
           "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
+        },
+        "svg": {
+          "type": "object",
+          "description": "An Svg's document: a file, or its text.",
+          "properties": {
+            "src": {
+              "type": "string",
+              "description": "An SVG file (`.svg` or `.svgz`), relative to this view. The pictures it refers to are decoded and found next to it."
+            },
+            "content": {
+              "type": "string",
+              "description": "The SVG document itself, as text."
+            }
+          },
+          "additionalProperties": false
         },
         "text": {
           "$ref": "#/definitions/text"

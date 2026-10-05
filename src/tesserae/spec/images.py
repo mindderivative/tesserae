@@ -46,6 +46,33 @@ def _resolve_src(base_dir: Path | None, src: str, node_id: str) -> Path:
     return canon_src
 
 
+def _svg(node: dict[str, Any], base_dir: Path | None, deps: set[Path]) -> dict[str, Any]:
+    """A `kind: Svg`'s `svg:` with its document read and the pictures in it decoded (`tesserae.spec.svg`)."""
+    from tesserae.spec.svg import load_svg
+
+    node_id = node.get("id")
+    svg = node.get("svg")
+    if not isinstance(node_id, str):
+        raise ComponentError("a `kind: Svg` needs an `id:`")
+    if not isinstance(svg, dict) or ("src" in svg) == ("content" in svg):
+        raise ComponentError(f"widget {node_id!r}: svg takes `src:` (a file next to the view) or `content:` (the document), one of them")
+    if "src" in svg:
+        src = svg["src"]
+        if not isinstance(src, str):
+            raise ComponentError(f"widget {node_id!r}: svg.src must be a string path, got {src!r}")
+        path = _resolve_src(base_dir, src, node_id).resolve()
+        deps.add(path)
+        try:
+            source: bytes | str = path.read_bytes()
+        except OSError as exc:
+            raise ComponentError(f"widget {node_id!r}: cannot read {path}: {exc}") from exc
+        return load_svg(source, base_dir, node_id, deps, svg_dir=path.parent)
+    content = svg["content"]
+    if not isinstance(content, (str, bytes)):
+        raise ComponentError(f"widget {node_id!r}: svg.content must be the document's text, got {type(content).__name__}")
+    return load_svg(content, base_dir, node_id, deps, svg_dir=base_dir)
+
+
 def _extract(node: Any, base_dir: Path | None, frames: list[Frame], deps: set[Path]) -> Any:
     if not isinstance(node, dict):
         return node
@@ -66,6 +93,8 @@ def _extract(node: Any, base_dir: Path | None, frames: list[Frame], deps: set[Pa
             raise ComponentError(f"widget {node_id!r}: {exc}") from exc
         frames.append((node_id, rgba, width, height))
         out["image"] = {k: v for k, v in image.items() if k != "src"}
+    if node.get("kind") == "Svg":
+        out["svg"] = _svg(node, base_dir, deps)
     children = node.get("children")
     if isinstance(children, list):
         out["children"] = [_extract(child, base_dir, frames, deps) for child in children]

@@ -68,6 +68,7 @@ Material Design 3's components, as Tesserae builds them. Each page says what the
 | --- | --- |
 | [Text](text.md) | `Text` |
 | [Images](images.md) | `Image` |
+| [SVG](svg.md) | Python only |
 | [Video](video.md) | `Video` |
 | [Carousel](carousel.md) | Python only |
 | [Pagination](pagination.md) | Python only |

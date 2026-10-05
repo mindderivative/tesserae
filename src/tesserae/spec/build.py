@@ -54,11 +54,11 @@ _CONTROL_KINDS = frozenset({
 })
 #: Kinds built with a `tesserae.widgets` widget (M60): a node graph and its nodes.
 _WIDGET_KINDS = frozenset({"NodeGraph", "GraphNode"})
-_KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon",
+_KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon", "Svg",
                                            "ScrollView"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "min", "max", "step",  # a SpinBox's (M58)
     "disabled",  # any node's (M70): the View applies it, or a control's own
@@ -651,6 +651,18 @@ def _image_props(ctx, node, style):
     }, None
 
 
+def _svg_props(ctx, node, style):
+    svg = node.get("svg")
+    if not isinstance(svg, dict) or "content" not in svg:
+        raise SpecBuildError(f'widget {_q(node["id"])}: Svg requires svg: {{src: file.svg}} (or content:), none given')
+    props = {**_layout(style), **_paint(ctx, node["id"], style), "svg": svg["content"],
+             "svg_images": dict(svg.get("images") or {}),
+             "fill": _color(ctx, node["id"], "background", style["background"]) if "background" in style else _TRANSPARENT}
+    if "foreground" in style:  # what `currentColor` is: a monochrome icon follows the theme
+        props["svg_color"] = _color(ctx, node["id"], "foreground", style["foreground"])
+    return props, None
+
+
 def _icon_props(ctx, node, style):
     icon = node.get("icon")
     if not isinstance(icon, dict):
@@ -666,7 +678,7 @@ def _icon_props(ctx, node, style):
 _PRIMITIVE = {
     "Rect": ("box", _box_props), "Container": ("box", _box_props), "Text": ("text", _text_props),
     "Link": ("box", _link_props), "TextField": ("box", _text_field_props), "Image": ("image", _image_props),
-    "Icon": ("path", _icon_props), "ScrollView": ("scroll_view", _scroll_props),
+    "Svg": ("svg", _svg_props), "Icon": ("path", _icon_props), "ScrollView": ("scroll_view", _scroll_props),
 }
 
 

@@ -1,5 +1,5 @@
 """Tesserae's own namespace for the Media & Graphics category --
-`image`, `video`, `icon`, `node_graph`, `graph_node` -- built by
+`image`, `svg`, `video`, `icon`, `node_graph`, `graph_node` -- built by
 Tesserae (M41-M42): `image`/`video` over Tesserae's own `image` nodes,
 the node graph from a clipped viewport and `path` edges.
 `icon(foreground=)` is the glyph's own paint.
@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Any
 from tesserae.images import decode_image
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from tesserae.theme import Theme
     from tesserae.widgets._composed import Widget
     from tre import Node, Window
@@ -45,6 +47,51 @@ def image(
     rgba, pixel_width, pixel_height = decode_image(path)
     widget = Widget(window, spec=_image_spec("image", width, height, fit), x=x, y=y, name="image",
                     frames={"image": (rgba, pixel_width, pixel_height)})
+    a11y.describe(widget.node, **({"role": "img", "label": label} if label is not None else {"hidden": True}))
+    return widget
+
+
+def svg(
+    window: "Window",
+    source: "str | Path | bytes",
+    width: float | None = None,
+    height: float | None = None,
+    x: float | None = None,
+    y: float | None = None,
+    *,
+    color: str | None = None,
+    base: "str | Path | None" = None,
+    label: str | None = None,
+) -> "Widget":
+    """An SVG drawn by the engine: `source` is a `.svg` or `.svgz` file, or the document's text or bytes. It is scaled
+    to fit `width` by `height`, or one of them if the other is left out. `color` is a theme role that `currentColor`
+    means in the document, so a monochrome icon follows the theme. The pictures (`<image href=...>`) in the document
+    are decoded here, found next to the file (or in `base` for a document given as text). Raises `OSError` for a file
+    that can't be read and `ValueError` for a document or picture that can't be used. Decorative unless given
+    `label=`, then `role="img"`."""
+    from pathlib import Path as _Path
+
+    from tesserae import a11y
+    from tesserae.spec.expand import ComponentError
+    from tesserae.spec.svg import load_svg
+    from tesserae.widgets._composed import Widget
+
+    deps: set = set()
+    is_text = isinstance(source, bytes) or (isinstance(source, str) and source.lstrip().startswith("<"))
+    folder = _Path(base) if base is not None else (_Path.cwd() if is_text else _Path(source).resolve().parent)
+    document = source if is_text else _Path(source).read_bytes()
+    try:
+        loaded = load_svg(document, folder, "svg", deps, svg_dir=folder)
+    except ComponentError as exc:
+        raise ValueError(str(exc)) from None
+    style: dict[str, Any] = {}
+    if width is not None:
+        style["width"] = width
+    if height is not None:
+        style["height"] = height
+    if color is not None:
+        style["foreground"] = color
+    widget = Widget(window, spec={"id": "svg", "kind": "Svg", "svg": loaded, "style": style}, x=x, y=y, name="svg")
     a11y.describe(widget.node, **({"role": "img", "label": label} if label is not None else {"hidden": True}))
     return widget
 

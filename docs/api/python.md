@@ -773,6 +773,25 @@ image(
 
 An image from a file, `width`x`height`, `fit` cover, contain or fill. Tesserae decodes the file (Pillow) and builds the node itself (`window.create("image")` with the pixels).
 
+### `svg`
+
+```python
+svg(
+    window: 'Window',
+    source: 'str | Path | bytes',
+    width: float | None = None,
+    height: float | None = None,
+    x: float | None = None,
+    y: float | None = None,
+    *,
+    color: str | None = None,
+    base: 'str | Path | None' = None,
+    label: str | None = None
+) -> 'Widget'
+```
+
+An SVG drawn by the engine: `source` is a `.svg` or `.svgz` file, or the document's text or bytes. It is scaled to fit `width` by `height`, or one of them if the other is left out.
+
 ### `linear_progress`
 
 ```python

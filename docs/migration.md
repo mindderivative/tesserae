@@ -3,6 +3,11 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.2
+
+Tesserae needs `tre` (`tesserae-engine`) 0.5.4 or newer, below 0.6: `pip install --upgrade tesserae-ui` brings it.
+Nothing in your code has to change.
+
 ## To 0.4.1
 
 Nothing in your code has to change. `tesserae new` makes a [project](guide/projects.md) with files in `Views/`,

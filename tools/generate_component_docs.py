@@ -180,6 +180,9 @@ def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sh
             if len(group) > 1:
                 out += [f"These {len(group)} have one structure; only their stylesheets, above, differ.", ""]
             out += _fence(first.body, "yaml")
+    elif entry.get("node_kind"):
+        out += [f"This component is the `{entry['node_kind']}` node kind, not a fragment: use `kind: {entry['node_kind']}` in a view "
+                "(the [YAML reference](../api/yaml.md#the-kinds)), or build it in Python.", ""]
     else:
         out += ["This component has no `component:` fragment: build it in Python.", ""]
     if entry.get("usage"):

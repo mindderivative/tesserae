@@ -2,10 +2,24 @@
 
 ## 0.4.2 (unreleased)
 
-Names for lists and embedded components ([#89](https://github.com/mindderivative/tesserae/issues/89)), and SVG.
+Names for lists and embedded components ([#89](https://github.com/mindderivative/tesserae/issues/89)), and SVG
+([#88](https://github.com/mindderivative/tesserae/issues/88)).
+
+### Requirements
+
+- **`tre` 0.5.4 or newer, below 0.6** (0.4.1 needed 0.5.1). 0.5.4 adds the `svg` node, and lays a text node's width out
+  rounded up so a width from `measure_text` fits its text.
 
 ### Added
 
+- **`kind: Svg`**: the engine draws a whole SVG document (shapes, gradients, patterns, clips, masks, text, a blur or
+  drop-shadow filter), scaled to fit its box. `svg: {src: logo.svg}` is a `.svg` or `.svgz` file next to the view,
+  `svg: {content: "<svg ...>"}` the document itself, and `style.foreground` is what `currentColor` means, so a
+  monochrome icon follows the theme. Tesserae decodes the raster pictures in a document (`<image href="...">`: PNG,
+  JPEG, GIF, WebP) for the engine, which decodes no image format: found next to the SVG file and inside the view's
+  folder, at most 8192 pixels on a side, a `data:` URL's picture too (its `href` is rewritten to a key of its own). A
+  picture that can't be found or decoded is an error naming it. Hot reload watches the file and its pictures.
+  `tesserae.widgets.svg(window, source, width, height, color=)` is the Python form.
 - **`Repeater` and `instantiate` find views and ViewModels by name**, as `app.load` does: `Repeater(view, items,
   "Row", into=node)` and `instantiate(view, "Row", into=node)` use `Views/Row_View.yaml` and `RowViewModel`, found in the
   app's project. `viewmodel_cls` and `into` are now optional in the signature (`into` is still needed: it is an error
