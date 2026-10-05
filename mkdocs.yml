@@ -56,6 +56,10 @@ nav:
       - Projects: guide/projects.md
       - Apps & Screens: guide/apps-and-screens.md
       - Layout: guide/layout.md
+      - Gradients & Effects: guide/effects.md
+      - Rich Text & Links: guide/rich-text.md
+      - Touch, Gestures & Files: guide/gestures.md
+      - Window Options & the OS: guide/window-options.md
       - Bindings: guide/bindings.md
       - Reactivity: guide/reactivity.md
       - Components & Embedding: guide/components.md

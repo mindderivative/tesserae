@@ -2,8 +2,10 @@
 
 ## 0.4.2 (unreleased)
 
-Names for lists and embedded components ([#89](https://github.com/mindderivative/tesserae/issues/89)), and SVG
-([#88](https://github.com/mindderivative/tesserae/issues/88)).
+Names for lists and embedded components ([#89](https://github.com/mindderivative/tesserae/issues/89)), SVG
+([#88](https://github.com/mindderivative/tesserae/issues/88)), and what the engine's 0.5.4 adds
+([#90](https://github.com/mindderivative/tesserae/issues/90)): gradients and effects, rich text, touch and files,
+window options, the OS's preferences for less motion and more contrast.
 
 ### Requirements
 
@@ -25,6 +27,35 @@ Names for lists and embedded components ([#89](https://github.com/mindderivative
   app's project. `viewmodel_cls` and `into` are now optional in the signature (`into` is still needed: it is an error
   without it), and a path and a class still work. A name with no app is an error that says there is no project.
   One function in `tesserae.project` (`resolve_view`) does the resolving for `app.load`, `instantiate` and `Repeater`.
+- **Gradients** in a style's `background`, `foreground` and `border_color`: a CSS-like string
+  (`linear-gradient(90deg, primary, tertiary)`, `radial-gradient(at 30% 30%, ...)`, `conic-gradient(from 90deg, ...)`,
+  stops that are theme roles or colours, with optional places) or a mapping (`{gradient: linear, angle: 90, stops: [...]}`).
+  See [Gradients & Effects](guide/effects.md).
+- **Effects as style keys**: `blur`, `backdrop_blur` (with a translucent `background`, a frosted surface), `blend_mode`
+  (CSS's sixteen), `filter` (`saturate`, `brightness`, `contrast`, `grayscale`, `hue_rotate`, `invert`, `sepia`),
+  `sticky` (a sticky header in a scroll view) and `cursor` (a name, or `{src: file.png, hotspot: [x, y]}` read with the view).
+- **Rich text**: `text.runs` makes a `Text` of styled pieces (`color`, `weight`, `italic`, `underline`, `strikethrough`,
+  `font_size`, `font_family`, `link`), measured run by run; a run with a `link` is `primary` and underlined and calls the
+  node's `on_link` handler with `event.href`. `text.selectable: true` lets the user select and copy a `Text`.
+  See [Rich Text & Links](guide/rich-text.md).
+- **Touch, gestures and files as handlers**: `on_tap`, `on_long_press`, `on_pan`, `on_pinch`, `on_touch_start`,
+  `on_touch_move`, `on_touch_end`, `on_touch_cancel`, `on_file_hover`, `on_file_hover_cancel`, `on_file_drop` and `on_link`,
+  and `app.on_file_drop(handler)` for a drop anywhere on the window. See [Touch, Gestures & Files](guide/gestures.md).
+- **Window options** on `App`: `dpi_scaling` (on by default), `present_mode`, `transparent`, `blur_behind`,
+  `click_through`, `glyph_cache` and `system_fonts` (also `tesserae.set_system_fonts()`), with `app.scale_factor` and
+  `app.transparent_active`. See [Window Options & the OS](guide/window-options.md).
+- **The OS's wishes**: `reduced_motion` and `high_contrast` follow the OS (or are fixed) and can be set with
+  `app.set_reduced_motion()` and `app.set_high_contrast()`. Reduced motion makes every animation take no time and stops
+  the indeterminate indicators; high contrast re-themes at the highest contrast level (`Theme.contrast`,
+  `tokens.color_scheme(contrast=)`). `tesserae.motion.duration(window, ms)` is for your own animations.
+- **A spring easing**: `Theme.easing("spring")` and `Theme.spring(bounce)`.
+- **Frame statistics**: `app.frame_stats()`, `app.profile_nodes`, `app.start_trace(path)` / `stop_trace()`,
+  `app.stats_handle()`, and `app.stats_overlay = True` (or `TESSERAE_STATS=1`) for a readout of the frame rate in the window.
+
+### Changed
+
+- A window is scaled to its screen by default (`App(dpi_scaling=False)` is the old way), and colours are drawn exactly
+  as written. See [Migrating](migration.md#to-042).
 
 ## 0.4.1
 

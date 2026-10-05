@@ -6,7 +6,15 @@ What to change in an existing app when you upgrade. Each section is the release 
 ## To 0.4.2
 
 Tesserae needs `tre` (`tesserae-engine`) 0.5.4 or newer, below 0.6: `pip install --upgrade tesserae-ui` brings it.
-Nothing in your code has to change.
+Nothing in your code has to change, but three things look or behave differently:
+
+- **A window is scaled to its screen** (`App(dpi_scaling=True)` is the default). On a high-density screen a 16-pixel
+  size is now the same size it is on a standard one, drawn with more pixels, and `width`, `height` and pointer
+  positions are in those logical pixels. `App(dpi_scaling=False)` is the old behaviour. See
+  [Window Options](guide/window-options.md).
+- **Animations stop for a user who asked the OS for less motion**, and the theme is made at a higher contrast for one
+  who asked for more. `App(reduced_motion=False, high_contrast=False)` ignores the OS.
+- **Colours are drawn exactly as written**, which on some screens is a little darker than before.
 
 ## To 0.4.1
 
