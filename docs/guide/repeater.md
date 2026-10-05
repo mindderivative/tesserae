@@ -12,12 +12,16 @@ items = Signal([])  # the single source of truth
 
 repeater = Repeater(view, items, "Card_View.yaml", CardViewModel, container)
 
+# in a project, a name is enough: Views/Card_View.yaml and CardViewModel (ViewModels/Card_ViewModel.py)
+repeater = Repeater(view, items, "Card", into=container)
+
 items.update(lambda lst: [*lst, new_id])               # adds one
 items.update(lambda lst: [i for i in lst if i != id])  # removes one
 ```
 
 | Argument | Default | Use |
 |---|---|---|
+| `viewmodel_cls` | found by the view's name | the ViewModel class; left out, it is `NameViewModel` in `Name_ViewModel.py`, beside the view or in the [project](projects.md)'s `ViewModels/` |
 | `key` | the item itself | for items that are dicts or dataclasses: a function returning a stable, hashable key |
 | `args` | `lambda item: (item,)` | what is forwarded to `viewmodel_cls(component, *args)`: override it for a ViewModel that needs more than the item |
 

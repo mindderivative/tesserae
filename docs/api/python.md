@@ -229,8 +229,8 @@ A built view. `spec` is an expanded view spec (from `tesserae.spec.build_view_sp
 instantiate(
     parent: Any,
     path: str | Path,
-    viewmodel_cls: type,
-    into: Any,
+    viewmodel_cls: type | None = None,
+    into: Any = None,
     *args: Any,
     **kwargs: Any
 ) -> tuple[Any, Any]
@@ -249,8 +249,8 @@ class Repeater(
     parent: Any,
     items_signal: Any,
     path: str | Path,
-    viewmodel_cls: type,
-    into: Any,
+    viewmodel_cls: type | None = None,
+    into: Any = None,
     key: Callable[[Any], Any] = <lambda>,
     args: Callable[[Any], tuple[Any, ...]] = <lambda>
 ) -> None

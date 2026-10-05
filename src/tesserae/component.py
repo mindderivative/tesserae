@@ -25,16 +25,21 @@ from typing import Any
 
 from tesserae.follow import app_of
 from tesserae.naming import check_naming_convention
+from tesserae.project import project_of, resolve_view
 from tesserae.spec import expand_components_to_spec
 from tesserae.spec.images import extract_images
 
 
 def instantiate(
-    parent: Any, path: str | Path, viewmodel_cls: type, into: Any, *args: Any, **kwargs: Any
+    parent: Any, path: str | Path, viewmodel_cls: type | None = None, into: Any = None, *args: Any, **kwargs: Any
 ) -> tuple[Any, Any]:
     """Instantiates the component at `path` into `into` (a `Node`, e.g.
     from `parent.node(widget_id)`), constructs `viewmodel_cls(component,
     *args, **kwargs)`, and returns `(component, viewmodel)`.
+
+    `path` is a file, or a name found in the app's project (`"TaskItem"` is `Views/TaskItem_View.yaml`);
+    `viewmodel_cls` left out is found by the view's name (`TaskItem_ViewModel.py`, class `TaskItemViewModel`),
+    beside the view or in `ViewModels/`.
 
     `parent` is whatever already has a real `instantiate(path, into)` of
     its own -- a `View` or another `Component` (they nest, so a
@@ -52,8 +57,10 @@ def instantiate(
     left to resolve against one. A `ValueError` from `tre` is re-raised
     naming `path`.
     """
+    if into is None:
+        raise TypeError("instantiate() needs `into`: the node the component goes in")
+    path, viewmodel_cls = resolve_view(project_of(parent), path, viewmodel_cls)
     check_naming_convention(path, viewmodel_cls)
-    path = Path(path)
     host = app_of(getattr(parent, "window", None))
     spec = expand_components_to_spec(path.read_text(encoding="utf-8"), base_dir=path.parent,
                                      project=host.project if host is not None else None)

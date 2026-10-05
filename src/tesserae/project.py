@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
-__all__ = ["KINDS", "Project", "ProjectError", "is_name"]
+__all__ = ["KINDS", "Project", "ProjectError", "is_name", "project_of", "resolve_view"]
 
 #: Each kind of file: the end of its name, and the folders it is kept in.
 KINDS: dict[str, tuple[str, tuple[str, ...]]] = {
@@ -129,6 +129,38 @@ class Project:
         ViewModels can import each other by their file names."""
         path = self.find("viewmodel", name)
         return load_viewmodel(path, name)
+
+
+def project_of(parent: Any) -> Optional[Project]:
+    """The project of the app that `parent` (a view, a component, a window) is in, or `None`."""
+    from tesserae.follow import app_of
+
+    app = app_of(getattr(parent, "window", parent))
+    return app.project if app is not None else None
+
+
+def resolve_view(project: Optional[Project], ref: str | Path, viewmodel_cls: Optional[type] = None) -> tuple[Path, type]:
+    """The view file and the ViewModel class for `ref`: a path, or a name found in `project`. A class left out is
+    found by the view's name, beside the view (`Name_ViewModel.py`) or in the project. One rule for `app.load`,
+    `instantiate` and `Repeater`."""
+    if is_name(ref):
+        if project is None:
+            raise ProjectError(f"{ref!r} is a name, but there is no project to look in: it needs an App "
+                               "(its root and folders), or pass the file's path")
+        path = project.find("view", ref)
+    else:
+        path = Path(ref)
+    if viewmodel_cls is None:
+        prefix = path.name.removesuffix(KINDS["view"][0])
+        beside = path.with_name(f"{prefix}{KINDS['viewmodel'][0]}")
+        if path.name.endswith(KINDS["view"][0]) and beside.is_file():
+            viewmodel_cls = load_viewmodel(beside, prefix)
+        elif project is not None:
+            viewmodel_cls = project.viewmodel(prefix)
+        else:
+            raise ProjectError(f"no ViewModel class given, and {beside.name} isn't beside {path.name} "
+                               "(and there is no project to look in)")
+    return path, viewmodel_cls
 
 
 def load_viewmodel(path: Path, name: str) -> type:

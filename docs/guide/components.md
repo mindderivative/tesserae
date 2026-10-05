@@ -19,11 +19,16 @@ window, with the same `*_View.yaml`/`*_ViewModel.py` naming check
 from tesserae import instantiate
 
 component, viewmodel = instantiate(view, "Card_View.yaml", CardViewModel, container)
+
+# in a project, a name is enough: Views/Card_View.yaml, and CardViewModel found by the view's name
+component, viewmodel = instantiate(view, "Card", into=container)
 ```
 
 - `parent` is a `View` or another `Component` -- they nest, so a
   component can itself hold further nested components the same way.
 - `into` is the `Node` to embed under (e.g. `view.node("item_list")`).
+- `path` is a file or a name found in the app's [project](projects.md); `viewmodel_cls` left out is found by the
+  view's name. A name with no app to look in is an error saying so.
 - Extra positional and keyword args are forwarded to
   `viewmodel_cls(component, *args, **kwargs)`: for a component that needs
   its own data, or a callback to notify its parent when it removes itself.

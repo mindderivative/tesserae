@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.2 (unreleased)
+
+Names for lists and embedded components ([#89](https://github.com/mindderivative/tesserae/issues/89)), and SVG.
+
+### Added
+
+- **`Repeater` and `instantiate` find views and ViewModels by name**, as `app.load` does: `Repeater(view, items,
+  "Row", into=node)` and `instantiate(view, "Row", into=node)` use `Views/Row_View.yaml` and `RowViewModel`, found in the
+  app's project. `viewmodel_cls` and `into` are now optional in the signature (`into` is still needed: it is an error
+  without it), and a path and a class still work. A name with no app is an error that says there is no project.
+  One function in `tesserae.project` (`resolve_view`) does the resolving for `app.load`, `instantiate` and `Repeater`.
+
 ## 0.4.1
 
 Projects ([#87](https://github.com/mindderivative/tesserae/issues/87)).

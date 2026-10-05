@@ -244,3 +244,67 @@ def test_a_shell_panel_is_a_view_found_in_the_project(tmp_path):
     app.load_shell("Frame")
     view, viewmodel = app.screen("Side")
     assert type(viewmodel).__name__ == "SideViewModel"
+
+
+# -- Repeater and instantiate use the same names (#89) --------------------------------------
+
+def _list_files(root):
+    _write(root, "Views/List_View.yaml", "id: root\nkind: Container\nchildren:\n  - {id: rows, kind: Container}\n")
+    _write(root, "ViewModels/List_ViewModel.py", "from tesserae import ViewModel\n\nclass ListViewModel(ViewModel):\n    pass\n")
+    _write(root, "Views/Row_View.yaml", "id: root\nkind: Text\ntext: {content: row, typography_role: body_large}\nstyle: {foreground: on_surface}\n")
+    _write(root, "ViewModels/Row_ViewModel.py",
+           "from tesserae import ViewModel\n\nclass RowViewModel(ViewModel):\n    def __init__(self, view, item):\n"
+           "        self.item = item\n        super().__init__(view)\n")
+
+
+def test_a_repeater_takes_a_view_name_and_finds_its_viewmodel(tmp_path):
+    from tesserae import Repeater, Signal
+
+    _list_files(tmp_path)
+    app = App(width=300, height=200, root=tmp_path)
+    view, _ = app.load("List")
+    items = Signal([1, 2])
+    rows = Repeater(view, items, "Row", into=view.node("rows"))  # no path, no class
+    assert [vm.item for _, _, vm in rows] == [1, 2]
+    items.set([1, 2, 3])
+    assert len(rows) == 3
+    assert {c.path.name for _, c, _ in rows} == {"Row_View.yaml"}
+
+
+def test_a_repeater_still_takes_a_path_and_a_class(tmp_path):
+    from tesserae import Repeater, Signal
+
+    _list_files(tmp_path)
+    app = App(width=300, height=200, root=tmp_path)
+    view, _ = app.load("List")
+    cls = app.project.viewmodel("Row")
+    rows = Repeater(view, Signal([7]), tmp_path / "Views" / "Row_View.yaml", cls, view.node("rows"))
+    assert [vm.item for _, _, vm in rows] == [7]
+
+
+def test_instantiate_takes_a_name_and_finds_its_viewmodel(tmp_path):
+    from tesserae import instantiate
+
+    _list_files(tmp_path)
+    app = App(width=300, height=200, root=tmp_path)
+    view, _ = app.load("List")
+    component, viewmodel = instantiate(view, "Row", into=view.node("rows"), item=5)
+    assert type(viewmodel).__name__ == "RowViewModel" and viewmodel.item == 5 and component.path.name == "Row_View.yaml"
+
+
+def test_a_name_with_no_app_is_an_error_that_says_there_is_no_project():
+    from tesserae import Repeater, Signal, View
+
+    view = View({"id": "root", "kind": "Container", "children": [{"id": "rows", "kind": "Container"}]}, theme_seed=SEED)
+    with pytest.raises(ProjectError, match="'Row' is a name, but there is no project to look in"):
+        Repeater(view, Signal([]), "Row", into=view.node("rows"))
+
+
+def test_into_is_required():
+    from tesserae import Repeater, Signal, View, instantiate
+
+    view = View({"id": "root", "kind": "Container"}, theme_seed=SEED)
+    with pytest.raises(TypeError, match="needs `into`"):
+        Repeater(view, Signal([]), "x_View.yaml")
+    with pytest.raises(TypeError, match="needs `into`"):
+        instantiate(view, "x_View.yaml")

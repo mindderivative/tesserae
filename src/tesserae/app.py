@@ -32,7 +32,7 @@ from tre import Window
 from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.listeners import Listeners
 from tesserae.naming import check_naming_convention
-from tesserae.project import Project, is_name, load_viewmodel
+from tesserae.project import Project, is_name, resolve_view
 from tesserae import tokens
 from tesserae.reactive import Computed, Effect, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
@@ -579,12 +579,7 @@ class App:
         Returns the `(view, viewmodel)` pair, for code that wants a node to click in a test or a Signal to
         read back.
         """
-        view_path = Path(self._named("view", view_path))
-        if viewmodel_cls is None:  # its `Name_ViewModel.py`: next to the view, or in the project
-            prefix = view_path.name.removesuffix("_View.yaml")
-            beside = view_path.with_name(f"{prefix}_ViewModel.py")
-            viewmodel_cls = (load_viewmodel(beside, prefix) if beside.is_file() and view_path.name.endswith("_View.yaml")
-                             else self.project.viewmodel(prefix))
+        view_path, viewmodel_cls = resolve_view(self.project, view_path, viewmodel_cls)
         prefix = check_naming_convention(view_path, viewmodel_cls)
 
         view = self.build_view(view_path, stylesheet=stylesheet, stylesheet_spec=stylesheet_spec)

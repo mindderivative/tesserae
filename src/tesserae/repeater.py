@@ -31,23 +31,29 @@ from typing import Any, Callable, Iterator
 
 from tesserae.component import instantiate
 from tesserae.naming import check_naming_convention
+from tesserae.project import project_of, resolve_view
 
 
 class Repeater:
     """Keeps one component and ViewModel alive for each item of a list `Signal`, adding and removing them as the list changes.
 
-    `key` says which items are the same one, and `args` makes each ViewModel's arguments from its item."""
+    `path` is a file, or a name found in the app's project (`"TaskItem"`); `viewmodel_cls` left out is found by
+    the view's name. `key` says which items are the same one, and `args` makes each ViewModel's arguments from
+    its item."""
 
     def __init__(
         self,
         parent: Any,
         items_signal: Any,
         path: str | Path,
-        viewmodel_cls: type,
-        into: Any,
+        viewmodel_cls: type | None = None,
+        into: Any = None,
         key: Callable[[Any], Any] = lambda item: item,
         args: Callable[[Any], tuple[Any, ...]] = lambda item: (item,),
     ) -> None:
+        if into is None:
+            raise TypeError("Repeater needs `into`: the node its components go in")
+        path, viewmodel_cls = resolve_view(project_of(parent), path, viewmodel_cls)  # a name, or a path
         check_naming_convention(path, viewmodel_cls)
         self._parent = parent
         self._items_signal = items_signal
