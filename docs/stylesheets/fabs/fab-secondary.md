@@ -38,7 +38,7 @@ styles:
 | `width` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
-| `background` | `secondary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
+| `background` | `secondary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | `corner_radius` | the `corner_radius` parameter | Pixels, or a shape token (`none` to `extra_large`). |
 | `elevation` | `level_3` | A shadow level, 0 to 5. |
 
@@ -48,7 +48,7 @@ styles:
 | --- | --- | --- |
 | `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## What it makes
 

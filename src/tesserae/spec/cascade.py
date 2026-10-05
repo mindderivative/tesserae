@@ -56,6 +56,8 @@ STYLE_FIELDS = frozenset({
     "align_content", "spread", "flex", "align_self", "align_wrapped", "align_tracks", "align_cells",
     "flex_wrap", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
     "position", "x", "y", "z_index", "clip_children",
+    # effects: `tesserae.spec.effects`
+    "blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor",
     "display", "grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows",
     "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap",
 })

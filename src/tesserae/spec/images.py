@@ -73,6 +73,31 @@ def _svg(node: dict[str, Any], base_dir: Path | None, deps: set[Path]) -> dict[s
     return load_svg(content, base_dir, node_id, deps, svg_dir=base_dir)
 
 
+def _cursor(node: dict[str, Any], base_dir: Path | None, deps: set[Path]) -> dict[str, Any]:
+    """A node's `style.cursor: {src: file.png, hotspot: [x, y]}` with its picture decoded, as `tre.CursorImage` takes it."""
+    node_id = str(node.get("id"))
+    cursor = node["style"]["cursor"]
+    src = cursor.get("src")
+    if not isinstance(src, str):
+        raise ComponentError(f"widget {node_id!r}: style.cursor.src must be a string path, got {src!r}")
+    unknown = set(cursor) - {"src", "hotspot"}
+    if unknown:
+        raise ComponentError(f"widget {node_id!r}: style.cursor has no {sorted(unknown)} (it takes src and hotspot)")
+    path = _resolve_src(base_dir, src, node_id)
+    deps.add(path)
+    try:
+        rgba, width, height = decode_image(path)
+    except OSError as exc:
+        raise ComponentError(f"widget {node_id!r}: {exc}") from exc
+    if not (1 <= width <= 256 and 1 <= height <= 256):
+        raise ComponentError(f"widget {node_id!r}: a cursor picture is 1 to 256 pixels a side, {src!r} is {width}x{height}")
+    hotspot = cursor.get("hotspot", [0, 0])
+    if not (isinstance(hotspot, (list, tuple)) and len(hotspot) == 2):
+        raise ComponentError(f"widget {node_id!r}: style.cursor.hotspot is [x, y], got {hotspot!r}")
+    return {**node, "style": {**node["style"], "cursor": {
+        "rgba": rgba, "width": width, "height": height, "hotspot": [int(hotspot[0]), int(hotspot[1])]}}}
+
+
 def _extract(node: Any, base_dir: Path | None, frames: list[Frame], deps: set[Path]) -> Any:
     if not isinstance(node, dict):
         return node
@@ -93,6 +118,9 @@ def _extract(node: Any, base_dir: Path | None, frames: list[Frame], deps: set[Pa
             raise ComponentError(f"widget {node_id!r}: {exc}") from exc
         frames.append((node_id, rgba, width, height))
         out["image"] = {k: v for k, v in image.items() if k != "src"}
+    style = node.get("style")
+    if isinstance(style, dict) and isinstance(style.get("cursor"), dict) and "src" in style["cursor"]:
+        out["style"] = _cursor(node, base_dir, deps)["style"]
     if node.get("kind") == "Svg":
         out["svg"] = _svg(node, base_dir, deps)
     children = node.get("children")

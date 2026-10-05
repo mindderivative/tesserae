@@ -58,7 +58,7 @@ styles:
 | `flex_direction` | `horizontal` | How its children are laid out: `horizontal` (the default) or `vertical`. |
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `56` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `tertiary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
+| `background` | `tertiary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | `corner_radius` | `large` | Pixels, or a shape token (`none` to `extra_large`). |
 | `elevation` | `level_3` | A shadow level, 0 to 5. |
 | `padding` | left `16`, right `20`, top `0`, bottom `0` if `icon`, else left `20`, right `20`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
@@ -71,13 +71,13 @@ styles:
 | --- | --- | --- |
 | `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `foreground` | `on_tertiary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | `on_tertiary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ### `label` (Text)
 
 | Field | Value | What it does |
 | --- | --- | --- |
-| `foreground` | `on_tertiary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | `on_tertiary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## What it makes
 

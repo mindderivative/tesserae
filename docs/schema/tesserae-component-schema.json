@@ -84,6 +84,62 @@
       ],
       "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`."
     },
+    "fill": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/color"
+        },
+        {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*(linear|radial|conic)-gradient\\("
+            },
+            {
+              "type": "object",
+              "required": [
+                "gradient",
+                "stops"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "gradient": {
+                  "enum": [
+                    "linear",
+                    "radial",
+                    "sweep"
+                  ]
+                },
+                "stops": {
+                  "type": "array",
+                  "minItems": 2,
+                  "description": "Colours, or `[place, colour]` pairs with places from 0 to 1."
+                },
+                "angle": {
+                  "type": "number",
+                  "description": "Degrees: 0 up, 90 right, 180 down."
+                },
+                "center": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "`[x, y]`, as fractions of the box."
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "start": {
+                  "type": "number"
+                }
+              }
+            }
+          ],
+          "description": "A CSS-like `linear-gradient(...)`, `radial-gradient(...)` or `conic-gradient(...)` whose stops are theme roles or colours, or a mapping with `gradient: linear|radial|sweep` and `stops`."
+        }
+      ],
+      "description": "A colour (a theme role, a hex or a CSS colour) or a gradient."
+    },
     "style": {
       "type": "object",
       "description": "How a node looks and lays out its children.",
@@ -219,10 +275,11 @@
           ],
           "description": "Width over height: gives the missing side from the one set."
         },
-        "background": {
+        "backdrop_blur": {
           "anyOf": [
             {
-              "$ref": "#/definitions/color"
+              "type": "number",
+              "minimum": 0
             },
             {
               "$ref": "#/definitions/parameter"
@@ -231,12 +288,72 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour."
+          "description": "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface."
+        },
+        "background": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/fill"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`."
+        },
+        "blend_mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "normal",
+                "multiply",
+                "screen",
+                "overlay",
+                "darken",
+                "lighten",
+                "color_dodge",
+                "color_burn",
+                "hard_light",
+                "soft_light",
+                "difference",
+                "exclusion",
+                "hue",
+                "saturation",
+                "color",
+                "luminosity"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "How it is drawn over what is behind it, as CSS `mix-blend-mode`."
+        },
+        "blur": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Blurs the node and what it draws, by this many pixels."
         },
         "border_color": {
           "anyOf": [
             {
-              "$ref": "#/definitions/color"
+              "$ref": "#/definitions/fill"
             },
             {
               "$ref": "#/definitions/parameter"
@@ -245,7 +362,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "The colour of its border."
+          "description": "The colour of its border: a colour or a gradient."
         },
         "border_width": {
           "anyOf": [
@@ -319,6 +436,68 @@
           ],
           "description": "Pixels, or a shape token (`none` to `extra_large`)."
         },
+        "cursor": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "enum": [
+                    "default",
+                    "pointer",
+                    "text",
+                    "grab",
+                    "grabbing",
+                    "move",
+                    "not_allowed",
+                    "wait",
+                    "progress",
+                    "crosshair",
+                    "help",
+                    "col_resize",
+                    "row_resize",
+                    "ew_resize",
+                    "ns_resize",
+                    "nesw_resize",
+                    "nwse_resize",
+                    "copy",
+                    "cell",
+                    "context_menu",
+                    "zoom_in",
+                    "zoom_out",
+                    "all_scroll"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "src"
+                  ],
+                  "properties": {
+                    "src": {
+                      "type": "string",
+                      "description": "A PNG (or any picture Pillow reads) next to the view."
+                    },
+                    "hotspot": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "description": "`[x, y]`: the pixel that is the pointer's place."
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`)."
+        },
         "display": {
           "anyOf": [
             {
@@ -363,6 +542,51 @@
             }
           ],
           "description": "A shadow level, 0 to 5."
+        },
+        "filter": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "saturate": {
+                  "type": "number",
+                  "description": "1 is unchanged, 0 grey, above 1 more vivid."
+                },
+                "brightness": {
+                  "type": "number",
+                  "description": "1 is unchanged, 0 black, above 1 brighter."
+                },
+                "contrast": {
+                  "type": "number",
+                  "description": "1 is unchanged, 0 flat grey, above 1 harder."
+                },
+                "grayscale": {
+                  "type": "number",
+                  "description": "0 is unchanged, 1 fully grey."
+                },
+                "hue_rotate": {
+                  "type": "number",
+                  "description": "Turns the hues, in degrees."
+                },
+                "invert": {
+                  "type": "number",
+                  "description": "0 is unchanged, 1 inverted."
+                },
+                "sepia": {
+                  "type": "number",
+                  "description": "0 is unchanged, 1 fully sepia."
+                }
+              }
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees)."
         },
         "flex": {
           "anyOf": [
@@ -420,7 +644,7 @@
         "foreground": {
           "anyOf": [
             {
-              "$ref": "#/definitions/color"
+              "$ref": "#/definitions/fill"
             },
             {
               "$ref": "#/definitions/parameter"
@@ -429,7 +653,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour."
+          "description": "Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient."
         },
         "gap": {
           "anyOf": [
@@ -937,6 +1161,20 @@
             }
           ],
           "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`."
+        },
+        "sticky": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."
         },
         "width": {
           "anyOf": [

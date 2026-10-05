@@ -32,7 +32,7 @@ from typing import Any, Callable, Optional
 from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
-from tesserae.spec import layout
+from tesserae.spec import effects, layout
 from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED, LayoutError, engine_style
 
 __all__ = ["style_props", 
@@ -374,6 +374,18 @@ def _color(ctx: _Context, node_id: str, field_name: str, raw: Any) -> RGBA:
         raise SpecBuildError(f'widget {_q(node_id)}: invalid style.{field_name} "{raw}": {exc}{hint}') from None
 
 
+def _fill(ctx: _Context, node_id: str, field_name: str, raw: Any) -> Any:
+    """A style colour or a gradient (`tesserae.spec.effects`): RGBA, or a `tre.Gradient` whose stops are roles or colours."""
+    if not effects.is_gradient(raw):
+        return _color(ctx, node_id, field_name, raw)
+    try:
+        return effects.make_gradient(raw, lambda c: _color(ctx, node_id, field_name, c), f"widget {_q(node_id)}: style.{field_name}")
+    except ValueError as exc:
+        if isinstance(exc, SpecBuildError):
+            raise
+        raise SpecBuildError(str(exc)) from None
+
+
 def _token(node_id: str, field_name: str, value: Any, lookup: Callable[[str], Optional[float]]) -> float:
     if isinstance(value, str):
         resolved = lookup(value)
@@ -417,9 +429,9 @@ def style_props(style: dict[str, Any], scheme: Optional[dict[str, RGBA]], where:
         elif key in ("padding", "margin"):
             props.update(_spacing(value, key))
         elif key == "background":
-            props["fill"] = _color(ctx, where, "background", value)
+            props["fill"] = _fill(ctx, where, "background", value)
         elif key == "border_color":
-            props["stroke_color"] = _color(ctx, where, "border_color", value)
+            props["stroke_color"] = _fill(ctx, where, "border_color", value)
         elif key == "border_width":
             props["stroke_width"] = float(value)
         elif key == "corner_radius":
@@ -428,6 +440,8 @@ def style_props(style: dict[str, Any], scheme: Optional[dict[str, RGBA]], where:
             props["opacity"] = float(value)
         elif key == "elevation":
             props["shadows"] = tokens.elevation_shadows(_token(where, "elevation", value, tokens.elevation))
+        elif key in effects.EFFECT_FIELDS:
+            props.update(_effects(where, {key: value}, only=key))
         elif key == "foreground":
             raise SpecBuildError(f"{where}: style.foreground has nothing to colour here (a box with no text); "
                                  "use style.background")
@@ -442,17 +456,29 @@ def _paint(ctx: _Context, node_id: str, style: dict[str, Any], *, corner_radius:
     paint: dict[str, Any] = {"opacity": float(style.get("opacity", 1.0))}
     if corner_radius:
         paint["corner_radius"] = _token(node_id, "corner_radius", style.get("corner_radius", 0.0), tokens.shape)
-    paint["stroke_color"] = _color(ctx, node_id, "border_color", style["border_color"]) if "border_color" in style else _TRANSPARENT
+    paint["stroke_color"] = _fill(ctx, node_id, "border_color", style["border_color"]) if "border_color" in style else _TRANSPARENT
     paint["stroke_width"] = float(style.get("border_width", 0.0))
     level = _token(node_id, "elevation", style.get("elevation", 0.0), tokens.elevation)
     paint["shadows"] = tokens.elevation_shadows(level)
+    paint.update(_effects(node_id, style))
     return paint
+
+
+def _effects(node_id: str, style: dict[str, Any], only: str | None = None) -> dict[str, Any]:
+    """`blur`, `backdrop_blur`, `blend_mode`, `filter`, `sticky` and `cursor` as node properties (`tesserae.spec.effects`)."""
+    try:
+        props = effects.effect_props(style, f"widget {_q(node_id)}: style")
+    except ValueError as exc:
+        raise SpecBuildError(str(exc)) from None
+    if only is None:
+        return props
+    return {name: props[name] for name in {"filter": ("shader",), "cursor": ("cursor",)}.get(only, (only,))}
 
 
 def _required_background(ctx: _Context, node: dict[str, Any], style: dict[str, Any], kind: str) -> RGBA:
     if "background" not in style:
         raise SpecBuildError(f'widget {_q(node["id"])}: {kind} requires style.background, none given')
-    return _color(ctx, node["id"], "background", style["background"])
+    return _fill(ctx, node["id"], "background", style["background"])
 
 
 def _required_foreground(ctx: _Context, node: dict[str, Any], style: dict[str, Any], kind: str) -> RGBA:
@@ -463,7 +489,7 @@ def _required_foreground(ctx: _Context, node: dict[str, Any], style: dict[str, A
         )
     if "foreground" not in style:
         raise SpecBuildError(f'widget {_q(node["id"])}: {kind} requires style.foreground, none given')
-    return _color(ctx, node["id"], "foreground", style["foreground"])
+    return _fill(ctx, node["id"], "foreground", style["foreground"])
 
 
 #: What `text.text_align` can be: `tre`'s own values, where the text
@@ -545,7 +571,7 @@ def _check_state(node: dict[str, Any], kind: str, expected: str, given: str) -> 
 
 def _box_props(ctx, node, style):
     fill = _required_background(ctx, node, style, "Rect") if node["kind"] == "Rect" else (
-        _color(ctx, node["id"], "background", style["background"]) if "background" in style else _TRANSPARENT
+        _fill(ctx, node["id"], "background", style["background"]) if "background" in style else _TRANSPARENT
     )
     return {**_layout(style), **_paint(ctx, node["id"], style), "fill": fill}, None
 
@@ -616,7 +642,8 @@ def _link_props(ctx, node, style):
     text, _ = _text_props(ctx, node, style)
     layout = _layout(style)
     outer = {k: v for k, v in layout.items() if k in _PLACED or k in ("width", "height")}
-    outer.update(role="link", cursor="pointer", focusable=True, label=text["text"])
+    cursor = text.pop("cursor", None)  # the hit-testable box shows it, not the text
+    outer.update(role="link", cursor="pointer" if cursor is None else cursor, focusable=True, label=text["text"])
     inner = {k: v for k, v in text.items() if k not in _PLACED}
     inner.update(hit_testable=False, a11y_hidden=True)
     return outer, inner

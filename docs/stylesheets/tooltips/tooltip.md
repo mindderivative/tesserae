@@ -41,7 +41,7 @@ styles:
 | --- | --- | --- |
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `inverse_surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
+| `background` | `inverse_surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | `corner_radius` | `extra_small` | Pixels, or a shape token (`none` to `extra_large`). |
 | `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | left `8`, right `8`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
@@ -50,7 +50,7 @@ styles:
 
 | Field | Value | What it does |
 | --- | --- | --- |
-| `foreground` | `inverse_on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | `inverse_on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `min_width` | `0` | The least width it can take. |
 

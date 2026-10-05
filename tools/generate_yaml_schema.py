@@ -134,9 +134,41 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "position": (enums["position"], "`absolute` takes it out of the flow and places it at `x` and `y`."),
         "display": (enums["display"], "`flex` (the default) or `grid`."),
         "grid_auto_flow": (enums["grid_auto_flow"], "How grid children fill the cells."),
-        "background": ({"$ref": "#/definitions/color"}, "Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour."),
-        "foreground": ({"$ref": "#/definitions/color"}, "Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour."),
-        "border_color": ({"$ref": "#/definitions/color"}, "The colour of its border."),
+        "background": ({"$ref": "#/definitions/fill"},
+                       "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as "
+                       "`linear-gradient(90deg, primary, tertiary)`."),
+        "foreground": ({"$ref": "#/definitions/fill"},
+                       "Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient."),
+        "border_color": ({"$ref": "#/definitions/fill"}, "The colour of its border: a colour or a gradient."),
+        "blur": ({"type": "number", "minimum": 0}, "Blurs the node and what it draws, by this many pixels."),
+        "backdrop_blur": ({"type": "number", "minimum": 0},
+                          "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface."),
+        "blend_mode": ({"enum": ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color_dodge", "color_burn",
+                                 "hard_light", "soft_light", "difference", "exclusion", "hue", "saturation", "color",
+                                 "luminosity"]},
+                       "How it is drawn over what is behind it, as CSS `mix-blend-mode`."),
+        "filter": ({"type": "object", "additionalProperties": False,
+                    "properties": {name: {"type": "number", "description": text} for name, text in (
+                        ("saturate", "1 is unchanged, 0 grey, above 1 more vivid."),
+                        ("brightness", "1 is unchanged, 0 black, above 1 brighter."),
+                        ("contrast", "1 is unchanged, 0 flat grey, above 1 harder."),
+                        ("grayscale", "0 is unchanged, 1 fully grey."),
+                        ("hue_rotate", "Turns the hues, in degrees."),
+                        ("invert", "0 is unchanged, 1 inverted."),
+                        ("sepia", "0 is unchanged, 1 fully sepia."))}},
+                   "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` "
+                   "(`hue_rotate` is in degrees)."),
+        "sticky": ({"type": "number"}, "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."),
+        "cursor": ({"anyOf": [{"enum": ["default", "pointer", "text", "grab", "grabbing", "move", "not_allowed", "wait",
+                                        "progress", "crosshair", "help", "col_resize", "row_resize", "ew_resize", "ns_resize",
+                                        "nesw_resize", "nwse_resize", "copy", "cell", "context_menu", "zoom_in", "zoom_out",
+                                        "all_scroll"]},
+                              {"type": "object", "additionalProperties": False, "required": ["src"],
+                               "properties": {"src": {"type": "string", "description": "A PNG (or any picture Pillow reads) next to the view."},
+                                              "hotspot": {"type": "array", "items": {"type": "integer"},
+                                                          "description": "`[x, y]`: the pixel that is the pointer's place."}}}]},
+                   "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most "
+                   "256 pixels a side; only in a node's own `style:`)."),
         "border_width": ({"type": "number", "minimum": 0}, "The width of its border, in pixels."),
         "corner_radius": ({"anyOf": [number, {"enum": sorted(tokens.SHAPES)}]}, "Pixels, or a shape token (`none` to `extra_large`)."),
         "opacity": ({"type": "number", "minimum": 0, "maximum": 1}, "From 0 (clear) to 1 (opaque)."),
@@ -330,8 +362,21 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     color = {"anyOf": [{"enum": roles}, {"type": "string"}],
              "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, "
                             "a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`."}
+    gradient = {"anyOf": [{"type": "string", "pattern": r"^\s*(linear|radial|conic)-gradient\("},
+                          {"type": "object", "required": ["gradient", "stops"], "additionalProperties": False,
+                           "properties": {"gradient": {"enum": ["linear", "radial", "sweep"]},
+                                          "stops": {"type": "array", "minItems": 2,
+                                                    "description": "Colours, or `[place, colour]` pairs with places from 0 to 1."},
+                                          "angle": {"type": "number", "description": "Degrees: 0 up, 90 right, 180 down."},
+                                          "center": {"type": "array", "items": {"type": "number"},
+                                                     "description": "`[x, y]`, as fractions of the box."},
+                                          "radius": {"type": "number"}, "start": {"type": "number"}}}],
+                "description": "A CSS-like `linear-gradient(...)`, `radial-gradient(...)` or `conic-gradient(...)` whose stops are "
+                               "theme roles or colours, or a mapping with `gradient: linear|radial|sweep` and `stops`."}
+    fill = {"anyOf": [{"$ref": "#/definitions/color"}, gradient],
+            "description": "A colour (a theme role, a hex or a CSS colour) or a gradient."}
     extra = {"parameter": param, "conditional": conditional} if fragment else {}
-    return {**extra, "color": color, "style": style, "text": text, "handlers": handlers, "a11y": a11y_schema,
+    return {**extra, "color": color, "fill": fill, "style": style, "text": text, "handlers": handlers, "a11y": a11y_schema,
             "widget": widget, "title_bar": title_bar_node, "component_call": component_call, "include": include_node,
             "node": node}
 
@@ -376,7 +421,7 @@ def _theme() -> dict[str, Any]:
 
     # A component's stylesheet (`<Name>_Stylesheet.yaml`, 0.3.4) is a stylesheet whose values may be the
     # component's `{{ parameters }}`, so a stylesheet's styles are as loose as a fragment's.
-    defs = _only(_definitions(fragment=True), "style", "color")
+    defs = _only(_definitions(fragment=True), "style", "color", "fill")
     defs["rule"] = {
         "type": "object",
         "description": "Styles for the nodes it matches: by `kind`, by `classes`, or by `id`. With none of the three, for every node.",
@@ -418,11 +463,11 @@ def _shell() -> dict[str, Any]:
     icon = {"enum": sorted(icons.ICONS), "description": "An icon name."}
     # A shell part's style (0.3.3): a node's, but a box with no text to colour has no `foreground`, and a
     # zone's size is its `size`, so its style has no width or height.
-    defs = _only(_definitions(fragment=False), "style", "color")
+    defs = _only(_definitions(fragment=False), "style", "color", "fill")
     full = defs["style"]
     part_style = {**full, "properties": {k: v for k, v in full["properties"].items() if k != "foreground"}}
     zone_style = {**part_style, "properties": {k: v for k, v in part_style["properties"].items() if k not in ("width", "height")}}
-    definitions = {"color": defs["color"], "style": part_style, "zone_style": zone_style}
+    definitions = {"color": defs["color"], "fill": defs["fill"], "style": part_style, "zone_style": zone_style}
     style_ref = {"$ref": "#/definitions/style", "description": "A node's `style:`: `height`, `background`, `padding`, ..."}
     size = {"type": "number", "exclusiveMinimum": 0, "description": "The zone's size in pixels."}
     body = {"type": "object", "additionalProperties": False, "properties": {

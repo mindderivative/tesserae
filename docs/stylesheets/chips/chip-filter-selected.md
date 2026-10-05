@@ -48,7 +48,7 @@ styles:
 | `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | left `16`, right `16`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `gap` | `8` | Space between its children. |
-| `background` | `secondary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
+| `background` | `secondary_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | `corner_radius` | `small` | Pixels, or a shape token (`none` to `extra_large`). |
 
 ### `check` (Icon)
@@ -57,13 +57,13 @@ styles:
 | --- | --- | --- |
 | `width` | `18` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `18` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ### `label` (Text)
 
 | Field | Value | What it does |
 | --- | --- | --- |
-| `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## What it makes
 

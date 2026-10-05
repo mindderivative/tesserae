@@ -29,7 +29,7 @@ styles:
 | --- | --- | --- |
 | `width` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `size` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `foreground` | the `background` parameter | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | the `background` parameter | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## What it makes
 

@@ -39,7 +39,7 @@ styles:
 | `align_content` | `top` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `gap` | `12` | Space between its children. |
 | `padding` | left `0`, right `0`, top `12`, bottom `12` | Space inside it: one number, or `{left, right, top, bottom}`. |
-| `background` | `surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
+| `background` | `surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 
 ## What it makes
 

@@ -135,18 +135,32 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `align_tracks` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | In a grid: how the tracks share the room left over. |
 | `align_wrapped` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | With `flex_wrap: wrap`: how the lines share the room left over. |
 | `aspect_ratio` | a number | Width over height: gives the missing side from the one set. |
-| `background` | a color | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
-| `border_color` | a color | The colour of its border. |
+| `backdrop_blur` | a number | Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. |
+| `background` | a color or a gradient | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| `blend_mode` | one of 16 names | How it is drawn over what is behind it, as CSS `mix-blend-mode`. |
+| `blur` | a number | Blurs the node and what it draws, by this many pixels. |
+| `border_color` | a color or a gradient | The colour of its border: a colour or a gradient. |
 | `border_width` | a number | The width of its border, in pixels. |
 | `clip_children` | `true` or `false` | Whether children are cut off at its edge. |
 | `column_gap` | a number | Space between columns (defaults to `gap`). |
 | `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` | Pixels, or a shape token (`none` to `extra_large`). |
+| `cursor` | one of 23 names or a mapping | The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). |
+| `cursor.src` *(required)* | text | A PNG (or any picture Pillow reads) next to the view. |
+| `cursor.hotspot` | a list | `[x, y]`: the pixel that is the pointer's place. |
 | `display` | `flex` \| `grid` | `flex` (the default) or `grid`. |
 | `elevation` | a number or `level_0` \| `level_1` \| `level_2` \| `level_3` \| `level_4` \| `level_5` | A shadow level, 0 to 5. |
+| `filter` | a mapping | Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees). |
+| `filter.saturate` | a number | 1 is unchanged, 0 grey, above 1 more vivid. |
+| `filter.brightness` | a number | 1 is unchanged, 0 black, above 1 brighter. |
+| `filter.contrast` | a number | 1 is unchanged, 0 flat grey, above 1 harder. |
+| `filter.grayscale` | a number | 0 is unchanged, 1 fully grey. |
+| `filter.hue_rotate` | a number | Turns the hues, in degrees. |
+| `filter.invert` | a number | 0 is unchanged, 1 inverted. |
+| `filter.sepia` | a number | 0 is unchanged, 1 fully sepia. |
 | `flex` | `none` \| `expand_horizontal` \| `expand_vertical` \| `fill` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
 | `flex_direction` | `horizontal` \| `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
 | `flex_wrap` | `no_wrap` \| `wrap` | `wrap` lets children flow onto more lines; `no_wrap` keeps one. |
-| `foreground` | a color | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | a color or a gradient | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `gap` | a number | Space between its children. |
 | `grid_auto_columns` | text | The size of columns the template doesn't name. |
 | `grid_auto_flow` | `row` \| `column` \| `row dense` \| `column dense` \| `dense` | How grid children fill the cells. |
@@ -174,6 +188,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `position` | `relative` \| `absolute` | `absolute` takes it out of the flow and places it at `x` and `y`. |
 | `row_gap` | a number | Space between rows (defaults to `gap`). |
 | `spread` | `none` \| `between` \| `around` \| `evenly` | Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`. |
+| `sticky` | a number | In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. |
 | `width` | a number or `auto` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `x` | a number or `auto` | Where an `absolute` node sits from the left. |
 | `y` | a number or `auto` | Where an `absolute` node sits from the top. |
@@ -182,6 +197,10 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 ## Colors
 
 Any field that takes a color takes a theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`.
+
+## Gradients
+
+`background`, `foreground` and `border_color` take a gradient where they take a color: a CSS-like string (`linear-gradient(90deg, primary, tertiary)`, `radial-gradient(at 30% 30%, primary_container, surface)`, `conic-gradient(from 90deg, primary, secondary, primary)`; `to right` and the like name a direction; a stop may have a place, `primary 40%`) or a mapping (`{gradient: linear, angle: 90, stops: [primary, [0.6, secondary], tertiary]}`). Stops are theme roles or colors. A control's color (a `Switch`, a `Slider`) takes a plain color only.
 
 ## The text
 

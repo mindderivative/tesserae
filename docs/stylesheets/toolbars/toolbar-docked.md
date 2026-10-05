@@ -34,7 +34,7 @@ styles:
 | `flex_direction` | `horizontal` | How its children are laid out: `horizontal` (the default) or `vertical`. |
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | `64` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | the `background` parameter | Its fill: a theme role such as `surface`, `#RRGGBB`, or any CSS colour. |
+| `background` | the `background` parameter | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | `padding` | `16` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `gap` | `32` | Space between its children. |

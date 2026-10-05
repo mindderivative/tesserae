@@ -70,8 +70,9 @@ class Reader:
     def values(self, schema: dict[str, Any]) -> str:
         if "$ref" in schema:
             name = schema["$ref"].rsplit("/", 1)[1]
-            if name in ("color", "style", "zone_style"):
-                return {"color": "a color", "style": "a `style` mapping", "zone_style": "a `style` mapping"}[name]
+            if name in ("color", "fill", "style", "zone_style"):
+                return {"color": "a color", "fill": "a color or a gradient", "style": "a `style` mapping",
+                        "zone_style": "a `style` mapping"}[name]
         schema = self.resolve(schema)
         if "enum" in schema:
             if len(schema["enum"]) > 14:
@@ -239,6 +240,13 @@ def render() -> str:
     out += _table(_rows(view, view.defs["style"]), "Field")
     out += ["## Colors", "", "Any field that takes a color takes " + view.defs["color"]["description"][0].lower()
             + view.defs["color"]["description"][1:].replace("A theme role (", "a theme role (", 1) + "", ""]
+    out += ["## Gradients", "",
+            "`background`, `foreground` and `border_color` take a gradient where they take a color: a CSS-like string "
+            "(`linear-gradient(90deg, primary, tertiary)`, `radial-gradient(at 30% 30%, primary_container, surface)`, "
+            "`conic-gradient(from 90deg, primary, secondary, primary)`; `to right` and the like name a direction; a stop "
+            "may have a place, `primary 40%`) or a mapping "
+            "(`{gradient: linear, angle: 90, stops: [primary, [0.6, secondary], tertiary]}`). Stops are theme roles or colors. "
+            "A control's color (a `Switch`, a `Slider`) takes a plain color only.", ""]
     out += ["## The text", "", "`text:` on a Text, Link or TextField.", ""]
     out += _block(view, view.defs["text"], "text", "Key")
     from tesserae import view as view_module

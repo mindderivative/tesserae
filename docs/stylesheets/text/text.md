@@ -25,7 +25,7 @@ styles:
 
 | Field | Value | What it does |
 | --- | --- | --- |
-| `foreground` | the `color` parameter | Its text or glyph colour: a theme role, `#RRGGBB`, or any CSS colour. |
+| `foreground` | the `color` parameter | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## What it makes
 
