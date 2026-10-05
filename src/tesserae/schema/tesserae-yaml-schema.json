@@ -740,6 +740,70 @@
           ],
           "description": "`word` (the default) breaks a line that is too long for its node onto the next; `none` keeps one line. Not for a TextField."
         },
+        "selectable": {
+          "type": "boolean",
+          "description": "A Text only: the user can select it with the pointer and copy it (Ctrl+C)."
+        },
+        "runs": {
+          "type": "array",
+          "minItems": 1,
+          "description": "A Text only: the text as styled pieces, instead of `content`. A piece is a string, or `{text, color, weight, italic, underline, strikethrough, font_size, font_family, link}`. A piece with a `link` is `primary` and underlined, and a click on it calls `on_link` with `event.href`.",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "description": "This piece's words."
+                  },
+                  "color": {
+                    "$ref": "#/definitions/color",
+                    "description": "Its colour: a theme role or a CSS colour."
+                  },
+                  "weight": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 1000,
+                    "description": "Its font weight."
+                  },
+                  "italic": {
+                    "type": "boolean",
+                    "description": "Italic."
+                  },
+                  "underline": {
+                    "type": "boolean",
+                    "description": "Underlined."
+                  },
+                  "strikethrough": {
+                    "type": "boolean",
+                    "description": "Struck through."
+                  },
+                  "font_size": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Its size in pixels."
+                  },
+                  "font_family": {
+                    "type": "string",
+                    "description": "Its font family."
+                  },
+                  "link": {
+                    "type": "string",
+                    "description": "Makes it a link: what `on_link` hears as `event.href`."
+                  }
+                }
+              }
+            ]
+          }
+        },
         "overflow": {
           "enum": [
             "clip",
@@ -777,6 +841,54 @@
         "on_focus_exit": {
           "type": "string",
           "description": "Runs on `unfocus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_tap": {
+          "type": "string",
+          "description": "Runs on `tap`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_long_press": {
+          "type": "string",
+          "description": "Runs on `long_press`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_pan": {
+          "type": "string",
+          "description": "Runs on `pan`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_pinch": {
+          "type": "string",
+          "description": "Runs on `pinch`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_touch_start": {
+          "type": "string",
+          "description": "Runs on `touch_start`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_touch_move": {
+          "type": "string",
+          "description": "Runs on `touch_move`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_touch_end": {
+          "type": "string",
+          "description": "Runs on `touch_end`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_touch_cancel": {
+          "type": "string",
+          "description": "Runs on `touch_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_file_hover": {
+          "type": "string",
+          "description": "Runs on `file_hover`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_file_hover_cancel": {
+          "type": "string",
+          "description": "Runs on `file_hover_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_file_drop": {
+          "type": "string",
+          "description": "Runs on `file_drop`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+        },
+        "on_link": {
+          "type": "string",
+          "description": "Runs on `link`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
         }
       },
       "additionalProperties": false

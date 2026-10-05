@@ -32,7 +32,7 @@ from typing import Any, Callable, Optional
 from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
-from tesserae.spec import effects, layout
+from tesserae.spec import effects, layout, richtext
 from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED, LayoutError, engine_style
 
 __all__ = ["style_props", 
@@ -545,7 +545,7 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         raise SpecBuildError(
             f'widget {_q(node["id"])}: text.content must be a string, got {type(content).__name__} {content!r}'
         )
-    return {
+    props = {
         "text": content,
         "font_family": family,
         "font_size": float(size),
@@ -554,7 +554,27 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         "text_align": align,
         "wrap": wrap,
         "overflow": overflow,
+        "spans": [],
+        "selectable": False,
     }
+    if "selectable" in text:
+        if not isinstance(text["selectable"], bool):
+            raise SpecBuildError(f'widget {_q(node["id"])}: text.selectable must be true or false, got {text["selectable"]!r}')
+        if text["selectable"] and kind != "Text":
+            raise SpecBuildError(f'widget {_q(node["id"])}: only a Text can be selectable (a {kind} is pressed, not selected)')
+        props["selectable"] = text["selectable"]
+    if "runs" in text:
+        if kind != "Text":
+            raise SpecBuildError(f'widget {_q(node["id"])}: only a Text has text.runs (a {kind}\'s text is one piece)')
+        if content:
+            raise SpecBuildError(f'widget {_q(node["id"])}: text.runs is the text, so there is no text.content with it')
+        try:
+            props["text"], props["spans"], props["_pieces"] = richtext.build(
+                text["runs"], f'widget {_q(node["id"])}', lambda c: _color(ctx, node["id"], "text.runs", c),
+                _role(ctx, "primary"))
+        except ValueError as exc:
+            raise SpecBuildError(str(exc)) from None
+    return props
 
 
 def _check_state(node: dict[str, Any], kind: str, expected: str, given: str) -> None:
@@ -609,9 +629,12 @@ def natural_size(window: Any, props: dict[str, Any], style: dict[str, Any]) -> d
     missing = [d for d in ("width", "height") if style.get(d) is None]
     if not missing:
         return {}
-    width, height = window.measure_text(props["text"], font_family=props["font_family"],
-                                        font_size=props["font_size"], font_weight=props["font_weight"],
-                                        line_height=props.get("line_height"))
+    if "_pieces" in props:  # rich text: each run in its own weight and size
+        width, height = richtext.measure(window, props["_pieces"], props)
+    else:
+        width, height = window.measure_text(props["text"], font_family=props["font_family"],
+                                            font_size=props["font_size"], font_weight=props["font_weight"],
+                                            line_height=props.get("line_height"))
     # Whole pixels, rounded up: the engine rounds an explicit width down, and text a fraction of a pixel
     # wider than its node wraps ("Add a / task").
     return {d: float(math.ceil(v)) for d, v in (("width", width), ("height", height)) if d in missing}
@@ -621,6 +644,7 @@ def _text_props(ctx, node, style):
     fill = _required_foreground(ctx, node, style, node["kind"])
     props = {**_layout(style), **_paint(ctx, node["id"], style), **_text_style(ctx, node, node["kind"]), "fill": fill}
     props.update(natural_size(ctx.window, props, style))
+    props.pop("_pieces", None)
     if node["kind"] == "Text" and style.get("width") is None and (props["text_align"] != "start" or style.get("_fill_x")):
         # The engine aligns text within the width it is laid out in, so a centred or right aligned Text with no
         # width fills its parent's, and keeps its own as the least (a parent with no width yet gives 100% nothing).
@@ -656,11 +680,16 @@ def _text_field_props(ctx, node, style):
     for key in ("wrap", "overflow"):
         if key in node["text"]:
             raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.{key} (it is a single line that scrolls)')
+    for key in ("runs", "selectable"):
+        if key in node["text"]:
+            raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.{key} (what is typed is one style)')
     text = _text_style(ctx, node, "TextField")
     text.pop("line_height")
     text.pop("text_align")
     text.pop("wrap")
     text.pop("overflow")
+    text.pop("spans")
+    text.pop("selectable")
     outer = {**_layout(style), **_paint(ctx, node["id"], style), "fill": background}
     # `tre`'s TextField draws its text in MD3's baseline on_surface, not a theme role.
     inner = {**text, "fill": _TEXT_FIELD_GLYPH, "flex_grow": 1.0, "align_self": "stretch", "role": "textbox", "focusable": True}

@@ -215,6 +215,8 @@ font_weight: <a number>
 line_height: <a number>
 text_align: <start | center | end>
 wrap: <word | none>
+selectable: <true or false>
+runs: <a list>
 overflow: <clip | ellipsis>
 ```
 
@@ -228,6 +230,8 @@ overflow: <clip | ellipsis>
 | `line_height` | a number | A multiple of the size. |
 | `text_align` | `start` \| `center` \| `end` | Where the text sits in its node's width; a `center` or `end` Text with no width fills its parent's. Not for a TextField. |
 | `wrap` | `word` \| `none` | `word` (the default) breaks a line that is too long for its node onto the next; `none` keeps one line. Not for a TextField. |
+| `selectable` | `true` or `false` | A Text only: the user can select it with the pointer and copy it (Ctrl+C). |
+| `runs` | a list | A Text only: the text as styled pieces, instead of `content`. A piece is a string, or `{text, color, weight, italic, underline, strikethrough, font_size, font_family, link}`. A piece with a `link` is `primary` and underlined, and a click on it calls `on_link` with `event.href`. |
 | `overflow` | `clip` \| `ellipsis` | What happens to a line that doesn't fit its node: `clip` (the default) cuts it off, `ellipsis` ends it with an ellipsis. Not for a TextField. |
 
 ## Handlers
@@ -236,12 +240,7 @@ overflow: <clip | ellipsis>
 
 | Event | Values | What it does |
 | --- | --- | --- |
-| `on_click` | a method name | Runs on `click`. |
-| `on_hover_enter` | a method name | Runs on `pointer_enter`. |
-| `on_hover_exit` | a method name | Runs on `pointer_leave`. |
-| `on_change` | a method name | Runs on `change`. |
-| `on_focus_enter` | a method name | Runs on `focus`. |
-| `on_focus_exit` | a method name | Runs on `unfocus`. |
+| `<name>` | a method name | One for each of 18 names, such as `on_click`, `on_hover_enter`, `on_hover_exit`, `on_change`.. |
 
 ## Accessibility
 

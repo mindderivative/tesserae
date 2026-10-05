@@ -34,7 +34,7 @@ from tesserae import tokens
 __all__ = ["DURATIONS", "EASINGS", "Theme"]
 
 RGBA = tuple[int, int, int, int]
-Easing = Union[str, tuple[float, float, float, float]]
+Easing = Union[str, tuple[float, float, float, float], tuple[str, float]]
 
 #: MD3's easing tokens. `tre`'s curves, except `emphasized` (see above).
 EASINGS: dict[str, Easing] = {
@@ -45,6 +45,8 @@ EASINGS: dict[str, Easing] = {
     "emphasized": (0.2, 0.0, 0.0, 1.0),
     "emphasized_decelerate": (0.05, 0.7, 0.1, 1.0),
     "emphasized_accelerate": (0.3, 0.0, 0.8, 0.15),
+    # a spring (tre 0.5.4): the duration is its period and it lasts until it settles; `Theme.spring(bounce)` bounces
+    "spring": "spring",
 }
 
 #: MD3's duration tokens, in milliseconds.
@@ -158,6 +160,13 @@ class Theme:
             return EASINGS[name]
         except KeyError:
             raise ValueError(f"unknown easing {name!r}; expected one of {sorted(EASINGS)}") from None
+
+    @staticmethod
+    def spring(bounce: float = 0.0) -> Easing:
+        """A spring easing: `bounce` from -1 to 1 (exclusive), 0 settling without overshoot, above 0 overshooting."""
+        if not -1.0 < float(bounce) < 1.0:
+            raise ValueError(f"a spring's bounce is from -1 to 1 (exclusive), got {bounce!r}")
+        return ("spring", float(bounce))
 
     @staticmethod
     def duration(name: str) -> int:

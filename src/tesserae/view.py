@@ -70,6 +70,14 @@ DEFAULT_SIZE = (800, 600)
 _EVENTS = {
     "on_click": "click", "on_hover_enter": "pointer_enter", "on_hover_exit": "pointer_leave",
     "on_change": "change", "on_focus_enter": "focus", "on_focus_exit": "unfocus",
+    # touch and gestures (tre 0.5.4): a `tap` has `count`, a `pan` `phase` and `delta_x/y`/`total_x/y`, a `pinch` `scale`
+    "on_tap": "tap", "on_long_press": "long_press", "on_pan": "pan", "on_pinch": "pinch",
+    "on_touch_start": "touch_start", "on_touch_move": "touch_move", "on_touch_end": "touch_end",
+    "on_touch_cancel": "touch_cancel",
+    # files dragged over the window: `file_drop` has `paths` (not on Wayland)
+    "on_file_hover": "file_hover", "on_file_hover_cancel": "file_hover_cancel", "on_file_drop": "file_drop",
+    # a link in selectable rich text was activated: `event.href`
+    "on_link": "link",
 }
 _COLOR_PROPS = {"background": "fill", "foreground": "fill", "border_color": "stroke_color"}
 #: The app's window actions a handler can name without a ViewModel method

@@ -328,12 +328,16 @@ class App:
         for name, value in (("reduced_motion", reduced_motion), ("high_contrast", high_contrast)):
             if value not in (True, False, "system"):
                 raise ValueError(f'App: {name} must be True, False or "system", got {value!r}')
+        self._stats_label: Any = None
+        self._stats_frames = 0
         self._reduced_motion_mode: bool | str = reduced_motion
         self._high_contrast_mode: bool | str = high_contrast
         self._reduced_motion: bool = self._wanted("reduced_motion", reduced_motion)
         self._high_contrast: bool = self._wanted("high_contrast", high_contrast)
         self._window.on("reduced_motion", self._on_reduced_motion)
         self._window.on("high_contrast", self._on_high_contrast)
+        if os.environ.get("TESSERAE_STATS") == "1":
+            self.stats_overlay = True
         # 0.3.0 M4 (the design's Q9): an undecorated window's 1 px border,
         # built the first time it shows, and shown while undecorated,
         # neither maximized nor fullscreen, and not on macOS (its frame).
@@ -495,6 +499,63 @@ class App:
     def stop_trace(self) -> int:
         """Ends the trace `start_trace` began and returns how many frames it holds."""
         return int(self._window.stop_trace())
+
+    def on_file_drop(self, handler: Any) -> None:
+        """Calls `handler(event)` when files are dropped anywhere on the window (`event.paths`); `None` stops it. A
+        node's own `on_file_drop:` hears the ones dropped on it first. Not on Wayland, which gives a program no drops."""
+        if handler is None:
+            self._window.off("file_drop")
+        else:
+            self._window.on("file_drop", handler)
+
+    @property
+    def stats_overlay(self) -> bool:
+        """Whether a small readout of the frame rate and what a frame costs shows in the window's top right corner. It is
+        off unless turned on, here or by `TESSERAE_STATS=1` in the environment (for a run from a terminal)."""
+        return self._stats_label is not None
+
+    @stats_overlay.setter
+    def stats_overlay(self, on: bool) -> None:
+        if bool(on) == (self._stats_label is not None):
+            return
+        if not on:
+            self._window.off("frame")
+            try:
+                self._stats_label.destroy()
+            except ValueError:  # the window already took it down
+                pass
+            self._stats_label = None
+            return
+        label = self._window.create(
+            "text", text="-- fps", font_family="Roboto", font_size=12.0, fill=(255, 255, 255, 255),
+            position="absolute", y=6.0, padding=4.0, hit_testable=False, a11y_hidden=True, z_index=1000,
+            corner_radius=4.0)
+        self._window.root.add_child(label)
+        self._stats_label = label
+        self._stats_frames = 0
+        self._window.on("frame", self._on_frame)
+        self._place_stats()
+
+    def _place_stats(self) -> None:
+        label = self._stats_label
+        if label is None:
+            return
+        width, _ = self._window.measure_text(label.get("text"), font_size=12.0)
+        label.set(width=float(width) + 8.0, x=max(0.0, float(self._window.get("width")) - float(width) - 14.0))
+
+    def _on_frame(self, event: Any) -> None:
+        """The stats readout, rewritten about four times a second: the frame rate, then the mean and the 95th
+        percentile of the frame's total time."""
+        self._stats_frames += 1
+        if self._stats_frames % 15 or self._stats_label is None:
+            return
+        recent = self.frame_stats().get("recent") or {}
+        total = recent.get("total_ms") or {}
+        fps, mean, p95 = recent.get("fps"), total.get("mean"), total.get("p95")
+        if fps is None:
+            return
+        self._stats_label.set(text=f"{fps:.0f} fps  {mean:.1f} ms  p95 {p95:.1f}" if mean is not None else f"{fps:.0f} fps")
+        self._place_stats()
 
     def stats_handle(self) -> Any:
         """An object any thread can read the frame stats from: `handle.read()` is `frame_stats()` without the profile."""

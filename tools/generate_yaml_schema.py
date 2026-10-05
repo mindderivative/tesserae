@@ -209,6 +209,24 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                 "wrap": loose({"enum": ["word", "none"],
                                "description": "`word` (the default) breaks a line that is too long for its node onto the next; "
                                               "`none` keeps one line. Not for a TextField."}),
+                "selectable": loose({"type": "boolean",
+                                     "description": "A Text only: the user can select it with the pointer and copy it (Ctrl+C)."}),
+                "runs": {"type": "array", "minItems": 1,
+                         "description": "A Text only: the text as styled pieces, instead of `content`. A piece is a string, or "
+                                        "`{text, color, weight, italic, underline, strikethrough, font_size, font_family, link}`. "
+                                        "A piece with a `link` is `primary` and underlined, and a click on it calls `on_link` "
+                                        "with `event.href`.",
+                         "items": {"anyOf": [{"type": "string"}, {"type": "object", "required": ["text"], "additionalProperties": False,
+                                  "properties": {
+                                      "text": {"type": "string", "description": "This piece's words."},
+                                      "color": {"$ref": "#/definitions/color", "description": "Its colour: a theme role or a CSS colour."},
+                                      "weight": {"type": "number", "minimum": 1, "maximum": 1000, "description": "Its font weight."},
+                                      "italic": {"type": "boolean", "description": "Italic."},
+                                      "underline": {"type": "boolean", "description": "Underlined."},
+                                      "strikethrough": {"type": "boolean", "description": "Struck through."},
+                                      "font_size": {"type": "number", "exclusiveMinimum": 0, "description": "Its size in pixels."},
+                                      "font_family": {"type": "string", "description": "Its font family."},
+                                      "link": {"type": "string", "description": "Makes it a link: what `on_link` hears as `event.href`."}}}]}},
                 "overflow": loose({"enum": ["clip", "ellipsis"],
                                    "description": "What happens to a line that doesn't fit its node: `clip` (the default) cuts it off, "
                                                   "`ellipsis` ends it with an ellipsis. Not for a TextField."}),

@@ -98,6 +98,7 @@ class App(
 - `navigate(name: str, **params: Any) -> Window`: Shows the screen registered under `name` as a step in the history : `back()` returns from it.
 - `navigate_to(route: str) -> Window`: Navigates to the screen the first matching route names, with the params it reads from `route` (a deep link, say `"notes/42"`).
 - `of(view: Any) -> 'App | None'`: The live app whose window `view` (a view, a component, or a window) is on, or `None`: for a ViewModel's constructor, before `super().__init__(view)` gives it `self.app`.
+- `on_file_drop(handler: Any) -> None`: Calls `handler(event)` when files are dropped anywhere on the window (`event.paths`); `None` stops it.
 - `platform` *(property)*: `"windows"`, `"macos"`, `"wayland"` or `"x11"`.
 - `present_mode` *(property)*: How frames are paced: `"vsync"` (one a display refresh, the default: an animating window uses a few percent of a core) or `"low_latency"` (the newest frame at once, and a whole core while something animates).
 - `profile_nodes` *(property)*: Whether each node's drawing time is measured, so `frame_stats()["profile"]` says where it went.
@@ -119,6 +120,7 @@ class App(
 - `show(name: str) -> Window`: Shows the view registered under `name` in the app's window: its root is attached, and the screen shown before it is detached (kept alive, with its state and bindings).
 - `start_trace(path: str | Path) -> None`: Writes every frame drawn from now on to `path`, for ui.perfetto.dev or chrome://tracing, until `stop_trace()`.
 - `stats_handle() -> Any`: An object any thread can read the frame stats from: `handle.read()` is `frame_stats()` without the profile.
+- `stats_overlay` *(property)*: Whether a small readout of the frame rate and what a frame costs shows in the window's top right corner.
 - `stop_trace() -> int`: Ends the trace `start_trace` began and returns how many frames it holds.
 - `system_menu` *(property)*: Whether a secondary press on the title bar opens the OS's window menu (Windows, and Wayland compositors with one).
 - `theme` *(property)*: The app's resolved theme (`tesserae.Theme`): roles, component shape and elevation, typography, and motion tokens.
@@ -347,12 +349,13 @@ A resolved theme. Build one with `Theme.resolve(...)`.
 - `resolve(theme_seed: Optional[RGBA] = None, dark: bool = False, default_theme_spec: Optional[dict[str, Any]] = None, custom_theme_spec: Optional[dict[str, Any]] = None, contrast: float = 0.0) -> 'Theme'`: Resolves a theme; raises `ValueError` for an unknown role, an unknown token in `components:` or an unknown `typography:` field.
 - `role(name: str) -> Optional[RGBA]`: An MD3 colour role, or `None` without a scheme or for an unknown name.
 - `shape(component: str, variant: Optional[str] = None) -> Optional[float]`: A component's corner radius from `components:`, or `None` when the theme doesn't say (the widget uses its own MD3 default).
+- `spring(bounce: float = 0.0) -> Easing`: A spring easing: `bounce` from -1 to 1 (exclusive), 0 settling without overshoot, above 0 overshooting.
 - `typography(role: str) -> Optional[tokens.TypeStyle]`: An MD3 type role with the theme's `typography:` overrides, or `None` for an unknown role.
 
 **Constants**
 
 - `DURATIONS` = `dict of 16`
-- `EASINGS` = `dict of 7`
+- `EASINGS` = `dict of 8`
 
 ## Tokens
 

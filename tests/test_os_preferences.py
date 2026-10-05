@@ -95,3 +95,51 @@ def test_frame_stats_and_handle_exist():
     app = _app()
     assert "frames" in app.frame_stats()
     assert app.stats_handle() is not None
+
+
+def test_the_os_changing_its_preferences_is_followed():
+    app = _app()
+    app.window.simulate("reduced_motion", value=True)
+    assert app.reduced_motion is True and motion.duration(app.window, 100) == 0
+    before = app.theme.role("primary")
+    app.window.simulate("high_contrast", value=True)
+    assert app.high_contrast is True and app.theme.role("primary") != before
+    app.window.simulate("reduced_motion", value=False)
+    app.window.simulate("high_contrast", value=False)
+    assert (app.reduced_motion, app.high_contrast) == (False, False)
+
+
+def test_a_forced_preference_ignores_the_os():
+    app = _app(reduced_motion=False, high_contrast=False)
+    app.window.simulate("reduced_motion", value=True)
+    app.window.simulate("high_contrast", value=True)
+    assert (app.reduced_motion, app.high_contrast) == (False, False)
+
+
+def test_the_stats_overlay_shows_and_goes():
+    app = _app()
+    assert app.stats_overlay is False
+    app.stats_overlay = True
+    assert app.stats_overlay is True
+    app.frame_stats = lambda reset=False: {"recent": {"fps": 59.6, "total_ms": {"mean": 4.25, "p95": 7.5}}}
+    for _ in range(15):  # the engine says each frame; the readout is rewritten every 15th
+        app._on_frame(None)
+    assert app._stats_label.get("text") == "60 fps  4.2 ms  p95 7.5"
+    app.stats_overlay = False
+    assert app.stats_overlay is False
+
+
+def test_the_environment_turns_the_overlay_on(monkeypatch):
+    monkeypatch.setenv("TESSERAE_STATS", "1")
+    assert _app().stats_overlay is True
+
+
+def test_a_drop_anywhere_on_the_window_is_heard():
+    app = _app()
+    heard = []
+    app.on_file_drop(lambda event: heard.append(list(event.paths)))
+    app.window.simulate("file_drop", x=10, y=10, paths=["/a.txt"])
+    assert heard == [["/a.txt"]]
+    app.on_file_drop(None)
+    app.window.simulate("file_drop", x=10, y=10, paths=["/b.txt"])
+    assert heard == [["/a.txt"]]
