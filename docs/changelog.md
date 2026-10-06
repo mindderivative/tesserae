@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.3 (unreleased)
+## 0.4.3
 
 Documentation ([#91](https://github.com/mindderivative/tesserae/issues/91)).
 
