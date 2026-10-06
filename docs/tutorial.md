@@ -7,6 +7,9 @@ own frame. Every step is a folder in
 [`examples/tutorial/`](https://github.com/mindderivative/tesserae/tree/main/examples/tutorial) that
 Tesserae's tests run; the page shows the files a step adds or changes.
 
+The files here sit side by side and are named by their paths. [The same app as a project](tutorial-project.md)
+puts them in the folders `tesserae new` makes and finds them by name.
+
 You need a working install ([Getting Started](getting-started.md)). Make a folder for the app, and for
 each step put its files in it (or run a step straight from a checkout: `python examples/tutorial/step3/app.py`).
 

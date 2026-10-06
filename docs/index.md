@@ -73,7 +73,7 @@ Linux, macOS and Windows.
 | --- | --- |
 | [Installation](installation.md) | `pip install tesserae-ui` |
 | [Getting Started](getting-started.md) | Your first window and node, declaratively and from Python |
-| [Tutorial](tutorial.md) | A Tasks app in six steps: components, styling, screens, a custom window |
+| [Tutorial](tutorial.md) and [the same as a project](tutorial-project.md) | A Tasks app in six steps: components, styling, screens, a custom window; in one flat folder, then as a `tesserae new` project |
 | [Guide](guide/apps-and-screens.md) | How each part works |
 | [Components](components/index.md) and [Stylesheets](stylesheets/index.md) | Every MD3 component, its YAML and its look |
 | [Themes](themes/index.md) | Colour, shape, type, light and dark |

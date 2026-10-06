@@ -51,7 +51,8 @@ nav:
   - Overview: index.md
   - Installation: installation.md
   - Getting Started: getting-started.md
-  - Tutorial: tutorial.md
+  - Tutorial (Flat Files): tutorial.md
+  - Tutorial (A Project): tutorial-project.md
   - Guide:
       - Projects: guide/projects.md
       - Apps & Screens: guide/apps-and-screens.md

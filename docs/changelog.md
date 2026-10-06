@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.3 (unreleased)
+
+Documentation ([#91](https://github.com/mindderivative/tesserae/issues/91)).
+
+### Added
+
+- **[Tutorial: The Same App as a Project](tutorial-project.md)** builds the Tutorial's Tasks app as the project
+  `tesserae new` makes, in six steps (`examples/tutorial_project/`, run by the tests): files in `Views/`, `ViewModels/`,
+  `Components/`, `Themes/` and `Styles/` found by name, `Repeater` rows by name, a theme and stylesheet by name,
+  `tesserae add screen`, a shell by name, with a table comparing a flat folder with a project. The flat
+  [Tutorial](tutorial.md) and the Getting Started, Overview and Projects pages point to each other.
+
+### Fixed
+
+- The Projects guide listed the `Repeater` and `instantiate` row twice.
+
 ## 0.4.2
 
 Names for lists and embedded components ([#89](https://github.com/mindderivative/tesserae/issues/89)), SVG

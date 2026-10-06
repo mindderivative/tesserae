@@ -21,6 +21,9 @@ notes/
   Styles/             Name_Stylesheet.yaml, Name_Style.yaml
 ```
 
+The [project tutorial](../tutorial-project.md) builds an app in one, step by step, beside the
+[flat-folder tutorial](../tutorial.md).
+
 `--no-venv` makes the folders and files without the virtual environment (the environment needs the network to
 install Tesserae). [The `tesserae` command](cli.md) has the rest.
 
@@ -30,7 +33,6 @@ install Tesserae). [The `tesserae` command](cli.md) has the rest.
 | --- | --- |
 | `app.load("Main")` | `Views/Main_View.yaml`, and `Main`'s ViewModel: `ViewModels/Main_ViewModel.py`, class `MainViewModel` |
 | `app.load_shell("Frame")` | `Views/Frame_Shell.yaml` |
-| `Repeater(view, items, "Row", into=node)` and `instantiate(view, "Row", into=node)` | `Views/Row_View.yaml`, and `Row`'s ViewModel (`RowViewModel`), as `app.load` does |
 | `Repeater(view, items, "Row", into=node)` and `instantiate(view, "Row", into=node)` | `Views/Row_View.yaml`, and `Row`'s ViewModel (`RowViewModel`), as `app.load` does |
 | `component: Stat` | `Components/Stat_Component.yaml`, and `Components/Stat_Stylesheet.yaml` |
 | `App(custom_theme="Brand")` | `Themes/Brand_Theme.yaml` |

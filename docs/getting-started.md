@@ -169,7 +169,8 @@ because a declarative screen is made of the same nodes you create in code:
 ## Next
 
 - [Tutorial](tutorial.md): build a bigger app with a custom window, several
-  views and ViewModels, components and styling.
+  views and ViewModels, components and styling, in one flat folder; or [as a project](tutorial-project.md),
+  with the files in folders and found by name.
 - [Projects](guide/projects.md) and [the `tesserae` command](guide/cli.md): start an app from a template, with
   its files in standard folders.
 - [Apps & Screens](guide/apps-and-screens.md), [Layout](guide/layout.md) and

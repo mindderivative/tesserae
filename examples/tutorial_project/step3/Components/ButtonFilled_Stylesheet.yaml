@@ -1,0 +1,6 @@
+# Next to the views, this goes over Tesserae's own ButtonFilled stylesheet, field by field.
+styles:
+  - id: root
+    style: {background: tertiary}
+  - id: label
+    style: {foreground: on_tertiary}

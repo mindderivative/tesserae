@@ -1,0 +1,12 @@
+# A number with a label under it. `value` is a binding expression, e.g. "{{ count.get() }}".
+params: [label, value]
+id: root
+kind: Container
+children:
+  - id: value
+    kind: Text
+    text: {content: "0", typography_role: title_large}
+    bindings: {text: "{{ value }}"}
+  - id: label
+    kind: Text
+    text: {content: "{{ label }}", typography_role: label_medium}
