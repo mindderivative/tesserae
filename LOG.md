@@ -2153,6 +2153,23 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.4.3 released (#91)
+
+User: "Update the MkDocs and make a tutorial using a new project vs a flat file system", "approved, push and release
+0.4.3", "approved, check PyPI".
+
+- Read the request as a second tutorial beside the flat one, not a replacement. `docs/tutorial-project.md` builds the
+  Tasks app as the project `tesserae new` makes, in six steps (`examples/tutorial_project/step1..6`, generated from the
+  flat steps by moving files into `Views/`, `ViewModels/`, `Components/`, `Themes/` and `Styles/`, with a hand-written
+  `app.py` each: names instead of paths, `Repeater(view, items, "TaskItem", into=...)`). It opens with a flat-vs-project
+  table. `tests/test_tutorial_project.py` runs every step and checks the page includes each new file, `app.py` and the
+  screen's ViewModel; the views change as in the flat tutorial, which the page links to.
+- MkDocs: nav entries "Tutorial (Flat Files)" and "Tutorial (A Project)", cross-links from Overview, Getting Started,
+  the flat Tutorial and Projects; a row listed twice in the Projects guide removed.
+- Released: 4856 tests passed, CI green on all platforms; `tesserae-ui` 0.4.3 is on PyPI (the Release run succeeded
+  a few minutes before the index showed it). From that install in a clean venv, `tesserae new notes --no-venv` made a
+  project whose app ran headless: "Hello from Notes", a click counted. `v0.4.3` is a pre-release.
+
 ## Tesserae 0.4.2 released (#88, #89, #90)
 
 User: issues #88 (SVG), #89 (names for `Repeater` and `instantiate`) and #90 (tre 0.5.4 adoption), "approved, do #88
