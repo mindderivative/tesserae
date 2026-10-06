@@ -121,9 +121,7 @@ def _files(step: int) -> dict[str, Path]:
     return {p.relative_to(folder).as_posix(): p for p in folder.rglob("*") if p.suffix in CHECKED and "__pycache__" not in p.parts}
 
 
-def test_the_page_includes_every_new_file_and_what_a_step_changes_about_finding_them():
-    """The views change as they do in the flat Tutorial, which the page points to; what is the project's own is a new
-    file, `app.py`, and the screen's ViewModel (where the rows are found by name)."""
+def test_the_page_includes_every_file_a_step_adds_or_changes():
     text = PAGE.read_text(encoding="utf-8")
     included = set(re.findall(r'--8<-- "(examples/tutorial_project/[^"]+)"', text))
     expected = set()
@@ -131,8 +129,7 @@ def test_the_page_includes_every_new_file_and_what_a_step_changes_about_finding_
     for step in range(1, 7):
         current = _files(step)
         for name, path in current.items():
-            changed = name not in previous or not filecmp.cmp(path, previous[name], shallow=False)
-            if changed and (name not in previous or name in ("app.py", "ViewModels/Main_ViewModel.py")):
+            if name not in previous or not filecmp.cmp(path, previous[name], shallow=False):
                 expected.add(path.relative_to(ROOT).as_posix())
         previous = current
     assert included == expected, f"missing {sorted(expected - included)}, unknown {sorted(included - expected)}"

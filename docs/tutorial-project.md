@@ -7,8 +7,8 @@ behaviour are the same, and what changes is where the files are and how little c
 
 Every step is a project folder in
 [`examples/tutorial_project/`](https://github.com/mindderivative/tesserae/tree/main/examples/tutorial_project)
-that Tesserae's tests run. The page shows the files a step makes new, and `app.py`; the views change as they do in
-the [flat Tutorial](tutorial.md), whose steps have their YAML.
+that Tesserae's tests run. The page shows every file a step adds or changes, so each step can be followed on its own; the
+[flat Tutorial](tutorial.md) explains the views and ViewModels in more depth.
 
 ## Flat or a project?
 
@@ -72,6 +72,10 @@ A task row is a view and ViewModel pair of its own, in the same two folders:
 --8<-- "examples/tutorial_project/step2/Views/TaskItem_View.yaml"
 ```
 
+```yaml title="Views/Main_View.yaml"
+--8<-- "examples/tutorial_project/step2/Views/Main_View.yaml"
+```
+
 ```python title="ViewModels/TaskItem_ViewModel.py"
 --8<-- "examples/tutorial_project/step2/ViewModels/TaskItem_ViewModel.py"
 ```
@@ -104,6 +108,14 @@ Themes, stylesheets and style files each have a folder, and an app or a view nam
 --8<-- "examples/tutorial_project/step3/Components/ButtonFilled_Stylesheet.yaml"
 ```
 
+```yaml title="Views/Main_View.yaml"
+--8<-- "examples/tutorial_project/step3/Views/Main_View.yaml"
+```
+
+```yaml title="Views/TaskItem_View.yaml"
+--8<-- "examples/tutorial_project/step3/Views/TaskItem_View.yaml"
+```
+
 ```python title="app.py"
 --8<-- "examples/tutorial_project/step3/app.py"
 ```
@@ -124,6 +136,14 @@ A fragment goes in `Components/`, and any view says `component: Stat`, wherever 
 --8<-- "examples/tutorial_project/step4/Components/Stat_Stylesheet.yaml"
 ```
 
+```yaml title="Views/Main_View.yaml"
+--8<-- "examples/tutorial_project/step4/Views/Main_View.yaml"
+```
+
+```yaml title="Styles/Tasks_Stylesheet.yaml"
+--8<-- "examples/tutorial_project/step4/Styles/Tasks_Stylesheet.yaml"
+```
+
 ```python title="ViewModels/Main_ViewModel.py"
 --8<-- "examples/tutorial_project/step4/ViewModels/Main_ViewModel.py"
 ```
@@ -142,6 +162,10 @@ route to `app.py`. Fill them in, and share state through the app:
 
 ```yaml title="Views/Settings_View.yaml"
 --8<-- "examples/tutorial_project/step5/Views/Settings_View.yaml"
+```
+
+```yaml title="Views/Main_View.yaml"
+--8<-- "examples/tutorial_project/step5/Views/Main_View.yaml"
 ```
 
 ```python title="ViewModels/Settings_ViewModel.py"
@@ -166,6 +190,18 @@ An app shell is one more file in `Views/`, loaded by name:
 
 ```yaml title="Views/Tasks_Shell.yaml"
 --8<-- "examples/tutorial_project/step6/Views/Tasks_Shell.yaml"
+```
+
+```yaml title="Views/Settings_View.yaml"
+--8<-- "examples/tutorial_project/step6/Views/Settings_View.yaml"
+```
+
+```python title="ViewModels/Settings_ViewModel.py"
+--8<-- "examples/tutorial_project/step6/ViewModels/Settings_ViewModel.py"
+```
+
+```yaml title="Views/Main_View.yaml"
+--8<-- "examples/tutorial_project/step6/Views/Main_View.yaml"
 ```
 
 ```python title="app.py"
