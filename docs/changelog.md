@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.3.3 (unreleased)
+## 0.4.3.3
 
 tre 0.5.5 ([#94](https://github.com/mindderivative/tesserae/issues/94)).
 
