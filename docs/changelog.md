@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.3.1 (unreleased)
+## 0.4.3.1
 
 Style files ([#92](https://github.com/mindderivative/tesserae/issues/92)).
 
