@@ -9,6 +9,15 @@ A TextField in dark mode ([#93](https://github.com/mindderivative/tesserae/issue
 - **A `TextField`'s text was dark in a dark scheme**, dark ink on a dark field. What is typed is the theme's
   `on_surface` now (or the style's `foreground`, if it has one), and the caret is the theme's `primary`, and both follow
   the app between light and dark.
+- A sweep of every component for the same fault found no other: in both schemes no component's text or icon is
+  unreadable against what is behind it, and a component built in one scheme and switched to the other by the app
+  looks as one built in it (`tests/test_component_colours.py`).
+
+### Added
+
+- **Text fields** has a component page (it was missing): the `TextField` node kind, how its colours come from the
+  theme, binding it two ways, and its limits. The Components index names a node kind (`kind: TextField`, `kind: Svg`)
+  where it used to say "Python only".
 
 ## 0.4.3.1
 

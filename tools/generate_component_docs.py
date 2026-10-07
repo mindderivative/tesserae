@@ -182,7 +182,7 @@ def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sh
             out += _fence(first.body, "yaml")
     elif entry.get("node_kind"):
         out += [f"This component is the `{entry['node_kind']}` node kind, not a fragment: use `kind: {entry['node_kind']}` in a view "
-                "(the [YAML reference](../api/yaml.md#the-kinds)), or build it in Python.", ""]
+                "(the [YAML reference](../api/yaml.md#the-kinds))" + (", or build it in Python." if entry.get("python") else "."), ""]
     else:
         out += ["This component has no `component:` fragment: build it in Python.", ""]
     if entry.get("usage"):
@@ -249,7 +249,8 @@ def overview_components(data: dict[str, Any]) -> str:
         out += [f"## {group}", "", "| Component | Fragments |", "| --- | --- |"]
         for entry in data["components"]:
             if entry["group"] == group:
-                frags = ", ".join(f"`{f}`" for f in entry["fragments"]) or "Python only"
+                frags = ", ".join(f"`{f}`" for f in entry["fragments"]) or (
+                    f"`kind: {entry['node_kind']}`" if entry.get("node_kind") else "Python only")
                 out.append(f"| [{entry['title']}]({entry['slug']}.md) | {frags} |")
         out.append("")
     return "\n".join(out)

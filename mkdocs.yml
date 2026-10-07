@@ -117,6 +117,7 @@ nav:
           - Switch: components/switches.md
           - Slider: components/sliders.md
           - Chips: components/chips.md
+          - Text fields: components/text-fields.md
           - Spin box: components/spin-boxes.md
           - Date picker: components/date-pickers.md
           - Time picker: components/time-pickers.md
