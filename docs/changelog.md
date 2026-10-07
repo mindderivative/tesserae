@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.4 (unreleased)
+## 0.4.4
 
 A window, a dock and embedded views in the same YAML as every other view ([#95](https://github.com/mindderivative/tesserae/issues/95)).
 
