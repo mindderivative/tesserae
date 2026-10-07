@@ -3,6 +3,12 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.3.3
+
+Tesserae needs `tre` (`tesserae-engine`) 0.5.5 or newer, below 0.6: `pip install --upgrade tesserae-ui` brings it. Nothing in your code has
+to change. Resizing a window, undecorated or with the OS's frame, no longer stalls on KDE Wayland: tre 0.5.4 stalled for up to a
+second at a time while it was dragged, and 0.5.5 fixes that.
+
 ## To 0.4.3.1
 
 Nothing has to change. A `*_Style.yaml` is written with its fields under `style:` now, and an `id:` if you like, and the

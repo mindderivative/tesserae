@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.3.3 (unreleased)
+
+tre 0.5.5 ([#94](https://github.com/mindderivative/tesserae/issues/94)).
+
+### Requirements
+
+- **`tre` 0.5.5 or newer, below 0.6** (0.4.3.2 needed 0.5.4). On KDE Wayland, tre 0.5.4 presented every frame with a vsync
+  barrier, and while a window was being resized the compositor then held back the next resize for up to a second, so the
+  window trailed the mouse and kept catching up after the button was released: undecorated and native windows both. 0.5.5 presents
+  without the barrier while a window is being resized and goes back to vsync after it. Tesserae's code is unchanged.
+
 ## 0.4.3.2
 
 A TextField in dark mode ([#93](https://github.com/mindderivative/tesserae/issues/93)).
