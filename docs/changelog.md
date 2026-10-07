@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.3.2 (unreleased)
+## 0.4.3.2
 
 A TextField in dark mode ([#93](https://github.com/mindderivative/tesserae/issues/93)).
 
