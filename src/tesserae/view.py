@@ -86,6 +86,8 @@ _COLOR_PROPS = {"background": "fill", "foreground": "fill", "border_color": "str
 #: The app's window actions a handler can name without a ViewModel method
 #: (0.3.0 M3): `on_click: window.close`, for a title bar's buttons.
 WINDOW_ACTIONS = ("minimize", "maximize", "restore", "toggle_maximized", "close")
+#: What a handler can name as `surface.<action>` (0.4.4): the surface the node is in -- a dialog or a sheet -- not the window.
+SURFACE_ACTIONS = ("dismiss",)
 #: How far a disabled node fades (M70): MD3's disabled content opacity.
 DISABLED_OPACITY = 0.38
 _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius", "border_width", "elevation"}
@@ -190,6 +192,7 @@ class View:
         self._disabled_on: set[str] = set()
         self._sync_interactions()
         self._sync_embeds()
+        self._wire_actions()
         if app is not None:
             app._followers[self] = None
 
@@ -403,12 +406,16 @@ class View:
         self._sync_embeds()
         if self._viewmodel is not None:
             self._wire(self._spec)
+        else:
+            self._wire_actions()
 
     def _use_scheme(self, scheme: Any) -> None:
         """Re-colours every node from `scheme` (a resolved `Theme`'s roles),
         for a composed widget given a `tesserae.Theme`."""
         self._repatch(scheme, self._layers)
         self._scheme = scheme
+        for component in list(self._components):  # an embedded view takes the colours too (0.4.4)
+            component._host_restyled(self)
 
     def _repatch(self, scheme: Any, layers: Any) -> None:
         for node_id, node_spec in self._built.specs.items():
@@ -614,6 +621,8 @@ class View:
         if self._viewmodel is not None:
             self._unwire()
             self._wire(self._spec)
+        else:
+            self._wire_actions()
 
     def _unwire(self) -> None:
         steps, self._wiring = self._wiring, []
@@ -649,6 +658,8 @@ class View:
         node_id = node_spec["id"]
         if method_name.startswith("window."):
             method = self._window_action(node_id, event, method_name)
+        elif method_name.startswith("surface."):
+            method = self._surface_action(node_id, event, method_name, node_spec)
         else:
             try:
                 method = getattr(self._viewmodel, method_name)
@@ -695,6 +706,33 @@ class View:
             if app is not None:
                 getattr(app, action)()
         return run
+
+    def _surface_action(self, node_id: str, event: str, name: str, node_spec: dict[str, Any]) -> Callable[[], None]:
+        """`surface.<action>` (0.4.4): `dismiss` closes the dialog, sheet or other overlay the node is in."""
+        action = name[len("surface."):]
+        if action not in SURFACE_ACTIONS:
+            raise ValueError(f'widget "{node_id}": handler "{event}" names "{name}", which isn\'t a surface action '
+                             f"({', '.join('surface.' + a for a in SURFACE_ACTIONS)})")
+
+        def run() -> None:
+            from tesserae.overlays import dismiss_surface
+
+            dismiss_surface(self._built.nodes[node_id])
+        return run
+
+    def _wire_actions(self) -> None:
+        """A view with no ViewModel still has its `window.*` and `surface.*` handlers (a title bar's buttons), which need
+        none: wires just those."""
+        self._unwire()
+        has_app = app_of(self.window) is not None
+        for node_spec in _walk(self._spec):
+            for event, method_name in (node_spec.get("handlers") or {}).items():
+                if not isinstance(method_name, str):
+                    continue
+                action = method_name.partition(".")[2]
+                if (method_name.startswith("window.") and has_app and action in WINDOW_ACTIONS) or (
+                        method_name.startswith("surface.") and action in SURFACE_ACTIONS):
+                    self._wire_handler(node_spec, event, method_name)  # a wrong one is said when a ViewModel attaches
 
     def _add_listener(self, node: Any, event: str, fn: Callable[[Any], None]) -> None:
         """A ViewModel's listener: removed when the view is unwired."""

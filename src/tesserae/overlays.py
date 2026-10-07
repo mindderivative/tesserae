@@ -27,6 +27,8 @@ opens 500 ms after its anchor is hovered, or at once on keyboard focus.
 
 from __future__ import annotations
 
+import weakref
+from pathlib import Path
 from typing import Any, Callable, Optional
 
 from tesserae import a11y
@@ -36,10 +38,27 @@ from tesserae.widgets._composed import Widget, fragment
 from tesserae import motion
 
 __all__ = ["Dialog", "Menu", "NavigationDrawer", "Overlay", "Popover", "SearchView", "SideSheet", "Snackbar",
-           "Tooltip"]
+           "Tooltip", "ViewDialog", "dismiss_surface"]
 
 #: MD3's scrim: black at 32%, as the fragments' own.
 SCRIM = "#00000052"
+
+#: The overlays that are showing or could show, by their node's hash, so a node inside one can find it (`dismiss_surface`).
+_LIVE: dict[int, "weakref.ReferenceType[Overlay]"] = {}
+
+
+def dismiss_surface(node: Any) -> bool:
+    """Closes the overlay (a dialog, a sheet, a menu, ...) that `node` is in, the nearest one up its parents, as its
+    own `close()` does. A `surface.dismiss` handler, such as a `TitleBar`'s `dismiss` button, calls this. Returns whether
+    there was one."""
+    while node is not None:
+        reference = _LIVE.get(hash(node))
+        overlay = reference() if reference is not None else None
+        if overlay is not None:
+            overlay.close()
+            return True
+        node = node.parent()
+    return False
 
 
 class _Timer:
@@ -77,6 +96,7 @@ class Overlay:
         self._open = False
         self._closes: list[Callable[[], Any]] = []
         self._undo = [widget.view._listen(self.node, "dismiss", lambda event: self.close())]
+        _LIVE[hash(self.node)] = weakref.ref(self)
 
     @property
     def is_open(self) -> bool:
@@ -175,6 +195,44 @@ class Dialog(Overlay):
         if fn is not None:
             fn()
         self.close()
+
+    def _fit(self, width: float, height: float) -> None:
+        self.node.set(width=width, height=height)  # the scrim covers the window
+
+
+class ViewDialog(Overlay):
+    """A dialog whose content is a view: `ViewDialog(window, "Settings_View.yaml")` shows that view, with its
+    ViewModel if it has one (`with:` as keyword arguments to its constructor), on a `surface_container_high` panel with 28 px
+    corners over a scrim, as `Dialog` does. A name is found in the app's project. Modal: focus moves into it, and Escape closes
+    it. Give the view a `TitleBar` with `buttons: [dismiss]` for a header with a close button. `.content` is the embedded view
+    and `.viewmodel` its ViewModel (`None` for a view with none)."""
+
+    modal = True
+
+    def __init__(self, window: Any, view: Any, *, arguments: Optional[dict[str, Any]] = None, width: float = 480.0,
+                 height: float = 320.0, label: Optional[str] = None, theme: Optional[Theme] = None) -> None:
+        name = "viewdialog"
+        ref = str(Path(view).resolve()) if Path(str(view)).suffix else str(view)  # a file by its full path, a name as it is
+        spec = {"id": name, "kind": "Container", "classes": ["view_dialog"],
+                "style": {"width": 1, "height": 1, "background": SCRIM, "align_content": "center"},
+                "children": [{"id": f"{name}.panel", "kind": "Container", "classes": ["view_dialog_panel"],
+                              "style": {"width": width, "height": height, "background": "surface_container_high",
+                                        "corner_radius": 28, "clip_children": True, "flex_direction": "vertical"},
+                              "children": [{"id": f"{name}.content", "view": ref, "with": dict(arguments or {}),
+                                            "style": {"width": "100%", "height": "100%"}}]}]}
+        widget = Widget(window, spec=spec, theme=theme, name=name, attach=False)
+        super().__init__(window, widget)
+        a11y.describe(widget.part("panel"), role="dialog", label=label or Path(ref).stem.removesuffix("_View"))
+
+    @property
+    def content(self) -> Any:
+        """The embedded view."""
+        return self.widget.view.embedded("viewdialog.content")
+
+    @property
+    def viewmodel(self) -> Any:
+        """The embedded view's ViewModel, or `None`."""
+        return self.content.viewmodel
 
     def _fit(self, width: float, height: float) -> None:
         self.node.set(width=width, height=height)  # the scrim covers the window

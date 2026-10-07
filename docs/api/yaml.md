@@ -236,7 +236,7 @@ overflow: <clip | ellipsis>
 
 ## Handlers
 
-`handlers:` names what an event calls: a ViewModel method, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`.
+`handlers:` names what an event calls: a ViewModel method, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`.
 
 | Event | Values | What it does |
 | --- | --- | --- |
@@ -276,7 +276,7 @@ a11y: <a mapping>
 | `kind` *(required)* | `TitleBar` | Always `TitleBar`. |
 | `title` | text | The window's title. |
 | `icon` | one of 15 names | An icon name, shown before the title. |
-| `buttons` | a list | Which window buttons, in order: minimize, maximize, close (all by default). |
+| `buttons` | a list | Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in. |
 | `children` | a list | The nodes inside this one. |
 | `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
 | `classes` | a list | Style classes a theme or stylesheet rule can match. |

@@ -234,6 +234,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
             },
             "additionalProperties": False}
     window_actions = ", ".join("`window." + action + "`" for action in view_module.WINDOW_ACTIONS)
+    window_actions += ", " + ", ".join("`surface." + action + "`" for action in view_module.SURFACE_ACTIONS)
     handlers = {"type": "object", "description": "What a user's action calls: the name of a ViewModel method, or `window.<action>`.",
                 "properties": {name: {"type": "string",
                                       "description": f"Runs on `{event}`: a ViewModel method name, or one of {window_actions}."}
@@ -318,8 +319,9 @@ def _definitions(fragment: bool) -> dict[str, Any]:
             "id": node_props["id"], "kind": {"const": "TitleBar"},
             "title": {"type": "string", "description": "The window's title."},
             "icon": {"enum": sorted(icons.ICONS), "description": "An icon name, shown before the title."},
-            "buttons": {"type": "array", "uniqueItems": True, "items": {"enum": list(title_bar.BUTTONS)},
-                        "description": "Which window buttons, in order: minimize, maximize, close (all by default)."},
+            "buttons": {"type": "array", "uniqueItems": True, "items": {"enum": [*title_bar.BUTTONS, *title_bar.SURFACE_BUTTONS]},
+                        "description": "Which window buttons, in order: minimize, maximize, close (all by default); or just "
+                                       "`dismiss`, a button that closes the dialog or sheet the bar is in."},
             "children": node_props["children"], "style": node_props["style"], "classes": node_props["classes"],
             "a11y": node_props["a11y"],
         },

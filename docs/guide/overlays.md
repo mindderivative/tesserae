@@ -24,12 +24,35 @@ Components such as dialogs, menus and snackbars have their own pages under
 Every overlay has `open()`, `close()`, `is_open`, `on_close(fn)` and
 `set_theme(theme)`. When it closes, focus goes back to where it was.
 
+## A dialog with a view of its own
+
+`ViewDialog(window, "Settings_View.yaml", width=480, height=320)` is a `Dialog` whose content is a [view](components.md#in-yaml-view): its
+file, or its name in a project, with its ViewModel if it has one (`arguments={"who": "Ada"}` goes to the constructor) and without one
+if it hasn't. `dialog.content` is the view and `dialog.viewmodel` its ViewModel. Put a `TitleBar` with `buttons: [dismiss]` at
+the top of the view for a header with a close button, and a `surface.dismiss` handler on anything for the rest:
+
+```yaml
+id: root
+kind: Container
+style: {flex_direction: vertical, width: 100%, height: 100%}
+children:
+  - {id: bar, kind: TitleBar, title: Settings, icon: settings, buttons: [dismiss]}
+  - id: done
+    component: ButtonText
+    with: {label: Done, width: 72, height: 40, corner_radius: 20}
+    handlers: {on_click: surface.dismiss}
+```
+
+`surface.dismiss` closes the overlay the node is in (the nearest one up its parents), as its `close()` does; in `tesserae.overlays`,
+`dismiss_surface(node)` is the same from Python.
+
 ## Which closes how
 
 | Overlay | Where it opens | Outside press | Escape | Modal |
 | --- | --- | --- | --- | --- |
 | `Menu` | below its anchor (flipped above if it won't fit), or at a point | closes | closes | no |
 | `Dialog` | centred over a scrim | -- | closes | yes |
+| `ViewDialog` | centred over a scrim, showing a view | -- | closes | yes |
 | `SideSheet` | the window's end, over a scrim, sliding in | -- | closes | yes |
 | `NavigationDrawer` | the window's start, over a scrim, sliding in | -- | closes | yes |
 | `Snackbar` | 24 px in, 72 px from the bottom | no | no | no |

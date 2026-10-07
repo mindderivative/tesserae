@@ -41,10 +41,12 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-__all__ = ["BUTTONS", "STYLES", "TitleBarError", "expand_title_bars", "window_parts"]
+__all__ = ["BUTTONS", "STYLES", "SURFACE_BUTTONS", "TitleBarError", "expand_title_bars", "window_parts"]
 
 #: The window buttons a title bar can have, in the order they're laid out.
 BUTTONS = ("minimize", "maximize", "close")
+#: What a bar in a dialog or a sheet has instead (0.4.4): a button that closes the surface it is in.
+SURFACE_BUTTONS = ("dismiss",)
 _KEYS = {"id", "kind", "title", "icon", "buttons", "children", "style", "classes", "a11y"}
 _ACTIONS = {"minimize": "window.minimize", "maximize": "window.toggle_maximized", "close": "window.close"}
 _LABELS = {"minimize": "Minimize", "maximize": "Maximize", "close": "Close"}
@@ -104,30 +106,50 @@ def _title_bar(node: dict[str, Any]) -> dict[str, Any]:
     if icon is not None and not isinstance(icon, str):
         raise TitleBarError(f"{where}'s icon is an icon name, got {icon!r}")
     buttons = node.get("buttons", list(BUTTONS))
-    if not isinstance(buttons, list) or any(b not in BUTTONS for b in buttons) or len(set(buttons)) != len(buttons):
-        raise TitleBarError(f"{where}'s buttons are some of {', '.join(BUTTONS)}, each once; got {buttons!r}")
-    inset, controls = window_parts(bar_id, buttons)
-    parts: list[dict[str, Any]] = [inset]
+    surface = isinstance(buttons, list) and any(b in SURFACE_BUTTONS for b in buttons)
+    if surface:  # a bar in a dialog or a sheet: no window to move, no window buttons, no OS controls to make room for
+        if buttons != list(SURFACE_BUTTONS):
+            raise TitleBarError(f"{where}'s `dismiss` button is on its own (a bar is for a window or for a dialog or sheet), "
+                                f"got {buttons!r}")
+        parts: list[dict[str, Any]] = []
+        controls = {"id": f"{bar_id}.buttons", "kind": "Container", "classes": ["title_bar_buttons"],
+                    "style": {"height": "100%"}, "children": [_dismiss(bar_id)]}
+    else:
+        if not isinstance(buttons, list) or any(b not in BUTTONS for b in buttons) or len(set(buttons)) != len(buttons):
+            raise TitleBarError(f"{where}'s buttons are some of {', '.join(BUTTONS)}, each once, or just "
+                                f"{', '.join(SURFACE_BUTTONS)} in a dialog or a sheet; got {buttons!r}")
+        inset, controls = window_parts(bar_id, buttons)
+        parts = [inset]
+    dim = {} if surface else {"bindings": {"opacity": _DIM}}  # a window's bar fades while the window isn't focused
     if icon is not None:
         parts.append({"id": f"{bar_id}.icon", "kind": "Icon", "icon": {"name": icon}, "classes": ["title_bar_icon"],
-                      "style": {"width": 20, "height": 20}, "bindings": {"opacity": _DIM}})
+                      "style": {"width": 20, "height": 20}, **dim})
     if title is not None:
         parts.append({"id": f"{bar_id}.title", "kind": "Text", "classes": ["title_bar_title"],
                       "text": {"content": title, "typography_role": "title_small"},
-                      "style": {}, "bindings": {"opacity": _DIM}})
+                      "style": {}, **dim})
     parts.append({"id": f"{bar_id}.content", "kind": "Container", "classes": ["title_bar_content"],
                   "style": {"flex": "expand_horizontal", "height": "100%", "align_content": "left", "gap": 8},
                   "children": list(node.get("children") or [])})
     if controls is not None:
         parts.append(controls)
     return {
-        "id": bar_id, "kind": "Container", "window_region": "drag",
+        "id": bar_id, "kind": "Container", "window_region": "none" if surface else "drag",
         "classes": ["title_bar", *(node.get("classes") or [])],
         **({"a11y": node["a11y"]} if "a11y" in node else {}),
         "style": {"height": HEIGHT, "align_content": "left", "gap": 8,
                   "padding": {"left": 12, "right": 0, "top": 0, "bottom": 0}, **(node.get("style") or {})},
         "children": parts,
     }
+
+
+def _dismiss(bar_id: str) -> dict[str, Any]:
+    """The close button of a bar in a dialog or a sheet: it closes the surface (`surface.dismiss`)."""
+    button_id = f"{bar_id}.dismiss"
+    return {"id": button_id, "kind": "Container", "classes": ["title_bar_button", "title_bar_close"],
+            "interaction": {"color": "error"}, "handlers": {"on_click": "surface.dismiss"}, "a11y": {"label": "Close"},
+            "style": {"width": BUTTON_WIDTH, "height": "100%", "align_content": "center"},
+            "children": [_glyph(button_id, "close")]}
 
 
 def window_parts(bar_id: str, buttons: Any = BUTTONS) -> tuple[dict[str, Any], dict[str, Any] | None]:

@@ -57,6 +57,17 @@ the restore glyph while the window is maximized, and its buttons call
 the app's actions with no ViewModel method needed. Its parts' ids are
 after the bar's: `bar.title`, `bar.close` and so on.
 
+### In a dialog or a sheet
+
+A `TitleBar` is a header for any surface, not only a window. With `buttons: [dismiss]` it has no window buttons, no room for the
+OS's controls and no drag region (a press on it doesn't move the window), and its one button closes the dialog or sheet the bar is
+in (`surface.dismiss`). Use it in a [`ViewDialog`](overlays.md#a-dialog-with-a-view-of-its-own). `dismiss` is on its own: a bar is
+for a window or for a surface.
+
+```yaml
+- {id: bar, kind: TitleBar, title: Settings, icon: settings, buttons: [dismiss]}
+```
+
 ### Height and look
 
 It's 40 px high unless its `style: {height: ...}` says otherwise, and

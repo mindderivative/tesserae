@@ -57,7 +57,8 @@ def embed(parent: Any, ref: str | Path, into: Any, arguments: dict[str, Any] | N
     """The view `ref` (a file, or a name found in the project) built into the node `into` of `parent`, as a `view:`
     node in a view does; returns `(component, viewmodel)`. The ViewModel is `Name_ViewModel.py`'s `NameViewModel`, built
     as `NameViewModel(component, **arguments)`, and a view with no ViewModel file is built with none (`viewmodel` is
-    `None`). A view with no ViewModel can't have bindings, handlers or `two_way:`, or be given `arguments`. A relative
+    `None`). A view with no ViewModel can't have bindings, `two_way:`, or handlers other than `window.*` and `surface.*`, or be
+    given `arguments`. A relative
     path is the folder `base`'s (where the file that names it is)."""
     path, viewmodel_cls = resolve_embedded(project_of(parent), ref, base)
     arguments = dict(arguments or {})
@@ -90,7 +91,8 @@ def wired_nodes(spec: dict[str, Any]) -> list[str]:
     found: list[str] = []
 
     def walk(node: dict[str, Any]) -> None:
-        if node.get("bindings") or node.get("handlers") or node.get("two_way"):
+        own = [h for h in (node.get("handlers") or {}).values() if not str(h).startswith(("window.", "surface."))]
+        if node.get("bindings") or own or node.get("two_way"):
             found.append(str(node.get("id")))
         for child in node.get("children") or []:
             if isinstance(child, dict):

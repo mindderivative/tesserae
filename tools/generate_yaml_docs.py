@@ -252,7 +252,8 @@ def render() -> str:
     out += _block(view, view.defs["text"], "text", "Key")
     from tesserae import view as view_module
 
-    actions = ", ".join(f"`window.{action}`" for action in view_module.WINDOW_ACTIONS)
+    actions = ", ".join([*(f"`window.{action}`" for action in view_module.WINDOW_ACTIONS),
+                         *(f"`surface.{action}`" for action in view_module.SURFACE_ACTIONS)])
     out += ["## Handlers", "", f"`handlers:` names what an event calls: a ViewModel method, or one of {actions}.", ""]
     handler_rows = [(key, "a method name", text.split(":")[0] + ".", req) for key, _, text, req in _rows(view, view.defs["handlers"])]
     out += _table(handler_rows, "Event")

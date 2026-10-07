@@ -1815,6 +1815,36 @@ Also has everything `Overlay` has.
 
 - `attach(anchor: Any) -> Callable[[], None]`: Shows it for `anchor` on hover and keyboard focus.
 
+### `ViewDialog`
+
+```python
+class ViewDialog(
+    window: Any,
+    view: Any,
+    *,
+    arguments: Optional[dict[str, Any]] = None,
+    width: float = 480.0,
+    height: float = 320.0,
+    label: Optional[str] = None,
+    theme: Optional[Theme] = None
+) -> None  # extends Overlay
+```
+
+A dialog whose content is a view: `ViewDialog(window, "Settings_View.yaml")` shows that view, with its ViewModel if it has one (`with:` as keyword arguments to its constructor), on a `surface_container_high` panel with 28 px corners over a scrim, as `Dialog` does. A name is found in the app's project.
+
+Also has everything `Overlay` has.
+
+- `content` *(property)*: The embedded view.
+- `viewmodel` *(property)*: The embedded view's ViewModel, or `None`.
+
+### `dismiss_surface`
+
+```python
+dismiss_surface(node: Any) -> bool
+```
+
+Closes the overlay (a dialog, a sheet, a menu, ...) that `node` is in, the nearest one up its parents, as its own `close()` does. A `surface.dismiss` handler, such as a `TitleBar`'s `dismiss` button, calls this.
+
 ## App shell
 
 `tesserae.shell`: Bars, navigation and docked zones around the screens.

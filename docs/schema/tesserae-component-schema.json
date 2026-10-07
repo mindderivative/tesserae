@@ -1489,75 +1489,75 @@
       "properties": {
         "on_click": {
           "type": "string",
-          "description": "Runs on `click`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `click`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_hover_enter": {
           "type": "string",
-          "description": "Runs on `pointer_enter`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `pointer_enter`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_hover_exit": {
           "type": "string",
-          "description": "Runs on `pointer_leave`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `pointer_leave`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_change": {
           "type": "string",
-          "description": "Runs on `change`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `change`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_focus_enter": {
           "type": "string",
-          "description": "Runs on `focus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `focus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_focus_exit": {
           "type": "string",
-          "description": "Runs on `unfocus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `unfocus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_tap": {
           "type": "string",
-          "description": "Runs on `tap`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `tap`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_long_press": {
           "type": "string",
-          "description": "Runs on `long_press`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `long_press`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_pan": {
           "type": "string",
-          "description": "Runs on `pan`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `pan`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_pinch": {
           "type": "string",
-          "description": "Runs on `pinch`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `pinch`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_touch_start": {
           "type": "string",
-          "description": "Runs on `touch_start`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `touch_start`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_touch_move": {
           "type": "string",
-          "description": "Runs on `touch_move`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `touch_move`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_touch_end": {
           "type": "string",
-          "description": "Runs on `touch_end`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `touch_end`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_touch_cancel": {
           "type": "string",
-          "description": "Runs on `touch_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `touch_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_file_hover": {
           "type": "string",
-          "description": "Runs on `file_hover`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `file_hover`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_file_hover_cancel": {
           "type": "string",
-          "description": "Runs on `file_hover_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `file_hover_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_file_drop": {
           "type": "string",
-          "description": "Runs on `file_drop`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `file_drop`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         },
         "on_link": {
           "type": "string",
-          "description": "Runs on `link`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`."
+          "description": "Runs on `link`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
         }
       },
       "additionalProperties": false
@@ -2031,10 +2031,11 @@
             "enum": [
               "minimize",
               "maximize",
-              "close"
+              "close",
+              "dismiss"
             ]
           },
-          "description": "Which window buttons, in order: minimize, maximize, close (all by default)."
+          "description": "Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in."
         },
         "children": {
           "type": "array",
@@ -6047,10 +6048,11 @@
             "enum": [
               "minimize",
               "maximize",
-              "close"
+              "close",
+              "dismiss"
             ]
           },
-          "description": "Which window buttons, in order: minimize, maximize, close (all by default)."
+          "description": "Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in."
         },
         "checked": {
           "anyOf": [

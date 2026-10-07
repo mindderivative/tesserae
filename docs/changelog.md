@@ -6,6 +6,11 @@ A window, a dock and embedded views in the same YAML as every other view ([#95](
 
 ### Added
 
+- **A `TitleBar` in a dialog or a sheet**: `buttons: [dismiss]` makes a bar with no window buttons, no OS-controls room and no drag
+  region, whose button closes the surface it is in (`surface.dismiss`, a new handler next to `window.*`; `dismiss_surface(node)` from
+  Python). **`ViewDialog(window, "Settings_View.yaml")`** is a dialog whose content is a view, with or without a ViewModel
+  (`.content`, `.viewmodel`). A view with no ViewModel now has its `window.*` and `surface.*` handlers wired, so a title bar's buttons
+  work in a static view. An embedded view takes the colours when its host is re-coloured.
 - **`view:`** shows another `*_View.yaml` where it is: `- {id: left, view: Left_View.yaml, with: {size: 3}, style: {width: 220}}`
   (or by name in a project). It is a view of its own, with its own ids and its own ViewModel when there is one
   (`Left_ViewModel.py`), and it needs none: a view with no ViewModel is static. `view.embedded(id)` and `view.viewmodel` read
