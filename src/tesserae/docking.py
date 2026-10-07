@@ -204,6 +204,26 @@ class Dock:
         self._rebuild(zone)
         return entry.node
 
+    def rename(self, panel: Any, title: str) -> None:
+        """Gives `panel` a new title, on its tab."""
+        entry = self._require(panel)
+        entry.title = title
+        a11y.describe(entry.node, label=title)
+        self._rebuild(self._zones[entry.side])
+
+    def dispose(self) -> None:
+        """Stops the dock: its window events, its tabs' listeners. The zones' nodes are the caller's to destroy."""
+        self.window.off("dock_target")
+        self.window.off("dock_drop")
+        for zone in self._zones.values():
+            for tab in zone.tabs:
+                for undo in tab.undo:
+                    undo()
+                tab.interaction.detach()
+        if self.highlight.parent() is not None:
+            self.highlight.remove()
+        self._press, self._dragging = None, None
+
     def on_move(self, fn: Callable[[Any, str], Any]) -> Callable[[], None]:
         """Calls `fn(node, side)` when a panel moves zone. Returns the stopper."""
         self._moves.append(fn)

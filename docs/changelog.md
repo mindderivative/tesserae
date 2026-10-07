@@ -6,6 +6,16 @@ A window, a dock and embedded views in the same YAML as every other view ([#95](
 
 ### Added
 
+- **`kind: Dock` and `kind: DockPanel`**: panels docked around the middle of a view. A `Dock` holds `DockPanel`s, each in the zone
+  its `style: {zone: left|right|top|bottom|center}` names (`zone` is a style field, and an error anywhere but on a `DockPanel` in
+  a `Dock`); a left or right zone is its panel's `width` wide, a top or bottom one its `height` high. Panels sharing a zone are its
+  tabs, titled by `title:`, which the user drags to another zone; a handle between a zone and the middle resizes it (drag, or the
+  arrow keys, Home and End). A `DockPanel` inside a `DockPanel` is a split of it, side by side or top and bottom
+  (`flex_direction`), with a handle between the halves, which can be split again. A reload leaves a panel the user moved, and the
+  sizes they set, where they are, and adds, removes, renames and moves panels the file changes. `view.dock_host("dock")` has
+  `layout()` and `restore(layout)` (zones, tabs, sizes and splits as plain data), `size(side)` and `set_size(side, size)`. One
+  dock per window; it doesn't depend on the app shell or the shell file. Not yet: dropping a dragged panel onto a split half
+  (a drag docks into the five zones).
 - **Routed views**: `- {id: settings, view: Settings_View.yaml, route: settings}` in a window view makes the view a screen of the app:
   registered under its name (`Settings`) and the route, shown in its node while it is current, and hidden (out of the layout, with
   its state) when it isn't. `app.navigate`, `show`, `navigate_to`, `back` and the history work as before. New handlers

@@ -1262,6 +1262,26 @@
             }
           ],
           "description": "Stacking order: higher is in front."
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom",
+                "center"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error."
         }
       },
       "additionalProperties": false
@@ -6263,6 +6283,112 @@
         }
       }
     },
+    "dock_node": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "description": "Panels docked in zones around the middle: its children are `DockPanel`s, each in the zone its `style: {zone: ...}` names. There is one Dock per window.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it."
+        },
+        "kind": {
+          "const": "Dock"
+        },
+        "style": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Style classes a theme or stylesheet rule can match."
+        },
+        "a11y": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/a11y"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          },
+          "description": "The nodes inside this one."
+        }
+      }
+    },
+    "dock_panel_node": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "description": "A panel in a Dock, in the zone its `style: {zone: ...}` says (left, right, top, bottom or center); panels in one zone are its tabs. Inside another DockPanel it is a split of it. It holds content or splits, not both.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it."
+        },
+        "kind": {
+          "const": "DockPanel"
+        },
+        "title": {
+          "type": "string",
+          "description": "The panel's tab (its id by default)."
+        },
+        "style": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Style classes a theme or stylesheet rule can match."
+        },
+        "a11y": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/a11y"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          },
+          "description": "The nodes inside this one."
+        }
+      }
+    },
     "node": {
       "type": "object",
       "description": "A node: a widget (`kind:`), a fragment used in place (`component:`), a file put in place (`include:`), or another view (`view:`).",
@@ -6585,6 +6711,8 @@
             "Checkbox",
             "CircularProgress",
             "Container",
+            "Dock",
+            "DockPanel",
             "GraphNode",
             "Icon",
             "Image",
@@ -6981,10 +7109,42 @@
             ],
             "properties": {
               "kind": {
+                "const": "Dock"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/definitions/dock_node"
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "const": "DockPanel"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/definitions/dock_panel_node"
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
                 "not": {
                   "enum": [
                     "TitleBar",
-                    "Window"
+                    "Window",
+                    "Dock",
+                    "DockPanel"
                   ]
                 }
               }

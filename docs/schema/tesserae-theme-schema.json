@@ -1262,6 +1262,26 @@
             }
           ],
           "description": "Stacking order: higher is in front."
+        },
+        "zone": {
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom",
+                "center"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error."
         }
       },
       "additionalProperties": false

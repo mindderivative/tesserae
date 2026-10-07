@@ -55,6 +55,7 @@ from tesserae.listeners import Listeners, handled
 from tesserae.scrolling import Scroller
 from tesserae.spec.images import check_frame
 from tesserae.project import ProjectError
+from tesserae.spec.dock import expand_docks
 from tesserae.spec.embed import embeds_of, expand_embeds
 from tesserae.spec.title_bar import expand_title_bars
 from tesserae.spec.window import expand_windows
@@ -166,6 +167,7 @@ class View:
         self._components: list["Component"] = []
         #: the views `view:` nodes embed, by the node's id: `(component, viewmodel or None, the request it was made for)`
         self._embedded: dict[str, tuple["Component", Any, dict[str, Any]]] = {}
+        self._docks: dict[str, Any] = {}  # a `kind: Dock` node's id -> its `DockHost` (0.4.4)
         self._scheme = tokens.resolve_scheme(theme_seed, dark, default_theme_spec, custom_theme_spec, contrast)
         self._layers = prepare_layers(default_theme_spec, custom_theme_spec, stylesheet_spec)
         self._owns_window = window is None
@@ -174,7 +176,7 @@ class View:
             window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
             # no `Window.set_theme` (removed in tre 0.3.5): since M40 nothing a view builds reads the window's theme
         self.window = window
-        spec = expand_embeds(expand_title_bars(expand_windows(spec)))  # `kind: Window`, `kind: TitleBar` into its nodes; `view:` into containers
+        spec = expand_embeds(expand_title_bars(expand_docks(expand_windows(spec))))  # `Window`, `Dock`, `TitleBar` into their nodes; `view:` into containers
         self._spec = spec
         self._built = Built(root=None)
         self._events = Listeners()
@@ -194,6 +196,7 @@ class View:
         #: M70: the nodes shown disabled now, by their `disabled:` key or binding.
         self._disabled_on: set[str] = set()
         self._sync_interactions()
+        self._sync_docks()
         self._sync_embeds()
         self._wire_actions()
         if app is not None:
@@ -262,7 +265,7 @@ class View:
 
     def reconcile(self, spec: dict[str, Any], frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
         """Brings the live tree in line with `spec`, in place."""
-        spec = expand_embeds(expand_title_bars(expand_windows(spec)))  # as in `__init__`
+        spec = expand_embeds(expand_title_bars(expand_docks(expand_windows(spec))))  # as in `__init__`
         if frames is not None:
             self._frames = dict(frames)
         # All or nothing: build the new spec on the side first, so an error
@@ -290,6 +293,7 @@ class View:
         self._sync_interactions()
         self._rewire()
         self._prune_components()
+        self._sync_docks()
         self._sync_embeds()
         self._window_changed()
 
@@ -299,6 +303,29 @@ class View:
         frame = getattr(app, "_frame", None)
         if frame is not None and frame.view is self:
             app._apply_window(self._spec.get("window") or {}, resize=False)
+
+    def dock_host(self, node_id: str) -> Any:
+        """The `DockHost` of the `kind: Dock` node `node_id`: its `dock`, `size`, `set_size`, `layout` and `restore`."""
+        try:
+            return self._docks[node_id]
+        except KeyError:
+            raise ValueError(f"no Dock with id {node_id!r} in this view") from None
+
+    def _sync_docks(self) -> None:
+        """Makes the docks the view's `kind: Dock` nodes ask for: one into each that has none yet, and takes away one whose node
+        is gone. A dock that is there keeps its panels where the user put them."""
+        from tesserae.dockhost import DockHost
+
+        wanted = {node["id"]: node["dock"] for node in _walk(self._spec) if isinstance(node.get("dock"), dict)}
+        for node_id, host in list(self._docks.items()):
+            if node_id not in wanted or not _alive(host.node):
+                del self._docks[node_id]
+                host.dispose()
+        for node_id, dock in wanted.items():
+            if node_id in self._docks:
+                self._docks[node_id].sync_splits()
+            else:
+                self._docks[node_id] = DockHost(self, node_id, dock)
 
     def embedded(self, node_id: str) -> "Component":
         """The view the `view:` node `node_id` embeds. Its ViewModel is `.viewmodel`, `None` for a view with none."""
@@ -533,6 +560,9 @@ class View:
                 frames=self._frames, control=self._built.controls.get(node_id),
                 before=self._built.layout_keys.get(node_id, frozenset()), parent=self._parent_layout(node_id, self._layers))
         self._built.specs[node_id] = new
+        if new.get("dock") is not None and node_id in self._docks:
+            self._reconcile_dock(old, new)
+            return
         if new.get("kind") == "NodeGraph":
             self._reconcile_graph(old, new)
             return
@@ -563,6 +593,47 @@ class View:
                 self._forget(child)
                 if node is not None:
                     node.destroy()
+
+    def _reconcile_dock(self, old: dict[str, Any], new: dict[str, Any]) -> None:
+        """A `Dock`'s panels, matched by id: a kept one is patched where the user left it (a panel moved to another zone
+        stays there unless the file moves it), a new one is built and docked, a gone one is undocked and destroyed."""
+        node_id = new["id"]
+        host = self._docks[node_id]
+        old_children = {c["id"]: c for c in old.get("children") or []}
+        new_info = {p["id"]: p for p in new["dock"]["panels"]}
+        old_info = {p["id"]: p for p in old["dock"]["panels"]}
+        kept: set[str] = set()
+        for child in new.get("children") or []:
+            panel_id, previous = child["id"], old_children.get(child["id"])
+            info = new_info[panel_id]
+            if previous is not None and self._same_shape(previous, child):
+                kept.add(panel_id)
+                self._reconcile_node(previous, child)
+                if info["title"] != old_info[panel_id]["title"]:
+                    host.retitle(panel_id, info["title"])
+                if info["zone"] != old_info[panel_id]["zone"]:  # the file moved it
+                    host.dock.move(self.node(panel_id), info["zone"])
+                    host.panels[panel_id]["zone"] = info["zone"]
+                continue
+            if previous is not None:
+                kept.add(panel_id)
+                host.remove_panel(panel_id)
+                self._forget(previous)
+            built = build_with(self.window, child, scheme=self._scheme, layers=self._layers, frames=self._frames,
+                               into=self._built, listen=self._events.listen, parent=node_id)
+            del built
+            host.add_panel(panel_id, info["zone"], info["title"])
+        for panel_id, child in old_children.items():
+            if panel_id not in kept:
+                node = self._built.outer.get(panel_id)
+                host.remove_panel(panel_id)
+                self._forget(child)
+                if node is not None:
+                    node.destroy()
+        for zone, size in new["dock"].get("sizes", {}).items():
+            if zone in host.sizes and size != old["dock"].get("sizes", {}).get(zone):
+                host.set_size(zone, size)  # the file changed it
+        host.sync_splits()
 
     def _reconcile_graph(self, old: dict[str, Any], new: dict[str, Any]) -> None:
         """A NodeGraph's GraphNodes, matched by id: a kept one is
@@ -605,16 +676,26 @@ class View:
         same size."""
         if old.get("kind") != new.get("kind"):
             return False
+        if (old.get("dock") is None) != (new.get("dock") is None):
+            return False
+        if new.get("dock") is not None and ({p["zone"] for p in old["dock"]["panels"]} != {p["zone"] for p in new["dock"]["panels"]}):
+            return False  # a zone came or went: the dock is made again
         if new.get("kind") in _CONTROL_KINDS or new.get("kind") in _WIDGET_KINDS:
             return control_shape(old, self._layers) == control_shape(new, self._layers)
         return True
 
     def _dispose_controls(self) -> None:
+        for host in self._docks.values():
+            host.dispose()
+        self._docks.clear()
         for control in self._built.controls.values():
             control.dispose()
         self._built.controls.clear()
 
     def _forget(self, spec: dict[str, Any]) -> None:
+        host = self._docks.pop(spec["id"], None)
+        if host is not None:
+            host.dispose()
         control = self._built.controls.pop(spec["id"], None)
         if control is not None:
             control.dispose()
@@ -978,6 +1059,15 @@ class Component(View):
         if self in self._host._components:
             self._host._components.remove(self)
         self._built.root.destroy()
+
+
+def _alive(node: Any) -> bool:
+    """Whether a node still exists (a destroyed one's handle raises on any read)."""
+    try:
+        node.get("visible")
+    except ValueError:
+        return False
+    return True
 
 
 def _walk(spec: dict[str, Any]):

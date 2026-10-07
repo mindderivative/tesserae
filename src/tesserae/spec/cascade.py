@@ -58,6 +58,8 @@ STYLE_FIELDS = frozenset({
     "position", "x", "y", "z_index", "clip_children",
     # effects: `tesserae.spec.effects`
     "blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor",
+    # where a DockPanel docks in its Dock (0.4.4)
+    "zone",
     "display", "grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows",
     "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap",
 })

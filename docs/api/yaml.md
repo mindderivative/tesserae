@@ -121,7 +121,10 @@ children: <a list>
 | `TimePickerDial` | MD3's time picker dial. | `hour:`, `minute:` |
 | `NodeGraph` | A pannable canvas of `GraphNode`s joined by edges. | `edges:`, children that are `GraphNode`s |
 | `GraphNode` | A node in a `NodeGraph`: a titled box at a place. | `label:`, `x:`, `y:` |
-| `TitleBar` | The window's own title bar: an icon, a title, your content and the window's buttons. Needs `App(decorations=False)`. | `title:`, `icon:`, `buttons:` |
+| `TitleBar` | A title bar: an icon, a title, your content and the window's buttons (`App(borderless=True)`), or a close button for a dialog or a sheet (`buttons: [dismiss]`). | `title:`, `icon:`, `buttons:` |
+| `Window` | The root of a view that is the whole OS window: its title, `borderless`, a `title_bar:`, and the content under it. | `title:`, `borderless:`, `min_width:`, `min_height:`, `title_bar:` |
+| `Dock` | Panels docked in zones (left, right, top, bottom, center) around the middle, with handles to resize them. One per window. | `DockPanel` children |
+| `DockPanel` | A panel in a Dock, in the zone its `style: {zone: ...}` names; panels in one zone are its tabs. Inside another DockPanel it is a split of it. | `title:`, `style: {zone}` |
 
 ## The style
 
@@ -193,6 +196,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `x` | a number or `auto` | Where an `absolute` node sits from the left. |
 | `y` | a number or `auto` | Where an `absolute` node sits from the top. |
 | `z_index` | an integer | Stacking order: higher is in front. |
+| `zone` | `left` \| `right` \| `top` \| `bottom` \| `center` | A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error. |
 
 ## Colors
 
@@ -370,6 +374,48 @@ children: <a list>
 | `title_bar.style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
 | `title_bar.classes` | a list | Style classes a theme or stylesheet rule can match. |
 | `title_bar.a11y` | a mapping | What assistive technology is told about this node. |
+| `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
+| `classes` | a list | Style classes a theme or stylesheet rule can match. |
+| `a11y` | a mapping | What assistive technology is told about this node. |
+| `children` | a list | The nodes inside this one. |
+
+## The dock
+
+`kind: Dock` holds `kind: DockPanel`s; each says which zone it is in with `style: {zone: left|right|top|bottom|center}`. Panels in one zone are its tabs (titled by `title:`), which the user can drag to another zone; the size of a left or right zone is its panel's `width`, a top or bottom one's its `height`, and a handle between a zone and the middle resizes it. A `DockPanel` inside a `DockPanel` is a split of it, side by side (`flex_direction: horizontal`, the default) or top and bottom (`vertical`), with a handle between them. A panel has splits or content, not both. From Python, `view.dock_host("dock")` has `layout()`, `restore(layout)`, `size(side)` and `set_size(side, size)`.
+
+```yaml
+id: <text>
+kind: <Dock>
+style: <a style mapping or text>
+classes: <a list>
+a11y: <a mapping>
+children: <a list>
+```
+
+| Key | Values | What it does |
+| --- | --- | --- |
+| `id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
+| `kind` *(required)* | `Dock` | Always `Dock`. |
+| `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
+| `classes` | a list | Style classes a theme or stylesheet rule can match. |
+| `a11y` | a mapping | What assistive technology is told about this node. |
+| `children` | a list | The nodes inside this one. |
+
+```yaml
+id: <text>
+kind: <DockPanel>
+title: <text>
+style: <a style mapping or text>
+classes: <a list>
+a11y: <a mapping>
+children: <a list>
+```
+
+| Key | Values | What it does |
+| --- | --- | --- |
+| `id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
+| `kind` *(required)* | `DockPanel` | Always `DockPanel`. |
+| `title` | text | The panel's tab (its id by default). |
 | `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
 | `classes` | a list | Style classes a theme or stylesheet rule can match. |
 | `a11y` | a mapping | What assistive technology is told about this node. |

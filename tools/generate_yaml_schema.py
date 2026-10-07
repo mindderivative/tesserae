@@ -160,6 +160,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                    "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` "
                    "(`hue_rotate` is in degrees)."),
         "sticky": ({"type": "number"}, "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."),
+        "zone": ({"enum": ["left", "right", "top", "bottom", "center"]},
+                 "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error."),
         "cursor": ({"anyOf": [{"enum": ["default", "pointer", "text", "grab", "grabbing", "move", "not_allowed", "wait",
                                         "progress", "crosshair", "help", "col_resize", "row_resize", "ew_resize", "ns_resize",
                                         "nesw_resize", "nwse_resize", "copy", "cell", "context_menu", "zoom_in", "zoom_out",
@@ -300,7 +302,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     if fragment:
         for key in ("style", "text", "bindings", "handlers", "a11y", "interaction"):
             node_props[key] = {"anyOf": [node_props[key], {"$ref": "#/definitions/conditional"}]}
-    uncovered = build._NODE_KEYS - set(node_props) - {"children", "embed", "window"}  # what a `view:` node and a root `Window` become, not keys a file has
+    uncovered = build._NODE_KEYS - set(node_props) - {"children", "embed", "window", "dock", "dock_panel", "split_handle"}  # what `view:`, `Window`, `Dock` and `DockPanel` become, not keys a file has
     if uncovered:
         raise SystemExit(f"the node keys changed: add {sorted(uncovered)} in {__file__}")
     node_props["children"] = {"type": "array", "items": {"$ref": "#/definitions/node"},
@@ -387,6 +389,20 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                          "it has the window buttons when the window is `borderless`."},
             "style": node_props["style"], "classes": node_props["classes"], "a11y": node_props["a11y"],
             "children": node_props["children"]}}
+    dock_node = {
+        "type": "object", "required": ["kind"], "additionalProperties": False,
+        "description": "Panels docked in zones around the middle: its children are `DockPanel`s, each in the zone its `style: {zone: ...}` "
+                       "names. There is one Dock per window.",
+        "properties": {"id": node_props["id"], "kind": {"const": "Dock"}, "style": node_props["style"], "classes": node_props["classes"],
+                       "a11y": node_props["a11y"], "children": node_props["children"]}}
+    dock_panel_node = {
+        "type": "object", "required": ["kind"], "additionalProperties": False,
+        "description": "A panel in a Dock, in the zone its `style: {zone: ...}` says (left, right, top, bottom or center); panels in "
+                       "one zone are its tabs. Inside another DockPanel it is a split of it. It holds content or splits, not both.",
+        "properties": {"id": node_props["id"], "kind": {"const": "DockPanel"},
+                       "title": {"type": "string", "description": "The panel's tab (its id by default)."},
+                       "style": node_props["style"], "classes": node_props["classes"], "a11y": node_props["a11y"],
+                       "children": node_props["children"]}}
     # Declared here as well as in the branches below, so an editor can suggest them before `kind:`
     # (or `component:`, or `include:`) is typed: the branches only apply once it is.
     suggestible = {**widget_props, **call_props, "include": include_node["properties"]["include"],
@@ -394,7 +410,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                    "borderless": window_node["properties"]["borderless"], "min_width": window_node["properties"]["min_width"],
                    "min_height": window_node["properties"]["min_height"],
                    "title": title_bar_node["properties"]["title"], "buttons": title_bar_node["properties"]["buttons"]}
-    suggestible["kind"] = {"enum": sorted([*build._KINDS, "TitleBar", "Window"]), "description": "What this node is."}
+    suggestible["kind"] = {"enum": sorted([*build._KINDS, "TitleBar", "Window", "Dock", "DockPanel"]), "description": "What this node is."}
     suggestible["title"] = {"type": "string", "description": "A TitleBar's title, or a Window's."}
     # `icon` means an object on an Icon node and a plain name on a TitleBar.
     suggestible["icon"] = {"anyOf": [widget_props["icon"], title_bar_node["properties"]["icon"]],
@@ -411,7 +427,11 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                  "then": {"$ref": "#/definitions/title_bar"}},
                 {"if": {"required": ["kind"], "properties": {"kind": {"const": "Window"}}},
                  "then": {"$ref": "#/definitions/window_node"}},
-                {"if": {"required": ["kind"], "properties": {"kind": {"not": {"enum": ["TitleBar", "Window"]}}}},
+                {"if": {"required": ["kind"], "properties": {"kind": {"const": "Dock"}}},
+                 "then": {"$ref": "#/definitions/dock_node"}},
+                {"if": {"required": ["kind"], "properties": {"kind": {"const": "DockPanel"}}},
+                 "then": {"$ref": "#/definitions/dock_panel_node"}},
+                {"if": {"required": ["kind"], "properties": {"kind": {"not": {"enum": ["TitleBar", "Window", "Dock", "DockPanel"]}}}},
                  "then": {"$ref": "#/definitions/widget"}},
             ]}
     color = {"anyOf": [{"enum": roles}, {"type": "string"}],
@@ -433,7 +453,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     extra = {"parameter": param, "conditional": conditional} if fragment else {}
     return {**extra, "color": color, "fill": fill, "style": style, "text": text, "handlers": handlers, "a11y": a11y_schema,
             "widget": widget, "title_bar": title_bar_node, "component_call": component_call, "include": include_node,
-            "view_node": view_node, "window_node": window_node,
+            "view_node": view_node, "window_node": window_node, "dock_node": dock_node, "dock_panel_node": dock_panel_node,
             "node": node}
 
 

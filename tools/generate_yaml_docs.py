@@ -45,7 +45,10 @@ KINDS = (
     ("TimePickerDial", "MD3's time picker dial.", "`hour:`, `minute:`"),
     ("NodeGraph", "A pannable canvas of `GraphNode`s joined by edges.", "`edges:`, children that are `GraphNode`s"),
     ("GraphNode", "A node in a `NodeGraph`: a titled box at a place.", "`label:`, `x:`, `y:`"),
-    ("TitleBar", "The window's own title bar: an icon, a title, your content and the window's buttons. Needs `App(decorations=False)`.", "`title:`, `icon:`, `buttons:`"),
+    ("TitleBar", "A title bar: an icon, a title, your content and the window's buttons (`App(borderless=True)`), or a close button for a dialog or a sheet (`buttons: [dismiss]`).", "`title:`, `icon:`, `buttons:`"),
+    ("Window", "The root of a view that is the whole OS window: its title, `borderless`, a `title_bar:`, and the content under it.", "`title:`, `borderless:`, `min_width:`, `min_height:`, `title_bar:`"),
+    ("Dock", "Panels docked in zones (left, right, top, bottom, center) around the middle, with handles to resize them. One per window.", "`DockPanel` children"),
+    ("DockPanel", "A panel in a Dock, in the zone its `style: {zone: ...}` names; panels in one zone are its tabs. Inside another DockPanel it is a split of it.", "`title:`, `style: {zone}`"),
 )
 
 
@@ -279,6 +282,15 @@ def render() -> str:
             "window's title bar when the window is `borderless`; its `children` are the content under it; `style:`'s `width` and "
             "`height` are the window's size and its `background` the window's.", ""]
     out += _block(view, view.resolve(view.defs["window_node"]), "window")
+    out += ["## The dock", "",
+            "`kind: Dock` holds `kind: DockPanel`s; each says which zone it is in with `style: {zone: left|right|top|bottom|center}`. "
+            "Panels in one zone are its tabs (titled by `title:`), which the user can drag to another zone; the size of a left or "
+            "right zone is its panel's `width`, a top or bottom one's its `height`, and a handle between a zone and the middle "
+            "resizes it. A `DockPanel` inside a `DockPanel` is a split of it, side by side (`flex_direction: horizontal`, the "
+            "default) or top and bottom (`vertical`), with a handle between them. A panel has splits or content, not both. "
+            "From Python, `view.dock_host(\"dock\")` has `layout()`, `restore(layout)`, `size(side)` and `set_size(side, size)`.", ""]
+    out += _block(view, view.resolve(view.defs["dock_node"]), "dock")
+    out += _block(view, view.resolve(view.defs["dock_panel_node"]), "dock panel")
     out += ["## Embedded views", "",
             "`view: Left_View.yaml` shows another view in place (or a name found in the project: `view: Left`). It is a view of its own, "
             "so its ids don't clash with this one's, and it has its own ViewModel when `Left_ViewModel.py` is beside it or in the project; "

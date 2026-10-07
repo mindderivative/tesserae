@@ -243,6 +243,7 @@ A built view. `spec` is an expanded view spec (from `tesserae.spec.build_view_sp
 
 - `click(node: Any) -> None`: A synthetic click on `node`, for tests: `window.simulate`.
 - `control(widget_id: str) -> Any`: The MD3 control (`tesserae.controls`) behind `widget_id`, one of the eight control kinds; its `.node` is `node(widget_id)`.
+- `dock_host(node_id: str) -> Any`: The `DockHost` of the `kind: Dock` node `node_id`: its `dock`, `size`, `set_size`, `layout` and `restore`.
 - `embedded(node_id: str) -> 'Component'`: The view the `view:` node `node_id` embeds.
 - `instantiate(path: Any, into: Any, spec: Optional[dict[str, Any]] = None, frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> 'Component'`: Builds a component -- a view of its own, with its own ViewModel -- under `into`, a node of this view, in this view's window.
 - `interaction(widget_id: str) -> Optional[Interaction]`: The state layer and ripple on `widget_id`'s node, or `None` when it has none.
@@ -1989,11 +1990,13 @@ The docking of one window (see the module doc). `add_zone(side, size)` returns t
 
 - `add_panel(side: str, panel: Any, title: str) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone, titled `title` on its tab, and shows it.
 - `add_zone(side: str, size: float) -> Any`: Creates `side`'s zone -- a tab strip over the area that shows its selected panel -- `size` px wide (left, right) or tall (top, bottom), or filling what's left (center).
+- `dispose() -> None`: Stops the dock: its window events, its tabs' listeners.
 - `move(panel: Any, side: str) -> None`: Moves `panel` to `side`'s zone and shows it there, as a drag would, moving it between zones.
 - `on_move(fn: Callable[[Any, str], Any]) -> Callable[[], None]`: Calls `fn(node, side)` when a panel moves zone.
 - `panel(title: str) -> Optional[Any]`: The docked panel titled `title`, or `None` (for `AppShell.restore`).
 - `panels(side: str) -> list[Any]`: `side`'s panels, in their tabs' order.
 - `remove_panel(panel: Any) -> Any`: Undocks `panel`: its tab goes, and if it was shown the zone shows the next panel, else the previous.
+- `rename(panel: Any, title: str) -> None`: Gives `panel` a new title, on its tab.
 - `set_theme(theme: Theme) -> None`: Re-colours the zones, tabs and highlight for `theme`, at once.
 - `show(panel: Any) -> None`: Shows `panel` in its zone.
 - `shown(side: str) -> Optional[Any]`: The panel `side`'s zone is showing, or `None` if it has none.

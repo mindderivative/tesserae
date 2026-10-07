@@ -60,6 +60,7 @@ _NODE_KEYS = frozenset({
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
+    "dock", "dock_panel", "split_handle",  # a Dock, a DockPanel and the handle between split panels, made containers (0.4.4)
     "min", "max", "step",  # a SpinBox's (M58)
     "disabled",  # any node's (M70): the View applies it, or a control's own
     "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not
@@ -248,6 +249,8 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built, parent_id: Optiona
         raise SpecBuildError(f"widget {_q(node_id)}: unknown field(s) {sorted(unknown)}"
                              + _did_you_mean(unknown, _NODE_KEYS))
     style = resolve_style(node, ctx.layers)
+    if "zone" in style and "dock_panel" not in node:
+        raise SpecBuildError(f"widget {_q(node_id)}: style.zone is for a DockPanel in a Dock")
     _check_interaction(node)
     _a11y_fields(node)
     engine = _engine(node_id, style, ctx.parent)  # first: it says what replaces an engine name
