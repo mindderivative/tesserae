@@ -2153,6 +2153,22 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.4.3.3 released (#94)
+
+User: "tre 0.5.5 should be released and ready for implementation on your end", "approved, push and release 0.4.3.3",
+"approved, check PyPI". (Before it: the window-resize investigation, with `tools/window_perf.py` pushed as `f9341e5`.)
+
+- The resize stalls found on KDE Wayland came from tre 0.5.4's vsync default (a `wp_fifo_v1` barrier on every commit: KWin then
+  held back the next configure for 0.1-1.1 s during an interactive resize, native and undecorated windows alike). tre 0.5.5
+  presents without the barrier while a window is being resized and restores vsync about 0.4 s later. The user confirmed by eye
+  on tre's local build that Tesserae's custom and native windows are smooth; Tesserae's code did not change.
+- Verified before touching anything: PyPI latest 0.5.5 (12 wheels + sdist), GitHub `v0.5.5` Latest, full suite on the real
+  PyPI 0.5.5 in a scratch venv (5185 passed). Then the floor `tesserae-engine>=0.5.5,<0.6`, CI and release checkouts at
+  `ref: v0.5.5`, README, migration, changelog, `tests/test_dependencies.py`, and the dev venv.
+- Released: 5185 tests passed, CI green on all platforms; `tesserae-ui` 0.4.3.3 is on PyPI. From that install in a clean venv:
+  it requires `tesserae-engine>=0.5.5` and pulled 0.5.5, and a native window and an undecorated one (resize border 6) both
+  drew a gradient. `v0.4.3.3` is a pre-release.
+
 ## Tesserae 0.4.3.2 released (#93)
 
 User: "TextField dark mode text is a dark color ... that makes it a bug. Please look into this", "as part of 0.4.3.2 I
