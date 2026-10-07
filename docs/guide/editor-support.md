@@ -12,6 +12,7 @@ what each one means, and underlines a mistake such as `foregorund`.
 | `tesserae-yaml-schema.json` | a view, `*_View.yaml` |
 | `tesserae-shell-schema.json` | an app shell, `*_Shell.yaml` |
 | `tesserae-component-schema.json` | a component fragment, `*_Component.yaml` |
+| `tesserae-style-schema.json` | a style file, `*_Style.yaml` |
 | `tesserae-theme-schema.json` | a theme, a stylesheet, or a component's stylesheet (`<Name>_Stylesheet.yaml`) |
 
 They are JSON Schema draft-07, which Red Hat's server supports, and they

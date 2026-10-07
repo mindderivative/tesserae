@@ -122,3 +122,37 @@ def test_each_loader_refuses_another_kinds_name(tmp_path, loader, name, message)
 def test_names_without_a_convention_still_load(tmp_path):
     assert load_theme(_write(tmp_path / "themes" / "Brand.yaml", {"seed": "#6750A4"}))["seed"] == "#6750A4"
     assert load_stylesheet(_write(tmp_path / "styles" / "Default.yaml", {"styles": []})) == {"styles": []}
+
+
+# -- 0.4.3.1 (#92): `style:` over the fields, and an `id:` --------------------------------------
+
+def test_a_style_file_can_say_what_it_is(tmp_path):
+    _write(tmp_path / "counter_Style.yaml", {"id": "counter_style", "style": COUNTER})
+    view_file = _write(tmp_path / "Counter_View.yaml", {"id": "root", "kind": "Container", "style": "counter_Style.yaml"})
+    spec, _, _ = build_view_spec(view_file)
+    assert spec["style"] == COUNTER  # the fields, with no `id` or `style` in them
+
+
+def test_the_id_is_optional_and_the_bare_form_still_works(tmp_path):
+    _write(tmp_path / "a_Style.yaml", {"style": COUNTER})
+    _write(tmp_path / "b_Style.yaml", COUNTER)
+    for name in ("a_Style.yaml", "b_Style.yaml"):
+        view_file = _write(tmp_path / "V_View.yaml", {"id": "root", "kind": "Container", "style": name})
+        assert build_view_spec(view_file)[0]["style"] == COUNTER
+
+
+@pytest.mark.parametrize("body, message", [
+    ({"id": 3, "style": {"gap": 1}}, "id must be a string"),
+    ({"id": "x", "style": ["gap"]}, "`style:` holds a mapping of style fields"),
+])
+def test_a_badly_formed_style_file_is_refused(tmp_path, body, message):
+    _write(tmp_path / "bad_Style.yaml", body)
+    view_file = _write(tmp_path / "V_View.yaml", {"id": "root", "kind": "Container", "style": "bad_Style.yaml"})
+    with pytest.raises(ComponentError, match=message):
+        build_view_spec(view_file)
+
+
+def test_a_rule_can_name_the_wrapped_form(tmp_path):
+    _write(tmp_path / "card_Style.yaml", {"id": "card_style", "style": {"corner_radius": 12}})
+    sheet = _write(tmp_path / "Page_Stylesheet.yaml", {"styles": [{"kind": "Rect", "style": "card_Style.yaml"}]})
+    assert load_stylesheet(sheet)["styles"][0]["style"] == {"corner_radius": 12}

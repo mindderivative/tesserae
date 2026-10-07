@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.3.1 (unreleased)
+
+Style files ([#92](https://github.com/mindderivative/tesserae/issues/92)).
+
+### Changed
+
+- **A `*_Style.yaml` says what it is.** Its fields go under a `style:` key, with an optional `id:` naming the style,
+  like the style in a view: `{id: row_style, style: {flex_direction: horizontal, gap: 8}}`. A file that is only the
+  fields still works, so nothing has to change.
+
+### Added
+
+- **`tesserae-style-schema.json`**, a schema for `*_Style.yaml` (`tesserae schema` lists it, `--settings` maps it), so
+  an editor checks a style file and says what each field is. The tutorials' `row_Style.yaml` use the new form.
+
 ## 0.4.3
 
 Documentation ([#91](https://github.com/mindderivative/tesserae/issues/91)).

@@ -1,0 +1,696 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindderivative.github.io/tesserae/schema/tesserae-style-schema.json",
+  "title": "Tesserae style file",
+  "description": "A style file, `*_Style.yaml`: one node's style, shared by the views and rules that name it (`style: row_Style.yaml`).",
+  "definitions": {
+    "color": {
+      "anyOf": [
+        {
+          "enum": [
+            "background",
+            "error",
+            "error_container",
+            "inverse_on_surface",
+            "inverse_primary",
+            "inverse_surface",
+            "on_background",
+            "on_error",
+            "on_error_container",
+            "on_primary",
+            "on_primary_container",
+            "on_primary_fixed",
+            "on_primary_fixed_variant",
+            "on_secondary",
+            "on_secondary_container",
+            "on_secondary_fixed",
+            "on_secondary_fixed_variant",
+            "on_surface",
+            "on_surface_variant",
+            "on_tertiary",
+            "on_tertiary_container",
+            "on_tertiary_fixed",
+            "on_tertiary_fixed_variant",
+            "outline",
+            "outline_variant",
+            "primary",
+            "primary_container",
+            "primary_fixed",
+            "primary_fixed_dim",
+            "scrim",
+            "secondary",
+            "secondary_container",
+            "secondary_fixed",
+            "secondary_fixed_dim",
+            "shadow",
+            "surface",
+            "surface_bright",
+            "surface_container",
+            "surface_container_high",
+            "surface_container_highest",
+            "surface_container_low",
+            "surface_container_lowest",
+            "surface_dim",
+            "surface_tint",
+            "surface_variant",
+            "tertiary",
+            "tertiary_container",
+            "tertiary_fixed",
+            "tertiary_fixed_dim"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`."
+    },
+    "fill": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/color"
+        },
+        {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*(linear|radial|conic)-gradient\\("
+            },
+            {
+              "type": "object",
+              "required": [
+                "gradient",
+                "stops"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "gradient": {
+                  "enum": [
+                    "linear",
+                    "radial",
+                    "sweep"
+                  ]
+                },
+                "stops": {
+                  "type": "array",
+                  "minItems": 2,
+                  "description": "Colours, or `[place, colour]` pairs with places from 0 to 1."
+                },
+                "angle": {
+                  "type": "number",
+                  "description": "Degrees: 0 up, 90 right, 180 down."
+                },
+                "center": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "`[x, y]`, as fractions of the box."
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "start": {
+                  "type": "number"
+                }
+              }
+            }
+          ],
+          "description": "A CSS-like `linear-gradient(...)`, `radial-gradient(...)` or `conic-gradient(...)` whose stops are theme roles or colours, or a mapping with `gradient: linear|radial|sweep` and `stops`."
+        }
+      ],
+      "description": "A colour (a theme role, a hex or a CSS colour) or a gradient."
+    },
+    "style": {
+      "type": "object",
+      "description": "How a node looks and lays out its children.",
+      "properties": {
+        "align_cells": {
+          "enum": [
+            "top_left",
+            "top",
+            "top_right",
+            "left",
+            "center",
+            "right",
+            "bottom_left",
+            "bottom",
+            "bottom_right"
+          ],
+          "description": "In a grid: where each item sits in its cell."
+        },
+        "align_content": {
+          "enum": [
+            "top_left",
+            "top",
+            "top_right",
+            "left",
+            "center",
+            "right",
+            "bottom_left",
+            "bottom",
+            "bottom_right"
+          ],
+          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout."
+        },
+        "align_self": {
+          "enum": [
+            "top_left",
+            "top",
+            "top_right",
+            "left",
+            "center",
+            "right",
+            "bottom_left",
+            "bottom",
+            "bottom_right"
+          ],
+          "description": "Its own place in its parent, over the parent's `align_content`."
+        },
+        "align_tracks": {
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch",
+            "between",
+            "around",
+            "evenly"
+          ],
+          "description": "In a grid: how the tracks share the room left over."
+        },
+        "align_wrapped": {
+          "enum": [
+            "start",
+            "center",
+            "end",
+            "stretch",
+            "between",
+            "around",
+            "evenly"
+          ],
+          "description": "With `flex_wrap: wrap`: how the lines share the room left over."
+        },
+        "aspect_ratio": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Width over height: gives the missing side from the one set."
+        },
+        "backdrop_blur": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface."
+        },
+        "background": {
+          "$ref": "#/definitions/fill",
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`."
+        },
+        "blend_mode": {
+          "enum": [
+            "normal",
+            "multiply",
+            "screen",
+            "overlay",
+            "darken",
+            "lighten",
+            "color_dodge",
+            "color_burn",
+            "hard_light",
+            "soft_light",
+            "difference",
+            "exclusion",
+            "hue",
+            "saturation",
+            "color",
+            "luminosity"
+          ],
+          "description": "How it is drawn over what is behind it, as CSS `mix-blend-mode`."
+        },
+        "blur": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Blurs the node and what it draws, by this many pixels."
+        },
+        "border_color": {
+          "$ref": "#/definitions/fill",
+          "description": "The colour of its border: a colour or a gradient."
+        },
+        "border_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The width of its border, in pixels."
+        },
+        "clip_children": {
+          "type": "boolean",
+          "description": "Whether children are cut off at its edge."
+        },
+        "column_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between columns (defaults to `gap`)."
+        },
+        "corner_radius": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "extra_large",
+                "extra_small",
+                "large",
+                "medium",
+                "none",
+                "small"
+              ]
+            }
+          ],
+          "description": "Pixels, or a shape token (`none` to `extra_large`)."
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "enum": [
+                "default",
+                "pointer",
+                "text",
+                "grab",
+                "grabbing",
+                "move",
+                "not_allowed",
+                "wait",
+                "progress",
+                "crosshair",
+                "help",
+                "col_resize",
+                "row_resize",
+                "ew_resize",
+                "ns_resize",
+                "nesw_resize",
+                "nwse_resize",
+                "copy",
+                "cell",
+                "context_menu",
+                "zoom_in",
+                "zoom_out",
+                "all_scroll"
+              ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "src"
+              ],
+              "properties": {
+                "src": {
+                  "type": "string",
+                  "description": "A PNG (or any picture Pillow reads) next to the view."
+                },
+                "hotspot": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  },
+                  "description": "`[x, y]`: the pixel that is the pointer's place."
+                }
+              }
+            }
+          ],
+          "description": "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`)."
+        },
+        "display": {
+          "enum": [
+            "flex",
+            "grid"
+          ],
+          "description": "`flex` (the default) or `grid`."
+        },
+        "elevation": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "level_0",
+                "level_1",
+                "level_2",
+                "level_3",
+                "level_4",
+                "level_5"
+              ]
+            }
+          ],
+          "description": "A shadow level, 0 to 5."
+        },
+        "filter": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "saturate": {
+              "type": "number",
+              "description": "1 is unchanged, 0 grey, above 1 more vivid."
+            },
+            "brightness": {
+              "type": "number",
+              "description": "1 is unchanged, 0 black, above 1 brighter."
+            },
+            "contrast": {
+              "type": "number",
+              "description": "1 is unchanged, 0 flat grey, above 1 harder."
+            },
+            "grayscale": {
+              "type": "number",
+              "description": "0 is unchanged, 1 fully grey."
+            },
+            "hue_rotate": {
+              "type": "number",
+              "description": "Turns the hues, in degrees."
+            },
+            "invert": {
+              "type": "number",
+              "description": "0 is unchanged, 1 inverted."
+            },
+            "sepia": {
+              "type": "number",
+              "description": "0 is unchanged, 1 fully sepia."
+            }
+          },
+          "description": "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees)."
+        },
+        "flex": {
+          "enum": [
+            "none",
+            "expand_horizontal",
+            "expand_vertical",
+            "fill"
+          ],
+          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both."
+        },
+        "flex_direction": {
+          "enum": [
+            "horizontal",
+            "vertical"
+          ],
+          "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
+        },
+        "flex_wrap": {
+          "enum": [
+            "no_wrap",
+            "wrap"
+          ],
+          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one."
+        },
+        "foreground": {
+          "$ref": "#/definitions/fill",
+          "description": "Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient."
+        },
+        "gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between its children."
+        },
+        "grid_auto_columns": {
+          "type": "string",
+          "description": "The size of columns the template doesn't name."
+        },
+        "grid_auto_flow": {
+          "enum": [
+            "row",
+            "column",
+            "row dense",
+            "column dense",
+            "dense"
+          ],
+          "description": "How grid children fill the cells."
+        },
+        "grid_auto_rows": {
+          "type": "string",
+          "description": "The size of rows the template doesn't name."
+        },
+        "grid_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid column it takes: `2`, or `1 / 3`."
+        },
+        "grid_row": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "description": "Which grid row it takes: `2`, or `1 / 3`."
+        },
+        "grid_template_columns": {
+          "type": "string",
+          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`."
+        },
+        "grid_template_rows": {
+          "type": "string",
+          "description": "The grid's rows, as in CSS."
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+        },
+        "margin": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space outside it: one number, or `{left, right, top, bottom}`."
+        },
+        "max_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most height it can take."
+        },
+        "max_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The most width it can take."
+        },
+        "min_height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least height it can take."
+        },
+        "min_width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "The least width it can take."
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "From 0 (clear) to 1 (opaque)."
+        },
+        "padding": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "top": {
+                  "type": "number"
+                },
+                "right": {
+                  "type": "number"
+                },
+                "bottom": {
+                  "type": "number"
+                },
+                "left": {
+                  "type": "number"
+                }
+              },
+              "additionalProperties": false
+            }
+          ],
+          "description": "Space inside it: one number, or `{left, right, top, bottom}`."
+        },
+        "position": {
+          "enum": [
+            "relative",
+            "absolute"
+          ],
+          "description": "`absolute` takes it out of the flow and places it at `x` and `y`."
+        },
+        "row_gap": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Space between rows (defaults to `gap`)."
+        },
+        "spread": {
+          "enum": [
+            "none",
+            "between",
+            "around",
+            "evenly"
+          ],
+          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`."
+        },
+        "sticky": {
+          "type": "number",
+          "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^-?\\d+(\\.\\d+)?%$"
+            }
+          ],
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the left."
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "enum": [
+                "auto"
+              ]
+            }
+          ],
+          "description": "Where an `absolute` node sits from the top."
+        },
+        "z_index": {
+          "type": "integer",
+          "description": "Stacking order: higher is in front."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "style"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "A name for the style, such as `row_style`. It is for the reader."
+    },
+    "style": {
+      "$ref": "#/definitions/style",
+      "description": "The style fields, as in a node's `style:`."
+    }
+  }
+}

@@ -329,6 +329,13 @@ def _style_from_file(owner: str, path: Any, base_dir: Path | None, visited: list
     if not isinstance(style, dict):
         raise ComponentError(f"{owner}: {path}: a style file holds a mapping of style fields, "
                              f"got {type(style).__name__}")
+    if "style" in style and set(style) <= {"id", "style"}:  # `style:` over the fields, and an optional `id:`
+        if "id" in style and not isinstance(style["id"], str):
+            raise ComponentError(f"{owner}: {path}: id must be a string, got {style['id']!r}")
+        style = style["style"]
+        if not isinstance(style, dict):
+            raise ComponentError(f"{owner}: {path}: `style:` holds a mapping of style fields, "
+                                 f"got {type(style).__name__}")
     return style
 
 

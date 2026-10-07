@@ -238,11 +238,17 @@ style: counter_Style.yaml   # or {flex_direction: vertical, width: 240, gap: 12}
 ```
 
 ```yaml
-# counter_Style.yaml: one node's style, a mapping of style fields
-flex_direction: vertical
-width: 240
-gap: 12
+# counter_Style.yaml: one node's style
+id: counter_style      # a name for the style, for the reader (optional)
+style:
+  flex_direction: vertical
+  width: 240
+  gap: 12
 ```
+
+The fields go under `style:`, as they do in a view, and `id:` is a name for the style that Tesserae doesn't use. A
+file that is only the fields, with no `style:` above them, is read as well. An editor with the
+[style schema](../guide/editor-support.md) checks the file and says what each field is.
 
 The file is found next to the file that names it, and can't be outside that folder (the same rules as
 `include:`). Hot reload watches it. It is the whole style: a node's `style:` is a file or a mapping, not

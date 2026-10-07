@@ -7,6 +7,7 @@ Four JSON Schema draft-07 files, each for one kind of file Tesserae reads:
 - `tesserae-shell-schema.json`      an app shell, `*_Shell.yaml`
 - `tesserae-theme-schema.json`      a theme or a stylesheet
 - `tesserae-component-schema.json`  a component fragment, `*_Component.yaml`
+- `tesserae-style-schema.json`      one node's style, `*_Style.yaml`
 
 They are built from Tesserae's own code, so a new kind, style field or
 token can't be left out by accident: the kinds, node keys, style fields, the
@@ -474,6 +475,16 @@ def _theme() -> dict[str, Any]:
                      "styles": {"type": "array", "items": {"$ref": "#/definitions/rule"}, "description": "Style rules, in order."}}})
 
 
+def _style_file() -> dict[str, Any]:
+    defs = _only(_definitions(fragment=False), "style", "color", "fill")
+    return _root("tesserae-style-schema.json", "Tesserae style file",
+                 "A style file, `*_Style.yaml`: one node's style, shared by the views and rules that name it "
+                 "(`style: row_Style.yaml`).",
+                 defs, {"type": "object", "required": ["style"], "additionalProperties": False, "properties": {
+                     "id": {"type": "string", "description": "A name for the style, such as `row_style`. It is for the reader."},
+                     "style": {"$ref": "#/definitions/style", "description": "The style fields, as in a node's `style:`."}}})
+
+
 def _shell() -> dict[str, Any]:
     from tesserae import icons, shell_file
 
@@ -527,7 +538,8 @@ def _shell() -> dict[str, Any]:
 
 def schemas() -> dict[str, dict[str, Any]]:
     return {"tesserae-yaml-schema.json": _view(), "tesserae-shell-schema.json": _shell(),
-            "tesserae-theme-schema.json": _theme(), "tesserae-component-schema.json": _component()}
+            "tesserae-theme-schema.json": _theme(), "tesserae-component-schema.json": _component(),
+            "tesserae-style-schema.json": _style_file()}
 
 
 def render(schema: dict[str, Any]) -> str:

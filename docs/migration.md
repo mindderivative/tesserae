@@ -3,6 +3,11 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.3.1
+
+Nothing has to change. A `*_Style.yaml` is written with its fields under `style:` now, and an `id:` if you like, and the
+style files you have, which are only the fields, still load. [Style files](themes/index.md#style-files) has the form.
+
 ## To 0.4.2
 
 Tesserae needs `tre` (`tesserae-engine`) 0.5.4 or newer, below 0.6: `pip install --upgrade tesserae-ui` brings it.

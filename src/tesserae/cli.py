@@ -36,6 +36,7 @@ SCHEMA_FILES = {
     "tesserae-yaml-schema.json": ["**/*_View.yaml"],
     "tesserae-shell-schema.json": ["**/*_Shell.yaml"],
     "tesserae-component-schema.json": ["**/*_Component.yaml"],
+    "tesserae-style-schema.json": ["**/*_Style.yaml"],
     # Themes and stylesheets (and a component's stylesheet): the suffixes, and a guess at other names.
     "tesserae-theme-schema.json": ["**/*_Theme.yaml", "**/*_Stylesheet.yaml", "**/*theme*.yaml", "**/*stylesheet*.yaml",
                                    "!**/*_View.yaml", "!**/*_Shell.yaml", "!**/*_Component.yaml"],

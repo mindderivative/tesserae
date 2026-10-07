@@ -125,7 +125,7 @@ children: <a list>
 
 ## The style
 
-A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` file. The same fields go in a stylesheet's or theme's rules, and in a shell file's parts.
+A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` file, which holds them under a `style:` key (and an optional `id:` naming it): `{id: row_style, style: {gap: 8}}`. The same fields go in a stylesheet's or theme's rules, and in a shell file's parts.
 
 | Field | Values | What it does |
 | --- | --- | --- |

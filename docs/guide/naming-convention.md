@@ -26,7 +26,7 @@ Three more names say what a YAML file is:
 
 | Suffix | What it holds | Used by |
 |---|---|---|
-| `*_Style.yaml` | one node's style: a mapping of style fields | a node's `style:`, a stylesheet or theme rule's `style:` |
+| `*_Style.yaml` | one node's style: `style:` over a mapping of style fields, and an optional `id:` | a node's `style:`, a stylesheet or theme rule's `style:` |
 | `*_Stylesheet.yaml` | a stylesheet: a `styles:` list of rules | `App(stylesheet=)`, `app.load(..., stylesheet=)`, `load_stylesheet` |
 | `*_Theme.yaml` | a theme: `seed:`, `colors:`, `styles:`, ... | `App(default_theme=, custom_theme=)`, `load_theme` |
 

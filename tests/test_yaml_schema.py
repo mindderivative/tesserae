@@ -20,7 +20,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS = ROOT / "src" / "tesserae" / "schema"
 SITE = ROOT / "docs" / "schema"
 NAMES = {"view": "tesserae-yaml-schema.json", "shell": "tesserae-shell-schema.json",
-         "theme": "tesserae-theme-schema.json", "component": "tesserae-component-schema.json"}
+         "theme": "tesserae-theme-schema.json", "component": "tesserae-component-schema.json",
+         "style": "tesserae-style-schema.json"}
 
 
 def _schema(kind: str) -> dict:
@@ -46,6 +47,8 @@ def _kind_of(path: Path, data) -> str | None:
         return "shell"
     if name.endswith("_Component.yaml"):
         return "component"
+    if name.endswith("_Style.yaml") and isinstance(data, dict) and "style" in data:
+        return "style"
     if isinstance(data, dict) and "kind" not in data and {"styles", "colors", "seed", "typography", "components"} & set(data):
         return "theme"
     return None
