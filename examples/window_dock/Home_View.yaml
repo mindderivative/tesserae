@@ -1,0 +1,13 @@
+# The Home screen: a static view (it has no ViewModel), a routed `view:` in Window_View.yaml.
+id: root
+kind: Container
+style: {flex_direction: vertical, gap: 12, padding: 24}
+children:
+  - id: title
+    kind: Text
+    text: {content: "Welcome", typography_role: headline_small}
+    style: {foreground: on_surface}
+  - id: body
+    kind: Text
+    text: {content: "Drag a tab to another zone, or a handle to resize one.", typography_role: body_medium}
+    style: {foreground: on_surface_variant}

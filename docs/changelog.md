@@ -39,6 +39,9 @@ A window, a dock and embedded views in the same YAML as every other view ([#95](
 - **Style fields in sections**: the YAML reference's style table, and the schema (an `x-group` on each field, and the group in its
   description, so autocomplete shows it), put each field in one of Size and spacing, Flex, Alignment, Grid, Position, Docking, and
   Paint and effects. Files stay flat. `tesserae.spec.cascade.STYLE_GROUPS` lists them, and a test keeps every field in one.
+- **`examples/window_dock/`**: the studio of `examples/app_shell_file/` written as one `Window_View.yaml` (title bar, rail, a dock of
+  `view:` panels, routed screens, status bar), with no widgets made in Python. It checks itself, and the tests read what it
+  draws back from the window's snapshot.
 - A guide page, [Windows, Docks & Embedded Views](guide/windows-and-docks.md), and component pages for Window, Title bar, Dock,
   Dock panel and Routed views.
 - **`view:`** shows another `*_View.yaml` where it is: `- {id: left, view: Left_View.yaml, with: {size: 3}, style: {width: 220}}`

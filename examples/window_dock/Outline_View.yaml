@@ -1,0 +1,7 @@
+# The Outline panel: a view named like a screen, shown by the Dock in Window_View.yaml.
+id: root
+kind: Container
+style: {flex_direction: vertical, gap: 8, padding: 16}
+children:
+  - {id: line0, kind: Text, text: {content: "Home", typography_role: body_medium}, style: {foreground: on_surface}}
+  - {id: line1, kind: Text, text: {content: "Notes", typography_role: body_medium}, style: {foreground: on_surface}}

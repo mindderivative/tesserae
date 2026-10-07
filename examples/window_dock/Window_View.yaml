@@ -1,0 +1,60 @@
+# The whole window: its title bar, a rail, a dock of panels around the screens, and a status bar.
+# Edit it while the app runs with hot_reload=True: the title, sizes and panels change in place, and a panel the user
+# moved stays where they put it.
+id: root
+kind: Window
+title: Tesserae Studio
+borderless: true
+min_width: 640
+min_height: 400
+style: {width: 1100, height: 700, background: surface, flex_direction: vertical}
+title_bar: {title: Tesserae Studio, icon: home, buttons: [minimize, maximize, close]}
+children:
+  - id: body
+    kind: Container
+    style: {flex: fill, flex_direction: horizontal}
+    children:
+      - id: nav
+        component: NavigationRailScreens
+        with:
+          items:
+            - {label: Home, icon: home, screen: Home}
+            - {label: Notes, icon: search, screen: Notes}
+      - id: dock
+        kind: Dock
+        style: {flex: fill}
+        children:
+          - id: files
+            kind: DockPanel
+            title: Files
+            style: {zone: left, width: 220}
+            children:
+              - {id: files_view, view: Files_View.yaml}
+          - id: outline
+            kind: DockPanel
+            title: Outline
+            style: {zone: left}
+            children:
+              - {id: outline_view, view: Outline_View.yaml}
+          - id: properties
+            kind: DockPanel
+            title: Properties
+            style: {zone: right, width: 260}
+            children:
+              - {id: properties_view, view: Properties_View.yaml}
+          - id: console
+            kind: DockPanel
+            title: Console
+            style: {zone: bottom, height: 160}
+            children:
+              - {id: console_view, view: Console_View.yaml}
+          - id: screens
+            kind: DockPanel
+            title: Screens
+            style: {zone: center}
+            children:
+              - {id: home, view: Home_View.yaml, route: "", style: {flex: fill}}
+              - {id: notes, view: Notes_View.yaml, route: notes, style: {flex: fill}}
+  - id: status
+    component: StatusBar
+    with: {text: Ready, width: "100%"}

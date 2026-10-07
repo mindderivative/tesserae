@@ -12,7 +12,8 @@ screens inside it, each a view of its own. This replaces the shell file (`*_Shel
 | Screens you navigate between | [`view:` with `route:`](#routed-views) |
 | Panels around the content, in tabs, that the user can drag | [`kind: Dock`](#docks) with `kind: DockPanel` |
 
-`tesserae new notes --window` makes a project with all of it.
+`tesserae new notes --window` makes a project with a window, a rail and routed screens, and `examples/window_dock/` in the repository
+is a studio with all of it: a title bar, a rail, docked panels, routed screens and a status bar, in one `Window_View.yaml`.
 
 ## The window
 
