@@ -235,6 +235,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
             "additionalProperties": False}
     window_actions = ", ".join("`window." + action + "`" for action in view_module.WINDOW_ACTIONS)
     window_actions += ", " + ", ".join("`surface." + action + "`" for action in view_module.SURFACE_ACTIONS)
+    window_actions += ", `navigate.<Screen>`, " + ", ".join("`navigate." + t + "`" for t in view_module.NAVIGATE_TARGETS)
     handlers = {"type": "object", "description": "What a user's action calls: the name of a ViewModel method, or `window.<action>`.",
                 "properties": {name: {"type": "string",
                                       "description": f"Runs on `{event}`: a ViewModel method name, or one of {window_actions}."}

@@ -89,6 +89,8 @@ _COLOR_PROPS = {"background": "fill", "foreground": "fill", "border_color": "str
 WINDOW_ACTIONS = ("minimize", "maximize", "restore", "toggle_maximized", "close")
 #: What a handler can name as `surface.<action>` (0.4.4): the surface the node is in -- a dialog or a sheet -- not the window.
 SURFACE_ACTIONS = ("dismiss",)
+#: `navigate.<Screen>` goes to a screen (a step it can go back from), `navigate.back` and `navigate.forward` move in the history.
+NAVIGATE_TARGETS = ("back", "forward")
 #: How far a disabled node fades (M70): MD3's disabled content opacity.
 DISABLED_OPACITY = 0.38
 _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius", "border_width", "elevation"}
@@ -330,7 +332,15 @@ class View:
                 if isinstance(exc, FileNotFoundError):
                     raise
                 raise ValueError(f'widget "{node_id}": {exc}') from exc
+            if "route" in request:  # a screen: shown only while its route is current
+                if self._spec.get("window") is None:
+                    component.remove()
+                    raise ValueError(f'widget "{node_id}": a `route:` is for a view in the window view (`kind: Window`)')
+                self._built.nodes[node_id].set(visible=False)  # until its route is current
             self._embedded[node_id] = (component, viewmodel, copy.deepcopy(request))
+        frame = getattr(app_of(self.window), "_frame", None)
+        if frame is not None and frame.view is self:
+            frame.sync()
 
     def _prune_components(self) -> None:
         """Forgets the components whose nodes a reload destroyed (their
@@ -669,6 +679,8 @@ class View:
             method = self._window_action(node_id, event, method_name)
         elif method_name.startswith("surface."):
             method = self._surface_action(node_id, event, method_name, node_spec)
+        elif method_name.startswith("navigate."):
+            method = self._navigate_action(node_id, event, method_name)
         else:
             try:
                 method = getattr(self._viewmodel, method_name)
@@ -729,6 +741,29 @@ class View:
             dismiss_surface(self._built.nodes[node_id])
         return run
 
+    def _navigate_action(self, node_id: str, event: str, name: str) -> Callable[[], None]:
+        """`navigate.<Screen>`, `navigate.back`, `navigate.forward` (0.4.4): `app.navigate(Screen)`, `app.back()`,
+        `app.forward()`. The screen is looked up when it runs."""
+        target = name[len("navigate."):]
+        if not target:
+            raise ValueError(f'widget "{node_id}": handler "{event}" names "{name}": say where to, `navigate.Settings`, '
+                             "`navigate.back` or `navigate.forward`")
+        if app_of(self.window) is None:
+            raise ValueError(f'widget "{node_id}": handler "{event}" names "{name}", but this view isn\'t on an App\'s '
+                             "window, which navigating needs")
+
+        def run() -> None:
+            app = app_of(self.window)
+            if app is None:
+                return
+            if target == "back":
+                app.back()
+            elif target == "forward":
+                app.forward()
+            else:
+                app.navigate(target)
+        return run
+
     def _wire_actions(self) -> None:
         """A view with no ViewModel still has its `window.*` and `surface.*` handlers (a title bar's buttons), which need
         none: wires just those."""
@@ -740,7 +775,8 @@ class View:
                     continue
                 action = method_name.partition(".")[2]
                 if (method_name.startswith("window.") and has_app and action in WINDOW_ACTIONS) or (
-                        method_name.startswith("surface.") and action in SURFACE_ACTIONS):
+                        method_name.startswith("surface.") and action in SURFACE_ACTIONS) or (
+                        method_name.startswith("navigate.") and has_app and action):
                     self._wire_handler(node_spec, event, method_name)  # a wrong one is said when a ViewModel attaches
 
     def _add_listener(self, node: Any, event: str, fn: Callable[[Any], None]) -> None:
@@ -796,7 +832,7 @@ class View:
                     except (TypeError, ValueError) as exc:
                         raise ValueError(f"{where}: a frame is (rgba bytes, width, height): {exc}") from None
             else:
-                _apply(node, kind, prop, value)
+                _apply(node, kind, prop, value, self._scheme)
                 if measured:
                     _remeasure(self.window, node, style, kind)
                 if kind == "Link" and prop == "text" and "label" not in (node_spec.get("a11y") or {}):
@@ -1017,7 +1053,7 @@ def _apply_to_control(control: Any, kind: Optional[str], prop: str, value: Any) 
     state.set(fit(expected(value)) if fit is not None else expected(value))
 
 
-def _apply(node: Any, kind: Optional[str], prop: str, value: Any) -> None:
+def _apply(node: Any, kind: Optional[str], prop: str, value: Any, scheme: Optional[dict[str, Any]] = None) -> None:
     """Sets one bound value, with `tre`'s type rules and messages; an
     unchanged value isn't set again."""
     if prop in ("checked", "selected", "visible"):  # visible: out of layout and hit-testing (0.3.0 M3)
@@ -1043,7 +1079,7 @@ def _apply(node: Any, kind: Optional[str], prop: str, value: Any) -> None:
                               "stroke_width" if prop == "border_width" else prop)
     if isinstance(value, str) and not isinstance(value, Handle) and prop in _COLOR_PROPS:
         try:
-            rgba = tokens.parse_color(value)
+            rgba = scheme[value] if scheme and value in scheme else tokens.parse_color(value)  # a theme role, or a CSS colour
         except ValueError as exc:
             raise ValueError(f'binding for property "{prop}" resolved to {exc}') from None
         if node.get(target) != rgba:

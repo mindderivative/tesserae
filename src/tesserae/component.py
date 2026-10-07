@@ -95,7 +95,7 @@ def wired_nodes(spec: dict[str, Any]) -> list[str]:
     found: list[str] = []
 
     def walk(node: dict[str, Any]) -> None:
-        own = [h for h in (node.get("handlers") or {}).values() if not str(h).startswith(("window.", "surface."))]
+        own = [h for h in (node.get("handlers") or {}).values() if not str(h).startswith(("window.", "surface.", "navigate."))]
         if node.get("bindings") or own or node.get("two_way"):
             found.append(str(node.get("id")))
         for child in node.get("children") or []:

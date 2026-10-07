@@ -1,0 +1,9 @@
+# A navigation rail whose destinations go to screens of the app: a narrow column of `NavigationRailScreen`s.
+# Structure only: its look is in NavigationRailScreens_Stylesheet.yaml.
+params: [items]
+id: root
+kind: Container
+children:
+  - id: item
+    component: NavigationRailScreen
+    repeat: "{{ items }}"

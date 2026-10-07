@@ -372,6 +372,9 @@ class App:
         self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
         #: The window view (`kind: Window`) once one is loaded: its `Frame` (0.4.4)
         self._frame: Any = None
+        #: The screen showing, as a value a binding can read: `{{ app.current_screen.get() == 'Main' }}`.
+        self._screen_name = Signal(None)
+        self.current_screen = Computed(self._screen_name.get)
         self._shell_file: Path | None = None  # the `*_Shell.yaml` `load_shell` read (M52)
         self._shell_spec: Any = None  # ...its spec as last applied, and the viewmodel it was given
         self._shell_viewmodel: Any = None
@@ -899,6 +902,22 @@ class App:
         if view.root.parent() is None:
             self._window.root.add_child(view.root)
         self._current = name
+        self._screen_name.set(name)
+        self._frame.sync()
+
+    def _register_screen(self, name: str, view: Any, viewmodel: Any, route: str) -> None:
+        """A routed view of the window view is a screen: registered under `name`, and reached by `route`."""
+        if name in self._registered:
+            raise ValueError(f"a view named {name!r} is already registered: the routed view {name!r} can't be a second")
+        self._registered[name] = _Registered(view, viewmodel)
+        self.route(route, name)
+
+    def _unregister_screen(self, name: str) -> None:
+        self._registered.pop(name, None)
+        self._routes = [r for r in self._routes if r.name != name]
+        if self._current == name:
+            self._current = self._frame.name if self._frame is not None else None
+            self._screen_name.set(self._current)
 
     def _apply_window(self, options: dict[str, Any], *, resize: bool = True) -> None:
         """Sets the OS window from a window view's `window:` (title, borderless, min sizes and, loading, its size)."""
@@ -1056,7 +1075,7 @@ class App:
         root = registered.view.root
         if self._frame is not None:  # a window view: its routed views are the screens (0.4.4)
             if name != self._frame.name:
-                self._frame.show_screen(root, name, previous)
+                self._frame.show_screen(name, self._current if self._current not in (None, name, self._frame.name) else None)
         elif self._shell is not None:  # M45: the shell places it (in its content, or as a center tab)
             self._shell.show_screen(root, name, previous)
         else:
@@ -1065,6 +1084,7 @@ class App:
             if root.parent() is None:
                 self._window.root.add_child(root)
         self._current = name
+        self._screen_name.set(name)
         if self._navigation is not None and name in self._navigation[1]:
             rail, screens = self._navigation
             rail.selected.set(screens.index(name))  # the rail follows, without calling its handler (M52)
@@ -1083,6 +1103,9 @@ class App:
         showing moves into it."""
         if getattr(shell, "window", None) is not self._window:
             raise ValueError("App.use_shell: build the shell on this app's window (AppShell(app.window, ...))")
+        if self._frame is not None:
+            raise ValueError(f"App.use_shell: the window view {self._frame.name!r} is the app's frame; an app shell can't "
+                             "also be one")
         self._shell = shell
         if self._current is not None:
             root = self._registered[self._current].view.root

@@ -50,7 +50,7 @@ This is a different thing from a view's stylesheet (`App(stylesheet=)`), whose r
 
 ## Navigation
 
-- **Navigation rail**: [`NavigationRail`](navigation-rail/navigation-rail.md), [`NavigationRailItem`](navigation-rail/navigation-rail-item.md)
+- **Navigation rail**: [`NavigationRail`](navigation-rail/navigation-rail.md), [`NavigationRailItem`](navigation-rail/navigation-rail-item.md), [`NavigationRailScreens`](navigation-rail/navigation-rail-screens.md), [`NavigationRailScreen`](navigation-rail/navigation-rail-screen.md)
 - **Navigation drawer**: [`NavigationDrawer`](navigation-drawer/navigation-drawer.md), [`NavigationDrawerItem`](navigation-drawer/navigation-drawer-item.md)
 - **Top app bar**: [`TopAppBar`](top-app-bar/top-app-bar.md)
 - **Tabs**: [`Tabs`](tabs/tabs.md), [`TabsItem`](tabs/tabs-item.md)

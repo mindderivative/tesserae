@@ -6,6 +6,12 @@ A window, a dock and embedded views in the same YAML as every other view ([#95](
 
 ### Added
 
+- **Routed views**: `- {id: settings, view: Settings_View.yaml, route: settings}` in a window view makes the view a screen of the app:
+  registered under its name (`Settings`) and the route, shown in its node while it is current, and hidden (out of the layout, with
+  its state) when it isn't. `app.navigate`, `show`, `navigate_to`, `back` and the history work as before. New handlers
+  `navigate.<Screen>`, `navigate.back` and `navigate.forward` do them from YAML, `app.current_screen` is a value bindings can
+  read, and a colour binding can name a theme role. **`NavigationRailScreens`** (and `NavigationRailScreen`) is a navigation rail
+  whose destinations go to screens and show which is current. A window view and an app shell can't both be the frame.
 - **`kind: Window`**: the root of a `*_View.yaml` that is the whole OS window, with `title:`, `borderless:`, `min_width:`,
   `min_height:`, a `title_bar:` (a `TitleBar`'s keys; the window's own when `borderless`), `children:` for the content, and
   `style:` `width`/`height` for the window's size and `background` for its colour. `app.load("Window")` (or

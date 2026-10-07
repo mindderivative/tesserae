@@ -236,7 +236,7 @@ overflow: <clip | ellipsis>
 
 ## Handlers
 
-`handlers:` names what an event calls: a ViewModel method, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`.
+`handlers:` names what an event calls: a ViewModel method, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`.
 
 | Event | Values | What it does |
 | --- | --- | --- |
@@ -298,7 +298,7 @@ interaction:
 classes: <a list>
 window_region: <drag | none>
 id: <text>
-component: <one of 77 names or text>
+component: <one of 79 names or text>
 with: <a mapping>
 repeat: <a list>
 ```
@@ -314,7 +314,7 @@ repeat: <a list>
 | `classes` | a list | Style classes a theme or stylesheet rule can match. |
 | `window_region` | `drag` \| `none` | `drag`: a press here moves the window (a title bar); `none`: it does not. |
 | `id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
-| `component` *(required)* | one of 77 names or text | A fragment: one of Tesserae's, or one of your own `<Name>_Component.yaml`. |
+| `component` *(required)* | one of 79 names or text | A fragment: one of Tesserae's, or one of your own `<Name>_Component.yaml`. |
 | `with` | a mapping | The fragment's parameters. |
 | `repeat` | a list | One call per entry, each merged over `with:`. |
 

@@ -72,6 +72,39 @@ children:
 - Hot reload watches the embedded file. Editing the host keeps an embedded view whose `view:` and `with:` didn't change, with its
   state, and builds a new one when they did.
 
+### Routed views
+
+Give a `view:` node a `route:` and the view is a screen of the app, not just a part of the layout. This is for the
+[window view](../api/yaml.md#the-window) (the `kind: Window` root), where the screens are:
+
+```yaml
+id: root
+kind: Window
+style: {width: 900, height: 600}
+children:
+  - id: nav
+    component: NavigationRailScreens
+    with:
+      items:
+        - {label: Tasks, icon: home, screen: Main}
+        - {label: Settings, icon: settings, screen: Settings}
+  - id: screens
+    kind: Container
+    style: {flex: fill}
+    children:
+      - {id: main, view: Main_View.yaml, route: ""}
+      - {id: settings, view: Settings_View.yaml, route: settings}
+```
+
+- The screen's name is the view's file name without `_View.yaml` (`Settings`): `app.show("Settings")`, `app.navigate("Settings")`,
+  `app.navigate_to("settings")` and `app.screen("Settings")` all work, and the view keeps its ViewModel and its state while another
+  screen shows (it is hidden, out of the layout, not rebuilt).
+- Nothing shows until a route is current: call `app.navigate_to("")` (or `app.show(...)`) after loading the window.
+- `handlers: {on_click: navigate.Settings}` on any node goes to a screen; `navigate.back` and `navigate.forward` move in the history.
+  `app.current_screen` is a value a binding can read: `{{ app.current_screen.get() == 'Settings' }}`.
+- `NavigationRailScreens` is a navigation rail whose destinations navigate and are filled while their screen is current.
+- A `route:` is an error outside the window view; a view can be routed once; editing the window view while the app runs adds or removes screens.
+
 ## Tearing a component down
 
 ```python

@@ -36,10 +36,11 @@ SAMPLE = {"label": "Go", "title": "Title", "text": "Hello", "headline": "Headlin
           "placeholder": "Search", "day": 7, "hour": 3, "minute": 15, "background": "primary", "left_padding": 16,
           "item_width": 100, "scrim_width": 400, "scrim_height": 300, "frame": "frame", "min": 0, "max": 10, "step": 1,
           "typography_role": "body_large", "color": "primary", "fab_size": "default", "button": "ButtonFilled",
-          "selected": False, "checked": False}
+          "selected": False, "checked": False, "screen": "Main"}
 ITEMS = {"ButtonGroup": [{"label": "A"}, {"label": "B"}], "Menu": [{"label": "A"}, {"label": "B"}],
          "Tabs": [{"label": "A", "selected": True}, {"label": "B"}],
          "NavigationRail": [{"label": "A", "icon": "home", "selected": True}, {"label": "B", "icon": "search"}],
+         "NavigationRailScreens": [{"label": "A", "icon": "home", "screen": "A"}, {"label": "B", "icon": "search", "screen": "B"}],
          "NavigationDrawer": [{"label": "A", "icon": "home", "selected": True}, {"label": "B", "icon": "search"}]}
 
 

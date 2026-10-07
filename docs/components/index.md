@@ -38,7 +38,7 @@ Material Design 3's components, as Tesserae builds them. Each page says what the
 
 | Component | Fragments |
 | --- | --- |
-| [Navigation rail](navigation-rail.md) | `NavigationRail`, `NavigationRailItem` |
+| [Navigation rail](navigation-rail.md) | `NavigationRail`, `NavigationRailItem`, `NavigationRailScreens`, `NavigationRailScreen` |
 | [Navigation drawer](navigation-drawer.md) | `NavigationDrawer`, `NavigationDrawerItem` |
 | [Top app bar](top-app-bar.md) | `TopAppBar` |
 | [Tabs](tabs.md) | `Tabs`, `TabsItem` |

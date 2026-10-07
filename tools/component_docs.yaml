@@ -360,13 +360,15 @@ components:
   - slug: navigation-rail
     title: Navigation rail
     group: Navigation
-    fragments: [NavigationRail, NavigationRailItem]
+    fragments: [NavigationRail, NavigationRailItem, NavigationRailScreens, NavigationRailScreen]
     md3: |
       A navigation rail puts three to seven destinations in a narrow column beside the content, on medium and
       large windows. Each is an icon in a pill with a label; the selected one's pill is filled.
     built: |
-      The rail is a column of `NavigationRailItem`s, one for each entry of `items`. A [shell file](../guide/app-shell.md)'s
-      `navigation:` builds one for you.
+      The rail is a column of `NavigationRailItem`s, one for each entry of `items`. `NavigationRailScreens` is the same
+      rail whose destinations go to screens of the app: each entry of `items` has a `screen`, choosing one is
+      `navigate.<screen>`, and the destination is filled while that screen is the app's current one (a Window view's routed
+      views are the screens). A [shell file](../guide/app-shell.md)'s `navigation:` builds a rail for you.
     usage: |
       - id: rail
         component: NavigationRail
@@ -374,6 +376,13 @@ components:
           items:
             - {label: Home, icon: home, selected: true}
             - {label: Search, icon: search}
+      # in a window view, a rail that navigates and follows the current screen:
+      - id: nav
+        component: NavigationRailScreens
+        with:
+          items:
+            - {label: Tasks, icon: home, screen: Main}
+            - {label: Settings, icon: settings, screen: Settings}
     python: |
       from tesserae.widgets import navigation_rail
 

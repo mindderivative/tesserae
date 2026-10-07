@@ -201,6 +201,8 @@ nav:
           - Navigation rail:
               - NavigationRail: stylesheets/navigation-rail/navigation-rail.md
               - NavigationRailItem: stylesheets/navigation-rail/navigation-rail-item.md
+              - NavigationRailScreens: stylesheets/navigation-rail/navigation-rail-screens.md
+              - NavigationRailScreen: stylesheets/navigation-rail/navigation-rail-screen.md
           - Navigation drawer:
               - NavigationDrawer: stylesheets/navigation-drawer/navigation-drawer.md
               - NavigationDrawerItem: stylesheets/navigation-drawer/navigation-drawer-item.md

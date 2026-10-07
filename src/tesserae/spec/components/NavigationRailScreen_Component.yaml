@@ -1,0 +1,31 @@
+# One destination in a navigation rail that goes to a screen of the app: an icon in a pill, with a label under it. Choosing
+# it is `navigate.<screen>`, and it is filled while that screen is the app's current one (the view needs an App).
+# Structure only: its look is in NavigationRailScreen_Stylesheet.yaml.
+params:
+  - label
+  - icon
+  - screen
+id: root
+kind: Container
+handlers:
+  on_click: "navigate.{{ screen }}"
+children:
+  - id: pill
+    kind: Rect
+    bindings:
+      background: "{{ app.current_screen.get() == '{{ screen }}' and 'secondary_container' or 'transparent' }}"
+    children:
+      - id: icon
+        kind: Icon
+        icon:
+          name: "{{ icon }}"
+        bindings:
+          foreground: "{{ app.current_screen.get() == '{{ screen }}' and 'on_secondary_container' or 'on_surface_variant' }}"
+  - id: label
+    kind: Text
+    text:
+      content: "{{ label }}"
+      typography_role: label_medium
+      wrap: none
+    bindings:
+      foreground: "{{ app.current_screen.get() == '{{ screen }}' and 'on_surface' or 'on_surface_variant' }}"

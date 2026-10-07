@@ -1,0 +1,15 @@
+# NavigationRailScreens: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters.
+styles:
+  - id: root
+    style:
+      width: 80
+      flex_direction: vertical
+      align_content: top
+      gap: 12
+      padding:
+        left: 0
+        right: 0
+        top: 12
+        bottom: 12
+      background: surface

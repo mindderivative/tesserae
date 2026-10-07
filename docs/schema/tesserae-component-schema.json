@@ -1489,75 +1489,75 @@
       "properties": {
         "on_click": {
           "type": "string",
-          "description": "Runs on `click`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `click`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_hover_enter": {
           "type": "string",
-          "description": "Runs on `pointer_enter`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `pointer_enter`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_hover_exit": {
           "type": "string",
-          "description": "Runs on `pointer_leave`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `pointer_leave`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_change": {
           "type": "string",
-          "description": "Runs on `change`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `change`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_focus_enter": {
           "type": "string",
-          "description": "Runs on `focus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `focus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_focus_exit": {
           "type": "string",
-          "description": "Runs on `unfocus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `unfocus`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_tap": {
           "type": "string",
-          "description": "Runs on `tap`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `tap`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_long_press": {
           "type": "string",
-          "description": "Runs on `long_press`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `long_press`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_pan": {
           "type": "string",
-          "description": "Runs on `pan`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `pan`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_pinch": {
           "type": "string",
-          "description": "Runs on `pinch`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `pinch`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_touch_start": {
           "type": "string",
-          "description": "Runs on `touch_start`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `touch_start`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_touch_move": {
           "type": "string",
-          "description": "Runs on `touch_move`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `touch_move`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_touch_end": {
           "type": "string",
-          "description": "Runs on `touch_end`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `touch_end`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_touch_cancel": {
           "type": "string",
-          "description": "Runs on `touch_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `touch_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_file_hover": {
           "type": "string",
-          "description": "Runs on `file_hover`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `file_hover`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_file_hover_cancel": {
           "type": "string",
-          "description": "Runs on `file_hover_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `file_hover_cancel`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_file_drop": {
           "type": "string",
-          "description": "Runs on `file_drop`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `file_drop`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         },
         "on_link": {
           "type": "string",
-          "description": "Runs on `link`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`."
+          "description": "Runs on `link`: a ViewModel method name, or one of `window.minimize`, `window.maximize`, `window.restore`, `window.toggle_maximized`, `window.close`, `surface.dismiss`, `navigate.<Screen>`, `navigate.back`, `navigate.forward`."
         }
       },
       "additionalProperties": false
@@ -2213,6 +2213,8 @@
                 "NavigationDrawerItem",
                 "NavigationRail",
                 "NavigationRailItem",
+                "NavigationRailScreen",
+                "NavigationRailScreens",
                 "NodeGraph",
                 "PeriodSelectorAM",
                 "PeriodSelectorPM",
@@ -4562,6 +4564,96 @@
           "if": {
             "properties": {
               "component": {
+                "const": "NavigationRailScreen"
+              }
+            },
+            "required": [
+              "component"
+            ]
+          },
+          "then": {
+            "properties": {
+              "with": {
+                "type": "object",
+                "properties": {
+                  "label": {},
+                  "icon": {},
+                  "screen": {}
+                },
+                "additionalProperties": false
+              },
+              "repeat": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {},
+                        "icon": {},
+                        "screen": {}
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/parameter"
+                  },
+                  {
+                    "$ref": "#/definitions/conditional"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "component": {
+                "const": "NavigationRailScreens"
+              }
+            },
+            "required": [
+              "component"
+            ]
+          },
+          "then": {
+            "properties": {
+              "with": {
+                "type": "object",
+                "properties": {
+                  "items": {}
+                },
+                "additionalProperties": false
+              },
+              "repeat": {
+                "anyOf": [
+                  {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "items": {}
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  {
+                    "$ref": "#/definitions/parameter"
+                  },
+                  {
+                    "$ref": "#/definitions/conditional"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "component": {
                 "const": "NodeGraph"
               }
             },
@@ -6293,6 +6385,8 @@
                 "NavigationDrawerItem",
                 "NavigationRail",
                 "NavigationRailItem",
+                "NavigationRailScreen",
+                "NavigationRailScreens",
                 "NodeGraph",
                 "PeriodSelectorAM",
                 "PeriodSelectorPM",

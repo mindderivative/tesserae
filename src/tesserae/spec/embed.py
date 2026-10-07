@@ -10,7 +10,9 @@ in the project, and none is fine), built in the host's window with the host's th
 `id: root`. Before the host is built, each `view:` node is turned into a plain `Container` holding the request in
 `embed:`; `tesserae.View` then builds the embedded view into that container (`tesserae.component.embed`).
 
-A `view:` node has an `id` and a `view`, and optionally `with`, `style`, `classes`, `a11y` and `group`. It has no `kind`,
+A `view:` node has an `id` and a `view`, and optionally `with`, `route`, `style`, `classes`, `a11y` and `group`. With a `route:` the
+view is a screen of the app (the Window view's routed views): registered under its name and that route, shown in this node when
+the route is current, and kept apart, with its state, when it isn't. It has no `kind`,
 `component`, `children` or content of its own.
 """
 
@@ -22,7 +24,7 @@ from typing import Any
 __all__ = ["EmbedError", "embeds_of", "expand_embeds"]
 
 #: What a `view:` node may carry besides `view` itself.
-_ALLOWED = frozenset({"id", "view", "with", "style", "classes", "a11y", "group", "window_region"})
+_ALLOWED = frozenset({"id", "view", "with", "route", "style", "classes", "a11y", "group", "window_region"})
 
 
 class EmbedError(ValueError):
@@ -58,9 +60,14 @@ def _placeholder(node: dict[str, Any]) -> dict[str, Any]:
     arguments = node.get("with", {})
     if not isinstance(arguments, dict) or not all(isinstance(k, str) for k in arguments):
         raise EmbedError(f"{where} `with:` is a mapping of keyword arguments for the ViewModel, got {arguments!r}")
-    out = {k: v for k, v in node.items() if k not in ("view", "with")}
+    out = {k: v for k, v in node.items() if k not in ("view", "with", "route")}
     out["kind"] = "Container"
     out["embed"] = {"view": ref.strip(), "with": dict(arguments)}
+    if "route" in node:
+        route = node["route"]
+        if not isinstance(route, str):
+            raise EmbedError(f"{where} `route:` is the route's path, such as `\"\"`, `settings` or `notes/{{id}}`, got {route!r}")
+        out["embed"]["route"] = route.strip("/")
     return out
 
 

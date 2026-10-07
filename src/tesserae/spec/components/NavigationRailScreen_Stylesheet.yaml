@@ -1,0 +1,26 @@
+# NavigationRailScreen: the look of each part of the component, by the part's id.
+# A value in {{ }} is one of the component's parameters. The selected look (the pill's fill, the icon's and label's colour)
+# follows the app's current screen once the view is on an App.
+styles:
+  - id: root
+    style:
+      width: 80
+      height: 56
+      flex_direction: vertical
+      align_content: top
+      gap: 4
+  - id: pill
+    style:
+      width: 56
+      height: 32
+      corner_radius: 16
+      background: transparent
+      align_content: center
+  - id: icon
+    style:
+      width: 24
+      height: 24
+      foreground: on_surface_variant
+  - id: label
+    style:
+      foreground: on_surface_variant
