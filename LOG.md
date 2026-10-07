@@ -2409,3 +2409,19 @@ replaced, so it is 0.3.2), then #79 added to it, and "approved, check PyPI".
   `tesserae new --shell --custom-title-bar` built and `--check` drew 30
   frames. The simple index lagged by a few minutes.
 
+
+## Tesserae 0.4.4 released (#95)
+
+User: "Continue milestone #95 till completion. I am going to bed.", "approved, push and release 0.4.4", "approved, check PyPI".
+
+- A window, a dock and embedded views, in the same YAML as every other view: `kind: Window` (with `title_bar:` and `borderless`),
+  `kind: Dock` / `kind: DockPanel` (zones, tabs, handles, splits, reloads that keep the user's layout), `view:` (with or without
+  a ViewModel), `view:` + `route:` routed screens with `navigate.*` handlers, `app.current_screen` and `NavigationRailScreens`,
+  a title bar in dialogs and sheets, `tesserae new --window`, style fields in sections, a guide page, five component pages, the
+  tutorials' step 6 on a window view, and `examples/window_dock`. New code does not use the shell file or `AppShell`; both are
+  to be phased out (#103).
+- Released: 5410 tests passed, CI green on all platforms (CI twice, Deploy Docs); `tesserae-ui` 0.4.4 is on PyPI and pulled
+  `tesserae-engine` 0.5.5. From that install in a clean venv: `tesserae new demo --window` ran, its Main and Settings screens
+  navigated, the window snapshotted at 960 by 600, and `examples/window_dock` ran its own checks.
+- Not built, filed: dropping a dragged panel onto a split half (#106), separate-OS-window modals (#105). The `window_perf.py`
+  resize check was not run (needs a hand-driven window).
