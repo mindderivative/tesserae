@@ -2153,6 +2153,22 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.4.3.1 released (#92)
+
+User: issue #92 (`*_Style.yaml` syntax is confusing: no root tag, no schema), "Added an issue, make it 0.4.3.1",
+"approved, push and release 0.4.3.1", "approved, check PyPI". (Before it, a docs-only fix to `tutorial-project.md` went
+straight to `main` as `dfdbe4c` at the user's request, with no issue: each step now shows every file it adds or
+changes, and the test requires it.)
+
+- A style file is `{id?, style: {fields}}`, as the issue proposed; the bare form still loads, so it is a patch release.
+  `_style_from_file` unwraps a mapping whose keys are only `id` and `style`; a rule in a stylesheet or theme takes the
+  wrapped form too. New `tesserae-style-schema.json` (generator, `tesserae schema`, `--settings` for
+  `**/*_Style.yaml`, the site copies); the tutorials' `row_Style.yaml` use the new form. The schema describes only the
+  new form, so an old bare file warns in an editor until wrapped (left to the user to decide otherwise).
+- Released: 4870 tests passed, CI green on all platforms; `tesserae-ui` 0.4.3.1 is on PyPI. From that install in a
+  clean venv, a wrapped and a bare style file both loaded (corner radius 12, width 50) and the style schema shipped.
+  My first check failed on my own test files (a `Rect` with no background), not the release. `v0.4.3.1` is a pre-release.
+
 ## Tesserae 0.4.3 released (#91)
 
 User: "Update the MkDocs and make a tutorial using a new project vs a flat file system", "approved, push and release
