@@ -2153,6 +2153,28 @@ and imperative; then "release 0.3.1", and "approved, check PyPI".
 - Next: with `tre` 0.5.1 out, the keepalive default can go off and the
   floor rise to 0.5.1 (a 0.3.2, the user's call).
 
+## Tesserae 0.4.3.2 released (#93)
+
+User: "TextField dark mode text is a dark color ... that makes it a bug. Please look into this", "as part of 0.4.3.2 I
+want you to do a sweep of all of components and their theme bindings ... then update the MkDocs which is missing the
+TextField component and the CodeEditor component", "approved, push and release 0.4.3.2 without CodeEditor",
+"Approved, check pypi".
+
+- Cause: `_text_field_props` gave every TextField the light scheme's ink, `#1C1B1F`, a leftover from when the engine
+  could not draw another; dark on dark in the dark scheme. tre honours `fill` on a `text_input`, so the text is the
+  theme's `on_surface` (or `style.foreground`), the caret `primary`, re-themed with the app. The tre-parity test now
+  skips that one deliberate difference.
+- The sweep (`tests/test_component_colours.py`): every component fragment, both schemes, text/icon contrast against
+  what is behind it (it flags the old bug through SearchBar), and a dark/light switch leaves nothing stale. Nothing
+  else was wrong. `TimePickerDial` is excluded (its selected number is over a path the check can't see); the counter,
+  todo_list and multi_screen examples use literal colours by design.
+- Docs: the Text fields component page, and node kinds show as `kind: X` in the index. CodeEditor does not exist in
+  Tesserae (tre's was removed in 0.3.5 for a multiline text input, and Tesserae never exposed it): not documented, and
+  the user chose not to build one in this release.
+- Released: 5185 tests passed, CI green on all platforms; `tesserae-ui` 0.4.3.2 is on PyPI. From that install, a
+  dark-scheme TextField's text is `on_surface` (230, 224, 233) and the light one's is (29, 27, 32); the Text fields page
+  is live. `v0.4.3.2` is a pre-release.
+
 ## Tesserae 0.4.3.1 released (#92)
 
 User: issue #92 (`*_Style.yaml` syntax is confusing: no root tag, no schema), "Added an issue, make it 0.4.3.1",
