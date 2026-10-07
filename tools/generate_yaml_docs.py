@@ -229,7 +229,7 @@ def render() -> str:
     widget = view.resolve(view.defs["widget"])
     out += ["## The node", "",
             "A view is one node, with its children inside it. A node is a widget (`kind:`), a fragment used in place "
-            "(`component:`), or a file put in place (`include:`).", ""]
+            "(`component:`), a file put in place (`include:`), or another view shown there (`view:`, below).", ""]
     out += _block(view, widget, "node")
     out += ["## The kinds", "", "`kind:` says what a node is. Beyond the keys every node has, each kind uses a few.", "",
             "| Kind | What it is | It also uses |", "| --- | --- | --- |"]
@@ -271,6 +271,13 @@ def render() -> str:
     out += _table(_rows(component, {"properties": extra}), "Key")
     out += ["Inside a fragment, any value can also be a `{{ parameter }}`, or chosen by one with "
             "`{if: \"{{ flag }}\", then: a, else: b}`.", ""]
+    out += ["## Embedded views", "",
+            "`view: Left_View.yaml` shows another view in place (or a name found in the project: `view: Left`). It is a view of its own, "
+            "so its ids don't clash with this one's, and it has its own ViewModel when `Left_ViewModel.py` is beside it or in the project; "
+            "a view with none is static (no bindings, handlers or `two_way:`). `with:` is given to the ViewModel's constructor as keyword "
+            "arguments. From the host, `view.embedded(\"left\")` is the embedded view and its `.viewmodel` the ViewModel. "
+            "A relative file is relative to the file that names it.", ""]
+    out += _block(view, view.resolve(view.defs["view_node"]), "view node")
     out += ["## Shell file", "", "`*_Shell.yaml`: [App Shell & Docking](../guide/app-shell.md).", ""]
     out += _block(shell, schemas["tesserae-shell-schema.json"], "shell")
     out += ["## Theme and stylesheet", "",

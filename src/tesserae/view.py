@@ -40,6 +40,7 @@ bound nodes show their live values.
 
 from __future__ import annotations
 
+import copy
 import inspect
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -53,6 +54,8 @@ from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.scrolling import Scroller
 from tesserae.spec.images import check_frame
+from tesserae.project import ProjectError
+from tesserae.spec.embed import embeds_of, expand_embeds
 from tesserae.spec.title_bar import expand_title_bars
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
@@ -125,7 +128,7 @@ class View:
         project: Any = None,
         contrast: float = 0.0,
     ) -> None:
-        self.path: Optional[Path] = None
+        self.path: Optional[Path] = getattr(self, "_given_path", None)  # a component is told its file (0.4.4)
         app = None
         if window is not None and all(arg is None for arg in (theme_seed, dark, default_theme_spec, custom_theme_spec)):
             app = app_of(window)  # no theme given: the app's, followed (M50)
@@ -156,6 +159,8 @@ class View:
         self._stylesheet_spec = stylesheet_spec
         self._frames = dict(frames or {})
         self._components: list["Component"] = []
+        #: the views `view:` nodes embed, by the node's id: `(component, viewmodel or None, the request it was made for)`
+        self._embedded: dict[str, tuple["Component", Any, dict[str, Any]]] = {}
         self._scheme = tokens.resolve_scheme(theme_seed, dark, default_theme_spec, custom_theme_spec, contrast)
         self._layers = prepare_layers(default_theme_spec, custom_theme_spec, stylesheet_spec)
         self._owns_window = window is None
@@ -164,7 +169,7 @@ class View:
             window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
             # no `Window.set_theme` (removed in tre 0.3.5): since M40 nothing a view builds reads the window's theme
         self.window = window
-        spec = expand_title_bars(spec)  # 0.3.0 M3: `kind: TitleBar` into its nodes
+        spec = expand_embeds(expand_title_bars(spec))  # 0.3.0 M3: `kind: TitleBar` into its nodes; 0.4.4: `view:` into containers
         self._spec = spec
         self._built = Built(root=None)
         self._events = Listeners()
@@ -184,6 +189,7 @@ class View:
         #: M70: the nodes shown disabled now, by their `disabled:` key or binding.
         self._disabled_on: set[str] = set()
         self._sync_interactions()
+        self._sync_embeds()
         if app is not None:
             app._followers[self] = None
 
@@ -250,7 +256,7 @@ class View:
 
     def reconcile(self, spec: dict[str, Any], frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
         """Brings the live tree in line with `spec`, in place."""
-        spec = expand_title_bars(spec)  # 0.3.0 M3, as in `__init__`
+        spec = expand_embeds(expand_title_bars(spec))  # 0.3.0 M3 and 0.4.4, as in `__init__`
         if frames is not None:
             self._frames = dict(frames)
         # All or nothing: build the new spec on the side first, so an error
@@ -278,6 +284,41 @@ class View:
         self._sync_interactions()
         self._rewire()
         self._prune_components()
+        self._sync_embeds()
+
+    def embedded(self, node_id: str) -> "Component":
+        """The view the `view:` node `node_id` embeds. Its ViewModel is `.viewmodel`, `None` for a view with none."""
+        try:
+            return self._embedded[node_id][0]
+        except KeyError:
+            raise ValueError(f"no view: node with id {node_id!r} in this view") from None
+
+    @property
+    def viewmodel(self) -> Any:
+        """The ViewModel attached to this view, or `None`."""
+        return self._viewmodel
+
+    def _sync_embeds(self) -> None:
+        """Makes the views the `view:` nodes ask for: builds one into each placeholder that has none, and takes away one
+        whose node is gone, whose request changed, or whose nodes a reload destroyed."""
+        from tesserae.component import embed
+
+        wanted = embeds_of(self._spec)
+        for node_id, (component, _, request) in list(self._embedded.items()):
+            if node_id not in wanted or wanted[node_id] != request or not component._follow_alive():
+                del self._embedded[node_id]
+                component.remove()
+        for node_id, request in wanted.items():
+            if node_id in self._embedded:
+                continue
+            try:
+                component, viewmodel = embed(self, request["view"], self._built.nodes[node_id], request["with"],
+                                              base=self.path.parent if self.path is not None else None)
+            except (ValueError, ProjectError, OSError) as exc:
+                if isinstance(exc, FileNotFoundError):
+                    raise
+                raise ValueError(f'widget "{node_id}": {exc}') from exc
+            self._embedded[node_id] = (component, viewmodel, copy.deepcopy(request))
 
     def _prune_components(self) -> None:
         """Forgets the components whose nodes a reload destroyed (their
@@ -328,7 +369,8 @@ class View:
         this view's theme and stylesheet, and follows them when they change.
         `spec` is the expanded spec; without it, `path` is read (the same
         call shape as `tre`'s `View.instantiate`)."""
-        component = Component(self, spec if spec is not None else path, frames=frames)
+        component = Component(self, spec if spec is not None else path, frames=frames,
+                              path=Path(path) if spec is not None and path else None)
         if spec is not None and path:
             component.path = Path(path)  # the file it came from, for hot reload (M51)
         into.add_child(component.root)
@@ -355,6 +397,10 @@ class View:
         self._owns_window = False
         del old_window
         self._sync_interactions()
+        for node_id, (component, _, _) in list(self._embedded.items()):  # their nodes went with the old tree
+            del self._embedded[node_id]
+            component.remove()
+        self._sync_embeds()
         if self._viewmodel is not None:
             self._wire(self._spec)
 
@@ -803,8 +849,10 @@ class Component(View):
     them when the host is re-themed or re-styled. `remove()` unwires it
     and frees its nodes."""
 
-    def __init__(self, host: View, source: Any, frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
+    def __init__(self, host: View, source: Any, frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
+                 path: Optional[Path] = None) -> None:
         self._host = host
+        self._given_path = path  # before the build, so a `view:` inside it finds files beside this one
         super().__init__(
             source, window=host.window, frames=frames, stylesheet_spec=host._stylesheet_spec, **host._theme,
         )

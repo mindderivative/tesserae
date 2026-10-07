@@ -4409,9 +4409,65 @@
       },
       "additionalProperties": true
     },
+    "view_node": {
+      "type": "object",
+      "required": [
+        "view"
+      ],
+      "additionalProperties": false,
+      "description": "Another view shown here: `view: Left_View.yaml` (or a name found in the project). It is a view of its own, with its own ids and its own ViewModel if it has one (`Left_ViewModel.py`); one with none is static.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it."
+        },
+        "view": {
+          "type": "string",
+          "description": "The view to show: a `*_View.yaml` next to this file, or a name found in the project."
+        },
+        "with": {
+          "type": "object",
+          "description": "What the embedded view's ViewModel is given, as keyword arguments to its constructor."
+        },
+        "style": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "type": "string",
+              "pattern": "_Style\\.yaml$",
+              "description": "A `*_Style.yaml` file next to this one."
+            }
+          ],
+          "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Style classes a theme or stylesheet rule can match."
+        },
+        "a11y": {
+          "$ref": "#/definitions/a11y"
+        },
+        "group": {
+          "type": "string",
+          "description": "A RadioButton's group: the ones with one name exclude each other."
+        },
+        "window_region": {
+          "enum": [
+            "drag",
+            "none"
+          ],
+          "description": "`drag`: a press here moves the window (a title bar); `none`: it does not."
+        }
+      }
+    },
     "node": {
       "type": "object",
-      "description": "A node: a widget (`kind:`), a fragment used in place (`component:`), or a file put in place (`include:`).",
+      "description": "A node: a widget (`kind:`), a fragment used in place (`component:`), a file put in place (`include:`), or another view (`view:`).",
       "properties": {
         "a11y": {
           "$ref": "#/definitions/a11y"
@@ -4823,6 +4879,10 @@
           ],
           "description": "A Slider's or SpinBox's value."
         },
+        "view": {
+          "type": "string",
+          "description": "The view to show: a `*_View.yaml` next to this file, or a name found in the project."
+        },
         "window_region": {
           "enum": [
             "drag",
@@ -4872,6 +4932,11 @@
           "required": [
             "include"
           ]
+        },
+        {
+          "required": [
+            "view"
+          ]
         }
       ],
       "allOf": [
@@ -4893,6 +4958,16 @@
           },
           "then": {
             "$ref": "#/definitions/include"
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "view"
+            ]
+          },
+          "then": {
+            "$ref": "#/definitions/view_node"
           }
         },
         {

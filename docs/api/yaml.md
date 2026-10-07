@@ -15,7 +15,7 @@ Every key Tesserae's YAML files take, with the values it accepts and what it doe
 
 ## The node
 
-A view is one node, with its children inside it. A node is a widget (`kind:`), a fragment used in place (`component:`), or a file put in place (`include:`).
+A view is one node, with its children inside it. A node is a widget (`kind:`), a fragment used in place (`component:`), a file put in place (`include:`), or another view shown there (`view:`, below).
 
 ```yaml
 id: <text>
@@ -326,6 +326,32 @@ repeat: <a list>
 | `when` | any value | Keeps this child only when the value is true. |
 
 Inside a fragment, any value can also be a `{{ parameter }}`, or chosen by one with `{if: "{{ flag }}", then: a, else: b}`.
+
+## Embedded views
+
+`view: Left_View.yaml` shows another view in place (or a name found in the project: `view: Left`). It is a view of its own, so its ids don't clash with this one's, and it has its own ViewModel when `Left_ViewModel.py` is beside it or in the project; a view with none is static (no bindings, handlers or `two_way:`). `with:` is given to the ViewModel's constructor as keyword arguments. From the host, `view.embedded("left")` is the embedded view and its `.viewmodel` the ViewModel. A relative file is relative to the file that names it.
+
+```yaml
+id: <text>
+view: <text>
+with: <a mapping>
+style: <a style mapping or text>
+classes: <a list>
+a11y: <a mapping>
+group: <text>
+window_region: <drag | none>
+```
+
+| Key | Values | What it does |
+| --- | --- | --- |
+| `id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
+| `view` *(required)* | text | The view to show: a `*_View.yaml` next to this file, or a name found in the project. |
+| `with` | a mapping | What the embedded view's ViewModel is given, as keyword arguments to its constructor. |
+| `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
+| `classes` | a list | Style classes a theme or stylesheet rule can match. |
+| `a11y` | a mapping | What assistive technology is told about this node. |
+| `group` | text | A RadioButton's group: the ones with one name exclude each other. |
+| `window_region` | `drag` \| `none` | `drag`: a press here moves the window (a title bar); `none`: it does not. |
 
 ## Shell file
 

@@ -298,7 +298,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     if fragment:
         for key in ("style", "text", "bindings", "handlers", "a11y", "interaction"):
             node_props[key] = {"anyOf": [node_props[key], {"$ref": "#/definitions/conditional"}]}
-    uncovered = build._NODE_KEYS - set(node_props) - {"children"}
+    uncovered = build._NODE_KEYS - set(node_props) - {"children", "embed"}  # `embed` is what a `view:` node becomes, not a key a file has
     if uncovered:
         raise SystemExit(f"the node keys changed: add {sorted(uncovered)} in {__file__}")
     node_props["children"] = {"type": "array", "items": {"$ref": "#/definitions/node"},
@@ -358,21 +358,32 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     include_node = {"type": "object", "required": ["include"], "description": "A file's contents, put in place.",
                     "properties": {"include": {"type": "string", "description": "A YAML file, relative to this one."}},
                     "additionalProperties": True}
+    view_node = {"type": "object", "required": ["view"], "additionalProperties": False,
+                 "description": "Another view shown here: `view: Left_View.yaml` (or a name found in the project). It is a view of its own, "
+                                "with its own ids and its own ViewModel if it has one (`Left_ViewModel.py`); one with none is static.",
+                 "properties": {
+                     "id": node_props["id"],
+                     "view": {"type": "string", "description": "The view to show: a `*_View.yaml` next to this file, or a name found in the project."},
+                     "with": {"type": "object", "description": "What the embedded view's ViewModel is given, as keyword arguments to its constructor."},
+                     "style": node_props["style"], "classes": node_props["classes"], "a11y": node_props["a11y"],
+                     "group": node_props["group"], "window_region": node_props["window_region"]}}
     # Declared here as well as in the branches below, so an editor can suggest them before `kind:`
     # (or `component:`, or `include:`) is typed: the branches only apply once it is.
     suggestible = {**widget_props, **call_props, "include": include_node["properties"]["include"],
+                   "view": view_node["properties"]["view"],
                    "title": title_bar_node["properties"]["title"], "buttons": title_bar_node["properties"]["buttons"]}
     suggestible["kind"] = {"enum": sorted([*build._KINDS, "TitleBar"]), "description": "What this node is."}
     # `icon` means an object on an Icon node and a plain name on a TitleBar.
     suggestible["icon"] = {"anyOf": [widget_props["icon"], title_bar_node["properties"]["icon"]],
                            "description": "An Icon's glyph (`{name: ...}`), or a TitleBar's icon name."}
     node = {"type": "object",
-            "description": "A node: a widget (`kind:`), a fragment used in place (`component:`), or a file put in place (`include:`).",
+            "description": "A node: a widget (`kind:`), a fragment used in place (`component:`), a file put in place (`include:`), or another view (`view:`).",
             "properties": dict(sorted(suggestible.items())),
-            "anyOf": [{"required": ["kind"]}, {"required": ["component"]}, {"required": ["include"]}],
+            "anyOf": [{"required": ["kind"]}, {"required": ["component"]}, {"required": ["include"]}, {"required": ["view"]}],
             "allOf": [
                 {"if": {"required": ["component"]}, "then": {"$ref": "#/definitions/component_call"}},
                 {"if": {"required": ["include"]}, "then": {"$ref": "#/definitions/include"}},
+                {"if": {"required": ["view"]}, "then": {"$ref": "#/definitions/view_node"}},
                 {"if": {"required": ["kind"], "properties": {"kind": {"const": "TitleBar"}}},
                  "then": {"$ref": "#/definitions/title_bar"}},
                 {"if": {"required": ["kind"], "properties": {"kind": {"not": {"const": "TitleBar"}}}},
@@ -397,6 +408,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     extra = {"parameter": param, "conditional": conditional} if fragment else {}
     return {**extra, "color": color, "fill": fill, "style": style, "text": text, "handlers": handlers, "a11y": a11y_schema,
             "widget": widget, "title_bar": title_bar_node, "component_call": component_call, "include": include_node,
+            "view_node": view_node,
             "node": node}
 
 

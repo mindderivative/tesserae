@@ -207,7 +207,8 @@ Runs `fn()` and returns its result, without its reads being recorded by the encl
 class Component(
     host: View,
     source: Any,
-    frames: Optional[dict[str, tuple[bytes, int, int]]] = None
+    frames: Optional[dict[str, tuple[bytes, int, int]]] = None,
+    path: Optional[Path] = None
 ) -> None  # extends View
 ```
 
@@ -239,6 +240,7 @@ A built view. `spec` is an expanded view spec (from `tesserae.spec.build_view_sp
 
 - `click(node: Any) -> None`: A synthetic click on `node`, for tests: `window.simulate`.
 - `control(widget_id: str) -> Any`: The MD3 control (`tesserae.controls`) behind `widget_id`, one of the eight control kinds; its `.node` is `node(widget_id)`.
+- `embedded(node_id: str) -> 'Component'`: The view the `view:` node `node_id` embeds.
 - `instantiate(path: Any, into: Any, spec: Optional[dict[str, Any]] = None, frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> 'Component'`: Builds a component -- a view of its own, with its own ViewModel -- under `into`, a node of this view, in this view's window.
 - `interaction(widget_id: str) -> Optional[Interaction]`: The state layer and ripple on `widget_id`'s node, or `None` when it has none.
 - `move_to(window: Any) -> None`: Rebuilds this view in `window`, keeping its spec, theme and ViewModel: bindings and handlers are wired again on the new nodes.
@@ -249,6 +251,7 @@ A built view. `spec` is an expanded view spec (from `tesserae.spec.build_view_sp
 - `set_theme(theme_seed: Optional[tuple[int, int, int, int]] = None, dark: bool = False, default_theme_spec: Optional[dict[str, Any]] = None, custom_theme_spec: Optional[dict[str, Any]] = None, contrast: float = 0.0) -> None`: Re-themes every node in place.
 - `spec` *(property)*: The expanded spec the view was built from: every `component:` and `include:` resolved.
 - `theme` *(property)*: This view's resolved theme (`tesserae.Theme`).
+- `viewmodel` *(property)*: The ViewModel attached to this view, or `None`.
 
 ## Embedding
 

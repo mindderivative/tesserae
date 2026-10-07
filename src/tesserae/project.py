@@ -163,6 +163,30 @@ def resolve_view(project: Optional[Project], ref: str | Path, viewmodel_cls: Opt
     return path, viewmodel_cls
 
 
+def resolve_embedded(project: Optional[Project], ref: str | Path, base: Optional[Path] = None) -> tuple[Path, Optional[type]]:
+    """The view file for a `view:` node, and its ViewModel class, or `None` for a view that has none: a path, or a name
+    found in `project` (a relative path is the folder `base`'s, the file that names it); the class is
+    `Name_ViewModel.py` beside the view or in the project, and no such file is fine."""
+    if is_name(ref):
+        if project is None:
+            raise ProjectError(f"{ref!r} is a name, but there is no project to look in: it needs an App "
+                               "(its root and folders), or give the file's path")
+        path = project.find("view", ref)
+    else:
+        path = Path(ref)
+        if base is not None and not path.is_absolute():
+            path = base / path
+    if not path.name.endswith(KINDS["view"][0]):
+        return path, None
+    prefix = path.name.removesuffix(KINDS["view"][0])
+    beside = path.with_name(f"{prefix}{KINDS['viewmodel'][0]}")
+    if beside.is_file():
+        return path, load_viewmodel(beside, prefix)
+    if project is not None and prefix in project.index("viewmodel"):
+        return path, project.viewmodel(prefix)
+    return path, None
+
+
 def load_viewmodel(path: Path, name: str) -> type:
     """The class `<name>ViewModel` from the file `path`."""
     folder = str(path.parent)

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.4 (unreleased)
+
+A window, a dock and embedded views in the same YAML as every other view ([#95](https://github.com/mindderivative/tesserae/issues/95)).
+
+### Added
+
+- **`view:`** shows another `*_View.yaml` where it is: `- {id: left, view: Left_View.yaml, with: {size: 3}, style: {width: 220}}`
+  (or by name in a project). It is a view of its own, with its own ids and its own ViewModel when there is one
+  (`Left_ViewModel.py`), and it needs none: a view with no ViewModel is static. `view.embedded(id)` and `view.viewmodel` read
+  them from Python; `tesserae.component.embed` is the function. See [Components & Embedding](guide/components.md#in-yaml-view).
+
 ## 0.4.3.3
 
 tre 0.5.5 ([#94](https://github.com/mindderivative/tesserae/issues/94)).

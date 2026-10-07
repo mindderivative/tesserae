@@ -46,6 +46,32 @@ component follows. Its own `*_View.yaml` is hot-reloaded too: editing it
 reloads every live instance in place, including ones added while the app
 runs (see [Hot Reload](hot-reload.md#components-added-at-run-time)).
 
+## In YAML: `view:`
+
+A `view:` node shows another view where it is, with no Python. It is the YAML form of `instantiate`, for a view that is part
+of the layout and not made from data:
+
+```yaml
+id: root
+kind: Container
+style: {flex_direction: horizontal, width: 480, height: 200}
+children:
+  - {id: sidebar, view: Sidebar_View.yaml, style: {width: 160}}
+  - {id: counter, view: Counter, with: {start: 5}}     # a name, found in the project
+```
+
+- The view is a view of its own, so its ids don't clash with the host's: `Sidebar_View.yaml` and the host can both have `id: root`.
+- It has its own ViewModel when there is one, `Sidebar_ViewModel.py` beside it or in the project's `ViewModels/`, and **it needs
+  none**: a view with no ViewModel is static (a layout, a header, a panel of text). A static view can't have `bindings:`,
+  `handlers:` or `two_way:`, and it can't be given `with:`: the error names the file and the node.
+- `with:` is given to the ViewModel's constructor as keyword arguments: `CounterViewModel(view, start=5)`.
+- `style:` on the node places the embedded view in its parent, as on any node. A relative file is relative to the file that names it.
+- It takes the host's theme and follows it, and a view embedded in a view works too.
+- From Python, `view.embedded("counter")` is the embedded view (`.node(...)`, `.viewmodel`) and `view.viewmodel` is a view's
+  own ViewModel.
+- Hot reload watches the embedded file. Editing the host keeps an embedded view whose `view:` and `with:` didn't change, with its
+  state, and builds a new one when they did.
+
 ## Tearing a component down
 
 ```python
