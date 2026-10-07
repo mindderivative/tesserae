@@ -44,8 +44,6 @@ __all__ = ["style_props",
 
 RGBA = tuple[int, int, int, int]
 _TRANSPARENT: RGBA = (0, 0, 0, 0)
-#: The fixed colour `tre`'s TextField draws its text in (`engine-core`).
-_TEXT_FIELD_GLYPH: RGBA = (0x1C, 0x1B, 0x1F, 0xFF)
 #: MD3's baseline colours, for nodes with no theme.
 _BASELINE = tokens.BASELINE
 _CONTROL_KINDS = frozenset({
@@ -691,8 +689,10 @@ def _text_field_props(ctx, node, style):
     text.pop("spans")
     text.pop("selectable")
     outer = {**_layout(style), **_paint(ctx, node["id"], style), "fill": background}
-    # `tre`'s TextField draws its text in MD3's baseline on_surface, not a theme role.
-    inner = {**text, "fill": _TEXT_FIELD_GLYPH, "flex_grow": 1.0, "align_self": "stretch", "role": "textbox", "focusable": True}
+    # What is typed is the theme's `on_surface` (or the style's `foreground`), and the caret its `primary`, so a
+    # dark scheme's field is light on dark: the engine's own default is the light scheme's dark ink.
+    ink = _fill(ctx, node["id"], "foreground", style["foreground"]) if "foreground" in style else _role(ctx, "on_surface")
+    inner = {**text, "fill": ink, "caret_color": _role(ctx, "primary"), "flex_grow": 1.0, "align_self": "stretch", "role": "textbox", "focusable": True}
     return outer, inner
 
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.3.2 (unreleased)
+
+A TextField in dark mode ([#93](https://github.com/mindderivative/tesserae/issues/93)).
+
+### Fixed
+
+- **A `TextField`'s text was dark in a dark scheme**, dark ink on a dark field. What is typed is the theme's
+  `on_surface` now (or the style's `foreground`, if it has one), and the caret is the theme's `primary`, and both follow
+  the app between light and dark.
+
 ## 0.4.3.1
 
 Style files ([#92](https://github.com/mindderivative/tesserae/issues/92)).

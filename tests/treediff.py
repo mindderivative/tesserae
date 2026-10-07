@@ -131,6 +131,8 @@ def diff(spec, frames=None, stylesheet=None, theirs=None):
                     if _get(outer, "shadows") != expected:
                         out.append((node_id, "shadows", expected, _get(outer, "shadows")))
                 continue
+            if kind == "TextField" and prop in ("fill", "caret_color"):
+                continue  # tre's own view builder draws a TextField's text in a fixed dark ink; Tesserae's is the theme's
             # On a TextField, tre's `fill` reads back its text colour, which
             # Tesserae's inner `text_input` carries; its background can't be read.
             # a Link is a box holding its text since M41; its text props are the text's
