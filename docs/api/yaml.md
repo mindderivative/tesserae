@@ -327,6 +327,54 @@ repeat: <a list>
 
 Inside a fragment, any value can also be a `{{ parameter }}`, or chosen by one with `{if: "{{ flag }}", then: a, else: b}`.
 
+## The window
+
+`kind: Window` is the root of a view that is the whole OS window (there is one per app, and it is not embedded or nested). Load it with `app.load("Window")` (or `App(window_view="Window")`). Its `title_bar:` takes a `TitleBar`'s keys and is the window's title bar when the window is `borderless`; its `children` are the content under it; `style:`'s `width` and `height` are the window's size and its `background` the window's.
+
+```yaml
+id: <text>
+kind: <Window>
+title: <text>
+borderless: <true or false>
+min_width: <a number>
+min_height: <a number>
+title_bar:
+  id: <text>
+  title: <text>
+  icon: <one of 15 names>
+  buttons: <a list>
+  children: <a list>
+  style: <a style mapping or text>
+  classes: <a list>
+  a11y: <a mapping>
+style: <a style mapping or text>
+classes: <a list>
+a11y: <a mapping>
+children: <a list>
+```
+
+| Key | Values | What it does |
+| --- | --- | --- |
+| `id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
+| `kind` *(required)* | `Window` | Always `Window`. |
+| `title` | text | The window's title. |
+| `borderless` | `true` or `false` | The OS window has no title bar or borders of its own: the `title_bar:` is the window's (the opposite of `decorations`). |
+| `min_width` | a number | The narrowest the user can resize the window to. |
+| `min_height` | a number | The shortest the user can resize the window to. |
+| `title_bar` | `true` or `false` or a mapping | The window's title bar, a `TitleBar`'s keys: its `title` is the window's by default, and it has the window buttons when the window is `borderless`. |
+| `title_bar.id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
+| `title_bar.title` | text | The window's title. |
+| `title_bar.icon` | one of 15 names | An icon name, shown before the title. |
+| `title_bar.buttons` | a list | Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in. |
+| `title_bar.children` | a list | The nodes inside this one. |
+| `title_bar.style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
+| `title_bar.classes` | a list | Style classes a theme or stylesheet rule can match. |
+| `title_bar.a11y` | a mapping | What assistive technology is told about this node. |
+| `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
+| `classes` | a list | Style classes a theme or stylesheet rule can match. |
+| `a11y` | a mapping | What assistive technology is told about this node. |
+| `children` | a list | The nodes inside this one. |
+
 ## Embedded views
 
 `view: Left_View.yaml` shows another view in place (or a name found in the project: `view: Left`). It is a view of its own, so its ids don't clash with this one's, and it has its own ViewModel when `Left_ViewModel.py` is beside it or in the project; a view with none is static (no bindings, handlers or `two_way:`). `with:` is given to the ViewModel's constructor as keyword arguments. From the host, `view.embedded("left")` is the embedded view and its `.viewmodel` the ViewModel. A relative file is relative to the file that names it.

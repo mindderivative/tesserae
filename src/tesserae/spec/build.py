@@ -59,6 +59,7 @@ _NODE_KEYS = frozenset({
     "image", "icon", "svg", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
+    "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
     "min", "max", "step",  # a SpinBox's (M58)
     "disabled",  # any node's (M70): the View applies it, or a control's own
     "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not

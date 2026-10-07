@@ -42,6 +42,10 @@ def _build_component(parent: Any, path: Path, into: Any) -> Any:
                                        frames={node_id: (rgba, w, h) for node_id, rgba, w, h in frames})
     except ValueError as exc:
         raise ValueError(f"{path}: {exc}") from exc
+    if component.spec.get("window") is not None:  # a Window is the whole OS window: there is one, and it is the app's
+        component.remove()
+        raise ValueError(f"{path}: a `kind: Window` view is the app's window and can't be embedded or instantiated "
+                         "(load it with `app.load`)")
     return component
 
 

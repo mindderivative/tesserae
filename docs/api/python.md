@@ -51,6 +51,8 @@ class App(
     search: Any = (),
     recursive: bool = False,
     decorations: bool = True,
+    borderless: bool | None = None,
+    window_view: str | Path | None = None,
     resize_border: int | None = None,
     min_width: int = 0,
     min_height: int = 0,
@@ -74,6 +76,7 @@ class App(
 
 - `back() -> bool`: Shows the history's previous entry, calling its ViewModel's `on_navigated` with that entry's params.
 - `blur_behind` *(property)*: Whether the compositor blurs what is behind a see-through window (Wayland with KDE, macOS; ignored elsewhere).
+- `borderless` *(property)*: Whether the OS window has no title bar and borders of its own (the opposite of `decorations`): the app draws its own, with a `TitleBar`.
 - `build_view(view_path: str | Path, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> Any`: Builds a view with this app's theme and stylesheet, without registering it -- for a screen given to `register()`, e.g. one whose `ViewModel` needs the `app` itself.
 - `click_through` *(property)*: Whether the whole window ignores the pointer, so clicks reach what is behind it.
 - `close() -> None`: Closes the window as the user's close would: `close_requested` fires first, so an app's "save changes?" check still runs and can cancel it.

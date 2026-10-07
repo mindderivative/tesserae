@@ -4466,6 +4466,156 @@
         }
       }
     },
+    "window_node": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "description": "The OS window: the root of a view (there is one per app). Its `title_bar:` is the window's title bar, its `children` are the window's content, and `style:`'s `width` and `height` are the window's size.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it."
+        },
+        "kind": {
+          "const": "Window"
+        },
+        "title": {
+          "type": "string",
+          "description": "The window's title."
+        },
+        "borderless": {
+          "type": "boolean",
+          "description": "The OS window has no title bar or borders of its own: the `title_bar:` is the window's (the opposite of `decorations`)."
+        },
+        "min_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The narrowest the user can resize the window to."
+        },
+        "min_height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The shortest the user can resize the window to."
+        },
+        "title_bar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "The window's title."
+                },
+                "icon": {
+                  "enum": [
+                    "add",
+                    "arrow_back",
+                    "arrow_forward",
+                    "check",
+                    "chevron_right",
+                    "close",
+                    "expand_more",
+                    "home",
+                    "menu",
+                    "remove",
+                    "search",
+                    "settings",
+                    "window_maximize",
+                    "window_minimize",
+                    "window_restore"
+                  ],
+                  "description": "An icon name, shown before the title."
+                },
+                "buttons": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "enum": [
+                      "minimize",
+                      "maximize",
+                      "close",
+                      "dismiss"
+                    ]
+                  },
+                  "description": "Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in."
+                },
+                "children": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/node"
+                  },
+                  "description": "The nodes inside this one."
+                },
+                "style": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/style"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "_Style\\.yaml$",
+                      "description": "A `*_Style.yaml` file next to this one."
+                    }
+                  ],
+                  "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
+                },
+                "classes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Style classes a theme or stylesheet rule can match."
+                },
+                "a11y": {
+                  "$ref": "#/definitions/a11y"
+                }
+              }
+            }
+          ],
+          "description": "The window's title bar, a `TitleBar`'s keys: its `title` is the window's by default, and it has the window buttons when the window is `borderless`."
+        },
+        "style": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/style"
+            },
+            {
+              "type": "string",
+              "pattern": "_Style\\.yaml$",
+              "description": "A `*_Style.yaml` file next to this one."
+            }
+          ],
+          "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Style classes a theme or stylesheet rule can match."
+        },
+        "a11y": {
+          "$ref": "#/definitions/a11y"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/node"
+          },
+          "description": "The nodes inside this one."
+        }
+      }
+    },
     "node": {
       "type": "object",
       "description": "A node: a widget (`kind:`), a fragment used in place (`component:`), a file put in place (`include:`), or another view (`view:`).",
@@ -4479,6 +4629,10 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "borderless": {
+          "type": "boolean",
+          "description": "The OS window has no title bar or borders of its own: the `title_bar:` is the window's (the opposite of `decorations`)."
         },
         "buttons": {
           "type": "array",
@@ -4761,7 +4915,8 @@
             "Text",
             "TextField",
             "TimePickerDial",
-            "TitleBar"
+            "TitleBar",
+            "Window"
           ],
           "description": "What this node is."
         },
@@ -4790,6 +4945,16 @@
             }
           ],
           "description": "The least a Slider or SpinBox takes."
+        },
+        "min_height": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The shortest the user can resize the window to."
+        },
+        "min_width": {
+          "type": "number",
+          "minimum": 0,
+          "description": "The narrowest the user can resize the window to."
         },
         "minute": {
           "anyOf": [
@@ -4864,7 +5029,92 @@
         },
         "title": {
           "type": "string",
-          "description": "The window's title."
+          "description": "A TitleBar's title, or a Window's."
+        },
+        "title_bar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "The window's title."
+                },
+                "icon": {
+                  "enum": [
+                    "add",
+                    "arrow_back",
+                    "arrow_forward",
+                    "check",
+                    "chevron_right",
+                    "close",
+                    "expand_more",
+                    "home",
+                    "menu",
+                    "remove",
+                    "search",
+                    "settings",
+                    "window_maximize",
+                    "window_minimize",
+                    "window_restore"
+                  ],
+                  "description": "An icon name, shown before the title."
+                },
+                "buttons": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "enum": [
+                      "minimize",
+                      "maximize",
+                      "close",
+                      "dismiss"
+                    ]
+                  },
+                  "description": "Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in."
+                },
+                "children": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/node"
+                  },
+                  "description": "The nodes inside this one."
+                },
+                "style": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/style"
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "_Style\\.yaml$",
+                      "description": "A `*_Style.yaml` file next to this one."
+                    }
+                  ],
+                  "description": "How a node looks: a mapping, or the name of a `*_Style.yaml` file."
+                },
+                "classes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "Style classes a theme or stylesheet rule can match."
+                },
+                "a11y": {
+                  "$ref": "#/definitions/a11y"
+                }
+              }
+            }
+          ],
+          "description": "The window's title bar, a `TitleBar`'s keys: its `title` is the window's by default, and it has the window buttons when the window is `borderless`."
         },
         "two_way": {
           "type": "string",
@@ -4994,8 +5244,26 @@
             ],
             "properties": {
               "kind": {
+                "const": "Window"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/definitions/window_node"
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
                 "not": {
-                  "const": "TitleBar"
+                  "enum": [
+                    "TitleBar",
+                    "Window"
+                  ]
                 }
               }
             }

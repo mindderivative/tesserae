@@ -272,6 +272,12 @@ def render() -> str:
     out += _table(_rows(component, {"properties": extra}), "Key")
     out += ["Inside a fragment, any value can also be a `{{ parameter }}`, or chosen by one with "
             "`{if: \"{{ flag }}\", then: a, else: b}`.", ""]
+    out += ["## The window", "",
+            "`kind: Window` is the root of a view that is the whole OS window (there is one per app, and it is not embedded or nested). "
+            "Load it with `app.load(\"Window\")` (or `App(window_view=\"Window\")`). Its `title_bar:` takes a `TitleBar`'s keys and is the "
+            "window's title bar when the window is `borderless`; its `children` are the content under it; `style:`'s `width` and "
+            "`height` are the window's size and its `background` the window's.", ""]
+    out += _block(view, view.resolve(view.defs["window_node"]), "window")
     out += ["## Embedded views", "",
             "`view: Left_View.yaml` shows another view in place (or a name found in the project: `view: Left`). It is a view of its own, "
             "so its ids don't clash with this one's, and it has its own ViewModel when `Left_ViewModel.py` is beside it or in the project; "

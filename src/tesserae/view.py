@@ -57,6 +57,7 @@ from tesserae.spec.images import check_frame
 from tesserae.project import ProjectError
 from tesserae.spec.embed import embeds_of, expand_embeds
 from tesserae.spec.title_bar import expand_title_bars
+from tesserae.spec.window import expand_windows
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
     focus_ring_color,
@@ -171,7 +172,7 @@ class View:
             window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
             # no `Window.set_theme` (removed in tre 0.3.5): since M40 nothing a view builds reads the window's theme
         self.window = window
-        spec = expand_embeds(expand_title_bars(spec))  # 0.3.0 M3: `kind: TitleBar` into its nodes; 0.4.4: `view:` into containers
+        spec = expand_embeds(expand_title_bars(expand_windows(spec)))  # `kind: Window`, `kind: TitleBar` into its nodes; `view:` into containers
         self._spec = spec
         self._built = Built(root=None)
         self._events = Listeners()
@@ -259,7 +260,7 @@ class View:
 
     def reconcile(self, spec: dict[str, Any], frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
         """Brings the live tree in line with `spec`, in place."""
-        spec = expand_embeds(expand_title_bars(spec))  # 0.3.0 M3 and 0.4.4, as in `__init__`
+        spec = expand_embeds(expand_title_bars(expand_windows(spec)))  # as in `__init__`
         if frames is not None:
             self._frames = dict(frames)
         # All or nothing: build the new spec on the side first, so an error
@@ -288,6 +289,14 @@ class View:
         self._rewire()
         self._prune_components()
         self._sync_embeds()
+        self._window_changed()
+
+    def _window_changed(self) -> None:
+        """A window view that was edited while the app runs sets the OS window again (its title, borderless, sizes)."""
+        app = app_of(self.window)
+        frame = getattr(app, "_frame", None)
+        if frame is not None and frame.view is self:
+            app._apply_window(self._spec.get("window") or {}, resize=False)
 
     def embedded(self, node_id: str) -> "Component":
         """The view the `view:` node `node_id` embeds. Its ViewModel is `.viewmodel`, `None` for a view with none."""

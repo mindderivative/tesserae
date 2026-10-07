@@ -6,6 +6,12 @@ A window, a dock and embedded views in the same YAML as every other view ([#95](
 
 ### Added
 
+- **`kind: Window`**: the root of a `*_View.yaml` that is the whole OS window, with `title:`, `borderless:`, `min_width:`,
+  `min_height:`, a `title_bar:` (a `TitleBar`'s keys; the window's own when `borderless`), `children:` for the content, and
+  `style:` `width`/`height` for the window's size and `background` for its colour. `app.load("Window")` (or
+  `App(window_view="Window")`) loads it, sets the OS window from it, and mounts it for good; it needs no ViewModel. There is one per
+  app, and it can't be nested or embedded. Editing it while the app runs sets the window again. **`borderless`** is the new name for an OS
+  window without its title bar and borders: `App(borderless=True)` and `app.borderless` (`decorations` still works).
 - **A `TitleBar` in a dialog or a sheet**: `buttons: [dismiss]` makes a bar with no window buttons, no OS-controls room and no drag
   region, whose button closes the surface it is in (`surface.dismiss`, a new handler next to `window.*`; `dismiss_surface(node)` from
   Python). **`ViewDialog(window, "Settings_View.yaml")`** is a dialog whose content is a view, with or without a ViewModel

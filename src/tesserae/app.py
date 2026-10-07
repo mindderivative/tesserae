@@ -18,6 +18,7 @@ life of the `App`.
 from __future__ import annotations
 
 import os
+import re
 import sys
 import time
 import weakref
@@ -32,7 +33,9 @@ from tre import Window
 from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.listeners import Listeners
 from tesserae.naming import check_naming_convention
-from tesserae.project import Project, is_name, resolve_view
+from tesserae.project import Project, is_name, resolve_embedded, resolve_view
+from tesserae.spec.window import window_of
+from tesserae.window_view import Frame, WindowViewModel
 from tesserae import tokens
 from tesserae.reactive import Computed, Effect, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
@@ -178,6 +181,15 @@ def _file_or_spec(owner: str, file_arg: str, file: Any, spec: Any, loader: Any) 
     return loader(file) if file is not None else spec
 
 
+def _is_window_file(path: Any) -> bool:
+    """Whether the view file at `path` has `kind: Window` as its root (a top-level `kind:` line)."""
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return re.search(r"^kind:\s*Window\s*(#.*)?$", text, re.M) is not None
+
+
 def _script_folder() -> Path:
     """The folder of the script that runs (`app.py`), or the current folder."""
     script = getattr(sys.modules.get("__main__"), "__file__", None)
@@ -228,6 +240,8 @@ class App:
         search: Any = (),
         recursive: bool = False,
         decorations: bool = True,
+        borderless: bool | None = None,
+        window_view: str | Path | None = None,
         resize_border: int | None = None,
         min_width: int = 0,
         min_height: int = 0,
@@ -248,6 +262,10 @@ class App:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
         #: `self.state`, and a binding as `{{ state.<name>.get() }}`.
+        if borderless is not None:  # the name other frameworks use: the OS window without its title bar and borders
+            if borderless is False and decorations is False:
+                raise ValueError("App: borderless=False and decorations=False say opposite things; give one (borderless)")
+            decorations = not borderless
         self.state = state
         #: The project's files, found by name: `Views/`, `ViewModels/`, `Components/`, `Themes/` and `Styles/`
         #: under `root` (the folder of the script that runs, by default), and the folders in `search`; with
@@ -352,6 +370,8 @@ class App:
                 self._dark = os_dark
         self._current: str | None = None
         self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
+        #: The window view (`kind: Window`) once one is loaded: its `Frame` (0.4.4)
+        self._frame: Any = None
         self._shell_file: Path | None = None  # the `*_Shell.yaml` `load_shell` read (M52)
         self._shell_spec: Any = None  # ...its spec as last applied, and the viewmodel it was given
         self._shell_viewmodel: Any = None
@@ -391,6 +411,8 @@ class App:
 
             set_system_fonts(True)
         self._transparent = bool(transparent)
+        if window_view is not None:  # the app's window, in YAML: `kind: Window` (0.4.4)
+            self.load(window_view)
 
     def _set_window(self, **options: Any) -> None:
         """Sets window options, naming the option and the app when the platform can't do it."""
@@ -845,14 +867,51 @@ class App:
         Returns the `(view, viewmodel)` pair, for code that wants a node to click in a test or a Signal to
         read back.
         """
-        view_path, viewmodel_cls = resolve_view(self.project, view_path, viewmodel_cls)
-        prefix = check_naming_convention(view_path, viewmodel_cls)
+        if viewmodel_cls is None and _is_window_file(self._named("view", view_path)):  # a window view needs none (0.4.4)
+            path, found = resolve_embedded(self.project, view_path)
+            viewmodel_cls = found if found is not None else WindowViewModel
+            prefix = path.name.removesuffix("_View.yaml")
+            if found is not None:
+                check_naming_convention(path, found)
+            view_path = path
+        else:
+            view_path, viewmodel_cls = resolve_view(self.project, view_path, viewmodel_cls)
+            prefix = check_naming_convention(view_path, viewmodel_cls)
 
         view = self.build_view(view_path, stylesheet=stylesheet, stylesheet_spec=stylesheet_spec)
         viewmodel = viewmodel_cls(view)
         self.register(name or prefix, view, viewmodel)
+        if window_of(view.spec) is not None:
+            self._adopt_window_view(name or prefix, view)
         logger.debug("loaded {!r} from {}", name or prefix, view_path)
         return view, viewmodel
+
+    def _adopt_window_view(self, name: str, view: Any) -> None:
+        """A loaded `kind: Window` view becomes the app's frame: it sets the OS window, and is mounted in it for good."""
+        if self._frame is not None:
+            raise ValueError(f"the app already has a window view ({self._frame.name!r}); {name!r} is a second: "
+                             "an app has one window")
+        if self._shell is not None:
+            raise ValueError(f"the window view {name!r} can't be used with an app shell (use_shell/load_shell): "
+                             "the window view is the frame")
+        self._frame = Frame(self, name, view)
+        self._apply_window(window_of(view.spec) or {})
+        if view.root.parent() is None:
+            self._window.root.add_child(view.root)
+        self._current = name
+
+    def _apply_window(self, options: dict[str, Any], *, resize: bool = True) -> None:
+        """Sets the OS window from a window view's `window:` (title, borderless, min sizes and, loading, its size)."""
+        if options.get("title") is not None:
+            self._title = options["title"]
+            self._window.set(title=options["title"])
+        self.borderless = bool(options.get("borderless", False))
+        for key in ("min_width", "min_height"):
+            if key in options:
+                setattr(self, key, int(options[key]))
+        if resize and options.get("size") is not None:
+            width, height = options["size"]
+            self._window.resize(int(width), int(height))
 
     def show(self, name: str) -> Window:
         """Shows the view registered under `name` in the app's window: its
@@ -995,7 +1054,10 @@ class App:
             raise KeyError(f"no view registered under {name!r} -- call register() first")
         previous = self._registered[self._current].view.root if self._current not in (None, name) else None
         root = registered.view.root
-        if self._shell is not None:  # M45: the shell places it (in its content, or as a center tab)
+        if self._frame is not None:  # a window view: its routed views are the screens (0.4.4)
+            if name != self._frame.name:
+                self._frame.show_screen(root, name, previous)
+        elif self._shell is not None:  # M45: the shell places it (in its content, or as a center tab)
             self._shell.show_screen(root, name, previous)
         else:
             if previous is not None:
@@ -1096,6 +1158,16 @@ class App:
     def decorations(self, value: bool) -> None:
         self._window.set(decorations=bool(value), resize_border=self._resize_for(bool(value)))
         self._decorated.set(bool(value))
+
+    @property
+    def borderless(self) -> bool:
+        """Whether the OS window has no title bar and borders of its own (the opposite of `decorations`): the app draws
+        its own, with a `TitleBar`. It can change while the app runs."""
+        return not self.decorations
+
+    @borderless.setter
+    def borderless(self, value: bool) -> None:
+        self.decorations = not bool(value)
 
     @property
     def resize_border(self) -> int:
