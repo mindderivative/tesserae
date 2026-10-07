@@ -22,7 +22,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Optional
 
-__all__ = ["STYLE_FIELDS", "Sheet", "check_stylesheet", "check_theme", "component_key", "resolve_style"]
+__all__ = ["STYLE_FIELDS", "STYLE_GROUPS", "STYLE_GROUP_OF", "Sheet", "check_stylesheet", "check_theme", "component_key", "resolve_style"]
 
 _THEME_FIELDS = ("seed", "dark", "colors", "styles", "components", "typography")
 
@@ -63,6 +63,22 @@ STYLE_FIELDS = frozenset({
     "display", "grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows",
     "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap",
 })
+
+#: The style fields in sections, in the order the YAML reference and the schema show them; each field is in exactly one.
+STYLE_GROUPS: dict[str, tuple[str, ...]] = {
+    "Size and spacing": ("width", "height", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
+                         "padding", "margin"),
+    "Flex": ("flex", "flex_direction", "flex_wrap", "gap"),
+    "Alignment": ("align_content", "align_self", "spread", "align_wrapped"),
+    "Grid": ("display", "grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows",
+             "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap", "align_tracks", "align_cells"),
+    "Position": ("position", "x", "y", "z_index", "sticky"),
+    "Docking": ("zone",),
+    "Paint and effects": ("background", "foreground", "border_width", "border_color", "corner_radius", "opacity",
+                          "elevation", "clip_children", "blur", "backdrop_blur", "blend_mode", "filter", "cursor"),
+}
+#: A style field's section.
+STYLE_GROUP_OF: dict[str, str] = {name: group for group, names in STYLE_GROUPS.items() for name in names}
 
 
 @dataclass

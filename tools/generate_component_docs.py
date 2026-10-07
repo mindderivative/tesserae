@@ -54,7 +54,8 @@ def _style_field_help() -> dict[str, str]:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     style = module._definitions(fragment=False)["style"]["properties"]
-    return {name: " ".join(prop.get("description", "").split()) for name, prop in style.items()}
+    return {name: " ".join(prop.get("description", "").split()).removesuffix(f" ({prop['x-group']}.)") if "x-group" in prop
+            else " ".join(prop.get("description", "").split()) for name, prop in style.items()}
 
 
 # -- reading the fragments ---------------------------------------------------------------------

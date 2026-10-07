@@ -137,7 +137,8 @@
             "bottom",
             "bottom_right"
           ],
-          "description": "In a grid: where each item sits in its cell."
+          "description": "In a grid: where each item sits in its cell. (Grid.)",
+          "x-group": "Grid"
         },
         "align_content": {
           "enum": [
@@ -151,7 +152,8 @@
             "bottom",
             "bottom_right"
           ],
-          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout."
+          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. (Alignment.)",
+          "x-group": "Alignment"
         },
         "align_self": {
           "enum": [
@@ -165,7 +167,8 @@
             "bottom",
             "bottom_right"
           ],
-          "description": "Its own place in its parent, over the parent's `align_content`."
+          "description": "Its own place in its parent, over the parent's `align_content`. (Alignment.)",
+          "x-group": "Alignment"
         },
         "align_tracks": {
           "enum": [
@@ -177,7 +180,8 @@
             "around",
             "evenly"
           ],
-          "description": "In a grid: how the tracks share the room left over."
+          "description": "In a grid: how the tracks share the room left over. (Grid.)",
+          "x-group": "Grid"
         },
         "align_wrapped": {
           "enum": [
@@ -189,21 +193,25 @@
             "around",
             "evenly"
           ],
-          "description": "With `flex_wrap: wrap`: how the lines share the room left over."
+          "description": "With `flex_wrap: wrap`: how the lines share the room left over. (Alignment.)",
+          "x-group": "Alignment"
         },
         "aspect_ratio": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Width over height: gives the missing side from the one set."
+          "description": "Width over height: gives the missing side from the one set. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "backdrop_blur": {
           "type": "number",
           "minimum": 0,
-          "description": "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface."
+          "description": "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "background": {
           "$ref": "#/definitions/fill",
-          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`."
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "blend_mode": {
           "enum": [
@@ -224,30 +232,36 @@
             "color",
             "luminosity"
           ],
-          "description": "How it is drawn over what is behind it, as CSS `mix-blend-mode`."
+          "description": "How it is drawn over what is behind it, as CSS `mix-blend-mode`. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "blur": {
           "type": "number",
           "minimum": 0,
-          "description": "Blurs the node and what it draws, by this many pixels."
+          "description": "Blurs the node and what it draws, by this many pixels. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "border_color": {
           "$ref": "#/definitions/fill",
-          "description": "The colour of its border: a colour or a gradient."
+          "description": "The colour of its border: a colour or a gradient. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "border_width": {
           "type": "number",
           "minimum": 0,
-          "description": "The width of its border, in pixels."
+          "description": "The width of its border, in pixels. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "clip_children": {
           "type": "boolean",
-          "description": "Whether children are cut off at its edge."
+          "description": "Whether children are cut off at its edge. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "column_gap": {
           "type": "number",
           "minimum": 0,
-          "description": "Space between columns (defaults to `gap`)."
+          "description": "Space between columns (defaults to `gap`). (Grid.)",
+          "x-group": "Grid"
         },
         "corner_radius": {
           "anyOf": [
@@ -265,7 +279,8 @@
               ]
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `extra_large`)."
+          "description": "Pixels, or a shape token (`none` to `extra_large`). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "cursor": {
           "anyOf": [
@@ -317,14 +332,16 @@
               }
             }
           ],
-          "description": "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`)."
+          "description": "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "display": {
           "enum": [
             "flex",
             "grid"
           ],
-          "description": "`flex` (the default) or `grid`."
+          "description": "`flex` (the default) or `grid`. (Grid.)",
+          "x-group": "Grid"
         },
         "elevation": {
           "anyOf": [
@@ -342,7 +359,8 @@
               ]
             }
           ],
-          "description": "A shadow level, 0 to 5."
+          "description": "A shadow level, 0 to 5. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "filter": {
           "type": "object",
@@ -377,7 +395,8 @@
               "description": "0 is unchanged, 1 fully sepia."
             }
           },
-          "description": "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees)."
+          "description": "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "flex": {
           "enum": [
@@ -386,30 +405,35 @@
             "expand_vertical",
             "fill"
           ],
-          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both."
+          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. (Flex.)",
+          "x-group": "Flex"
         },
         "flex_direction": {
           "enum": [
             "horizontal",
             "vertical"
           ],
-          "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
+          "description": "How its children are laid out: `horizontal` (the default) or `vertical`. (Flex.)",
+          "x-group": "Flex"
         },
         "flex_wrap": {
           "enum": [
             "no_wrap",
             "wrap"
           ],
-          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one."
+          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one. (Flex.)",
+          "x-group": "Flex"
         },
         "gap": {
           "type": "number",
           "minimum": 0,
-          "description": "Space between its children."
+          "description": "Space between its children. (Flex.)",
+          "x-group": "Flex"
         },
         "grid_auto_columns": {
           "type": "string",
-          "description": "The size of columns the template doesn't name."
+          "description": "The size of columns the template doesn't name. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_auto_flow": {
           "enum": [
@@ -419,11 +443,13 @@
             "column dense",
             "dense"
           ],
-          "description": "How grid children fill the cells."
+          "description": "How grid children fill the cells. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_auto_rows": {
           "type": "string",
-          "description": "The size of rows the template doesn't name."
+          "description": "The size of rows the template doesn't name. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_column": {
           "anyOf": [
@@ -434,7 +460,8 @@
               "type": "integer"
             }
           ],
-          "description": "Which grid column it takes: `2`, or `1 / 3`."
+          "description": "Which grid column it takes: `2`, or `1 / 3`. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_row": {
           "anyOf": [
@@ -445,15 +472,18 @@
               "type": "integer"
             }
           ],
-          "description": "Which grid row it takes: `2`, or `1 / 3`."
+          "description": "Which grid row it takes: `2`, or `1 / 3`. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_template_columns": {
           "type": "string",
-          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`."
+          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_template_rows": {
           "type": "string",
-          "description": "The grid's rows, as in CSS."
+          "description": "The grid's rows, as in CSS. (Grid.)",
+          "x-group": "Grid"
         },
         "height": {
           "anyOf": [
@@ -470,7 +500,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "margin": {
           "anyOf": [
@@ -496,7 +527,8 @@
               "additionalProperties": false
             }
           ],
-          "description": "Space outside it: one number, or `{left, right, top, bottom}`."
+          "description": "Space outside it: one number, or `{left, right, top, bottom}`. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "max_height": {
           "anyOf": [
@@ -513,7 +545,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The most height it can take."
+          "description": "The most height it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "max_width": {
           "anyOf": [
@@ -530,7 +563,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The most width it can take."
+          "description": "The most width it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "min_height": {
           "anyOf": [
@@ -547,7 +581,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The least height it can take."
+          "description": "The least height it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "min_width": {
           "anyOf": [
@@ -564,13 +599,15 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The least width it can take."
+          "description": "The least width it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "opacity": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "From 0 (clear) to 1 (opaque)."
+          "description": "From 0 (clear) to 1 (opaque). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "padding": {
           "anyOf": [
@@ -596,19 +633,22 @@
               "additionalProperties": false
             }
           ],
-          "description": "Space inside it: one number, or `{left, right, top, bottom}`."
+          "description": "Space inside it: one number, or `{left, right, top, bottom}`. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "position": {
           "enum": [
             "relative",
             "absolute"
           ],
-          "description": "`absolute` takes it out of the flow and places it at `x` and `y`."
+          "description": "`absolute` takes it out of the flow and places it at `x` and `y`. (Position.)",
+          "x-group": "Position"
         },
         "row_gap": {
           "type": "number",
           "minimum": 0,
-          "description": "Space between rows (defaults to `gap`)."
+          "description": "Space between rows (defaults to `gap`). (Grid.)",
+          "x-group": "Grid"
         },
         "spread": {
           "enum": [
@@ -617,11 +657,13 @@
             "around",
             "evenly"
           ],
-          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`."
+          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`. (Alignment.)",
+          "x-group": "Alignment"
         },
         "sticky": {
           "type": "number",
-          "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."
+          "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. (Position.)",
+          "x-group": "Position"
         },
         "width": {
           "anyOf": [
@@ -638,7 +680,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "x": {
           "anyOf": [
@@ -651,7 +694,8 @@
               ]
             }
           ],
-          "description": "Where an `absolute` node sits from the left."
+          "description": "Where an `absolute` node sits from the left. (Position.)",
+          "x-group": "Position"
         },
         "y": {
           "anyOf": [
@@ -664,11 +708,13 @@
               ]
             }
           ],
-          "description": "Where an `absolute` node sits from the top."
+          "description": "Where an `absolute` node sits from the top. (Position.)",
+          "x-group": "Position"
         },
         "z_index": {
           "type": "integer",
-          "description": "Stacking order: higher is in front."
+          "description": "Stacking order: higher is in front. (Position.)",
+          "x-group": "Position"
         },
         "zone": {
           "enum": [
@@ -678,7 +724,8 @@
             "bottom",
             "center"
           ],
-          "description": "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error."
+          "description": "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error. (Docking.)",
+          "x-group": "Docking"
         }
       },
       "additionalProperties": false
@@ -699,7 +746,8 @@
             "bottom",
             "bottom_right"
           ],
-          "description": "In a grid: where each item sits in its cell."
+          "description": "In a grid: where each item sits in its cell. (Grid.)",
+          "x-group": "Grid"
         },
         "align_content": {
           "enum": [
@@ -713,7 +761,8 @@
             "bottom",
             "bottom_right"
           ],
-          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout."
+          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. (Alignment.)",
+          "x-group": "Alignment"
         },
         "align_self": {
           "enum": [
@@ -727,7 +776,8 @@
             "bottom",
             "bottom_right"
           ],
-          "description": "Its own place in its parent, over the parent's `align_content`."
+          "description": "Its own place in its parent, over the parent's `align_content`. (Alignment.)",
+          "x-group": "Alignment"
         },
         "align_tracks": {
           "enum": [
@@ -739,7 +789,8 @@
             "around",
             "evenly"
           ],
-          "description": "In a grid: how the tracks share the room left over."
+          "description": "In a grid: how the tracks share the room left over. (Grid.)",
+          "x-group": "Grid"
         },
         "align_wrapped": {
           "enum": [
@@ -751,21 +802,25 @@
             "around",
             "evenly"
           ],
-          "description": "With `flex_wrap: wrap`: how the lines share the room left over."
+          "description": "With `flex_wrap: wrap`: how the lines share the room left over. (Alignment.)",
+          "x-group": "Alignment"
         },
         "aspect_ratio": {
           "type": "number",
           "exclusiveMinimum": 0,
-          "description": "Width over height: gives the missing side from the one set."
+          "description": "Width over height: gives the missing side from the one set. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "backdrop_blur": {
           "type": "number",
           "minimum": 0,
-          "description": "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface."
+          "description": "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "background": {
           "$ref": "#/definitions/fill",
-          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`."
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "blend_mode": {
           "enum": [
@@ -786,30 +841,36 @@
             "color",
             "luminosity"
           ],
-          "description": "How it is drawn over what is behind it, as CSS `mix-blend-mode`."
+          "description": "How it is drawn over what is behind it, as CSS `mix-blend-mode`. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "blur": {
           "type": "number",
           "minimum": 0,
-          "description": "Blurs the node and what it draws, by this many pixels."
+          "description": "Blurs the node and what it draws, by this many pixels. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "border_color": {
           "$ref": "#/definitions/fill",
-          "description": "The colour of its border: a colour or a gradient."
+          "description": "The colour of its border: a colour or a gradient. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "border_width": {
           "type": "number",
           "minimum": 0,
-          "description": "The width of its border, in pixels."
+          "description": "The width of its border, in pixels. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "clip_children": {
           "type": "boolean",
-          "description": "Whether children are cut off at its edge."
+          "description": "Whether children are cut off at its edge. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "column_gap": {
           "type": "number",
           "minimum": 0,
-          "description": "Space between columns (defaults to `gap`)."
+          "description": "Space between columns (defaults to `gap`). (Grid.)",
+          "x-group": "Grid"
         },
         "corner_radius": {
           "anyOf": [
@@ -827,7 +888,8 @@
               ]
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `extra_large`)."
+          "description": "Pixels, or a shape token (`none` to `extra_large`). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "cursor": {
           "anyOf": [
@@ -879,14 +941,16 @@
               }
             }
           ],
-          "description": "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`)."
+          "description": "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "display": {
           "enum": [
             "flex",
             "grid"
           ],
-          "description": "`flex` (the default) or `grid`."
+          "description": "`flex` (the default) or `grid`. (Grid.)",
+          "x-group": "Grid"
         },
         "elevation": {
           "anyOf": [
@@ -904,7 +968,8 @@
               ]
             }
           ],
-          "description": "A shadow level, 0 to 5."
+          "description": "A shadow level, 0 to 5. (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "filter": {
           "type": "object",
@@ -939,7 +1004,8 @@
               "description": "0 is unchanged, 1 fully sepia."
             }
           },
-          "description": "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees)."
+          "description": "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "flex": {
           "enum": [
@@ -948,30 +1014,35 @@
             "expand_vertical",
             "fill"
           ],
-          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both."
+          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. (Flex.)",
+          "x-group": "Flex"
         },
         "flex_direction": {
           "enum": [
             "horizontal",
             "vertical"
           ],
-          "description": "How its children are laid out: `horizontal` (the default) or `vertical`."
+          "description": "How its children are laid out: `horizontal` (the default) or `vertical`. (Flex.)",
+          "x-group": "Flex"
         },
         "flex_wrap": {
           "enum": [
             "no_wrap",
             "wrap"
           ],
-          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one."
+          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one. (Flex.)",
+          "x-group": "Flex"
         },
         "gap": {
           "type": "number",
           "minimum": 0,
-          "description": "Space between its children."
+          "description": "Space between its children. (Flex.)",
+          "x-group": "Flex"
         },
         "grid_auto_columns": {
           "type": "string",
-          "description": "The size of columns the template doesn't name."
+          "description": "The size of columns the template doesn't name. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_auto_flow": {
           "enum": [
@@ -981,11 +1052,13 @@
             "column dense",
             "dense"
           ],
-          "description": "How grid children fill the cells."
+          "description": "How grid children fill the cells. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_auto_rows": {
           "type": "string",
-          "description": "The size of rows the template doesn't name."
+          "description": "The size of rows the template doesn't name. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_column": {
           "anyOf": [
@@ -996,7 +1069,8 @@
               "type": "integer"
             }
           ],
-          "description": "Which grid column it takes: `2`, or `1 / 3`."
+          "description": "Which grid column it takes: `2`, or `1 / 3`. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_row": {
           "anyOf": [
@@ -1007,15 +1081,18 @@
               "type": "integer"
             }
           ],
-          "description": "Which grid row it takes: `2`, or `1 / 3`."
+          "description": "Which grid row it takes: `2`, or `1 / 3`. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_template_columns": {
           "type": "string",
-          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`."
+          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`. (Grid.)",
+          "x-group": "Grid"
         },
         "grid_template_rows": {
           "type": "string",
-          "description": "The grid's rows, as in CSS."
+          "description": "The grid's rows, as in CSS. (Grid.)",
+          "x-group": "Grid"
         },
         "margin": {
           "anyOf": [
@@ -1041,7 +1118,8 @@
               "additionalProperties": false
             }
           ],
-          "description": "Space outside it: one number, or `{left, right, top, bottom}`."
+          "description": "Space outside it: one number, or `{left, right, top, bottom}`. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "max_height": {
           "anyOf": [
@@ -1058,7 +1136,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The most height it can take."
+          "description": "The most height it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "max_width": {
           "anyOf": [
@@ -1075,7 +1154,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The most width it can take."
+          "description": "The most width it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "min_height": {
           "anyOf": [
@@ -1092,7 +1172,8 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The least height it can take."
+          "description": "The least height it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "min_width": {
           "anyOf": [
@@ -1109,13 +1190,15 @@
               "pattern": "^-?\\d+(\\.\\d+)?%$"
             }
           ],
-          "description": "The least width it can take."
+          "description": "The least width it can take. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "opacity": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "From 0 (clear) to 1 (opaque)."
+          "description": "From 0 (clear) to 1 (opaque). (Paint and effects.)",
+          "x-group": "Paint and effects"
         },
         "padding": {
           "anyOf": [
@@ -1141,19 +1224,22 @@
               "additionalProperties": false
             }
           ],
-          "description": "Space inside it: one number, or `{left, right, top, bottom}`."
+          "description": "Space inside it: one number, or `{left, right, top, bottom}`. (Size and spacing.)",
+          "x-group": "Size and spacing"
         },
         "position": {
           "enum": [
             "relative",
             "absolute"
           ],
-          "description": "`absolute` takes it out of the flow and places it at `x` and `y`."
+          "description": "`absolute` takes it out of the flow and places it at `x` and `y`. (Position.)",
+          "x-group": "Position"
         },
         "row_gap": {
           "type": "number",
           "minimum": 0,
-          "description": "Space between rows (defaults to `gap`)."
+          "description": "Space between rows (defaults to `gap`). (Grid.)",
+          "x-group": "Grid"
         },
         "spread": {
           "enum": [
@@ -1162,11 +1248,13 @@
             "around",
             "evenly"
           ],
-          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`."
+          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`. (Alignment.)",
+          "x-group": "Alignment"
         },
         "sticky": {
           "type": "number",
-          "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."
+          "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. (Position.)",
+          "x-group": "Position"
         },
         "x": {
           "anyOf": [
@@ -1179,7 +1267,8 @@
               ]
             }
           ],
-          "description": "Where an `absolute` node sits from the left."
+          "description": "Where an `absolute` node sits from the left. (Position.)",
+          "x-group": "Position"
         },
         "y": {
           "anyOf": [
@@ -1192,11 +1281,13 @@
               ]
             }
           ],
-          "description": "Where an `absolute` node sits from the top."
+          "description": "Where an `absolute` node sits from the top. (Position.)",
+          "x-group": "Position"
         },
         "z_index": {
           "type": "integer",
-          "description": "Stacking order: higher is in front."
+          "description": "Stacking order: higher is in front. (Position.)",
+          "x-group": "Position"
         },
         "zone": {
           "enum": [
@@ -1206,7 +1297,8 @@
             "bottom",
             "center"
           ],
-          "description": "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error."
+          "description": "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error. (Docking.)",
+          "x-group": "Docking"
         }
       },
       "additionalProperties": false

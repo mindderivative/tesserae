@@ -29,8 +29,8 @@ The options (`decorations`, `resize_border`, `min_width`, `system_menu`, `icon`,
 window's actions and the `app.maximized` and `app.active` values a binding can follow are in
 [The window](apps-and-screens.md#the-window), and the [Python API](../api/python.md).
 
-`tesserae new notes --shell --custom-title-bar` makes an app like this
-([The `tesserae` command](cli.md)).
+`tesserae new notes --window --custom-title-bar` makes an app like this
+([The `tesserae` command](cli.md)); the window is a [`kind: Window`](windows-and-docks.md) with `borderless: true` and a `title_bar:`.
 
 ## `kind: TitleBar`
 

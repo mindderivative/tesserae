@@ -70,6 +70,7 @@ nav:
       - Interaction & Accessibility: guide/interaction.md
       - Controls: guide/controls.md
       - Overlays: guide/overlays.md
+      - Windows, Docks & Embedded Views: guide/windows-and-docks.md
       - App Shell & Docking: guide/app-shell.md
       - Custom Title Bars: guide/custom-title-bars.md
       - Hot Reload: guide/hot-reload.md
@@ -134,6 +135,12 @@ nav:
           - Status bar: components/status-bar.md
           - Node graph: components/node-graph.md
           - Splitter: components/splitter.md
+      - Windows and docking:
+          - Window: components/window.md
+          - Title bar: components/title-bar.md
+          - Dock: components/dock.md
+          - Dock panel: components/dock-panel.md
+          - Routed views: components/routed-views.md
   - Stylesheets:
       - Overview: stylesheets/index.md
       - Actions:

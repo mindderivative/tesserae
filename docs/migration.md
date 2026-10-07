@@ -3,6 +3,24 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.4
+
+Nothing has to change: shell files, `app.load_shell()` and `decorations=False` work as before. New apps can write their frame as
+a `kind: Window` view (`tesserae new notes --window`), and the shell file is being phased out, so an app that has one can move
+over when it likes:
+
+| In the shell file | In the window view |
+| --- | --- |
+| `top_bar: {title: Notes}` | `title_bar: {title: Notes}` on the `kind: Window` root |
+| `navigation: {items: [...]}` | a `NavigationRailScreens` with the same items (`screen:` names a screen) |
+| `status_bar: {text: Ready}` | a `StatusBar` component |
+| `zones:` | a `kind: Dock` with `kind: DockPanel`s, each `style: {zone: left}` |
+| `app.load("Main")` and `app.route("", "Main")` | `- {id: main, view: Main_View.yaml, route: ""}` in the window view |
+| `App(decorations=False)` | `borderless: true` on the window (or `App(borderless=True)`) |
+
+Then `app.load("Window")` replaces `app.load_shell(...)`. [Windows, Docks & Embedded Views](guide/windows-and-docks.md) has each form.
+An app can't load a window view and a shell file together.
+
 ## To 0.4.3.3
 
 Tesserae needs `tre` (`tesserae-engine`) 0.5.5 or newer, below 0.6: `pip install --upgrade tesserae-ui` brings it. Nothing in your code has

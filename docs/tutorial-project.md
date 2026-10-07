@@ -186,10 +186,11 @@ route to `app.py`. Fill them in, and share state through the app:
 
 ## 6. A custom window
 
-An app shell is one more file in `Views/`, loaded by name:
+The app's frame is one more view, a `kind: Window` file in `Views/`, loaded by name. It holds the title bar, a rail, a status
+bar, and the two screens as `view:` nodes with a `route:`:
 
-```yaml title="Views/Tasks_Shell.yaml"
---8<-- "examples/tutorial_project/step6/Views/Tasks_Shell.yaml"
+```yaml title="Views/Window_View.yaml"
+--8<-- "examples/tutorial_project/step6/Views/Window_View.yaml"
 ```
 
 ```yaml title="Views/Settings_View.yaml"
@@ -213,8 +214,11 @@ An app shell is one more file in `Views/`, loaded by name:
 ```
 
 - The rail replaces the Settings button, so `Main_ViewModel.py` loses `open_settings`.
-- `app.load_shell("Tasks")` opens `Views/Tasks_Shell.yaml`. The shell's navigation names screens (`Main`,
-  `Settings`), which `app.load` registered.
+- `app.load("Window")` opens `Views/Window_View.yaml`. Its `view: Main_View.yaml` and `view: Settings_View.yaml` nodes, with a
+  `route:`, are the screens: each is registered under its file's name (`Main`, `Settings`) and finds its ViewModel in
+  `ViewModels/`, so `app.py` no longer loads or routes them.
+- The window's `borderless: true` and `title_bar:` replace `decorations=False`; the rail is a `NavigationRailScreens` whose
+  `screen:` names the screens.
 
 ## Where next
 

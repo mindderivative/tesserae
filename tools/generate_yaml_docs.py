@@ -20,6 +20,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from tesserae.spec import cascade
+
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "docs" / "api" / "yaml.md"
 
@@ -207,6 +209,23 @@ def _stub(reader: Reader, schema: dict[str, Any], indent: int = 0, depth: int = 
     return lines
 
 
+def _style_tables(reader: Reader) -> list[str]:
+    """The style fields in the sections `tesserae.spec.cascade.STYLE_GROUPS` makes, each its own table."""
+    style = reader.defs["style"]
+    rows = _rows(reader, style)
+    by_group: dict[str, list[tuple[str, str, str, bool]]] = {}
+    for row in rows:
+        top = row[0].split(".")[0]  # a field's own keys (`filter.sepia`) go with it
+        group = style["properties"][top]["x-group"]
+        by_group.setdefault(group, []).append((row[0], row[1], row[2].removesuffix(f" ({group}.)"), row[3]))
+    out: list[str] = []
+    for group in cascade.STYLE_GROUPS:
+        out += [f"### {group}", ""] + _table(by_group.pop(group), "Field")
+    if by_group:
+        raise SystemExit(f"style fields in no known group: {sorted(by_group)}")
+    return out
+
+
 def _block(reader: Reader, schema: dict[str, Any], what: str, first: str = "Key") -> list[str]:
     return ["```yaml", *_stub(reader, schema), "```", "", *_table(_rows(reader, schema), first)]
 
@@ -241,7 +260,7 @@ def render() -> str:
     out += ["## The style", "", "A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` file, which holds them under a "
             "`style:` key (and an optional `id:` naming it): `{id: row_style, style: {gap: 8}}`. "
             "The same fields go in a stylesheet's or theme's rules, and in a shell file's parts.", ""]
-    out += _table(_rows(view, view.defs["style"]), "Field")
+    out += _style_tables(view)
     out += ["## Colors", "", "Any field that takes a color takes " + view.defs["color"]["description"][0].lower()
             + view.defs["color"]["description"][1:].replace("A theme role (", "a theme role (", 1) + "", ""]
     out += ["## Gradients", "",

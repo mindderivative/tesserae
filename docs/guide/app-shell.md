@@ -1,5 +1,11 @@
 # App Shell & Docking
 
+!!! note "Superseded"
+    The shell file and `AppShell` are being phased out. An app's frame is written as a `kind: Window` view now, with a
+    `kind: Dock` for docked panels, a `title_bar:`, and screens that are `view:` nodes with a `route:`:
+    [Windows, Docks & Embedded Views](windows-and-docks.md). This page stays for apps that have a shell file, and for
+    docking from Python.
+
 An app shell is the frame around an app's screens: a top app bar, a
 navigation rail or drawer, a status bar, and panels docked around the
 content — a file tree on the left, an inspector on the right, a console

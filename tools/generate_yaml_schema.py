@@ -193,7 +193,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     if missing or extra:
         raise SystemExit(f"the style fields changed: add {sorted(missing)}, drop {sorted(extra)} in {__file__}")
     style = {"type": "object", "description": "How a node looks and lays out its children.",
-             "properties": {name: {**loose(schema), "description": text}
+             "properties": {name: {**loose(schema), "description": f"{text} ({cascade.STYLE_GROUP_OF[name]}.)",
+                                  "x-group": cascade.STYLE_GROUP_OF[name]}
                             for name, (schema, text) in sorted(style_fields.items())},
              "additionalProperties": False}
 
@@ -370,6 +371,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                      "id": node_props["id"],
                      "view": {"type": "string", "description": "The view to show: a `*_View.yaml` next to this file, or a name found in the project."},
                      "with": {"type": "object", "description": "What the embedded view's ViewModel is given, as keyword arguments to its constructor."},
+                     "route": {"type": "string", "description": "In the window view, makes the view a screen of the app: its route, "
+                                                                "such as `\"\"`, `settings` or `notes/{id}`. A view can be routed once."},
                      "style": node_props["style"], "classes": node_props["classes"], "a11y": node_props["a11y"],
                      "group": node_props["group"], "window_region": node_props["window_region"]}}
     bar_props = {k: v for k, v in title_bar_node["properties"].items() if k != "kind"}

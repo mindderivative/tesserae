@@ -184,12 +184,13 @@ See [Apps & Screens](guide/apps-and-screens.md).
 
 ## 6. A custom window
 
-With `decorations=False` the OS draws no title bar, and the app draws its own frame. An **app shell**
-is that frame: a top bar (which becomes the title bar and gets the window's buttons), a navigation
-rail that switches screens, and a status bar. It is one more file.
+With `borderless: true` the OS draws no title bar, and the app draws its own frame. The **window view** is that frame:
+a `kind: Window` file with a title bar (which gets the window's buttons), a navigation rail that switches screens, a status
+bar, and the screens themselves, each a `view:` with a `route:`. The app loads the one file, and the window's file now
+brings the two screens in.
 
-```yaml title="Tasks_Shell.yaml"
---8<-- "examples/tutorial/step6/Tasks_Shell.yaml"
+```yaml title="Window_View.yaml"
+--8<-- "examples/tutorial/step6/Window_View.yaml"
 ```
 
 ```yaml title="Tasks_View.yaml"
@@ -212,11 +213,13 @@ rail that switches screens, and a status bar. It is one more file.
 --8<-- "examples/tutorial/step6/app.py"
 ```
 
-- Every part of a shell takes a `style:`, so the top bar's height and colour are yours to set.
+- `style:` on the `Window` is the window's size and colour, and the title bar takes a `style:` too, so its colour is yours to set.
+- A `view:` with a `route:` is a screen: `Tasks_View.yaml` is `Tasks`, `Settings_View.yaml` is `Settings`, and each finds its
+  ViewModel beside it, so `app.py` no longer loads or routes them one by one.
 - The rail replaces the Settings and Back buttons, so they are gone from the screens.
-- The window is still resizable (from its edges), and the top bar still drags it.
+- The window is still resizable (from its edges), and the title bar still drags it.
 
-See [App Shell & Docking](guide/app-shell.md) and [Custom Title Bars](guide/custom-title-bars.md).
+See [Windows, Docks & Embedded Views](guide/windows-and-docks.md) and [Custom Title Bars](guide/custom-title-bars.md).
 
 ## Where next
 

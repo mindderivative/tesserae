@@ -186,3 +186,17 @@ def test_the_layout_enums_in_the_schema_are_ones_tre_accepts():
 def test_the_site_copies_are_the_shipped_ones():
     for name in NAMES.values():
         assert (SITE / name).read_text(encoding="utf-8") == (SCHEMAS / name).read_text(encoding="utf-8"), name
+
+
+def test_every_style_field_is_in_exactly_one_group():
+    """0.4.4 (#101): the reference and the schema show style fields in sections; a new field can't go ungrouped."""
+    from tesserae.spec import cascade
+
+    listed = [name for names in cascade.STYLE_GROUPS.values() for name in names]
+    assert len(listed) == len(set(listed)), "a style field is in two groups"
+    assert set(listed) == cascade.STYLE_FIELDS, (
+        f"ungrouped: {sorted(cascade.STYLE_FIELDS - set(listed))}, not a field: {sorted(set(listed) - cascade.STYLE_FIELDS)}")
+    schema = json.loads((ROOT / "src" / "tesserae" / "schema" / "tesserae-yaml-schema.json").read_text(encoding="utf-8"))
+    properties = schema["definitions"]["style"]["properties"]
+    assert {name: p["x-group"] for name, p in properties.items()} == cascade.STYLE_GROUP_OF
+    assert all(f"({p['x-group']}.)" in p["description"] for p in properties.values())

@@ -42,7 +42,7 @@ RUNNER = textwrap.dedent('''
         report["decorations"] = app.decorations
         report["title_bar"] = app._shell.top_bar.node.get("window_region") if app._shell is not None else None
         for name in report["screens"]:
-            if name == "Main":
+            if name in ("Main", "Window"):  # a window app registers its window view too
                 continue
             app.navigate(name)
             app.window.simulate("click", node=app._registered[name].view.node("back"))  # its Back button
@@ -114,7 +114,7 @@ def test_new_with_a_custom_title_bar(tmp_path, capsys):
     plain = cli.main(["new", "plain", "--shell", "--no-venv", "--dir", str(tmp_path)])
     assert plain == 0 and _run(tmp_path / "plain")["decorations"] is True
     assert cli.main(["new", "lonely", "--custom-title-bar", "--dir", str(tmp_path)]) == 2
-    assert "--custom-title-bar goes with --shell" in capsys.readouterr().err
+    assert "--custom-title-bar goes with" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("app_py", ["# an app of my own\n", f"# half of it\n{cli.IMPORT_MARKER}\n"])
@@ -219,3 +219,34 @@ def test_a_failed_install_keeps_the_project_and_says_how_to_finish(tmp_path, mon
     err = capsys.readouterr().err
     assert err.startswith("tesserae: made the project, but its virtual environment failed (ERROR: no network)")
     assert "pip install tesserae-ui" in err and (tmp_path / "notes" / "app.py").is_file()
+
+
+def test_new_with_a_window(tmp_path):
+    """0.4.4 (#101): `--window` makes a `kind: Window` view whose screens are routed `view:` nodes."""
+    assert cli.main(["new", "studio", "--window", "--no-venv", "--dir", str(tmp_path)]) == 0
+    project = tmp_path / "studio"
+    assert (project / "Views" / "Window_View.yaml").is_file() and not list(project.glob("Views/*_Shell.yaml"))
+    assert "load_shell" not in (project / "app.py").read_text()
+    report = _run(project)
+    assert report["ran"] and not report["shell"] and report["screens"] == ["Main", "Settings", "Window"]
+    assert report["routes"] == ["", "settings"] and report["size"] == [960, 600]
+    assert report["back_from"] == [["Settings", "Main"]]
+    assert report["decorations"] is True
+    assert _run(project, "settings")["start"] == "Settings"
+
+
+def test_new_with_a_borderless_window(tmp_path, capsys):
+    assert cli.main(["new", "studio", "--window", "--custom-title-bar", "--no-venv", "--dir", str(tmp_path)]) == 0
+    report = _run(tmp_path / "studio")
+    assert report["ran"] and report["decorations"] is False
+    assert cli.main(["new", "both", "--window", "--shell", "--dir", str(tmp_path)]) == 2
+    assert "choose one" in capsys.readouterr().err
+
+
+def test_add_screen_to_a_window_project_says_where_the_view_node_goes(tmp_path, capsys):
+    assert cli.main(["new", "studio", "--window", "--no-venv", "--dir", str(tmp_path)]) == 0
+    project = tmp_path / "studio"
+    assert cli.main(["add", "screen", "UserProfile", "--dir", str(project)]) == 0
+    out = capsys.readouterr().out
+    assert 'view: UserProfile_View.yaml, route: "user-profile"' in out and "Window_View.yaml" in out
+    assert (project / "Views" / "UserProfile_View.yaml").is_file()

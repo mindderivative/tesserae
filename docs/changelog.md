@@ -33,6 +33,14 @@ A window, a dock and embedded views in the same YAML as every other view ([#95](
   Python). **`ViewDialog(window, "Settings_View.yaml")`** is a dialog whose content is a view, with or without a ViewModel
   (`.content`, `.viewmodel`). A view with no ViewModel now has its `window.*` and `surface.*` handlers wired, so a title bar's buttons
   work in a static view. An embedded view takes the colours when its host is re-coloured.
+- **`tesserae new --window`** makes a project whose app is one `Window_View.yaml`: a title bar, a `NavigationRailScreens` and two
+  routed screens, Main and Settings (`--custom-title-bar` makes it `borderless`). `tesserae add screen` in such a project says
+  which `view:` node to add to the window instead of editing `app.py`.
+- **Style fields in sections**: the YAML reference's style table, and the schema (an `x-group` on each field, and the group in its
+  description, so autocomplete shows it), put each field in one of Size and spacing, Flex, Alignment, Grid, Position, Docking, and
+  Paint and effects. Files stay flat. `tesserae.spec.cascade.STYLE_GROUPS` lists them, and a test keeps every field in one.
+- A guide page, [Windows, Docks & Embedded Views](guide/windows-and-docks.md), and component pages for Window, Title bar, Dock,
+  Dock panel and Routed views.
 - **`view:`** shows another `*_View.yaml` where it is: `- {id: left, view: Left_View.yaml, with: {size: 3}, style: {width: 220}}`
   (or by name in a project). It is a view of its own, with its own ids and its own ViewModel when there is one
   (`Left_ViewModel.py`), and it needs none: a view with no ViewModel is static. `view.embedded(id)` and `view.viewmodel` read

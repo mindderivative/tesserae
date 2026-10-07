@@ -81,3 +81,13 @@ Material Design 3's components, as Tesserae builds them. Each page says what the
 | [Status bar](status-bar.md) | `StatusBar` |
 | [Node graph](node-graph.md) | `NodeGraph` |
 | [Splitter](splitter.md) | Python only |
+
+## Windows and docking
+
+| Component | Fragments |
+| --- | --- |
+| [Window](window.md) | Python only |
+| [Title bar](title-bar.md) | Python only |
+| [Dock](dock.md) | Python only |
+| [Dock panel](dock-panel.md) | Python only |
+| [Routed views](routed-views.md) | Python only |

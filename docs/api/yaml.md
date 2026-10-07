@@ -130,48 +130,11 @@ children: <a list>
 
 A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` file, which holds them under a `style:` key (and an optional `id:` naming it): `{id: row_style, style: {gap: 8}}`. The same fields go in a stylesheet's or theme's rules, and in a shell file's parts.
 
+### Size and spacing
+
 | Field | Values | What it does |
 | --- | --- | --- |
-| `align_cells` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | In a grid: where each item sits in its cell. |
-| `align_content` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
-| `align_self` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | Its own place in its parent, over the parent's `align_content`. |
-| `align_tracks` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | In a grid: how the tracks share the room left over. |
-| `align_wrapped` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | With `flex_wrap: wrap`: how the lines share the room left over. |
 | `aspect_ratio` | a number | Width over height: gives the missing side from the one set. |
-| `backdrop_blur` | a number | Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. |
-| `background` | a color or a gradient | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `blend_mode` | one of 16 names | How it is drawn over what is behind it, as CSS `mix-blend-mode`. |
-| `blur` | a number | Blurs the node and what it draws, by this many pixels. |
-| `border_color` | a color or a gradient | The colour of its border: a colour or a gradient. |
-| `border_width` | a number | The width of its border, in pixels. |
-| `clip_children` | `true` or `false` | Whether children are cut off at its edge. |
-| `column_gap` | a number | Space between columns (defaults to `gap`). |
-| `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` | Pixels, or a shape token (`none` to `extra_large`). |
-| `cursor` | one of 23 names or a mapping | The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). |
-| `cursor.src` *(required)* | text | A PNG (or any picture Pillow reads) next to the view. |
-| `cursor.hotspot` | a list | `[x, y]`: the pixel that is the pointer's place. |
-| `display` | `flex` \| `grid` | `flex` (the default) or `grid`. |
-| `elevation` | a number or `level_0` \| `level_1` \| `level_2` \| `level_3` \| `level_4` \| `level_5` | A shadow level, 0 to 5. |
-| `filter` | a mapping | Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees). |
-| `filter.saturate` | a number | 1 is unchanged, 0 grey, above 1 more vivid. |
-| `filter.brightness` | a number | 1 is unchanged, 0 black, above 1 brighter. |
-| `filter.contrast` | a number | 1 is unchanged, 0 flat grey, above 1 harder. |
-| `filter.grayscale` | a number | 0 is unchanged, 1 fully grey. |
-| `filter.hue_rotate` | a number | Turns the hues, in degrees. |
-| `filter.invert` | a number | 0 is unchanged, 1 inverted. |
-| `filter.sepia` | a number | 0 is unchanged, 1 fully sepia. |
-| `flex` | `none` \| `expand_horizontal` \| `expand_vertical` \| `fill` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
-| `flex_direction` | `horizontal` \| `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `flex_wrap` | `no_wrap` \| `wrap` | `wrap` lets children flow onto more lines; `no_wrap` keeps one. |
-| `foreground` | a color or a gradient | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| `gap` | a number | Space between its children. |
-| `grid_auto_columns` | text | The size of columns the template doesn't name. |
-| `grid_auto_flow` | `row` \| `column` \| `row dense` \| `column dense` \| `dense` | How grid children fill the cells. |
-| `grid_auto_rows` | text | The size of rows the template doesn't name. |
-| `grid_column` | text or an integer | Which grid column it takes: `2`, or `1 / 3`. |
-| `grid_row` | text or an integer | Which grid row it takes: `2`, or `1 / 3`. |
-| `grid_template_columns` | text | The grid's columns, as in CSS: `1fr 2fr 100px`. |
-| `grid_template_rows` | text | The grid's rows, as in CSS. |
 | `height` | a number or `auto` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `margin` | a number or a mapping | Space outside it: one number, or `{left, right, top, bottom}`. |
 | `margin.top` | a number | Space on the top side. |
@@ -182,21 +145,90 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `max_width` | a number or `auto` or a percentage such as `50%` | The most width it can take. |
 | `min_height` | a number or `auto` or a percentage such as `50%` | The least height it can take. |
 | `min_width` | a number or `auto` or a percentage such as `50%` | The least width it can take. |
-| `opacity` | a number | From 0 (clear) to 1 (opaque). |
 | `padding` | a number or a mapping | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `padding.top` | a number | Space on the top side. |
 | `padding.right` | a number | Space on the right side. |
 | `padding.bottom` | a number | Space on the bottom side. |
 | `padding.left` | a number | Space on the left side. |
-| `position` | `relative` \| `absolute` | `absolute` takes it out of the flow and places it at `x` and `y`. |
-| `row_gap` | a number | Space between rows (defaults to `gap`). |
-| `spread` | `none` \| `between` \| `around` \| `evenly` | Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`. |
-| `sticky` | a number | In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. |
 | `width` | a number or `auto` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+
+### Flex
+
+| Field | Values | What it does |
+| --- | --- | --- |
+| `flex` | `none` \| `expand_horizontal` \| `expand_vertical` \| `fill` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
+| `flex_direction` | `horizontal` \| `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
+| `flex_wrap` | `no_wrap` \| `wrap` | `wrap` lets children flow onto more lines; `no_wrap` keeps one. |
+| `gap` | a number | Space between its children. |
+
+### Alignment
+
+| Field | Values | What it does |
+| --- | --- | --- |
+| `align_content` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
+| `align_self` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | Its own place in its parent, over the parent's `align_content`. |
+| `align_wrapped` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | With `flex_wrap: wrap`: how the lines share the room left over. |
+| `spread` | `none` \| `between` \| `around` \| `evenly` | Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`. |
+
+### Grid
+
+| Field | Values | What it does |
+| --- | --- | --- |
+| `align_cells` | `top_left` \| `top` \| `top_right` \| `left` \| `center` \| `right` \| `bottom_left` \| `bottom` \| `bottom_right` | In a grid: where each item sits in its cell. |
+| `align_tracks` | `start` \| `center` \| `end` \| `stretch` \| `between` \| `around` \| `evenly` | In a grid: how the tracks share the room left over. |
+| `column_gap` | a number | Space between columns (defaults to `gap`). |
+| `display` | `flex` \| `grid` | `flex` (the default) or `grid`. |
+| `grid_auto_columns` | text | The size of columns the template doesn't name. |
+| `grid_auto_flow` | `row` \| `column` \| `row dense` \| `column dense` \| `dense` | How grid children fill the cells. |
+| `grid_auto_rows` | text | The size of rows the template doesn't name. |
+| `grid_column` | text or an integer | Which grid column it takes: `2`, or `1 / 3`. |
+| `grid_row` | text or an integer | Which grid row it takes: `2`, or `1 / 3`. |
+| `grid_template_columns` | text | The grid's columns, as in CSS: `1fr 2fr 100px`. |
+| `grid_template_rows` | text | The grid's rows, as in CSS. |
+| `row_gap` | a number | Space between rows (defaults to `gap`). |
+
+### Position
+
+| Field | Values | What it does |
+| --- | --- | --- |
+| `position` | `relative` \| `absolute` | `absolute` takes it out of the flow and places it at `x` and `y`. |
+| `sticky` | a number | In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. |
 | `x` | a number or `auto` | Where an `absolute` node sits from the left. |
 | `y` | a number or `auto` | Where an `absolute` node sits from the top. |
 | `z_index` | an integer | Stacking order: higher is in front. |
+
+### Docking
+
+| Field | Values | What it does |
+| --- | --- | --- |
 | `zone` | `left` \| `right` \| `top` \| `bottom` \| `center` | A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error. |
+
+### Paint and effects
+
+| Field | Values | What it does |
+| --- | --- | --- |
+| `backdrop_blur` | a number | Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. |
+| `background` | a color or a gradient | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| `blend_mode` | one of 16 names | How it is drawn over what is behind it, as CSS `mix-blend-mode`. |
+| `blur` | a number | Blurs the node and what it draws, by this many pixels. |
+| `border_color` | a color or a gradient | The colour of its border: a colour or a gradient. |
+| `border_width` | a number | The width of its border, in pixels. |
+| `clip_children` | `true` or `false` | Whether children are cut off at its edge. |
+| `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` | Pixels, or a shape token (`none` to `extra_large`). |
+| `cursor` | one of 23 names or a mapping | The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). |
+| `cursor.src` *(required)* | text | A PNG (or any picture Pillow reads) next to the view. |
+| `cursor.hotspot` | a list | `[x, y]`: the pixel that is the pointer's place. |
+| `elevation` | a number or `level_0` \| `level_1` \| `level_2` \| `level_3` \| `level_4` \| `level_5` | A shadow level, 0 to 5. |
+| `filter` | a mapping | Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees). |
+| `filter.saturate` | a number | 1 is unchanged, 0 grey, above 1 more vivid. |
+| `filter.brightness` | a number | 1 is unchanged, 0 black, above 1 brighter. |
+| `filter.contrast` | a number | 1 is unchanged, 0 flat grey, above 1 harder. |
+| `filter.grayscale` | a number | 0 is unchanged, 1 fully grey. |
+| `filter.hue_rotate` | a number | Turns the hues, in degrees. |
+| `filter.invert` | a number | 0 is unchanged, 1 inverted. |
+| `filter.sepia` | a number | 0 is unchanged, 1 fully sepia. |
+| `foreground` | a color or a gradient | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| `opacity` | a number | From 0 (clear) to 1 (opaque). |
 
 ## Colors
 
@@ -429,6 +461,7 @@ children: <a list>
 id: <text>
 view: <text>
 with: <a mapping>
+route: <text>
 style: <a style mapping or text>
 classes: <a list>
 a11y: <a mapping>
@@ -441,6 +474,7 @@ window_region: <drag | none>
 | `id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
 | `view` *(required)* | text | The view to show: a `*_View.yaml` next to this file, or a name found in the project. |
 | `with` | a mapping | What the embedded view's ViewModel is given, as keyword arguments to its constructor. |
+| `route` | text | In the window view, makes the view a screen of the app: its route, such as `""`, `settings` or `notes/{id}`. A view can be routed once. |
 | `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
 | `classes` | a list | Style classes a theme or stylesheet rule can match. |
 | `a11y` | a mapping | What assistive technology is told about this node. |

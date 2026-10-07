@@ -109,10 +109,10 @@ def test_step_5_two_screens_share_state_and_navigate(run_step):
     assert app.current == "Tasks"
 
 
-def test_step_6_a_custom_window_with_a_shell(run_step):
+def test_step_6_a_custom_window(run_step):
     app = run_step(6)
     assert app.decorations is False
-    assert app._shell is not None and app.current == "Tasks"
+    assert app._frame is not None and app._shell is None and app.current == "Tasks"
     app.show("Settings")
     assert app.current == "Settings"
 

@@ -14,6 +14,7 @@ groups:
   - Selection and input
   - Content
   - Beyond MD3
+  - Windows and docking
 
 components:
   # -- Actions -----------------------------------------------------------------------------------
@@ -910,3 +911,132 @@ components:
       from tesserae.widgets import splitter
 
       panes = splitter(app.window, left.node, right.node, 640, 400, orientation="horizontal", position=0.3)
+
+  # -- Windows and docking -----------------------------------------------------------------------
+  - slug: window
+    title: Window
+    group: Windows and docking
+    fragments: []
+    md3: |
+      Material Design 3 describes how an app's content adapts to a window, not the window itself. `kind: Window` is the OS
+      window as a view: the root of `Window_View.yaml`, with its title, size and title bar.
+    built: |
+      Before the view is built, the `Window` becomes a vertical container holding the `TitleBar` and a content container;
+      `App` reads its title, size, `borderless` and minimum size when it loads the view. There is one per app, and it
+      can't be nested or embedded.
+
+      ```yaml
+      id: root
+      kind: Window
+      title: Notes
+      borderless: true
+      style: {width: 960, height: 600}
+      title_bar: {title: Notes, buttons: [minimize, maximize, close]}
+      children:
+        - id: body
+          view: Main_View.yaml
+          route: ""
+      ```
+
+      ```python
+      app = App(title="Notes", root=HERE)
+      app.load("Window")
+      ```
+    see: [guide/windows-and-docks.md, guide/custom-title-bars.md]
+
+  - slug: title-bar
+    title: Title bar
+    group: Windows and docking
+    fragments: []
+    md3: |
+      Material Design 3's top app bar sits inside the window; a title bar is the window's own strip. A desktop app that
+      draws its own keeps the OS's behaviour: drag to move, double-click to maximize.
+    built: |
+      The `TitleBar` kind, or `title_bar:` on a `Window`. Its buttons are the handlers `window.minimize`,
+      `window.maximize`, `window.close` and the like, which need no ViewModel; in a dialog or a sheet `dismiss` closes it.
+    usage: |
+      - id: bar
+        kind: TitleBar
+        title: Notes
+        icon: home
+        buttons: [minimize, maximize, close]
+    see: [guide/custom-title-bars.md, guide/windows-and-docks.md]
+
+  - slug: dock
+    title: Dock
+    group: Windows and docking
+    fragments: []
+    md3: |
+      Material Design 3 has no dock. A desktop tool often wants panels around its content that the user can move and
+      resize: files on the left, output below.
+    built: |
+      The `Dock` kind holds `DockPanel`s; each says its zone with the style field `zone`. Panels in one zone are tabs, and
+      the user drags a tab to another zone or the handles between zones. `view.dock_host(id)` reads and sets the zone
+      sizes and saves and restores the layout: `dock = view.dock_host("dock")`, then `dock.set_size("left", 280)`,
+      `saved = dock.layout()` and `dock.restore(saved)`.
+    usage: |
+      - id: dock
+        kind: Dock
+        style: {flex: fill}
+        children:
+          - {id: files, kind: DockPanel, title: Files, style: {zone: left, width: 220}, children: []}
+          - {id: editor, kind: DockPanel, title: Editor, style: {zone: center}, children: []}
+    see: [guide/windows-and-docks.md, guide/app-shell.md]
+
+  - slug: dock-panel
+    title: Dock panel
+    group: Windows and docking
+    fragments: []
+    md3: |
+      Material Design 3 has no dock panel. It is one panel of a dock: a titled tab in a zone.
+    built: |
+      The `DockPanel` kind, with `zone` in its `style`. A `DockPanel` inside another is a split of it, side by side
+      (`flex_direction: horizontal`) or top and bottom (`vertical`), with a handle to resize.
+    usage: |
+      - id: dock
+        kind: Dock
+        style: {flex: fill}
+        children:
+          - id: editor
+            kind: DockPanel
+            title: Editor
+            style: {zone: center}
+            children:
+              - id: source
+                kind: DockPanel
+                title: Source
+                children: []
+              - id: preview
+                kind: DockPanel
+                title: Preview
+                children: []
+    see: [guide/windows-and-docks.md]
+
+  - slug: routed-views
+    title: Routed views
+    group: Windows and docking
+    fragments: []
+    md3: |
+      Material Design 3's navigation rail and bar move between an app's destinations. A routed view is a destination whose
+      content is a view of its own.
+    built: |
+      A `view:` node with a `route:` in the window view. It is registered as a screen of the app under its file's name, and
+      shown while it is current; the others are hidden, with their state. `NavigationRailScreens` is a rail whose
+      destinations navigate.
+
+      ```yaml
+      - id: nav
+        component: NavigationRailScreens
+        with:
+          items:
+            - {label: Notes, icon: home, screen: Main}
+            - {label: Settings, icon: settings, screen: Settings}
+      - {id: main, view: Main_View.yaml, route: ""}
+      - {id: settings, view: Settings_View.yaml, route: settings}
+      ```
+
+      ```python
+      app.navigate("Settings")
+      app.navigate_to("settings")
+      ```
+    see: [guide/windows-and-docks.md, guide/apps-and-screens.md]
