@@ -57,3 +57,25 @@ def test_load_shell_and_a_shell_file_say_what_replaced_them(tmp_path):
         app.load(tmp_path / "Studio_Shell.yaml")
     for gone in ("shell_file", "tesserae-shell-schema.json", "Shell.yaml.tmpl"):
         assert not [p for p in (ROOT / "src").rglob(f"*{gone}*") if p.suffix != ".pyc"], gone
+
+
+def test_use_shell_and_app_shell_say_what_replaced_them():
+    """0.4.5 (#109): the Python app shell is gone; docking from Python is `Dock`."""
+    app = App(width=300, height=200)
+    with pytest.raises(RemovedError, match=r"`App.use_shell` was removed.*tesserae.docking.Dock") as raised:
+        app.use_shell(object())
+    assert raised.value.name == "App.use_shell"
+    with pytest.raises(RemovedError, match=r"`AppShell` was removed.*kind: Window"):
+        from tesserae.shell import AppShell  # noqa: F401
+    with pytest.raises(AttributeError):
+        importlib.import_module("tesserae.shell").Anything
+    from tesserae.docking import Dock  # stays
+
+    assert Dock is not None
+
+
+def test_nothing_else_of_the_app_shell_is_left_in_src():
+    leftovers = [p.name for p in (ROOT / "src" / "tesserae").rglob("*.py") if p.name not in ("_removed.py", "shell.py")
+                 and ("AppShell" in p.read_text(encoding="utf-8") or "use_shell" in p.read_text(encoding="utf-8").replace(
+                     'removed("App.use_shell")', "").replace("def use_shell", ""))]
+    assert leftovers == []

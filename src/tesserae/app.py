@@ -369,7 +369,6 @@ class App:
             if os_dark is not None:
                 self._dark = os_dark
         self._current: str | None = None
-        self._shell: Any = None  # an `AppShell`, once `use_shell` is called (M45)
         #: The window view (`kind: Window`) once one is loaded: its `Frame` (0.4.4)
         self._frame: Any = None
         #: The screen showing, as a value a binding can read: `{{ app.current_screen.get() == 'Main' }}`.
@@ -892,9 +891,6 @@ class App:
         if self._frame is not None:
             raise ValueError(f"the app already has a window view ({self._frame.name!r}); {name!r} is a second: "
                              "an app has one window")
-        if self._shell is not None:
-            raise ValueError(f"the window view {name!r} can't be used with an app shell (use_shell/load_shell): "
-                             "the window view is the frame")
         self._frame = Frame(self, name, view)
         self._apply_window(window_of(view.spec) or {})
         if view.root.parent() is None:
@@ -1074,8 +1070,6 @@ class App:
         if self._frame is not None:  # a window view: its routed views are the screens (0.4.4)
             if name != self._frame.name:
                 self._frame.show_screen(name, self._current if self._current not in (None, name, self._frame.name) else None)
-        elif self._shell is not None:  # M45: the shell places it (in its content, or as a center tab)
-            self._shell.show_screen(root, name, previous)
         else:
             if previous is not None:
                 previous.remove()  # detached, kept alive with its state
@@ -1092,21 +1086,9 @@ class App:
         return self._window
 
     def use_shell(self, shell: Any) -> None:
-        """Shows screens inside `shell.content`: an
-        `AppShell` built on this app's window -- a top app bar, navigation,
-        docked panels and a status bar around the screens. A screen already
-        showing moves into it."""
-        if getattr(shell, "window", None) is not self._window:
-            raise ValueError("App.use_shell: build the shell on this app's window (AppShell(app.window, ...))")
-        if self._frame is not None:
-            raise ValueError(f"App.use_shell: the window view {self._frame.name!r} is the app's frame; an app shell can't "
-                             "also be one")
-        self._shell = shell
-        if self._current is not None:
-            root = self._registered[self._current].view.root
-            if root.parent() is not None:
-                root.remove()
-            shell.show_screen(root, self._current)
+        """Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`. Raises
+        `tesserae._removed.RemovedError`, which says how."""
+        raise removed("App.use_shell")
 
     def load_shell(self, path: str | Path, viewmodel: Any = None) -> Any:
         """Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`. Raises

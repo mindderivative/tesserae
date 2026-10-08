@@ -15,8 +15,7 @@ from tesserae.controls import Checkbox, SpinBox
 from tesserae.docking import Dock
 from tesserae.follow import app_of, initial_theme
 from tesserae.overlays import NavigationDrawer
-from tesserae.shell import AppShell
-from tesserae.widgets import button, dialog, linear_progress, navigation_rail, top_app_bar
+from tesserae.widgets import button, dialog, linear_progress
 
 SEED = (0x67, 0x50, 0xA4, 0xFF)
 OTHER = (0x00, 0x66, 0x88, 0xFF)
@@ -162,26 +161,11 @@ def test_a_view_whose_root_was_destroyed_is_dropped():
     assert view not in app._followers
 
 
-def test_the_shell_and_its_dock_follow_but_leave_a_pinned_bar_alone():
-    app = _app()
-    fixed = Theme.resolve(theme_seed=OTHER)
-    bar = top_app_bar(app.window, "Studio", width=600, theme=fixed)
-    rail = navigation_rail(app.window, ["Home"], ["home"])
-    shell = AppShell(app.window, top_bar=bar, navigation=rail, zones={"left": 200})
-    app.set_dark(True)
-    dark = _dark(app)
-    assert shell.node.get("fill") == dark["surface"]
-    assert shell.dock._zones["left"].node.get("fill") == dark["surface_container_low"]
-    assert shell._handles["left"].grip.get("fill") == dark["outline"]
-    assert rail.theme.dark is True  # it follows by itself
-    assert bar.node.get("fill") == fixed.role("surface") and bar.theme is fixed
-
-
-def test_a_shell_given_a_pinned_dock_leaves_it_alone_and_a_dock_alone_follows():
+def test_a_pinned_dock_is_left_alone_and_a_dock_alone_follows():
     app = _app()
     fixed = Theme.resolve(theme_seed=OTHER)
     pinned = Dock(app.window, theme=fixed)
-    AppShell(app.window, zones={"left": 200}, dock=pinned)
+    pinned.add_zone("left", 200)
     lone = Dock(app.window)
     lone_zone = lone.add_zone("right", 200)
     app.set_dark(True)
@@ -199,11 +183,11 @@ def test_overlays_follow_through_their_widgets():
     assert drawer.drawer.node.get("fill") == dark["surface_container_low"]
 
 
-def test_a_failing_follower_rolls_back_a_following_view_and_shell():
+def test_a_failing_follower_rolls_back_a_following_view_and_dock():
     app = _app()
     view = _panel(app.window)
-    shell = AppShell(app.window, zones={"left": 200})
-    light = (view.root.get("fill"), shell.node.get("fill"))
+    zone = Dock(app.window).add_zone("left", 200)
+    light = (view.root.get("fill"), zone.get("fill"))
 
     class Broken:
         node = view.root
@@ -215,4 +199,4 @@ def test_a_failing_follower_rolls_back_a_following_view_and_shell():
     initial_theme(app.window, None, Broken())
     with pytest.raises(RuntimeError):
         app.set_dark(True)
-    assert (view.root.get("fill"), shell.node.get("fill")) == light and view.theme.dark is False
+    assert (view.root.get("fill"), zone.get("fill")) == light and view.theme.dark is False

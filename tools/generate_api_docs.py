@@ -40,7 +40,6 @@ SECTIONS = (
     ("tesserae.widgets", "Widgets", "One function per MD3 widget, called against a window."),
     ("tesserae.controls", "Controls", "MD3's stateful controls."),
     ("tesserae.overlays", "Overlays", "Dialogs, menus, snackbars, tooltips, sheets, drawers."),
-    ("tesserae.shell", "App shell", "Bars, navigation and docked zones around the screens."),
     ("tesserae.docking", "Docking", "Panels the user can drag between zones."),
     ("tesserae.interaction", "Interaction", "State layer, ripple and focus ring."),
     ("tesserae.a11y", "Accessibility", "What a node tells assistive technology."),

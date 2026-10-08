@@ -185,16 +185,6 @@ def test_nodes_added_by_calls_are_content_even_with_a_screen_registered(fake_tre
     assert fake_tre.ran == [1]
 
 
-def test_run_starts_for_a_shell_before_any_screen(fake_tre):
-    from tesserae.shell import AppShell
-    from tesserae.widgets import top_app_bar
-
-    app = App(width=400, height=300)
-    app.use_shell(AppShell(app.window, top_bar=top_app_bar(app.window, "Studio", width=400)))
-    app.run(max_frames=1)
-    assert fake_tre.ran == [1]
-
-
 @pytest.mark.parametrize("with_a_node", [True, False])
 def test_a_code_only_app_draws_frames_in_a_real_window(tmp_path, with_a_node):
     """The real thing, in a subprocess (a second real `App.run()` in one pytest

@@ -15,7 +15,6 @@ Every public class, function and constant, with its signature and what it does. 
 - [Widgets](#widgets): One function per MD3 widget, called against a window.
 - [Controls](#controls): MD3's stateful controls.
 - [Overlays](#overlays): Dialogs, menus, snackbars, tooltips, sheets, drawers.
-- [App shell](#app-shell): Bars, navigation and docked zones around the screens.
 - [Docking](#docking): Panels the user can drag between zones.
 - [Interaction](#interaction): State layer, ripple and focus ring.
 - [Accessibility](#accessibility): What a node tells assistive technology.
@@ -130,7 +129,7 @@ class App(
 - `toggle_maximized() -> None`: Maximizes the window, or restores it if it's maximized: a title bar's maximize button.
 - `transparent` *(property)*: Whether the window was made see-through (`App(transparent=True)`); `transparent_active` says whether it took.
 - `transparent_active` *(property)*: Whether the window really is see-through (the platform may not allow it); `None` until it opens.
-- `use_shell(shell: Any) -> None`: Shows screens inside `shell.content`: an `AppShell` built on this app's window -- a top app bar, navigation, docked panels and a status bar around the screens.
+- `use_shell(shell: Any) -> None`: Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`.
 - `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change; `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.
 - `window` *(property)*: The app's one window (it exists from the start).
 - `window_border` *(property)*: Whether an undecorated window gets its 1 px border (on by default): around the window, in the theme's `outline_variant`, a node of class `window_border` a theme or stylesheet can restyle.
@@ -1848,43 +1847,6 @@ dismiss_surface(node: Any) -> bool
 
 Closes the overlay (a dialog, a sheet, a menu, ...) that `node` is in, the nearest one up its parents, as its own `close()` does. A `surface.dismiss` handler, such as a `TitleBar`'s `dismiss` button, calls this.
 
-## App shell
-
-`tesserae.shell`: Bars, navigation and docked zones around the screens.
-
-### `AppShell`
-
-```python
-class AppShell(
-    window: Any,
-    *,
-    top_bar: Any = None,
-    navigation: Any = None,
-    status_bar: Any = None,
-    zones: Optional[dict[str, float]] = None,
-    dock: Optional[Dock] = None,
-    center: bool = False,
-    theme: Optional[Theme] = None,
-    styles: Optional[dict[str, dict[str, Any]]] = None
-) -> None
-```
-
-An app's frame: `top_bar`, `navigation` and `status_bar` (widgets or nodes, placed as they are), a `Dock` (`dock=`, or a new one) whose zones -- `zones={side: size}`, from left, right, top and bottom -- sit around `content`, where `App.use_shell` shows screens; with `center=True`, `content` is the dock's center zone and screens are its tabs. `size`, `set_size`, `layout`, `restore`, `set_theme`.
-
-- `layout() -> dict[str, Any]`: Where each panel is (by title), which is shown, and each zone's size (`None` for the center, which takes what's left), as plain data.
-- `restore(layout: dict[str, Any]) -> None`: Puts back a `layout()`: moves each titled panel into its zone, shows the one that was shown, and sizes the zones.
-- `set_size(side: str, size: float) -> float`: Sets `side`'s zone size, clamped between `MIN_ZONE` and 70% of the area it sits in; returns the size it got.
-- `set_style(part: str, style: Optional[dict[str, Any]]) -> None`: Styles `part` (`frame`, `content`, or a zone's side) with a node's `style:`; `None` or `{}` puts back what the shell itself had.
-- `set_theme(theme: Theme) -> None`: Re-colours the shell, its dock and the widgets it was given.
-- `show_screen(root: Any, title: str, previous: Any = None) -> None`: Shows a screen's root (`App.show` calls this): in `content`, replacing the screen there; or, with `center=True`, as a center tab, docked the first time and brought forward after.
-- `size(side: str) -> float`: `side`'s zone size, px (its width, or height for top and bottom).
-
-**Constants**
-
-- `HANDLE_SPAN` = `16.0`
-- `MIN_ZONE` = `120.0`
-- `STEP` = `16.0`
-
 ## Docking
 
 `tesserae.docking`: Panels the user can drag between zones.
@@ -1895,14 +1857,14 @@ An app's frame: `top_bar`, `navigation` and `status_bar` (widgets or nodes, plac
 class Dock(window: Any, *, theme: Optional[Theme] = None) -> None
 ```
 
-The docking of one window (see the module doc). `add_zone(side, size)` returns the zone's node to place in the layout (an `AppShell` places them); `add_panel(side, node, title)` docks a panel; `show`, `move`, `side_of`, `panels`, `shown`, `titles`, `shown_title`, `panel(title)`; `on_move(fn)` hears a panel moving, `fn(node, side)`; `set_theme(theme)` re-colours it.
+The docking of one window (see the module doc). `add_zone(side, size)` returns the zone's node to place in the layout (the caller places them); `add_panel(side, node, title)` docks a panel; `show`, `move`, `side_of`, `panels`, `shown`, `titles`, `shown_title`, `panel(title)`; `on_move(fn)` hears a panel moving, `fn(node, side)`; `set_theme(theme)` re-colours it.
 
 - `add_panel(side: str, panel: Any, title: str) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone, titled `title` on its tab, and shows it.
 - `add_zone(side: str, size: float) -> Any`: Creates `side`'s zone -- a tab strip over the area that shows its selected panel -- `size` px wide (left, right) or tall (top, bottom), or filling what's left (center).
 - `dispose() -> None`: Stops the dock: its window events, its tabs' listeners.
 - `move(panel: Any, side: str) -> None`: Moves `panel` to `side`'s zone and shows it there, as a drag would, moving it between zones.
 - `on_move(fn: Callable[[Any, str], Any]) -> Callable[[], None]`: Calls `fn(node, side)` when a panel moves zone.
-- `panel(title: str) -> Optional[Any]`: The docked panel titled `title`, or `None` (for `AppShell.restore`).
+- `panel(title: str) -> Optional[Any]`: The docked panel titled `title`, or `None` (for putting a saved layout back).
 - `panels(side: str) -> list[Any]`: `side`'s panels, in their tabs' order.
 - `remove_panel(panel: Any) -> Any`: Undocks `panel`: its tab goes, and if it was shown the zone shows the next panel, else the previous.
 - `rename(panel: Any, title: str) -> None`: Gives `panel` a new title, on its tab.

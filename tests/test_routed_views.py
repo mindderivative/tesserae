@@ -184,14 +184,6 @@ def test_editing_the_window_view_adds_and_removes_screens(project):
     assert app.current == settings and view.node("settings").get("visible")
 
 
-def test_a_window_view_is_a_frame_so_an_app_shell_is_not_also_one(project):
-    from tesserae.shell import AppShell
-
-    app, _ = _app(project)
-    with pytest.raises(ValueError, match="the window view 'Window' is the app's frame"):
-        app.use_shell(AppShell(app.window))
-
-
 def test_a_rail_of_screens_follows_the_current_screen(project):
     tmp_path, home, settings = project
     text = (tmp_path / "Views" / "Window_View.yaml").read_text()

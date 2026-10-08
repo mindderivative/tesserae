@@ -482,8 +482,8 @@ def top_app_bar(
     region, with the window buttons after its trailing icons and, on
     macOS, room for the traffic lights -- a `TitleBar`'s
     (`tesserae.spec.title_bar.window_parts`). It defaults to whether the
-    app's window is undecorated, so an app shell's top bar is the title
-    bar of an `App(decorations=False)`.
+    app's window is borderless, so a top bar is the title bar of an
+    `App(borderless=True)`.
 
     `style` is laid over the bar's own: `{height: 40}` makes a slimmer
     one (its icon buttons shrink to fit under 56 px), and `background`,

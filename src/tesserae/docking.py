@@ -78,7 +78,7 @@ class _Zone:
 
 class Dock:
     """The docking of one window (see the module doc). `add_zone(side,
-    size)` returns the zone's node to place in the layout (an `AppShell`
+    size)` returns the zone's node to place in the layout (the caller
     places them); `add_panel(side, node, title)` docks a panel; `show`,
     `move`, `side_of`, `panels`, `shown`, `titles`, `shown_title`,
     `panel(title)`; `on_move(fn)` hears a panel
@@ -162,7 +162,7 @@ class Dock:
         return entry.title if entry else None
 
     def panel(self, title: str) -> Optional[Any]:
-        """The docked panel titled `title`, or `None` (for `AppShell.restore`)."""
+        """The docked panel titled `title`, or `None` (for putting a saved layout back)."""
         return next((p.node for z in self._zones.values() for p in z.panels if p.title == title), None)
 
     def side_of(self, panel: Any) -> Optional[str]:

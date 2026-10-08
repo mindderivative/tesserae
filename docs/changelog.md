@@ -11,6 +11,9 @@ One way to describe a window ([#103](https://github.com/mindderivative/tesserae/
   site and `tesserae schema`), its project folder kind, the `tesserae new --shell` template and flag, and the
   `examples/app_shell_file` example. Each says what replaces it (a `kind: Window` view) when it is used.
 
+- **The Python app shell**: `tesserae.shell.AppShell` and `App.use_shell`, and the `examples/app_shell` example. `tesserae.docking.Dock`
+  stays, for docking panels from Python. Using either removed name says what replaces it.
+
 ### Changed
 
 - **A removed name says what replaces it.** `decorations=`, `app.decorations`, `app.decorated`, `App.load_shell`, `App.use_shell`,
