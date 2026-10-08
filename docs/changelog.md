@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.5 (unreleased)
+
+One way to describe a window ([#103](https://github.com/mindderivative/tesserae/issues/103)). The shell file, `AppShell` and
+`decorations=` are removed in the phases below; this release is breaking, and [Migrating](migration.md) says how to move.
+
+### Changed
+
+- **A removed name says what replaces it.** `decorations=`, `app.decorations`, `app.decorated`, `App.load_shell`, `App.use_shell`,
+  `AppShell`, a `*_Shell.yaml` and `tesserae new --shell` raise a `RemovedError` (a `ValueError`) naming the replacement and the
+  migration page, instead of an `AttributeError` that says nothing. The messages are in `tesserae._removed`.
+
 ## 0.4.4
 
 A window, a dock and embedded views in the same YAML as every other view ([#95](https://github.com/mindderivative/tesserae/issues/95)).
