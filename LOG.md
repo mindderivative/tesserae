@@ -2425,3 +2425,25 @@ User: "Continue milestone #95 till completion. I am going to bed.", "approved, p
   navigated, the window snapshotted at 960 by 600, and `examples/window_dock` ran its own checks.
 - Not built, filed: dropping a dragged panel onto a split half (#106), separate-OS-window modals (#105). The `window_perf.py`
   resize check was not run (needs a hand-driven window).
+
+## Tesserae 0.4.5 released (#103)
+
+User: "Continue with phases 108 through 112 until completion", "window_perf test went well, no issues", "approved, push and release 0.4.5",
+"approved, check PyPI".
+
+- One way to describe a window: the shell file (`*_Shell.yaml`, `App.load_shell`, its schema, template and `tesserae new --shell`),
+  the Python `AppShell` and `App.use_shell`, and `decorations` (`App(decorations=)`, `app.decorations`) are removed; `borderless`
+  and a `kind: Window` view replace them. Each removed name raises a `RemovedError` (`tesserae/_removed.py`) naming the
+  replacement and the migration page; `tesserae new --shell` exits 2 with it. `docking.Dock` stays; `guide/app-shell.md` became
+  `guide/docking.md`. Breaking on a patch number, as agreed; the migration page says so first.
+- Found beyond the checklist: `ci.yml` and `release.yml` ran the deleted `app_shell` examples and scaffolded `--shell` apps, which
+  would have failed on the first push; they run `examples/window_dock` and scaffold `--window` now. `app.decorated` never existed
+  publicly, so it was dropped from the removed-names table.
+- Released: 5288 tests passed, CI green on all platforms (12 jobs, build-executable on the `--window` scaffold included). The user ran
+  `tools/window_perf.py` by hand, native and custom: no issues. `tesserae-ui` 0.4.5 is on PyPI (the JSON API listed it a few
+  minutes before pip's index served it) and pulled `tesserae-engine` 0.5.5. From that install in a clean venv: `tesserae new demo
+  --window --custom-title-bar` ran, navigated Main to Settings and snapshotted at 960 by 600 borderless; `App(decorations=)`,
+  `load_shell`, `use_shell` and importing `AppShell` each raised their message; `new --shell` exited 2; `examples/window_dock`
+  ran its own checks.
+- Still open: #105 (separate-OS-window modals) and #106 (dropping a panel onto a split half), both Backlog. The removal stubs go in
+  the release after this one.
