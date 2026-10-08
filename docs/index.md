@@ -61,7 +61,7 @@ Linux, macOS and Windows.
   [stylesheet](stylesheets/index.md) for each, and [themes](themes/index.md): a seed colour makes the
   palette, and light and dark follow the OS.
 - **Real desktop behaviour.** [Keyboard, state layers and screen-reader support](guide/interaction.md),
-  [overlays](guide/overlays.md), an [app shell with docking](guide/app-shell.md), and
+  [overlays](guide/overlays.md), a [window, docks and embedded views](guide/windows-and-docks.md), and
   [custom title bars](guide/custom-title-bars.md).
 - **Fast iteration.** [Hot reload](guide/hot-reload.md) updates a running app when a view, a stylesheet or
   a theme changes, and [editor support](guide/editor-support.md) completes and checks your YAML.

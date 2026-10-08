@@ -3,9 +3,110 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.5
+
+**This release is breaking.** There is one way to describe a window now, a `kind: Window` view ([Windows, Docks & Embedded
+Views](guide/windows-and-docks.md)), so the older ways are removed. Each removed name raises an error that says what replaces
+it (a `RemovedError`, a `ValueError`), so a run of your app tells you where to look. The names are removed for one release;
+the errors for them go in the one after.
+
+| Removed | Use instead |
+| --- | --- |
+| `*_Shell.yaml` and `app.load_shell(...)` | a `Window_View.yaml` of `kind: Window`, loaded with `app.load("Window")` |
+| `tesserae.shell.AppShell` and `app.use_shell(...)` | the same window view; for docking from Python, `tesserae.docking.Dock` |
+| `App(decorations=False)` | `App(borderless=True)`, or `borderless: true` on the `Window` |
+| `app.decorations` (and `app.decorations = ...`) | `app.borderless`, which is the opposite |
+| `tesserae new --shell` | `tesserae new --window` |
+| the `tesserae-shell-schema.json` editor schema | none: a window view is a `*_View.yaml`, which has its schema |
+
+### From a shell file
+
+Before, `app.py` loaded the screens, routed them and loaded the shell:
+
+```python
+app = App(width=640, height=480, title="Tasks", decorations=False)
+app.load("Main")
+app.load("Settings")
+app.route("", "Main")
+app.route("settings", "Settings")
+app.load_shell("Tasks")                       # Views/Tasks_Shell.yaml
+```
+
+```yaml
+# Tasks_Shell.yaml
+top_bar: {title: Tasks, style: {background: primary_container}}
+navigation:
+  items:
+    - {screen: Main, icon: home}
+    - {screen: Settings, icon: settings}
+status_bar: {text: Ready, style: {height: 28}}
+```
+
+Now the window view holds the frame and the screens, and `app.py` loads one file:
+
+```python
+app = App(title="Tasks")
+app.load("Window")                            # Views/Window_View.yaml
+app.navigate_to("")
+```
+
+```yaml
+# Window_View.yaml
+id: root
+kind: Window
+title: Tasks
+borderless: true
+style: {width: 640, height: 480, background: surface, flex_direction: vertical}
+title_bar: {title: Tasks, style: {background: primary_container}, buttons: [minimize, maximize, close]}
+children:
+  - id: body
+    kind: Container
+    style: {flex: fill, flex_direction: horizontal}
+    children:
+      - id: nav
+        component: NavigationRailScreens
+        with:
+          items:
+            - {label: Tasks, icon: home, screen: Main}
+            - {label: Settings, icon: settings, screen: Settings}
+      - id: screens
+        kind: Container
+        style: {flex: fill}
+        children:
+          - {id: main, view: Main_View.yaml, route: "", style: {flex: fill}}
+          - {id: settings, view: Settings_View.yaml, route: settings, style: {flex: fill}}
+  - id: status
+    component: StatusBar
+    with: {text: Ready, width: "100%"}
+```
+
+| In the shell file | In the window view |
+| --- | --- |
+| `top_bar: {title, leading_icon, trailing_icons, style}` | `title_bar: {title, icon, buttons, children, style}`; your icons are `children` |
+| `navigation: {items}` (`screen`, `icon`) | a `NavigationRailScreens` with `items` of `label`, `icon`, `screen` |
+| `navigation.on_navigate` | `handlers: {on_click: ...}` on your own nodes, or `navigate.<Screen>` |
+| `status_bar: {text, style}` | a `StatusBar` component |
+| `zones: {left: 220}`, `center`, `panels` | a `kind: Dock` with `kind: DockPanel`s: `style: {zone: left, width: 220}`; panels in one zone are tabs |
+| a panel named `Files` (a screen or `Files_View.yaml`) | `- {id: files_view, view: Files_View.yaml}` inside a `DockPanel` |
+| `app.load("Main")` and `app.route("", "Main")` | `view: Main_View.yaml` with `route: ""` in the window view |
+| `shell.layout()` and `shell.restore(layout)` | `view.dock_host("dock").layout()` and `.restore(layout)` |
+| `shell.size(side)` and `shell.set_size(side, px)` | `view.dock_host("dock").size(side)` and `.set_size(side, px)` |
+| `app.screen("Files")` | `view.embedded("files_view")` |
+
+### From `AppShell` and `use_shell`
+
+Build the frame as a window view as above. A Python-built `Dock` (`from tesserae.docking import Dock`) is unchanged: `Dock(window)`,
+`add_zone`, `add_panel`, `move`, `show` and the rest. `AppShell`'s own `layout()`, `restore()`, `size()` and `set_size()` are on
+the `DockHost` of a `kind: Dock` (`view.dock_host(id)`), as in the table.
+
+### From `decorations`
+
+`decorations=False` is `borderless=True`, and `decorations=True` is `borderless=False` (the default). Read the state as
+`app.borderless`; a binding that read `app.decorations` should be `not app.borderless`.
+
 ## To 0.4.4
 
-Nothing has to change: shell files, `app.load_shell()` and `decorations=False` work as before. New apps can write their frame as
+Nothing had to change: shell files, `app.load_shell()` and `decorations=False` worked as before. New apps could write their frame as
 a `kind: Window` view (`tesserae new notes --window`), and the shell file is being phased out, so an app that has one can move
 over when it likes:
 

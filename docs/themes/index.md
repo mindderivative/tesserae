@@ -117,7 +117,7 @@ doesn't reach them.
 ## Light and dark
 
 An `App` follows the OS by default (`dark="system"`): when the OS switches, every screen, widget,
-control, overlay and the shell switch with it, in place. On Linux the starting appearance is known at
+control, overlay and the window's frame switch with it, in place. On Linux the starting appearance is known at
 once, from the desktop's settings portal; on macOS and Windows it is known once the window opens, so
 the app starts dark and switches on the first frame if the OS is light. Headless, it starts dark.
 

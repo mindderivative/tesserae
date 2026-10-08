@@ -217,7 +217,7 @@ bar, and the two screens as `view:` nodes with a `route:`:
 - `app.load("Window")` opens `Views/Window_View.yaml`. Its `view: Main_View.yaml` and `view: Settings_View.yaml` nodes, with a
   `route:`, are the screens: each is registered under its file's name (`Main`, `Settings`) and finds its ViewModel in
   `ViewModels/`, so `app.py` no longer loads or routes them.
-- The window's `borderless: true` and `title_bar:` replace `decorations=False`; the rail is a `NavigationRailScreens` whose
+- The window's `borderless: true` and `title_bar:` make the window's own title bar; the rail is a `NavigationRailScreens` whose
   `screen:` names the screens.
 
 ## Where next

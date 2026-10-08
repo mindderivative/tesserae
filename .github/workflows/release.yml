@@ -76,7 +76,7 @@ jobs:
         run: |
           python -c "import tesserae; assert 'site-packages' in tesserae.__file__, tesserae.__file__; print(tesserae.__file__)"
           pytest tests/
-          for example in counter multi_screen todo_list app_shell app_shell_file; do
+          for example in counter multi_screen todo_list window_dock; do
             python examples/$example/app.py
           done
 

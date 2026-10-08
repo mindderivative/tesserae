@@ -14,7 +14,7 @@ python app.py
 notes/
   .venv/              a virtual environment with Tesserae in it
   app.py
-  Views/              Main_View.yaml, and Name_Shell.yaml
+  Views/              Main_View.yaml, Window_View.yaml (the window), Name_View.yaml
   ViewModels/         Main_ViewModel.py
   Components/         Name_Component.yaml, and Name_Stylesheet.yaml for its look
   Themes/             Name_Theme.yaml
@@ -32,13 +32,13 @@ install Tesserae). [The `tesserae` command](cli.md) has the rest.
 | You write | Tesserae opens |
 | --- | --- |
 | `app.load("Main")` | `Views/Main_View.yaml`, and `Main`'s ViewModel: `ViewModels/Main_ViewModel.py`, class `MainViewModel` |
-| `app.load_shell("Frame")` | `Views/Frame_Shell.yaml` |
+| `app.load("Window")` | `Views/Window_View.yaml`, the window (a `kind: Window` view) |
+| `view: Side` in a view | the view `Side`: `Views/Side_View.yaml`, and its ViewModel if there is one |
 | `Repeater(view, items, "Row", into=node)` and `instantiate(view, "Row", into=node)` | `Views/Row_View.yaml`, and `Row`'s ViewModel (`RowViewModel`), as `app.load` does |
 | `component: Stat` | `Components/Stat_Component.yaml`, and `Components/Stat_Stylesheet.yaml` |
 | `App(custom_theme="Brand")` | `Themes/Brand_Theme.yaml` |
 | `App(stylesheet="Page")` or `load(..., stylesheet="Page")` | `Styles/Page_Stylesheet.yaml` |
 | `style: row_Style.yaml` | next to the view, or in `Styles/` |
-| a panel `Side` in a shell file | the screen `Side`, or `Views/Side_View.yaml` |
 
 A **path** works wherever a name does, as it always has: `app.load("Views/Main_View.yaml")`, or a `Path`.
 A name has no `/` and no `.`. Fragments and style files next to the view are still found first.

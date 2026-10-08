@@ -36,6 +36,6 @@ children:
 ## See also
 
 - [Windows And Docks](../guide/windows-and-docks.md)
-- [App Shell](../guide/app-shell.md)
+- [Docking](../guide/docking.md)
 - [Python API reference](../api/python.md)
 - [YAML reference](../api/yaml.md)

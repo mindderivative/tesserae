@@ -68,7 +68,7 @@ Everything under the app's folder (the folder `app.py` is in), at the
 same place relative to it: view and style files, images, fonts, the
 ViewModels. The app's folder is scanned, rather than only what the app
 opens at start-up, because an app opens files later too: a screen the
-user navigates to, an app shell's panels, an image picked at run time.
+user navigates to, a `view:` in a window view, an image picked at run time.
 
 Left out, wherever they are:
 
@@ -238,7 +238,7 @@ containers), and removes the Windows and Linux ones again.
 - **Start-up** takes a little longer than `python app.py`: the executable
   unpacks itself first (on Linux, about 0.55 s against 0.23 s for a
   `tesserae new` app).
-- **Size:** a `tesserae new --shell` app is about 41 MB on Linux, 25 MB on
+- **Size:** a `tesserae new --window` app is about 41 MB on Linux, 25 MB on
   macOS and 30 MB on Windows, most of it Python itself and `tre`'s engine.
 - **Hot reload is off.** There are no source files to edit, so
   `app.run(hot_reload=True)` logs that and runs without it.

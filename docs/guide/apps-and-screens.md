@@ -91,7 +91,7 @@ class NoteViewModel(ViewModel):
 - **Alt+Left** and **Alt+Right** go back and forward, except in a text
   input, where Option+Left moves by word on macOS. So do the mouse's
   **back and forward side buttons**, wherever the pointer is; the other buttons don't.
-- A shell file's navigation rail navigates, so `back()` returns from a
+- A `NavigationRailScreens` in a [window view](windows-and-docks.md) navigates, so `back()` returns from a
   rail choice, and the rail follows `back()` and `forward()`.
 
 ### Routes and deep links
@@ -147,7 +147,7 @@ class SettingsViewModel(ViewModel):
 - **Nothing is global:** each `App` has its own `state`, and it can be
   set later (`app.state = AppState()`).
 - **A ViewModel's own attribute wins:** one that sets `self.state` or
-  `self.app` itself (as the shell examples pass `app` in) keeps its own,
+  `self.app` itself (as a ViewModel built by hand may pass `app` in) keeps its own,
   and its views' `state` names it.
 - **In a constructor**, before `super().__init__(view)`, `self.state`
   isn't there yet; `App.of(view).state` is:
@@ -175,18 +175,18 @@ it the same way.
 
 ```python
 app = App(width=960, height=640, title="Notes",
-          decorations=False,   # no OS title bar or borders: the app draws its own
+          borderless=True,     # no OS title bar or borders: the app draws its own
           min_width=480, min_height=320, icon="icon.png")
 ```
 
 | Option | What it does |
 |---|---|
-| `decorations` | Whether the OS draws the title bar and borders (default `True`). Without them the app draws its own title bar; on macOS the title bar stays, transparent, with the traffic lights. |
-| `resize_border` | How many pixels along each edge resize an undecorated window. Unless given, 6 while undecorated and 0 otherwise. It is off while maximized or fullscreen, and on macOS, where the OS resizes the window. |
+| `borderless` | Whether the OS window has no title bar or borders (default `False`). Then the app draws its own title bar; on macOS the title bar stays, transparent, with the traffic lights. A [window view](windows-and-docks.md) sets it with `borderless: true`. |
+| `resize_border` | How many pixels along each edge resize a borderless window. Unless given, 6 while borderless and 0 otherwise. It is off while maximized or fullscreen, and on macOS, where the OS resizes the window. |
 | `min_width`, `min_height` | The smallest the user can resize the window to (0 for no limit), so a title bar's buttons never crush. |
 | `fullscreen` | Borderless, filling the monitor. |
 | `system_menu` | Whether a right-click on the title bar opens the OS's window menu (Windows, and Wayland compositors that have one). Off by default, so the right-click is the app's. |
-| `window_border` | Whether an undecorated window gets a 1 px border (default `True`; see [The window border](custom-title-bars.md#the-window-border)). |
+| `window_border` | Whether a borderless window gets a 1 px border (default `True`; see [The window border](custom-title-bars.md#the-window-border)). |
 | `icon` | An image file (a square PNG is best), shown on Windows and X11; `app.set_icon(path)` changes it. Wayland and macOS take the icon from the app's desktop entry or bundle, which `tesserae build --installer` makes. |
 
 `app.platform` says which it is: `"windows"`, `"macos"`, `"wayland"` or
@@ -210,10 +210,10 @@ state:
 
 ### A title bar
 
-With `decorations=False`, a view draws the title bar, most simply with
+With `borderless=True`, a view draws the title bar, most simply with
 `kind: TitleBar` (an icon, a title, the app's own controls, and the
-window buttons), or a node of its own marked `window_region: drag`. An
-undecorated window also gets a 1 px border. All of it, and macOS's
+window buttons), or a node of its own marked `window_region: drag`. A
+borderless window also gets a 1 px border. All of it, and macOS's
 traffic lights, is in [Custom Title Bars](custom-title-bars.md).
 
 ## Running the app
@@ -239,7 +239,7 @@ none raises `RuntimeError`.
 | Option | What it does |
 | --- | --- |
 | `max_frames` | Stops after that many frames; for headless and CI runs. |
-| `hot_reload=True` | Reloads every screen built from a file, and the app's theme, stylesheet, component and shell files, when they change on disk. A screen built from a spec dict has no file, so it isn't watched. See [Hot Reload](hot-reload.md). |
+| `hot_reload=True` | Reloads every screen built from a file, and the app's theme, stylesheet and component files, when they change on disk. A screen built from a spec dict has no file, so it isn't watched. See [Hot Reload](hot-reload.md). |
 | `keepalive` | `False` (the default) does not tick. `True` wakes the loop every 0.02 s; a number is the interval in seconds. Each tick sleeps on the loop thread, so input can wait up to a tick, and an idle window costs about half a percent of one core. It is for code that wants the loop woken regularly; hot reload and threads don't need it. |
 
 ### From another thread

@@ -24,8 +24,7 @@ route (a [deep link](apps-and-screens.md#routes-and-deep-links)).
 | --- | --- |
 | `--no-venv` | Makes the folders and files without the virtual environment, which needs the network to install Tesserae. |
 | `--window` | Makes the app one [`Window_View.yaml`](windows-and-docks.md): a title bar, a navigation rail and two routed screens, Main and Settings. |
-| `--shell` | Adds an [app shell](app-shell.md) file, `Views/Notes_Shell.yaml` (a top bar, a navigation rail over Main and Settings, a status bar), and a Settings screen. |
-| `--custom-title-bar` | With `--window` or `--shell`: no OS title bar. The window's own [title bar](custom-title-bars.md) (the shell's top bar, with `--shell`): it moves the window and has the minimize, maximize and close buttons. The window is at least 640 by 400. |
+| `--custom-title-bar` | With `--window`: no OS title bar (`borderless: true`). The window's own [title bar](custom-title-bars.md): it moves the window and has the minimize, maximize and close buttons. The window is at least 640 by 400. |
 | `--dir PARENT` | Makes the app in `PARENT` instead of here. |
 
 Nothing is overwritten: a folder that isn't empty is refused with a one-line message (exit code 2).

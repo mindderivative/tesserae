@@ -369,7 +369,7 @@ components:
       The rail is a column of `NavigationRailItem`s, one for each entry of `items`. `NavigationRailScreens` is the same
       rail whose destinations go to screens of the app: each entry of `items` has a `screen`, choosing one is
       `navigate.<screen>`, and the destination is filled while that screen is the app's current one (a Window view's routed
-      views are the screens). A [shell file](../guide/app-shell.md)'s `navigation:` builds a rail for you.
+      views are the screens).
     usage: |
       - id: rail
         component: NavigationRail
@@ -388,7 +388,7 @@ components:
       from tesserae.widgets import navigation_rail
 
       rail = navigation_rail(app.window, ["Home", "Search"], ["home", "search"], selected=0)
-    see: [guide/app-shell.md]
+    see: [guide/windows-and-docks.md]
 
   - slug: navigation-drawer
     title: Navigation drawer
@@ -432,7 +432,7 @@ components:
       from tesserae.widgets import top_app_bar
 
       bar = top_app_bar(app.window, "Notes", leading_icon="menu", trailing_icons=["settings"])
-    see: [guide/custom-title-bars.md, guide/app-shell.md]
+    see: [guide/custom-title-bars.md, guide/windows-and-docks.md]
 
   - slug: tabs
     title: Tabs
@@ -879,7 +879,7 @@ components:
       from tesserae.widgets import status_bar
 
       status = status_bar(app.window, "Ready", style={"height": 32})
-    see: [guide/app-shell.md]
+    see: [guide/windows-and-docks.md]
 
   - slug: node-graph
     title: Node graph
@@ -981,7 +981,7 @@ components:
         children:
           - {id: files, kind: DockPanel, title: Files, style: {zone: left, width: 220}, children: []}
           - {id: editor, kind: DockPanel, title: Editor, style: {zone: center}, children: []}
-    see: [guide/windows-and-docks.md, guide/app-shell.md]
+    see: [guide/windows-and-docks.md, guide/docking.md]
 
   - slug: dock-panel
     title: Dock panel

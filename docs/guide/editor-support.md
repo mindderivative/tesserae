@@ -10,7 +10,6 @@ what each one means, and underlines a mistake such as `foregorund`.
 | Schema | For |
 | --- | --- |
 | `tesserae-yaml-schema.json` | a view, `*_View.yaml` |
-| `tesserae-shell-schema.json` | an app shell, `*_Shell.yaml` |
 | `tesserae-component-schema.json` | a component fragment, `*_Component.yaml` |
 | `tesserae-style-schema.json` | a style file, `*_Style.yaml` |
 | `tesserae-theme-schema.json` | a theme, a stylesheet, or a component's stylesheet (`<Name>_Stylesheet.yaml`) |
@@ -36,7 +35,6 @@ user settings):
 {
   "yaml.schemas": {
     "/path/to/site-packages/tesserae/schema/tesserae-yaml-schema.json": ["**/*_View.yaml"],
-    "/path/to/site-packages/tesserae/schema/tesserae-shell-schema.json": ["**/*_Shell.yaml"],
     "/path/to/site-packages/tesserae/schema/tesserae-component-schema.json": ["**/*_Component.yaml"]
   }
 }
@@ -112,7 +110,7 @@ committed files are what it writes. Run the language-server check
     against every YAML file in the repository. Beyond that,
     `tools/check_schema_in_language_server.py` drives Red Hat's real
     language server over the Language
-    Server Protocol, the way VS Code does: every view, shell, fragment and
+    Server Protocol, the way VS Code does: every view, fragment and
     theme file in the repository opens with no diagnostics, kinds, style
     fields, handlers, colour roles and a fragment's parameters are suggested,
     and a typo or a wrong value is flagged. It needs node, so CI doesn't run

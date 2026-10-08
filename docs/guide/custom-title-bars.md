@@ -5,14 +5,14 @@ in its theme, with its own controls in it: a search field, tabs, a
 menu.
 `examples/custom_title_bar/` in the repository shows each way below.
 
-## An undecorated window
+## A borderless window
 
 ```python
 app = App(width=960, height=640, title="Notes", theme_seed=(0x67, 0x50, 0xA4, 0xFF),
-          decorations=False, min_width=480, min_height=320)
+          borderless=True, min_width=480, min_height=320)
 ```
 
-`decorations=False` takes away the OS's title bar and borders. The app
+`borderless=True` takes away the OS's title bar and borders (in a [window view](windows-and-docks.md#the-window), `borderless: true`). The app
 then draws a title bar, and the window is still:
 
 - **moved** by dragging the bar, and maximized by double-clicking it;
@@ -25,7 +25,7 @@ then draws a title bar, and the window is still:
 `min_width` and `min_height` keep the user from resizing it so small
 that the bar's buttons crush.
 
-The options (`decorations`, `resize_border`, `min_width`, `system_menu`, `icon`, `fullscreen`), the
+The options (`borderless`, `resize_border`, `min_width`, `system_menu`, `icon`, `fullscreen`), the
 window's actions and the `app.maximized` and `app.active` values a binding can follow are in
 [The window](apps-and-screens.md#the-window), and the [Python API](../api/python.md).
 
@@ -100,7 +100,7 @@ doesn't take it away.
 
 ### macOS
 
-On macOS an undecorated window keeps the OS's title bar, transparent,
+On macOS a borderless window keeps the OS's title bar, transparent,
 with the traffic lights. A TitleBar leaves room for them at its start
 and hides its own buttons. `app.titlebar_inset` (the `(height, width)`
 they take, `(0, 0)` elsewhere and in fullscreen) and
@@ -155,20 +155,18 @@ on a double-click), the pressed node gets `pointer_cancel` instead of
 `pointer_up`, and no click. Every Tesserae widget releases its press on
 it; a widget of your own that tracks a press should listen for both.
 
-## The app shell's top bar
+## A top app bar as the title bar
 
-In an undecorated app, an [app shell](app-shell.md#the-top-bar-as-the-title-bar)'s
-top bar is the title bar: the window's drag region, with the window
-buttons after its trailing icons, whether it's made in code with
-`top_app_bar` or in a shell file. `top_app_bar(..., window_controls=)`
-asks for it or refuses it.
+In a borderless app, a `top_app_bar` made in code is the title bar: the window's drag region, with the window
+buttons after its trailing icons. `top_app_bar(..., window_controls=)` asks for it or refuses it. In a view, use
+a `kind: TitleBar` or a window's `title_bar:` instead.
 
 ## The window border
 
-An undecorated window would blend into what's behind it, so Tesserae
+A borderless window would blend into what's behind it, so Tesserae
 draws a 1 px border around it, in the theme's `outline_variant` (an
-unthemed app gets the baseline colour). It lies over every screen and
-the shell, but takes no presses: a press reaches whatever is under it,
+unthemed app gets the baseline colour). It lies over every screen
+and panel, but takes no presses: a press reaches whatever is under it,
 and one within `resize_border` of an edge resizes the window. It hides
 while the window is maximized or fullscreen, and it isn't drawn on
 macOS, where the OS keeps the frame. It follows the app's theme, light
@@ -190,7 +188,7 @@ transparent windows.
 
 A TitleBar hot-reloads like the rest of its view: an edit to its title,
 icon, buttons or content shows while the app runs, and the buttons keep
-working. So does a shell file's top bar. See [Hot Reload](hot-reload.md).
+working. So does a window view's `title_bar:`. See [Hot Reload](hot-reload.md).
 
 ## On each platform
 

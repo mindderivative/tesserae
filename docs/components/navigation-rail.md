@@ -12,7 +12,7 @@ large windows. Each is an icon in a pill with a label; the selected one's pill i
 The rail is a column of `NavigationRailItem`s, one for each entry of `items`. `NavigationRailScreens` is the same
 rail whose destinations go to screens of the app: each entry of `items` has a `screen`, choosing one is
 `navigate.<screen>`, and the destination is filled while that screen is the app's current one (a Window view's routed
-views are the screens). A [shell file](../guide/app-shell.md)'s `navigation:` builds a rail for you.
+views are the screens).
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -182,6 +182,6 @@ See [Component stylesheets](../stylesheets/index.md).
 
 ## See also
 
-- [App Shell](../guide/app-shell.md)
+- [Windows And Docks](../guide/windows-and-docks.md)
 - [Python API reference](../api/python.md)
 - [YAML reference](../api/yaml.md)

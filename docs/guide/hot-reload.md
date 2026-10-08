@@ -101,31 +101,20 @@ hot reload: watching component TodoItem_View.yaml (3 instance(s))
 reloaded /path/to/TodoItem_View.yaml (3 instance(s))
 ```
 
-## The shell file
+## The window view
 
-A shell loaded with `app.load_shell` from a `*_Shell.yaml` is watched
-too. An edit is applied in place where it can be:
+A `kind: Window` view is watched like any view, and so is each view it embeds (`view:`). An edit is applied in place:
 
 | Edit | What happens |
 | --- | --- |
-| the top bar's title or icons | the bar is rebuilt where it is (in an undecorated app, still the [title bar](custom-title-bars.md)) |
-| the status bar's text | set on the same bar |
+| the window's `title`, `min_width`, `min_height` or `borderless` | the OS window is set again |
+| the `title_bar:` | the bar is rebuilt where it is, and still the [title bar](custom-title-bars.md) |
+| a `view:` with a `route:` added or removed | the screen is registered or dropped; the current screen stays showing |
+| a `DockPanel` added, removed, renamed or moved to another zone | docked there; a panel the file didn't move stays where the user dragged it |
 | a zone's size | set, and a zone the file didn't change keeps the size the user dragged it to |
-| navigation items or `on_navigate` | the rail is rebuilt, the current screen still selected |
-| a panel added, or moved to another zone | docked there; a panel the file didn't move stays where the user dragged it |
-| a panel removed | undocked: its tab goes, the zone shows another, and its screen stays registered, so `app.show` can still show it |
+| an embedded view's file | that view is rebuilt in place, with its ViewModel; editing the host keeps an embedded view whose `view:` and `with:` didn't change, with its state |
 
-A structural edit is logged at WARNING as needing a restart, and the
-rest of the edit still applies. Structural edits are a bar or the rail
-added or removed, a zone added or removed, and `center`:
-
-```text
-the shell file Studio_Shell.yaml changed (zones right added): restart the app to see it
-```
-
-An edit naming a panel or `on_navigate` method that can't be found is
-logged as an error and changes nothing. The panels' own view files are
-screens, so they're reloaded as screens are.
+A change that can't be applied is logged as an error and the app keeps running.
 
 ## Theme and stylesheet files
 

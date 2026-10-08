@@ -231,11 +231,11 @@ whose node was destroyed under it is dropped at the next re-theme
 so their view re-colours them, as before. Phase 3: a `tesserae.View` on an
 app's window with no theme argument at all (`dark` now defaults to
 `None`, so `dark=False` counts as given) starts from `app._view_theme()`
-and follows. `Dock` and `AppShell` start from `initial_theme` too.
+and follows. `Dock` starts from `initial_theme` too.
 Followers can define `_follow_theme(theme, view_theme)`, which
 `follow.retheme` prefers to `set_theme`: a view takes the app's theme
-arguments, and a shell re-colours itself and the dock it made, not the
-widgets it was given, so a pinned bar stays pinned. `_follow_alive` lets a
+arguments, and a dock re-colours itself, not the widgets it was given, so a
+pinned bar stays pinned. `_follow_alive` lets a
 view (whose `node` is a lookup method) say whether its root still exists.
 Overlays follow through their widgets.
 
@@ -287,51 +287,13 @@ first time while hot reload runs and does nothing otherwise.
 `_stop_watchers` (run's `finally`) stops them all, mid-run ones
 included.
 
-**Shell files, M52:** `shell_file.py` reads a `*_Shell.yaml`, a small
-schema rather than a widget tree (`top_bar`, `navigation`, `status_bar`,
-`zones`, `center`, `panels`), and `parse_shell_spec` checks every key,
-raising `ShellSpecError` with `file: key: problem`. `build_shell` builds
-the existing `AppShell` and widgets from it: the bars at `width="100%"`,
-the rail from the navigation items' screen names, and no `theme=`, so
-it follows the app (M50). `App.load_shell` builds, remembers the file
-(`_shell_file`, for hot reload) and calls `use_shell`. The view pipeline
-is untouched, since it has no pluggable kinds, and its reconcile would
-fight the dock (M52 Q1).
-Phase 3: `check_references` checks each panel (registered, or its
-`<Name>_View.yaml` exists) and `on_navigate` before anything is built.
-`place_panels` docks each by name, loading and registering a file one
-(its ViewModel class `<Name>ViewModel`, imported once under the module's
-own name so an app's earlier import is reused). `bind_navigation` wires
-the rail to `app.show` or the method, and `app._navigation` lets `show`
-move the rail's selection (`selected.set`, which doesn't fire
-`on_change`). `AppShell.show_screen` now brings a docked root's tab
-forward (a panel is a screen) and tracks the screen in `content` itself
-(`_in_content`), removing it only while it's still there, so a screen
-docked as a panel is never pulled back out. `tre`'s `dock_panel` takes a
-node from wherever it's attached.
-Phase 4: `_start_watchers` adds a `FileWatcher` for the shell file
-(logged on its own, not counted with theme and stylesheet files), and
-`App._reload_shell` runs `check_references`, then
-`shell_file.reload_shell(old, new)`, then stores the spec. Bars, rail,
-zones and `center` are compared with the live shell, and panels with the
-last spec applied, so user drags survive. A changed top bar or rail is
-rebuilt in its slot (`_swap`: `insert_child` at the old index, then
-`destroy`) and rebound. The status text and zone sizes are set. Panels
-the file added or moved go through `place_panels`. What can't be done
-in place is returned and logged as needing a restart. A panel removal
-is one of those: `tre` has no undock, and a detached panel stays in its
-zone's list, so `set_active_panel` would reattach it (probed).
-M53, on `tre` 0.3.5.2's `undock_panel` (`tre` #16): `Dock.remove_panel`
-undocks a panel, clears its drag state if it was being dragged (`tre`
-cancels the drag), and redraws the zone's strip, so the zone's tabs
-match `tre`'s list again. `reload_shell` undocks each panel the file
-dropped that is still docked, keeping its screen registered; one the
-file placed in a zone the live shell hasn't (a restart) was never
-docked, and is skipped.
-Phase 5: `App.screen(name)` returns a registered screen's `(view,
-viewmodel)`, the public way to reach a panel's ViewModel that the app
-built from a file. `examples/app_shell_file/` (in CI) declares the
-studio in `Studio_Shell.yaml`, with no widgets made in Python.
+**The window view (0.4.4), which replaced shell files (M52).** A `kind: Window` root is expanded by `spec/window.py` into a
+container with a `TitleBar` and a content container, and `App.load` mounts it for good as the app's `Frame`
+(`window_view.py`). Its `view:` nodes are embedded views (`spec/embed.py`, `component.embed`); one with a `route:` is a screen the
+`Frame` registers with the app and shows while it is current. A `kind: Dock` (`spec/dock.py`) becomes containers carrying
+`dock:`/`dock_panel:` markers, and `dockhost.DockHost` makes the `docking.Dock` from them once built, keeping the user's layout
+across reloads. The old `*_Shell.yaml` reader, `AppShell` and `App.load_shell`/`use_shell` were removed in the next release; their
+names are in `tesserae._removed`, and say what replaces them. `App.screen(name)` returns a registered screen's `(view, viewmodel)`.
 
 **Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
 the framework (D10). Each zone is a column -- a tab strip, a divider, and
@@ -347,16 +309,9 @@ moves the panel in the model and rebuilds both strips. `move()` calls
 the model itself, since `dock_panel` fires no `dock_drop`. The `Dock` owns
 the window's two docking events, so a window has one.
 
-**The app shell, M45:** `tesserae.shell.AppShell` is a vertical box at
-100% of the window (so it follows resizes with no listener): the top
-bar, a middle row -- navigation, the left zone and its handle, a centre
-column (top zone, `content`, bottom zone) and the right zone -- and the
-status bar. Zones keep a pixel size and the content flexes, so the
-handles set a zone's size (clamped between 120 px and 70% of its area)
-rather than sharing a proportion as M42's `splitter` does. `App.show`
-mounts screens through `shell.show_screen` once `use_shell` is called: in `content`, one at a time, or -- with `center=True`, where `content` is the dock's center zone -- as center tabs, docked on first show and brought forward after.
-`layout()` records panels by title, the shown one and each size;
-`restore()` moves panels first, then shows and sizes.
+**The app shell, M45 (removed).** `tesserae.shell.AppShell` framed the screens with bars, a rail and a `Dock`; it is replaced by a
+`kind: Window` view with a `kind: Dock`, and `tesserae.docking.Dock` (above) is what is left. Zones keep a pixel size and the
+content flexes, so a handle sets a zone's size (clamped between 120 px and 70% of its area).
 
 **Controls, M40:** `tesserae.controls.Control` is the base of the
 stateful MD3 controls that replace `tre`'s. It holds `.node`, a
@@ -500,11 +455,11 @@ it.
 
 ## Custom windowing (0.3.0)
 
-On `tre` 0.5. `App(decorations=False)` takes the OS's title bar away
+On `tre` 0.5. `App(borderless=True)` takes the OS's title bar away
 and the app draws its own (design: `docs/design/custom-windowing.md`;
 guide: `docs/guide/custom-title-bars.md`).
 
-- **The window on `App`** (`app.py`). The options (`decorations`,
+- **The window on `App`** (`app.py`). The options (`borderless`,
   `resize_border`, `min_width`/`min_height`, `fullscreen`, `system_menu`,
   `icon`, `window_border`) are `App` arguments and live properties; the
   actions (`minimize`, `maximize`, `restore`, `toggle_maximized`, `close`)
@@ -534,17 +489,16 @@ guide: `docs/guide/custom-title-bars.md`).
   and hit-testing). Its look is classes in a built-in first layer of the
   cascade (`title_bar.STYLES`, under the default theme), so every theme and
   stylesheet can change it and an app's own `default_theme` doesn't lose it.
-- **The shell's top bar** (`widgets/navigation.py`): `top_app_bar` gets
-  `window_controls`, on when the app is undecorated, and then adds the
-  drag region, the inset and the buttons to the same bar. Shell files get
-  it through `top_app_bar`, so a reload rebuilds it the same way.
+- **A top app bar** (`widgets/navigation.py`): `top_app_bar` gets
+  `window_controls`, on when the app is borderless, and then adds the
+  drag region, the inset and the buttons to the same bar.
 - **The window border** (`App._build_border`): a full-window `Rect` over
   the screens (`z_index` 1000, neither hit-testable nor in the
-  accessibility tree), shown by an `Effect` while the window is undecorated,
+  accessibility tree), shown by an `Effect` while the window is borderless,
   not maximized, not fullscreen and not on macOS, and styled by the
   `window_border` class.
-- **Scaffolding.** `tesserae new --shell --custom-title-bar` makes an app
-  with `decorations=False, min_width=640, min_height=400`;
+- **Scaffolding.** `tesserae new --window --custom-title-bar` makes a window
+  view with `borderless: true`;
   `examples/custom_title_bar` shows a `TitleBar` and a bar made by hand.
 
 Tests run headless: tre's `simulate` delivers the presses, `maximized`,

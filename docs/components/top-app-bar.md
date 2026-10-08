@@ -81,6 +81,6 @@ See [Component stylesheets](../stylesheets/index.md).
 ## See also
 
 - [Custom Title Bars](../guide/custom-title-bars.md)
-- [App Shell](../guide/app-shell.md)
+- [Windows And Docks](../guide/windows-and-docks.md)
 - [Python API reference](../api/python.md)
 - [YAML reference](../api/yaml.md)

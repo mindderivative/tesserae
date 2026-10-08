@@ -5,6 +5,14 @@
 One way to describe a window ([#103](https://github.com/mindderivative/tesserae/issues/103)). The shell file, `AppShell` and
 `decorations=` are removed in the phases below; this release is breaking, and [Migrating](migration.md) says how to move.
 
+### Documentation
+
+- **Windows, Docks & Embedded Views** is the guide for the window frame; **App Shell & Docking** is now **Docking from Python**
+  (`guide/docking.md`), about `tesserae.docking.Dock` alone. The tutorials, the CLI, hot reload, editor support, projects and
+  custom title bar pages, the README and `ARCHITECTURE.md` describe the window view. [Migrating](migration.md) has the
+  step-by-step for a shell file, `AppShell` and `decorations`.
+- CI and the release workflow run `examples/window_dock` and build `tesserae new --window` apps in place of the shell ones.
+
 ### Removed
 
 - **The shell file**: `*_Shell.yaml`, `App.load_shell`, its hot reload, its schema (`tesserae-shell-schema.json`, in the package, the

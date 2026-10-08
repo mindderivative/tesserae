@@ -12,7 +12,7 @@ everything above that.
                     |               |               |               |
  Tesserae       registry, ----> spec pipeline       |         controls, composed
                 routing         expand -> cascade   |         widgets, overlays,
-                    |           -> compiler         |         shell, docking
+                    |           -> compiler         |         docking
                     |               |               |               |
                     |         View / Component: nodes, reconciler, bindings
                     |               |      Signal / Computed / Effect (reactive)
@@ -61,10 +61,10 @@ the OS light/dark switch and `App.set_theme_specs` re-colour them in place. See
 from a fragment into a `Widget` with `.node` and its parts. `tesserae.interaction` draws what the
 engine does not: state layers, the ripple and focus rings. `tesserae.a11y` sets roles and states.
 `tesserae.overlays` (`Dialog`, `Menu`, `Snackbar`, `Tooltip`, `Popover`, `SearchView`,
-`NavigationDrawer`) show nodes with `window.show_layer`. `AppShell` frames the screens with a top
-bar, navigation, a status bar and docked zones, and `Dock` manages the panels in those zones.
+`NavigationDrawer`) show nodes with `window.show_layer`. A `kind: Window` view frames the screens with a title
+bar, a rail and docked panels, and `Dock` manages the panels in its zones.
 See the [widget catalog](guide/widget-catalog.md), [controls](guide/controls.md),
-[overlays](guide/overlays.md), [app shell](guide/app-shell.md) and the
+[overlays](guide/overlays.md), [windows and docks](guide/windows-and-docks.md) and the
 [component gallery](components/index.md).
 
 **The engine, `tre`.** It provides the node tree (`create`, `set`, `get`, `animate`, `on`,
@@ -112,7 +112,7 @@ after each update, without doubling listeners.
 thread) watches the view file and everything it was built from: includes, fragments and
 images. On a change it reruns the same pipeline off the main thread and hands the result to the
 event loop through `tre`'s thread-safe loop handle, which reconciles the live view. Theme,
-stylesheet, component and shell files are watched the same way. A failed reload is logged and the
+stylesheet and component files are watched the same way. A failed reload is logged and the
 app keeps running. See [Hot reload](guide/hot-reload.md).
 
 ## Design rules

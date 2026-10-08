@@ -70,13 +70,9 @@ jobs:
         working-directory: tesserae
         run: python examples/todo_list/app.py
 
-      - name: Run the app-shell example
+      - name: Run the window and dock example
         working-directory: tesserae
-        run: python examples/app_shell/app.py
-
-      - name: Run the app-shell file example
-        working-directory: tesserae
-        run: python examples/app_shell_file/app.py
+        run: python examples/window_dock/app.py
 
       - name: Run the custom title bar example
         working-directory: tesserae
@@ -120,7 +116,7 @@ jobs:
         run: '"$PY" tools/clean_install_smoke.py'
 
   # M77: `tesserae build` on every supported platform. The wheel (with its
-  # `build` extra) goes into a fresh venv, a `tesserae new --shell` app is
+  # `build` extra) goes into a fresh venv, a `tesserae new --window` app is
   # built into one executable, and `--check` runs it from an empty folder:
   # it must draw frames and exit cleanly. Linux has no display, so it runs
   # under Xvfb with lavapipe (Mesa's software Vulkan), and needs
@@ -158,23 +154,23 @@ jobs:
         shell: bash
         run: |
           mkdir work && cd work
-          "$BIN/tesserae" new demo --shell --no-venv
+          "$BIN/tesserae" new demo --window --no-venv
           cd demo
           if [ "$RUNNER_OS" = "Linux" ]; then RUN="xvfb-run -a"; else RUN=""; fi
           $RUN "$BIN/tesserae" build --check
           ls -l dist
 
-      # 0.3.0 M5: the same for an app whose window is undecorated, so the
-      # shell's top bar is the title bar (and its window border is drawn):
+      # 0.3.0 M5: the same for an app whose window is borderless, so the
+      # window view's title bar is the title bar (and its window border is drawn):
       # it must build, open its window without the OS's title bar, draw
       # frames and exit cleanly on every platform.
       - name: Make a custom-title-bar app and build it, checked
         shell: bash
         run: |
           cd work
-          "$BIN/tesserae" new demo_bar --shell --custom-title-bar --no-venv
+          "$BIN/tesserae" new demo_bar --window --custom-title-bar --no-venv
           cd demo_bar
-          grep -q "decorations=False" app.py
+          grep -q "borderless: true" Views/Window_View.yaml
           if [ "$RUNNER_OS" = "Linux" ]; then RUN="xvfb-run -a"; else RUN=""; fi
           $RUN "$BIN/tesserae" build --check
           ls -l dist

@@ -71,7 +71,7 @@ nav:
       - Controls: guide/controls.md
       - Overlays: guide/overlays.md
       - Windows, Docks & Embedded Views: guide/windows-and-docks.md
-      - App Shell & Docking: guide/app-shell.md
+      - Docking from Python: guide/docking.md
       - Custom Title Bars: guide/custom-title-bars.md
       - Hot Reload: guide/hot-reload.md
       - Logging: guide/logging.md

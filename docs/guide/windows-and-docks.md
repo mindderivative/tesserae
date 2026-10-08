@@ -1,8 +1,8 @@
 # Windows, Docks and Embedded Views
 
 An app's whole frame can be written in the same YAML as any other view: the window, its title bar, a dock of panels, and the
-screens inside it, each a view of its own. This replaces the shell file (`*_Shell.yaml`) for new apps; see
-[moving off a shell file](#moving-off-a-shell-file).
+screens inside it, each a view of its own. An app that still has a `*_Shell.yaml` can move over with
+[Migrating](../migration.md).
 
 | You want | Write |
 | --- | --- |
@@ -43,7 +43,8 @@ app.run()
 
 - `style:`'s `width` and `height` are the window's size, and `background` its fill. The rest of `style:` lays out the
   content (a `flex_direction: horizontal` puts a rail beside the screens).
-- `borderless: true` is `decorations=False`. It is the new spelling; `App(decorations=)` still works.
+- `borderless: true` is the same as `App(borderless=True)`: the OS window has no title bar or borders, and the title bar below is
+  the window's.
 - A window with a `title_bar:` that isn't `borderless` has a plain header: the OS draws the window's own buttons, so the bar
   has none of its own.
 - `app.load("Window")` is what an app loads; `App(window_view="Name")` loads `Name_View.yaml` as the window when the app is
@@ -164,19 +165,3 @@ dock.restore(saved)        # ...put back later, e.g. when the app starts
 ```
 
 Dragging a panel onto one half of a split isn't supported: a dragged panel docks in the five zones.
-
-## Moving off a shell file
-
-The shell file (`*_Shell.yaml`, `app.load_shell()`) still works in this release and is being phased out; nothing has to change
-at once. To move an app over:
-
-| In the shell file | In the window view |
-| --- | --- |
-| `top_bar: {title: Notes}` | `title_bar: {title: Notes, ...}` on the `Window` |
-| `navigation: {items: [...]}` | a `NavigationRailScreens` with the same items |
-| `status_bar: {text: Ready}` | a `StatusBar` component at the end of the content |
-| `zones:` | a `kind: Dock` with `DockPanel`s |
-| `app.load("Main")` and `app.route("", "Main")` | `view: Main_View.yaml` with `route: ""` |
-| `App(decorations=False)` | `borderless: true` |
-
-An app that loads a window view can't also load a shell file.

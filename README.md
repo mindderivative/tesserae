@@ -16,9 +16,8 @@ widget-class trees, paired with a Python `ViewModel` per view -- a plain
 screens, switched via `App.show()` from inside a real dispatched
 handler), `examples/todo_list/` (a real dynamic list, one list
 `Signal` as the single source of truth, `Repeater` keeping components in
-sync automatically), and `examples/app_shell/` and
-`examples/app_shell_file/` (an app shell with docked panels, built in
-Python and from a `*_Shell.yaml`). `Signal`/`Computed`/`Effect`/`batch`/`untrack`/
+sync automatically), and `examples/window_dock/` (a window with a title
+bar, a rail, docked panels and routed screens, in one `Window_View.yaml`). `Signal`/`Computed`/`Effect`/`batch`/`untrack`/
 `ViewModel` are Tesserae's own (M35) -- see Reactivity below. The MD3 widget catalog
 is real too: 67 declarative `component:` fragments for `*_View.yaml`
 files, plus `tesserae.widgets` for building widgets from Python. See the
@@ -93,8 +92,7 @@ for testing against an unreleased `tre` checkout.
 python examples/counter/app.py
 python examples/multi_screen/app.py
 python examples/todo_list/app.py
-python examples/app_shell/app.py
-python examples/app_shell_file/app.py
+python examples/window_dock/app.py
 ```
 
 `counter/`: a real `Signal`-bound counter -- a `Counter_View.yaml` +
@@ -122,15 +120,10 @@ instance lifecycle: add, toggle a two-way-bound checkbox, remove
 dispatched handler), add again, all through real dispatched clicks and
 one live window.
 
-`app_shell/`: an app framed by a top app bar, a navigation rail and a
-status bar, with tool panels docked left, right and bottom and screens as
-center tabs (M45), all built in Python with `tesserae.shell.AppShell`
-and `tesserae.docking.Dock`.
-
-`app_shell_file/`: the same studio declared in `Studio_Shell.yaml` and
-built by `app.load_shell()` (M52). Its panels are views named like
-screens, found next to the shell file; its rail shows screens; and the
-shell file itself is hot-reloaded.
+`window_dock/`: a studio written as one `Window_View.yaml`: a title bar, a
+navigation rail, tool panels docked left, right and bottom, routed screens
+in the middle, and a status bar -- all `kind: Window`, `kind: Dock` and
+`view:` nodes, with no widgets made in Python.
 
 ## Components
 
@@ -248,8 +241,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md).
 ## Starting an app
 
 `tesserae new notes` makes a runnable app (`app.py` and a `Home` pair,
-with shared state and routes); `--shell` adds an app shell file and a
-Settings screen. `tesserae add screen Settings` adds a pair and loads and
+with shared state and routes); `--window` makes the app one window view
+with a rail and two routed screens. `tesserae add screen Settings` adds a pair and loads and
 routes it in `app.py` (M67). See [Getting Started](https://mindderivative.github.io/tesserae/getting-started/).
 
 The items once listed here as deferred are done: shared state (M65),
