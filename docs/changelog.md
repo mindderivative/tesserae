@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.4.5 (unreleased)
+## 0.4.5
 
 One way to describe a window ([#103](https://github.com/mindderivative/tesserae/issues/103)). The shell file, `AppShell` and
 `decorations=` are removed in the phases below; this release is breaking, and [Migrating](migration.md) says how to move.
