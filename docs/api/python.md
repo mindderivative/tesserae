@@ -1970,15 +1970,15 @@ Routes `node`'s `a11y_action` events to `handlers[action]`, each given the event
 class BindingError
 ```
 
-A binding that doesn't parse, or fails to evaluate. The message is `tre`'s.
+A binding that doesn't parse, or fails to evaluate.
 
 ### `Expression`
 
 ```python
-class Expression(kind: str, value: Any = None, left: Any = None, right: Any = None) -> None
+class Expression(expr: Expr, source: str) -> None
 ```
 
-One node: `kind` is `Ident`, `Literal`, `Attr`, `Index`, `Call`, `Not` or `BinaryOp`.
+A compiled binding. `kind`, `value` and `left` describe the one shape the two-way check looks for: a Signal's own ``name.get()`` (``kind == "Call"``, ``value == "get"``, ``left.kind == "Ident"``).
 
 ### `Handle`
 
@@ -1986,7 +1986,7 @@ One node: `kind` is `Ident`, `Literal`, `Attr`, `Index`, `Call`, `Not` or `Binar
 class Handle(obj: Any, id: int) -> None
 ```
 
-An opaque Python object inside an evaluation. `id` numbers the handles one evaluation made, in order, as `tre` does.
+Any value that is not a bool, int, float or str, inside an evaluation. `id` numbers the handles one evaluation made, in order.
 
 ### `evaluate`
 
@@ -1994,7 +1994,15 @@ An opaque Python object inside an evaluation. `id` numbers the handles one evalu
 evaluate(expr: Expression, viewmodel: Any) -> Any
 ```
 
-Evaluates `expr` against `viewmodel` and returns the Python value: a primitive, or the object a handle stands for. Signal reads inside it are recorded on `tesserae.reactive`'s stack.
+Evaluates `expr` against `viewmodel` and returns the Python value.
+
+### `evaluate_value`
+
+```python
+evaluate_value(expr: Expression, viewmodel: Any) -> Value
+```
+
+Evaluates `expr` against `viewmodel`: a primitive or a `Handle`. Signal reads are recorded on `tesserae.reactive`'s stack.
 
 ### `parse_binding`
 
@@ -2002,7 +2010,7 @@ Evaluates `expr` against `viewmodel` and returns the Python value: a primitive, 
 parse_binding(raw: str) -> Expression
 ```
 
-Parses `"{{ expression }}"`. Raises `BindingError` with `tre`'s message if it isn't wrapped in `{{ }}` or doesn't parse.
+Parses ``"{{ expression }}"``. Raises `BindingError` if it isn't wrapped in ``{{ }}`` or doesn't parse.
 
 ### `value_debug`
 

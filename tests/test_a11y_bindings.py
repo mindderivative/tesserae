@@ -98,7 +98,7 @@ def test_none_clears_a_bound_label_or_level():
     ("label", "{{ number.get() }}", 'a11y binding on "label" ("{{ number.get() }}"): a11y label must be a string, got 7'),
     ("hidden", "{{ title.get() }}", "a11y hidden must be true or false, got 'Inbox'"),
     ("level", "{{ collapsed.get() }}", "a11y level must be a positive whole number, got False"),
-    ("label", "{{ unread }}", "a11y label can't be Handle"),
+    ("label", "{{ unread }}", "a11y label must be a string, got 3"),  # a Signal reads as its value since 0.5.0
     ("label", "{{ missing.get() }}", 'widget "status" a11y binding on "label"'),
 ])
 def test_a_bad_bound_value_is_an_error_naming_the_widget_and_field(field, raw, message):

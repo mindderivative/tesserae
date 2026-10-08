@@ -24,5 +24,5 @@ def test_tre_is_the_0_5_line():
     assert ("<", "0.6") in bounds, f"{engine!r}: a new tre line is a new Tesserae line, the user's to start"
 
 
-def test_tesserae_is_0_4():
-    assert _project()["version"].startswith("0.4.")
+def test_tesserae_is_0_5():
+    assert _project()["version"].startswith("0.5.")

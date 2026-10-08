@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.5.0 (unreleased)
+
+The YAML language redesign ([#209](https://github.com/mindderivative/tesserae/issues/209)), then the components and the windows work.
+The language is specified in `design/yaml-language.md`; the phases land one at a time.
+
+### Changed
+
+- **Bindings are a Python subset** (phase 2). `tesserae.expr` is a sandboxed evaluator (an `ast` node whitelist, name resolution
+  through a scope, limits on source size, depth, nodes, steps, ranges, sequences, exponents, integers and text) that replaces the port
+  of `tre`'s binding grammar. Python's arithmetic and comparison rules apply (`1 == 1.0` is `True`, unary minus, `None`, `if`/`else`,
+  comprehensions, f-strings, whitelisted functions and methods), and a Signal reads as its value (`count` and `count.get()` agree).
+  Operators, truth tests, subscripts, formatting and built-ins touch only plain values, built-in containers, mappings, dates, decimals
+  and enums, so an application's own object can be read by attribute but none of its methods run from a view. `tesserae.binding`
+  keeps `parse_binding`, `evaluate`, `evaluate_value`, `Handle` and `BindingError` over it, and errors now carry the position and a hint.
+  See [Binding Expressions](guide/bindings.md).
+
+### Removed
+
+- `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).
+
+### Added
+
+- `tests/test_expr.py`: the grammar table row by row, every limit, an escape corpus of about 190 inputs run as expressions and as
+  handlers, grammar-based and mutation fuzzers, and a manual mutation check of the sandbox rules (each rule switched off fails a test).
+
 ## 0.4.6
 
 The removal stubs are removed ([#113](https://github.com/mindderivative/tesserae/issues/113)).

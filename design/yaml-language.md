@@ -562,7 +562,7 @@ this list fixes only the names the language and the registry are designed around
 
 | Phase | New or changed modules | Tests |
 |---|---|---|
-| 2 expression language | `spec/expr.py` (parse, check, evaluate, classify); replaces `binding.py` | the section 8 grammar table row by row; the sandbox corpus and fuzzer (8.6); every limit; static and reactive classification; Signals as values; error positions |
+| 2 expression language | `src/tesserae/expr.py` (parse, check, evaluate, classify); `binding.py` is now a facade over it | the section 8 grammar table row by row; the sandbox corpus and fuzzer (8.6); every limit; static and reactive classification; Signals as values; error positions |
 | 3 node model | `spec/widgets.py` (registry, `Property`, `@widget`), `spec/load.py` (nodes with ids), a schema generator per widget | one test per key in section 2; unknown-property errors with suggestions; the old-to-new translator over every file in the repository |
 | 4 composition | `spec/compose.py` (params, caller scope, `Slot`, `for`, `if`, `state`) | scope rules; slot placement and errors; reactive `for:` reconciliation (add, remove, reorder with keys); hot reload keeping state |
 | 5 binding | `viewmodel.py`, `app.bind`, the `views` mapping, the contract checker | the pie-and-list case from section 11 as a test (two views, one instance, one Signal); swap; per-instance factory; unbound views |

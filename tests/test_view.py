@@ -125,20 +125,24 @@ def test_dependencies_are_retracked_on_each_evaluation():
 
 
 BAD_BINDINGS = {
-    "doesn't parse": "{{ -1 }}",
-    "unknown attribute": "{{ missing.get() }}",
-    "not a string for text": "{{ width.get() }}",
+    "doesn't parse": ("{{ 1 + }}", 'widget "label" binding on "text" ("{{ 1 + }}"): failed to parse binding expression'),
+    "unknown name": ("{{ missing.get() }}", "'missing' is not defined"),
+    "not a string for text": ("{{ width.get() }}", 'widget property "text" expects a string binding, got Int('),
 }
 
 
 @pytest.mark.parametrize("name", sorted(BAD_BINDINGS))
-def test_binding_errors_read_as_tres_do(name):
-    spec = _root(_text(binding=BAD_BINDINGS[name]))
-    with pytest.raises(ValueError) as theirs:
-        reference.tre(lambda: (VM(tre.View(spec=spec, theme_seed=SEED)), None)[1])
+def test_a_bad_binding_is_an_error_naming_the_widget_and_the_problem(name):
+    raw, message = BAD_BINDINGS[name]
     with pytest.raises(ValueError) as ours:
-        VM(_view(spec))
-    assert str(ours.value) == str(theirs.value)
+        VM(_view(_root(_text(binding=raw))))
+    assert message in str(ours.value)
+
+
+def test_a_binding_is_a_python_expression_with_signals_read_as_values():
+    view = _view(_root(_text(binding="{{ -width + 1 if width > 0 else None }}")))
+    with pytest.raises(ValueError, match="expects a string binding"):
+        VM(view)
 
 
 # -- handlers --------------------------------------------------------------------
