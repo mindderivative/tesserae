@@ -25,6 +25,13 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   the other three are reported (a dynamic widget name, and a property a call binds that its fragment does not declare). Nothing builds from the
   new syntax yet: that is phases 4 and 5.
 
+- **Composition** (phase 4). `tesserae.spec.compose.Composer` turns parsed views into a live tree of `Instance`s: a view call is replaced by the
+  callee's root, its arguments are evaluated in the caller's scope and stay reactive inside the callee, `Slot` holds the call's children (built in
+  the caller's scope, with errors for a view that takes none or a slot it lacks), `for:` expands a node per element and a reactive one is
+  reconciled by `key:` (kept, added, removed, reordered), `if:` builds and disposes as its expression changes, and `state:` is a per-instance
+  `Signal` that survives a recomposition for the same ids. Disposing a composition releases every subscription. Nothing builds `tre` nodes from it
+  yet (phase 5).
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

@@ -230,6 +230,7 @@ class ViewDoc:
     params: Any = None
     expects: Any = None
     decl: Optional[WidgetDecl] = None
+    text: str = ""
 
 
 def _assign_ids(node: Node, prefix: str) -> None:
@@ -333,7 +334,8 @@ class _Parser:
     def universal(self, node: Node, key: str, value: Any, vat: Position, where: Position, depth: int) -> None:
         if key == "name":
             if not isinstance(value, str) or not _NAME.match(value):
-                raise self.fail(vat, f"a name is letters, digits and '_' and does not start with a digit, got {value!r}")
+                hint = "YAML reads yes, no, on and off as true and false: put the name in quotes" if isinstance(value, bool) else None
+                raise self.fail(vat, f"a name is letters, digits and '_' and does not start with a digit, got {value!r}", hint)
             node.name = value
         elif key == "slot":
             if not isinstance(value, str) or not _NAME.match(value):
@@ -471,7 +473,7 @@ def parse_view(text: str, file: str = "<view>", *, resolver: Optional[Callable[[
     root = parser.node(data, 0, root=True)
     _assign_ids(root, "root")
     _check_names(parser)
-    doc = ViewDoc(root=root, file=file, name=root.name, params=data.get("params"), expects=data.get("expects"))
+    doc = ViewDoc(root=root, file=file, name=root.name, params=data.get("params"), expects=data.get("expects"), text=text)
     if "params" in data:
         try:
             doc.decl = decl_from_params(view_name or root.name or file, data["params"])

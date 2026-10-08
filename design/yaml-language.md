@@ -1,7 +1,7 @@
 # The Tesserae view language (0.5.0)
 
 Phase 1 of [#209](https://github.com/mindderivative/tesserae/issues/209). This is the spec the later phases build and test against.
-**Status: draft for the user's review.** Implemented so far: the expression language (phase 2) and the node model (phase 3).
+**Status: draft for the user's review.** Implemented so far: the expression language (phase 2), the node model (phase 3) and composition (phase 4).
 
 Conventions: **Decided** marks what the user decided (2026-10-08); **Proposed** marks what this document adds and the user may change;
 **Reserved** marks a place the language may grow without breaking what is written here. "Old" means 0.4.x.
@@ -530,6 +530,16 @@ removed in the release after, with clear messages, as the 0.4.5 and 0.4.6 patter
 - YAML 1.1 reads the key `on` as `true`; the loader keeps a boolean-looking key as written, so `state: {on: false}` works.
 - **Not translatable, left for the component pass**: a widget name that is a parameter (`component: "{{ button }}"` in `ButtonGroup`; a `variant` property replaces it), and a call that binds a property its fragment does not declare (`ButtonText` has no `disabled`). The translator reports both and `tests/test_translate.py` names them.
 
+**Findings of phase 4** (composition, tested headless; building real nodes is phase 5):
+
+- **Ids.** An instance id is the parent's id, a dot, the node's `name` or place (`children[2]`), and `[key]` under a `for:`. A view call's id is the callee root's, so parts read `nav.label`. Slot content is the call's child: its segment is its `name`, else `content[i]` (`<slot>[i]` for a named slot), so it cannot collide with the callee's own `children[i]`; a real clash (a slot child named like a callee part) is an error naming the id.
+- **Reactivity of names.** A name from a frame (state, loop variable, param) is reactive only when its value is a `Signal` or `Computed`; a ViewModel name is reactive; a built-in function is static. So `for: i in range(3)` expands once and `for: r in rows` needs a `key:`.
+- **Read-only names.** Loop variables and params cannot be assigned in a handler (`'r' is not writable`); state and ViewModel Signals can.
+- **State.** A node's `state:` is a `Signal` per name; a call's `state:` is visible to the call's arguments and its slot content (both written in the caller's scope). A recomposition (`Composer(previous=...)`) restores a value when the instance id and the name match; the key is `(id, name, call or node)`.
+- **A call's own keys** (`style`, `classes`, `a11y`, `interaction`, `window_region`, `route`, `name`, `handlers`) lie over the callee's root; a handler written at the call runs in the caller's scope, the callee's own handlers in the callee's.
+- **YAML trap**: `name: no` or `name: yes` reads as a boolean; the error says to quote it.
+- A reactive `for:` over a list that is **replaced** is reconciled; a list changed **in place** is not seen (Signals notify on assignment). The ViewModel replaces lists, as `Signal.set` does everywhere.
+
 `tesserae migrate-yaml [path]` rewrites a project in place (a report of what it could not translate) and is tested against all 45 views, the
 79 fragments, the examples and the tutorials in the repository.
 
@@ -573,7 +583,7 @@ this list fixes only the names the language and the registry are designed around
 |---|---|---|
 | 2 expression language | `src/tesserae/expr.py` (parse, check, evaluate, classify); `binding.py` is now a facade over it | the section 8 grammar table row by row; the sandbox corpus and fuzzer (8.6); every limit; static and reactive classification; Signals as values; error positions |
 | 3 node model | `src/tesserae/spec/widgets.py` (registry, `Property`, `@widget`, `decl_from_params`, JSON schema), `spec/builtin_widgets.py` (the 25 built-in declarations), `spec/nodes.py` (`parse_view`: nodes, ids, positions, `LoadError`), `spec/translate.py` (old to new), `tools/generate_widget_schema.py` | one test per key in section 2; unknown-property errors with suggestions; the translator over every file in the repository (128 of 131 load, 3 known gaps) |
-| 4 composition | `spec/compose.py` (params, caller scope, `Slot`, `for`, `if`, `state`) | scope rules; slot placement and errors; reactive `for:` reconciliation (add, remove, reorder with keys); hot reload keeping state |
+| 4 composition | `src/tesserae/spec/compose.py` (`Composer`, `Composition`, `Instance`, `Scope`: params, the caller's scope, `Slot`, `for`, `if`, `state`, ids, disposal) | scope rules; slot placement and errors; reactive `for:` reconciliation (add, remove, reorder, update in place, 10 000 rows); state per row and across a recomposition; the call's keys over the callee's root; every subscription released on dispose; mutation-checked |
 | 5 binding | `viewmodel.py`, `app.bind`, the `views` mapping, the contract checker | the pie-and-list case from section 11 as a test (two views, one instance, one Signal); swap; per-instance factory; unbound views |
 | 6 style | `spec/cascade.py` (rules by widget, variant, part, state), per-widget extras | specificity table; state selectors from `Interaction`; the inline-versus-rule fix |
 | 7 migration | `tesserae/migrate.py`, the CLI command, docs, tutorials, built-ins in the new language | the translator on the whole repository; round trip (translated files load and build the same tree as before) |
