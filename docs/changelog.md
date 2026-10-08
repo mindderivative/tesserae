@@ -5,6 +5,12 @@
 One way to describe a window ([#103](https://github.com/mindderivative/tesserae/issues/103)). The shell file, `AppShell` and
 `decorations=` are removed in the phases below; this release is breaking, and [Migrating](migration.md) says how to move.
 
+### Removed
+
+- **The shell file**: `*_Shell.yaml`, `App.load_shell`, its hot reload, its schema (`tesserae-shell-schema.json`, in the package, the
+  site and `tesserae schema`), its project folder kind, the `tesserae new --shell` template and flag, and the
+  `examples/app_shell_file` example. Each says what replaces it (a `kind: Window` view) when it is used.
+
 ### Changed
 
 - **A removed name says what replaces it.** `decorations=`, `app.decorations`, `app.decorated`, `App.load_shell`, `App.use_shell`,

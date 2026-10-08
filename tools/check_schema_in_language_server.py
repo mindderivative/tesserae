@@ -3,7 +3,7 @@
 
 `tests/test_yaml_schema.py` checks the schemas with a generic validator. This
 drives the server an editor uses, over the Language Server Protocol, the way
-VS Code does: it opens every `*_View.yaml`, `*_Shell.yaml`, `*_Component.yaml`
+VS Code does: it opens every `*_View.yaml`, `*_Component.yaml`
 and the default theme in the repository (each must come back with no
 diagnostics), then asks for completions and checks that mistakes are flagged.
 It needs node and the server, so CI doesn't run it; run it after regenerating
@@ -24,7 +24,7 @@ import time
 from pathlib import Path
 L = Path(sys.argv[1]); REPO = Path(sys.argv[2]).resolve(); S = REPO / "src/tesserae/schema"
 THEMES = sys.argv[3:]
-SCHEMAS = {(S / "tesserae-yaml-schema.json").as_uri(): ["**/*_View.yaml"], (S / "tesserae-shell-schema.json").as_uri(): ["**/*_Shell.yaml"],
+SCHEMAS = {(S / "tesserae-yaml-schema.json").as_uri(): ["**/*_View.yaml"],
            (S / "tesserae-component-schema.json").as_uri(): ["**/*_Component.yaml"],
            (S / "tesserae-theme-schema.json").as_uri(): [(REPO / t).as_posix() for t in THEMES] or ["**/__none__.yaml"]}
 YAML_SETTINGS = {"schemas": SCHEMAS, "validate": True, "completion": True, "hover": True, "schemaStore": {"enable": False}}
@@ -72,7 +72,7 @@ def labels(uri, line, col):
 
 # 1. every repo YAML file, in the real server
 bad = []; n = 0
-files = [p for p in sorted([*(REPO / "src").rglob("*.yaml"), *(REPO / "examples").rglob("*.yaml")]) if p.name.endswith(("_View.yaml", "_Shell.yaml", "_Component.yaml")) or p.relative_to(REPO).as_posix() in THEMES]
+files = [p for p in sorted([*(REPO / "src").rglob("*.yaml"), *(REPO / "examples").rglob("*.yaml")]) if p.name.endswith(("_View.yaml", "_Component.yaml")) or p.relative_to(REPO).as_posix() in THEMES]
 for p in files:
     uri = open_doc(p.relative_to(REPO), p.read_text()); n += 1
     ds = [d["message"][:90] for d in c.diags.get(uri, ["<no response>"])]
@@ -104,10 +104,10 @@ u = open_doc("Scn4_View.yaml", "id: b\ncomponent: ButtonFilled\nwith:\n  labell:
 check("a misspelt parameter is flagged", any("labell" in m for m in messages(u)), messages(u))
 u = open_doc("Scn5_View.yaml", "id: bar\nkind: TitleBar\nbuttons: [minimize, help]\n")
 check("a title bar's wrong button is flagged", any("Valid values" in m for m in messages(u)), messages(u))
-u = open_doc("Scn6_Shell.yaml", "top_bar:\n  titel: Studio\nzones:\n  middle: 100\n")
-check("a shell's typos are flagged", sum("not allowed" in m for m in messages(u)) == 2, messages(u))
-u = open_doc("Scn7_Shell.yaml", "top_bar:\n  tit\n"); got = labels(u, 1, 5)
-check("a shell's keys are suggested", "title" in got, got)
+u = open_doc("Scn6_View.yaml", "id: root\nkind: Window\ntitel: Studio\n")
+check("a window's typo is flagged", any("not allowed" in m for m in messages(u)), messages(u))
+u = open_doc("Scn7_View.yaml", "id: root\nkind: Window\nbor\n"); got = labels(u, 2, 3)
+check("a window's keys are suggested", "borderless" in got, got)
 u = open_doc("Scn8_View.yaml", "id: root\nkind: \n"); got = labels(u, 1, 6)
 check("every kind is suggested for `kind:`", {"Container", "Text", "Rect", "TitleBar"} <= set(got), f"{len(got)} kinds")
 u = open_doc("Scn9_View.yaml", "id: root\nkind: Rect\nstyle:\n  fo\n"); got = labels(u, 3, 4)

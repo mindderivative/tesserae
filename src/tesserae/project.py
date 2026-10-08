@@ -2,7 +2,7 @@
 
 A project is a folder with standard places for each kind of file:
 
-    Views/        Name_View.yaml, Name_Shell.yaml
+    Views/        Name_View.yaml
     ViewModels/   Name_ViewModel.py
     Components/   Name_Component.yaml (and Name_Stylesheet.yaml, its look)
     Themes/       Name_Theme.yaml
@@ -26,7 +26,6 @@ __all__ = ["KINDS", "Project", "ProjectError", "is_name", "project_of", "resolve
 #: Each kind of file: the end of its name, and the folders it is kept in.
 KINDS: dict[str, tuple[str, tuple[str, ...]]] = {
     "view": ("_View.yaml", ("Views",)),
-    "shell": ("_Shell.yaml", ("Views",)),
     "viewmodel": ("_ViewModel.py", ("ViewModels",)),
     "component": ("_Component.yaml", ("Components",)),
     "theme": ("_Theme.yaml", ("Themes",)),

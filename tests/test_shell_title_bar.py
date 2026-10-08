@@ -1,12 +1,11 @@
 """0.3.0 M4 Phase 1 (#54): an app shell's top bar is the title bar of an
 undecorated window: the window's drag region, with the window buttons
 after its trailing icons, the maximize swap, the fade while unfocused,
-and (on macOS) room for the traffic lights. From code and from a shell
-file; a decorated app's top bar is as it was.
+and (on macOS) room for the traffic lights. A decorated app's top bar is
+as it was.
 """
 
 import pytest
-import yaml
 
 from tesserae import App, View
 from tesserae.widgets.navigation import top_app_bar
@@ -88,18 +87,3 @@ def test_window_controls_can_be_asked_for_or_refused():
     assert _bar(_app(decorations=False), window_controls=False).node.get("window_region") is None
     with pytest.raises(ValueError, match="window_controls needs the window to be an App's"):
         top_app_bar(View({"id": "r", "kind": "Container", "style": {}}).window, "x", window_controls=True)
-
-
-def test_a_shell_files_top_bar_is_the_title_bar(tmp_path):
-    (tmp_path / "Home_View.yaml").write_text(yaml.safe_dump(
-        {"id": "home", "kind": "Container", "style": {"width": 200, "height": 100}}), encoding="utf-8")
-    shell = tmp_path / "Studio_Shell.yaml"
-    shell.write_text(yaml.safe_dump({"top_bar": {"title": "Studio", "trailing_icons": ["settings"]}}),
-                     encoding="utf-8")
-    app = _app(decorations=False)
-    app.register("Home", app.build_view(tmp_path / "Home_View.yaml"), None)
-    app.load_shell(shell)
-    app.window.advance(16)
-    top = app._shell.top_bar
-    assert top.node.get("window_region") == "drag"
-    assert top.view.node("top_app_bar.close") is not None

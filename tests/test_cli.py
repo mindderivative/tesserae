@@ -36,11 +36,8 @@ RUNNER = textwrap.dedent('''
             report["count"] = home.node("count").get("text")
         report["screens"] = sorted(app._registered)
         report["routes"] = [r.pattern for r in app._routes]
-        report["shell"] = app._shell is not None
-        report["rail"] = app._navigation[1] if app._navigation is not None else None
         report["size"] = [app.window.get("width"), app.window.get("height")]
-        report["decorations"] = app.decorations
-        report["title_bar"] = app._shell.top_bar.node.get("window_region") if app._shell is not None else None
+        report["borderless"] = app.borderless
         for name in report["screens"]:
             if name in ("Main", "Window"):  # a window app registers its window view too
                 continue
@@ -74,7 +71,7 @@ def test_new_makes_a_runnable_app(tmp_path):
     assert report["start"] == "Main" and report["location"] == "" and report["ran"]
     assert report["greeting"] == "Hello from My Notes" and report["count"] == "Clicked 1 times"
     assert report["button"] == ["button", "Click me"]  # a ButtonFilled fragment, named (M69)
-    assert report["screens"] == ["Main"] and not report["shell"] and report["size"] == [480, 320]
+    assert report["screens"] == ["Main"] and report["size"] == [480, 320]
 
 
 def test_add_screen_adds_a_pair_and_loads_and_routes_it(tmp_path, capsys):
@@ -95,26 +92,17 @@ def test_add_screen_adds_a_pair_and_loads_and_routes_it(tmp_path, capsys):
     assert deep["start"] == "UserProfile" and deep["location"] == "user-profile"
 
 
-def test_new_with_a_shell(tmp_path):
-    assert cli.main(["new", "studio", "--shell", "--no-venv", "--dir", str(tmp_path)]) == 0
-    project = tmp_path / "studio"
-    assert (project / "Views" / "Studio_Shell.yaml").is_file() and (project / "Views" / "Settings_View.yaml").is_file()
-    report = _run(project)
-    assert report["shell"] and report["screens"] == ["Main", "Settings"] and report["routes"] == ["", "settings"]
-    assert report["rail"] == ["Main", "Settings"] and report["size"] == [960, 600]
-    assert report["back_from"] == [["Settings", "Main"]]
+def test_new_with_a_shell_says_what_replaced_it(tmp_path, capsys):
+    """0.4.5 (#108): `--shell` was removed; it says to use `--window`."""
+    assert cli.main(["new", "studio", "--shell", "--no-venv", "--dir", str(tmp_path)]) == 2
+    err = capsys.readouterr().err
+    assert "`tesserae new --shell` was removed" in err and "tesserae new --window" in err
+    assert not (tmp_path / "studio").exists()
 
 
-def test_new_with_a_custom_title_bar(tmp_path, capsys):
-    """0.3.0 M4: an undecorated shell app, its top bar the title bar."""
-    assert cli.main(["new", "studio", "--shell", "--custom-title-bar", "--no-venv", "--dir", str(tmp_path)]) == 0
-    report = _run(tmp_path / "studio")
-    assert report["decorations"] is False and report["title_bar"] == "drag" and report["shell"]
-    assert "min_width=640, min_height=400" in (tmp_path / "studio" / "app.py").read_text()
-    plain = cli.main(["new", "plain", "--shell", "--no-venv", "--dir", str(tmp_path)])
-    assert plain == 0 and _run(tmp_path / "plain")["decorations"] is True
+def test_a_custom_title_bar_goes_with_a_window(tmp_path, capsys):
     assert cli.main(["new", "lonely", "--custom-title-bar", "--dir", str(tmp_path)]) == 2
-    assert "--custom-title-bar goes with" in capsys.readouterr().err
+    assert "--custom-title-bar goes with --window" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("app_py", ["# an app of my own\n", f"# half of it\n{cli.IMPORT_MARKER}\n"])
@@ -182,7 +170,6 @@ def test_schema_says_where_the_yaml_schemas_are_and_prints_the_setting(capsys):
     assert cli.main(["schema", "--settings"]) == 0
     setting = json.loads(capsys.readouterr().out)["yaml.schemas"]
     assert setting[str(cli.SCHEMAS / "tesserae-yaml-schema.json")] == ["**/*_View.yaml"]
-    assert setting[str(cli.SCHEMAS / "tesserae-shell-schema.json")] == ["**/*_Shell.yaml"]
     assert set(setting) == {str(cli.SCHEMAS / name) for name in cli.SCHEMA_FILES}
 
 
@@ -228,19 +215,17 @@ def test_new_with_a_window(tmp_path):
     assert (project / "Views" / "Window_View.yaml").is_file() and not list(project.glob("Views/*_Shell.yaml"))
     assert "load_shell" not in (project / "app.py").read_text()
     report = _run(project)
-    assert report["ran"] and not report["shell"] and report["screens"] == ["Main", "Settings", "Window"]
+    assert report["ran"] and report["screens"] == ["Main", "Settings", "Window"]
     assert report["routes"] == ["", "settings"] and report["size"] == [960, 600]
     assert report["back_from"] == [["Settings", "Main"]]
-    assert report["decorations"] is True
+    assert report["borderless"] is False
     assert _run(project, "settings")["start"] == "Settings"
 
 
-def test_new_with_a_borderless_window(tmp_path, capsys):
+def test_new_with_a_borderless_window(tmp_path):
     assert cli.main(["new", "studio", "--window", "--custom-title-bar", "--no-venv", "--dir", str(tmp_path)]) == 0
     report = _run(tmp_path / "studio")
-    assert report["ran"] and report["decorations"] is False
-    assert cli.main(["new", "both", "--window", "--shell", "--dir", str(tmp_path)]) == 2
-    assert "choose one" in capsys.readouterr().err
+    assert report["ran"] and report["borderless"] is True
 
 
 def test_add_screen_to_a_window_project_says_where_the_view_node_goes(tmp_path, capsys):

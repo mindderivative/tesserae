@@ -19,7 +19,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS = ROOT / "src" / "tesserae" / "schema"
 SITE = ROOT / "docs" / "schema"
-NAMES = {"view": "tesserae-yaml-schema.json", "shell": "tesserae-shell-schema.json",
+NAMES = {"view": "tesserae-yaml-schema.json",
          "theme": "tesserae-theme-schema.json", "component": "tesserae-component-schema.json",
          "style": "tesserae-style-schema.json"}
 
@@ -43,8 +43,6 @@ def _kind_of(path: Path, data) -> str | None:
     name = path.name
     if name.endswith("_View.yaml"):
         return "view"
-    if name.endswith("_Shell.yaml"):
-        return "shell"
     if name.endswith("_Component.yaml"):
         return "component"
     if name.endswith("_Style.yaml") and isinstance(data, dict) and "style" in data:
@@ -131,10 +129,7 @@ def test_a_fragment_may_use_its_parameters_where_a_view_may_not():
     assert list(_validator("view").iter_errors(node))
 
 
-def test_shell_and_theme_files_reject_a_misspelt_key():
-    assert not list(_validator("shell").iter_errors({"top_bar": {"title": "Studio"}, "zones": {"left": 200}}))
-    assert list(_validator("shell").iter_errors({"top_bar": {"titel": "Studio"}}))
-    assert list(_validator("shell").iter_errors({"zones": {"middle": 200}}))
+def test_theme_files_reject_a_misspelt_key():
     assert not list(_validator("theme").iter_errors({"seed": "#6750A4", "styles": [{"kind": "Rect", "style": {"corner_radius": 4}}]}))
     assert list(_validator("theme").iter_errors({"styles": [{"kind": "Rect", "style": {"corner_radious": 4}}]}))
 

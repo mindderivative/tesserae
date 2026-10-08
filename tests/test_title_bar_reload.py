@@ -1,7 +1,6 @@
 """0.3.0 M4 Phase 4 (#57): title bars hot-reload like anything else. An
 edit to a view with a `TitleBar` (its title, its buttons, its content)
-reloads it, and its buttons still act; an undecorated app's shell file
-reloads with its top bar still the title bar.
+reloads it, and its buttons still act.
 """
 
 import os
@@ -10,7 +9,6 @@ import pytest
 import yaml
 
 from tesserae import App, ViewModel
-from tesserae.shell_file import load_shell_spec
 from tesserae.spec.watch import ViewWatcher
 
 SEED = (0x67, 0x50, 0xA4, 0xFF)
@@ -68,24 +66,3 @@ def test_dropping_buttons_by_hot_reload(tmp_path):
     assert view.node("bar.close").get("layout_x") + 46 == 600  # still at the right edge, alone
     with pytest.raises(ValueError, match="no widget with id 'bar.minimize'"):
         view.node("bar.minimize")  # gone, not just hidden
-
-
-def test_a_shell_file_reload_keeps_the_title_bar(tmp_path):
-    (tmp_path / "Home_View.yaml").write_text(yaml.safe_dump(
-        {"id": "home", "kind": "Container", "style": {"width": 200, "height": 100}}), encoding="utf-8")
-    shell = tmp_path / "Studio_Shell.yaml"
-    shell.write_text(yaml.safe_dump({"top_bar": {"title": "Studio"}}), encoding="utf-8")
-    app = App(width=800, height=500, theme_seed=SEED, decorations=False)
-    app._native_controls.set(False)
-    app.register("Home", app.build_view(tmp_path / "Home_View.yaml"), None)
-    app.load_shell(shell)
-    shell.write_text(yaml.safe_dump({"top_bar": {"title": "Studio, edited", "trailing_icons": ["settings"]}}),
-                     encoding="utf-8")
-    app._reload_shell(load_shell_spec(shell))
-    app.window.advance(16)
-    top = app._shell.top_bar
-    assert top.node.get("window_region") == "drag"
-    assert top.view.node("top_app_bar.title").get("text") == "Studio, edited"
-    assert top.view.node("top_app_bar.trailing0") is not None
-    app.window.simulate("click", node=top.view.node("top_app_bar.maximize"))
-    assert app.maximized.get() is True

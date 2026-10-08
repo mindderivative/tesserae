@@ -3,7 +3,7 @@
 
 One page for every key of every kind of file Tesserae reads: a view's node (and
 its `style`, `text`, `handlers`, `a11y`), the kinds of node, component calls
-and fragments, a shell file, a theme and a stylesheet. Each stub lists all of
+and fragments, a theme and a stylesheet. Each stub lists all of
 its properties with the values they take and what they do. It is written from
 the same schemas the editors use (`tools/generate_yaml_schema.py`), so the page,
 the schemas and the code can't disagree; the only prose of its own is KINDS.
@@ -233,7 +233,7 @@ def _block(reader: Reader, schema: dict[str, Any], what: str, first: str = "Key"
 def render() -> str:
     schemas = _schemas()
     view, component = Reader(schemas["tesserae-yaml-schema.json"]), Reader(schemas["tesserae-component-schema.json"])
-    shell, theme = Reader(schemas["tesserae-shell-schema.json"]), Reader(schemas["tesserae-theme-schema.json"])
+    theme = Reader(schemas["tesserae-theme-schema.json"])
     out = ["# YAML Reference", "",
            "Every key Tesserae's YAML files take, with the values it accepts and what it does. "
            "This page is written from the same schemas your editor uses (`tesserae schema`), "
@@ -242,7 +242,6 @@ def render() -> str:
            "| File | What it is | Reference |", "| --- | --- | --- |",
            "| `<Name>_View.yaml` | A screen: one node with its children. | [The node](#the-node) |",
            "| `<Name>_Component.yaml` | A reusable fragment with `params:`. | [Components](#components) |",
-           "| `<Name>_Shell.yaml` | The frame around the screens: bars, navigation, zones. | [Shell file](#shell-file) |",
            "| `<Name>_Theme.yaml` | A theme: colours, type, shapes and style rules. | [Theme and stylesheet](#theme-and-stylesheet) |",
            "| `<Name>_Stylesheet.yaml` | Style rules for a view. | [Theme and stylesheet](#theme-and-stylesheet) |",
            "| `<Name>_Style.yaml` | One node's `style:`, shared. | [The style](#the-style) |", ""]
@@ -259,7 +258,7 @@ def render() -> str:
     out += [""]
     out += ["## The style", "", "A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` file, which holds them under a "
             "`style:` key (and an optional `id:` naming it): `{id: row_style, style: {gap: 8}}`. "
-            "The same fields go in a stylesheet's or theme's rules, and in a shell file's parts.", ""]
+            "The same fields go in a stylesheet's or theme's rules.", ""]
     out += _style_tables(view)
     out += ["## Colors", "", "Any field that takes a color takes " + view.defs["color"]["description"][0].lower()
             + view.defs["color"]["description"][1:].replace("A theme role (", "a theme role (", 1) + "", ""]
@@ -317,8 +316,6 @@ def render() -> str:
             "arguments. From the host, `view.embedded(\"left\")` is the embedded view and its `.viewmodel` the ViewModel. "
             "A relative file is relative to the file that names it.", ""]
     out += _block(view, view.resolve(view.defs["view_node"]), "view node")
-    out += ["## Shell file", "", "`*_Shell.yaml`: [App Shell & Docking](../guide/app-shell.md).", ""]
-    out += _block(shell, schemas["tesserae-shell-schema.json"], "shell")
     out += ["## Theme and stylesheet", "",
             "A stylesheet has only `styles:`; a theme has everything. See [Themes](../themes/index.md).", ""]
     out += _block(theme, schemas["tesserae-theme-schema.json"], "theme")

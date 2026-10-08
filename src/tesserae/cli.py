@@ -1,14 +1,13 @@
 """`tesserae`, the command line: scaffolding for a new app.
 
-    tesserae new <name> [--window | --shell] [--custom-title-bar] [--dir PARENT]
+    tesserae new <name> [--window [--custom-title-bar]] [--dir PARENT]
     tesserae add screen <Name> [--dir DIR]
     tesserae build [app.py] [--name N] [--icon F] [--console] [--include G] [--exclude G] [--check]
     tesserae schema [--settings]
 
 `new` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair
 following the naming convention, runnable at once; `--window` makes the app
-one `kind: Window` view (title bar, rail, and two routed screens); `--shell`
-adds an app shell file and a `Settings` screen (the older form). `add screen` adds a pair and, at the
+one `kind: Window` view (title bar, rail, and two routed screens). `add screen` adds a pair and, at the
 marker comments `new` leaves in `app.py`, its import, `load()` and route.
 Neither overwrites a file. The templates are in `tesserae/templates/`.
 `build` makes the app one executable: see `tesserae.build`.
@@ -27,6 +26,8 @@ from pathlib import Path
 from string import Template
 from typing import Optional, Sequence
 
+from tesserae._removed import removed
+
 TEMPLATES = Path(__file__).parent / "templates"
 #: The lines `tesserae new` leaves in `app.py`; `add screen` inserts above them.
 IMPORT_MARKER = "# (tesserae add screen adds each new screen's import above this line)"
@@ -35,12 +36,11 @@ SCHEMAS = Path(__file__).parent / "schema"
 #: Each YAML schema and the files it is for, as `yaml.schemas` globs (a `!` leaves files out).
 SCHEMA_FILES = {
     "tesserae-yaml-schema.json": ["**/*_View.yaml"],
-    "tesserae-shell-schema.json": ["**/*_Shell.yaml"],
     "tesserae-component-schema.json": ["**/*_Component.yaml"],
     "tesserae-style-schema.json": ["**/*_Style.yaml"],
     # Themes and stylesheets (and a component's stylesheet): the suffixes, and a guess at other names.
     "tesserae-theme-schema.json": ["**/*_Theme.yaml", "**/*_Stylesheet.yaml", "**/*theme*.yaml", "**/*stylesheet*.yaml",
-                                   "!**/*_View.yaml", "!**/*_Shell.yaml", "!**/*_Component.yaml"],
+                                   "!**/*_View.yaml", "!**/*_Component.yaml"],
 }
 
 
@@ -85,17 +85,14 @@ def _make_venv(folder: Path) -> None:
                        "`python -m venv .venv`, then `.venv/bin/pip install tesserae-ui`") from None
 
 
-def new(name: str, parent: Path, shell: bool = False, custom_title_bar: bool = False, venv: bool = True,
-        window: bool = False) -> Path:
+def new(name: str, parent: Path, custom_title_bar: bool = False, venv: bool = True, window: bool = False) -> Path:
     """Makes the project `name` in `parent` and returns its folder: its virtual environment (unless
     `venv=False`), the folders its files are found in, `app.py`, and a `Main` screen.
     `window` makes the app a `kind: Window` view with `Main` and `Settings` screens in it; `custom_title_bar`
-    (with `window` or `shell`) makes its window borderless, so its own title bar is the window's."""
-    if window and shell:
-        raise CliError("--window and --shell are two forms of one app: choose one")
-    if custom_title_bar and not (shell or window):
-        raise CliError("--custom-title-bar goes with --window or --shell: the window's title bar is the title bar "
-                       "(without either, put a `kind: TitleBar` in a view)")
+    (with `window`) makes its window borderless, so its own title bar is the window's."""
+    if custom_title_bar and not window:
+        raise CliError("--custom-title-bar goes with --window: the window's title bar is the title bar "
+                       "(without it, put a `kind: TitleBar` in a view)")
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", name):
         raise CliError(f"{name!r} isn't a project name: start with a letter; then letters, digits, - or _")
     folder = parent / name
@@ -106,29 +103,18 @@ def new(name: str, parent: Path, shell: bool = False, custom_title_bar: bool = F
         (folder / sub).mkdir(exist_ok=True)
         if sub not in ("Views", "ViewModels"):
             (folder / sub / ".gitkeep").touch()  # an empty folder is kept by git
-    words = _words(name)
-    title = " ".join(w.capitalize() for w in words)
-    camel = "".join(w.capitalize() for w in words)
-    load_shell = f'app.load_shell("{camel}")  # Views/{camel}_Shell.yaml: a top bar, the rail, a status bar\n'
-    size = {"width": "960", "height": "600"} if shell else {"width": "480", "height": "320"}
-    window_form = window
-    window = (",\n          decorations=False, min_width=640, min_height=400"  # the shell's top bar is the title bar
-              if custom_title_bar else "")
-    if window_form:
+    title = " ".join(w.capitalize() for w in _words(name))
+    if window:
         _write(folder / "app.py", _render("app_window.py.tmpl", title=title))
         _write(folder / "Views" / "Window_View.yaml",
                _render("Window_View.yaml.tmpl", title=title, borderless="true" if custom_title_bar else "false"))
     else:
-        _write(folder / "app.py", _render("app.py.tmpl", title=title, shell=load_shell if shell else "", window=window,
-                                          **size))
+        _write(folder / "app.py", _render("app.py.tmpl", title=title, width="480", height="320"))
     _write(folder / "Views" / "Main_View.yaml", _render("Main_View.yaml.tmpl"))
     _write(folder / "ViewModels" / "Main_ViewModel.py", _render("Main_ViewModel.py.tmpl"))
-    if window_form:  # its screens are `view:` nodes in the window, not `app.load()` lines
+    if window:  # its screens are `view:` nodes in the window, not `app.load()` lines
         _write(folder / "Views" / "Settings_View.yaml", _render("Screen_View.yaml.tmpl", name="Settings", title="Settings"))
         _write(folder / "ViewModels" / "Settings_ViewModel.py", _render("Screen_ViewModel.py.tmpl", name="Settings"))
-    if shell:
-        _write(folder / "Views" / f"{camel}_Shell.yaml", _render("Shell.yaml.tmpl", title=title))
-        add_screen("Settings", folder)
     if venv:
         _make_venv(folder)
     return folder
@@ -187,12 +173,11 @@ def _parser() -> argparse.ArgumentParser:
     new_cmd.add_argument("name", help="the app's folder name, e.g. notes or my-notes")
     new_cmd.add_argument("--window", action="store_true",
                          help="make the app one `kind: Window` view: title bar, rail, and two routed screens")
-    new_cmd.add_argument("--shell", action="store_true",
-                         help="add an app shell (top bar, rail, status bar) and a Settings screen")
+    new_cmd.add_argument("--shell", action="store_true", help=argparse.SUPPRESS)  # removed: says what replaces it
     new_cmd.add_argument("--dir", type=Path, default=Path("."), help="where to make it (default: here)")
     new_cmd.add_argument("--no-venv", action="store_true", help="don't make a virtual environment in the project")
     new_cmd.add_argument("--custom-title-bar", action="store_true",
-                         help="with --window or --shell: no OS title bar; the app's own is the title bar")
+                         help="with --window: no OS title bar; the window's own title bar is the title bar")
     add_cmd = commands.add_parser("add", help="add to an app")
     what = add_cmd.add_subparsers(dest="what", required=True)
     screen_cmd = what.add_parser("screen", help="add a screen: a View/ViewModel pair")
@@ -280,7 +265,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.command == "schema":
             return _schema(args)
         if args.command == "new":
-            folder = new(args.name, args.dir, shell=args.shell, window=args.window, custom_title_bar=args.custom_title_bar,
+            if args.shell:
+                raise CliError(str(removed("tesserae new --shell")))
+            folder = new(args.name, args.dir, window=args.window, custom_title_bar=args.custom_title_bar,
                          venv=not args.no_venv)
             activate = "source .venv/bin/activate" if os.name != "nt" else r".venv\Scripts\activate"
             steps = f"cd {folder}\n    " + (f"{activate}\n    " if not args.no_venv else "") + "python app.py"

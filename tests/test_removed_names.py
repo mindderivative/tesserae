@@ -45,3 +45,15 @@ def test_the_migration_link_is_where_the_docs_are():
     assert MIGRATION == "https://mindderivative.github.io/tesserae/migration/"
     assert MIGRATION.removesuffix("migration/") in (ROOT / "README.md").read_text(encoding="utf-8")
     assert (ROOT / "docs" / "migration.md").is_file()
+
+
+def test_load_shell_and_a_shell_file_say_what_replaced_them(tmp_path):
+    """0.4.5 (#108): the shell file is gone."""
+    app = App(width=300, height=200)
+    with pytest.raises(RemovedError, match=r"`App.load_shell` was removed.*kind: Window") as raised:
+        app.load_shell(tmp_path / "Studio_Shell.yaml")
+    assert raised.value.name == "App.load_shell"
+    with pytest.raises(RemovedError, match=r"`\*_Shell.yaml` was removed.*title_bar"):
+        app.load(tmp_path / "Studio_Shell.yaml")
+    for gone in ("shell_file", "tesserae-shell-schema.json", "Shell.yaml.tmpl"):
+        assert not [p for p in (ROOT / "src").rglob(f"*{gone}*") if p.suffix != ".pyc"], gone

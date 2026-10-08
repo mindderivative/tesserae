@@ -2,7 +2,7 @@
 and hands the params to the screen's ViewModel (`on_navigated`); `back`
 and `forward` move through the history; `show` stays a jump that
 replaces the current entry. Routes (`route`, `navigate_to`, `location`)
-map strings to screens and params; the shell's rail navigates; Alt+Left
+map strings to screens and params; Alt+Left
 and Alt+Right go back and forward.
 """
 
@@ -241,18 +241,6 @@ def test_a_bad_pattern_is_named(pattern, message):
 
 
 # -- the rail and the keys --------------------------------------------------------------
-
-def test_the_shell_rail_navigates_with_history(tmp_path):
-    shell_file = tmp_path / "Studio_Shell.yaml"
-    shell_file.write_text("navigation:\n  items:\n    - {screen: Home, icon: home}\n    - {screen: Notes, icon: search}\n")
-    app, log = _app("Home", "Notes")
-    shell = app.load_shell(shell_file)
-    app.show("Home")
-    app.window.simulate("click", node=shell.navigation.part("item1"))
-    assert app.current == "Notes" and log == [("Notes", {})] and app.can_go_back.get()
-    app.back()
-    assert app.current == "Home" and shell.navigation.selected.get() == 0  # the rail follows
-
 
 def _key(app, key, node=None, **mods):
     if node is not None:

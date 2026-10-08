@@ -4,7 +4,6 @@
 Four JSON Schema draft-07 files, each for one kind of file Tesserae reads:
 
 - `tesserae-yaml-schema.json`       a view, `*_View.yaml`
-- `tesserae-shell-schema.json`      an app shell, `*_Shell.yaml`
 - `tesserae-theme-schema.json`      a theme or a stylesheet
 - `tesserae-component-schema.json`  a component fragment, `*_Component.yaml`
 - `tesserae-style-schema.json`      one node's style, `*_Style.yaml`
@@ -545,59 +544,8 @@ def _style_file() -> dict[str, Any]:
                      "style": {"$ref": "#/definitions/style", "description": "The style fields, as in a node's `style:`."}}})
 
 
-def _shell() -> dict[str, Any]:
-    from tesserae import icons, shell_file
-
-    edges = list(shell_file._EDGES)
-    icon = {"enum": sorted(icons.ICONS), "description": "An icon name."}
-    # A shell part's style (0.3.3): a node's, but a box with no text to colour has no `foreground`, and a
-    # zone's size is its `size`, so its style has no width or height.
-    defs = _only(_definitions(fragment=False), "style", "color", "fill")
-    full = defs["style"]
-    part_style = {**full, "properties": {k: v for k, v in full["properties"].items() if k != "foreground"}}
-    zone_style = {**part_style, "properties": {k: v for k, v in part_style["properties"].items() if k not in ("width", "height")}}
-    definitions = {"color": defs["color"], "fill": defs["fill"], "style": part_style, "zone_style": zone_style}
-    style_ref = {"$ref": "#/definitions/style", "description": "A node's `style:`: `height`, `background`, `padding`, ..."}
-    size = {"type": "number", "exclusiveMinimum": 0, "description": "The zone's size in pixels."}
-    body = {"type": "object", "additionalProperties": False, "properties": {
-        "style": {**style_ref, "description": "The whole shell's style."},
-        "top_bar": {"type": "object", "required": ["title"], "additionalProperties": False, "description": "The bar across the top.",
-                    "properties": {"title": {"type": "string", "description": "The title shown in the bar."},
-                                   "leading_icon": {**icon, "description": "An icon before the title, such as a menu."},
-                                   "trailing_icons": {"type": "array", "items": icon, "description": "Icons after the title, as icon buttons."},
-                                   "style": style_ref}},
-        "navigation": {"type": "object", "required": ["items"], "additionalProperties": False,
-                       "description": "A navigation rail of screens.",
-                       "properties": {"items": {"type": "array", "minItems": 1, "description": "The screens, in order.", "items": {
-                           "type": "object", "required": ["screen", "icon"], "additionalProperties": False,
-                           "properties": {"screen": {"type": "string", "description": "A registered screen's name."}, "icon": icon}}},
-                                      "on_navigate": {"type": "string",
-                                                      "description": "A ViewModel method to call instead of showing the screen."},
-                                      "style": style_ref}},
-        "status_bar": {"type": "object", "required": ["text"], "additionalProperties": False,
-                       "description": "The bar across the bottom.",
-                       "properties": {"text": {"type": "string", "description": "The text shown in the bar."}, "style": style_ref}},
-        "content": {"type": "object", "additionalProperties": False, "description": "Where the screens show.",
-                    "properties": {"style": style_ref}},
-        "zones": {"type": "object", "description": "Docked areas around the content: a size in pixels, or `{size, style}`.",
-                  "properties": {edge: {"anyOf": [size, {"type": "object", "required": ["size"], "additionalProperties": False,
-                                                          "properties": {"size": size, "style": {"$ref": "#/definitions/zone_style"}}}],
-                                        "description": f"The {edge} zone: its size in pixels, or `{{size, style}}`."}
-                                 for edge in edges},
-                  "additionalProperties": False},
-        "center": {"type": "boolean", "description": "Whether the middle is a dock zone too, with the screens as its tabs."},
-        "panels": {"type": "object", "description": "Which panels (screens) sit in which zone.",
-                   "properties": {edge: {"type": "array", "items": {"type": "string"},
-                                         "description": f"The panels docked {'in the middle' if edge == 'center' else 'on the ' + edge}, in tab order."}
-                                  for edge in [*edges, "center"]},
-                   "additionalProperties": False}}}
-    return _root("tesserae-shell-schema.json", "Tesserae app shell",
-                 "An app shell: `*_Shell.yaml`. A top bar, a navigation rail, a status bar and docked zones around the screens.",
-                 definitions, body)
-
-
 def schemas() -> dict[str, dict[str, Any]]:
-    return {"tesserae-yaml-schema.json": _view(), "tesserae-shell-schema.json": _shell(),
+    return {"tesserae-yaml-schema.json": _view(),
             "tesserae-theme-schema.json": _theme(), "tesserae-component-schema.json": _component(),
             "tesserae-style-schema.json": _style_file()}
 

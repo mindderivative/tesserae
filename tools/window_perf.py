@@ -4,7 +4,7 @@ custom window, with every frame, every resize and a background sample of the fra
 resizes and drags it by hand.
 
     python tools/window_perf.py native            # the OS draws the title bar and borders
-    python tools/window_perf.py custom            # `decorations=False`: the shell's top bar is the title bar
+    python tools/window_perf.py custom            # `borderless: true`: the window view's title bar is the title bar
     python tools/window_perf.py bare-native       # a bare `tre` window (no Tesserae), the OS's frame
     python tools/window_perf.py bare-custom       # a bare `tre` window, undecorated, with a drag region and a resize border
 
@@ -37,13 +37,10 @@ def build(mode: str):
         def __init__(self):
             self.user = Signal("Ada")
 
-    app = App(width=640, height=480, title=f"Tasks ({mode})", root=PROJECT, decorations=(mode == "native"),
-              custom_theme="Brand", stylesheet="Tasks", state=AppState())
-    app.load("Main")
-    app.load("Settings")
-    app.route("", "Main")
-    app.route("settings", "Settings")
-    app.load_shell("Tasks")
+    app = App(title=f"Tasks ({mode})", root=PROJECT, custom_theme="Brand", stylesheet="Tasks", state=AppState())
+    app.load("Window")  # Views/Window_View.yaml: borderless, with its own title bar, a rail and the two screens
+    if mode == "native":
+        app.borderless = False  # the OS draws the title bar and borders
     app.navigate_to("")
     return app
 

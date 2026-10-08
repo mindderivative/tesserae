@@ -1,7 +1,7 @@
 """M77: `tesserae build`, an app as one executable. What the scan bundles,
 PyInstaller's command line, how `App.run` behaves in a built app
 (`TESSERAE_MAX_FRAMES`, no hot reload), the command's mistakes, and one
-real build of a generated shell app run from somewhere else.
+real build of a generated window app run from somewhere else.
 """
 
 import io
@@ -145,12 +145,12 @@ def test_build_mistakes_are_one_line(tmp_path, capsys, monkeypatch):
     assert "pip install tesserae-ui[build]" in capsys.readouterr().err
 
 
-def test_a_generated_shell_app_builds_and_runs_from_elsewhere(tmp_path, capsys, monkeypatch):
-    """The real thing: `tesserae new --shell`, `tesserae build --check`.
-    The shell's panels import their ViewModels by path, so this fails if
+def test_a_generated_window_app_builds_and_runs_from_elsewhere(tmp_path, capsys, monkeypatch):
+    """The real thing: `tesserae new --window`, `tesserae build --check`.
+    The window's screens import their ViewModels by path, so this fails if
     the app's files aren't in the executable."""
     pytest.importorskip("PyInstaller")
-    folder = cli.new("demo", tmp_path, shell=True, venv=False)
+    folder = cli.new("demo", tmp_path, window=True, venv=False)
     monkeypatch.chdir(folder)
     assert cli.main(["build", "--name", "Demo App"]) == 0, capsys.readouterr().err
     executable = build.executable_path(folder / "dist", "Demo App")

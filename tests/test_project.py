@@ -39,7 +39,7 @@ def test_a_name_is_not_a_path():
 
 
 @pytest.mark.parametrize("kind, folder, suffix", [
-    ("view", "Views", "_View.yaml"), ("shell", "Views", "_Shell.yaml"), ("viewmodel", "ViewModels", "_ViewModel.py"),
+    ("view", "Views", "_View.yaml"), ("viewmodel", "ViewModels", "_ViewModel.py"),
     ("component", "Components", "_Component.yaml"), ("theme", "Themes", "_Theme.yaml"),
     ("stylesheet", "Styles", "_Stylesheet.yaml"), ("style", "Styles", "_Style.yaml"),
 ])
@@ -217,14 +217,6 @@ def test_hot_reload_watches_the_projects_components_and_styles(tmp_path):
     assert {p.name for p in watched} >= {"Main_View.yaml", "Stat_Component.yaml", "Stat_Stylesheet.yaml", "row_Style.yaml"}
 
 
-def test_the_shell_is_found_by_name(tmp_path):
-    _app_files(tmp_path)
-    _write(tmp_path, "Views/Frame_Shell.yaml", "top_bar: {title: Hi}\nnavigation:\n  items:\n    - {screen: Main, icon: home}\n")
-    app = App(width=600, height=400, root=tmp_path)
-    app.load("Main")
-    assert app.load_shell("Frame") is not None
-
-
 def test_a_view_built_outside_an_app_does_not_search_a_project():
     spec = {"id": "r", "kind": "Container", "children": [{"id": "c", "component": "NoSuch"}]}
     from tesserae.spec import expand_components_to_spec
@@ -232,18 +224,6 @@ def test_a_view_built_outside_an_app_does_not_search_a_project():
 
     with pytest.raises(ComponentError, match="unknown component 'NoSuch'"):
         expand_components_to_spec(__import__("yaml").safe_dump(spec))
-
-
-def test_a_shell_panel_is_a_view_found_in_the_project(tmp_path):
-    _app_files(tmp_path)
-    _write(tmp_path, "Views/Side_View.yaml", VIEW)
-    _write(tmp_path, "ViewModels/Side_ViewModel.py", "from tesserae import ViewModel\n\nclass SideViewModel(ViewModel):\n    pass\n")
-    _write(tmp_path, "Views/Frame_Shell.yaml", "zones: {left: 200}\npanels: {left: [Side]}\n")
-    app = App(width=600, height=400, root=tmp_path)
-    app.load("Main")
-    app.load_shell("Frame")
-    view, viewmodel = app.screen("Side")
-    assert type(viewmodel).__name__ == "SideViewModel"
 
 
 # -- Repeater and instantiate use the same names (#89) --------------------------------------

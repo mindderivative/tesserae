@@ -8,7 +8,6 @@ Every key Tesserae's YAML files take, with the values it accepts and what it doe
 | --- | --- | --- |
 | `<Name>_View.yaml` | A screen: one node with its children. | [The node](#the-node) |
 | `<Name>_Component.yaml` | A reusable fragment with `params:`. | [Components](#components) |
-| `<Name>_Shell.yaml` | The frame around the screens: bars, navigation, zones. | [Shell file](#shell-file) |
 | `<Name>_Theme.yaml` | A theme: colours, type, shapes and style rules. | [Theme and stylesheet](#theme-and-stylesheet) |
 | `<Name>_Stylesheet.yaml` | Style rules for a view. | [Theme and stylesheet](#theme-and-stylesheet) |
 | `<Name>_Style.yaml` | One node's `style:`, shared. | [The style](#the-style) |
@@ -128,7 +127,7 @@ children: <a list>
 
 ## The style
 
-A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` file, which holds them under a `style:` key (and an optional `id:` naming it): `{id: row_style, style: {gap: 8}}`. The same fields go in a stylesheet's or theme's rules, and in a shell file's parts.
+A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` file, which holds them under a `style:` key (and an optional `id:` naming it): `{id: row_style, style: {gap: 8}}`. The same fields go in a stylesheet's or theme's rules.
 
 ### Size and spacing
 
@@ -480,80 +479,6 @@ window_region: <drag | none>
 | `a11y` | a mapping | What assistive technology is told about this node. |
 | `group` | text | A RadioButton's group: the ones with one name exclude each other. |
 | `window_region` | `drag` \| `none` | `drag`: a press here moves the window (a title bar); `none`: it does not. |
-
-## Shell file
-
-`*_Shell.yaml`: [App Shell & Docking](../guide/app-shell.md).
-
-```yaml
-style: <a style mapping>
-top_bar:
-  title: <text>
-  leading_icon: <one of 15 names>
-  trailing_icons: <a list>
-  style: <a style mapping>
-navigation:
-  items: <a list>
-  on_navigate: <text>
-  style: <a style mapping>
-status_bar:
-  text: <text>
-  style: <a style mapping>
-content:
-  style: <a style mapping>
-zones:
-  left: <a number or a mapping>
-  right: <a number or a mapping>
-  top: <a number or a mapping>
-  bottom: <a number or a mapping>
-center: <true or false>
-panels:
-  left: <a list>
-  right: <a list>
-  top: <a list>
-  bottom: <a list>
-  center: <a list>
-```
-
-| Key | Values | What it does |
-| --- | --- | --- |
-| `style` | a `style` mapping | The whole shell's style. |
-| `top_bar` | a mapping | The bar across the top. |
-| `top_bar.title` *(required)* | text | The title shown in the bar. |
-| `top_bar.leading_icon` | one of 15 names | An icon before the title, such as a menu. |
-| `top_bar.trailing_icons` | a list | Icons after the title, as icon buttons. |
-| `top_bar.style` | a `style` mapping | A node's `style:`: `height`, `background`, `padding`, ... |
-| `navigation` | a mapping | A navigation rail of screens. |
-| `navigation.items` *(required)* | a list | The screens, in order. |
-| `navigation.items[].screen` *(required)* | text | A registered screen's name. |
-| `navigation.items[].icon` *(required)* | one of 15 names | An icon name. |
-| `navigation.on_navigate` | text | A ViewModel method to call instead of showing the screen. |
-| `navigation.style` | a `style` mapping | A node's `style:`: `height`, `background`, `padding`, ... |
-| `status_bar` | a mapping | The bar across the bottom. |
-| `status_bar.text` *(required)* | text | The text shown in the bar. |
-| `status_bar.style` | a `style` mapping | A node's `style:`: `height`, `background`, `padding`, ... |
-| `content` | a mapping | Where the screens show. |
-| `content.style` | a `style` mapping | A node's `style:`: `height`, `background`, `padding`, ... |
-| `zones` | a mapping | Docked areas around the content: a size in pixels, or `{size, style}`. |
-| `zones.left` | a number or a mapping | The left zone: its size in pixels, or `{size, style}`. |
-| `zones.left.size` *(required)* | a number | The zone's size in pixels. |
-| `zones.left.style` | a `style` mapping | How a node looks and lays out its children. |
-| `zones.right` | a number or a mapping | The right zone: its size in pixels, or `{size, style}`. |
-| `zones.right.size` *(required)* | a number | The zone's size in pixels. |
-| `zones.right.style` | a `style` mapping | How a node looks and lays out its children. |
-| `zones.top` | a number or a mapping | The top zone: its size in pixels, or `{size, style}`. |
-| `zones.top.size` *(required)* | a number | The zone's size in pixels. |
-| `zones.top.style` | a `style` mapping | How a node looks and lays out its children. |
-| `zones.bottom` | a number or a mapping | The bottom zone: its size in pixels, or `{size, style}`. |
-| `zones.bottom.size` *(required)* | a number | The zone's size in pixels. |
-| `zones.bottom.style` | a `style` mapping | How a node looks and lays out its children. |
-| `center` | `true` or `false` | Whether the middle is a dock zone too, with the screens as its tabs. |
-| `panels` | a mapping | Which panels (screens) sit in which zone. |
-| `panels.left` | a list | The panels docked on the left, in tab order. |
-| `panels.right` | a list | The panels docked on the right, in tab order. |
-| `panels.top` | a list | The panels docked on the top, in tab order. |
-| `panels.bottom` | a list | The panels docked on the bottom, in tab order. |
-| `panels.center` | a list | The panels docked in the middle, in tab order. |
 
 ## Theme and stylesheet
 

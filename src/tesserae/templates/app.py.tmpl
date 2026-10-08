@@ -29,11 +29,11 @@ class AppState:
 
 
 app = App(width=${width}, height=${height}, title="${title}", root=HERE, theme_seed=(0x67, 0x50, 0xA4, 0xFF),
-          state=AppState()${window})
+          state=AppState())
 
 app.load("Main")  # Views/Main_View.yaml and ViewModels/Main_ViewModel.py
 app.route("", "Main")
 # (tesserae add screen adds each new screen's load and route above this line)
 
 app.navigate_to(sys.argv[1] if len(sys.argv) > 1 else "")  # a route, or "" for Main
-${shell}app.run()
+app.run()

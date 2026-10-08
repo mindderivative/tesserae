@@ -40,7 +40,7 @@ from tesserae import tokens
 from tesserae.reactive import Computed, Effect, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
-from tesserae.shell_file import load_shell_spec
+from tesserae._removed import removed
 from tesserae.spec.watch import ComponentWatcher, FileWatcher
 
 #: How often `run(keepalive=True)` ticks, in seconds: about 50 times a second,
@@ -375,10 +375,6 @@ class App:
         #: The screen showing, as a value a binding can read: `{{ app.current_screen.get() == 'Main' }}`.
         self._screen_name = Signal(None)
         self.current_screen = Computed(self._screen_name.get)
-        self._shell_file: Path | None = None  # the `*_Shell.yaml` `load_shell` read (M52)
-        self._shell_spec: Any = None  # ...its spec as last applied, and the viewmodel it was given
-        self._shell_viewmodel: Any = None
-        self._navigation: Any = None  # (the shell file's rail, its screens), for `show` to select (M52)
         self._tre_app: _TreApp | None = None
         #: The widgets made on this window with no `theme=`, which follow
         #: the app's theme (M50), in the order they were made (a dict as an
@@ -870,6 +866,8 @@ class App:
         Returns the `(view, viewmodel)` pair, for code that wants a node to click in a test or a Signal to
         read back.
         """
+        if str(view_path).endswith("_Shell.yaml"):
+            raise removed("*_Shell.yaml")
         if viewmodel_cls is None and _is_window_file(self._named("view", view_path)):  # a window view needs none (0.4.4)
             path, found = resolve_embedded(self.project, view_path)
             viewmodel_cls = found if found is not None else WindowViewModel
@@ -1085,9 +1083,6 @@ class App:
                 self._window.root.add_child(root)
         self._current = name
         self._screen_name.set(name)
-        if self._navigation is not None and name in self._navigation[1]:
-            rail, screens = self._navigation
-            rail.selected.set(screens.index(name))  # the rail follows, without calling its handler (M52)
         logger.debug("showing {!r}", name)
         return self._window
 
@@ -1114,32 +1109,13 @@ class App:
             shell.show_screen(root, self._current)
 
     def load_shell(self, path: str | Path, viewmodel: Any = None) -> Any:
-        """Builds the app shell a `*_Shell.yaml` describes -- its top bar,
-        navigation rail, status bar, docked zones, center tabs and panels
- -- and shows screens in it, as `use_shell` does. A panel is
-        the screen registered under its name, or else `<Name>_View.yaml`
-        (and `<Name>_ViewModel.py`) next to the shell file, registered under
-        it. Choosing a rail item shows its screen, or calls `viewmodel`'s
-        `on_navigate` method. Returns the `AppShell`. Raises
-        `tesserae.shell_file.ShellSpecError` (a `ValueError`) naming the
-        file and key for a mistake."""
-        from tesserae.shell_file import bind_navigation, build_shell, check_references, load_shell_spec, place_panels
-
-        path = Path(self._named("shell", path))
-        spec = load_shell_spec(path)
-        check_references(self, spec, path, viewmodel)  # before anything is built
-        shell = build_shell(self, spec)
-        self._shell_file, self._shell_spec, self._shell_viewmodel = path, spec, viewmodel
-        self.use_shell(shell)
-        place_panels(self, shell, spec, path)
-        bind_navigation(self, shell, spec, path, viewmodel)
-        logger.info("loaded the app shell from {}", path)
-        return shell
+        """Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`. Raises
+        `tesserae._removed.RemovedError`, which says how."""
+        raise removed("App.load_shell")
 
     def screen(self, name: str) -> tuple[Any, Any]:
         """The `(view, viewmodel)` registered under `name` -- by `register`,
-        `load`, or a shell file's panels, whose ViewModels the app
-        builds; `viewmodel` is `None` for a view with none."""
+        `load` or an embedded view; `viewmodel` is `None` for a view with none."""
         registered = self._registered.get(name)
         if registered is None:
             raise KeyError(f"no view registered under {name!r} -- call register() first")
@@ -1411,24 +1387,16 @@ class App:
                     name="theme",
                 )
             )
-        shell_watcher = None
-        if self._shell_file is not None:  # M52: the shell file, patched in place
-            path = self._shell_file.resolve()
-            shell_watcher = FileWatcher(
-                [path], lambda path=path: load_shell_spec(path), self._reload_shell, name="shell")
-            watchers.append(shell_watcher)
         for watcher in watchers:
             watcher.start(handle)
         self._hot_handle, self._watchers = handle, watchers
-        if shell_watcher is not None:
-            logger.info("hot reload: watching the shell file {}", self._shell_file.name)
         for path in sorted({c.path.resolve() for c in self._live_components()}):
             self.watch_component(path)
         views = sum(isinstance(w, ViewWatcher) and not isinstance(w, ComponentWatcher) for w in watchers)
         logger.info(
             "hot reload on: watching {} screen(s) and {} theme/stylesheet file(s)",
             views,
-            sum(len(w.files) for w in watchers if not isinstance(w, ViewWatcher) and w is not shell_watcher),
+            sum(len(w.files) for w in watchers if not isinstance(w, ViewWatcher)),
         )
         return watchers
 
@@ -1484,21 +1452,6 @@ class App:
         self._watchers.append(watcher)
         logger.info("hot reload: watching component {} ({} instance(s))", path.name, len(self._live_components(path)))
 
-    def _reload_shell(self, spec: dict[str, Any]) -> None:
-        """Applies an edited shell file: what can change in place
-        is patched; a structural change is logged as needing a restart.
-        A panel or `on_navigate` it can't find fails before anything
-        changes."""
-        from tesserae.shell_file import check_references, reload_shell
-
-        path = self._shell_file
-        check_references(self, spec, path, self._shell_viewmodel)
-        needs = reload_shell(self, self._shell, self._shell_spec, spec, path, self._shell_viewmodel)
-        self._shell_spec = spec
-        logger.info("reloaded the shell from {}", path)
-        for change in needs:
-            logger.warning("the shell file {} changed ({}): restart the app to see it", path.name, change)
-
     def _apply_theme_files(self, specs: tuple[Any, Any]) -> None:
         self.set_theme_specs(*specs)
         files = ", ".join(str(f) for f in self._theme_files.values() if f is not None)
@@ -1528,9 +1481,7 @@ class App:
         dict has no file, so it isn't watched, and the log says so. A
         component built with `tesserae.instantiate` is watched by its file
         too, one watcher for all its live instances, including ones added
-        while the app runs. So is a shell file from `load_shell`:
-        an edit is patched in place, and a structural one is logged as
-        needing a restart.
+        while the app runs.
 
         M31: the theme files given to `App(default_theme=, custom_theme=)`
         are watched too. An edit re-reads them on the watcher thread and
