@@ -292,8 +292,8 @@ container with a `TitleBar` and a content container, and `App.load` mounts it fo
 (`window_view.py`). Its `view:` nodes are embedded views (`spec/embed.py`, `component.embed`); one with a `route:` is a screen the
 `Frame` registers with the app and shows while it is current. A `kind: Dock` (`spec/dock.py`) becomes containers carrying
 `dock:`/`dock_panel:` markers, and `dockhost.DockHost` makes the `docking.Dock` from them once built, keeping the user's layout
-across reloads. The old `*_Shell.yaml` reader, `AppShell` and `App.load_shell`/`use_shell` were removed in the next release; their
-names are in `tesserae._removed`, and say what replaces them. `App.screen(name)` returns a registered screen's `(view, viewmodel)`.
+across reloads. The old `*_Shell.yaml` reader, `AppShell` and `App.load_shell`/`use_shell` were removed in 0.4.5 (for one release their names raised an
+error naming the replacement; since 0.4.6 they are simply gone, and `tests/test_no_shell_left.py` keeps them out). `App.screen(name)` returns a registered screen's `(view, viewmodel)`.
 
 **Docking, M45:** `tesserae.docking.Dock` draws what `tre` 0.3.5 leaves to
 the framework (D10). Each zone is a column -- a tab strip, a divider, and

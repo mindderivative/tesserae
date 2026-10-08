@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.6
+
+The removal stubs are removed ([#113](https://github.com/mindderivative/tesserae/issues/113)).
+
+### Removed
+
+- **The messages for the names 0.4.5 removed**: `tesserae._removed` (`RemovedError`), `tesserae.shell`, and the `use_shell`, `load_shell`
+  and `decorations` members of `App` that only raised them, the `--shell` argument of `tesserae new`, and the `_Shell.yaml` check in
+  `App.load`. An old name now fails as any unknown name does (`TypeError`, `AttributeError`, `ModuleNotFoundError`, "unrecognized
+  arguments"); [Migrating](migration.md#to-045) says what replaced each. Nothing that works changes.
+
+### Added
+
+- `tests/test_no_shell_left.py` keeps the shell file, `AppShell` and `decorations` out of the code, the examples, the tools and the
+  workflows.
+
 ## 0.4.5
 
 One way to describe a window ([#103](https://github.com/mindderivative/tesserae/issues/103)). The shell file, `AppShell` and

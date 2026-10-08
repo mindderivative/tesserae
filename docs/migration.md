@@ -3,12 +3,20 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.4.6
+
+Nothing has to change if your app already runs on 0.4.5. The old names that 0.4.5 removed each raised an error saying what
+replaced them; those messages are gone now, and an old name fails as any unknown name does: `App(decorations=False)` is a
+`TypeError` ("unexpected keyword argument"), `app.load_shell`, `app.use_shell` and `app.decorations` are an `AttributeError`,
+`from tesserae.shell import AppShell` is a `ModuleNotFoundError`, `tesserae new --shell` is "unrecognized arguments", and a
+`*_Shell.yaml` is an ordinary view that doesn't fit the schema. If you meet one of them, [To 0.4.5](#to-045) is the table of what
+replaces each.
+
 ## To 0.4.5
 
 **This release is breaking.** There is one way to describe a window now, a `kind: Window` view ([Windows, Docks & Embedded
-Views](guide/windows-and-docks.md)), so the older ways are removed. Each removed name raises an error that says what replaces
-it (a `RemovedError`, a `ValueError`), so a run of your app tells you where to look. The names are removed for one release;
-the errors for them go in the one after.
+Views](guide/windows-and-docks.md)), so the older ways are removed. In this release each removed name raised an error that said what replaces
+it; from 0.4.6 they fail as unknown names do ([To 0.4.6](#to-046)), so this table is where to look.
 
 | Removed | Use instead |
 | --- | --- |
