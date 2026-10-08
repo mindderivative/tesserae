@@ -2447,3 +2447,26 @@ User: "Continue with phases 108 through 112 until completion", "window_perf test
   ran its own checks.
 - Still open: #105 (separate-OS-window modals) and #106 (dropping a panel onto a split half), both Backlog. The removal stubs go in
   the release after this one.
+
+## Tesserae 0.4.6 released (#113)
+
+User: "scope #113 as 0.4.6", "approved, move #113 to Ready and start phase 1", "Continue with phase 2", "approved, push and release
+0.4.6 and commit the window-perf/", "approved, check PyPI".
+
+- The removal stubs 0.4.5 left are removed: `tesserae._removed` (`RemovedError`), `tesserae.shell`, the `use_shell`, `load_shell`
+  and `decorations` members of `App` that only raised, the hidden `--shell` argument of `tesserae new`, the `_Shell.yaml` check in
+  `App.load`, and their tests. An old name now fails as any unknown name does. `tests/test_no_shell_left.py` keeps the shell file,
+  `AppShell` and `decorations` out of `src/`, `examples/`, `tools/` and `.github` (tre's own `Window(decorations=)` calls aside).
+  The migration page gained "To 0.4.6" and kept "To 0.4.5". Nothing that worked changed.
+- `tests/reference/test_tree_parity.json`'s `Studio_Shell.yaml` is the text of a recorded node that `test_tree_parity.py` reads, not
+  code, so it stayed.
+- The user asked for `window-perf/` (the hand-driven 0.4.5 resize and drag results, 4 files, 1.8 MB, no personal paths) to be
+  committed; it went in on its own, ahead of the release commit (`3e5582f`). The native run's resize phase has a few long gaps
+  between frames (the longest 2015 ms with no new frame); the user had called the run good, so they were read as pauses between mouse
+  movements, and are noted here in case they turn out not to be.
+- Released: 5275 tests passed, CI green on all platforms (12 jobs plus Deploy Docs). `tesserae-ui` 0.4.6 is on PyPI and pulled
+  `tesserae-engine` 0.5.5. From that install in a clean venv: `tesserae new demo --window --custom-title-bar` ran, navigated Main to
+  Settings and snapshotted at 960 by 600 borderless; `App(decorations=)` is a `TypeError`, `load_shell` and `use_shell` an
+  `AttributeError`, `tesserae.shell` and `tesserae._removed` a `ModuleNotFoundError`; `new --shell` is "unrecognized arguments";
+  `examples/window_dock` ran its own checks.
+- Still open: #105 (separate-OS-window modals) and #106 (dropping a panel onto a split half), both Backlog.
