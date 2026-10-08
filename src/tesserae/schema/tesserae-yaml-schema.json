@@ -1397,7 +1397,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "A window title bar: an icon, a title, your own content and the window's buttons. Needs `App(decorations=False)`."
+      "description": "A window title bar: an icon, a title, your own content and the window's buttons. Needs `App(borderless=True)`, or `borderless: true` on a Window."
     },
     "component_call": {
       "type": "object",
@@ -4621,7 +4621,7 @@
         },
         "borderless": {
           "type": "boolean",
-          "description": "The OS window has no title bar or borders of its own: the `title_bar:` is the window's (the opposite of `decorations`)."
+          "description": "The OS window has no title bar or borders of its own: the `title_bar:` is the window's."
         },
         "min_width": {
           "type": "number",
@@ -4864,7 +4864,7 @@
         },
         "borderless": {
           "type": "boolean",
-          "description": "The OS window has no title bar or borders of its own: the `title_bar:` is the window's (the opposite of `decorations`)."
+          "description": "The OS window has no title bar or borders of its own: the `title_bar:` is the window's."
         },
         "buttons": {
           "type": "array",

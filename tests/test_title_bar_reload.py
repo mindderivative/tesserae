@@ -29,7 +29,7 @@ def _write(path, spec):
 def _app_with(tmp_path, spec):
     path = tmp_path / "Home_View.yaml"
     _write(path, spec)
-    app = App(width=600, height=400, theme_seed=SEED, decorations=False)
+    app = App(width=600, height=400, theme_seed=SEED, borderless=True)
     app._native_controls.set(False)  # the bar as Windows and Linux show it
     view = app.build_view(path)
     app.register("Home", view, None)

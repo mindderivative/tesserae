@@ -14,9 +14,13 @@ One way to describe a window ([#103](https://github.com/mindderivative/tesserae/
 - **The Python app shell**: `tesserae.shell.AppShell` and `App.use_shell`, and the `examples/app_shell` example. `tesserae.docking.Dock`
   stays, for docking panels from Python. Using either removed name says what replaces it.
 
+- **`decorations`**: `App(decorations=)` and `app.decorations` (the opposite of `borderless`, which is the one name now:
+  `App(borderless=True)`, `app.borderless`, `borderless: true` on a `kind: Window`). `app.decorations` and `App(decorations=)` raise
+  an error saying so. `tre`'s own `Window(decorations=)` is the engine's and is unchanged.
+
 ### Changed
 
-- **A removed name says what replaces it.** `decorations=`, `app.decorations`, `app.decorated`, `App.load_shell`, `App.use_shell`,
+- **A removed name says what replaces it.** `decorations=`, `app.decorations`, `App.load_shell`, `App.use_shell`,
   `AppShell`, a `*_Shell.yaml` and `tesserae new --shell` raise a `RemovedError` (a `ValueError`) naming the replacement and the
   migration page, instead of an `AttributeError` that says nothing. The messages are in `tesserae._removed`.
 

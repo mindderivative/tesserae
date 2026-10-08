@@ -491,7 +491,7 @@ def top_app_bar(
     name = "top_app_bar"
     app = app_of(window)
     if window_controls is None:
-        window_controls = app is not None and not app.decorations
+        window_controls = app is not None and app.borderless
     if window_controls and app is None:
         raise ValueError("top_app_bar: window_controls needs the window to be an App's")
     trailing = list(trailing_icons or [])

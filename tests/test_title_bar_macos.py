@@ -35,7 +35,7 @@ def _app_with(tmp_path):
     path = tmp_path / "Home_View.yaml"
     path.write_text(yaml.safe_dump({"id": "root", "kind": "Container", "style": {"width": 600, "height": 400},
                                     "children": [BAR]}), encoding="utf-8")
-    app = App(width=600, height=400, theme_seed=SEED, decorations=False)
+    app = App(width=600, height=400, theme_seed=SEED, borderless=True)
     view = app.build_view(path)
     app.register("Home", view, None)
     app.show("Home")
@@ -114,5 +114,5 @@ def test_visible_takes_a_boolean():
 def test_on_a_real_mac_an_undecorated_window_has_no_drawn_border():
     """macOS keeps the window's frame, so Tesserae's border (M4) is never
     built there."""
-    app = App(width=400, height=300, theme_seed=SEED, decorations=False)
+    app = App(width=400, height=300, theme_seed=SEED, borderless=True)
     assert app._border is None

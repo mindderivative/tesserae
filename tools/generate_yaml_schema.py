@@ -330,7 +330,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         },
         "additionalProperties": False,
         "description": "A window title bar: an icon, a title, your own content and the window's buttons. "
-                       "Needs `App(decorations=False)`.",
+                       "Needs `App(borderless=True)`, or `borderless: true` on a Window.",
     }
     if set(title_bar_node["properties"]) != set(title_bar._KEYS):
         raise SystemExit(f"a TitleBar's keys changed: they are now {sorted(title_bar._KEYS)}; update {__file__}")
@@ -383,7 +383,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
             "id": node_props["id"], "kind": {"const": "Window"},
             "title": {"type": "string", "description": "The window's title."},
             "borderless": {"type": "boolean", "description": "The OS window has no title bar or borders of its own: the "
-                                                             "`title_bar:` is the window's (the opposite of `decorations`)."},
+                                                             "`title_bar:` is the window's."},
             "min_width": {"type": "number", "minimum": 0, "description": "The narrowest the user can resize the window to."},
             "min_height": {"type": "number", "minimum": 0, "description": "The shortest the user can resize the window to."},
             "title_bar": {"anyOf": [{"type": "boolean"}, {"type": "object", "additionalProperties": False, "properties": bar_props}],

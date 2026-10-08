@@ -93,7 +93,7 @@ def test_loading_a_window_view_sets_the_os_window(tmp_path):
     view, viewmodel = app.load("Window")
     app.window.advance(16)
     assert isinstance(viewmodel, WindowViewModel)
-    assert app.borderless is True and app.decorations is False and app.resize_border == 6
+    assert app.borderless is True and app.resize_border == 6
     assert (app.min_width, app.min_height) == (320, 200)
     assert app.window.get("title") == "Tasks"
     assert (app.window.get("width"), app.window.get("height")) == (640.0, 400.0)
@@ -188,19 +188,29 @@ def test_editing_the_window_view_while_running_sets_the_window_again(tmp_path):
 
 # -- borderless on App -------------------------------------------------------------------------
 
-def test_borderless_is_the_opposite_of_decorations():
+def test_borderless_sets_the_os_window_and_its_resize_border():
     app = App(theme_seed=SEED, borderless=True)
-    assert app.borderless is True and app.decorations is False
+    assert app.borderless is True and app.window.get("decorations") is False and app.resize_border == 6
     app.borderless = False
-    assert app.decorations is True and app.resize_border == 0
+    assert app.borderless is False and app.window.get("decorations") is True and app.resize_border == 0
     app.borderless = True
-    assert app.decorations is False and app.resize_border == 6
+    assert app.borderless is True and app.resize_border == 6
+    assert App(theme_seed=SEED).borderless is False
 
 
-def test_saying_both_opposite_things_is_an_error():
-    with pytest.raises(ValueError, match="borderless=False and decorations=False"):
-        App(borderless=False, decorations=False)
-    assert App(borderless=False).decorations is True
+def test_decorations_is_removed_and_says_what_replaced_it():
+    """0.4.5 (#110)."""
+    from tesserae._removed import RemovedError
+
+    with pytest.raises(RemovedError, match=r"`decorations` was removed: use `borderless=True`"):
+        App(decorations=False)
+    app = App(theme_seed=SEED)
+    with pytest.raises(RemovedError, match="`app.decorations` was removed.*app.borderless"):
+        app.decorations
+    with pytest.raises(RemovedError, match="`app.decorations` was removed"):
+        app.decorations = False
+    with pytest.raises(TypeError, match="unexpected keyword argument 'decoratons'"):
+        App(decoratons=False)
 
 
 def test_a_window_view_with_no_app_is_just_a_container():

@@ -393,7 +393,7 @@ children: <a list>
 | `id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
 | `kind` *(required)* | `Window` | Always `Window`. |
 | `title` | text | The window's title. |
-| `borderless` | `true` or `false` | The OS window has no title bar or borders of its own: the `title_bar:` is the window's (the opposite of `decorations`). |
+| `borderless` | `true` or `false` | The OS window has no title bar or borders of its own: the `title_bar:` is the window's. |
 | `min_width` | a number | The narrowest the user can resize the window to. |
 | `min_height` | a number | The shortest the user can resize the window to. |
 | `title_bar` | `true` or `false` or a mapping | The window's title bar, a `TitleBar`'s keys: its `title` is the window's by default, and it has the window buttons when the window is `borderless`. |

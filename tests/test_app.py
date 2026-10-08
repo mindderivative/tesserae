@@ -127,7 +127,7 @@ def test_run_with_screens_registered_but_none_shown_raises_a_clear_runtime_error
 @pytest.mark.skipif(sys.platform == "darwin", reason="no drawn border on macOS: the OS draws the frame")
 def test_an_undecorated_apps_border_is_not_something_to_show(tmp_path):
     """The window border is a child of the window's root, but not content."""
-    app = App(decorations=False)
+    app = App(borderless=True)
     app.register("a", View(write_view(tmp_path, SIMPLE_VIEW)), None)
     assert app._border is not None and len(app.window.root.children()) == 1
     with pytest.raises(RuntimeError, match="none is showing"):
@@ -165,7 +165,7 @@ def fake_tre(monkeypatch):
 def test_an_empty_window_runs(fake_tre):
     """0.3.1: an app built in Python starts empty, so a window with no screens is allowed."""
     App(width=200, height=100).run(max_frames=2)
-    App(decorations=False).run(max_frames=3)  # and its border alone is no reason to refuse
+    App(borderless=True).run(max_frames=3)  # and its border alone is no reason to refuse
     assert fake_tre.ran == [2, 3]
 
 
@@ -178,7 +178,7 @@ def test_run_starts_for_a_window_with_nodes_added_by_calls(fake_tre):
 
 
 def test_nodes_added_by_calls_are_content_even_with_a_screen_registered(fake_tre, tmp_path):
-    app = App(decorations=False)  # its border is a second child, not the reason it runs
+    app = App(borderless=True)  # its border is a second child, not the reason it runs
     app.register("a", View(write_view(tmp_path, SIMPLE_VIEW)), None)
     app.window.root.add_child(app.window.create("box", width=10, height=10, fill=(0, 0, 0, 255)))
     app.run(max_frames=1)

@@ -10,7 +10,7 @@ start and up to a few action icons at the end.
 ## In Tesserae
 
 The fragment is the bar and its title; `top_app_bar()` adds the icon buttons, and keeps the bar's height
-when the window is short. With `App(decorations=False)` it can also be the window's own title bar.
+when the window is short. With `App(borderless=True)` it can also be the window's own title bar.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |

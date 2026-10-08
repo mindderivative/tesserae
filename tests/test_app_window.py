@@ -9,32 +9,32 @@ from PIL import Image
 from tesserae import App
 
 
-def test_the_defaults_are_a_decorated_window():
+def test_the_defaults_are_a_native_window():
     app = App()
-    assert (app.decorations, app.resize_border, app.min_width, app.min_height) == (True, 0, 0, 0)
+    assert (app.borderless, app.resize_border, app.min_width, app.min_height) == (False, 0, 0, 0)
     assert (app.fullscreen, app.system_menu) == (False, False)
     assert app.platform in ("wayland", "x11", "windows", "macos")
 
 
-def test_an_undecorated_window_resizes_from_a_6_px_border():
-    app = App(decorations=False)
-    assert app.decorations is False and app.resize_border == App.DEFAULT_RESIZE_BORDER == 6
-    app.decorations = True  # live: the border follows, since the app gave none
-    assert (app.decorations, app.resize_border) == (True, 0)
-    app.decorations = False
+def test_a_borderless_window_resizes_from_a_6_px_border():
+    app = App(borderless=True)
+    assert app.borderless is True and app.resize_border == App.DEFAULT_RESIZE_BORDER == 6
+    app.borderless = False  # live: the border follows, since the app gave none
+    assert (app.borderless, app.resize_border) == (False, 0)
+    app.borderless = True
     assert app.resize_border == 6
 
 
 def test_the_apps_own_border_wins():
-    app = App(decorations=False, resize_border=10)
+    app = App(borderless=True, resize_border=10)
     assert app.resize_border == 10
-    app.decorations = True
-    assert app.resize_border == 10  # given, so kept whatever the decorations
+    app.borderless = False
+    assert app.resize_border == 10  # given, so kept whatever the borderless setting
     app.resize_border = None  # back to the default
     assert app.resize_border == 0
-    app.decorations = False
+    app.borderless = True
     assert app.resize_border == 6
-    app.resize_border = 0  # none, even undecorated
+    app.resize_border = 0  # none, even borderless
     assert app.resize_border == 0
 
 

@@ -17,7 +17,7 @@ def _app_with(tmp_path, **app_kwargs):
     path = tmp_path / "Home_View.yaml"
     path.write_text(yaml.safe_dump({"id": "root", "kind": "Container", "style": {"width": 600, "height": 400},
                                     "children": [BAR]}), encoding="utf-8")
-    app = App(width=600, height=400, theme_seed=SEED, decorations=False, **app_kwargs)
+    app = App(width=600, height=400, theme_seed=SEED, borderless=True, **app_kwargs)
     view = app.build_view(path)
     app.register("Home", view, None)
     app.show("Home")
@@ -87,14 +87,14 @@ def test_a_theme_restyles_it_too(tmp_path):
 
 
 def test_a_title_bar_works_in_an_app_with_no_theme_seed(tmp_path):
-    """0.3.3 (#82): a bare `App(decorations=False)` failed with "unknown color identifier"; the bar's
+    """0.3.3 (#82): a bare `App(borderless=True)` failed with "unknown color identifier"; the bar's
     roles are MD3's baseline palette now, and close is still red."""
     from tesserae import tokens
 
     path = tmp_path / "Home_View.yaml"
     path.write_text(yaml.safe_dump({"id": "root", "kind": "Container", "style": {"width": 600, "height": 400},
                                     "children": [BAR]}), encoding="utf-8")
-    app = App(width=600, height=400, decorations=False)
+    app = App(width=600, height=400, borderless=True)
     view = app.build_view(path)
     app.register("Home", view, None)
     app.show("Home")

@@ -48,8 +48,7 @@ class App(
     root: str | Path | None = None,
     search: Any = (),
     recursive: bool = False,
-    decorations: bool = True,
-    borderless: bool | None = None,
+    borderless: bool = False,
     window_view: str | Path | None = None,
     resize_border: int | None = None,
     min_width: int = 0,
@@ -66,7 +65,8 @@ class App(
     glyph_cache: bool = False,
     system_fonts: bool = False,
     reduced_motion: bool | str = 'system',
-    high_contrast: bool | str = 'system'
+    high_contrast: bool | str = 'system',
+    **removed_kwargs: Any
 ) -> None
 ```
 
@@ -74,14 +74,14 @@ class App(
 
 - `back() -> bool`: Shows the history's previous entry, calling its ViewModel's `on_navigated` with that entry's params.
 - `blur_behind` *(property)*: Whether the compositor blurs what is behind a see-through window (Wayland with KDE, macOS; ignored elsewhere).
-- `borderless` *(property)*: Whether the OS window has no title bar and borders of its own (the opposite of `decorations`): the app draws its own, with a `TitleBar`.
+- `borderless` *(property)*: Whether the OS window has no title bar and borders of its own: the app draws its own, with a `TitleBar` (on macOS the title bar stays, transparent, with the traffic lights).
 - `build_view(view_path: str | Path, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> Any`: Builds a view with this app's theme and stylesheet, without registering it -- for a screen given to `register()`, e.g. one whose `ViewModel` needs the `app` itself.
 - `click_through` *(property)*: Whether the whole window ignores the pointer, so clicks reach what is behind it.
 - `close() -> None`: Closes the window as the user's close would: `close_requested` fires first, so an app's "save changes?" check still runs and can cancel it.
 - `current` *(property)*: The name last passed to `show()`, or `None` before the first real call -- lets a registered handler ask "which screen is this, anyway" without the app keeping its own separate bookkeeping.
 - `dark` *(property)*: Whether the app is showing its dark scheme right now.
 - `dark_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True`/`False`.
-- `decorations` *(property)*: Whether the OS draws the title bar and borders.
+- `decorations` *(property)*: Removed: use `app.borderless`, its opposite.
 - `dpi_scaling` *(property)*: Whether the window lays out in logical pixels and draws at the display's scale (on by default), so it is sharp on a HiDPI screen.
 - `forward() -> bool`: Shows the entry `back()` left, if any.
 - `frame_stats(reset: bool = False) -> dict[str, Any]`: What the window's frames cost: `frames`, `skipped`, `last` (the last frame's stage times in milliseconds) and `recent` (the last 240 frames: `fps`, and the mean, 95th percentile and maximum of the total and the CPU time).
@@ -106,7 +106,7 @@ class App(
 - `reduced_motion` *(property)*: Whether the app is to reduce motion: the user asked the OS for it (or the app says so).
 - `reduced_motion_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True` or `False`.
 - `register(name: str, view: Any, viewmodel: Any) -> None`: Registers `view` (already loaded) and its already-`_attach`ed `viewmodel` (e.g. `FooViewModel(view)`) under `name`, for a later `show(name)` to display.
-- `resize_border` *(property)*: How many pixels along each edge resize an undecorated window (`tre` turns it off while maximized or fullscreen, and on macOS).
+- `resize_border` *(property)*: How many pixels along each edge resize a borderless window (`tre` turns it off while maximized or fullscreen, and on macOS).
 - `restore() -> None`: Restores the window from maximized or minimized.
 - `route(pattern: str, name: str) -> None`: Adds a route: a pattern like `"notes/{id}"` for the screen registered (now or later) under `name`.
 - `run(max_frames: int | None = None, *, hot_reload: bool = False, keepalive: bool | float = False) -> None`: The one blocking call -- opens the real `Window` and runs `tre`'s own real render loop, showing the screen `show()` made current and any nodes added to `app.window.root` by calls.
@@ -132,7 +132,7 @@ class App(
 - `use_shell(shell: Any) -> None`: Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`.
 - `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change; `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.
 - `window` *(property)*: The app's one window (it exists from the start).
-- `window_border` *(property)*: Whether an undecorated window gets its 1 px border (on by default): around the window, in the theme's `outline_variant`, a node of class `window_border` a theme or stylesheet can restyle.
+- `window_border` *(property)*: Whether a borderless window gets its 1 px border (on by default): around the window, in the theme's `outline_variant`, a node of class `window_border` a theme or stylesheet can restyle.
 
 ## Reactivity
 

@@ -24,7 +24,7 @@ def _page(bar):
 def _app_with(tmp_path, bar, **app_kwargs):
     path = tmp_path / "Home_View.yaml"
     path.write_text(yaml.safe_dump(_page(bar)), encoding="utf-8")
-    app = App(width=600, height=400, theme_seed=SEED, decorations=False, **app_kwargs)
+    app = App(width=600, height=400, theme_seed=SEED, borderless=True, **app_kwargs)
     # The bar as Windows and Linux show it, with its own buttons: on macOS
     # the OS's traffic lights show instead and they hide (test_title_bar_macos).
     app._native_controls.set(False)
@@ -176,7 +176,7 @@ def test_the_example_builds(monkeypatch):
     spec.loader.exec_module(module)
     HomeViewModel = module.HomeViewModel
 
-    app = App(width=720, height=420, theme_seed=SEED, decorations=False)
+    app = App(width=720, height=420, theme_seed=SEED, borderless=True)
     app._native_controls.set(False)
     view, vm = app.load(folder / "Home_View.yaml", HomeViewModel)
     app.show("Home")

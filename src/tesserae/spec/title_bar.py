@@ -1,5 +1,5 @@
 """`kind: TitleBar` (0.3.0 M3): a window's title bar in a YAML view, for an
-app whose window has no OS title bar (`App(decorations=False)`).
+app whose window has no OS title bar (`App(borderless=True)`).
 
     - id: bar
       kind: TitleBar
@@ -68,7 +68,7 @@ STYLES = {"styles": [
     {"classes": ["title_bar_title"], "style": {"foreground": "on_surface"}},
     {"classes": ["title_bar_icon"], "style": {"foreground": "on_surface"}},
     {"classes": ["title_bar_glyph"], "style": {"foreground": "on_surface"}},
-    # 0.3.0 M4: an undecorated window's border (App(window_border=...)).
+    # 0.3.0 M4: a borderless window's border (App(window_border=...)).
     {"classes": ["window_border"], "style": {"background": "transparent", "border_color": "outline_variant",
                                              "border_width": 1}},
 ]}
@@ -158,7 +158,7 @@ def window_parts(bar_id: str, buttons: Any = BUTTONS) -> tuple[dict[str, Any], d
     says, 0 elsewhere), and `<id>.buttons`, the window buttons flush
     together (`None` for none), hidden while the OS's own controls show
     and faded while the window isn't focused. A `TitleBar` has them, and
-    so does an app shell's top bar on an undecorated window (0.3.0 M4).
+    so does a top app bar on a borderless window.
     Their bindings and handlers reach the app, so the view they're in
     needs a ViewModel on the app's window."""
     inset = {"id": f"{bar_id}.inset", "kind": "Container", "classes": ["title_bar_inset"],

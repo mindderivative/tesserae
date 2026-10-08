@@ -26,7 +26,7 @@ def _border(app):
 
 
 def test_an_undecorated_window_has_a_border_around_it():
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     border = _border(app)
     assert border.get("visible") is True and app.window_border is True
     assert (border.get("layout_x"), border.get("layout_y")) == (0.0, 0.0)
@@ -40,7 +40,7 @@ def test_a_decorated_window_has_none():
 
 
 def test_it_hides_while_maximized_fullscreen_or_decorated_or_turned_off():
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     border = _border(app)
     app.window.simulate("maximized", maximized=True)
     assert border.get("visible") is False
@@ -49,19 +49,19 @@ def test_it_hides_while_maximized_fullscreen_or_decorated_or_turned_off():
     app.fullscreen = True
     assert border.get("visible") is False
     app.fullscreen = False
-    app.decorations = True
+    app.borderless = False
     assert border.get("visible") is False
-    app.decorations = False
+    app.borderless = True
     app.window_border = False
     assert border.get("visible") is False
     app.window_border = True
     assert border.get("visible") is True
-    assert _border(_app(decorations=False, window_border=False)) is None
+    assert _border(_app(borderless=True, window_border=False)) is None
 
 
 def test_it_shows_when_a_decorated_window_loses_its_decorations():
     app = _app()
-    app.decorations = False
+    app.borderless = True
     assert _border(app).get("visible") is True
 
 
@@ -78,7 +78,7 @@ def test_it_lies_over_the_screens_and_presses_go_through(tmp_path):
         def go(self):
             self.clicks += 1
 
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     view = app.build_view(path)
     app.register("Home", view, None)
     app.show("Home")  # a screen shown after the border was made
@@ -95,20 +95,20 @@ def test_it_lies_over_the_screens_and_presses_go_through(tmp_path):
 
 def test_a_stylesheet_restyles_or_removes_it():
     red = {"styles": [{"classes": ["window_border"], "style": {"border_color": "#FF0000", "border_width": 2}}]}
-    app = _app(decorations=False, stylesheet_spec=red)
+    app = _app(borderless=True, stylesheet_spec=red)
     assert _border(app).get("stroke_color") == (255, 0, 0, 255) and _border(app).get("stroke_width") == 2.0
     none = {"styles": [{"classes": ["window_border"], "style": {"border_width": 0}}]}
-    assert _border(_app(decorations=False, stylesheet_spec=none)).get("stroke_width") == 0.0
+    assert _border(_app(borderless=True, stylesheet_spec=none)).get("stroke_width") == 0.0
 
 
 def test_it_rethemes_with_the_app():
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     for dark in (not app.dark, app.dark):
         app.set_dark(dark)
         assert _border(app).get("stroke_color") == Theme.resolve(theme_seed=SEED, dark=dark).role("outline_variant")
 
 
 def test_an_unthemed_app_gets_the_baseline_colour():
-    app = App(decorations=False)
+    app = App(borderless=True)
     assert _border(app).get("stroke_color") == tokens.BASELINE["outline_variant"]
     assert _border(app).get("stroke_width") == 1.0

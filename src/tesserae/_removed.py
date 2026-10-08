@@ -19,7 +19,6 @@ REMOVED: dict[str, str] = {
     "decorations": "use `borderless=True` instead (`decorations=False` is `borderless=True`), or `borderless: true` on a "
                    "`kind: Window` view",
     "app.decorations": "use `app.borderless` instead (it is the opposite: `app.decorations` was `not app.borderless`)",
-    "app.decorated": "bind `app.borderless` instead (it is the opposite of `app.decorated`)",
     "App.load_shell": "describe the frame as a `kind: Window` view with a `title_bar:`, a `NavigationRailScreens`, a `kind: Dock` and "
                       "routed `view:` nodes, and load it with `app.load(\"Window\")`",
     "App.use_shell": "describe the frame as a `kind: Window` view and load it with `app.load(\"Window\")`; to dock panels "

@@ -27,7 +27,7 @@ def _bar(app, **kwargs):
 
 
 def test_an_undecorated_apps_top_bar_is_the_title_bar():
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     bar = _bar(app)
     node = bar.view.node
     assert bar.node.get("window_region") == "drag"
@@ -40,7 +40,7 @@ def test_an_undecorated_apps_top_bar_is_the_title_bar():
 
 
 def test_its_buttons_act_and_it_follows_the_window(monkeypatch):
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     bar = _bar(app)
     node = bar.view.node
     app.window.simulate("click", node=node("top_app_bar.maximize"))
@@ -55,7 +55,7 @@ def test_its_buttons_act_and_it_follows_the_window(monkeypatch):
 
 
 def test_its_own_buttons_still_work():
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     bar = _bar(app)
     clicked = []
     bar.on_click(lambda: clicked.append("menu"), part="leading")
@@ -64,7 +64,7 @@ def test_its_own_buttons_still_work():
 
 
 def test_on_macos_it_makes_room_and_hides_its_buttons():
-    app = _app(decorations=False)
+    app = _app(borderless=True)
     bar = _bar(app)
     app._native_controls.set(True)  # as tre reports it on a Mac
     app._titlebar_inset.set((28.0, 78.0))
@@ -84,6 +84,6 @@ def test_a_decorated_apps_top_bar_is_as_it_was():
 
 def test_window_controls_can_be_asked_for_or_refused():
     assert _bar(_app(), window_controls=True).node.get("window_region") == "drag"
-    assert _bar(_app(decorations=False), window_controls=False).node.get("window_region") is None
+    assert _bar(_app(borderless=True), window_controls=False).node.get("window_region") is None
     with pytest.raises(ValueError, match="window_controls needs the window to be an App's"):
         top_app_bar(View({"id": "r", "kind": "Container", "style": {}}).window, "x", window_controls=True)

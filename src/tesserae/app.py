@@ -239,8 +239,7 @@ class App:
         root: str | Path | None = None,
         search: Any = (),
         recursive: bool = False,
-        decorations: bool = True,
-        borderless: bool | None = None,
+        borderless: bool = False,
         window_view: str | Path | None = None,
         resize_border: int | None = None,
         min_width: int = 0,
@@ -258,14 +257,15 @@ class App:
         system_fonts: bool = False,
         reduced_motion: bool | str = "system",
         high_contrast: bool | str = "system",
+        **removed_kwargs: Any,
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
         #: `self.state`, and a binding as `{{ state.<name>.get() }}`.
-        if borderless is not None:  # the name other frameworks use: the OS window without its title bar and borders
-            if borderless is False and decorations is False:
-                raise ValueError("App: borderless=False and decorations=False say opposite things; give one (borderless)")
-            decorations = not borderless
+        if "decorations" in removed_kwargs:
+            raise removed("decorations")
+        if removed_kwargs:
+            raise TypeError(f"App() got an unexpected keyword argument {next(iter(removed_kwargs))!r}")
         self.state = state
         #: The project's files, found by name: `Views/`, `ViewModels/`, `Components/`, `Themes/` and `Styles/`
         #: under `root` (the folder of the script that runs, by default), and the folders in `search`; with
@@ -309,14 +309,14 @@ class App:
         # M37: the app's one window exists from the start, so screens are built
         # straight into it. Like a `Window.from_view` root: no padding, and a
         # screen root with no size of its own is sized to its content.
-        self._window: Window = Window(width=width, height=height, title=title, decorations=bool(decorations))
+        self._window: Window = Window(width=width, height=height, title=title, decorations=not borderless)
         self._window.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0,
                               align_items="flex_start")
         # 0.3.0 M2: the window's own options, for a title bar the app draws
-        # (`tre` 0.5.0). An undecorated window resizes from a 6 px border
+        # (`tre` 0.5.0). A borderless window resizes from a 6 px border
         # unless the app gives its own width (the design's Q6).
         self._resize_border: int | None = _non_negative("resize_border", resize_border, allow_none=True)
-        self._window.set(resize_border=self._resize_for(bool(decorations)),
+        self._window.set(resize_border=self._resize_for(bool(borderless)),
                          min_width=_non_negative("min_width", min_width),
                          min_height=_non_negative("min_height", min_height),
                          fullscreen=bool(fullscreen), system_menu=bool(system_menu))
@@ -356,10 +356,10 @@ class App:
         self._window.on("high_contrast", self._on_high_contrast)
         if os.environ.get("TESSERAE_STATS") == "1":
             self.stats_overlay = True
-        # 0.3.0 M4 (the design's Q9): an undecorated window's 1 px border,
-        # built the first time it shows, and shown while undecorated,
+        # 0.3.0 M4 (the design's Q9): a borderless window's 1 px border,
+        # built the first time it shows, and shown while borderless,
         # neither maximized nor fullscreen, and not on macOS (its frame).
-        self._decorated = Signal(bool(decorations))
+        self._borderless = Signal(bool(borderless))
         self._fullscreen = Signal(bool(fullscreen))
         self._window_border = Signal(bool(window_border))
         self._border: Any = None
@@ -1120,47 +1120,45 @@ class App:
 
     # -- the window (0.3.0 M2: custom windowing, `tre` 0.5.0) ----------------
 
-    #: The resize border of an undecorated window whose app gives none.
+    #: The resize border of a borderless window whose app gives none.
     DEFAULT_RESIZE_BORDER = 6
 
-    def _resize_for(self, decorations: bool) -> int:
+    def _resize_for(self, borderless: bool) -> int:
         if self._resize_border is not None:
             return self._resize_border
-        return 0 if decorations else self.DEFAULT_RESIZE_BORDER
+        return self.DEFAULT_RESIZE_BORDER if borderless else 0
 
     @property
     def decorations(self) -> bool:
-        """Whether the OS draws the title bar and borders. `False` leaves them
-        to the app (on macOS the title bar stays, transparent, with the
-        traffic lights); it can change while the app runs."""
-        return bool(self._window.get("decorations"))
+        """Removed: use `app.borderless`, its opposite. Raises `tesserae._removed.RemovedError`, which says how."""
+        raise removed("app.decorations")
 
     @decorations.setter
     def decorations(self, value: bool) -> None:
-        self._window.set(decorations=bool(value), resize_border=self._resize_for(bool(value)))
-        self._decorated.set(bool(value))
+        raise removed("app.decorations")
 
     @property
     def borderless(self) -> bool:
-        """Whether the OS window has no title bar and borders of its own (the opposite of `decorations`): the app draws
-        its own, with a `TitleBar`. It can change while the app runs."""
-        return not self.decorations
+        """Whether the OS window has no title bar and borders of its own: the app draws its own, with a `TitleBar`
+        (on macOS the title bar stays, transparent, with the traffic lights). It can change while the app runs."""
+        return self._borderless.get()
 
     @borderless.setter
     def borderless(self, value: bool) -> None:
-        self.decorations = not bool(value)
+        self._window.set(decorations=not bool(value), resize_border=self._resize_for(bool(value)))
+        self._borderless.set(bool(value))
 
     @property
     def resize_border(self) -> int:
-        """How many pixels along each edge resize an undecorated window
+        """How many pixels along each edge resize a borderless window
         (`tre` turns it off while maximized or fullscreen, and on macOS).
-        Unless set, 6 while undecorated and 0 otherwise."""
+        Unless set, 6 while borderless and 0 otherwise."""
         return int(self._window.get("resize_border"))
 
     @resize_border.setter
     def resize_border(self, value: int | None) -> None:
         self._resize_border = _non_negative("resize_border", value, allow_none=True)
-        self._window.set(resize_border=self._resize_for(self.decorations))
+        self._window.set(resize_border=self._resize_for(self.borderless))
 
     @property
     def min_width(self) -> int:
@@ -1192,7 +1190,7 @@ class App:
 
     @property
     def window_border(self) -> bool:
-        """Whether an undecorated window gets its 1 px border (on by
+        """Whether a borderless window gets its 1 px border (on by
         default): around the window, in the theme's `outline_variant`, a
         node of class `window_border` a theme or stylesheet can restyle.
         It's hidden while maximized or fullscreen, and on macOS, where the
@@ -1204,7 +1202,7 @@ class App:
         self._window_border.set(bool(value))
 
     def _show_border(self) -> None:
-        shown = (self._window_border.get() and not self._decorated.get() and not self._maximized.get()
+        shown = (self._window_border.get() and self._borderless.get() and not self._maximized.get()
                  and not self._fullscreen.get() and self.platform != "macos")
         if shown and self._border is None:
             self._border = self._build_border()
@@ -1305,7 +1303,7 @@ class App:
         """The mistake `run()` reports (0.3.1): screens were registered and
         none was shown, with nothing else on the window. A window with no
         screens at all runs: an app built in Python starts empty and adds
-        nodes to `app.window.root`. The window border an undecorated app
+        nodes to `app.window.root`. The window border a borderless app
         draws is a child of the root too, and doesn't count as content."""
         if self._current is not None or not self._registered:
             return False
