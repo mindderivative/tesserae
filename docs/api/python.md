@@ -65,8 +65,7 @@ class App(
     glyph_cache: bool = False,
     system_fonts: bool = False,
     reduced_motion: bool | str = 'system',
-    high_contrast: bool | str = 'system',
-    **removed_kwargs: Any
+    high_contrast: bool | str = 'system'
 ) -> None
 ```
 
@@ -81,7 +80,6 @@ class App(
 - `current` *(property)*: The name last passed to `show()`, or `None` before the first real call -- lets a registered handler ask "which screen is this, anyway" without the app keeping its own separate bookkeeping.
 - `dark` *(property)*: Whether the app is showing its dark scheme right now.
 - `dark_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True`/`False`.
-- `decorations` *(property)*: Removed: use `app.borderless`, its opposite.
 - `dpi_scaling` *(property)*: Whether the window lays out in logical pixels and draws at the display's scale (on by default), so it is sharp on a HiDPI screen.
 - `forward() -> bool`: Shows the entry `back()` left, if any.
 - `frame_stats(reset: bool = False) -> dict[str, Any]`: What the window's frames cost: `frames`, `skipped`, `last` (the last frame's stage times in milliseconds) and `recent` (the last 240 frames: `fps`, and the mean, 95th percentile and maximum of the total and the CPU time).
@@ -90,7 +88,6 @@ class App(
 - `high_contrast` *(property)*: Whether the app uses MD3's highest-contrast colours: the user asked the OS for more contrast (or the app says so).
 - `high_contrast_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True` or `False`.
 - `load(view_path: str | Path, viewmodel_cls: type | None = None, name: str | None = None, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> tuple[Any, Any]`: Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it.
-- `load_shell(path: str | Path, viewmodel: Any = None) -> Any`: Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`.
 - `location` *(property)*: The screen showing, as a route string (for saving where the user was): from the first route of its screen that reads its params back exactly, or `None` if none does.
 - `maximize() -> None`: Maximizes the window (before `run()`, it opens maximized).
 - `min_height` *(property)*: The shortest the user can resize the window to (0 for no limit).
@@ -129,7 +126,6 @@ class App(
 - `toggle_maximized() -> None`: Maximizes the window, or restores it if it's maximized: a title bar's maximize button.
 - `transparent` *(property)*: Whether the window was made see-through (`App(transparent=True)`); `transparent_active` says whether it took.
 - `transparent_active` *(property)*: Whether the window really is see-through (the platform may not allow it); `None` until it opens.
-- `use_shell(shell: Any) -> None`: Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`.
 - `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change; `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.
 - `window` *(property)*: The app's one window (it exists from the start).
 - `window_border` *(property)*: Whether a borderless window gets its 1 px border (on by default): around the window, in the theme's `outline_variant`, a node of class `window_border` a theme or stylesheet can restyle.

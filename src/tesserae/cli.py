@@ -26,8 +26,6 @@ from pathlib import Path
 from string import Template
 from typing import Optional, Sequence
 
-from tesserae._removed import removed
-
 TEMPLATES = Path(__file__).parent / "templates"
 #: The lines `tesserae new` leaves in `app.py`; `add screen` inserts above them.
 IMPORT_MARKER = "# (tesserae add screen adds each new screen's import above this line)"
@@ -173,7 +171,6 @@ def _parser() -> argparse.ArgumentParser:
     new_cmd.add_argument("name", help="the app's folder name, e.g. notes or my-notes")
     new_cmd.add_argument("--window", action="store_true",
                          help="make the app one `kind: Window` view: title bar, rail, and two routed screens")
-    new_cmd.add_argument("--shell", action="store_true", help=argparse.SUPPRESS)  # removed: says what replaces it
     new_cmd.add_argument("--dir", type=Path, default=Path("."), help="where to make it (default: here)")
     new_cmd.add_argument("--no-venv", action="store_true", help="don't make a virtual environment in the project")
     new_cmd.add_argument("--custom-title-bar", action="store_true",
@@ -265,8 +262,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.command == "schema":
             return _schema(args)
         if args.command == "new":
-            if args.shell:
-                raise CliError(str(removed("tesserae new --shell")))
             folder = new(args.name, args.dir, window=args.window, custom_title_bar=args.custom_title_bar,
                          venv=not args.no_venv)
             activate = "source .venv/bin/activate" if os.name != "nt" else r".venv\Scripts\activate"

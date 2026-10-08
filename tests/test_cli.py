@@ -92,14 +92,6 @@ def test_add_screen_adds_a_pair_and_loads_and_routes_it(tmp_path, capsys):
     assert deep["start"] == "UserProfile" and deep["location"] == "user-profile"
 
 
-def test_new_with_a_shell_says_what_replaced_it(tmp_path, capsys):
-    """0.4.5 (#108): `--shell` was removed; it says to use `--window`."""
-    assert cli.main(["new", "studio", "--shell", "--no-venv", "--dir", str(tmp_path)]) == 2
-    err = capsys.readouterr().err
-    assert "`tesserae new --shell` was removed" in err and "tesserae new --window" in err
-    assert not (tmp_path / "studio").exists()
-
-
 def test_a_custom_title_bar_goes_with_a_window(tmp_path, capsys):
     assert cli.main(["new", "lonely", "--custom-title-bar", "--dir", str(tmp_path)]) == 2
     assert "--custom-title-bar goes with --window" in capsys.readouterr().err

@@ -40,7 +40,6 @@ from tesserae import tokens
 from tesserae.reactive import Computed, Effect, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
-from tesserae._removed import removed
 from tesserae.spec.watch import ComponentWatcher, FileWatcher
 
 #: How often `run(keepalive=True)` ticks, in seconds: about 50 times a second,
@@ -257,15 +256,10 @@ class App:
         system_fonts: bool = False,
         reduced_motion: bool | str = "system",
         high_contrast: bool | str = "system",
-        **removed_kwargs: Any,
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
         #: `self.state`, and a binding as `{{ state.<name>.get() }}`.
-        if "decorations" in removed_kwargs:
-            raise removed("decorations")
-        if removed_kwargs:
-            raise TypeError(f"App() got an unexpected keyword argument {next(iter(removed_kwargs))!r}")
         self.state = state
         #: The project's files, found by name: `Views/`, `ViewModels/`, `Components/`, `Themes/` and `Styles/`
         #: under `root` (the folder of the script that runs, by default), and the folders in `search`; with
@@ -865,8 +859,6 @@ class App:
         Returns the `(view, viewmodel)` pair, for code that wants a node to click in a test or a Signal to
         read back.
         """
-        if str(view_path).endswith("_Shell.yaml"):
-            raise removed("*_Shell.yaml")
         if viewmodel_cls is None and _is_window_file(self._named("view", view_path)):  # a window view needs none (0.4.4)
             path, found = resolve_embedded(self.project, view_path)
             viewmodel_cls = found if found is not None else WindowViewModel
@@ -1085,16 +1077,6 @@ class App:
         """The app's one window (it exists from the start)."""
         return self._window
 
-    def use_shell(self, shell: Any) -> None:
-        """Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`. Raises
-        `tesserae._removed.RemovedError`, which says how."""
-        raise removed("App.use_shell")
-
-    def load_shell(self, path: str | Path, viewmodel: Any = None) -> Any:
-        """Removed: describe the frame as a `kind: Window` view and load it with `app.load("Window")`. Raises
-        `tesserae._removed.RemovedError`, which says how."""
-        raise removed("App.load_shell")
-
     def screen(self, name: str) -> tuple[Any, Any]:
         """The `(view, viewmodel)` registered under `name` -- by `register`,
         `load` or an embedded view; `viewmodel` is `None` for a view with none."""
@@ -1127,15 +1109,6 @@ class App:
         if self._resize_border is not None:
             return self._resize_border
         return self.DEFAULT_RESIZE_BORDER if borderless else 0
-
-    @property
-    def decorations(self) -> bool:
-        """Removed: use `app.borderless`, its opposite. Raises `tesserae._removed.RemovedError`, which says how."""
-        raise removed("app.decorations")
-
-    @decorations.setter
-    def decorations(self, value: bool) -> None:
-        raise removed("app.decorations")
 
     @property
     def borderless(self) -> bool:

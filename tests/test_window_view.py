@@ -198,21 +198,6 @@ def test_borderless_sets_the_os_window_and_its_resize_border():
     assert App(theme_seed=SEED).borderless is False
 
 
-def test_decorations_is_removed_and_says_what_replaced_it():
-    """0.4.5 (#110)."""
-    from tesserae._removed import RemovedError
-
-    with pytest.raises(RemovedError, match=r"`decorations` was removed: use `borderless=True`"):
-        App(decorations=False)
-    app = App(theme_seed=SEED)
-    with pytest.raises(RemovedError, match="`app.decorations` was removed.*app.borderless"):
-        app.decorations
-    with pytest.raises(RemovedError, match="`app.decorations` was removed"):
-        app.decorations = False
-    with pytest.raises(TypeError, match="unexpected keyword argument 'decoratons'"):
-        App(decoratons=False)
-
-
 def test_a_window_view_with_no_app_is_just_a_container():
     view = View(yaml.safe_load(WINDOW))
     assert view.node("root").get("kind") == "box" and view.node("hello").get("text") == "Hello"
