@@ -1,0 +1,42 @@
+window performance: native
+  total 30.3s, 2119 frames, 1756 resize events
+
+== resize: 16.0s ==
+  frames 2101 (131.7/s), resize events 1755 (110.0/s), pointer events 1
+    frame interval         mean    6.63  p50    5.49  p95    9.28  p99   11.65  max  598.49 ms
+    gaps over 50 ms: 11, over 100 ms: 7
+    frame total_ms         mean    5.12  p50    5.27  p95    8.80  p99    9.90  max   11.94 ms
+    frame cpu_ms           mean    5.02  p50    5.18  p95    8.71  p99    9.81  max   11.85 ms
+    frame gpu_ms           -
+    resize interval        mean    7.09  p50    5.74  p95    9.36  p99   11.95  max  521.40 ms
+    resize -> next frame   mean    6.13  p50    5.61  p95    9.09  p99   10.08  max   12.00 ms
+    size 635x475 -> 632x503
+    sampled counter: 3 -> 2103; stalls over 150 ms: 7, longest 2015 ms with no new frame
+
+== drag: 11.9s ==
+  frames 16 (1.3/s), resize events 0 (0.0/s), pointer events 3
+    frame interval         mean  732.32  p50    5.98  p95  602.75  p99 10314.82  max 10314.82 ms
+    gaps over 50 ms: 2, over 100 ms: 2
+    frame total_ms         mean    4.31  p50    5.53  p95    6.98  p99    7.96  max    7.96 ms
+    frame cpu_ms           mean    0.70  p50    0.53  p95    1.50  p99    1.56  max    1.56 ms
+    frame gpu_ms           -
+    sampled counter: 2104 -> 2119; stalls over 150 ms: 3, longest 10241 ms with no new frame
+
+== idle: 2.4s ==
+  frames 2 (0.8/s), resize events 1 (0.4/s), pointer events 1
+    frame interval         mean   23.05  p50   23.05  p95   23.05  p99   23.05  max   23.05 ms
+    gaps over 50 ms: 0, over 100 ms: 0
+    frame total_ms         mean    4.50  p50    2.06  p95    6.93  p99    6.93  max    6.93 ms
+    frame cpu_ms           mean    4.02  p50    1.91  p95    6.13  p99    6.13  max    6.13 ms
+    frame gpu_ms           -
+    resize interval        -
+    resize -> next frame   mean   14.31  p50   14.31  p95   14.31  p99   14.31  max   14.31 ms
+    size 640x480 -> 640x480
+    sampled counter: 0 -> 2; stalls over 150 ms: 1, longest 2215 ms with no new frame
+
+== resize bursts (found by timing) ==
+     3.0-  11.3s ( 8.3s)  635x475 -> 480x360  events 1264, frames 1264
+      frame gap p50 5.4 p95 9.1 max 256.9 ms;  frame total p50 5.2 p95 8.7 max 11.9 ms;  resize->frame p50 5.2 p95 8.7 max 12.0 ms
+    11.9-  15.4s ( 3.6s)  482x360 -> 632x503  events 491, frames 519
+      frame gap p50 7.0 p95 9.5 max 92.2 ms;  frame total p50 6.8 p95 9.2 max 11.7 ms;  resize->frame p50 7.0 p95 9.3 max 11.8 ms
+  pointer/key events: [(2.4, 'key:1'), (18.4, 'key:2'), (20.8, 'pointer_down'), (20.8, 'pointer_cancel'), (30.3, 'key:q')]
