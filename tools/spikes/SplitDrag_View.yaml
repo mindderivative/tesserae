@@ -1,0 +1,60 @@
+# The window the drag spike (`drag_events.py`) opens: a Dock with tabs in the left zone, a split in the middle (Source | Preview),
+# a right zone and a bottom zone, so there is something to drag and halves to drop onto.
+id: root
+kind: Window
+title: Drag spike
+style: {width: 960, height: 600, background: surface, flex_direction: vertical}
+children:
+  - id: help
+    kind: Text
+    text: {content: "Drag a tab onto the Source and Preview halves (edges and middle) and the other zones. Press q when done.", typography_role: body_medium}
+    style: {foreground: on_surface_variant, padding: 8}
+  - id: dock
+    kind: Dock
+    style: {flex: fill}
+    children:
+      - id: files
+        kind: DockPanel
+        title: Files
+        style: {zone: left, width: 200}
+        children:
+          - {id: files_text, kind: Text, text: {content: Files, typography_role: body_large}, style: {foreground: on_surface, padding: 12}}
+      - id: outline
+        kind: DockPanel
+        title: Outline
+        style: {zone: left}
+        children:
+          - {id: outline_text, kind: Text, text: {content: Outline, typography_role: body_large}, style: {foreground: on_surface, padding: 12}}
+      - id: editor
+        kind: DockPanel
+        title: Editor
+        style: {zone: center}
+        children:
+          - id: source
+            kind: DockPanel
+            title: Source
+            children:
+              - {id: source_text, kind: Text, text: {content: Source half, typography_role: body_large}, style: {foreground: on_surface, padding: 12}}
+          - id: preview
+            kind: DockPanel
+            title: Preview
+            children:
+              - {id: preview_text, kind: Text, text: {content: Preview half, typography_role: body_large}, style: {foreground: on_surface, padding: 12}}
+      - id: notes
+        kind: DockPanel
+        title: Notes
+        style: {zone: center}
+        children:
+          - {id: notes_text, kind: Text, text: {content: Notes, typography_role: body_large}, style: {foreground: on_surface, padding: 12}}
+      - id: properties
+        kind: DockPanel
+        title: Properties
+        style: {zone: right, width: 200}
+        children:
+          - {id: properties_text, kind: Text, text: {content: Properties, typography_role: body_large}, style: {foreground: on_surface, padding: 12}}
+      - id: console
+        kind: DockPanel
+        title: Console
+        style: {zone: bottom, height: 120}
+        children:
+          - {id: console_text, kind: Text, text: {content: Console, typography_role: body_large}, style: {foreground: on_surface, padding: 12}}
