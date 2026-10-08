@@ -16,6 +16,15 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   keeps `parse_binding`, `evaluate`, `evaluate_value`, `Handle` and `BindingError` over it, and errors now carry the position and a hint.
   See [Binding Expressions](guide/bindings.md).
 
+- **The node model** (phase 3). `tesserae.spec.widgets` is the widget registry (`Property` with type, default, choices, required and model;
+  `@widget`, `declare`, `register_widget`, `decl_from_params` for a view's `params:`, and a JSON schema per widget in
+  `schema/tesserae-widget-schema.json`). `tesserae.spec.nodes.parse_view` reads a view in the 0.5.0 syntax (`widget:`, optional `name:`,
+  properties, `if`, `for`, `key`, `slot`, `state`, `style`, `classes`, `handlers`, `a11y`, `interaction`, `window_region`, `route`, `children`):
+  every key and property is checked, every expression compiled, every node given an id from its path, and an error names the file, line and
+  column with a suggestion. `tesserae.spec.translate` turns 0.4.x YAML into it; 128 of the 131 files in the repository translate and load, and
+  the other three are reported (a dynamic widget name, and a property a call binds that its fragment does not declare). Nothing builds from the
+  new syntax yet: that is phases 4 and 5.
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

@@ -13,7 +13,7 @@ The expression is evaluated against the ViewModel when the view is
 attached. Every `Signal` or `Computed` it reads becomes a dependency, and
 a change to one evaluates it again and updates the property.
 
-Since 0.5.0 an expression is a **Python subset**, run by a sandboxed
+An expression is a **Python subset**, run by a sandboxed
 evaluator (`tesserae.expr`): nothing in a view file can import, open a
 file, reach `__class__` or run code the application did not expose. The
 full grammar and limits are in `design/yaml-language.md` section 8.
