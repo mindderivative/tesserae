@@ -3432,6 +3432,18 @@
             ],
             "description": "The text can be selected and copied but not changed."
           },
+          "mask": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A pattern the typed text is put in: # a digit, A a letter, * either, \\ a literal; other characters come by themselves."
+          },
           "typography_role": {
             "anyOf": [
               {
@@ -3506,6 +3518,7 @@
             "obscured",
             "max_length",
             "read_only",
+            "mask",
             "typography_role",
             "font_family",
             "font_size",

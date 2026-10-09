@@ -41,6 +41,7 @@ declare("TextInput", {
     "obscured": P("bool", doc="Shows dots instead of the text, and blocks copy and cut (a password)."),
     "max_length": P("int", default=0, doc="The most characters it takes; 0 is no limit."),
     "read_only": P("bool", doc="The text can be selected and copied but not changed."),
+    "mask": P("mask", doc="A pattern the typed text is put in: # a digit, A a letter, * either, \\ a literal; other characters come by themselves."),
     "typography_role": P("str"), "font_family": P("str"), "font_size": P("float"), "font_weight": P("any"), "disabled": P("bool"),
 }, extras=("foreground",), doc="A bare text input (the part of a TextField that takes the typing).")
 declare("Image", {

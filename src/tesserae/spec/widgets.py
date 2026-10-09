@@ -20,7 +20,7 @@ __all__ = [
     "names", "register_widget", "style_fields_of", "unregister_widget", "widget",
 ]
 
-PROPERTY_TYPES = ("str", "int", "float", "bool", "color", "length", "icon", "enum", "list", "dict", "node", "nodes", "handler", "any")
+PROPERTY_TYPES = ("str", "int", "float", "bool", "color", "length", "icon", "mask", "enum", "list", "dict", "node", "nodes", "handler", "any")
 
 #: Keys every node has (spec section 2) and the header keys: a property may not use one of these names.
 RESERVED_KEYS = frozenset({
@@ -157,6 +157,19 @@ def _icon(prop: Property, value: Any) -> str:
     return value
 
 
+def _mask(prop: Property, value: Any) -> str:
+    from tesserae.spec.mask import Mask
+
+    if not isinstance(value, str):
+        raise _bad(prop, value, "a mask pattern such as '(###) ###-####'")
+    try:
+        if value:  # "" is no mask
+            Mask(value)
+    except ValueError as exc:
+        raise PropertyError(f"'{prop.name}': {exc}") from None
+    return value
+
+
 def _list(prop: Property, value: Any) -> list:
     if not isinstance(value, list):
         raise _bad(prop, value, "a list")
@@ -176,7 +189,7 @@ def _handler(prop: Property, value: Any) -> str:
 
 
 _COERCE: dict[str, Callable[[Property, Any], Any]] = {
-    "str": _str, "int": _int, "float": _float, "bool": _bool, "color": _color, "length": _length, "icon": _icon,
+    "str": _str, "int": _int, "float": _float, "bool": _bool, "color": _color, "length": _length, "icon": _icon, "mask": _mask,
     "enum": lambda prop, value: value, "list": _list, "dict": _dict, "handler": _handler, "any": lambda prop, value: value,
 }
 
@@ -343,7 +356,7 @@ _UNIVERSAL: dict[str, dict[str, Any]] = {
 }
 _EXPRESSION = {"type": "string", "pattern": r"\{\{"}
 _JSON_TYPE = {
-    "str": {"type": "string"}, "icon": {"type": "string"}, "handler": {"type": "string"}, "color": {"type": "string"},
+    "str": {"type": "string"}, "icon": {"type": "string"}, "mask": {"type": "string"}, "handler": {"type": "string"}, "color": {"type": "string"},
     "int": {"type": "integer"}, "float": {"type": "number"}, "bool": {"type": "boolean"}, "length": {"type": ["number", "string"]},
     "list": {"type": "array"}, "dict": {"type": "object"},
 }

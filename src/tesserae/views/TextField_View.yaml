@@ -16,6 +16,7 @@ params:
   prefix: {type: str, default: "", doc: "Text before the typing, such as a currency sign."}
   suffix: {type: str, default: "", doc: "Text after the typing, such as a unit."}
   max_length: {type: int, default: 0, doc: "The most characters it takes; 0 is no limit."}
+  mask: {type: mask, default: "", doc: "A pattern the typing is put in: # a digit, A a letter, * either, \\ a literal; other characters come by themselves, as in (###) ###-####."}
   counter: {type: bool, default: false, doc: "Shows how many characters are typed (of max_length, when there is one)."}
   multiline: {type: bool, default: false, doc: "Several lines; Enter makes a new one, so on_submit does not fire."}
   obscured: {type: bool, default: false, doc: "A password: dots instead of the text, with a button that shows it."}
@@ -48,6 +49,7 @@ children:
             multiline: "{{ multiline }}"
             obscured: "{{ obscured and not reveal }}"
             max_length: "{{ max_length }}"
+            mask: "{{ mask }}"
             read_only: "{{ read_only }}"
             disabled: "{{ disabled }}"
             typography_role: body_large

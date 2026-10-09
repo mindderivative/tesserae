@@ -27,6 +27,7 @@ from tesserae.spec.compose import Instance
 from tesserae.timers import Timers
 from tesserae.spec.images import extract_images
 from tesserae.spec.lower import lower
+from tesserae.spec.mask import Mask
 from tesserae.spec.nodes import ViewDoc
 from tesserae.view import _EVENTS, SURFACE_ACTIONS, WINDOW_ACTIONS, View
 
@@ -465,8 +466,18 @@ class ComposedView(View):
             if limit and len(text) > limit:
                 node.set(text=text[:limit])
 
+        mask = Mask(inst.value("mask")) if inst.value("mask") else None
+
+        def fit(event: Any = None) -> None:
+            text = node.get("text")
+            masked = mask.apply(text)
+            if masked != text:
+                node.set(text=masked)
+
         if inst.value("read_only") or inst.value("max_length"):
             self._handler_undos.append(self._listen(node, "change", enforce))
+        if mask is not None:  # after the others: a read-only field is put back whole, a masked one fitted
+            self._handler_undos.append(self._listen(node, "change", fit))
 
     def close(self) -> None:
         """Stops following the composition and releases it."""

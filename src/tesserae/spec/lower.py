@@ -21,7 +21,7 @@ _FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "pl
 #: The widget names that are not the builder's kind names.
 _KIND = {"TextInput": "TextField"}
 #: Properties the renderer acts on (it has no builder equivalent), so they are not part of the lowered spec.
-_RENDERER_ONLY = {"TextInput": {"max_length", "read_only"}}
+_RENDERER_ONLY = {"TextInput": {"max_length", "read_only", "mask"}}
 #: Properties the renderer does not draw yet: said by name, never dropped silently.
 _PLACEHOLDER = "composed"
 _NOT_RENDERED = {"frame": "a video frame"}

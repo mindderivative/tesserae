@@ -101,6 +101,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Windows, title bars and docks in composed views** ([#221](https://github.com/mindderivative/tesserae/issues/221)). A `widget: Window` root opened with `app.open_view` sets the OS
   window (it becomes the app's window view, as `kind: Window` is for `app.load`), and the bindings a `TitleBar` expands to (inactive dimming, the maximize/restore glyph, the OS's inset and
   buttons) are wired without a ViewModel. Docks already worked and are now covered by tests.
+- **Input masks** ([#222](https://github.com/mindderivative/tesserae/issues/222)). `mask: "(###) ###-####"` on a `TextInput` or `TextField` formats what is typed or pasted (`#` digit, `A` letter,
+  `*` either, `\\` a literal); `tesserae.spec.mask.Mask` is the same for Python.
 
 ### Removed
 
