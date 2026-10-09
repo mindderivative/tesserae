@@ -667,6 +667,18 @@
             "items": {
               "$ref": "#"
             }
+          },
+          "disabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Dimmed, not focusable, and its handlers do not run."
           }
         },
         "required": [
@@ -692,7 +704,8 @@
             "tooltip",
             "params",
             "expects",
-            "children"
+            "children",
+            "disabled"
           ]
         }
       }
@@ -2665,6 +2678,18 @@
             "items": {
               "$ref": "#"
             }
+          },
+          "disabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Dimmed, not focusable, and its handlers do not run."
           }
         },
         "required": [
@@ -2690,7 +2715,8 @@
             "tooltip",
             "params",
             "expects",
-            "children"
+            "children",
+            "disabled"
           ]
         }
       }

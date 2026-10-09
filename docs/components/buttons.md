@@ -11,9 +11,26 @@ high and fully rounded, and its label is in the *label large* type style.
 
 ## In Tesserae
 
-Each type is its own fragment: `component:` can't branch on a name, so a `variant` can't pick between them
-the way `button(variant=)` does in Python. A fragment's `corner_radius` is a parameter because `{{ }}` can't
-do arithmetic: a pill is half the height, and `button()` works that out for you.
+`widget: Button` is a view Tesserae ships (`Button_View.yaml` and `Button_Stylesheet.yaml`). One widget has all five types, in five sizes. It is as wide
+as its label and icons, and `handlers: {on_click: ...}` on the call is what a press does.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `label` | text | the text |
+| `variant` | `filled`, `tonal`, `elevated`, `outlined`, `text` | the type (default `filled`) |
+| `size` | `xs`, `s`, `m`, `l`, `xl` | 32, 40, 56, 96 or 136 pixels tall (default `s`) |
+| `shape` | `round`, `square` | a pill, or a rounded square |
+| `icon`, `trailing_icon` | an icon name | before and after the label |
+| `disabled` | true or false | dimmed, not focusable, handlers do not run |
+| `loading` | true or false | a spinner in the icon's place; does not respond |
+| `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the colours and the shape swap while it is on |
+
+Padding is 24 pixels each side (16 on the side with an icon; a text button 12). The container is a pill and, while pressed, squares off; a toggle that is
+on takes the other shape. A filled or tonal button lifts to level 1 when hovered, an elevated one rests at level 1 and lifts to 2. The state layer, ripple and
+focus ring are the node's interaction. The look is in the stylesheet: write a `Button_Stylesheet.yaml` in your project to change it. Not built: the
+container colour at 12% for a disabled filled button (a disabled button fades as a whole).
+
+`widget: Button` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -53,18 +70,18 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: actions
+widget: Container
+style: {flex_direction: horizontal, gap: 12, padding: 16, align_content: center}
 children:
-  - id: save
-    component: ButtonFilled
-    with: {label: Save, width: 120, height: 40, corner_radius: 20}
-    handlers: {on_click: save}
+  - {widget: Button, label: Save, icon: home, handlers: {on_click: save}}
+  - {widget: Button, label: Draft, variant: outlined}
+  - {widget: Button, label: Mute, variant: tonal, toggle: true, selected: "{{ muted }}"}
+  - {widget: Button, label: Sync, variant: text, loading: "{{ syncing }}"}
 ```
+
+## Using it
 
 In Python:
 

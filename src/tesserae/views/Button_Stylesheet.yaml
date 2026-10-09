@@ -1,0 +1,94 @@
+# The look of Button (Material 3, with the Expressive sizes). Sizes set the height, the padding (24 each side, 16 on the side with an icon; a text button
+# 12 and 12) and the gap; variants set the colours; the shape is a pill or a rounded square, and a toggle that is on, or a press, takes the other.
+# A state layer and a ripple come from the node's interaction; a filled, tonal or elevated button lifts when hovered.
+styles:
+  - widget: Button
+    style:
+      height: 40
+      transition: {corner_radius: 200, elevation: 200, background: 150}
+  # sizes
+  - {widget: Button, size: xs, style: {height: 32, gap: 4}}
+  - {widget: Button, size: s, style: {height: 40, gap: 8}}
+  - {widget: Button, size: m, style: {height: 56, gap: 8}}
+  - {widget: Button, size: l, style: {height: 96, gap: 12}}
+  - {widget: Button, size: xl, style: {height: 136, gap: 16}}
+  - widget: Button
+    style:
+      padding: "{{ {'left': (({'xs': 12, 's': 16, 'm': 24, 'l': 48, 'xl': 64}[size]) if (icon != '' or loading) else ({'xs': 12, 's': 24, 'm': 24, 'l': 48, 'xl': 64}[size])) if variant != 'text' else 12, 'right': (({'xs': 12, 's': 16, 'm': 24, 'l': 48, 'xl': 64}[size]) if trailing_icon != '' else ({'xs': 12, 's': 24, 'm': 24, 'l': 48, 'xl': 64}[size])) if variant != 'text' else 12, 'top': 0, 'bottom': 0} }}"
+  # shapes: a pill, or a rounded square; a toggle that is on (and a press) takes the other
+  - widget: Button
+    shape: round
+    style: {corner_radius: full}
+  - widget: Button
+    shape: square
+    style: {corner_radius: "{{ {'xs': 12, 's': 12, 'm': 16, 'l': 28, 'xl': 28}[size] }}"}
+  - widget: Button
+    shape: round
+    state: selected
+    style: {corner_radius: "{{ {'xs': 12, 's': 12, 'm': 16, 'l': 28, 'xl': 28}[size] }}"}
+  - widget: Button
+    shape: square
+    state: selected
+    style: {corner_radius: full}
+  - widget: Button
+    shape: round
+    state: pressed
+    style: {corner_radius: "{{ {'xs': 12, 's': 12, 'm': 16, 'l': 28, 'xl': 28}[size] }}"}
+  # variants
+  - widget: Button
+    variant: filled
+    style: {background: "{{ 'primary' if (not toggle or selected) else 'surface_container_highest' }}"}
+  - widget: Button
+    variant: tonal
+    style: {background: "{{ 'secondary_container' if (not toggle or not selected) else 'secondary' }}"}
+  - widget: Button
+    variant: elevated
+    style: {background: "{{ 'surface_container_low' if (not toggle or not selected) else 'primary' }}", elevation: 1}
+  - widget: Button
+    variant: outlined
+    style:
+      background: "{{ 'transparent' if (not toggle or not selected) else 'inverse_surface' }}"
+      border_width: "{{ 1 if (not toggle or not selected) else 0 }}"
+      border_color: outline
+  - widget: Button
+    variant: text
+    style: {background: transparent}
+  # lifting
+  - {widget: Button, variant: filled, state: hovered, style: {elevation: 1}}
+  - {widget: Button, variant: tonal, state: hovered, style: {elevation: 1}}
+  - {widget: Button, variant: elevated, state: hovered, style: {elevation: 2}}
+  - {widget: Button, variant: elevated, state: pressed, style: {elevation: 1}}
+  # content colours
+  - widget: Button
+    variant: filled
+    part: label
+    style: {foreground: "{{ 'on_primary' if (not toggle or selected) else 'on_surface_variant' }}"}
+  - widget: Button
+    variant: tonal
+    part: label
+    style: {foreground: "{{ 'on_secondary_container' if (not toggle or not selected) else 'on_secondary' }}"}
+  - widget: Button
+    variant: elevated
+    part: label
+    style: {foreground: "{{ 'primary' if (not toggle or not selected) else 'on_primary' }}"}
+  - widget: Button
+    variant: outlined
+    part: label
+    style: {foreground: "{{ 'primary' if not toggle else ('inverse_on_surface' if selected else 'on_surface_variant') }}"}
+  - widget: Button
+    variant: text
+    part: label
+    style: {foreground: primary}
+  - {widget: Button, variant: filled, part: icon, style: {foreground: "{{ 'on_primary' if (not toggle or selected) else 'on_surface_variant' }}"}}
+  - {widget: Button, variant: tonal, part: icon, style: {foreground: "{{ 'on_secondary_container' if (not toggle or not selected) else 'on_secondary' }}"}}
+  - {widget: Button, variant: elevated, part: icon, style: {foreground: "{{ 'primary' if (not toggle or not selected) else 'on_primary' }}"}}
+  - {widget: Button, variant: outlined, part: icon, style: {foreground: "{{ 'primary' if not toggle else ('inverse_on_surface' if selected else 'on_surface_variant') }}"}}
+  - {widget: Button, variant: text, part: icon, style: {foreground: primary}}
+  - {widget: Button, variant: filled, part: trailing, style: {foreground: "{{ 'on_primary' if (not toggle or selected) else 'on_surface_variant' }}"}}
+  - {widget: Button, variant: tonal, part: trailing, style: {foreground: "{{ 'on_secondary_container' if (not toggle or not selected) else 'on_secondary' }}"}}
+  - {widget: Button, variant: elevated, part: trailing, style: {foreground: "{{ 'primary' if (not toggle or not selected) else 'on_primary' }}"}}
+  - {widget: Button, variant: outlined, part: trailing, style: {foreground: "{{ 'primary' if not toggle else ('inverse_on_surface' if selected else 'on_surface_variant') }}"}}
+  - {widget: Button, variant: text, part: trailing, style: {foreground: primary}}
+  # icon sizes
+  - {widget: Button, part: icon, style: {width: "{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}", height: "{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}"}}
+  - {widget: Button, part: trailing, style: {width: "{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}", height: "{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}"}}

@@ -16,8 +16,9 @@ _TEXT_WRAPS = ("word", "none")
 _TEXT_OVERFLOWS = ("clip", "ellipsis")
 
 declare("Slot", doc="Where a caller's children go in a view (a default slot, or a named one).")
-declare("Rect", container=True, doc="A filled box that can hold children.")
-declare("Container", container=True, doc="A box with an optional fill that lays out its children.")
+_DISABLED = {"disabled": P("bool", doc="Dimmed, not focusable, and its handlers do not run.")}
+declare("Rect", _DISABLED, container=True, doc="A filled box that can hold children.")
+declare("Container", _DISABLED, container=True, doc="A box with an optional fill that lays out its children.")
 
 _TEXT = {
     "text": P("str", default="", doc="The text shown."),

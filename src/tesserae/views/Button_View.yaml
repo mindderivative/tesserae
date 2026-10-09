@@ -1,0 +1,47 @@
+# The Material 3 button: filled, tonal, elevated, outlined or text, in five sizes, with a leading and a trailing icon, a toggle form, a loading form and a
+# disabled form. It is as wide as its label and icons, unless the call gives it a width. `handlers: {on_click: save}` on the call is what it does when pressed.
+# With `toggle: true` a press flips `selected` (two-way) and the button swaps its colours and its shape; `loading` shows a spinner in the icon's place and
+# stops it taking presses. Colours, sizes, shapes and how it lifts are in Button_Stylesheet.yaml: write a project Button_View.yaml and Button_Stylesheet.yaml to change them.
+params:
+  label: {type: str, default: "", doc: "The text."}
+  variant: {type: enum, choices: [filled, tonal, elevated, outlined, text], default: filled, doc: "filled is the screen's main action; tonal and elevated are important but secondary; outlined is medium; text is the lowest emphasis."}
+  size: {type: enum, choices: [xs, s, m, l, xl], default: s, doc: "32, 40, 56, 96 or 136 pixels tall."}
+  shape: {type: enum, choices: [round, square], default: round, doc: "A pill, or a rounded square. A toggle button swaps to the other shape while selected."}
+  icon: {type: str, default: "", doc: "A leading icon."}
+  trailing_icon: {type: str, default: "", doc: "An icon after the label."}
+  disabled: {type: bool, default: false, doc: "Dimmed, not focusable, and it does not respond."}
+  loading: {type: bool, default: false, doc: "A spinner in the icon's place; it does not respond while it shows."}
+  toggle: {type: bool, default: false, doc: "A press flips `selected`."}
+  selected: {type: bool, default: false, model: true, doc: "For a toggle button: whether it is on."}
+widget: Container
+interaction: true
+disabled: "{{ disabled or loading }}"
+style:
+  flex_direction: horizontal
+  align_content: center
+  clip_children: false
+handlers:
+  on_click: "selected = (not selected) if toggle else selected"
+a11y:
+  role: button
+  label: "{{ label }}"
+  pressed: "{{ selected if toggle else None }}"
+  busy: "{{ loading }}"
+children:
+  - widget: CircularProgress
+    name: spinner
+    if: loading
+    style: {width: "{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}", height: "{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}"}
+  - widget: Icon
+    name: icon
+    if: "icon != '' and not loading"
+    icon: "{{ icon }}"
+  - widget: Text
+    name: label
+    if: "label != ''"
+    text: "{{ label }}"
+    typography_role: "{{ {'xs': 'label_large', 's': 'label_large', 'm': 'title_medium', 'l': 'headline_small', 'xl': 'headline_large'}[size] }}"
+  - widget: Icon
+    name: trailing
+    if: "trailing_icon != ''"
+    icon: "{{ trailing_icon }}"
