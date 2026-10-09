@@ -32,7 +32,7 @@ styles:
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `height` | the `height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `background` | `surface_container_low` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `corner_radius` | `medium` | Pixels, or a shape token (`none` to `extra_large`). |
+| `corner_radius` | `medium` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). |
 | `elevation` | `level_1` | A shadow level, 0 to 5. |
 
 ## What it makes

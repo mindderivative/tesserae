@@ -199,7 +199,7 @@ ERROR_CASES = {
     "Text without a font": {"id": "x", "kind": "Text", "text": {"content": "a", "font_size": 1}, "style": {"foreground": "#000000"}},
     "Text without a size": {"id": "x", "kind": "Text", "text": {"content": "a", "font_family": "Roboto"}, "style": {"foreground": "#000000"}},
     "unknown typography role": {"id": "x", "kind": "Text", "text": {"content": "a", "typography_role": "huge"}, "style": {"foreground": "#000000"}},
-    "unknown shape token": {"id": "x", "kind": "Rect", "style": {"background": "#000000", "corner_radius": "full"}},
+    "unknown shape token": {"id": "x", "kind": "Rect", "style": {"background": "#000000", "corner_radius": "enormous"}},
     "unknown elevation token": {"id": "x", "kind": "Rect", "style": {"background": "#000000", "elevation": "level_9"}},
     "unknown icon": {"id": "x", "kind": "Icon", "icon": {"name": "nope"}, "style": {"foreground": "#000000"}},
     "Checkbox with selected": {"id": "x", "kind": "Checkbox", "selected": True, "style": {"background": "#000000"}},

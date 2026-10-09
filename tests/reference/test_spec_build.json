@@ -78,7 +78,7 @@
  "test_errors_read_as_tres_do[unknown shape token]#1": {
   "__raises__": [
    "ValueError",
-   "widget \"x\": unknown style.corner_radius token \"full\""
+   "widget \"x\": unknown style.corner_radius token \"enormous\""
   ]
  },
  "test_errors_read_as_tres_do[unknown typography role]#1": {

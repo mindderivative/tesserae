@@ -80,7 +80,7 @@ def test_elevation_levels_match_tre(name):
 
 
 def test_unknown_tokens_are_none_as_in_tre():
-    assert tokens.shape("full") is None and tokens.elevation("level_6") is None and tokens.type_style("huge") is None
+    assert tokens.shape("enormous") is None and tokens.elevation("level_6") is None and tokens.type_style("huge") is None
 
 
 @pytest.mark.parametrize("role", sorted(tokens.TYPE_SCALE))
