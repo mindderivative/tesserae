@@ -1,6 +1,6 @@
 # Request to tre: clip any node to a shape (a mask)
 
-*Drafted for Tesserae 0.5.0 (#225). Not sent: sending it to tre is the project owner's decision.*
+*Drafted for Tesserae 0.5.0 (#225). Sent 2026-10-08 as mindderivative/tre#164.*
 
 ## What Tesserae needs
 

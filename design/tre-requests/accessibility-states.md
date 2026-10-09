@@ -1,6 +1,6 @@
 # Request to tre: more accessibility states
 
-*Drafted for Tesserae 0.5.0 (#232). Not sent: sending it to tre is the project owner's decision.*
+*Drafted for Tesserae 0.5.0 (#232). Sent 2026-10-08 as mindderivative/tre#160.*
 
 ## What Tesserae needs
 

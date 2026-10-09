@@ -1,6 +1,6 @@
 # Request to tre: more on the text input
 
-*Drafted for Tesserae 0.5.0 (#234). Not sent: sending it to tre is the project owner's decision.*
+*Drafted for Tesserae 0.5.0 (#234). Sent 2026-10-08 as mindderivative/tre#162.*
 
 ## What Tesserae needs
 

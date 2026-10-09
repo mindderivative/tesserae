@@ -1,6 +1,6 @@
 # Request to tre: animatable layout properties, and an animation-finished event
 
-*Drafted for Tesserae 0.5.0 (#233). Not sent: sending it to tre is the project owner's decision.*
+*Drafted for Tesserae 0.5.0 (#233). Sent 2026-10-08 as mindderivative/tre#161.*
 
 ## What Tesserae needs
 
