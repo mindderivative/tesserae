@@ -1,0 +1,37 @@
+# The rows of one level of a tree, each followed by its children's level while it is open (this view calls itself). `Tree` is the one to use; this is its part.
+params:
+  nodes: {type: list, default: [], doc: "The rows: {value, label} and optionally {icon, children, disabled}."}
+  level: {type: int, default: 0, doc: "How deep this level is."}
+  expanded: {type: list, default: [], model: true, doc: "The values of the branches that are open."}
+  selected: {type: any, default: "", model: true, doc: "The value of the chosen row."}
+  compact: {type: bool, default: false, doc: "40 pixel rows."}
+widget: Container
+style: {flex_direction: vertical, width: 100%}
+children:
+  - widget: Container
+    for: n in nodes
+    key: n['value']
+    name: entry
+    style: {flex_direction: vertical, width: 100%}
+    children:
+      - widget: TreeNode
+        name: row
+        label: "{{ n['label'] }}"
+        icon: "{{ n.get('icon', '') }}"
+        level: "{{ level }}"
+        branch: "{{ len(n.get('children', [])) > 0 }}"
+        expanded: "{{ n['value'] in expanded }}"
+        selected: "{{ n['value'] == selected }}"
+        compact: "{{ compact }}"
+        disabled: "{{ n.get('disabled', False) }}"
+        handlers:
+          on_click: "selected = n['value']; expanded = ([v for v in expanded if v != n['value']] if n['value'] in expanded else expanded + [n['value']]) if len(n.get('children', [])) > 0 else expanded"
+          on_key: "expanded = (expanded + [n['value']]) if (event.key == 'arrow_right' and len(n.get('children', [])) > 0 and n['value'] not in expanded) else (([v for v in expanded if v != n['value']]) if (event.key == 'arrow_left' and n['value'] in expanded) else expanded)"
+      - widget: TreeLevel
+        name: children
+        if: "len(n.get('children', [])) > 0 and n['value'] in expanded"
+        nodes: "{{ n.get('children', []) }}"
+        level: "{{ level + 1 }}"
+        expanded: "{{ expanded }}"
+        selected: "{{ selected }}"
+        compact: "{{ compact }}"

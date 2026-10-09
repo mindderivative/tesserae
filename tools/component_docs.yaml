@@ -648,19 +648,43 @@ components:
   - slug: trees
     title: Trees
     group: Containment
+    shipped_view: Tree
     fragments: [TreeNodeBranch, TreeNodeLeaf]
     md3: |
       Material Design 3 has no tree view; this is MD3's list row, indented by depth, with a chevron on the rows
       that open.
     built: |
-      Two fragments, a branch (with the chevron) and a leaf. `left_padding` is the indent for the row's depth.
-    usage: |
-      - id: folder
-        component: TreeNodeBranch
-        with: {title: src, width: 280, left_padding: 8}
-      - id: file
-        component: TreeNodeLeaf
-        with: {title: app.py, width: 280, left_padding: 32}
+      Views Tesserae ships: `Tree` (the whole tree from data), `TreeNode` (one row, a branch with a chevron or a leaf) and `TreeLevel` (the rows of one level, which calls itself for
+      the children of an open branch).
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `nodes` | a list | rows: `{value, label}` and optionally `{icon, children, disabled}`; `children` is the same shape |
+      | `expanded` | a list; two-way | the values of the open branches |
+      | `selected` | a value; two-way | the chosen row |
+      | `compact` | true or false | 40 pixel rows instead of 56 |
+
+      A row is indented 16 pixels plus 24 for each level, has a 24 pixel chevron that turns a quarter when its branch opens (a leaf keeps the room), an optional icon and a `body_large`
+      label; the chosen row is `secondary_container`. A press chooses a row and opens or closes a branch. One Tab stop; the up and down arrows move through the rows that show, Right
+      opens a branch and Left closes it, and typing the start of a label jumps to a row. A screen reader hears a tree whose items have their level, and a branch says whether it is
+      expanded. `TreeNode` can be used alone for a custom tree. Not built: loading children when a branch first opens, selecting several, dragging to reorder, a context menu, and
+      building only the rows in view for a very large tree.
+    usage_view: |
+      name: files
+      widget: Container
+      style: {width: 360, height: 420}
+      children:
+        - widget: Tree
+          expanded: "{{ open }}"
+          selected: "{{ current }}"
+          nodes:
+            - value: docs
+              label: Documents
+              icon: folder
+              children:
+                - {value: a, label: Letter}
+                - {value: b, label: Reports, children: [{value: q, label: Q1}]}
+            - {value: readme, label: Readme, icon: file}
     python: |
       from tesserae.widgets import tree_node
 

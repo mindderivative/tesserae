@@ -1,0 +1,21 @@
+# A tree (the WAI-ARIA tree pattern in Material 3's list terms): rows that open to show their children, one level inside the next. `nodes` is a list of {value, label} and
+# optionally {icon, children, disabled}, the children being the same shape. `expanded` is the list of values of the open branches and `selected` the value of the chosen row;
+# both are two-way. A press on a row chooses it, and on a branch opens or closes it too. One Tab stop; the up and down arrows move through the rows that show, Right opens a branch
+# and Left closes one, and typing the start of a label jumps to a row.
+params:
+  nodes: {type: list, default: [], doc: "The rows: {value, label} and optionally {icon, children, disabled}; children are the same shape."}
+  expanded: {type: list, default: [], model: true, doc: "The values of the branches that are open."}
+  selected: {type: any, default: "", model: true, doc: "The value of the chosen row."}
+  compact: {type: bool, default: false, doc: "40 pixel rows instead of 56."}
+widget: Container
+focus_group: vertical
+a11y: {role: tree, label: Tree}
+style: {flex_direction: vertical, width: 100%}
+children:
+  - widget: TreeLevel
+    name: top
+    nodes: "{{ nodes }}"
+    level: 0
+    expanded: "{{ expanded }}"
+    selected: "{{ selected }}"
+    compact: "{{ compact }}"

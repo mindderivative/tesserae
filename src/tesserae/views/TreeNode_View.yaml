@@ -1,0 +1,38 @@
+# One row of a tree: a leaf (#158) or a branch (#157) with a chevron that turns a quarter when it opens. 56 pixels tall (40 when `compact`), indented 16 pixels plus 24 for each
+# `level`, with an optional 24 pixel icon and a `body_large` label; a selected row is `secondary_container`. A screen reader hears a tree item at level `level + 1`, a branch
+# saying whether it is expanded. It is pressable; `handlers: {on_click: ...}` on the call is what a press does. `Tree` puts the rows together.
+params:
+  label: {type: str, default: "", doc: "The row's text."}
+  icon: {type: str, default: "", doc: "A leading icon."}
+  level: {type: int, default: 0, doc: "How deep it is: 0 for the top."}
+  branch: {type: bool, default: false, doc: "It has children: a chevron shows."}
+  expanded: {type: bool, default: false, doc: "For a branch: whether its children show."}
+  selected: {type: bool, default: false, doc: "Whether this is the chosen row."}
+  compact: {type: bool, default: false, doc: "A 40 pixel row instead of 56."}
+  disabled: {type: bool, default: false, doc: "Dimmed and not pressable."}
+widget: Container
+interaction: true
+disabled: "{{ disabled }}"
+a11y:
+  role: treeitem
+  label: "{{ label }}"
+  level: "{{ level + 1 }}"
+  expanded: "{{ expanded if branch else None }}"
+  selected: "{{ selected }}"
+style:
+  flex_direction: horizontal
+  align_content: left
+  height: "{{ 40 if compact else 56 }}"
+  width: 100%
+children:
+  - widget: Icon
+    name: chevron
+    if: branch
+    icon: chevron_right
+    style: {rotation_deg: "{{ 90 if expanded else 0 }}", transition: {rotation_deg: 200}}
+  - widget: Container
+    name: chevron_space
+    if: "not branch"
+    style: {width: 24, height: 24}
+  - {widget: Icon, name: icon, if: "icon != ''", icon: "{{ icon }}"}
+  - {widget: Text, name: label, text: "{{ label }}", typography_role: body_large, max_lines: 1, overflow: ellipsis}

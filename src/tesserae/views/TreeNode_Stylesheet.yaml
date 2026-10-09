@@ -1,0 +1,12 @@
+# The look of TreeNode (Material 3 list terms): 16 pixels in plus 24 for each level on the left, 16 on the right, 8 between the parts; a selected row is
+# secondary_container.
+styles:
+  - widget: TreeNode
+    style:
+      padding: "{{ {'left': 16 + 24 * level, 'right': 16, 'top': 0, 'bottom': 0} }}"
+      gap: 8
+      background: "{{ 'secondary_container' if selected else 'transparent' }}"
+      transition: {background: 150}
+  - {widget: TreeNode, part: chevron, style: {width: 24, height: 24, foreground: on_surface_variant}}
+  - {widget: TreeNode, part: icon, style: {width: 24, height: 24, foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
+  - {widget: TreeNode, part: label, style: {foreground: "{{ 'on_secondary_container' if selected else 'on_surface' }}"}}
