@@ -11,7 +11,7 @@ A tooltip names or explains a control when the pointer rests on it, or it has ke
 Any node takes a `tooltip:`. A plain one is text on the inverse surface; a rich one has a `title`, up to two `actions` and a `placement`
 (`below`, `above`, `start`, `end`), is a raised surface the pointer can move onto, and closes when an action is pressed. It shows after the
 pointer rests for `delay` (500 ms), at once on keyboard focus, or after a long press; Escape, a press, or leaving closes it. The text also names
-the node for a screen reader. Not built: reaching the actions by keyboard, and testing the long press (the headless engine cannot simulate it).
+the node for a screen reader. Not built: reaching the actions by keyboard.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |

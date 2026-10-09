@@ -355,3 +355,12 @@ def test_these_are_refused_at_load(tooltip, message):
     with pytest.raises(LoadError, match=message.replace("{", r"\{").replace("}", r"\}").replace(".", r"\.")):
         parse_view(view_text(tooltip), "Main_View.yaml")
 
+
+
+def test_a_touch_held_in_place_shows_it(tmp_path):
+    view, _ = opened(tmp_path)
+    view.window.simulate("touch_start", node=view.node("root.b"), id=1)
+    run(view, 100)
+    assert not view._tips
+    run(view, 600)
+    assert texts(view) == ["Delete"]

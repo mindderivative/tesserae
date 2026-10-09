@@ -561,6 +561,9 @@ class ComposedView(View):
                 if getattr(event, "focus_visible", True):  # a mouse click that focuses it is not a reason to show it
                     self._show_tip(inst)
 
+            def held(event: Any = None, inst: Instance = inst) -> None:
+                self._show_tip(inst)
+
             def away(event: Any = None, inst: Instance = inst) -> None:
                 self.timers.cancel(f"tip:{inst.id}")
                 self._hide_tip(inst.id)
@@ -574,7 +577,7 @@ class ComposedView(View):
                     away(event)
 
             for event_name, fn in (("pointer_enter", start), ("pointer_leave", leave), ("pointer_down", away), ("focus", now), ("unfocus", away),
-                                   ("long_press", now)):
+                                   ("long_press", held)):
                 self._tip_undos.append(self._listen(node, event_name, fn))
         for gone in set(self._tips) - live:
             self._hide_tip(gone)
