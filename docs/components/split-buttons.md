@@ -21,8 +21,8 @@ trailing chevron opens the others.
 | `disabled` | true or false | both parts are dimmed and do not respond |
 
 The inner corners are small (4 pixels) and the outer ones round; while the menu is open the trailing part is round on every corner and its chevron is turned over. Each part is its
-own Tab stop; the trailing part says it is expanded while its menu shows. Not built: arrow-down on the main part opening the menu, the menu's first row taking the focus, and a
-toggle form.
+own Tab stop; the trailing part says it is expanded while its menu shows. Arrow-down on either part opens the menu and moves the focus to its first row (a press opens it
+without moving the focus). Not built: a toggle form.
 
 `widget: SplitButton` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 

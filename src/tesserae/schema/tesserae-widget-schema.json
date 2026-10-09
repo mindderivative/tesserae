@@ -2433,6 +2433,18 @@
             ],
             "description": "Escape and a press outside close it."
           },
+          "focus_first": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "When it opens, the focus moves to the first thing in it that can take it (a menu's first row)."
+          },
           "timeout": {
             "anyOf": [
               {
@@ -2475,6 +2487,7 @@
             "placement",
             "modal",
             "dismissible",
+            "focus_first",
             "timeout"
           ]
         }
