@@ -1,0 +1,38 @@
+# The look of Fab (Material 3): a container at elevation level 3 that lifts to 4 when hovered and settles back when pressed. The container colour is the
+# variant's, the icon and label its "on" colour. The extended form (with a label that shows) is 56 tall with 16 pixels of padding before the icon and 20
+# after the label.
+styles:
+  - widget: Fab
+    style:
+      elevation: 3
+      transition: {elevation: 200, corner_radius: 200}
+      height: 56
+      width: auto
+      corner_radius: 16
+  - {widget: Fab, size: small, style: {height: 40, corner_radius: 12}}
+  - {widget: Fab, size: medium, style: {height: 56, corner_radius: 16}}
+  - {widget: Fab, size: large, style: {height: 96, corner_radius: 28}}
+  # the shape: a square one for an icon alone, otherwise as wide as it needs
+  - widget: Fab
+    style:
+      width: "{{ {'small': 40, 'medium': 56, 'large': 96}[size] if (label == '' or collapsed) else 'auto' }}"
+      height: "{{ 56 if (label != '' and not collapsed) else {'small': 40, 'medium': 56, 'large': 96}[size] }}"
+      padding: "{{ {'left': 16, 'right': 20, 'top': 0, 'bottom': 0} if (label != '' and not collapsed) else 0 }}"
+      gap: 8
+  - {widget: Fab, state: hovered, style: {elevation: 4}}
+  - {widget: Fab, state: pressed, style: {elevation: 3}}
+  # colours
+  - {widget: Fab, variant: primary, style: {background: primary_container}}
+  - {widget: Fab, variant: secondary, style: {background: secondary_container}}
+  - {widget: Fab, variant: tertiary, style: {background: tertiary_container}}
+  - {widget: Fab, variant: surface, style: {background: surface_container_high}}
+  - {widget: Fab, variant: primary, part: icon, style: {foreground: on_primary_container}}
+  - {widget: Fab, variant: secondary, part: icon, style: {foreground: on_secondary_container}}
+  - {widget: Fab, variant: tertiary, part: icon, style: {foreground: on_tertiary_container}}
+  - {widget: Fab, variant: surface, part: icon, style: {foreground: primary}}
+  - {widget: Fab, variant: primary, part: label, style: {foreground: on_primary_container}}
+  - {widget: Fab, variant: secondary, part: label, style: {foreground: on_secondary_container}}
+  - {widget: Fab, variant: tertiary, part: label, style: {foreground: on_tertiary_container}}
+  - {widget: Fab, variant: surface, part: label, style: {foreground: primary}}
+  # icon sizes
+  - {widget: Fab, part: icon, style: {width: "{{ 36 if size == 'large' else 24 }}", height: "{{ 36 if size == 'large' else 24 }}"}}

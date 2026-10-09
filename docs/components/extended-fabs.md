@@ -8,7 +8,10 @@ An extended FAB is a FAB with a text label, for a main action that an icon alone
 
 ## In Tesserae
 
-A container with an optional icon and a label; give no `icon` for a text-only one.
+It is the same `widget: Fab` (see Floating action buttons) given a `label`: 56 tall, as wide as its label, with 16 pixels before the icon and 20
+after the text. Give no `icon` for a text-only one.
+
+`widget: Fab` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -54,17 +57,15 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: inbox
+widget: Container
+style: {width: 240, height: 120}
 children:
-  - id: new
-    component: ExtendedFabPrimary
-    with: {label: New, icon: add, width: 120}
+  - {widget: Fab, label: New, icon: add, variant: secondary, handlers: {on_click: create}}
 ```
+
+## Using it
 
 In Python:
 

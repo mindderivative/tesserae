@@ -10,8 +10,23 @@ default (56dp) and large (96dp).
 
 ## In Tesserae
 
-The size is a parameter, and `fab_size` names it (`small`, `default` or `large`) so a theme's
-`components:` entry can shape each.
+`widget: Fab` is a view Tesserae ships (`Fab_View.yaml`): one widget for the four colours and three sizes, and for the extended form too (give it a
+`label`).
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `icon` | an icon name | the glyph (24 pixels, 36 on a large FAB) |
+| `label` | text | the text beside the icon, which makes it extended; also the accessible name |
+| `variant` | `primary`, `secondary`, `tertiary`, `surface` | the container colour |
+| `size` | `small`, `medium`, `large` | 40, 56 or 96 pixels, with 12, 16 and 28 pixel corners |
+| `collapsed` | true or false | an extended FAB shows only its icon (and its label becomes its tooltip) |
+| `disabled` | true or false | dimmed, not focusable, handlers do not run |
+
+It rests at elevation level 3, lifts to 4 when hovered and settles to 3 when pressed. To collapse as a list scrolls down and extend as it scrolls up, bind
+`collapsed: "{{ way == 'down' }}"` to the `scroll_direction` of the list. Not built: extending animates only as far as the engine lets a width go to `auto`
+(the collapse eases, the extend is at once), and the FAB menu.
+
+`widget: Fab` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -53,18 +68,23 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: inbox
+widget: Container
+style: {flex_direction: vertical, width: 360, height: 480}
 children:
-  - id: add
-    component: FabPrimary
-    with: {icon: add, size: 56, corner_radius: 16}
-    handlers: {on_click: add_item}
+  - widget: ScrollView
+    scroll_direction: "{{ way }}"
+    style: {height: 400}
+    children: [{widget: Text, text: Messages}]
+  - widget: Fab
+    icon: add
+    label: Compose
+    collapsed: "{{ way == 'down' }}"
+    handlers: {on_click: compose}
 ```
+
+## Using it
 
 In Python:
 
