@@ -127,7 +127,8 @@ STEM = re.compile(r"_(View|Component)\.yaml$")
 PARAMS = {}
 for _f in FILES:
     _d = yaml.safe_load(_f.read_text(encoding="utf-8"))
-    PARAMS.setdefault(STEM.sub("", _f.name), _d.get("params") if isinstance(_d, dict) else None)
+    if _f.name.endswith("_View.yaml") or STEM.sub("", _f.name) not in PARAMS:  # a view of a name beats a 0.4 component of it (Divider, Tabs)
+        PARAMS[STEM.sub("", _f.name)] = _d.get("params") if isinstance(_d, dict) else None
 
 
 def _resolver(name):

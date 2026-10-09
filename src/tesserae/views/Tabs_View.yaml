@@ -1,0 +1,64 @@
+# The Material 3 tab bar: a row of tabs over a divider, an indicator under the selected one that slides to the next. `tabs` is a list of
+# {value, label, icon, badge}; `selected` is the chosen value and a press writes it back. `variant: primary` (48 tall, 64 with icons, a 3 dp indicator as
+# wide as the label's share of the tab) or `secondary` (48 tall, a 2 dp indicator across the whole tab). The tabs are `tab_width` wide each: a fixed bar.
+# Arrow keys move the focus along the bar and choose the tab (one Tab stop); the panel each tab shows is yours to switch on `selected`.
+# A scrolling bar waits for the engine to scroll sideways.
+params:
+  tabs: {type: list, default: [], doc: "The tabs, each {value, label} and optionally {icon, badge}."}
+  selected: {type: any, default: "", model: true, doc: "The value of the chosen tab; a press writes it back."}
+  variant: {type: enum, choices: [primary, secondary], default: primary, doc: "primary has a short rounded indicator; secondary one across the tab."}
+  tab_width: {type: float, default: 120, doc: "How wide each tab is."}
+widget: Container
+style: {flex_direction: vertical}
+children:
+  - widget: Container
+    name: bar
+    focus_group: horizontal
+    a11y: {role: tablist}
+    style:
+      flex_direction: horizontal
+      height: "{{ 64 if (variant == 'primary' and any([t.get('icon', '') != '' for t in tabs])) else 48 }}"
+    children:
+      - widget: Container
+        for: t in tabs
+        key: t['value']
+        name: tab
+        interaction: true
+        style:
+          width: "{{ tab_width }}"
+          flex_direction: vertical
+          align_content: center
+          gap: 2
+        handlers:
+          on_click: "selected = t['value']"
+          on_focus_enter: "selected = t['value']"
+        a11y:
+          role: tab
+          label: "{{ t['label'] }}"
+          selected: "{{ t['value'] == selected }}"
+        children:
+          - widget: Badge
+            name: badged
+            if: "t.get('icon', '') != '' and t.get('badge', '') != ''"
+            value: "{{ t['badge'] }}"
+            anchored: true
+            children:
+              - {widget: Icon, name: badged_icon, icon: "{{ t['icon'] }}", style: {width: 24, height: 24, foreground: "{{ 'primary' if t['value'] == selected else 'on_surface_variant' }}"}}
+          - {widget: Icon, name: icon, if: "t.get('icon', '') != '' and t.get('badge', '') == ''", icon: "{{ t['icon'] }}", style: {width: 24, height: 24, foreground: "{{ 'primary' if t['value'] == selected else 'on_surface_variant' }}"}}
+          - widget: Text
+            name: label
+            text: "{{ t['label'] }}"
+            typography_role: title_small
+            style: {foreground: "{{ 'primary' if t['value'] == selected else 'on_surface_variant' }}"}
+      - widget: Container
+        name: indicator
+        style:
+          position: absolute
+          x: "{{ (([t['value'] for t in tabs].index(selected) if selected in [t['value'] for t in tabs] else 0) * tab_width) + (0 if variant == 'secondary' else 12) }}"
+          y: "{{ (62 if any([t.get('icon', '') != '' for t in tabs]) else 46) if variant == 'primary' else 46 }}"
+          width: "{{ tab_width if variant == 'secondary' else tab_width - 24 }}"
+          height: "{{ 3 if variant == 'primary' else 2 }}"
+          background: primary
+          corner_radius: "{{ {'top_left': 3, 'top_right': 3} if variant == 'primary' else 0 }}"
+          transition: {x: 250, width: 250}
+  - {widget: Divider, name: divider}

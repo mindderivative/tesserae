@@ -9,7 +9,21 @@ may carry an icon above the label.
 
 ## In Tesserae
 
-A row of `TabsItem`s over a divider, one for each entry of `items`. Give an item an `icon` and it is taller.
+`widget: Tabs` is a view Tesserae ships (`Tabs_View.yaml`): a row of equal tabs over a divider, with an indicator under the chosen tab that
+slides to the next one.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `tabs` | a list | the tabs, each `{value, label}` and optionally `{icon, badge}`; an expression follows its Signals |
+| `selected` | a value; two-way | the chosen tab; a press, or an arrow key, writes it back |
+| `variant` | `primary` or `secondary` | primary: a 3 pixel rounded indicator as wide as the label's share of the tab; secondary: 2 pixels across the whole tab |
+| `tab_width` | a number | how wide each tab is (default 120) |
+
+The bar is 48 pixels tall, or 64 when a primary bar has an icon. The chosen tab's label and icon are `primary`, the others `on_surface_variant`. The bar
+is a `tablist` with one Tab stop; the arrow keys, Home and End move the focus and choose the tab. The panel each tab shows is yours: put an
+`if: "selected == 'trips'"` on it. Not built: a bar that scrolls when the tabs do not fit (the engine's scroll view scrolls only vertically).
+
+`widget: Tabs` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -88,21 +102,20 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: trips
+widget: Container
+style: {flex_direction: vertical, width: 360, height: 160}
 children:
-  - id: tabs
-    component: Tabs
-    with:
-      item_width: 120
-      items:
-        - {label: Videos, selected: true}
-        - {label: Photos}
+  - widget: Tabs
+    selected: "{{ tab }}"
+    tabs:
+      - {value: flights, label: Flights, icon: home}
+      - {value: trips, label: Trips, icon: search, badge: 3}
+      - {value: explore, label: Explore, icon: menu}
 ```
+
+## Using it
 
 In Python:
 
