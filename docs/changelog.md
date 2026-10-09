@@ -111,6 +111,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Image** ([#196](https://github.com/mindderivative/tesserae/issues/196)). `widget: Image` takes `alt` (a screen reader's description; without it the picture is decorative and hidden from one,
   unless it handles clicks) and checks `fit`; its shape is `style.corner_radius`, per corner too, which the engine clips the picture to. A `src` that follows a Signal now changes the picture
   shown (a changed picture was missed by the reconcile).
+- **Svg** ([#197](https://github.com/mindderivative/tesserae/issues/197)). `widget: Svg` takes `alt` as `Image` does, and needs one of `src` and `content` (a load error otherwise); `currentColor` is the
+  `foreground`, so a monochrome icon follows the theme.
 
 ### Removed
 

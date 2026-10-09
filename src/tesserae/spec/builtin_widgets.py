@@ -55,7 +55,9 @@ declare("Icon", {"icon": P("icon", doc="A built-in icon name."),
                  "view_box": P("list", doc="[min_x, min_y, width, height] the path is drawn in; Material Symbols' 0 -960 960 960 when not given.")},
         extras=("foreground",), one_of=[("icon", "path")], doc="A glyph from the built-in set, or from SVG path data.")
 declare("Canvas", {"draw": P("list", doc="Drawing commands in order: rect, circle or path, each with a color.")}, doc="A drawing surface: rects, circles and paths from data.")
-declare("Svg", {"src": P("str"), "content": P("str", doc="The SVG text, instead of a file.")}, extras=("foreground",), doc="A vector picture.")
+declare("Svg", {"src": P("str", doc="A .svg or .svgz file, relative to the view."), "content": P("str", doc="The SVG text, instead of a file."),
+                "alt": P("str", doc="What the picture shows, for a screen reader. Without it the picture is decorative and hidden from one.")},
+        extras=("foreground",), one_of=[("src", "content")], doc="A vector picture.")
 declare("ScrollView", {
     "scroll_offset": P("float", default=0.0, model=True, doc="The scrolled distance; scrolling writes it back to a Signal it is bound to."),
     "at_top": P("bool", model=True, doc="Output: whether it is scrolled to the start. Bind a Signal or a state name to read it."),

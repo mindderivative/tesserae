@@ -2866,7 +2866,8 @@
                 "type": "string",
                 "pattern": "\\{\\{"
               }
-            ]
+            ],
+            "description": "A .svg or .svgz file, relative to the view."
           },
           "content": {
             "anyOf": [
@@ -2879,6 +2880,18 @@
               }
             ],
             "description": "The SVG text, instead of a file."
+          },
+          "alt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "What the picture shows, for a screen reader. Without it the picture is decorative and hidden from one."
           }
         },
         "required": [
@@ -2904,7 +2917,8 @@
             "params",
             "expects",
             "src",
-            "content"
+            "content",
+            "alt"
           ]
         }
       }

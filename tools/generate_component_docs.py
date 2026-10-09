@@ -188,6 +188,9 @@ def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sh
     elif entry.get("shipped_view"):
         out += [f"This component is a view Tesserae ships: use `widget: {entry['shipped_view']}` in a view "
                 "(see [The View Language](../guide/view-language.md)).", ""]
+    elif entry.get("node_kind") and entry.get("widget"):
+        out += [f"This component is a widget, not a fragment: use `widget: {entry['widget']}` in a view "
+                f"(see [The View Language](../guide/view-language.md)), or `kind: {entry['node_kind']}` in the older syntax.", ""]
     elif entry.get("node_kind"):
         out += [f"This component is the `{entry['node_kind']}` node kind, not a fragment: use `kind: {entry['node_kind']}` in a view "
                 "(the [YAML reference](../api/yaml.md#the-kinds))" + (", or build it in Python." if entry.get("python") else "."), ""]

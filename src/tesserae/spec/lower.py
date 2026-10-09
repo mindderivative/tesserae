@@ -49,7 +49,7 @@ def lower(inst: Instance) -> dict[str, Any]:
         folded = {"src", "fit", "alt"}
         node["image"] = {k: values[k] for k in ("src", "fit") if k in values}
     elif widget == "Svg":
-        folded = {"src", "content"}
+        folded = {"src", "content", "alt"}
         node["svg"] = {k: values[k] for k in ("src", "content") if k in values}
     elif widget == "ScrollView":
         folded = {"scroll_offset", "at_top", "at_end", "scroll_direction"}  # the outputs are the renderer's to write, not part of the node
@@ -65,7 +65,7 @@ def lower(inst: Instance) -> dict[str, Any]:
     if inst.classes:
         node["classes"] = list(inst.classes)
     a11y: dict[str, Any] = {}
-    if widget == "Image":  # described by `alt`, else decorative -- unless it is pressed, when hiding it would hide a control
+    if widget in ("Image", "Svg"):  # described by `alt`, else decorative -- unless it is pressed, when hiding it would hide a control
         a11y = {"role": "img", "label": values["alt"]} if values.get("alt") else {} if inst.handlers else {"hidden": True}
     if inst.a11y:  # what the node says itself beats what `alt` makes of it
         a11y.update({name: (held.get() if hasattr(held, "get") else held) for name, held in inst.a11y.items()})
