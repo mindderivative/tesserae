@@ -1,0 +1,49 @@
+# The Material 3 chip: assist (an action), filter (a toggle), input (a piece of what the user entered, with a close) or suggestion (a suggested reply or
+# query). 32 pixels tall with 8 pixel corners, a `label_large` label and an optional 18 pixel leading `icon` or 24 pixel avatar (`avatar_text`, letters in a
+# circle). A filter chip flips `selected` on a press, and while it is on it is `secondary_container` with a check in place of its icon. An input chip has a close
+# button, `removable`, which sets `removed` to true. `elevated` swaps the outline for a raised surface. `handlers: {on_click: ...}` on the call is what a press does.
+# Colours and shapes are in Chip_Stylesheet.yaml.
+params:
+  label: {type: str, default: "", doc: "The text."}
+  variant: {type: enum, choices: [assist, filter, input, suggestion], default: assist, doc: "assist runs an action; filter toggles; input is what the user entered; suggestion offers a reply or a query."}
+  icon: {type: str, default: "", doc: "A leading icon."}
+  avatar_text: {type: str, default: "", doc: "Letters in a circle before the label (an avatar)."}
+  selected: {type: bool, default: false, model: true, doc: "For a filter or input chip: whether it is on."}
+  elevated: {type: bool, default: false, doc: "A raised surface instead of an outline."}
+  removable: {type: bool, default: false, doc: "A close button after the label (an input chip)."}
+  removed: {type: bool, default: false, model: true, doc: "Set to true when the close button is pressed."}
+  on_remove: {type: handler, doc: "What to do when the close button is pressed, written as a handler (an action name or statements)."}
+  flip: {type: bool, default: true, doc: "For a filter chip: whether a press flips `selected` itself. Off, the caller decides (a chip group does)."}
+  disabled: {type: bool, default: false, doc: "Dimmed, not focusable, and it does not respond."}
+widget: Container
+interaction: true
+disabled: "{{ disabled }}"
+style:
+  flex_direction: horizontal
+  align_content: center
+  height: 32
+handlers:
+  on_click: "selected = (not selected) if (variant == 'filter' and flip) else selected"
+a11y:
+  role: "{{ 'checkbox' if variant == 'filter' else 'button' }}"
+  label: "{{ label }}"
+  checked: "{{ selected if variant == 'filter' else None }}"
+children:
+  - widget: Container
+    name: avatar
+    if: "avatar_text != ''"
+    children:
+      - {widget: Text, name: avatar_text, text: "{{ avatar_text }}", typography_role: label_medium}
+  - widget: Icon
+    name: icon
+    if: "avatar_text == '' and (icon != '' or (variant == 'filter' and selected))"
+    icon: "{{ 'check' if (variant == 'filter' and selected) else icon }}"
+  - {widget: Text, name: label, text: "{{ label }}", typography_role: label_large}
+  - widget: Container
+    name: close
+    if: removable
+    interaction: true
+    handlers: {on_click: "removed = True; on_remove()"}
+    a11y: {role: button, label: "{{ 'Remove ' + label }}"}
+    children:
+      - {widget: Icon, name: close_icon, icon: close}

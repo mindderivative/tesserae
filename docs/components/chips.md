@@ -10,8 +10,25 @@ things the user entered, and **suggestion** chips offer a reply or next step.
 
 ## In Tesserae
 
-A rounded `Rect` with a label. The selected filter chip is its own fragment because a fragment's structure
-can't change with a parameter: it adds the check mark.
+`widget: Chip` is a view Tesserae ships (`Chip_View.yaml`): 32 pixels tall with 8 pixel corners, as wide as its label. `widget: ChipGroup` is a wrapping row of
+them.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `label` | text | the text |
+| `variant` | `assist`, `filter`, `input`, `suggestion` | what it is for (default `assist`) |
+| `icon`, `avatar_text` | an icon, letters | a leading 18 pixel icon, or letters in a 24 pixel circle |
+| `selected` | true or false; two-way | a filter or input chip that is on: `secondary_container`, no outline, a check in place of the icon |
+| `elevated` | true or false | a raised surface instead of an outline |
+| `removable`, `removed`, `on_remove` | true or false; true or false, two-way; a handler | a close button; pressing it sets `removed` and runs `on_remove` |
+| `disabled` | true or false | dimmed, not focusable, handlers do not respond |
+
+A filter chip flips `selected` itself (`flip: false` leaves that to you); `handlers: {on_click: ...}` on the call is what a press does. A `ChipGroup` takes
+`chips` (`{value, label}` and optionally `{icon, avatar_text, disabled}`) and a `mode`: `none` (assist or suggestion chips; the last pressed goes to
+`chosen`), `single` or `multiple` (filter chips; `selected` is the value or the list of values), or `input` (chips with a close, and a field: Enter adds a
+chip, the close removes one, and `chips` is two-way). Not built: dragging chips to reorder, and a chip group that scrolls sideways.
+
+`widget: Chip` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -74,17 +91,20 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: filters
+widget: Container
+style: {flex_direction: vertical, gap: 16, width: 420, height: 240}
 children:
-  - id: shipped
-    component: ChipFilterSelected
-    with: {label: Shipped, width: 96}
+  - {widget: Chip, label: Share, icon: home, handlers: {on_click: share}}
+  - widget: ChipGroup
+    mode: multiple
+    selected: "{{ filters }}"
+    chips: [{value: open, label: Open}, {value: mine, label: Mine}, {value: late, label: Overdue}]
+  - {widget: ChipGroup, mode: input, chips: "{{ tags }}", entry: "{{ typed }}"}
 ```
+
+## Using it
 
 In Python:
 

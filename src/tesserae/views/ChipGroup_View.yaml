@@ -1,0 +1,47 @@
+# A group of chips, wrapping onto new rows. `chips` is a list of {value, label} and optionally {icon, avatar_text, disabled}. `mode` says how they behave:
+# `none` suggestion/assist chips that act (the last one pressed goes to `chosen`); `single` and `multiple` filter chips (`selected` is the chosen value, or the
+# list of them); `input` chips with a close button and a text field after them, so typing and pressing Enter adds a chip, and the close removes one (`chips`
+# is two-way: the list the user has built). One Tab stop; the arrows move the focus along the chips (and, for `single`, the choice).
+params:
+  chips: {type: list, default: [], model: true, doc: "The chips, each {value, label} and optionally {icon, avatar_text, disabled}. In input mode adding and removing write it back."}
+  mode: {type: enum, choices: [none, single, multiple, input], default: none, doc: "none: actions; single or multiple: filters; input: what the user entered."}
+  selected: {type: any, default: "", model: true, doc: "single: the chosen value; multiple: the list of chosen values."}
+  chosen: {type: any, default: "", model: true, doc: "none: the value of the chip last pressed."}
+  variant: {type: enum, choices: [assist, suggestion], default: assist, doc: "The look of the chips in `none` mode."}
+  elevated: {type: bool, default: false, doc: "Raised chips instead of outlined ones."}
+  placeholder: {type: str, default: "Add", doc: "Input mode: the hint in the text field."}
+  entry: {type: str, default: "", model: true, doc: "Input mode: what is typed in the field."}
+widget: Container
+focus_group: both
+a11y: {role: group}
+style:
+  flex_direction: horizontal
+  flex_wrap: wrap
+  gap: 8
+  align_content: left
+children:
+  - widget: Chip
+    for: c in chips
+    key: c['value']
+    name: chip
+    label: "{{ c['label'] }}"
+    icon: "{{ c.get('icon', '') }}"
+    avatar_text: "{{ c.get('avatar_text', '') }}"
+    variant: "{{ {'none': variant, 'single': 'filter', 'multiple': 'filter', 'input': 'input'}[mode] }}"
+    selected: "{{ ((c['value'] in selected) if mode == 'multiple' else (c['value'] == selected)) if mode in ('single', 'multiple') else False }}"
+    removable: "{{ mode == 'input' }}"
+    flip: false
+    on_remove: "chips = [x for x in chips if x['value'] != c['value']]"
+    elevated: "{{ elevated }}"
+    disabled: "{{ c.get('disabled', False) }}"
+    handlers:
+      on_click: "chosen = c['value'] if mode == 'none' else chosen; selected = (c['value'] if mode == 'single' else ([v for v in selected if v != c['value']] if c['value'] in selected else selected + [c['value']])) if mode in ('single', 'multiple') else selected"
+      on_focus_enter: "selected = c['value'] if (mode == 'single' and not c.get('disabled', False)) else selected"
+  - widget: TextField
+    name: entry
+    if: "mode == 'input'"
+    variant: outlined
+    label: "{{ placeholder }}"
+    text: "{{ entry }}"
+    handlers:
+      on_submit: "chips = chips + [{'value': entry, 'label': entry}] if (entry != '' and entry not in [c['value'] for c in chips]) else chips; entry = ''"

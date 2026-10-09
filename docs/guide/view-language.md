@@ -122,6 +122,8 @@ the one named by their `slot:`; a view with no slot takes no children.
 A call's own `style`, `classes`, `a11y`, `interaction` and `handlers` lie over the called view's root, and a handler written at the call runs in
 the caller's names. A view may call itself (a tree), to a depth of 64.
 
+A param of type `handler` takes the caller's action name or statements (`on_remove: "items = [x for x in items if x != row]"`), read in the caller's names. The view runs it by calling the param like an action, `on_remove()`; a param the caller left out does nothing when called.
+
 A param that is `model: true` and is given a bare Signal (`on: "{{ dark }}"`) passes the Signal itself, so the view's own `Switch` edits the
 caller's value.
 

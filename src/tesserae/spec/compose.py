@@ -58,6 +58,23 @@ class _StateValues(dict):
 # -- scope -----------------------------------------------------------------------------------------------------------------
 
 
+class HandlerRef:
+    """A `handler` parameter's value: the caller's handler, run in the scope it was written in when the view calls the parameter by name
+    (`on_remove()`). A parameter the caller left out is one that does nothing."""
+
+    def __init__(self, handler: Optional[Handler] = None, scope: Optional["Scope"] = None) -> None:
+        self.handler, self.scope = handler, scope
+
+    def __call__(self) -> None:
+        if self.handler is None or self.scope is None:
+            return
+        if self.handler.action is not None:
+            self.scope.call_action(self.handler.action, [], {})
+        else:
+            assert self.handler.statements is not None
+            self.handler.statements.run(self.scope, event=None)
+
+
 class Scope:
     """The names an expression reads: one frame of values (state, loop variables or params) over its parent, and at the end the
     ViewModel's public attributes. A `Signal` or `Computed` in a frame makes the name reactive."""
@@ -133,6 +150,9 @@ class Scope:
         target.set(value)
 
     def _action(self, path: str) -> Optional[Callable[..., Any]]:
+        held = self._frame(path)
+        if held is not None and isinstance(held.values[path], HandlerRef):  # a handler parameter, called by its name
+            return lambda: held.values[path]()
         if self.actions is not None:
             built_in = self.actions(path, self) if getattr(self.actions, "wants_scope", False) else self.actions(path)
             if built_in is not None:
@@ -701,6 +721,19 @@ class Composer:
             return computed
         return convert(value.evaluate(scope))
 
+    def _handler_ref(self, ctx: _Ctx, node: Node, pname: str, call_scope: "Scope") -> HandlerRef:
+        from tesserae.expr import ExprError, Origin, compile_statements, is_action_name
+
+        text = node.props[pname]
+        if not isinstance(text, str) or not text.strip():
+            raise self._fail(ctx, node.prop_at.get(pname, node.at), f"{node.widget}: '{pname}' is an action name or statements")
+        if is_action_name(text):
+            return HandlerRef(Handler(text.strip(), action=text.strip()), call_scope)
+        try:
+            return HandlerRef(Handler(text, statements=compile_statements(text, origin=Origin(ctx.doc.file, *node.prop_at.get(pname, node.at)))), call_scope)
+        except ExprError as exc:
+            raise self._fail(ctx, node.prop_at.get(pname, node.at), exc.message, exc.hint) from None
+
     def _local_copy(self, bound: Any, holder: Instance) -> Signal:
         """A Signal holding `bound`'s value, following it as it changes. A write to it stays here until the expression next changes."""
         if not isinstance(bound, (Signal, Computed)):
@@ -856,7 +889,9 @@ class Composer:
         for pname, prop in decl.properties.items():
             if pname in RESERVED:
                 raise self._fail(ctx, node.at, f"'{pname}' is a reserved name and cannot be a parameter of {node.widget}")
-            if pname in node.props:
+            if pname in node.props and prop.type == "handler":  # the caller's action, not an expression: compiled where it was written
+                values[pname] = self._handler_ref(ctx, node, pname, call_scope)
+            elif pname in node.props:
                 shared = self._model_ref(decl, pname, node.props[pname], call_scope)
                 if shared is not None:  # a model param given a bare Signal: the callee gets the Signal, so its edits write back
                     values[pname] = call_scope.lookup(shared)
@@ -868,6 +903,8 @@ class Composer:
                     models.add(pname)
             elif prop.required:
                 raise self._fail(ctx, node.at, f"{node.widget}: '{pname}' is required")
+            elif prop.type == "handler":
+                values[pname] = HandlerRef()
             elif prop.model and holder is not None:
                 values[pname] = Signal(prop.default)  # a model param nobody bound holds its own value: the view's handlers may write it
                 models.add(pname)
