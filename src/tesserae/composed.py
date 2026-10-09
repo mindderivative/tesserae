@@ -171,6 +171,7 @@ class ComposedView(View):
         self._link_hot: dict[str, set[str]] = {}  # a Link's reasons to be underlined now: 'pointer', 'focus'
         self._link_undos: list[Callable[[], None]] = []
         self._field_undos: list[Callable[[], None]] = []
+        self._frame_effects: list[Effect] = []
         self._split_last_up: dict[str, float] = {}
         self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
@@ -259,6 +260,7 @@ class ComposedView(View):
             untrack(self._wire_tooltips)
             untrack(self._wire_links)
             untrack(self._wire_fields)
+            untrack(self._wire_frames)
             untrack(self._wire_states)
             untrack(self._wire_focus_groups)
             untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -489,6 +491,25 @@ class ComposedView(View):
             }, listen=self._listen))
 
     # labelled controls (#175)
+
+    def _wire_frames(self) -> None:
+        """An Image with a `frame` shows each new one as it is given (a video: the app pushes `(rgba, width, height)`); none yet leaves the last."""
+        for effect in self._frame_effects:
+            effect.dispose()
+        self._frame_effects = []
+        for inst in self.handle.composition.walk():
+            if inst.widget != "Image" or "frame" not in inst.props or inst.id not in self._built.nodes:
+                continue
+
+            def show(inst: Instance = inst) -> None:
+                frame = inst.value("frame")  # the Effect follows what this reads
+                if frame is None:
+                    return
+                try:
+                    untrack(lambda: self._show_frame(inst.id, self._built.nodes[inst.id], frame))
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(f"{inst.id}: a frame is (rgba bytes, width, height): {exc}") from None
+            self._frame_effects.append(Effect(show))
 
     def _wire_fields(self) -> None:
         """A Checkbox, RadioButton or Switch with a `label` is a row of the control and its text; a press on the text is a press on the control
@@ -962,6 +983,8 @@ class ComposedView(View):
         """Stops following the composition and releases it."""
         if self._effect is not None:
             self._effect.dispose()
+        for effect in self._frame_effects:
+            effect.dispose()
         if self._timers is not None:
             self._timers.cancel_all()
         for inst_id in list(self._tips):

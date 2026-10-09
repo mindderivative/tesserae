@@ -1,0 +1,71 @@
+# A video player: a picture surface with the usual transport controls under it. Tesserae has no decoder, so the app supplies the frames: a `frame` (rgba bytes, width, height) that a
+# ViewModel updates as it plays, like an `Image`'s `frame`. The player owns none of the playing: `playing` (two-way) is what the play button flips, `position` (two-way, seconds) is where the seek
+# slider is and what it writes when dragged, and the app's player follows both and moves `position` on as the video plays. `duration` is the length in seconds. `muted` (two-way) is the volume button.
+# `buffering` lays a wait ring over the picture; `caption` is a line of subtitle on a darkened band at its foot. Keys, on the seek slider: Space plays or pauses, the arrows step `position` by `step` seconds, M mutes (the buttons are Tab stops with their own keys). The role is a group named by `label`. Not here: a decoder, full-screen, speeds, a volume level.
+params:
+  frame: {type: any, default: null, doc: "The current picture: (rgba bytes, width, height), pushed by the app as the video plays."}
+  width: {type: float, default: 480, doc: "The picture's width."}
+  height: {type: float, default: 270, doc: "The picture's height."}
+  fit: {type: enum, choices: [cover, contain, fill], default: contain, doc: "How the picture fills its box."}
+  playing: {type: bool, default: false, model: true, doc: "Whether it is playing; the play button flips it."}
+  position: {type: float, default: 0, model: true, doc: "Seconds in; the seek slider shows and writes it."}
+  duration: {type: float, default: 0, doc: "The length in seconds."}
+  muted: {type: bool, default: false, model: true, doc: "Whether the sound is off; the volume button flips it."}
+  buffering: {type: bool, default: false, doc: "A wait ring over the picture."}
+  caption: {type: str, default: "", doc: "A subtitle line shown at the foot of the picture."}
+  step: {type: float, default: 1, doc: "Seconds the arrow keys move the seek slider (and a drag lands on a multiple of it)."}
+  label: {type: str, default: Video, doc: "What a screen reader calls the player."}
+widget: Container
+a11y: {role: group, label: "{{ label }}"}
+style:
+  flex_direction: vertical
+  width: "{{ width }}"
+  gap: 8
+children:
+  - widget: Container
+    name: stage
+    style: {width: 100%, height: "{{ height }}", corner_radius: 12, clip_children: true, background: scrim}
+    children:
+      - widget: Image
+        name: picture
+        frame: "{{ frame }}"
+        fit: "{{ fit }}"
+        style: {position: absolute, x: 0, y: 0, width: 100%, height: 100%}
+      - widget: CircularProgress
+        name: wait
+        if: buffering
+        label: Buffering
+        style: {position: absolute, x: 50%, y: 50%, translate_x: -24, translate_y: -24, width: 48, height: 48}
+      - widget: Container
+        name: caption
+        if: "caption != ''"
+        style: {position: absolute, x: 0, y: "100%", translate_y: -40, width: 100%, height: 40, align_content: center, background: "scrim@60%"}
+        children:
+          - {widget: Text, name: caption_text, text: "{{ caption }}", typography_role: body_medium, max_lines: 1, overflow: ellipsis}
+  - widget: Container
+    name: controls
+    focus_group: horizontal
+    style: {flex_direction: horizontal, align_content: center, gap: 8}
+    children:
+      - widget: IconButton
+        name: play
+        icon: "{{ 'pause' if playing else 'play' }}"
+        label: "{{ 'Pause' if playing else 'Play' }}"
+        handlers: {on_click: "playing = not playing"}
+      - {widget: Text, name: elapsed, style: {width: 44}, text: "{{ str(int(position // 60)) + ':' + str(int(position % 60)).zfill(2) }}", typography_role: label_medium}
+      - widget: Slider
+        name: seek
+        min: 0
+        max: "{{ max(duration, 1) }}"
+        value: "{{ position }}"
+        step: "{{ step }}"
+        disabled: "{{ duration <= 0 }}"
+        a11y: {label: Seek}
+        style: {width: "{{ max(80, width - 200) }}"}
+        handlers: {on_key: "playing = (not playing) if event.key == 'space' else playing; muted = (not muted) if event.key == 'm' else muted"}
+      - {widget: Text, name: total, style: {width: 44}, text: "{{ str(int(duration // 60)) + ':' + str(int(duration % 60)).zfill(2) }}", typography_role: label_medium}
+      - widget: IconButton
+        name: volume
+        icon: "{{ 'volume_off' if muted else 'volume_high' }}"
+        label: "{{ 'Unmute' if muted else 'Mute' }}"
+        handlers: {on_click: "muted = not muted"}

@@ -60,10 +60,9 @@ def test_values_are_read_at_lowering_so_a_new_lowering_sees_the_change():
     assert lower(comp.root)["text"]["content"] == "bye"
 
 
-@pytest.mark.parametrize("source, what", [("widget: Image\nframe: x", "a video frame")])
-def test_a_property_the_renderer_cannot_draw_is_an_error_naming_it(source, what):
-    with pytest.raises(ValueError, match=what):
-        spec(source)
+def test_an_image_frame_is_not_lowered_it_is_followed_by_the_view():
+    node = spec("widget: Image\nframe: x")
+    assert "frame" not in node and "frame" not in node["image"]
 
 
 def test_flat_properties_of_a_widget_with_a_nested_shape_are_kept():

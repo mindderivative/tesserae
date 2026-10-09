@@ -163,8 +163,8 @@ def test_two_views_of_one_viewmodel_are_rendered_at_once_and_both_follow_one_sig
     assert vm.views["pie"].closed is False and vm.views["list"] is lst.handle
 
 
-def test_a_property_the_renderer_does_not_draw_yet_is_named_not_dropped():
-    with pytest.raises(ValueError, match="Image.frame .a video frame. is not drawn"):
+def test_an_image_frame_that_is_not_a_frame_is_named_not_dropped():
+    with pytest.raises(ValueError, match="a frame is .rgba bytes, width, height."):
         render(BASE + "  - {widget: Image, name: i, frame: '{{ title }}', style: {width: 10, height: 10}}\n")
 
 

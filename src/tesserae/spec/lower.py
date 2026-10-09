@@ -22,18 +22,14 @@ _FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "pl
 _KIND = {"TextInput": "TextField", "VirtualList": "ScrollView"}
 #: Properties the renderer acts on (it has no builder equivalent), so they are not part of the lowered spec.
 _RENDERER_ONLY = {"TextInput": {"max_length", "read_only", "mask"}}
-#: Properties the renderer does not draw yet: said by name, never dropped silently.
 _PLACEHOLDER = "composed"
-_NOT_RENDERED = {"frame": "a video frame"}
 
 
 def lower(inst: Instance) -> dict[str, Any]:
     """The 0.4.x node mapping for `inst` and everything under it, at the values the instances hold now."""
     node: dict[str, Any] = {"id": inst.id, "kind": _KIND.get(inst.widget, inst.widget)}
-    values = {name: inst.value(name) for name in inst.props}
-    for name, what in _NOT_RENDERED.items():
-        if name in values:
-            raise ValueError(f"{inst.id}: {inst.widget}.{name} ({what}) is not drawn by the renderer yet")
+    # an Image's `frame` changes many times a second: it is not read here (the view would be lowered again each time) but followed by `ComposedView._wire_frames`
+    values = {name: inst.value(name) for name in inst.props if not (name == "frame" and inst.widget == "Image")}
     widget = inst.widget
     folded: set[str] = set()  # the properties a nested mapping took
     if widget in ("Text", "Link"):
@@ -50,7 +46,7 @@ def lower(inst: Instance) -> dict[str, Any]:
         folded = {"icon", "path", "view_box"}
         node["icon"] = {name: values[key] for name, key in (("name", "icon"), ("path", "path"), ("view_box", "view_box")) if values.get(key) is not None}
     elif widget == "Image":
-        folded = {"src", "fit", "alt"}
+        folded = {"src", "fit", "alt", "frame"}
         node["image"] = {k: values[k] for k in ("src", "fit") if k in values}
     elif widget == "Svg":
         folded = {"src", "content", "alt"}
