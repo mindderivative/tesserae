@@ -379,11 +379,12 @@ class TypeStyle(
     font_family: str,
     font_weight: float,
     font_size: float,
-    line_height: float
+    line_height: float,
+    tracking: float = 0.0
 ) -> None
 ```
 
-TypeStyle(font_family: 'str', font_weight: 'float', font_size: 'float', line_height: 'float')
+TypeStyle(font_family: 'str', font_weight: 'float', font_size: 'float', line_height: 'float', tracking: 'float' = 0.0)
 
 ### `baseline_scheme`
 
@@ -488,6 +489,8 @@ The font size, weight, line height and tracking of the MD3 type role `role`, or 
 - `TYPE_SCALE` = `dict of 15`
 - `FULL_RADIUS` = `9999.0`
 - `HEIGHT_CLASSES` = `(('compact', 0.0), ('medium', 480.0), ('expanded', 900.0))`
+- `MD3_TRACKING` = `dict of 15`
+- `MD3_TRACKING_TYPOGRAPHY` = `dict of 15`
 - `WIDTH_CLASSES` = `tuple of 5`
 
 ## Widgets

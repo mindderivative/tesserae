@@ -31,7 +31,9 @@ _TEXT = {
     "max_lines": P("int", doc="The most lines shown, from 1; a longer text is cut (with `overflow: ellipsis`, an ellipsis ends the last line)."),
     "letter_spacing": P("float", default=0.0, doc="Extra space between letters, in pixels (tracking)."),
 }
-declare("Text", {**_TEXT, "selectable": P("bool", doc="The text can be selected and copied.")}, extras=("foreground",), doc="A run of text.")
+declare("Text", {**_TEXT, "selectable": P("bool", doc="The text can be selected and copied."),
+                 "heading": P("int", choices=(1, 2, 3, 4, 5, 6), doc="Makes it a heading of this level for a screen reader.")},
+        extras=("foreground",), doc="A run of text.")
 declare("Link", {**_TEXT, "text": P("str", default="", doc="The link's text, which names it for a screen reader.")},
         extras=("foreground",), doc="Text that can be activated.")
 declare("TextInput", {

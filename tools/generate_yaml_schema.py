@@ -574,7 +574,8 @@ def _theme() -> dict[str, Any]:
                               "properties": {"font_family": {"type": "string", "description": "A font family."},
                                              "font_size": {"type": "number", "description": "Pixels."},
                                              "font_weight": {"type": "number", "description": "1 to 1000."},
-                                             "line_height": {"type": "number", "description": "A multiple of the size."}},
+                                             "line_height": {"type": "number", "description": "A multiple of the size."},
+                                             "tracking": {"type": "number", "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."}},
                               "additionalProperties": False}
                        for role in sorted(tokens.TYPE_SCALE)},
         "additionalProperties": False}

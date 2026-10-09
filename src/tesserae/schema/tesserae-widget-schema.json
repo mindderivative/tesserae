@@ -3458,6 +3458,18 @@
               }
             ],
             "description": "The text can be selected and copied."
+          },
+          "heading": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Makes it a heading of this level for a screen reader."
           }
         },
         "required": [
@@ -3492,7 +3504,8 @@
             "text_align",
             "max_lines",
             "letter_spacing",
-            "selectable"
+            "selectable",
+            "heading"
           ]
         }
       }

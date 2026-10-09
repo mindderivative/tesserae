@@ -563,6 +563,7 @@ styles:
 | `typography.<name>.font_size` | a number | Pixels. |
 | `typography.<name>.font_weight` | a number | 1 to 1000. |
 | `typography.<name>.line_height` | a number | A multiple of the size. |
+| `typography.<name>.tracking` | a number | Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`). |
 | `components` | a mapping | Per-component shape and elevation. |
 | `styles` | a list | Style rules, in order. |
 | `styles[].kind` | a [kind](#the-kinds) | Every node of this kind. |

@@ -58,7 +58,7 @@ DURATIONS: dict[str, int] = {
 }
 
 _COMPONENT_FIELDS = ("corner_radius", "elevation")
-_TYPE_FIELDS = ("font_family", "font_weight", "font_size", "line_height")
+_TYPE_FIELDS = ("font_family", "font_weight", "font_size", "line_height", "tracking")
 
 
 @dataclass(frozen=True)

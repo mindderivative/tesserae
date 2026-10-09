@@ -35,7 +35,7 @@ from tesserae import _wide_gamut
 
 __all__ = [
     "BASELINE", "ELEVATION_LEVELS", "baseline_scheme", "ROLES", "SHAPES", "TYPE_SCALE", "TypeStyle", "color_scheme",
-    "elevation", "elevation_shadows", "FULL_RADIUS", "HEIGHT_CLASSES", "WIDTH_CLASSES", "height_class", "width_class", "parse_color", "resolve_color", "resolve_scheme", "shape", "type_style",
+    "elevation", "elevation_shadows", "FULL_RADIUS", "HEIGHT_CLASSES", "MD3_TRACKING", "MD3_TRACKING_TYPOGRAPHY", "WIDTH_CLASSES", "height_class", "width_class", "parse_color", "resolve_color", "resolve_scheme", "shape", "type_style",
 ]
 
 RGBA = Tuple[int, int, int, int]
@@ -316,6 +316,8 @@ class TypeStyle:
     font_size: float
     #: A multiple of `font_size`.
     line_height: float
+    #: Extra space between letters, in pixels. 0 for every role here (as `tre` draws them); `MD3_TRACKING` is Material 3's.
+    tracking: float = 0.0
 
 
 def _roboto(weight: float, size: float, line_height: float) -> TypeStyle:
@@ -333,6 +335,16 @@ TYPE_SCALE = {
     "label_large": _roboto(500, 14, 1.43), "label_medium": _roboto(500, 12, 1.33),
     "label_small": _roboto(500, 11, 1.45),
 }
+
+
+#: Material 3's tracking for each type role, in pixels. Not applied unless a theme asks for it:
+#: `typography: {body_large: {tracking: 0.5}, ...}` in a theme, or `typography: tokens.MD3_TRACKING_TYPOGRAPHY` for all of them.
+MD3_TRACKING = {
+    "display_large": -0.25, "display_medium": 0.0, "display_small": 0.0, "headline_large": 0.0, "headline_medium": 0.0, "headline_small": 0.0,
+    "title_large": 0.0, "title_medium": 0.15, "title_small": 0.1, "body_large": 0.5, "body_medium": 0.25, "body_small": 0.4,
+    "label_large": 0.1, "label_medium": 0.5, "label_small": 0.5,
+}
+MD3_TRACKING_TYPOGRAPHY = {role: {"tracking": tracking} for role, tracking in MD3_TRACKING.items()}
 
 
 def type_style(role: str) -> Optional[TypeStyle]:

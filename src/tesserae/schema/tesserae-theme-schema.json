@@ -2553,6 +2553,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2575,6 +2579,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2597,6 +2605,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2619,6 +2631,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2641,6 +2657,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2663,6 +2683,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2685,6 +2709,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2707,6 +2735,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2729,6 +2761,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2751,6 +2787,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2773,6 +2813,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2795,6 +2839,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2817,6 +2865,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2839,6 +2891,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false
@@ -2861,6 +2917,10 @@
             "line_height": {
               "type": "number",
               "description": "A multiple of the size."
+            },
+            "tracking": {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (Material 3's tracking: `tokens.MD3_TRACKING`)."
             }
           },
           "additionalProperties": false

@@ -37,7 +37,7 @@ def lower(inst: Instance) -> dict[str, Any]:
     widget = inst.widget
     folded: set[str] = set()  # the properties a nested mapping took
     if widget in ("Text", "Link"):
-        folded = {"text", *_TEXT_KEYS}
+        folded = {"text", "heading", *_TEXT_KEYS}
         node["text"] = {"content": values.get("text", ""), **{k: values[k] for k in _TEXT_KEYS if k in values}}
     elif widget == "TextInput":
         folded = {"text", *_FIELD_KEYS, *_RENDERER_ONLY["TextInput"]}
@@ -73,6 +73,8 @@ def lower(inst: Instance) -> dict[str, Any]:
     if inst.classes:
         node["classes"] = list(inst.classes)
     a11y: dict[str, Any] = {}
+    if widget == "Text" and values.get("heading"):
+        a11y = {"role": "heading", "level": values["heading"]}
     if widget in ("Image", "Svg"):  # described by `alt`, else decorative -- unless it is pressed, when hiding it would hide a control
         a11y = {"role": "img", "label": values["alt"]} if values.get("alt") else {} if inst.handlers else {"hidden": True}
     if inst.a11y:  # what the node says itself beats what `alt` makes of it

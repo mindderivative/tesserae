@@ -846,13 +846,42 @@ components:
   - slug: text
     title: Text
     group: Content
+    widget: Text
     fragments: [Text]
     md3: |
       Text is set in Material Design 3's type scale: 15 styles in five groups (display, headline, title, body and
-      label), each large, medium or small, with a font, size, weight and line height.
+      label), each large, medium or small, with a font, size, weight, line height and tracking.
     built: |
-      The `Text` kind. Name a `typography_role` and Tesserae fills in the rest; a theme's `typography:` can change
+      `widget: Text`. Name a `typography_role` and Tesserae fills in the rest; a theme's `typography:` can change
       what a role means.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `text` | text | what is shown; an expression follows the Signals it reads |
+      | `typography_role` | a role such as `body_large` | the font, size, weight and line height |
+      | `font_family`, `font_size`, `font_weight` | | replace what the role gives |
+      | `wrap`, `overflow`, `text_align` | | `word` or `none`; `clip` or `ellipsis`; `start`, `center`, `end` |
+      | `max_lines` | whole number | the most lines shown; with `overflow: ellipsis` the last one ends in an ellipsis |
+      | `letter_spacing` | number | extra space between letters, in pixels |
+      | `selectable` | true or false | the text can be selected and copied |
+      | `heading` | 1 to 6 | makes it a heading of that level for a screen reader |
+
+      The colour is `style.foreground`. Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are
+      `tokens.MD3_TRACKING`, and a theme turns them on with `typography: tokens.MD3_TRACKING_TYPOGRAPHY` (or one role at a time:
+      `typography: {body_large: {tracking: 0.5}}`). A node's own `letter_spacing` wins.
+    usage_view: |
+      name: article
+      widget: Container
+      style: {flex_direction: vertical, gap: 8, width: 360, height: 200}
+      children:
+        - {widget: Text, text: Notes, typography_role: headline_medium, heading: 1, style: {foreground: on_surface}}
+        - widget: Text
+          text: "{{ summary }}"
+          typography_role: body_large
+          max_lines: 3
+          overflow: ellipsis
+          selectable: true
+          style: {foreground: on_surface_variant}
     usage: |
       - id: heading
         component: Text

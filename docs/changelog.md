@@ -125,6 +125,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   window's size and can be read in any expression. `app` itself is now readable in views whose ViewModel is the new kind (it had only worked for a 0.4.x ViewModel).
 - **Screen transitions** ([#231](https://github.com/mindderivative/tesserae/issues/231)). `app.transition` (or `App(transition=...)`) is `none`, `fade_through`, `shared_axis_x`, `shared_axis_y`,
   `shared_axis_z` or `container_transform`, played by `navigate`, `back` and `forward` (reversed going back); `app.navigate_with(name, transition=..., origin=node)` picks one for a single navigation.
+- **Text** ([#195](https://github.com/mindderivative/tesserae/issues/195)). `widget: Text` takes `heading: 1` to `6` (a heading of that level for a screen reader). Type roles have a `tracking`
+  field: `tokens.MD3_TRACKING` is Material 3's per role, off unless a theme's `typography:` sets it (`tokens.MD3_TRACKING_TYPOGRAPHY` for all). Every role's size and line height is tested against the MD3 scale.
 
 ### Removed
 

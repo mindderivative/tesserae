@@ -563,7 +563,7 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         override = getattr(ctx.layers, "typography", {}).get(role) if kind in _THEMED_TEXT else None
         if override:
             role_style = tokens.TypeStyle(**{f: override.get(f, getattr(role_style, f))
-                                             for f in ("font_family", "font_weight", "font_size", "line_height")})
+                                             for f in ("font_family", "font_weight", "font_size", "line_height", "tracking")})
     family = text.get("font_family") or (role_style.font_family if role_style else None)
     if family is None:
         raise SpecBuildError(f'widget {_q(node["id"])}: {kind} requires text.font_family (or text.typography_role), none given')
@@ -601,7 +601,7 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         "overflow": overflow,
         "spans": [],
         "selectable": False,
-        "letter_spacing": 0.0,
+        "letter_spacing": role_style.tracking if role_style is not None else 0.0,
         "max_lines": None,
     }
     spacing = text.get("letter_spacing")
