@@ -683,6 +683,8 @@ def _scroll_props(ctx, node, style):
     scroll = node.get("scroll")
     horizontal = isinstance(scroll, dict) and scroll.get("orientation") == "horizontal"
     outer["orientation"] = "horizontal" if horizontal else "vertical"
+    snap = scroll.get("snap") if isinstance(scroll, dict) else None
+    outer["scroll_snap"] = snap if snap in ("start", "center", "end") else "none"
     if isinstance(scroll, dict) and scroll.get("offset") is not None:
         offset = scroll["offset"]
         if isinstance(offset, bool) or not isinstance(offset, (int, float)) or offset != offset or offset < 0:

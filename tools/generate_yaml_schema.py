@@ -160,6 +160,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                    "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` "
                    "(`hue_rotate` is in degrees)."),
         "sticky": ({"type": "number"}, "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."),
+        "snap_align": ({"enum": ["none", "start", "center", "end"]}, "In a scroll view that has `snap`, this node is a place it settles on, with this edge of the node at the same edge of the view."),
         "scale": ({"type": "number", "minimum": 0}, "Draws the node and what is in it at this multiple of its size (1 is unchanged), about its centre."),
         "translate_x": ({"type": "number"}, "Draws the node this many pixels to the right of where it is laid out."),
         "translate_y": ({"type": "number"}, "Draws the node this many pixels lower than where it is laid out."),

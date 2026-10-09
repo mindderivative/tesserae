@@ -308,6 +308,7 @@ children:
   at once, and that is what's written back.
 - Its scrollbar is the theme's `outline`.
 - It scrolls vertically, or sideways with `orientation: horizontal` (its children then sit in a row, and `scroll_direction` is `right` or `left`).
+- `snap: start` (or `center`, `end`) makes it settle, when scrolling stops, on the nearest child whose style has a matching `snap_align`.
 
 For a long list built from data, put a `Repeater`'s container
 (`tesserae.Repeater`) inside a `ScrollView`.

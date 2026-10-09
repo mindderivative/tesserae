@@ -230,6 +230,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | Field | Values | What it does |
 | --- | --- | --- |
 | `position` | `relative` \| `absolute` | `absolute` takes it out of the flow and places it at `x` and `y`. |
+| `snap_align` | `none` \| `start` \| `center` \| `end` | In a scroll view that has `snap`, this node is a place it settles on, with this edge of the node at the same edge of the view. |
 | `sticky` | a number | In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. |
 | `x` | a number or `auto` | Where an `absolute` node sits from the left. |
 | `y` | a number or `auto` | Where an `absolute` node sits from the top. |

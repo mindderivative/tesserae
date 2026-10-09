@@ -1401,6 +1401,26 @@
           "description": "Draws the node and what is in it at this multiple of its size (1 is unchanged), about its centre. (Motion.)",
           "x-group": "Motion"
         },
+        "snap_align": {
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "start",
+                "center",
+                "end"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "In a scroll view that has `snap`, this node is a place it settles on, with this edge of the node at the same edge of the view. (Position.)",
+          "x-group": "Position"
+        },
         "spread": {
           "anyOf": [
             {

@@ -2845,6 +2845,23 @@
             ],
             "description": "Which way it scrolls. Horizontal lays its children out in a row and `scroll_direction` is 'right' or 'left'."
           },
+          "snap": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "start",
+                  "center",
+                  "end"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "When scrolling stops it settles on the nearest child that has a `snap_align` style, with that edge of the child at the same edge of the view."
+          },
           "scroll_offset": {
             "anyOf": [
               {
@@ -2919,6 +2936,7 @@
             "expects",
             "children",
             "orientation",
+            "snap",
             "scroll_offset",
             "at_top",
             "at_end",

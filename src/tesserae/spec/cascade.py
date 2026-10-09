@@ -57,7 +57,7 @@ STYLE_FIELDS = frozenset({
     "flex_wrap", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
     "position", "x", "y", "z_index", "clip_children",
     # effects: `tesserae.spec.effects`
-    "blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor",
+    "blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor", "snap_align",
     # motion: a transform, and which changes ease (`tesserae.spec.transition`)
     "scale", "translate_x", "translate_y", "rotation_deg", "transition",
     # where a DockPanel docks in its Dock (0.4.4)
@@ -74,7 +74,7 @@ STYLE_GROUPS: dict[str, tuple[str, ...]] = {
     "Alignment": ("align_content", "align_self", "spread", "align_wrapped"),
     "Grid": ("display", "grid_template_columns", "grid_template_rows", "grid_auto_columns", "grid_auto_rows",
              "grid_auto_flow", "grid_column", "grid_row", "row_gap", "column_gap", "align_tracks", "align_cells"),
-    "Position": ("position", "x", "y", "z_index", "sticky"),
+    "Position": ("position", "x", "y", "z_index", "sticky", "snap_align"),
     "Docking": ("zone",),
     "Motion": ("scale", "translate_x", "translate_y", "rotation_deg", "transition"),
     "Paint and effects": ("background", "foreground", "border_width", "border_color", "corner_radius", "opacity",

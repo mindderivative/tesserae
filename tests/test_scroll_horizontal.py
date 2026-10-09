@@ -117,3 +117,39 @@ children:
     assert view._built.outer["root.short"].get("layout_height") == 40.0
     assert view._built.outer["root.tall"].get("layout_height") == 100.0
     assert view._built.outer["root.wide"].get("layout_width") == 120.0
+
+
+def test_snap_and_snap_align_make_it_settle_on_a_child_and_a_wrong_alignment_is_refused(tmp_path):
+    (tmp_path / "Views").mkdir(exist_ok=True)
+
+    def view_with(snap, align):
+        (tmp_path / "Views" / "Main_View.yaml").write_text(f"""name: main
+widget: Container
+style: {{width: 300, height: 100, align_content: top_left}}
+children:
+  - widget: ScrollView
+    name: s
+    orientation: horizontal
+    snap: {snap}
+    style: {{width: 100, height: 60}}
+    children:
+      - {{widget: Container, name: a, style: {{width: 150, height: 40, snap_align: {align}}}}}
+      - {{widget: Container, name: b, style: {{width: 150, height: 40, snap_align: {align}}}}}
+""")
+        app = App(root=tmp_path)
+        app.bind(VM)
+        view = app.open_view("Main")
+        app.show("main")
+        for _ in range(4):
+            view.window.advance(16)
+        return view
+
+    view = view_with("start", "start")
+    strip = view._built.outer["root.s"]
+    assert strip.get("scroll_snap") == "start" and view.node("root.s.a").get("snap_align") == "start"
+    view.window.simulate("wheel", node=strip, delta_x=100.0, delta_y=0.0)
+    for _ in range(60):
+        view.window.advance(16)
+    assert strip.get("scroll_offset") == 150.0
+    with pytest.raises(Exception, match="snap_align"):
+        view_with("start", "middle")

@@ -22,7 +22,7 @@ __all__ = ["EFFECT_FIELDS", "cursor_value", "effect_props", "is_gradient", "make
 RGBA = tuple[int, int, int, int]
 
 #: The style keys `effect_props` reads.
-EFFECT_FIELDS = frozenset({"blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor"})
+EFFECT_FIELDS = frozenset({"blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor", "snap_align"})
 
 _FUNCTION = re.compile(r"^\s*(linear|radial|conic)-gradient\((.*)\)\s*$", re.DOTALL | re.IGNORECASE)
 _KINDS = {"linear": "linear", "radial": "radial", "conic": "sweep", "sweep": "sweep"}
@@ -239,6 +239,18 @@ def _non_negative(value: Any, name: str, where: str) -> float:
     return number
 
 
+SNAP_ALIGNS = ("none", "start", "center", "end")
+
+
+def _snap_align(value: Any, where: str) -> Any:
+    """`snap_align` as the engine takes it: `start`, `center` or `end`, else `None` (the node is no snap point)."""
+    if value is None or value == "none":
+        return None
+    if value not in SNAP_ALIGNS:
+        raise ValueError(f"{where}.snap_align is one of {', '.join(SNAP_ALIGNS)}, got {value!r}")
+    return value
+
+
 def effect_props(style: dict[str, Any], where: str, *, cursor: bool = True) -> dict[str, Any]:
     """The node properties for the effects `style` gives, and the resting value for each it doesn't (so a patch
     clears what the style no longer asks for). `cursor=False` leaves `cursor` out (a kind that sets its own)."""
@@ -248,6 +260,7 @@ def effect_props(style: dict[str, Any], where: str, *, cursor: bool = True) -> d
         "blend_mode": str(style.get("blend_mode", "normal")),
         "shader": _filter(style.get("filter"), where),
         "sticky": None if style.get("sticky") is None else float(style["sticky"]),
+        "snap_align": _snap_align(style.get("snap_align"), where),
     }
     if cursor:
         props["cursor"] = cursor_value(style["cursor"], where) if style.get("cursor") is not None else None

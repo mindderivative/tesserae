@@ -1,0 +1,4 @@
+# The look of Carousel: the item captions in white over a darkened band.
+styles:
+  - {widget: Carousel, part: title, style: {foreground: "#FFFFFF"}}
+  - {widget: Carousel, part: supporting, style: {foreground: "#FFFFFFCC"}}
