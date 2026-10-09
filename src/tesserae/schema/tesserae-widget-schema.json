@@ -2258,17 +2258,6 @@
             ],
             "description": "What the user has typed."
           },
-          "placeholder": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "string",
-                "pattern": "\\{\\{"
-              }
-            ]
-          },
           "typography_role": {
             "anyOf": [
               {
@@ -2303,28 +2292,6 @@
             ]
           },
           "font_weight": {},
-          "multiline": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string",
-                "pattern": "\\{\\{"
-              }
-            ]
-          },
-          "obscured": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "string",
-                "pattern": "\\{\\{"
-              }
-            ]
-          },
           "disabled": {
             "anyOf": [
               {

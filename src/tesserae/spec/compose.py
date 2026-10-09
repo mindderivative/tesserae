@@ -24,9 +24,9 @@ its `name` or `<slot>[i]` (`content[i]` for the default slot).
 
 from __future__ import annotations
 
-from typing import Any, Callable, Iterator, Mapping, Optional
+from typing import Any, Callable, Iterable, Iterator, Mapping, Optional
 
-from tesserae.expr import BUILTIN_FUNCTIONS, Expr
+from tesserae.expr import BUILTIN_FUNCTIONS, Expr, Template
 from tesserae.reactive import Computed, Effect, Signal, untrack
 from tesserae.spec.nodes import Handler, LoadError, Node, ViewDoc
 from tesserae.spec.widgets import PropertyError, WidgetDecl
@@ -46,11 +46,14 @@ class Scope:
     ViewModel's public attributes. A `Signal` or `Computed` in a frame makes the name reactive."""
 
     def __init__(self, parent: Optional["Scope"] = None, values: Optional[Mapping[str, Any]] = None, *, root: Any = None,
-                 readonly: bool = False) -> None:
+                 readonly: bool = False, writable: Iterable[str] = (), actions: Optional[Callable[[str], Optional[Callable[..., Any]]]] = None) -> None:
         self.parent = parent
         self.values = dict(values or {})
-        self.readonly = readonly  # loop variables and params are read-only; state is not
+        self.readonly = readonly  # loop variables and params are read-only; state is not (a model param holds the caller's Signal)
+        self.writable = set(writable)
         self.root = root if root is not None or parent is None else parent.root
+        #: built-in actions (`window.close`, `navigate.back`, `navigate_to(...)`): a function from a dotted name to a callable or None
+        self.actions = actions if actions is not None or parent is None else parent.actions
 
     def _frame(self, name: str) -> Optional["Scope"]:
         scope: Optional[Scope] = self
@@ -91,7 +94,7 @@ class Scope:
     def assign(self, name: str, value: Any) -> None:
         frame = self._frame(name)
         if frame is not None:
-            if frame.readonly:
+            if frame.readonly and name not in frame.writable:
                 raise KeyError(name)
             target = frame.values[name]
         elif self.root is not None and not name.startswith("_") and hasattr(self.root, name):
@@ -103,6 +106,10 @@ class Scope:
         target.set(value)
 
     def _action(self, path: str) -> Optional[Callable[..., Any]]:
+        if self.actions is not None:
+            built_in = self.actions(path)
+            if built_in is not None:
+                return built_in
         if self.root is None:
             return None
         target: Any = self.root
@@ -111,6 +118,12 @@ class Scope:
                 return None
             target = getattr(target, part)
         return target if callable(target) and not isinstance(target, (Signal, Computed)) else None
+
+    def is_writable(self, name: str) -> bool:
+        frame = self._frame(name)
+        if frame is not None:
+            return not frame.readonly or name in frame.writable
+        return self.root is not None and not name.startswith("_") and isinstance(getattr(self.root, name, None), Signal)
 
     def is_action(self, path: str) -> bool:
         return self._action(path) is not None
@@ -142,6 +155,8 @@ class Instance:
         self.window_region: Optional[str] = node.window_region
         self.route: Optional[str] = node.route
         self.state: dict[str, Signal] = {}
+        #: model properties given a bare writable reference: property -> (name, scope); what the user's edit is written back to
+        self.models: dict[str, tuple[str, Scope]] = {}
         self.parent: Optional["Instance"] = None
         self.children: list["Instance"] = []
         self.disposed = False
@@ -429,9 +444,11 @@ class Composer:
     """Composes views. `views` maps a view name to its parsed `ViewDoc` (or is a function that does); `viewmodel` is the object the views'
     names resolve against; `previous` is an earlier `Composition` whose state is carried over."""
 
-    def __init__(self, views: Any = None, viewmodel: Any = None, *, previous: Optional[Composition] = None) -> None:
+    def __init__(self, views: Any = None, viewmodel: Any = None, *, previous: Optional[Composition] = None,
+                 actions: Optional[Callable[[str], Optional[Callable[..., Any]]]] = None) -> None:
         self._views = views if views is not None else {}
         self.viewmodel = viewmodel
+        self.actions = actions
         self.by_id: dict[str, Instance] = {}
         self.states: dict[tuple[str, str, str], Signal] = {}
         self._previous = previous._composer.states if previous is not None else {}
@@ -441,7 +458,7 @@ class Composer:
     def compose(self, doc: ViewDoc) -> Composition:
         ctx = _Ctx(doc, 0, (doc.name or doc.file,))
         self._check_root(doc.root, ctx)
-        scope = Scope(None, {}, root=self.viewmodel)
+        scope = Scope(None, {}, root=self.viewmodel, actions=self.actions)
         return Composition(self._instance(doc.root, "root", scope, ctx, forced_id="root"), self)
 
     # errors and lookup
@@ -568,6 +585,9 @@ class Composer:
             nodes = [value] if isinstance(value, Node) else value if isinstance(value, list) and value and all(isinstance(v, Node) for v in value) else None
             if nodes is None:
                 inst.props[name] = self._bind(value, inner, inst, self._coercer(ctx, node, node.decl, name))
+                bare = self._model_ref(node.decl, name, value, inner)
+                if bare is not None:
+                    inst.models[name] = (bare, inner)
                 continue
             inst.parts[name] = [self._instance(sub, name if isinstance(value, Node) else f"{name}[{i}]", inner, ctx, parent_id=iid)
                                 for i, sub in enumerate(nodes)]
@@ -577,6 +597,19 @@ class Composer:
             inst._regions.append(self._region(child, f"children[{index}]", iid, inner, ctx, inst._refresh))
         inst._refresh()
         return inst
+
+    def _model_ref(self, decl: Optional[WidgetDecl], name: str, value: Any, scope: Scope) -> Optional[str]:
+        """The name a `model` property is two-way with: it is given one bare reference to a writable Signal (spec 9.3)."""
+        prop = decl.properties.get(name) if decl else None
+        if prop is None or not prop.model or not isinstance(value, Template) or not value.single:
+            return None
+        bare = value.parts[0].bare_name()
+        if bare is None:
+            return None
+        try:
+            return bare if isinstance(scope.lookup(bare), Signal) and scope.is_writable(bare) else None
+        except KeyError:
+            return None
 
     # view calls
 
@@ -595,10 +628,16 @@ class Composer:
             raise self._fail(ctx, node.prop_at.get(unknown[0], node.at), f"{node.widget}: no parameter '{unknown[0]}'",
                              f"parameters: {', '.join(decl.properties) or 'none'}")
         values: dict[str, Any] = {}
+        models: set[str] = set()
         for pname, prop in decl.properties.items():
             if pname in RESERVED:
                 raise self._fail(ctx, node.at, f"'{pname}' is a reserved name and cannot be a parameter of {node.widget}")
             if pname in node.props:
+                shared = self._model_ref(decl, pname, node.props[pname], call_scope)
+                if shared is not None:  # a model param given a bare Signal: the callee gets the Signal, so its edits write back
+                    values[pname] = call_scope.lookup(shared)
+                    models.add(pname)
+                    continue
                 values[pname] = self._bind(node.props[pname], call_scope, holder, self._coercer(ctx, node, decl, pname))
             elif prop.required:
                 raise self._fail(ctx, node.at, f"{node.widget}: '{pname}' is required")
@@ -617,7 +656,7 @@ class Composer:
 
         sub = _Ctx(doc, ctx.depth + 1, (*ctx.chain, node.widget), content, call_scope, ctx, iid)
         self._check_root(doc.root, sub)
-        inst = self._instance(doc.root, "root", Scope(None, values, root=self.viewmodel, readonly=True), sub, forced_id=iid)
+        inst = self._instance(doc.root, "root", Scope(None, values, root=self.viewmodel, readonly=True, writable=models, actions=self.actions), sub, forced_id=iid)
         # the call's own keys lie over the callee's root; a handler written at the call runs in the caller's scope
         for name, value in node.style.items():
             inst.style[name] = self._bind(value, call_scope, inst)

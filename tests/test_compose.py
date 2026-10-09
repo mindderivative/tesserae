@@ -406,3 +406,17 @@ def test_the_composer_checks_a_calls_properties_against_the_view_it_finds():
     missing = parse_view("widget: Container\nchildren:\n  - {widget: Btn}", "Main_View.yaml", resolver={"Btn": loose}.get)
     with pytest.raises(LoadError, match="Btn: 'label' is required"):
         Composer({"Btn": strict}, VM()).compose(missing)
+
+
+def test_built_in_actions_come_from_the_composers_actions_and_the_viewmodel_cannot_shadow_them():
+    called = []
+    actions = {"window.close": lambda: called.append("close"), "navigate_to": lambda screen: called.append(screen)}.get
+
+    class Shadow(VM):
+        window = type("W", (), {"close": staticmethod(lambda: called.append("viewmodel"))})()
+
+    doc = parse_view("widget: Rect\nhandlers:\n  on_click: window.close\n  on_hover_enter: 'navigate_to(\"Settings\")'\n", "Main_View.yaml")
+    comp = Composer({}, Shadow(), actions=actions).compose(doc)
+    comp.root.fire("on_click")
+    comp.root.fire("on_hover_enter")
+    assert called == ["close", "Settings"]

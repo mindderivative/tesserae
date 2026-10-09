@@ -1,7 +1,7 @@
 # The Tesserae view language (0.5.0)
 
 Phase 1 of [#209](https://github.com/mindderivative/tesserae/issues/209). This is the spec the later phases build and test against.
-**Status: draft for the user's review.** Implemented so far: the expression language (phase 2), the node model (phase 3) and composition (phase 4).
+**Status: draft for the user's review.** Implemented so far: the expression language (phase 2), the node model (phase 3) and composition (phase 4) and ViewModel binding with a renderer (phase 5).
 
 Conventions: **Decided** marks what the user decided (2026-10-08); **Proposed** marks what this document adds and the user may change;
 **Reserved** marks a place the language may grow without breaking what is written here. "Old" means 0.4.x.
@@ -540,6 +540,16 @@ removed in the release after, with clear messages, as the 0.4.5 and 0.4.6 patter
 - **YAML trap**: `name: no` or `name: yes` reads as a boolean; the error says to quote it.
 - A reactive `for:` over a list that is **replaced** is reconciled; a list changed **in place** is not seen (Signals notify on assignment). The ViewModel replaces lists, as `Signal.set` does everywhere.
 
+**Findings of phase 5** (binding and rendering):
+
+- **Rendering reuses the builder.** `spec/lower.py` writes a composition as the 0.4.x node mappings at the values the instances hold now; `ComposedView` (a `View`) builds that, then an `Effect` lowers again whenever a value any property reads changes and `View.reconcile` patches the live nodes by id. Structure changes (`for:`, `if:`) re-run the effect so it follows the new instances. So the cascade, controls, interaction and themes are the tested code; only what feeds them is new.
+- **`views` is two things.** On the class it lists the names a ViewModel serves; on an instance `self.views` is the mapping from name to `ViewHandle` (the base class replaces it when the first view opens). `declared_views(cls)` reads the class form.
+- **`ViewModel(view=None)`**: the 0.4.x `ViewModel(view)` still attaches; with no argument the ViewModel is attached by `app.bind`. `on_attached(handle)` and `on_detached(handle)` are called per view.
+- **Swapping.** `self.show("data_phone")` of section 11 cannot say what it replaces, and both views are visible by default; so it is `self.show(name, instead_of=other_or_list)`, and a handle has `.show()` and `.hide()`. **Proposed**: declared groups remain reserved.
+- **Two-way.** A `model` property given a bare reference to a writable Signal or state writes the user's edit back. A model *param* given a bare Signal passes the Signal itself to the callee, so a view built around a `Checkbox` can be two-way with its caller's Signal. A loop variable or a computed expression is one-way.
+- **Contract.** `check_view(doc, viewmodel)` reports, as `file:line:column`, every name a view reads and every action it names that the ViewModel lacks, and each `expects:` entry (`int float str bool list dict any handler`) that is missing or of another type. `App.check()` runs it for the opened views and warns about a ViewModel that serves a name no view has.
+- **Not yet** (phase 7 or the component pass): discovering a `*_ViewModel.py` by its `views` in `app.load`, `app.unbind`, hot reload of a new-syntax file, `style:` as a file name in a composed view, `on_key` handlers, an Image `frame`, a ScrollView `scroll_offset`. A property the renderer cannot draw is an error naming it. The TextField declaration lost `placeholder`, `multiline` and `obscured`, which the builder never supported.
+
 `tesserae migrate-yaml [path]` rewrites a project in place (a report of what it could not translate) and is tested against all 45 views, the
 79 fragments, the examples and the tutorials in the repository.
 
@@ -584,7 +594,7 @@ this list fixes only the names the language and the registry are designed around
 | 2 expression language | `src/tesserae/expr.py` (parse, check, evaluate, classify); `binding.py` is now a facade over it | the section 8 grammar table row by row; the sandbox corpus and fuzzer (8.6); every limit; static and reactive classification; Signals as values; error positions |
 | 3 node model | `src/tesserae/spec/widgets.py` (registry, `Property`, `@widget`, `decl_from_params`, JSON schema), `spec/builtin_widgets.py` (the 25 built-in declarations), `spec/nodes.py` (`parse_view`: nodes, ids, positions, `LoadError`), `spec/translate.py` (old to new), `tools/generate_widget_schema.py` | one test per key in section 2; unknown-property errors with suggestions; the translator over every file in the repository (128 of 131 load, 3 known gaps) |
 | 4 composition | `src/tesserae/spec/compose.py` (`Composer`, `Composition`, `Instance`, `Scope`: params, the caller's scope, `Slot`, `for`, `if`, `state`, ids, disposal) | scope rules; slot placement and errors; reactive `for:` reconciliation (add, remove, reorder, update in place, 10 000 rows); state per row and across a recomposition; the call's keys over the callee's root; every subscription released on dispose; mutation-checked |
-| 5 binding | `viewmodel.py`, `app.bind`, the `views` mapping, the contract checker | the pie-and-list case from section 11 as a test (two views, one instance, one Signal); swap; per-instance factory; unbound views |
+| 5 binding | `src/tesserae/viewmodel.py` (`Bindings`, `ViewHandle`, `open_view`, `check_view`), `spec/lower.py` (instances to the builder's spec), `composed.py` (`ComposedView`, `open_composed`, built-in actions), `App.bind`/`open_view`/`check`, `ViewModel(view=None)` with `views`, `show`, `on_attached`, `on_detached` | the pie-and-list case (two views, one instance, one Signal) headless and on screen; the three ways to bind; unbound views; swap; the contract and `expects:`; lowering of every widget shape; handlers, two-way edits, `for:` and `if:` reaching real nodes; mutation-checked |
 | 6 style | `spec/cascade.py` (rules by widget, variant, part, state), per-widget extras | specificity table; state selectors from `Interaction`; the inline-versus-rule fix |
 | 7 migration | `tesserae/migrate.py`, the CLI command, docs, tutorials, built-ins in the new language | the translator on the whole repository; round trip (translated files load and build the same tree as before) |
 

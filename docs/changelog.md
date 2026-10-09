@@ -32,6 +32,15 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `Signal` that survives a recomposition for the same ids. Disposing a composition releases every subscription. Nothing builds `tre` nodes from it
   yet (phase 5).
 
+- **ViewModel binding and a renderer** (phase 5). A `ViewModel` lists the named views it serves in `views`; one instance serves every view with
+  one of those names, wherever they are, so a pie chart and a list of the same rows follow one `Signal`. `app.bind(DataViewModel)` makes it once,
+  when its first view opens; `app.bind(instance)` uses yours; `app.bind(factory=DataViewModel)` makes one per view instance; a view without a
+  `name:` is not bound. `app.open_view("Main")` composes a view written in the new syntax and shows it with the existing builder, keeping it in
+  step with its Signals (`for:` and `if:` add and remove real nodes, handlers run in the scope they were written in, a `model` property given a
+  bare reference writes the user's edit back). `ViewModel.views[name]` is a handle (`.node`, `.state`, `.show`, `.hide`), `self.show(name,
+  instead_of=...)` swaps views, and `app.check()` / `check_view` compare every name, action and `expects:` entry of a view with its ViewModel
+  without a window. `ViewModel(view)` still works.
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

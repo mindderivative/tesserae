@@ -314,6 +314,26 @@ class ViewModel:
     app = _FromApp()
     state = _FromApp()
 
-    def __init__(self, view: Any) -> None:
+    #: The names of the views this ViewModel serves: a list, or a string for one. At run time the instance's `self.views` is the
+    #: mapping from each open view's name to its handle (`.node(name)`, `.state(name)`, `.show()`, `.hide()`).
+    views: Any = ()
+
+    def __init__(self, view: Any = None) -> None:
+        """`ViewModel(view)` is the 0.4.x form: it attaches to `view`. With no argument the ViewModel serves the named views its
+        `views` lists, which `app.bind` attaches (spec section 11)."""
         self._view = view
-        view._attach(self)
+        if view is not None:
+            view._attach(self)
+
+    def on_attached(self, handle: Any) -> None:
+        """Called when one of the views this ViewModel serves is opened."""
+
+    def on_detached(self, handle: Any) -> None:
+        """Called when one of the views this ViewModel serves is closed."""
+
+    def show(self, name: str, *, instead_of: Any = None) -> None:
+        """Shows the open view `name`, hiding the views named in `instead_of` (a name or a list of them)."""
+        handles = self.views
+        handles[name].show()
+        for other in ([instead_of] if isinstance(instead_of, str) else list(instead_of or ())):
+            handles[other].hide()

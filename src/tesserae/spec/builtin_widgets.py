@@ -34,9 +34,8 @@ declare("Link", {**_TEXT, "text": P("str", default="", doc="The link's text, whi
         doc="Text that can be activated.")
 declare("TextField", {
     "text": P("str", default="", model=True, doc="What the user has typed."),
-    "placeholder": P("str"), "typography_role": P("str"), "font_family": P("str"), "font_size": P("float"), "font_weight": P("any"),
-    "multiline": P("bool"), "obscured": P("bool"), "disabled": P("bool"),
-}, doc="A single- or multi-line text input.")
+    "typography_role": P("str"), "font_family": P("str"), "font_size": P("float"), "font_weight": P("any"), "disabled": P("bool"),
+}, doc="A single-line text input.")
 declare("Image", {
     "src": P("str", doc="A path relative to the file."),
     "fit": P("str", default="cover", doc="How the picture fills its box: cover, contain, fill ..."),

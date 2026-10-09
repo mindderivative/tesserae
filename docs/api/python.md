@@ -72,9 +72,11 @@ class App(
 `width`/`height`/`title` describe the one real `Window` this `App` opens the first time `show()` is called -- every registered view is shown inside that same window, at whatever size it already is, not its own independent size (matching `Window.show_view`'s own real, stated scope: only the *currently* active view's `width`/ `height` are kept in sync with the window).
 
 - `back() -> bool`: Shows the history's previous entry, calling its ViewModel's `on_navigated` with that entry's params.
+- `bind(target: Any = None, *, factory: Any = None, views: Any = None) -> None`: Serves named views with a ViewModel: `bind(DataViewModel)` makes the one instance when its first view opens, `bind(instance)` uses yours, `bind(factory=DataViewModel)` makes one per view instance.
 - `blur_behind` *(property)*: Whether the compositor blurs what is behind a see-through window (Wayland with KDE, macOS; ignored elsewhere).
 - `borderless` *(property)*: Whether the OS window has no title bar and borders of its own: the app draws its own, with a `TitleBar` (on macOS the title bar stays, transparent, with the traffic lights).
 - `build_view(view_path: str | Path, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> Any`: Builds a view with this app's theme and stylesheet, without registering it -- for a screen given to `register()`, e.g. one whose `ViewModel` needs the `app` itself.
+- `check() -> list[str]`: Problems between the views opened with `open_view` and their ViewModels (names, actions and `expects:`), and ViewModels that serve a view none of them has.
 - `click_through` *(property)*: Whether the whole window ignores the pointer, so clicks reach what is behind it.
 - `close() -> None`: Closes the window as the user's close would: `close_requested` fires first, so an app's "save changes?" check still runs and can cancel it.
 - `current` *(property)*: The name last passed to `show()`, or `None` before the first real call -- lets a registered handler ask "which screen is this, anyway" without the app keeping its own separate bookkeeping.
@@ -97,6 +99,7 @@ class App(
 - `navigate_to(route: str) -> Window`: Navigates to the screen the first matching route names, with the params it reads from `route` (a deep link, say `"notes/42"`).
 - `of(view: Any) -> 'App | None'`: The live app whose window `view` (a view, a component, or a window) is on, or `None`: for a ViewModel's constructor, before `super().__init__(view)` gives it `self.app`.
 - `on_file_drop(handler: Any) -> None`: Calls `handler(event)` when files are dropped anywhere on the window (`event.paths`); `None` stops it.
+- `open_view(view: str | Path, name: str | None = None) -> Any`: Opens a view written with `widget:` nodes against the ViewModel that serves its name, and registers it under `name` (default: its root `name:`, else its file's name) for `show(name)`.
 - `platform` *(property)*: `"windows"`, `"macos"`, `"wayland"` or `"x11"`.
 - `present_mode` *(property)*: How frames are paced: `"vsync"` (one a display refresh, the default: an animating window uses a few percent of a core) or `"low_latency"` (the newest frame at once, and a whole core while something animates).
 - `profile_nodes` *(property)*: Whether each node's drawing time is measured, so `frame_stats()["profile"]` says where it went.
@@ -173,10 +176,14 @@ Also has everything `_Notifiable` has.
 ### `ViewModel`
 
 ```python
-class ViewModel(view: Any) -> None
+class ViewModel(view: Any = None) -> None
 ```
 
 The object a view's bindings and handlers resolve against. Constructing one attaches it to `view`: every declared handler is wired and every binding evaluated and subscribed.
+
+- `on_attached(handle: Any) -> None`: Called when one of the views this ViewModel serves is opened.
+- `on_detached(handle: Any) -> None`: Called when one of the views this ViewModel serves is closed.
+- `show(name: str, *, instead_of: Any = None) -> None`: Shows the open view `name`, hiding the views named in `instead_of` (a name or a list of them).
 
 ### `batch`
 

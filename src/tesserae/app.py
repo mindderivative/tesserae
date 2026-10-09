@@ -40,6 +40,7 @@ from tesserae import tokens
 from tesserae.reactive import Computed, Effect, Signal, batch
 from tesserae.spec import ViewWatcher, load_stylesheet, load_theme
 from tesserae.view import View as TesseraeView
+from tesserae.viewmodel import Bindings, check_view
 from tesserae.spec.watch import ComponentWatcher, FileWatcher
 
 #: How often `run(keepalive=True)` ticks, in seconds: about 50 times a second,
@@ -383,6 +384,10 @@ class App:
         #: While `run(hot_reload=True)` runs: the loop's handle, every
         #: watcher started, and each component file's watcher (M51).
         self._hot_handle: Any = None
+        #: The ViewModels that serve named views (`bind`) and the views opened against them (`open_view`), by name (0.5.0).
+        self.bindings = Bindings()
+        self._opened: dict[str, Any] = {}
+        self._view_docs: dict[str, Any] = {}
         self._watchers: list[Any] = []
         self._component_watchers: dict[Path, Any] = {}
         #: Every component `tesserae.instantiate` made on this window, in any
@@ -806,6 +811,60 @@ class App:
             raise
         self._built.append(built)
         return built.view
+
+    def bind(self, target: Any = None, *, factory: Any = None, views: Any = None) -> None:
+        """Serves named views with a ViewModel: `bind(DataViewModel)` makes the one instance when its first view opens,
+        `bind(instance)` uses yours, `bind(factory=DataViewModel)` makes one per view instance. The ViewModel's `views` lists the
+        view names it serves; a view is named by its root `name:`."""
+        self.bindings.bind(target, factory=factory, views=views)
+
+    def open_view(self, view: str | Path, name: str | None = None) -> Any:
+        """Opens a view written with `widget:` nodes against the ViewModel that serves its name, and registers it under
+        `name` (default: its root `name:`, else its file's name) for `show(name)`. `view` is a path or a name found in the project;
+        the views it calls are found in the project too. Returns the `ComposedView`; its `.handle` is what the ViewModel holds."""
+        from tesserae.composed import open_composed
+        from tesserae.spec.nodes import parse_view
+        from tesserae.spec.widgets import WidgetDecl, decl_from_params
+
+        import yaml
+
+        path = Path(self._named("view", view))
+        index = self.project.index("view")
+
+        def decl(called: str) -> WidgetDecl | None:
+            found = index.get(called)
+            if found is None:
+                return None
+            params = (yaml.safe_load(found.read_text(encoding="utf-8")) or {}).get("params")
+            return decl_from_params(called, params) if params is not None else WidgetDecl(called, view=True, container=True)
+
+        def callee(called: str) -> Any:
+            found = index.get(called)
+            if found is None:
+                return None
+            if found not in self._view_docs:
+                self._view_docs[found] = parse_view(found.read_text(encoding="utf-8"), str(found), resolver=decl, view_name=called)
+            return self._view_docs[found]
+
+        doc = parse_view(path.read_text(encoding="utf-8"), str(path), resolver=decl, view_name=path.name.removesuffix("_View.yaml"))
+        kwargs = self._view_theme()
+        if self._stylesheet_spec is not None:
+            kwargs["stylesheet_spec"] = self._stylesheet_spec
+        opened = open_composed(doc, self.bindings, callee, base_dir=path.parent, window=self._window, **kwargs)
+        key = name or doc.name or path.name.removesuffix("_View.yaml")
+        self.register(key, opened, opened.handle.viewmodel)
+        self._built.append(_Built(opened))
+        self._opened[key] = opened
+        return opened
+
+    def check(self) -> list[str]:
+        """Problems between the views opened with `open_view` and their ViewModels (names, actions and `expects:`), and ViewModels that
+        serve a view none of them has. An empty list is a clean bill."""
+        problems: list[str] = []
+        for opened in self._opened.values():
+            problems.extend(check_view(opened.handle.doc, opened.handle.viewmodel))
+        problems.extend(self.bindings.unserved(o.handle.name for o in self._opened.values() if o.handle.name))
+        return problems
 
     def register(self, name: str, view: Any, viewmodel: Any) -> None:
         """Registers `view` (already loaded) and its already-`_attach`ed
