@@ -167,3 +167,59 @@ def test_actions_stack_when_they_do_not_fit_on_one_row(tmp_path):
     show(view, vm)
     a, b = node(view, "panel.actions.action[a]"), node(view, "panel.actions.action[b]")
     assert a.get("layout_y") < b.get("layout_y") and a.get("layout_x") >= node(view, "panel").get("layout_x")
+
+
+# -- the full-screen form (#151, step 83) --------------------------------------------------------------------------------------
+
+
+def test_the_full_screen_form_fills_the_window_on_surface_with_square_corners(tmp_path):
+    view, vm = opened(tmp_path, "fullscreen: true")
+    show(view, vm)
+    panel = node(view, "panel")
+    win = view.window.root
+    assert (panel.get("layout_width"), panel.get("layout_height")) == (win.get("layout_width"), win.get("layout_height"))
+    assert panel.get("fill") == role(view, "surface") and panel.get("corner_radius") == 0.0 and not panel.get("shadows")
+
+
+def test_the_full_screen_header_has_a_close_button_the_headline_and_the_actions_in_a_row(tmp_path):
+    view, vm = opened(tmp_path, "fullscreen: true", actions="[{label: Save, value: save, variant: filled}]")
+    show(view, vm)
+    close, title, save = node(view, "panel.bar.close"), node(view, "panel.bar.bar_title"), node(view, "panel.bar.bar_action[save]")
+    assert close.get("label") == "Close" and view._built.specs["root.d.panel.bar.bar_title"]["text"]["content"] == "Discard draft?"
+    assert close.get("layout_x") < title.get("layout_x") < save.get("layout_x")
+    assert abs(save.get("layout_y") + save.get("layout_height") / 2 - node(view, "panel.bar").get("layout_y") - 28) < 1
+    assert "root.d.panel.actions" not in view._built.specs and "root.d.panel.headline" not in view._built.specs
+
+
+def test_the_full_screen_close_button_closes_without_a_result_and_an_action_reports(tmp_path):
+    view, vm = opened(tmp_path, "fullscreen: true", actions="[{label: Save, value: save}]")
+    show(view, vm)
+    view.window.simulate("click", node=node(view, "panel.bar.close"))
+    for _ in range(4):
+        view.window.advance(16)
+    assert vm.shown.get() is False and vm.result.get() == ""
+    show(view, vm)
+    view.window.simulate("click", node=node(view, "panel.bar.bar_action[save]"))
+    for _ in range(4):
+        view.window.advance(16)
+    assert vm.shown.get() is False and vm.result.get() == "save"
+
+
+def test_the_full_screen_content_takes_the_rest_and_scrolls(tmp_path):
+    kids = "".join(f"    - {{widget: Text, name: t{i}, text: line {i}, typography_role: body_large, style: {{foreground: on_surface}}}}\n" for i in range(60))
+    view, vm = opened(tmp_path, "fullscreen: true", children="    children:\n" + kids.replace("    - ", "      - "))
+    show(view, vm)
+    content, bar = view._built.outer["root.d.panel.content"], node(view, "panel.bar")  # the viewport; its own node holds the whole content
+    assert content.get("layout_y") >= bar.get("layout_y") + 56 and content.get("layout_y") + content.get("layout_height") <= view.window.root.get("layout_height") + 0.5
+    assert content.get("layout_height") > 200 and node(view, "panel.content").get("layout_height") > content.get("layout_height")  # it scrolls
+
+
+def test_a_line_shows_under_the_full_screen_header_once_the_content_has_scrolled(tmp_path):
+    kids = "".join(f"      - {{widget: Text, name: t{i}, text: line {i}, typography_role: body_large, style: {{foreground: on_surface}}}}\n" for i in range(60))
+    view, vm = opened(tmp_path, "fullscreen: true", children="    children:\n" + kids)
+    show(view, vm)
+    assert "root.d.panel.bar_line" not in view._built.specs
+    view.window.simulate("wheel", node=view._built.outer["root.d.panel.content"], delta_x=0.0, delta_y=60.0)
+    for _ in range(4):
+        view.window.advance(16)
+    assert "root.d.panel.bar_line" in view._built.specs and "root.d.panel.line" not in view._built.specs

@@ -20,10 +20,13 @@ corners, 24 of padding) with an optional icon, a headline, supporting text, your
 | `result` | a value; two-way | the `value` of the action pressed; pressing one also closes the dialog |
 | `dismissible` | true or false | off, only an action closes it |
 | `width`, `max_height` | numbers | the panel's width, held between 280 and 560 (default 312); the content scrolls beyond `max_height` |
+| `fullscreen` | true or false | the full-screen form: the panel fills the window on `surface`, with a close button, the headline and the actions in a 56 pixel bar along the top, and the content scrolling under it |
 
 Children are the content, after the supporting text. When the content scrolls, a line shows above the actions. Actions stack when they do not fit
-one row. A screen reader hears a `dialog` named by the headline (tre has no `alertdialog` role). Not built: the full-screen dialog for small
-windows, focusing a form dialog's first field.
+one row. A screen reader hears a `dialog` named by the headline (tre has no `alertdialog` role). In the full-screen form the close button writes
+`false` to `open` with no result, the actions sit in the bar instead of under the content (MD3 has one confirming action there), and a line shows under
+the bar once the content has scrolled; use it where the window is `compact` (`fullscreen: "{{ app.width_class == 'compact' }}"`). Not built: focusing a
+form dialog's first field.
 
 `widget: Dialog` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 

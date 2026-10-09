@@ -1,4 +1,4 @@
-# The Material 3 basic dialog: a modal panel over a scrim, with an optional icon, a headline, supporting text or your own content, and up to a few text
+# The Material 3 dialog, basic or (`fullscreen: true`) full-screen: a modal panel over a scrim, with an optional icon, a headline, supporting text or your own content, and up to a few text
 # button actions. `open` is two-way (Escape and a press on the scrim close it, unless `dismissible: false`); pressing an action closes it and writes the
 # action's value to `result`, so the caller can tell which was chosen. A screen reader hears a `dialog` named by the headline (tre has no `alertdialog` role, so an alert is a `dialog` with
 # `dismissible: false`). The content scrolls when it is taller than the dialog, and a line shows above the actions then. Children are the content:
@@ -13,6 +13,7 @@ params:
   dismissible: {type: bool, default: true, doc: "Escape and a press on the scrim close it. Off, it is an alert dialog: only an action closes it."}
   width: {type: float, default: 312, doc: "From 280 to 560 pixels."}
   max_height: {type: float, default: 480, doc: "The content scrolls beyond this."}
+  fullscreen: {type: bool, default: false, doc: "The full-screen form: it fills the window, with a close button, the headline and the actions along the top, and the content scrolling under them."}
 widget: Overlay
 open: "{{ open }}"
 modal: true
@@ -24,22 +25,50 @@ children:
     a11y: {role: dialog, label: "{{ headline }}"}
     style:
       flex_direction: vertical
-      width: "{{ min(560, max(280, width)) }}"
+      width: "{{ '100%' if fullscreen else min(560, max(280, width)) }}"
+      height: "{{ '100%' if fullscreen else 'auto' }}"
     children:
+      - widget: Container
+        name: bar
+        if: fullscreen
+        style: {flex_direction: horizontal, align_content: center, width: 100%, height: 56}
+        children:
+          - widget: IconButton
+            name: close
+            icon: close
+            label: Close
+            handlers: {on_click: "open = False"}
+          - widget: Text
+            name: bar_title
+            text: "{{ headline }}"
+            typography_role: title_large
+            heading: 2
+            style: {flex: expand_horizontal}
+          - widget: Button
+            for: a in actions
+            key: a['value']
+            name: bar_action
+            variant: "{{ a.get('variant', 'text') }}"
+            label: "{{ a['label'] }}"
+            handlers:
+              on_click: "result = a['value']; open = False"
+      - widget: Divider
+        name: bar_line
+        if: "fullscreen and not top"
       - widget: Icon
         name: icon
-        if: "icon != ''"
+        if: "icon != '' and not fullscreen"
         icon: "{{ icon }}"
       - widget: Text
         name: headline
-        if: "headline != ''"
+        if: "headline != '' and not fullscreen"
         text: "{{ headline }}"
         typography_role: headline_small
         heading: 2
       - widget: ScrollView
         name: content
         at_top: "{{ top }}"
-        style: {flex_direction: vertical, max_height: "{{ max_height }}"}
+        style: {flex_direction: vertical, max_height: "{{ None if fullscreen else max_height }}", flex: "{{ 'fill' if fullscreen else 'none' }}"}
         children:
           - widget: Text
             name: body
@@ -49,10 +78,10 @@ children:
           - widget: Slot
       - widget: Divider
         name: line
-        if: "not top"
+        if: "not top and not fullscreen"
       - widget: Container
         name: actions
-        if: "len(actions) > 0"
+        if: "len(actions) > 0 and not fullscreen"
         style:
           flex_direction: "{{ 'vertical' if sum([len(a['label']) * 8 + 24 for a in actions]) + 8 * (len(actions) - 1) > width - 48 else 'horizontal' }}"
           align_content: bottom_right
