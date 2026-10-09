@@ -13,6 +13,7 @@ params:
   disabled: {type: bool, default: false, doc: "Dimmed, not focusable, and it does not respond."}
   toggle: {type: bool, default: false, doc: "A press flips `selected`."}
   selected: {type: bool, default: false, model: true, doc: "For a toggle: whether it is on."}
+  tint: {type: str, default: "", doc: "A standard button's icon colour, a colour role such as on_primary_container (on_surface_variant when empty)."}
 widget: Container
 interaction: true
 disabled: "{{ disabled }}"

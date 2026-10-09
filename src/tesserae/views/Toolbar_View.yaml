@@ -1,0 +1,75 @@
+# The Material 3 toolbar: a row (or, floating, a column) of icon buttons with an optional action button at the end and an overflow menu. `variant: docked` spans its width, 64 tall, on
+# `surface_container`; `floating` is a pill with a shadow that is as long as its buttons, and `vibrant: true` puts it on `primary_container` (the icons on_primary_container). `items` is a list of
+# {value, icon, label} and optionally {disabled}: pressing one sets `chosen` to its `value`; every icon has a label (its name and its tooltip). `overflow` is a list of Menu rows shown under a
+# more button at the end (what does not fit is for the caller to put there). Your own content goes in the default slot after the items. `fab_icon` (with `fab_label` and `on_fab`) adds an action
+# button at the end. `hidden: true` fades the toolbar out of the way and out of the tab order (bind it to the way a list scrolls). The arrow keys move between the buttons (one Tab stop).
+# Role: a group, because the engine has no toolbar role.
+params:
+  variant: {type: enum, choices: [docked, floating], default: docked, doc: "docked spans its width; floating is a pill with a shadow."}
+  orientation: {type: enum, choices: [horizontal, vertical], default: horizontal, doc: "A row, or (for the floating one) a column."}
+  vibrant: {type: bool, default: false, doc: "primary_container, with on_primary_container icons."}
+  width: {type: any, default: null, doc: "A docked toolbar's width; the width of its place when not given."}
+  label: {type: str, default: Toolbar, doc: "The toolbar's accessible name."}
+  items: {type: list, default: [], doc: "The icon buttons, each {value, icon, label} and optionally {disabled}."}
+  overflow: {type: list, default: [], doc: "Menu rows under a more button at the end (empty shows no button)."}
+  chosen: {type: any, default: "", model: true, doc: "The value of the item or overflow row last pressed."}
+  fab_icon: {type: str, default: "", doc: "An action button at the end (empty shows none)."}
+  fab_label: {type: str, default: "", doc: "Its name and tooltip."}
+  on_fab: {type: handler, doc: "What the action button does."}
+  hidden: {type: bool, default: false, doc: "Faded out of the way and out of the tab order."}
+  disabled: {type: bool, default: false, doc: "No button responds."}
+widget: Container
+state: {menu_open: false}
+focus_group: both
+a11y: {role: group, label: "{{ label }}", hidden: "{{ hidden }}"}
+style:
+  flex_direction: "{{ 'vertical' if (variant == 'floating' and orientation == 'vertical') else 'horizontal' }}"
+  align_content: center
+  opacity: "{{ 0 if hidden else 1 }}"
+  transition: {opacity: 200}
+  width: "{{ (64 if orientation == 'vertical' else 'auto') if variant == 'floating' else (width if width is not None else '100%') }}"
+  height: "{{ 'auto' if (variant == 'floating' and orientation == 'vertical') else 64 }}"
+children:
+  - widget: Container
+    name: group
+    style:
+      flex_direction: "{{ 'vertical' if (variant == 'floating' and orientation == 'vertical') else 'horizontal' }}"
+      align_content: center
+      flex: "{{ 'expand_horizontal' if (variant == 'docked' and (fab_icon != '' or len(overflow) > 0)) else 'none' }}"
+    children:
+      - widget: IconButton
+        for: o in items
+        key: o['value']
+        name: item
+        icon: "{{ o['icon'] }}"
+        label: "{{ o['label'] }}"
+        tint: "{{ 'on_primary_container' if vibrant else '' }}"
+        disabled: "{{ disabled or hidden or o.get('disabled', False) }}"
+        handlers: {on_click: "chosen = o['value']"}
+      - widget: Slot
+  - widget: IconButton
+    name: more
+    if: "len(overflow) > 0"
+    icon: "{{ 'dots_vertical' if orientation == 'vertical' else 'dots_horizontal' }}"
+    label: More actions
+    tint: "{{ 'on_primary_container' if vibrant else '' }}"
+    disabled: "{{ disabled or hidden }}"
+    a11y: {expanded: "{{ menu_open }}"}
+    handlers: {on_click: "menu_open = not menu_open"}
+  - widget: Menu
+    name: menu
+    if: "len(overflow) > 0"
+    open: "{{ menu_open }}"
+    anchor: more
+    placement: "{{ 'start' if orientation == 'vertical' else 'above' }}"
+    items: "{{ overflow }}"
+    chosen: "{{ chosen }}"
+  - widget: Fab
+    name: fab
+    if: "fab_icon != ''"
+    icon: "{{ fab_icon }}"
+    label: "{{ fab_label }}"
+    size: small
+    variant: primary
+    disabled: "{{ disabled or hidden }}"
+    handlers: {on_click: "on_fab()"}

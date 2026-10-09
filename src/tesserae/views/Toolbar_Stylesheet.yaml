@@ -1,0 +1,9 @@
+# The look of Toolbar (Material 3): a docked one is a 64 pixel surface_container strip with 16 pixels of padding; a floating one is a pill at elevation level 3 with 8 pixels of padding.
+# Vibrant uses primary_container. The buttons stand 4 pixels apart.
+styles:
+  - widget: Toolbar
+    style:
+      background: "{{ 'primary_container' if vibrant else 'surface_container' }}"
+  - {widget: Toolbar, variant: docked, style: {padding: {left: 16, right: 16, top: 0, bottom: 0}, gap: 8}}
+  - {widget: Toolbar, variant: floating, style: {padding: 8, gap: 8, corner_radius: full, elevation: 3}}
+  - {widget: Toolbar, part: group, style: {gap: 4}}

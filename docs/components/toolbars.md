@@ -9,7 +9,24 @@ one is a rounded bar over the content.
 
 ## In Tesserae
 
-Containers whose children are yours: put buttons or icon buttons inside.
+`widget: Toolbar` is a view Tesserae ships (`Toolbar_View.yaml`): one widget for the docked and the floating toolbar, built from `IconButton`s, an optional `Fab` and a `Menu`.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `variant` | `docked` or `floating` | docked spans its width, 64 tall, on `surface_container`; floating is a pill with a shadow as long as its buttons |
+| `orientation` | `horizontal` or `vertical` | a floating toolbar can be a column, 64 wide |
+| `vibrant` | true or false | `primary_container`, with `on_primary_container` icons |
+| `items` | a list | the icon buttons, each `{value, icon, label}` and optionally `disabled` |
+| `chosen` | a value; two-way | the `value` of the item or overflow row pressed |
+| `overflow` | a list | `Menu` rows under a more button at the end |
+| `fab_icon`, `fab_label`, `on_fab` | | an action button at the end, and what it does |
+| `hidden` | true or false | fades it out and takes its buttons out of the tab order (bind it to the way a list scrolls) |
+| `label`, `width`, `disabled` | | its accessible name; a docked toolbar's width; no button responds |
+
+Your own content goes in the default slot after the items. The arrow keys move between the buttons (one Tab stop). The role is `group`: the engine has no toolbar role.
+Not built: moving the buttons that do not fit into the overflow menu by width (list them in `overflow` yourself), and sliding out of the way (it fades).
+
+`widget: Toolbar` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -55,17 +72,33 @@ children: []
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: editor
+widget: Container
+style: {width: 420, height: 200, padding: 16, flex_direction: vertical, gap: 16}
 children:
-  - id: tools
-    component: ToolbarFloating
-    with: {background: surface_container, width: 240, corner_radius: 28}
+  - widget: Toolbar
+    name: tools
+    items:
+      - {value: bold, icon: format_bold, label: Bold}
+      - {value: italic, icon: format_italic, label: Italic}
+      - {value: link, icon: link, label: Link}
+    overflow:
+      - {value: copy, label: Copy}
+      - {value: share, label: Share}
+    fab_icon: plus
+    fab_label: Add
+    chosen: "{{ last }}"
+  - widget: Toolbar
+    variant: floating
+    vibrant: true
+    items:
+      - {value: search, icon: search, label: Search}
+      - {value: star, icon: star, label: Star}
+  - {widget: Text, text: "{{ last }}", typography_role: body_medium, style: {foreground: on_surface}}
 ```
+
+## Using it
 
 In Python:
 
