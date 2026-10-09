@@ -9,8 +9,22 @@ window, and may offer one action. It goes away by itself.
 
 ## In Tesserae
 
-The fragment is its look; `tesserae.overlays.Snackbar` shows it on a layer above the window, with the
-action and the close button.
+Two views Tesserae ships: `Snackbar` (one message) and `SnackbarHost` (several, one after another).
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `open` | true or false; two-way | whether it is showing; it writes `false` when it closes |
+| `message`, `action`, `closable` | text, text, true or false | the message, a text button after it, a close button |
+| `on_action`, `on_close` | handlers | the action button's handler; called when it closes however it closes |
+| `duration` | milliseconds | how long it stays (default 4000; 0 keeps it until it is closed); the pointer over it holds the time off |
+| `width`, `margin`, `centered` | numbers, true or false | 344 to 560 wide, 16 from the window's edge, at the start or centred |
+
+It is `inverse_surface` at level 3 with 4 pixel corners, 48 pixels tall (68 for two lines), over the content, not modal, and takes no focus; a screen reader hears it
+as a polite alert. A `SnackbarHost` takes `messages` (`{message}` and optionally `{action, value, id, duration}`), shows the first, drops it when it closes
+and shows the next; add to the list from anywhere that can write it; `chosen` is the `value` of the action pressed. An `Overlay` now has a `timeout`
+and an `on_dismiss` handler, which is how this is made. Not built: swipe to dismiss, and lifting above a FAB or a bottom bar.
+
+`widget: Snackbar` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -43,17 +57,22 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: notes
+widget: Container
+style: {width: 480, height: 320}
 children:
-  - id: saved
-    component: Snackbar
-    with: {text: Saved, width: 280}
+  - widget: SnackbarHost
+    messages: "{{ toasts }}"
+    chosen: "{{ undo }}"
+  - widget: Snackbar
+    open: "{{ saved }}"
+    message: Note saved
+    action: Undo
+    on_action: undo_save
 ```
+
+## Using it
 
 In Python:
 

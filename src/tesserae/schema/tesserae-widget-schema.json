@@ -2367,6 +2367,18 @@
               }
             ],
             "description": "Escape and a press outside close it."
+          },
+          "timeout": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Closes itself this many milliseconds after it opens, unless the pointer is over it; 0 never."
           }
         },
         "required": [
@@ -2397,7 +2409,8 @@
             "anchor",
             "placement",
             "modal",
-            "dismissible"
+            "dismissible",
+            "timeout"
           ]
         }
       }

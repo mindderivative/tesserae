@@ -175,6 +175,7 @@ class ComposedView(View):
         self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
         self._layer_resize: dict[str, Callable[[], None]] = {}
+        self._layer_timeouts: dict[str, Callable[[], None]] = {}
         self._shown_layers: dict[str, Any] = {}  # each Overlay showing: its id -> the layer node shown
         self._overlay_undos: list[Callable[[], None]] = []
         self._dismissed_open: set[str] = set()  # overlays closed by the user whose `open` is not a Signal: not reopened until `open` goes false
@@ -714,10 +715,26 @@ class ComposedView(View):
         self.window.show_layer(layer, anchor=anchor, placement=inst.value("placement") or "below", modal=bool(inst.value("modal")),
                                dismissible=inst.value("dismissible") is not False)
         self._shown_layers[inst.id] = layer
+        self._start_layer_timeout(inst, layer)
         if inst.value("modal"):  # the scrim follows the window's size while it is up
             self._layer_resize[inst.id] = listen_window(self.window, "resize", lambda event, inst=inst, layer=layer: self._fit_layer(inst, layer))
 
+    def _start_layer_timeout(self, inst: Instance, layer: Any) -> None:
+        """An `Overlay` with a `timeout` closes itself that long after it opens; the pointer on it holds the time off until it leaves."""
+        timeout = inst.value("timeout")
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or timeout <= 0:
+            return
+        name = f"overlay:{inst.id}"
+        arm = lambda: self.timers.after(float(timeout), lambda: self._dismiss_layer(inst), name=name)  # noqa: E731
+        arm()
+        enter = self._listen(layer, "pointer_enter", lambda event: self.timers.cancel(name))
+        leave = self._listen(layer, "pointer_leave", lambda event: arm())
+        self._layer_timeouts[inst.id] = lambda: (enter(), leave(), self.timers.cancel(name))
+
     def _hide_layer(self, inst_id: str) -> None:
+        stop = self._layer_timeouts.pop(inst_id, None)
+        if stop is not None:
+            stop()
         layer = self._shown_layers.pop(inst_id, None)
         undo = self._layer_resize.pop(inst_id, None)
         if undo is not None:
@@ -736,6 +753,8 @@ class ComposedView(View):
             scope.assign(name, False)
         else:
             self._dismissed_open.add(inst.id)
+        if "on_dismiss" in inst.handlers and inst.id not in self._disabled_on:
+            inst.fire("on_dismiss")
 
     def _wire_states(self) -> None:
         """Feeds the interaction Signals (`hovered`, `focused`, `pressed`) of the instances a rule or an expression asked about."""

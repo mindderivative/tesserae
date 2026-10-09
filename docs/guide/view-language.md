@@ -415,6 +415,8 @@ children:
   - {widget: Text, text: Rename, typography_role: label_large, style: {foreground: on_surface}}
 ```
 
+`timeout: 4000` closes it by itself that many milliseconds after it opens (the pointer over it holds the time off), and `handlers: {on_dismiss: ...}` runs whenever it closes itself or the user closes it.
+
 Escape and a press outside close it, and write `false` to the Signal `open` is bound to; with an `open` that is not a Signal it stays closed until `open`
 goes false. Focus goes back to where it was. `dismissible: false` turns both off.
 

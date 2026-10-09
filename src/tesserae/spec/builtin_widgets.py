@@ -95,7 +95,8 @@ declare("Overlay", {
     "placement": P("enum", choices=("below", "above", "start", "end"), default="below", doc="Which side of the anchor; it flips or shifts to fit."),
     "modal": P("bool", doc="Dims the window behind it, blocks input to it, and keeps focus inside."),
     "dismissible": P("bool", default=True, doc="Escape and a press outside close it."),
-}, container=True, doc="A layer over the window: a menu, a dialog, a popover.")
+    "timeout": P("float", default=0.0, doc="Closes itself this many milliseconds after it opens, unless the pointer is over it; 0 never."),
+}, container=True, doc="A layer over the window: a menu, a dialog, a popover. `on_dismiss` runs when it closes itself, or the user closes it.")
 _CONTROL_LABEL = P("str", doc="Text beside it that is part of what you press, and what a screen reader calls it.")
 declare("Checkbox", {"checked": P("bool", model=True, doc="true, false, or empty (null) for a box that is neither: a parent of some checked children."),
                      "disabled": P("bool"), "error": P("bool", doc="Drawn in the error colours."), "label": _CONTROL_LABEL},

@@ -1,0 +1,25 @@
+# Several snackbars, one after another (Material 3 shows one at a time). `messages` is a list of {message} and optionally {action, value, id, duration}; the first
+# shows, and when it closes it is taken off the list and the next one shows. Add to the list (`messages = messages + [{'message': 'Saved'}]`) from anywhere that can
+# write it. The `value` of an action that was pressed goes to `chosen`. It takes no room where it is written.
+params:
+  messages: {type: list, default: [], model: true, doc: "The waiting messages, each {message} and optionally {action, value, id, duration}. The first is showing."}
+  chosen: {type: any, default: "", model: true, doc: "The value of the action last pressed."}
+  closable: {type: bool, default: false, doc: "A close button on each."}
+  centered: {type: bool, default: false, doc: "In the middle of the window instead of at the start."}
+  margin: {type: float, default: 16, doc: "The space between a snackbar and the window's edge."}
+widget: Container
+style: {width: 0, height: 0}
+children:
+  - widget: Snackbar
+    for: m in messages[:1]
+    key: m.get('id', m['message'])
+    name: current
+    open: true
+    message: "{{ m['message'] }}"
+    action: "{{ m.get('action', '') }}"
+    duration: "{{ m.get('duration', 4000) }}"
+    closable: "{{ closable }}"
+    centered: "{{ centered }}"
+    margin: "{{ margin }}"
+    on_action: "chosen = m.get('value', m['message'])"
+    on_close: "messages = messages[1:]"

@@ -239,3 +239,15 @@ def test_a_press_on_the_content_of_a_modal_one_does_not_close_it(tmp_path):
     view.window.simulate("pointer_up", x=x, y=y)
     view.window.advance(16)
     assert vm.shown.get() is True and showing(view, "dialog")
+
+
+def test_a_timeout_closes_it_by_itself_and_on_dismiss_runs(tmp_path):
+    view_text = MENU.replace("    anchor: trigger\n", "    anchor: trigger\n    timeout: 300\n    handlers: {on_dismiss: picked}\n")
+    app, view, vm = opened(tmp_path, view_text)
+    vm.shown.set(True)
+    for _ in range(4):
+        view.window.advance(16)
+    assert view._shown_layers
+    for _ in range(30):
+        view.window.advance(16)
+    assert vm.shown.get() is False and not view._shown_layers and vm.log == ["picked"]

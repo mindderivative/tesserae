@@ -1,0 +1,58 @@
+# The Material 3 snackbar: a short message near the bottom of the window, over the content, that goes by itself. It is not modal, takes no focus and blocks
+# nothing. `open` shows it (and is written false when it closes); it closes `duration` milliseconds after it opens (4000 by default; 0 keeps it up) unless the
+# pointer is over it, when the action or the close button is pressed, and calls `on_close` then. An `action` is a text button after the message: pressing it runs
+# `on_action`, then closes. Announced politely. `SnackbarHost` shows several one after another.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether it is showing; it writes false when it closes."}
+  message: {type: str, default: "", doc: "What to say."}
+  action: {type: str, default: "", doc: "The label of a text button after the message."}
+  on_action: {type: handler, doc: "What the action button does."}
+  on_close: {type: handler, doc: "Called when it closes, however it closes."}
+  closable: {type: bool, default: false, doc: "A close button after the message."}
+  duration: {type: float, default: 4000, doc: "Milliseconds before it closes itself; 0 keeps it until it is closed."}
+  margin: {type: float, default: 16, doc: "The space between it and the window's edge."}
+  centered: {type: bool, default: false, doc: "In the middle of the window instead of at the start."}
+  width: {type: float, default: 344, doc: "How wide it is, from 344 to 560 pixels; a message longer than fits goes onto a second line."}
+widget: Overlay
+open: "{{ open }}"
+dismissible: false
+timeout: "{{ duration }}"
+handlers: {on_dismiss: "on_close()"}
+style:
+  position: absolute
+  x: "{{ ((app.window_width - min(560, max(344, width))) / 2 if app.window_width > min(560, max(344, width)) + 2 * margin else margin) if centered else margin }}"
+  y: "{{ app.window_height - 48 - margin }}"
+  width: "{{ min(560, max(344, width)) }}"
+children:
+  - widget: Container
+    name: bar
+    a11y: {role: alert, live: polite, label: "{{ message }}"}
+    style:
+      flex_direction: horizontal
+      align_content: left
+      gap: 8
+      min_height: 48
+      width: 100%
+    children:
+      - widget: Text
+        name: message
+        text: "{{ message }}"
+        typography_role: body_medium
+        wrap: word
+        style: {width: "{{ min(560, max(344, width)) - 24 - ((len(action) * 9 + 24 + 8) if action != '' else 0) - (48 if closable else 0) }}"}
+      - widget: Container
+        name: action
+        if: "action != ''"
+        interaction: true
+        handlers: {on_click: "on_action(); open = False; on_close()"}
+        a11y: {role: button, label: "{{ action }}"}
+        children:
+          - {widget: Text, name: action_text, text: "{{ action }}", typography_role: label_large}
+      - widget: Container
+        name: close
+        if: closable
+        interaction: true
+        handlers: {on_click: "open = False; on_close()"}
+        a11y: {role: button, label: Close}
+        children:
+          - {widget: Icon, name: close_icon, icon: close}

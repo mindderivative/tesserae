@@ -1,0 +1,20 @@
+# The look of Snackbar (Material 3): inverse_surface at level 3 with 4 pixel corners, 16 pixels in from the edge on the left and 8 on the right of the buttons;
+# the message in inverse_on_surface, the action in inverse_primary.
+styles:
+  - widget: Snackbar
+    style:
+      background: inverse_surface
+      corner_radius: 4
+      elevation: 3
+  - widget: Snackbar
+    part: bar
+    style: {padding: {left: 16, right: 8, top: 0, bottom: 0}}
+  - {widget: Snackbar, part: message, style: {foreground: inverse_on_surface, flex: expand_horizontal, padding: {left: 0, right: 0, top: 14, bottom: 14}}}
+  - widget: Snackbar
+    part: action
+    style: {padding: {left: 8, right: 8, top: 8, bottom: 8}, corner_radius: 16}
+  - {widget: Snackbar, part: action_text, style: {foreground: inverse_primary}}
+  - widget: Snackbar
+    part: close
+    style: {width: 40, height: 40, corner_radius: 20, align_content: center}
+  - {widget: Snackbar, part: close_icon, style: {foreground: inverse_on_surface, width: 24, height: 24}}
