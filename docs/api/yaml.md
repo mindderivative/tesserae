@@ -31,6 +31,8 @@ min: <a number or text>
 max: <a number or text>
 step: <a number or text>
 track: <text or any value>
+icons: <true or false or text>
+error: <true or false or text>
 buffer: <a number or text>
 stop_indicator: <true or false or text>
 image:
@@ -85,6 +87,8 @@ children: <a list>
 | `max` | a number or text | The most a Slider or SpinBox takes. |
 | `step` | a number or text | How far a Slider or SpinBox moves. |
 | `track` | text or any value | The colour role of the track behind a progress indicator. |
+| `icons` | `true` or `false` or text | Whether a Switch shows a check or a cross on its handle. |
+| `error` | `true` or `false` or text | Whether a Checkbox or RadioButton is drawn in the error colours. |
 | `buffer` | a number or text | A LinearProgress's loaded share, 0 to 1. |
 | `stop_indicator` | `true` or `false` or text | Whether a LinearProgress shows a dot at the end of its track. |
 | `image` | a mapping | An Image's source and fit. |

@@ -345,7 +345,8 @@
                 "type": "string",
                 "pattern": "\\{\\{"
               }
-            ]
+            ],
+            "description": "true, false, or empty (null) for a box that is neither: a parent of some checked children."
           },
           "disabled": {
             "anyOf": [
@@ -357,6 +358,30 @@
                 "pattern": "\\{\\{"
               }
             ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Drawn in the error colours."
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Text beside it that is part of what you press, and what a screen reader calls it."
           }
         },
         "required": [
@@ -383,7 +408,9 @@
             "params",
             "expects",
             "checked",
-            "disabled"
+            "disabled",
+            "error",
+            "label"
           ]
         }
       }
@@ -2485,6 +2512,30 @@
                 "pattern": "\\{\\{"
               }
             ]
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Drawn in the error colours."
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Text beside it that is part of what you press, and what a screen reader calls it."
           }
         },
         "required": [
@@ -2512,7 +2563,9 @@
             "expects",
             "selected",
             "group",
-            "disabled"
+            "disabled",
+            "error",
+            "label"
           ]
         }
       }
@@ -3731,6 +3784,30 @@
                 "pattern": "\\{\\{"
               }
             ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Text beside it that is part of what you press, and what a screen reader calls it."
+          },
+          "icons": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A check on the handle when on and a cross when off."
           }
         },
         "required": [
@@ -3757,7 +3834,9 @@
             "params",
             "expects",
             "selected",
-            "disabled"
+            "disabled",
+            "label",
+            "icons"
           ]
         }
       }

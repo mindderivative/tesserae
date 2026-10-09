@@ -57,7 +57,7 @@ _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", 
                                            "ScrollView", "Canvas", "Overlay"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "error", "icons", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -972,6 +972,8 @@ def _a11y_props(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:
     fields = _a11y_fields(node)
     bound = {A11Y_BINDABLE[k] for k in a11y_bindings(node)}  # the view sets these; a patch leaves them
     reset = {k: v for k, v in _A11Y_RESET.items() if k not in bound}
+    if node["kind"] in _CONTROL_KINDS:  # a control keeps its own states (checked, selected, value): resetting them would undo what it just drew
+        reset = {k: v for k, v in reset.items() if k not in _A11Y_STATES}
     props = {**reset, **{k: v for k, v in fields.items() if k != "role"}} if patching else {
         k: v for k, v in fields.items() if k != "role"}
     if node["kind"] not in _OWN_ROLE:
@@ -1178,14 +1180,21 @@ def _theme(ctx: _Context) -> Any:
 
 
 def _control_colour(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) -> Optional[RGBA]:
-    """The selected/active colour a control's style gives: `background`
-    (the fragments' param) or, for the indicators, `foreground`."""
-    field = "foreground" if node["kind"] in _INDICATOR_KINDS else "background"
+    """The selected/active colour a control's style gives: `foreground` (the view language's) or, for the 0.4.x controls, `background` (the
+    fragments' param); an indicator takes `foreground` only."""
+    field = "foreground" if node["kind"] in _INDICATOR_KINDS or style.get("foreground") is not None else "background"
     raw = style.get(field)
     return None if raw is None else _color(ctx, node["id"], field, raw)
 
 
 _INDICATOR_KINDS = frozenset({"CircularProgress", "LinearProgress", "LoadingIndicator"})
+
+
+def _checked(node: dict[str, Any]) -> Optional[bool]:
+    """A checkbox's state: on, off, or `None` (neither) when the node says `checked` and it is empty. A node that does not mention it is off."""
+    if "checked" in node and node["checked"] is None:
+        return None
+    return bool(node.get("checked") or False)
 
 
 def _progress_value(node: dict[str, Any]) -> Optional[float]:
@@ -1230,15 +1239,15 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
     else:
         common["listen"] = ctx.listen
         if kind == "Checkbox":
-            control = controls.Checkbox(ctx.window, checked=bool(node.get("checked") or False), **size, **common)
+            control = controls.Checkbox(ctx.window, checked=_checked(node), error=bool(node.get("error")), **size, **common)
         elif kind == "RadioButton":
             radio_group = None
             if group is not None:
                 radio_group = built.radio_groups.setdefault(group, controls.RadioGroup())
             control = controls.RadioButton(ctx.window, selected=bool(node.get("selected") or False),
-                                           group=radio_group, **size, **common)
+                                           group=radio_group, error=bool(node.get("error")), **size, **common)
         elif kind == "Switch":
-            control = controls.Switch(ctx.window, selected=bool(node.get("selected") or False), **size, **common)
+            control = controls.Switch(ctx.window, selected=bool(node.get("selected") or False), icons=bool(node.get("icons")), **size, **common)
         elif kind == "Slider":
             control = controls.Slider(ctx.window, value=float(node.get("value") or 0.0), **size, **common)
         elif kind == "SpinBox":  # M58: two buttons and a field, sized by MD3, not `width`/`height`
@@ -1336,9 +1345,12 @@ def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], c
     if hasattr(control, "disabled"):  # a progress indicator is never disabled
         control.disabled.set(bool(node.get("disabled") or False))  # M70
     if kind == "Checkbox":
-        control.checked.set(bool(node.get("checked") or False))
+        control.checked.set(_checked(node))
+        control.error.set(bool(node.get("error")))
     elif kind in ("Switch", "RadioButton"):
         control.selected.set(bool(node.get("selected") or False))
+        if kind == "RadioButton":
+            control.error.set(bool(node.get("error")))
     elif kind in ("CircularProgress", "LinearProgress"):
         control.value.set(_progress_value(node))
         if kind == "LinearProgress":
@@ -1357,4 +1369,4 @@ def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> 
     the reconciler rebuilds the control rather than patching it."""
     style = resolve_style(node, layers)
     return (node.get("kind"), style.get("width"), style.get("height"), node.get("group"),
-            node.get("min"), node.get("max"), node.get("step"), node.get("track"), node.get("stop_indicator"))  # a SpinBox's bounds are built in (M58)
+            node.get("min"), node.get("max"), node.get("step"), node.get("track"), node.get("stop_indicator"), node.get("icons"))  # a SpinBox's bounds are built in (M58)

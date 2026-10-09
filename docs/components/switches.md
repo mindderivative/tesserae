@@ -9,7 +9,16 @@ it is on.
 
 ## In Tesserae
 
-The `Switch` kind, a Tesserae control, with a `selected` signal.
+`widget: Switch`, a Tesserae control: a 52 by 32 pixel track and a handle that slides across it and grows when pressed.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `selected` | true or false, two-way | whether it is on |
+| `label` | text | beside the track, part of what you press, and what a screen reader calls it |
+| `icons` | true or false | a check on the handle when on and a cross when off (the off handle is then as big as the on one) |
+| `disabled` | true or false | dimmed and does nothing |
+
+`widget: Switch` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -37,6 +46,17 @@ selected: "{{ selected }}"
 ```
 
 ## Using it
+
+```yaml
+name: settings
+widget: Container
+style: {flex_direction: vertical, gap: 8, width: 240, height: 140, padding: 16}
+children:
+  - {widget: Switch, selected: "{{ wifi }}", label: Wi-Fi}
+  - {widget: Switch, selected: "{{ dark }}", label: Dark mode, icons: true}
+```
+
+## Using the fragment
 
 In a view:
 

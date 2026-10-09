@@ -142,6 +142,9 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `visited` (and `state: visited` in rules), `disabled`, and `underline` (`hover` by default: under the pointer or the keyboard focus, `always`, `never`).
 - **Progress indicators** ([#143](https://github.com/mindderivative/tesserae/issues/143), [#144](https://github.com/mindderivative/tesserae/issues/144), [#145](https://github.com/mindderivative/tesserae/issues/145)). `LinearProgress` and `CircularProgress` with no `value` (or an expression
   that gives nothing) are a wait with no end (the builder had always made them a bar at 0); new `track`, linear `buffer` and `stop_indicator`, and `label`; a screen reader hears busy, or the value as a percentage.
+- **Checkbox, RadioButton, Switch** ([#175](https://github.com/mindderivative/tesserae/issues/175), [#176](https://github.com/mindderivative/tesserae/issues/176), [#177](https://github.com/mindderivative/tesserae/issues/177)). `label` (beside the control, part of what you
+  press), `error` (checkbox and radio), a Checkbox that is neither on nor off (`checked: null`), Switch `icons`, and the colour is `style.foreground`. A patch no longer reset a control's own
+  accessibility states (`checked`, `value`) to nothing.
 
 ### Removed
 

@@ -94,10 +94,15 @@ declare("Overlay", {
     "modal": P("bool", doc="Dims the window behind it, blocks input to it, and keeps focus inside."),
     "dismissible": P("bool", default=True, doc="Escape and a press outside close it."),
 }, container=True, doc="A layer over the window: a menu, a dialog, a popover.")
-declare("Checkbox", {"checked": P("bool", model=True), "disabled": P("bool")}, doc="A box that is on or off.")
+_CONTROL_LABEL = P("str", doc="Text beside it that is part of what you press, and what a screen reader calls it.")
+declare("Checkbox", {"checked": P("bool", model=True, doc="true, false, or empty (null) for a box that is neither: a parent of some checked children."),
+                     "disabled": P("bool"), "error": P("bool", doc="Drawn in the error colours."), "label": _CONTROL_LABEL},
+        extras=("foreground",), doc="A box that is on or off.")
 declare("RadioButton", {"selected": P("bool", model=True), "group": P("str", doc="Buttons with one group are exclusive."),
-                        "disabled": P("bool")}, doc="One choice of a group.")
-declare("Switch", {"selected": P("bool", model=True), "disabled": P("bool")}, doc="A toggle.")
+                        "disabled": P("bool"), "error": P("bool", doc="Drawn in the error colours."), "label": _CONTROL_LABEL},
+        extras=("foreground",), doc="One choice of a group.")
+declare("Switch", {"selected": P("bool", model=True), "disabled": P("bool"), "label": _CONTROL_LABEL,
+                   "icons": P("bool", doc="A check on the handle when on and a cross when off.")}, extras=("foreground",), doc="A toggle.")
 declare("Slider", {"value": P("float", default=0.0, model=True), "disabled": P("bool")}, doc="Picks a value from 0 to 1 by dragging.")
 declare("SpinBox", {
     "value": P("float", default=0.0, model=True), "min": P("float"), "max": P("float"), "step": P("float", default=1.0),

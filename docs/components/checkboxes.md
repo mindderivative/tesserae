@@ -9,8 +9,18 @@ state layer around an 18dp box.
 
 ## In Tesserae
 
-The `Checkbox` kind is one of Tesserae's controls (`tesserae.controls.Checkbox`), whose `checked` is a
-signal, so a binding can read and write it.
+`widget: Checkbox` is one of Tesserae's controls (`tesserae.controls.Checkbox`). Give `checked` a bare reference and a press writes it back.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `checked` | true, false or empty, two-way | empty (`null`) is neither on nor off: a dash in a filled box, for a parent of some checked children; a press turns it on |
+| `label` | text | beside the box, part of what you press, and what a screen reader calls it |
+| `error` | true or false | drawn in the error colours |
+| `disabled` | true or false | dimmed and does nothing |
+
+The colour is `style.foreground`. The 18 pixel box sits in a 48 pixel target with a 40 pixel state layer; Space toggles it from the keyboard.
+
+`widget: Checkbox` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -39,6 +49,17 @@ checked: "{{ checked }}"
 ```
 
 ## Using it
+
+```yaml
+name: terms
+widget: Container
+style: {flex_direction: vertical, gap: 4, width: 280, height: 160, padding: 16}
+children:
+  - {widget: Checkbox, checked: "{{ all_read }}", label: I have read the terms, error: "{{ show_error }}"}
+  - {widget: Checkbox, checked: "{{ some_read }}", label: Select all}      # empty while only some are on
+```
+
+## Using the fragment
 
 In a view:
 

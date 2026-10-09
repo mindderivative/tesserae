@@ -9,7 +9,20 @@ and the arrow keys move between them.
 
 ## In Tesserae
 
-The `RadioButton` kind, a Tesserae control. Radio buttons with one `group:` name share a `RadioGroup`.
+`widget: RadioButton`, a Tesserae control. Radio buttons with one `group:` name share a group: choosing one unchooses the others, the group is one
+Tab stop (the chosen one, else the first), and the arrow keys move the choice.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `selected` | true or false, two-way | whether it is the chosen one |
+| `group` | a name | buttons with the same name exclude each other |
+| `label` | text | beside the ring, part of what you press, and what a screen reader calls it |
+| `error` | true or false | drawn in the error colours |
+| `disabled` | true or false | dimmed and does nothing |
+
+To keep the choice in one value, test it in `selected` and set it in `on_change`: `selected: "{{ size == 'm' }}"`, `on_change: "size = 'm'"`.
+
+`widget: RadioButton` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -36,6 +49,18 @@ selected: "{{ selected }}"
 ```
 
 ## Using it
+
+```yaml
+name: sizes
+widget: Container
+style: {flex_direction: vertical, gap: 4, width: 240, height: 180, padding: 16}
+children:
+  - {widget: RadioButton, group: size, label: Small, selected: "{{ size == 's' }}", handlers: {on_change: "size = 's'"}}
+  - {widget: RadioButton, group: size, label: Medium, selected: "{{ size == 'm' }}", handlers: {on_change: "size = 'm'"}}
+  - {widget: RadioButton, group: size, label: Large, selected: "{{ size == 'l' }}", handlers: {on_change: "size = 'l'"}}
+```
+
+## Using the fragment
 
 In a view:
 

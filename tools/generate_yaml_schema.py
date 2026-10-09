@@ -323,6 +323,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "max": {**maybe_number, "description": "The most a Slider or SpinBox takes."},
         "step": {**maybe_number, "description": "How far a Slider or SpinBox moves."},
         "track": {"anyOf": [{"type": "string"}, {"type": "null"}], "description": "The colour role of the track behind a progress indicator."},
+        "icons": {**maybe_bool, "description": "Whether a Switch shows a check or a cross on its handle."},
+        "error": {**maybe_bool, "description": "Whether a Checkbox or RadioButton is drawn in the error colours."},
         "buffer": {**maybe_number, "description": "A LinearProgress's loaded share, 0 to 1."},
         "stop_indicator": {**maybe_bool, "description": "Whether a LinearProgress shows a dot at the end of its track."},
         "image": {"type": "object", "description": "An Image's source and fit.",

@@ -161,6 +161,7 @@ class ComposedView(View):
         self._tip_undos: list[Callable[[], None]] = []
         self._link_hot: dict[str, set[str]] = {}  # a Link's reasons to be underlined now: 'pointer', 'focus'
         self._link_undos: list[Callable[[], None]] = []
+        self._field_undos: list[Callable[[], None]] = []
         self._split_last_up: dict[str, float] = {}
         self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
@@ -246,6 +247,7 @@ class ComposedView(View):
             untrack(self._wire_splitters)
             untrack(self._wire_tooltips)
             untrack(self._wire_links)
+            untrack(self._wire_fields)
             untrack(self._wire_states)
             untrack(self._wire_focus_groups)
             untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -426,6 +428,28 @@ class ComposedView(View):
                 "decrement": lambda e, inst=inst, user=user: user(float(inst.value("position")) - self.SPLIT_STEP),
                 "set_value": lambda e, user=user: user(float(e.value)),
             }, listen=self._listen))
+
+    # labelled controls (#175)
+
+    def _wire_fields(self) -> None:
+        """A Checkbox, RadioButton or Switch with a `label` is a row of the control and its text; a press on the text is a press on the control
+        (it takes the focus and toggles, or selects), and a press on the control itself is its own."""
+        for undo in self._field_undos:
+            undo()
+        self._field_undos = []
+        for inst in self.handle.composition.walk():
+            field_id = f"{inst.id}.field"
+            if field_id not in self._built.nodes or inst.id not in self._built.controls:
+                continue
+            control = self._built.controls[inst.id]
+
+            def press(event: Any, control: Any = control) -> None:
+                if control.disabled.get():
+                    return  # (the control's own press is handled, and does not reach this row)
+                control.node.focus()
+                control._activate()
+
+            self._field_undos.append(self._listen(self._built.nodes[field_id], "click", handled(press)))
 
     # links (#174)
 
@@ -811,7 +835,7 @@ class ComposedView(View):
             self._timers.cancel_all()
         for inst_id in list(self._tips):
             self._hide_tip(inst_id)
-        for undo in (*self._tip_undos, *self._link_undos):
+        for undo in (*self._tip_undos, *self._link_undos, *self._field_undos):
             undo()
         for inst_id in list(self._shown_layers):
             self._hide_layer(inst_id)

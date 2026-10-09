@@ -187,9 +187,11 @@ class Checkbox(Control):
     role = "checkbox"
     SIZE = 18.0
     CHECK = "M3.5,9.5 L7,13 L14.5,5.5"
+    DASH = "M4,9 L14,9"  # a checkbox that is neither on nor off (a parent of some checked children)
 
-    def __init__(self, window: Any, *, checked: bool = False, color: Optional[RGBA] = None, **kwargs: Any) -> None:
-        self.checked = Signal(bool(checked))
+    def __init__(self, window: Any, *, checked: Optional[bool] = False, color: Optional[RGBA] = None, error: bool = False, **kwargs: Any) -> None:
+        self.checked = Signal(None if checked is None else bool(checked))  # None is indeterminate
+        self.error = Signal(bool(error))
         self._color = color
         super().__init__(window, **kwargs)
 
@@ -203,34 +205,36 @@ class Checkbox(Control):
         self.node.add_child(self.box)
 
     def _selected(self) -> RGBA:
-        return self._color or self.color("primary")
+        return self.color("error") if self.error.get() else (self._color or self.color("primary"))
 
     def _tint(self) -> RGBA:
-        # MD3: a selected control's hover and focus layers are `primary`
-        return self._selected() if self.checked.get() else self.color("on_surface")
+        # MD3: a selected control's hover and focus layers are `primary` (`error` in error)
+        return self._selected() if self.checked.get() is not False else self.color("error") if self.error.get() else self.color("on_surface")
 
     def _paint(self, animate: bool) -> None:
-        checked, disabled = self.checked.get(), self.disabled.get()
+        checked, disabled, error = self.checked.get(), self.disabled.get(), self.error.get()
+        mixed = checked is None
+        on = checked is not False
         self.node.set(checked=checked)
         off = with_alpha(self.color("on_surface"), DISABLED_CONTENT)
-        if checked:
+        if on:
             fill = off if disabled else self._selected()
             stroke = fill
-            mark = self.color("surface") if disabled else self.color("on_primary")
+            mark = self.color("surface") if disabled else self.color("on_error" if error else "on_primary")
         else:
-            fill, stroke = _CLEAR, off if disabled else self.color("on_surface_variant")
+            fill, stroke = _CLEAR, off if disabled else self.color("error" if error else "on_surface_variant")
             mark = self.mark.get("stroke_color") or _CLEAR
         colour_ms = self._ms(animate, "short3")
         self._to(self.box, "fill", fill, colour_ms)
         self._to(self.box, "stroke_color", stroke, colour_ms)
-        self.mark.set(stroke_color=mark)
-        if checked:
+        self.mark.set(stroke_color=mark, data=self.DASH if mixed else self.CHECK)
+        if on:
             self._to(self.mark, "trim_end", 1.0, self._ms(animate, "medium1"), Theme.easing("emphasized_decelerate"))
         else:
             self._to(self.mark, "trim_end", 0.0, self._ms(animate, "short3"), Theme.easing("emphasized_accelerate"))
 
     def _activate(self) -> None:
-        self.checked.set(not self.checked.get())
+        self.checked.set(not self.checked.get())  # off or in between becomes on; on becomes off
         self._changed(self.checked.get())
 
 
@@ -305,8 +309,9 @@ class RadioButton(Control):
     DOT = 10.0
 
     def __init__(self, window: Any, *, selected: bool = False, group: Optional[RadioGroup] = None,
-                 color: Optional[RGBA] = None, **kwargs: Any) -> None:
+                 color: Optional[RGBA] = None, error: bool = False, **kwargs: Any) -> None:
         self.selected = Signal(bool(selected))
+        self.error = Signal(bool(error))
         self.group = group
         self._color = color
         super().__init__(window, **kwargs)
@@ -325,7 +330,7 @@ class RadioButton(Control):
         self.node.add_child(self.ring)
 
     def _on_colour(self) -> RGBA:
-        return self._color or self.color("primary")
+        return self.color("error") if self.error.get() else (self._color or self.color("primary"))
 
     def _tint(self) -> RGBA:
         return self._on_colour() if self.selected.get() else self.color("on_surface")
@@ -341,7 +346,7 @@ class RadioButton(Control):
         selected, disabled = self.selected.get(), self.disabled.get()
         self.node.set(checked=selected)
         off = with_alpha(self.color("on_surface"), DISABLED_CONTENT)
-        colour = off if disabled else (self._on_colour() if selected else self.color("on_surface_variant"))
+        colour = off if disabled else (self._on_colour() if selected else self.color("error" if self.error.get() else "on_surface_variant"))
         ms = self._ms(animate, "short3")
         self._to(self.ring, "stroke_color", colour, ms)
         self._to(self.dot, "fill", off if disabled else self._on_colour(), ms)
@@ -381,9 +386,10 @@ class Switch(Control):
     HANDLE = 28.0  # drawn at this size and scaled: 16 off, 24 on, 28 pressed
     OFF, ON, PRESSED = 16.0, 24.0, 28.0
 
-    def __init__(self, window: Any, *, selected: bool = False, color: Optional[RGBA] = None, **kwargs: Any) -> None:
+    def __init__(self, window: Any, *, selected: bool = False, color: Optional[RGBA] = None, icons: bool = False, **kwargs: Any) -> None:
         self.selected = Signal(bool(selected))
         self._color = color
+        self.icons = bool(icons)  # a check on the handle when on, a cross when off; the off handle is then as big as the on one
         self._pressed = False
         super().__init__(window, **kwargs)
         self._undo.append(self._listen(self.node, "pointer_down", lambda e: self._press(True)))
@@ -402,6 +408,10 @@ class Switch(Control):
                                          y=centre - self.HANDLE / 2, width=self.HANDLE, height=self.HANDLE,
                                          corner_radius=self.HANDLE / 2, hit_testable=False, a11y_hidden=True)
         self.track.add_child(self.handle)
+        self.icon = self.window.create("path", data=icon_path("check"), view_box=icon_view_box("check"), width=16.0, height=16.0,
+                                       position="absolute", x=(self.HANDLE - 16.0) / 2, y=(self.HANDLE - 16.0) / 2,
+                                       visible=self.icons, hit_testable=False, a11y_hidden=True)
+        self.handle.add_child(self.icon)
         self.node.add_child(self.track)
         # the state layer's circle rides on the handle
         offset = (self.target[1] - self.HEIGHT) / 2  # the track is centred in the target
@@ -419,12 +429,16 @@ class Switch(Control):
     def _handle_size(self) -> float:
         if self._pressed and not self.disabled.get():
             return self.PRESSED
-        return self.ON if self.selected.get() else self.OFF
+        return self.ON if self.selected.get() or self.icons else self.OFF
 
     def _paint(self, animate: bool) -> None:
         selected, disabled = self.selected.get(), self.disabled.get()
         self.node.set(checked=selected)
         on_surface = self.color("on_surface")
+        if self.icons:
+            self.icon.set(data=icon_path("check" if selected else "close"),
+                          fill=with_alpha(on_surface, DISABLED_CONTENT) if disabled else
+                          self.color("on_primary_container" if selected else "surface_container_highest"))
         if selected:
             track = with_alpha(on_surface, DISABLED_CONTAINER) if disabled else self._on_colour()
             border = track

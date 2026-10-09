@@ -61,6 +61,10 @@ def lower(inst: Instance) -> dict[str, Any]:
             node["virtual"] = {"count": inst.virtual.count, "extent": float(inst.virtual.extent())}
         if "scroll_offset" in values:
             node["scroll"] = {"offset": values["scroll_offset"]}
+    elif widget in ("Checkbox", "RadioButton", "Switch"):
+        folded = {"label"}
+        if widget == "Checkbox" and "checked" in values:
+            node["checked"] = values["checked"]
     elif widget in ("LinearProgress", "CircularProgress", "LoadingIndicator"):
         if widget != "LoadingIndicator" and "value" not in values:
             node["value"] = None  # no value is a wait with no end
@@ -84,7 +88,7 @@ def lower(inst: Instance) -> dict[str, Any]:
     if inst.classes:
         node["classes"] = list(inst.classes)
     a11y: dict[str, Any] = {}
-    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator") and values.get("label"):
+    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator", "Checkbox", "RadioButton", "Switch") and values.get("label"):
         a11y = {"label": values["label"]}
     if widget == "Text" and values.get("heading"):
         a11y = {"role": "heading", "level": values["heading"]}
@@ -109,7 +113,17 @@ def lower(inst: Instance) -> dict[str, Any]:
         _split(inst, node, values)
     elif inst.children:
         node["children"] = [lower(child) for child in inst.children]
+    if widget in ("Checkbox", "RadioButton", "Switch") and values.get("label"):
+        return _field(inst, node, str(values["label"]))
     return node
+
+
+def _field(inst: Instance, control: dict[str, Any], label: str) -> dict[str, Any]:
+    """A control with a label beside it: a row of the control and its text, in which a press on the text is a press on the control."""
+    text = {"id": f"{inst.id}.label", "kind": "Text", "text": {"content": label, "typography_role": "body_large"},
+            "style": {"foreground": "on_surface", "opacity": 0.38 if control.get("disabled") else 1.0}}
+    return {"id": f"{inst.id}.field", "kind": "Container",
+            "style": {"flex_direction": "horizontal", "align_content": "left", "gap": 4}, "children": [control, text]}
 
 
 #: The handle between a Splitter's panes: its width along the split, and the grip drawn in it (MD3's 4 x 48 drag handle).

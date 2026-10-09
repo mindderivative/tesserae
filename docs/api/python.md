@@ -1502,8 +1502,9 @@ A surface for video frames (an `image` node Tesserae builds). `video.frame(rgba,
 class Checkbox(
     window: Any,
     *,
-    checked: bool = False,
+    checked: Optional[bool] = False,
     color: Optional[RGBA] = None,
+    error: bool = False,
     **kwargs: Any
 ) -> None  # extends Control
 ```
@@ -1545,6 +1546,7 @@ class RadioButton(
     selected: bool = False,
     group: Optional[RadioGroup] = None,
     color: Optional[RGBA] = None,
+    error: bool = False,
     **kwargs: Any
 ) -> None  # extends Control
 ```
@@ -1654,6 +1656,7 @@ class Switch(
     *,
     selected: bool = False,
     color: Optional[RGBA] = None,
+    icons: bool = False,
     **kwargs: Any
 ) -> None  # extends Control
 ```

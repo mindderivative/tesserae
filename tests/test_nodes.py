@@ -30,6 +30,14 @@ def resolver(name):
 # -- every key of section 2 -----------------------------------------------------------------------------------------------
 
 
+def accepting_foreground():
+    """The widgets that declare `foreground` among their style extras, as the error names them."""
+    from tesserae.spec import widgets as registry
+
+    registry._load_builtins()
+    return ", ".join(sorted(name for name, decl in registry._REGISTRY.items() if "foreground" in decl.extras))
+
+
 def test_widget_picks_the_widget_and_a_missing_or_unknown_one_is_an_error():
     assert node("widget: Text").widget == "Text"
     fails("text: x", "a node needs a 'widget:'")
@@ -83,7 +91,7 @@ def test_style_takes_universal_fields_a_widgets_extras_and_expressions():
     assert node("widget: Container\nstyle: row_Style.yaml").style_file == "row_Style.yaml"
     assert node("widget: Text\nstyle: {foreground: on_surface}").style["foreground"] == "on_surface"  # an extra of the widgets that draw text
     err = fails("widget: Container\nstyle: {foreground: red}", "Container: style 'foreground' is not valid here")
-    assert "widgets that accept it: CircularProgress, Icon, LinearProgress, Link, LoadingIndicator, Svg, Text, TextInput" in str(err)
+    assert f"widgets that accept it: {accepting_foreground()}" in str(err)
     W.register_widget(WidgetDecl("Gauge", {}, extras=("track_height",)))
     try:
         assert node("widget: Gauge\nstyle: {track_height: 4}").style["track_height"] == 4

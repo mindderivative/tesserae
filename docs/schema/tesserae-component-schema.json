@@ -3362,6 +3362,28 @@
           ],
           "description": "The colour role of the track behind a progress indicator."
         },
+        "icons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Switch shows a check or a cross on its handle."
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Checkbox or RadioButton is drawn in the error colours."
+        },
         "buffer": {
           "anyOf": [
             {
@@ -8677,6 +8699,17 @@
           "type": "array",
           "description": "A NodeGraph's edges."
         },
+        "error": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Checkbox or RadioButton is drawn in the error colours."
+        },
         "group": {
           "type": "string",
           "description": "A RadioButton's group: the ones with one name exclude each other."
@@ -9060,6 +9093,17 @@
             }
           ],
           "description": "An Icon's glyph (`{name: ...}`), or a TitleBar's icon name."
+        },
+        "icons": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Switch shows a check or a cross on its handle."
         },
         "id": {
           "type": "string",

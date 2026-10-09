@@ -77,7 +77,7 @@ Every widget declares its properties: a type, a default, the values it allows, w
 | `Slot` | where a calling view's children go |
 
 State is a property (`checked`, `selected`, `value`, `disabled`), never a style. `foreground` is a style extra of the widgets that draw text or
-glyphs and indicators (`Text`, `Link`, `TextInput`, `Icon`, `Svg`, `LoadingIndicator`, `LinearProgress`, `CircularProgress`); anywhere else it is an error that names who accepts it.
+glyphs, indicators and controls (`Text`, `Link`, `TextInput`, `Icon`, `Svg`, `LoadingIndicator`, `LinearProgress`, `CircularProgress`, `Checkbox`, `RadioButton`, `Switch`); anywhere else it is an error that names who accepts it.
 
 ## Expressions
 

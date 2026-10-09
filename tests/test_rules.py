@@ -42,6 +42,14 @@ def compose(main, rules, views=None, vm=None):
 # -- the shape -------------------------------------------------------------------------------------------------------------
 
 
+def accepting_foreground():
+    """The widgets that declare `foreground` among their style extras, as the error names them."""
+    from tesserae.spec import widgets as registry
+
+    registry._load_builtins()
+    return ", ".join(sorted(name for name, decl in registry._REGISTRY.items() if "foreground" in decl.extras))
+
+
 def test_a_sheet_of_rules_is_checked_and_prepared():
     s = sheet("styles:\n  - widget: Text\n    classes: [big]\n    state: hovered\n    style: {foreground: on_surface, opacity: 0.5}\n"
               "  - style: {corner_radius: 4}\n")
@@ -90,7 +98,7 @@ def test_selectors_must_be_properties_the_widget_declares_and_values_it_allows()
 def test_foreground_is_an_extra_and_the_error_names_who_accepts_it():
     sheet("styles:\n  - widget: Text\n    style: {foreground: primary}\n  - widget: SomeView\n    style: {foreground: primary}")
     err = bad("styles:\n  - widget: Container\n    style: {foreground: primary}", "Container: style 'foreground' is not valid here")
-    assert "widgets that accept it: CircularProgress, Icon, LinearProgress, Link, LoadingIndicator, Svg, Text, TextInput" in str(err) and (err.line, err.column) == (3, 12)
+    assert f"widgets that accept it: {accepting_foreground()}" in str(err) and (err.line, err.column) == (3, 12)
     err = bad("styles:\n  - widget: Container\n    style: {widht: 1}", "style 'widht' is not valid here")
     assert "did you mean 'width'" in str(err)
 
