@@ -1816,6 +1816,11 @@ components:
       the user drags a tab to another zone or the handles between zones. `view.dock_host(id)` reads and sets the zone
       sizes and saves and restores the layout: `dock = view.dock_host("dock")`, then `dock.set_size("left", 280)`,
       `saved = dock.layout()` and `dock.restore(saved)`.
+
+      A panel with `closable: true` has a close button on its tab. A Dock's `closed` (a list, two-way) holds the names of the closable panels that are shut: a close
+      button adds its panel's name, and taking a name out opens the panel again, as the last tab of its zone. Putting names in shuts them without the button. `dock.closed()`,
+      `dock.close(id)` and `dock.reopen(id)` do the same from Python. Not built: floating panels, tearing a panel off into a window, maximising a panel, reordering tabs,
+      and layouts saved by name.
     usage: |
       - id: dock
         kind: Dock
@@ -1823,6 +1828,16 @@ components:
         children:
           - {id: files, kind: DockPanel, title: Files, style: {zone: left, width: 220}, children: []}
           - {id: editor, kind: DockPanel, title: Editor, style: {zone: center}, children: []}
+    usage_view: |
+      name: studio
+      widget: Window
+      style: {width: 900, height: 600, flex_direction: vertical}
+      children:
+        - widget: Dock
+          closed: "{{ shut }}"
+          children:
+            - {widget: DockPanel, name: files, title: Files, closable: true, style: {zone: left, width: 220}}
+            - {widget: DockPanel, name: editor, title: Editor, style: {zone: center}}
     see: [guide/windows-and-docks.md, guide/docking.md]
 
   - slug: dock-panel
@@ -1833,7 +1848,7 @@ components:
       Material Design 3 has no dock panel. It is one panel of a dock: a titled tab in a zone.
     built: |
       The `DockPanel` kind, with `zone` in its `style`. A `DockPanel` inside another is a split of it, side by side
-      (`flex_direction: horizontal`) or top and bottom (`vertical`), with a handle to resize.
+      (`flex_direction: horizontal`) or top and bottom (`vertical`), with a handle to resize. `closable: true` puts a close button on its tab (see the Dock's `closed`).
     usage: |
       - id: dock
         kind: Dock

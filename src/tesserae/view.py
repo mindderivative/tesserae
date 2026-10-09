@@ -332,6 +332,8 @@ class View:
                 self._docks[node_id].sync_splits()
             else:
                 self._docks[node_id] = DockHost(self, node_id, dock)
+                if dock.get("closed"):
+                    self._docks[node_id].sync_closed(dock["closed"])
 
     def embedded(self, node_id: str) -> "Component":
         """The view the `view:` node `node_id` embeds. Its ViewModel is `.viewmodel`, `None` for a view with none."""
@@ -615,9 +617,10 @@ class View:
             if previous is not None and self._same_shape(previous, child):
                 kept.add(panel_id)
                 self._reconcile_node(previous, child)
-                if info["title"] != old_info[panel_id]["title"]:
+                shut = panel_id in host._closed
+                if info["title"] != old_info[panel_id]["title"] and not shut:
                     host.retitle(panel_id, info["title"])
-                if info["zone"] != old_info[panel_id]["zone"]:  # the file moved it
+                if info["zone"] != old_info[panel_id]["zone"] and not shut:  # the file moved it
                     host.dock.move(self.node(panel_id), info["zone"])
                     host.panels[panel_id]["zone"] = info["zone"]
                 continue
@@ -636,6 +639,8 @@ class View:
                 self._forget(child)
                 if node is not None:
                     node.destroy()
+        if new["dock"].get("closed", []) != old["dock"].get("closed", []):  # a bound `closed` list changed
+            host.sync_closed(new["dock"].get("closed", []))
         for zone, size in new["dock"].get("sizes", {}).items():
             if zone in host.sizes and size != old["dock"].get("sizes", {}).get(zone):
                 host.set_size(zone, size)  # the file changed it

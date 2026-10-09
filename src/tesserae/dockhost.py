@@ -127,8 +127,11 @@ class DockHost:
         self._handles: dict[str, _Handle] = {}
         self._splits: dict[str, _Handle] = {}
         self._split_sizes: dict[str, float] = {}
-        self.panels: dict[str, dict[str, Any]] = {}  # a panel's id -> {title, zone}
+        self.panels: dict[str, dict[str, Any]] = {}  # a panel's id -> {title, zone, closable}
+        self._closed: dict[str, dict[str, Any]] = {}  # the closable panels that are shut: id -> what they were (to open them again)
+        self._close_listeners: list[Callable[[list[str]], Any]] = []
         self.dock = Dock(self.window, theme=self.theme)
+        self.dock.on_close(self._shut)
         self._build(spec)
 
     # -- laying out ------------------------------------------------------------------
@@ -162,8 +165,8 @@ class DockHost:
         self.centre.add_child(self._zones["center"])
         self._place("bottom", self.centre)
         for panel in panels:
-            self.dock.add_panel(panel["zone"], nodes[panel["id"]], panel["title"])
-            self.panels[panel["id"]] = {"title": panel["title"], "zone": panel["zone"]}
+            self.dock.add_panel(panel["zone"], nodes[panel["id"]], panel["title"], bool(panel.get("closable")))
+            self.panels[panel["id"]] = {"title": panel["title"], "zone": panel["zone"], "closable": bool(panel.get("closable"))}
         for side in self.dock._zones:  # the first panel of each zone shows, as the file lists them
             first = next((p for p in panels if p["zone"] == side), None)
             if first is not None:
@@ -283,15 +286,60 @@ class DockHost:
 
     # -- the host's panels, for a reload -----------------------------------------------
 
-    def add_panel(self, panel_id: str, zone: str, title: str) -> None:
+    def add_panel(self, panel_id: str, zone: str, title: str, closable: bool = False) -> None:
         """Docks the view's node `panel_id` in `zone`, titled `title`."""
         if zone not in self.dock._zones:
             raise ValueError(f"the dock has no {zone} zone")
         node = self.view.node(panel_id)
         if node.parent() is not None:
             node.remove()
-        self.dock.add_panel(zone, node, title)
-        self.panels[panel_id] = {"title": title, "zone": zone}
+        self.dock.add_panel(zone, node, title, closable)
+        self.panels[panel_id] = {"title": title, "zone": zone, "closable": closable}
+
+    # -- closing and opening a closable panel ------------------------------------------------------------
+
+    def closed(self) -> list[str]:
+        """The ids of the closable panels that are shut."""
+        return list(self._closed)
+
+    def on_closed(self, fn: Callable[[list[str]], Any]) -> Callable[[], None]:
+        """Calls `fn(ids)`, the ids of the panels that are shut, when a close button shuts one. Returns the stopper."""
+        self._close_listeners.append(fn)
+        return lambda: self._close_listeners.remove(fn) if fn in self._close_listeners else None
+
+    def _shut(self, node: Any) -> None:
+        for panel_id, info in list(self.panels.items()):
+            if self.view.node(panel_id) == node:
+                self._closed[panel_id] = self.panels.pop(panel_id)
+        for fn in list(self._close_listeners):
+            fn(self.closed())
+
+    def close(self, panel_id: str) -> None:
+        """Shuts the closable panel `panel_id` (as its close button does), keeping its node to open it again."""
+        if panel_id in self.panels and self.panels[panel_id].get("closable"):
+            self._shut_by_id(panel_id)
+
+    def _shut_by_id(self, panel_id: str) -> None:
+        node = self.view.node(panel_id)
+        if self.dock.side_of(node) is not None:
+            self.dock.remove_panel(node)
+        self._closed[panel_id] = self.panels.pop(panel_id)
+
+    def reopen(self, panel_id: str) -> None:
+        """Docks a shut panel back in the zone it was in, as the last tab."""
+        info = self._closed.pop(panel_id, None)
+        if info is not None:
+            self.add_panel(panel_id, info["zone"], info["title"], info.get("closable", False))
+
+    def sync_closed(self, ids: list[str]) -> None:
+        """Shuts the panels in `ids` that are open and opens the shut ones that are not in it (what a bound `closed` list says)."""
+        wanted = set(ids)
+        for panel_id in list(self._closed):
+            if panel_id not in wanted:
+                self.reopen(panel_id)
+        for panel_id in list(self.panels):
+            if panel_id in wanted:
+                self.close(panel_id)
 
     def remove_panel(self, panel_id: str) -> None:
         """Takes the panel out of the dock (its node is the caller's to destroy)."""
@@ -299,6 +347,7 @@ class DockHost:
         if self.dock.side_of(node) is not None:
             self.dock.remove_panel(node)
         self.panels.pop(panel_id, None)
+        self._closed.pop(panel_id, None)
 
     def retitle(self, panel_id: str, title: str) -> None:
         self.dock.rename(self.view.node(panel_id), title)

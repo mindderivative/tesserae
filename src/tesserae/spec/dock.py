@@ -33,8 +33,8 @@ from typing import Any
 __all__ = ["DOCK_SIDES", "DockError", "expand_docks"]
 
 DOCK_SIDES = ("left", "right", "top", "bottom", "center")
-_DOCK_KEYS = frozenset({"id", "kind", "style", "classes", "a11y", "children"})
-_PANEL_KEYS = frozenset({"id", "kind", "title", "style", "classes", "a11y", "children"})
+_DOCK_KEYS = frozenset({"id", "kind", "style", "classes", "a11y", "children", "closed"})
+_PANEL_KEYS = frozenset({"id", "kind", "title", "closable", "style", "classes", "a11y", "children"})
 #: How wide a split's handle is across the split.
 SPLIT_SPAN = 16
 
@@ -108,12 +108,13 @@ def _dock(node: dict[str, Any], docks: list[str]) -> dict[str, Any]:
         if not isinstance(title, str):
             raise DockError(f"widget {child['id']!r}: a DockPanel's title is text, got {title!r}")
         panel = _panel(child, style, docks)
-        panel["dock_panel"] = {"title": title, "zone": zone}
-        panels.append({"id": child["id"], "title": title, "zone": zone})
+        closable = bool(child.get("closable"))
+        panel["dock_panel"] = {"title": title, "zone": zone, **({"closable": True} if closable else {})}
+        panels.append({"id": child["id"], "title": title, "zone": zone, **({"closable": True} if closable else {})})
         children.append(panel)
     style = {"flex": "fill", **(node.get("style") or {})}
     out: dict[str, Any] = {"id": node_id, "kind": "Container", "classes": ["dock", *(node.get("classes") or [])],
-                           "style": style, "dock": {"panels": panels, "sizes": sizes}, "children": children}
+                           "style": style, "dock": {"panels": panels, "sizes": sizes, **({"closed": [f"{node_id}.{name}" for name in node["closed"]]} if node.get("closed") else {})}, "children": children}
     if "a11y" in node:
         out["a11y"] = node["a11y"]
     return out

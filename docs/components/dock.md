@@ -14,9 +14,28 @@ the user drags a tab to another zone or the handles between zones. `view.dock_ho
 sizes and saves and restores the layout: `dock = view.dock_host("dock")`, then `dock.set_size("left", 280)`,
 `saved = dock.layout()` and `dock.restore(saved)`.
 
+A panel with `closable: true` has a close button on its tab. A Dock's `closed` (a list, two-way) holds the names of the closable panels that are shut: a close
+button adds its panel's name, and taking a name out opens the panel again, as the last tab of its zone. Putting names in shuts them without the button. `dock.closed()`,
+`dock.close(id)` and `dock.reopen(id)` do the same from Python. Not built: floating panels, tearing a panel off into a window, maximising a panel, reordering tabs,
+and layouts saved by name.
+
 This component has no `component:` fragment: build it in Python.
 
 ## Using it
+
+```yaml
+name: studio
+widget: Window
+style: {width: 900, height: 600, flex_direction: vertical}
+children:
+  - widget: Dock
+    closed: "{{ shut }}"
+    children:
+      - {widget: DockPanel, name: files, title: Files, closable: true, style: {zone: left, width: 220}}
+      - {widget: DockPanel, name: editor, title: Editor, style: {zone: center}}
+```
+
+## Using the fragment
 
 In a view:
 

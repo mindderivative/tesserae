@@ -1915,10 +1915,12 @@ class Dock(window: Any, *, theme: Optional[Theme] = None) -> None
 
 The docking of one window (see the module doc). `add_zone(side, size)` returns the zone's node to place in the layout (the caller places them); `add_panel(side, node, title)` docks a panel; `show`, `move`, `side_of`, `panels`, `shown`, `titles`, `shown_title`, `panel(title)`; `on_move(fn)` hears a panel moving, `fn(node, side)`; `set_theme(theme)` re-colours it.
 
-- `add_panel(side: str, panel: Any, title: str) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone, titled `title` on its tab, and shows it.
+- `add_panel(side: str, panel: Any, title: str, closable: bool = False) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone, titled `title` on its tab, and shows it.
 - `add_zone(side: str, size: float) -> Any`: Creates `side`'s zone -- a tab strip over the area that shows its selected panel -- `size` px wide (left, right) or tall (top, bottom), or filling what's left (center).
+- `close(panel: Any) -> Any`: Closes `panel` as its tab's close button does: it is undocked (see `remove_panel`) and `on_close` is told.
 - `dispose() -> None`: Stops the dock: its window events, its tabs' listeners.
 - `move(panel: Any, side: str) -> None`: Moves `panel` to `side`'s zone and shows it there, as a drag would, moving it between zones.
+- `on_close(fn: Callable[[Any], Any]) -> Callable[[], None]`: Calls `fn(node)` when a panel's close button closes it.
 - `on_move(fn: Callable[[Any, str], Any]) -> Callable[[], None]`: Calls `fn(node, side)` when a panel moves zone.
 - `panel(title: str) -> Optional[Any]`: The docked panel titled `title`, or `None` (for putting a saved layout back).
 - `panels(side: str) -> list[Any]`: `side`'s panels, in their tabs' order.

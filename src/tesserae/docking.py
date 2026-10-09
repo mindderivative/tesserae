@@ -30,6 +30,7 @@ from typing import Any, Callable, Optional
 
 from tesserae import a11y, tokens
 from tesserae.follow import initial_theme
+from tesserae.icons import icon_path, icon_view_box
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.theme import Theme
@@ -42,6 +43,9 @@ SIDES = ("left", "right", "top", "bottom", "center")
 TAB_HEIGHT = 48.0
 TAB_PADDING = 16.0
 INDICATOR = 2.0
+#: A closable tab's close button: 18 px, with 8 px before it.
+CLOSE_SIZE = 18.0
+CLOSE_ROOM = CLOSE_SIZE + 8.0
 #: How far a press must move before it drags the panel, so a click selects.
 DRAG_THRESHOLD = 4.0
 #: The drop highlight: `primary` at 12% (MD3's pressed/dragged overlay) with a 2 px outline.
@@ -54,6 +58,7 @@ class _Panel:
     node: Any
     title: str
     side: str
+    closable: bool = False
 
 
 @dataclass
@@ -90,6 +95,7 @@ class Dock:
         self._events = Listeners()
         self._zones: dict[str, _Zone] = {}
         self._moves: list[Callable[[Any, str], Any]] = []
+        self._closes: list[Callable[[Any], Any]] = []
         self._press: Optional[dict[str, Any]] = None
         self._dragging: Optional[_Panel] = None
         self._menu: Any = None
@@ -128,15 +134,15 @@ class Dock:
         self._paint_zone(zone)
         return node
 
-    def add_panel(self, side: str, panel: Any, title: str) -> Any:
+    def add_panel(self, side: str, panel: Any, title: str, closable: bool = False) -> Any:
         """Docks `panel` (a node, or a widget's `.node`) in `side`'s zone,
-        titled `title` on its tab, and shows it. Returns the node."""
+        titled `title` on its tab, and shows it. A `closable` panel's tab has a close button (`on_close`). Returns the node."""
         zone = self._zone(side)
         node = getattr(panel, "node", panel)
         if self._find(node) is not None:
             raise ValueError(f"{title!r} is already docked; use move() to move it")
         self.window.dock_panel(side, node)
-        zone.panels.append(_Panel(node, title, side))
+        zone.panels.append(_Panel(node, title, side, closable))
         if node.get("role") is None:
             a11y.describe(node, role="tabpanel", label=title)
         self._rebuild(zone)
@@ -204,6 +210,18 @@ class Dock:
         self._rebuild(zone)
         return entry.node
 
+    def close(self, panel: Any) -> Any:
+        """Closes `panel` as its tab's close button does: it is undocked (see `remove_panel`) and `on_close` is told. Returns the node."""
+        node = self.remove_panel(panel)
+        for fn in list(self._closes):
+            fn(node)
+        return node
+
+    def on_close(self, fn: Callable[[Any], Any]) -> Callable[[], None]:
+        """Calls `fn(node)` when a panel's close button closes it. Returns the stopper."""
+        self._closes.append(fn)
+        return lambda: self._closes.remove(fn) if fn in self._closes else None
+
     def rename(self, panel: Any, title: str) -> None:
         """Gives `panel` a new title, on its tab."""
         entry = self._require(panel)
@@ -255,8 +273,9 @@ class Dock:
             entry.title, font_family=style.font_family, font_size=style.font_size,
             font_weight=style.font_weight, line_height=style.line_height)
         text_width, text_height = math.ceil(text_width), math.ceil(text_height)  # the engine rounds a width down
-        node = self.window.create("box", height=TAB_HEIGHT, width=text_width + 2 * TAB_PADDING, flex_shrink=0.0,
-                                  align_items="center", justify_content="center", focusable=True, role="tab",
+        room = CLOSE_ROOM if entry.closable else 0.0
+        node = self.window.create("box", height=TAB_HEIGHT, width=text_width + 2 * TAB_PADDING + room, flex_shrink=0.0,
+                                  flex_direction="horizontal", align_items="center", justify_content="center", focusable=True, role="tab",
                                   label=entry.title, cursor="pointer")
         label = self.window.create("text", text=entry.title, font_family=style.font_family,
                                    font_size=style.font_size, font_weight=style.font_weight,
@@ -265,6 +284,15 @@ class Dock:
         indicator = self.window.create("box", position="absolute", x=0.0, y=TAB_HEIGHT - INDICATOR, width="100%",
                                        height=INDICATOR, hit_testable=False, a11y_hidden=True)
         node.add_child(label)
+        close = None
+        if entry.closable:
+            close = self.window.create("box", width=CLOSE_SIZE, height=CLOSE_SIZE, corner_radius=CLOSE_SIZE / 2, margin_left=8.0, flex_shrink=0.0,
+                                       align_items="center", justify_content="center", focusable=True, role="button",
+                                       label=f"Close {entry.title}", cursor="pointer")
+            glyph = self.window.create("path", data=icon_path("close"), view_box=icon_view_box("close"), width=14.0, height=14.0,
+                                       fill=self._color("on_surface_variant"), hit_testable=False, a11y_hidden=True)
+            close.add_child(glyph)
+            node.add_child(close)
         node.add_child(indicator)
         zone.strip.add_child(node)
         interaction = Interaction(self.window, node, self._color("on_surface"), self._events.listen,
@@ -280,6 +308,8 @@ class Dock:
             listen(node, "pointer_cancel", lambda e: self._up()),  # the OS took the press (0.3.0 M2)
             listen(node, "secondary_click", handled(lambda e: self._open_menu(entry, at=(e.window_x, e.window_y)))),
         ]
+        if close is not None:
+            tab.undo.append(listen(close, "click", handled(lambda e: self.close(entry.node))))
         return tab
 
     def _paint_tabs(self, zone: _Zone) -> None:

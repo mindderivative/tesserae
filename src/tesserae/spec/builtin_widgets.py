@@ -146,5 +146,7 @@ declare("Window", {
     "min_width": P("float"), "min_height": P("float"), "title_bar": P("dict", doc="Title, icon and buttons of a custom title bar."),
 }, container=True, doc="The root of an app window.")
 declare("TitleBar", {"title": P("str"), "icon": P("icon"), "buttons": P("list")}, container=True, doc="A custom title bar.")
-declare("Dock", container=True, doc="Panels docked around a centre.")
-declare("DockPanel", {"title": P("str", doc="The panel's tab, when its zone has several.")}, container=True, doc="One panel of a Dock.")
+declare("Dock", {"closed": P("list", model=True, doc="The names of the closable panels that are shut; a close button adds its panel, and taking a name out opens the panel again.")},
+        container=True, doc="Panels docked around a centre.")
+declare("DockPanel", {"title": P("str", doc="The panel's tab, when its zone has several."),
+                      "closable": P("bool", doc="Its tab has a close button.")}, container=True, doc="One panel of a Dock.")

@@ -9,7 +9,7 @@ Material Design 3 has no dock panel. It is one panel of a dock: a titled tab in 
 ## In Tesserae
 
 The `DockPanel` kind, with `zone` in its `style`. A `DockPanel` inside another is a split of it, side by side
-(`flex_direction: horizontal`) or top and bottom (`vertical`), with a handle to resize.
+(`flex_direction: horizontal`) or top and bottom (`vertical`), with a handle to resize. `closable: true` puts a close button on its tab (see the Dock's `closed`).
 
 This component has no `component:` fragment: build it in Python.
 

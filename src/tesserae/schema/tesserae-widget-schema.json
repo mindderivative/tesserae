@@ -805,6 +805,18 @@
             "items": {
               "$ref": "#"
             }
+          },
+          "closed": {
+            "anyOf": [
+              {
+                "type": "array"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The names of the closable panels that are shut; a close button adds its panel, and taking a name out opens the panel again."
           }
         },
         "required": [
@@ -830,7 +842,8 @@
             "tooltip",
             "params",
             "expects",
-            "children"
+            "children",
+            "closed"
           ]
         }
       }
@@ -942,6 +955,18 @@
               }
             ],
             "description": "The panel's tab, when its zone has several."
+          },
+          "closable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Its tab has a close button."
           }
         },
         "required": [
@@ -968,7 +993,8 @@
             "params",
             "expects",
             "children",
-            "title"
+            "title",
+            "closable"
           ]
         }
       }

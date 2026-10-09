@@ -291,6 +291,12 @@ class ComposedView(View):
             for prop, (name, scope) in inst.models.items():
                 if inst.widget in ("ScrollView", "VirtualList") and prop in _SCROLL_OUTPUTS:
                     continue  # `_wire_scroll`'s
+                if inst.widget == "Dock" and prop == "closed":  # a closable panel's close button: the names of the panels that are shut
+                    host = self._docks.get(inst.id)
+                    if host is not None:
+                        self._handler_undos.append(host.on_closed(
+                            lambda ids, scope=scope, name=name: scope.assign(name, [i.rsplit(".", 1)[-1] for i in ids])))
+                    continue
                 state = getattr(control, prop, None) if control is not None else None
                 if state is not None and prop == "mode" and hasattr(control, "on_mode"):  # the dial moving itself on to the minutes
                     self._handler_undos.append(control.on_mode(
