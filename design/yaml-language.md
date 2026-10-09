@@ -1,7 +1,7 @@
 # The Tesserae view language (0.5.0)
 
 Phase 1 of [#209](https://github.com/mindderivative/tesserae/issues/209). This is the spec the later phases build and test against.
-**Status: draft for the user's review.** Implemented so far: the expression language (phase 2), the node model (phase 3) and composition (phase 4) and ViewModel binding with a renderer (phase 5).
+**Status: draft for the user's review.** Implemented so far: the expression language (phase 2), the node model (phase 3) and composition (phase 4), ViewModel binding with a renderer (phase 5) and style rules (phase 6).
 
 Conventions: **Decided** marks what the user decided (2026-10-08); **Proposed** marks what this document adds and the user may change;
 **Reserved** marks a place the language may grow without breaking what is written here. "Old" means 0.4.x.
@@ -451,7 +451,7 @@ class DataViewModel(ViewModel):
   is a warning when `app.run()` starts.
 - **Resolution** (8.3): a view bound to several names of one ViewModel resolves `{{ }}` and `handlers` against that one instance.
 - **Handles.** `self.views` is a mapping from bind key to a **view handle** (`.node(name)`, `.state(name)`, `.show()`, `.hide()`). A
-  ViewModel can show one of its views in place of another: `self.show("data_phone")` (**Reserved**: declared groups,
+  ViewModel can show one of its views in place of another: `self.show("data_phone", "data_list")` (**Decided** by the user: the second argument is the view it replaces, a name or a list; **Reserved**: declared groups,
   `views = {"data": [...], "phone": [...]}`).
 - **Lifetime.** A ViewModel is created before the first view it serves is attached and lives until the app ends (or `app.unbind(...)`).
   `ViewModel.on_attached(view_handle)` and `.on_detached(view_handle)` are called per view.
@@ -540,12 +540,23 @@ removed in the release after, with clear messages, as the 0.4.5 and 0.4.6 patter
 - **YAML trap**: `name: no` or `name: yes` reads as a boolean; the error says to quote it.
 - A reactive `for:` over a list that is **replaced** is reconciled; a list changed **in place** is not seen (Signals notify on assignment). The ViewModel replaces lists, as `Signal.set` does everywhere.
 
+**Findings of phase 6** (style):
+
+- **A new module, not a change to `cascade.py`.** The rule shape (`widget`, `variant`, `size`, `shape`, `classes`, `name`, `part`, `state`) is `spec/rules.py`; `cascade.py` keeps the 0.4.x shape (`kind`, `classes`, `id`) for the old builder and the themes. `is_rule_sheet` tells them apart by the keys; one app uses one shape for its stylesheet for now, and a rule-shaped stylesheet reaches composed views only.
+- **Specificity** is the tuple (named, number of variant/size/shape/classes matched, has a state, has a widget), then the later rule. A class rule therefore beats a widget rule alone, and `variant` beats `state`.
+- **Layers** run lowest first (a widget's shipped looks, then the app's); a later layer wins whatever the specificity. **Inline `style:` beats every rule, for the fields it sets and no others**, and a call-site `style:` lies over the callee's root. The 0.4.x trap (a component's look written *into* its inline style, so no class rule could beat it) is gone because a widget's shipped looks are rules in the lowest layer.
+- **Naming a node.** An instance has identities: itself as its widget, the root of a view call as that view, and a named node inside a view as `part:` of it. Slot content belongs to the caller, not to the view it is passed to. The root of a view is the widget, not a part.
+- **States.** `hovered`, `focused` and `pressed` are Signals made when a rule or an expression first asks (`focused` is keyboard focus, as the focus ring is); the renderer wires pointer and focus events to the ones that exist. `disabled`, `selected`, `checked` and `expanded` read the widget's own property of that name. The three are readable names (`{{ 'hover' if hovered else 'rest' }}`, for the nearest widget with `interaction`) and read-only.
+- **`foreground` is an extra** of `Text`, `Link`, `TextField`, `Icon` and `Svg` (`widgets.style_fields_of`); anywhere else it is an error naming who accepts it. The 131 repository files all still load.
+- **Rule values** may be expressions, read in the widget's own names (a view's params, a built-in's properties), and follow them.
+- **Deferred.** `transition:`, role-with-alpha colours, per-corner radius and the `full` shape token stay reserved. Section 13's overlays (`open`, `anchor`, `placement`, `modal`, `dismissible` on `Menu`, `Dialog` and the rest) need those widgets, so they are the component pass's; the property names stay reserved.
+
 **Findings of phase 5** (binding and rendering):
 
 - **Rendering reuses the builder.** `spec/lower.py` writes a composition as the 0.4.x node mappings at the values the instances hold now; `ComposedView` (a `View`) builds that, then an `Effect` lowers again whenever a value any property reads changes and `View.reconcile` patches the live nodes by id. Structure changes (`for:`, `if:`) re-run the effect so it follows the new instances. So the cascade, controls, interaction and themes are the tested code; only what feeds them is new.
 - **`views` is two things.** On the class it lists the names a ViewModel serves; on an instance `self.views` is the mapping from name to `ViewHandle` (the base class replaces it when the first view opens). `declared_views(cls)` reads the class form.
 - **`ViewModel(view=None)`**: the 0.4.x `ViewModel(view)` still attaches; with no argument the ViewModel is attached by `app.bind`. `on_attached(handle)` and `on_detached(handle)` are called per view.
-- **Swapping.** `self.show("data_phone")` of section 11 cannot say what it replaces, and both views are visible by default; so it is `self.show(name, instead_of=other_or_list)`, and a handle has `.show()` and `.hide()`. **Proposed**: declared groups remain reserved.
+- **Swapping** (**Decided**): `self.show(new, old)`. Both views are visible by default, so the second argument says what `new` replaces (a name or a list of names); the `show` docstring explains it. A handle has `.show()` and `.hide()`. Declared groups remain reserved.
 - **Two-way.** A `model` property given a bare reference to a writable Signal or state writes the user's edit back. A model *param* given a bare Signal passes the Signal itself to the callee, so a view built around a `Checkbox` can be two-way with its caller's Signal. A loop variable or a computed expression is one-way.
 - **Contract.** `check_view(doc, viewmodel)` reports, as `file:line:column`, every name a view reads and every action it names that the ViewModel lacks, and each `expects:` entry (`int float str bool list dict any handler`) that is missing or of another type. `App.check()` runs it for the opened views and warns about a ViewModel that serves a name no view has.
 - **Not yet** (phase 7 or the component pass): discovering a `*_ViewModel.py` by its `views` in `app.load`, `app.unbind`, hot reload of a new-syntax file, `style:` as a file name in a composed view, `on_key` handlers, an Image `frame`, a ScrollView `scroll_offset`. A property the renderer cannot draw is an error naming it. The TextField declaration lost `placeholder`, `multiline` and `obscured`, which the builder never supported.
@@ -595,7 +606,7 @@ this list fixes only the names the language and the registry are designed around
 | 3 node model | `src/tesserae/spec/widgets.py` (registry, `Property`, `@widget`, `decl_from_params`, JSON schema), `spec/builtin_widgets.py` (the 25 built-in declarations), `spec/nodes.py` (`parse_view`: nodes, ids, positions, `LoadError`), `spec/translate.py` (old to new), `tools/generate_widget_schema.py` | one test per key in section 2; unknown-property errors with suggestions; the translator over every file in the repository (128 of 131 load, 3 known gaps) |
 | 4 composition | `src/tesserae/spec/compose.py` (`Composer`, `Composition`, `Instance`, `Scope`: params, the caller's scope, `Slot`, `for`, `if`, `state`, ids, disposal) | scope rules; slot placement and errors; reactive `for:` reconciliation (add, remove, reorder, update in place, 10 000 rows); state per row and across a recomposition; the call's keys over the callee's root; every subscription released on dispose; mutation-checked |
 | 5 binding | `src/tesserae/viewmodel.py` (`Bindings`, `ViewHandle`, `open_view`, `check_view`), `spec/lower.py` (instances to the builder's spec), `composed.py` (`ComposedView`, `open_composed`, built-in actions), `App.bind`/`open_view`/`check`, `ViewModel(view=None)` with `views`, `show`, `on_attached`, `on_detached` | the pie-and-list case (two views, one instance, one Signal) headless and on screen; the three ways to bind; unbound views; swap; the contract and `expects:`; lowering of every widget shape; handlers, two-way edits, `for:` and `if:` reaching real nodes; mutation-checked |
-| 6 style | `spec/cascade.py` (rules by widget, variant, part, state), per-widget extras | specificity table; state selectors from `Interaction`; the inline-versus-rule fix |
+| 6 style | `src/tesserae/spec/rules.py` (`RuleSheet`, `Rule`, `Identity`, the specificity order, `is_rule_sheet`, `load_rule_sheet`), `widgets.style_fields_of` (per-widget extras), rule resolution and the `hovered`/`focused`/`pressed` Signals in `spec/compose.py`, state wiring in `composed.py`; `spec/cascade.py` stays for the 0.4.x shape | the shape and its errors; the specificity table; layers; inline over rules for the fields it sets; variant, part and state selectors; rule values that read params; hover and press on screen; mutation-checked |
 | 7 migration | `tesserae/migrate.py`, the CLI command, docs, tutorials, built-ins in the new language | the translator on the whole repository; round trip (translated files load and build the same tree as before) |
 
 **Risks.** (1) A reactive `for:` over a list that is replaced often: reconciliation by `key` must be linear and tested at 10 000 rows against

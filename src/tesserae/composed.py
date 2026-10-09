@@ -69,6 +69,7 @@ class ComposedView(View):
         self.handle = handle
         self._base_dir = Path(base_dir) if base_dir is not None else Path.cwd()
         self._handler_undos: list[Callable[[], None]] = []
+        self._state_undos: list[Callable[[], None]] = []
         self._observed: set[int] = set()
         self._synced = False
         self._effect: Optional[Effect] = None
@@ -93,6 +94,7 @@ class ComposedView(View):
         if self._synced:
             untrack(lambda: self.reconcile(spec, frames))
         untrack(self._wire_instances)
+        untrack(self._wire_states)
         untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
 
     def _observe(self) -> None:
@@ -141,21 +143,41 @@ class ComposedView(View):
                     self._handler_undos.append(self._listen(
                         node, "change", lambda ev, scope=scope, name=name, node=node, prop=prop: scope.assign(name, node.get(prop))))
 
+    def _wire_states(self) -> None:
+        """Feeds the interaction Signals (`hovered`, `focused`, `pressed`) of the instances a rule or an expression asked about."""
+        for undo in self._state_undos:
+            undo()
+        self._state_undos = []
+        for inst in self.handle.composition.walk():
+            if not inst._istates or inst.id not in self._built.outer:
+                continue
+            node = self._built.outer[inst.id]
+            signals = inst._istates
+
+            def setter(name: str, value: Any, signals: dict = signals) -> Callable[[Any], None]:
+                return lambda event=None: signals[name].set(value(event) if callable(value) else value) if name in signals else None
+
+            for event, name, value in (("pointer_enter", "hovered", True), ("pointer_leave", "hovered", False),
+                                       ("pointer_down", "pressed", True), ("pointer_up", "pressed", False), ("pointer_cancel", "pressed", False),
+                                       ("focus", "focused", lambda e: bool(getattr(e, "focus_visible", False))), ("unfocus", "focused", False)):
+                if name in signals:
+                    self._state_undos.append(self._listen(node, event, setter(name, value)))
+
     def close(self) -> None:
         """Stops following the composition and releases it."""
         if self._effect is not None:
             self._effect.dispose()
-        for undo in self._handler_undos:
+        for undo in (*self._handler_undos, *self._state_undos):
             undo()
-        self._handler_undos = []
+        self._handler_undos, self._state_undos = [], []
         self.handle.close()
 
 
 def open_composed(doc: ViewDoc, bindings: Bindings, views: Any = None, *, base_dir: Optional[Path] = None, window: Any = None,
-                  **kwargs: Any) -> ComposedView:
+                  rules: Any = (), **kwargs: Any) -> ComposedView:
     """Opens `doc` against the ViewModel that serves its name and builds it: `kwargs` are `View`'s (theme seed, dark, ...)."""
     holder: list[ComposedView] = []
-    handle = open_view(doc, bindings, views, actions=builtin_actions(lambda: holder[0] if holder else None))
+    handle = open_view(doc, bindings, views, actions=builtin_actions(lambda: holder[0] if holder else None), rules=rules)
     view = ComposedView(handle, base_dir=base_dir, window=window, **kwargs)
     holder.append(view)
     return view

@@ -21,9 +21,7 @@ import yaml
 from tesserae import a11y as a11y_module
 from tesserae.expr import Expr, ExprError, Origin, Statements, compile_expr, compile_statements, compile_template, is_action_name
 from tesserae.spec import widgets as registry
-from tesserae.spec.cascade import STYLE_FIELDS
-from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED
-from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from_params, is_expression
+from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from_params, is_expression, style_fields_of
 
 __all__ = ["EVENTS", "ForSpec", "Handler", "LoadError", "Node", "ViewDoc", "load_marked", "parse_view"]
 
@@ -395,10 +393,14 @@ class _Parser:
             return
         if not isinstance(value, PMap):
             raise self.fail(vat, f"'style:' takes a mapping or a style file name, got {_describe(value)}")
-        allowed = STYLE_FIELDS | LAYOUT_FIELDS | set(REPLACED) | set(node.decl.extras)
+        allowed = style_fields_of(node.decl)
         for key, item in value.items():
             if key not in allowed:
-                raise self.fail(value.key_at[key], f"{node.decl.name}: no style field '{key}'", _near(key, allowed))
+                hint = None
+                if key == "foreground":
+                    users = sorted(n for n in registry.names() if "foreground" in (registry.lookup(n).extras or ()))
+                    hint = f"widgets that accept it: {', '.join(users)}"
+                raise self.fail(value.key_at[key], f"{node.decl.name}: style '{key}' is not valid here", hint or _near(key, allowed))
             node.style[key] = self.template(item, value.val_at[key])
 
     def handlers(self, node: Node, value: Any, vat: Position) -> None:

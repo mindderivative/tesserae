@@ -77,14 +77,17 @@ def test_state_declares_names_with_starting_values():
 def test_style_takes_universal_fields_a_widgets_extras_and_expressions():
     n = node("widget: Container\nstyle: {width: 100, background: '{{ color }}', flex_direction: vertical}")
     assert n.style["width"] == 100 and isinstance(n.style["background"], Template)
-    err = fails("widget: Container\nstyle: {widht: 100}", "Container: no style field 'widht'")
+    err = fails("widget: Container\nstyle: {widht: 100}", "Container: style 'widht' is not valid here")
     assert "did you mean 'width'" in str(err)
     fails("widget: Container\nstyle: [1]", "'style:' takes a mapping")
     assert node("widget: Container\nstyle: row_Style.yaml").style_file == "row_Style.yaml"
+    assert node("widget: Text\nstyle: {foreground: on_surface}").style["foreground"] == "on_surface"  # an extra of the widgets that draw text
+    err = fails("widget: Container\nstyle: {foreground: red}", "Container: style 'foreground' is not valid here")
+    assert "widgets that accept it: Icon, Link, Svg, Text, TextField" in str(err)
     W.register_widget(WidgetDecl("Gauge", {}, extras=("track_height",)))
     try:
         assert node("widget: Gauge\nstyle: {track_height: 4}").style["track_height"] == 4
-        fails("widget: Rect\nstyle: {track_height: 4}", "no style field 'track_height'")
+        fails("widget: Rect\nstyle: {track_height: 4}", "style 'track_height' is not valid here")
     finally:
         W.unregister_widget("Gauge")
 

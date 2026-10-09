@@ -151,9 +151,9 @@ def test_a_viewmodel_can_swap_one_view_for_another():
     pie, lst = open_view(doc(PIE), bindings), open_view(doc(LIST), bindings)
     vm = pie.viewmodel
     assert pie.visible.get() and lst.visible.get()  # both are visible at once by default
-    vm.show("data_list", instead_of="data_pie")
+    vm.show("data_list", "data_pie")
     assert lst.visible.get() and not pie.visible.get()
-    vm.show("data_pie", instead_of=["data_list"])
+    vm.show("data_pie", ["data_list"])
     assert pie.visible.get() and not lst.visible.get()
     pie.hide()
     pie.show()

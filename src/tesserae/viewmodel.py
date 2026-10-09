@@ -218,10 +218,10 @@ def _handles_of(vm: Any) -> ViewHandles:
 
 
 def open_view(doc: ViewDoc, bindings: Bindings, views: Any = None, *, actions: Optional[Callable[[str], Any]] = None,
-              previous: Optional[ViewHandle] = None) -> ViewHandle:
+              previous: Optional[ViewHandle] = None, rules: Iterable[Any] = ()) -> ViewHandle:
     """Composes `doc` against the ViewModel that serves its name and attaches it. `views` resolves the views `doc` calls."""
     vm = bindings.viewmodel_for(doc.name)
-    composer = Composer(views, vm, previous=previous.composition if previous else None, actions=actions)
+    composer = Composer(views, vm, previous=previous.composition if previous else None, actions=actions, rules=rules)
     handle = ViewHandle(doc.name, composer.compose(doc), vm, bindings, doc)
     bindings._attach(handle)
     return handle

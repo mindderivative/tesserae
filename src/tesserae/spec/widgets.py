@@ -17,7 +17,7 @@ from typing import Any, Callable, Iterable, Optional
 
 __all__ = [
     "PROPERTY_TYPES", "RESERVED_KEYS", "Property", "PropertyError", "WidgetDecl", "declare", "decl_from_params", "is_expression", "json_schema", "lookup",
-    "names", "register_widget", "unregister_widget", "widget",
+    "names", "register_widget", "style_fields_of", "unregister_widget", "widget",
 ]
 
 PROPERTY_TYPES = ("str", "int", "float", "bool", "color", "length", "icon", "enum", "list", "dict", "node", "nodes", "handler", "any")
@@ -27,6 +27,13 @@ RESERVED_KEYS = frozenset({
     "widget", "name", "if", "for", "key", "slot", "state", "style", "classes", "handlers", "a11y", "interaction", "window_region",
     "route", "children", "params", "expects",
 })
+
+def _style_fields() -> frozenset[str]:
+    from tesserae.spec.cascade import STYLE_FIELDS
+    from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED
+
+    return (frozenset(STYLE_FIELDS) | frozenset(LAYOUT_FIELDS) | frozenset(REPLACED)) - {"foreground"}
+
 
 _HEX_COLOR = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
 _ROLE_OR_NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_]*$")
@@ -266,6 +273,15 @@ def lookup(name: str) -> Optional[WidgetDecl]:
 def names() -> list[str]:
     _load_builtins()
     return sorted(_REGISTRY)
+
+
+def style_fields_of(decl: Optional[WidgetDecl]) -> frozenset[str]:
+    """The style fields `decl`'s nodes may have (spec section 10): the universal ones and the widget's own `extras`
+    (`foreground` is one for the widgets that draw text or glyphs). A view accepts `foreground` too: its root decides."""
+    base = _style_fields()
+    if decl is not None and decl.view:
+        return base | {"foreground"}
+    return base | frozenset(decl.extras if decl else ())
 
 
 def decl_from_params(name: str, params: Any) -> WidgetDecl:

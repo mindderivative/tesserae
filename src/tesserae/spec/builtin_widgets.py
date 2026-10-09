@@ -29,20 +29,20 @@ _TEXT = {
     "overflow": P("enum", choices=_TEXT_OVERFLOWS, default="clip"),
     "text_align": P("enum", choices=_TEXT_ALIGNS, default="start"),
 }
-declare("Text", dict(_TEXT), doc="A run of text.")
+declare("Text", dict(_TEXT), extras=("foreground",), doc="A run of text.")
 declare("Link", {**_TEXT, "text": P("str", default="", doc="The link's text, which names it for a screen reader.")},
-        doc="Text that can be activated.")
+        extras=("foreground",), doc="Text that can be activated.")
 declare("TextField", {
     "text": P("str", default="", model=True, doc="What the user has typed."),
     "typography_role": P("str"), "font_family": P("str"), "font_size": P("float"), "font_weight": P("any"), "disabled": P("bool"),
-}, doc="A single-line text input.")
+}, extras=("foreground",), doc="A single-line text input.")
 declare("Image", {
     "src": P("str", doc="A path relative to the file."),
     "fit": P("str", default="cover", doc="How the picture fills its box: cover, contain, fill ..."),
     "frame": P("any", doc="A video frame, (rgba, width, height), pushed from a ViewModel."),
 }, doc="A picture.")
-declare("Icon", {"icon": P("icon", required=True, doc="A built-in icon name.")}, doc="A glyph from the built-in set.")
-declare("Svg", {"src": P("str"), "content": P("str", doc="The SVG text, instead of a file.")}, doc="A vector picture.")
+declare("Icon", {"icon": P("icon", required=True, doc="A built-in icon name.")}, extras=("foreground",), doc="A glyph from the built-in set.")
+declare("Svg", {"src": P("str"), "content": P("str", doc="The SVG text, instead of a file.")}, extras=("foreground",), doc="A vector picture.")
 declare("ScrollView", {
     "scroll_offset": P("float", default=0.0, model=True, doc="The scrolled distance."),
 }, container=True, doc="A scrolling viewport for its children.")

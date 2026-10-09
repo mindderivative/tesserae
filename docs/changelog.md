@@ -37,9 +37,15 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   when its first view opens; `app.bind(instance)` uses yours; `app.bind(factory=DataViewModel)` makes one per view instance; a view without a
   `name:` is not bound. `app.open_view("Main")` composes a view written in the new syntax and shows it with the existing builder, keeping it in
   step with its Signals (`for:` and `if:` add and remove real nodes, handlers run in the scope they were written in, a `model` property given a
-  bare reference writes the user's edit back). `ViewModel.views[name]` is a handle (`.node`, `.state`, `.show`, `.hide`), `self.show(name,
-  instead_of=...)` swaps views, and `app.check()` / `check_view` compare every name, action and `expects:` entry of a view with its ViewModel
+  bare reference writes the user's edit back). `ViewModel.views[name]` is a handle (`.node`, `.state`, `.show`, `.hide`), `self.show(new, old)` swaps views, and `app.check()` / `check_view` compare every name, action and `expects:` entry of a view with its ViewModel
   without a window. `ViewModel(view)` still works.
+
+- **Style rules** (phase 6). A stylesheet may hold rules by `widget`, `variant`, `size`, `shape`, `classes`, `name`, `part` and `state`
+  (`tesserae.spec.rules`). The most specific rule wins (a name, then the number of properties matched, then a state, then the widget alone),
+  a later rule wins a tie, an app's stylesheet beats the looks a widget ships, and a node's inline `style:` beats every rule for the fields it
+  sets. `hovered`, `focused` and `pressed` are Signals a rule can select on and an expression can read; `disabled`, `selected`, `checked` and
+  `expanded` read the widget's own property. `foreground` is no longer valid on every widget: the widgets that draw text or glyphs declare it, and
+  the error names them. `self.show(new, old)` swaps one of a ViewModel's views for another.
 
 ### Removed
 

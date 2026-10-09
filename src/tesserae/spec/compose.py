@@ -29,6 +29,7 @@ from typing import Any, Callable, Iterable, Iterator, Mapping, Optional
 from tesserae.expr import BUILTIN_FUNCTIONS, Expr, Template
 from tesserae.reactive import Computed, Effect, Signal, untrack
 from tesserae.spec.nodes import Handler, LoadError, Node, ViewDoc
+from tesserae.spec.rules import INTERACTION_STATES, Identity, Rule, RuleSheet, ordered
 from tesserae.spec.widgets import PropertyError, WidgetDecl
 
 __all__ = ["Composer", "Composition", "Instance", "Scope"]
@@ -36,6 +37,22 @@ __all__ = ["Composer", "Composition", "Instance", "Scope"]
 MAX_DEPTH = 64
 #: Names a param, a loop variable or a state variable may not take (spec 8.7).
 RESERVED = frozenset({"hovered", "focused", "pressed", "event", "app", "True", "False", "None"}) | frozenset(BUILTIN_FUNCTIONS)
+
+
+class _StateValues(dict):
+    """A frame that also answers `hovered`, `focused` and `pressed` with the interaction state of one instance, made when first read."""
+
+    def __init__(self, values: Mapping[str, Any], inst: "Instance") -> None:
+        super().__init__(values)
+        self._inst = inst
+
+    def __contains__(self, key: object) -> bool:
+        return key in INTERACTION_STATES or dict.__contains__(self, key)
+
+    def __getitem__(self, key: str) -> Any:
+        if key in INTERACTION_STATES and not dict.__contains__(self, key):
+            return self._inst.interaction_signal(key)
+        return dict.__getitem__(self, key)
 
 
 # -- scope -----------------------------------------------------------------------------------------------------------------
@@ -46,9 +63,11 @@ class Scope:
     ViewModel's public attributes. A `Signal` or `Computed` in a frame makes the name reactive."""
 
     def __init__(self, parent: Optional["Scope"] = None, values: Optional[Mapping[str, Any]] = None, *, root: Any = None,
-                 readonly: bool = False, writable: Iterable[str] = (), actions: Optional[Callable[[str], Optional[Callable[..., Any]]]] = None) -> None:
+                 readonly: bool = False, writable: Iterable[str] = (), actions: Optional[Callable[[str], Optional[Callable[..., Any]]]] = None,
+                 states: Optional["Instance"] = None) -> None:
         self.parent = parent
-        self.values = dict(values or {})
+        #: with `states`, the names `hovered`, `focused` and `pressed` are that instance's interaction state (spec 8.7)
+        self.values = _StateValues(values or {}, states) if states is not None else dict(values or {})
         self.readonly = readonly  # loop variables and params are read-only; state is not (a model param holds the caller's Signal)
         self.writable = set(writable)
         self.root = root if root is not None or parent is None else parent.root
@@ -157,6 +176,11 @@ class Instance:
         self.state: dict[str, Signal] = {}
         #: model properties given a bare writable reference: property -> (name, scope); what the user's edit is written back to
         self.models: dict[str, tuple[str, Scope]] = {}
+        #: the ways a stylesheet rule can name this instance, and the interaction states some rule or expression has asked for
+        self.identities: list[Identity] = []
+        self._istates: dict[str, Signal] = {}
+        self._rules: Optional[Computed] = None
+        self._release_rules: list[Callable[[], None]] = []
         self.parent: Optional["Instance"] = None
         self.children: list["Instance"] = []
         self.disposed = False
@@ -175,8 +199,23 @@ class Instance:
         return prop.default
 
     def style_value(self, name: str) -> Any:
+        """The inline value of a style field (what the node or the call gave)."""
         held = self.style[name]
         return held.get() if isinstance(held, (Signal, Computed)) else held
+
+    def effective_style(self) -> dict[str, Any]:
+        """The style at the values things hold now: the stylesheet rules that match, then the inline fields over them."""
+        resolved = dict(self._rules.get()) if self._rules is not None else {}
+        for name in self.style:
+            resolved[name] = self.style_value(name)
+        return resolved
+
+    def interaction_signal(self, name: str) -> Signal:
+        """The Signal for `hovered`, `focused` or `pressed`, made on first use; a renderer that sees one here wires the events to it."""
+        signal = self._istates.get(name)
+        if signal is None:
+            signal = self._istates[name] = Signal(False)
+        return signal
 
     def on_children(self, callback: Callable[["Instance", list["Instance"], list["Instance"]], None]) -> Callable[[], None]:
         """Calls `callback(instance, old_children, new_children)` when the children change; returns the undo."""
@@ -214,6 +253,9 @@ class Instance:
         if self.disposed:
             return
         self.disposed = True
+        for release in self._release_rules:
+            release()
+        self._release_rules = []
         for region in self._regions:
             region.dispose()
         for sub in self.parts.values():
@@ -225,6 +267,22 @@ class Instance:
 
     def __repr__(self) -> str:
         return f"<Instance {self.widget} {self.id}>"
+
+
+def _read(inst: Instance, name: str) -> Any:
+    """A property of a built-in instance, or `None` when it has none by that name."""
+    try:
+        return inst.value(name)
+    except KeyError:
+        return None
+
+
+def _state_holds(rule: Rule, inst: Instance, ident: Identity) -> bool:
+    if rule.state is None:
+        return True
+    if rule.state in INTERACTION_STATES:
+        return bool(inst.interaction_signal(rule.state).get())
+    return bool(ident.get(rule.state))
 
 
 def _release_computed(computed: Computed) -> Callable[[], None]:
@@ -404,12 +462,21 @@ class _For(_Region):
 # -- the composer ----------------------------------------------------------------------------------------------------------
 
 
+class _Owner:
+    """The view call a node is inside, as a stylesheet names it: the widget, how it reads that widget's properties, and where its rules read."""
+
+    def __init__(self, widget: str, get: Callable[[str], Any], scope: Scope) -> None:
+        self.widget, self.get, self.scope = widget, get, scope
+
+
 class _Ctx:
-    """Where a node is being composed: its view, how deep, and the slot content a view call passed."""
+    """Where a node is being composed: its view, how deep, the slot content a view call passed, and the call it is inside."""
 
     def __init__(self, doc: ViewDoc, depth: int, chain: tuple[str, ...], slots: Optional[dict[str, list[tuple[int, Node]]]] = None,
-                 slot_scope: Optional[Scope] = None, slot_ctx: Optional["_Ctx"] = None, call_id: str = "") -> None:
+                 slot_scope: Optional[Scope] = None, slot_ctx: Optional["_Ctx"] = None, call_id: str = "",
+                 owner: Optional[_Owner] = None) -> None:
         self.doc, self.depth, self.chain = doc, depth, chain
+        self.owner = owner
         self.slots, self.slot_scope, self.slot_ctx, self.call_id = slots or {}, slot_scope, slot_ctx, call_id
 
 
@@ -445,10 +512,12 @@ class Composer:
     names resolve against; `previous` is an earlier `Composition` whose state is carried over."""
 
     def __init__(self, views: Any = None, viewmodel: Any = None, *, previous: Optional[Composition] = None,
-                 actions: Optional[Callable[[str], Optional[Callable[..., Any]]]] = None) -> None:
+                 actions: Optional[Callable[[str], Optional[Callable[..., Any]]]] = None, rules: Iterable[RuleSheet] = ()) -> None:
         self._views = views if views is not None else {}
         self.viewmodel = viewmodel
         self.actions = actions
+        #: stylesheet layers, lowest first (a widget's shipped looks, then the app's)
+        self.rules = [sheet for sheet in rules if sheet.rules]
         self.by_id: dict[str, Instance] = {}
         self.states: dict[tuple[str, str, str], Signal] = {}
         self._previous = previous._composer.states if previous is not None else {}
@@ -516,7 +585,7 @@ class Composer:
             if doc is None:
                 raise self._fail(ctx, node.at, f"no view named '{node.widget}'")
             return self._call(node, doc, iid, scope, ctx)
-        return self._builtin(node, iid, scope, ctx)
+        return self._builtin(node, iid, scope, ctx, forced=forced_id is not None)
 
     def _register(self, inst: Instance, ctx: _Ctx) -> None:
         existing = self.by_id.get(inst.id)
@@ -571,10 +640,15 @@ class Composer:
 
     # built-in widgets
 
-    def _builtin(self, node: Node, iid: str, scope: Scope, ctx: _Ctx) -> Instance:
+    def _builtin(self, node: Node, iid: str, scope: Scope, ctx: _Ctx, forced: bool = False) -> Instance:
         inst = Instance(node, node.widget, iid, node.decl)
         self._register(inst, ctx)
         inner = self._with_state(node, scope, iid, "node", ctx, inst)
+        if node.interaction or forced:  # `hovered`, `focused` and `pressed` are the nearest interactive widget's (a call may make a root so)
+            inner = Scope(inner, states=inst, readonly=True)
+        inst.identities.append(Identity(node.widget, None, lambda name, inst=inst: _read(inst, name), inner))
+        if ctx.owner is not None and node.name and not forced:
+            inst.identities.append(Identity(ctx.owner.widget, node.name, ctx.owner.get, ctx.owner.scope))
         for name, value in node.style.items():
             inst.style[name] = self._bind(value, inner, inst)
         for name, value in node.a11y.items():
@@ -596,7 +670,41 @@ class Composer:
         for index, child in enumerate(node.children):
             inst._regions.append(self._region(child, f"children[{index}]", iid, inner, ctx, inst._refresh))
         inst._refresh()
+        self._install_rules(inst)
         return inst
+
+    # stylesheet rules
+
+    def _install_rules(self, inst: Instance) -> None:
+        """Makes the `Computed` that resolves which rules apply to `inst` (again, when it gained a name from a view call)."""
+        if inst._rules is not None:
+            for release in inst._release_rules:
+                release()
+            inst._release_rules = []
+            inst._rules = None
+        if not self.rules:
+            return
+        widgets = {ident.widget for ident in inst.identities}
+        layers = [(sheet, sheet.candidates(widgets)) for sheet in self.rules]
+        if not any(candidates for _, candidates in layers):
+            return
+
+        def resolve() -> dict[str, Any]:
+            style: dict[str, Any] = {}
+            for _, candidates in layers:
+                matched: list[tuple[Rule, Identity]] = []
+                for rule in candidates:
+                    for ident in inst.identities:
+                        if rule.matches(ident, inst.classes, inst.name) and _state_holds(rule, inst, ident):
+                            matched.append((rule, ident))
+                            break
+                for rule, ident in sorted(matched, key=lambda pair: (pair[0].specificity, pair[0].order)):
+                    for field_name, value in rule.style.items():
+                        style[field_name] = value.evaluate(ident.scope) if hasattr(value, "evaluate") else value
+            return style
+
+        inst._rules = Computed(resolve)
+        inst._release_rules.append(_release_computed(inst._rules))
 
     def _model_ref(self, decl: Optional[WidgetDecl], name: str, value: Any, scope: Scope) -> Optional[str]:
         """The name a `model` property is two-way with: it is given one bare reference to a writable Signal (spec 9.3)."""
@@ -654,9 +762,15 @@ class Composer:
                 raise self._fail(ctx, child.at, f"{node.widget} has no slot '{slot}'", f"slots: {', '.join(available)}")
             content.setdefault(slot, []).append((index, child))
 
-        sub = _Ctx(doc, ctx.depth + 1, (*ctx.chain, node.widget), content, call_scope, ctx, iid)
+        callee_scope = Scope(None, values, root=self.viewmodel, readonly=True, writable=models, actions=self.actions)
+
+        def param(name: str) -> Any:
+            held = values.get(name)
+            return held.get() if isinstance(held, (Signal, Computed)) else held
+
+        sub = _Ctx(doc, ctx.depth + 1, (*ctx.chain, node.widget), content, call_scope, ctx, iid, owner=_Owner(node.widget, param, callee_scope))
         self._check_root(doc.root, sub)
-        inst = self._instance(doc.root, "root", Scope(None, values, root=self.viewmodel, readonly=True, writable=models, actions=self.actions), sub, forced_id=iid)
+        inst = self._instance(doc.root, "root", callee_scope, sub, forced_id=iid)
         # the call's own keys lie over the callee's root; a handler written at the call runs in the caller's scope
         for name, value in node.style.items():
             inst.style[name] = self._bind(value, call_scope, inst)
@@ -675,4 +789,6 @@ class Composer:
             inst.name = node.name
         inst.state = {**inst.state, **holder.state}
         inst._release.extend(holder._release)
+        inst.identities.append(Identity(node.widget, None, param, callee_scope))
+        self._install_rules(inst)
         return inst

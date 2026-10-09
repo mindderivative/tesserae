@@ -47,8 +47,9 @@ def lower(inst: Instance) -> dict[str, Any]:
         folded = {"src", "content"}
         node["svg"] = {k: values[k] for k in ("src", "content") if k in values}
     node.update({k: v for k, v in values.items() if k not in folded})  # the rest stay flat: `disabled`, `checked`, `value`, ...
-    if inst.style:
-        node["style"] = {name: inst.style_value(name) for name in inst.style}
+    style = inst.effective_style()
+    if style:
+        node["style"] = style
     if inst.classes:
         node["classes"] = list(inst.classes)
     if inst.a11y:

@@ -850,12 +850,24 @@ class App:
         kwargs = self._view_theme()
         if self._stylesheet_spec is not None:
             kwargs["stylesheet_spec"] = self._stylesheet_spec
-        opened = open_composed(doc, self.bindings, callee, base_dir=path.parent, window=self._window, **kwargs)
+        from tesserae.spec.rules import is_rule_sheet
+
+        if self._stylesheet_spec is not None and is_rule_sheet(self._stylesheet_spec):  # rules by widget, variant, part and state
+            kwargs.pop("stylesheet_spec")
+            rules = [self._rule_sheet()]
+        else:
+            rules = []
+        opened = open_composed(doc, self.bindings, callee, base_dir=path.parent, window=self._window, rules=rules, **kwargs)
         key = name or doc.name or path.name.removesuffix("_View.yaml")
         self.register(key, opened, opened.handle.viewmodel)
         self._built.append(_Built(opened))
         self._opened[key] = opened
         return opened
+
+    def _rule_sheet(self) -> Any:
+        from tesserae.spec.rules import RuleSheet
+
+        return RuleSheet.of(self._stylesheet_spec, "<stylesheet>")
 
     def check(self) -> list[str]:
         """Problems between the views opened with `open_view` and their ViewModels (names, actions and `expects:`), and ViewModels that

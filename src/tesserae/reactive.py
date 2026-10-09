@@ -331,9 +331,10 @@ class ViewModel:
     def on_detached(self, handle: Any) -> None:
         """Called when one of the views this ViewModel serves is closed."""
 
-    def show(self, name: str, *, instead_of: Any = None) -> None:
-        """Shows the open view `name`, hiding the views named in `instead_of` (a name or a list of them)."""
+    def show(self, new: str, old: Any = None) -> None:
+        """Shows the open view `new`. Give `old` (a view name, or a list of names) to hide it, or them, in the same call: the swap
+        `self.show("data_phone", "data_list")` puts the phone layout where the list was. Both views are visible by default."""
         handles = self.views
-        handles[name].show()
-        for other in ([instead_of] if isinstance(instead_of, str) else list(instead_of or ())):
+        handles[new].show()
+        for other in ([old] if isinstance(old, str) else list(old or ())):
             handles[other].hide()

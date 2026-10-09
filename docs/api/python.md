@@ -183,7 +183,7 @@ The object a view's bindings and handlers resolve against. Constructing one atta
 
 - `on_attached(handle: Any) -> None`: Called when one of the views this ViewModel serves is opened.
 - `on_detached(handle: Any) -> None`: Called when one of the views this ViewModel serves is closed.
-- `show(name: str, *, instead_of: Any = None) -> None`: Shows the open view `name`, hiding the views named in `instead_of` (a name or a list of them).
+- `show(new: str, old: Any = None) -> None`: Shows the open view `new`.
 
 ### `batch`
 
