@@ -8,9 +8,40 @@ A segmented button is a row of two to five connected options, for one choice or 
 
 ## In Tesserae
 
-Python only: there is no `component:` fragment, because the number of segments changes its structure.
+`widget: SegmentedButton` is a view Tesserae ships (`SegmentedButton_View.yaml`): one outlined pill (40 pixels tall, a 1 pixel `outline`, fully
+rounded) of segments with a line between them.
 
-This component has no `component:` fragment: build it in Python.
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `options` | a list | the segments, each `{value, label}` and optionally `{icon, disabled}`; an expression follows its Signals |
+| `selected` | a value, or a list with `multiple`; two-way | the chosen one(s); a press writes it back |
+| `multiple` | true or false | several can be chosen; each segment toggles |
+| `disabled` | true or false | dimmed, and no segment can be pressed |
+
+A chosen segment is `secondary_container` with a check that takes the place of its icon. Single choice is a radio group: one Tab stop (the
+chosen segment), and the arrow keys move the choice; multiple choice is a group of toggles, each its own Tab stop with the arrows moving focus
+only. The look is in the view, because each segment's state is its own: write a `SegmentedButton_View.yaml` in your project to change it.
+
+This component is a view Tesserae ships: use `widget: SegmentedButton` in a view (see [The View Language](../guide/view-language.md)).
+
+## Using it
+
+```yaml
+name: calendar
+widget: Container
+style: {flex_direction: vertical, gap: 16, width: 360, height: 140, padding: 16}
+children:
+  - widget: SegmentedButton
+    selected: "{{ range }}"
+    options:
+      - {value: day, label: Day}
+      - {value: week, label: Week, icon: home}
+      - {value: month, label: Month}
+  - widget: SegmentedButton
+    multiple: true
+    selected: "{{ styles }}"
+    options: [{value: bold, label: Bold}, {value: italic, label: Italic}]
+```
 
 ## Using it
 

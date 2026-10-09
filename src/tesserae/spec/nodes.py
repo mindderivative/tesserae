@@ -467,6 +467,9 @@ class _Parser:
                 raise self.fail(value.key_at[key], f"no a11y field '{key}'", _near(key, A11Y_FIELDS))
             iat = value.val_at[key]
             if is_expression(item):
+                if key == "role":  # a role cannot change while a view is open, but it may be worked out from the view's params (checked when composing)
+                    node.a11y[key] = self.template(item, iat)
+                    continue
                 if key not in a11y_module.BINDABLE:
                     raise self.fail(iat, f"a11y '{key}' cannot be bound", f"bindable: {', '.join(a11y_module.BINDABLE)}")
                 node.a11y[key] = self.template(item, iat)

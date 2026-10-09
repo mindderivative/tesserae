@@ -730,6 +730,9 @@ class Composer:
             inst.style[name] = self._bind(value, inner, inst)
         for name, value in node.a11y.items():
             inst.a11y[name] = self._bind(value, inner, inst)
+            if name == "role" and isinstance(inst.a11y[name], (Signal, Computed)):
+                raise self._fail(ctx, node.at, "a11y role cannot change while the view is open",
+                                 "it may be worked out from the view's params, but not from a Signal")
         for name, value in node.tooltip.items():
             inst.tooltip[name] = self._bind(value, inner, inst)
         for event, handler in node.handlers.items():

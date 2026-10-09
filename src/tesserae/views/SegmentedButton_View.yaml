@@ -1,0 +1,49 @@
+# The Material 3 segmented button: two to five connected segments in one outlined pill. `options` is a list of {value, label, icon, disabled};
+# `selected` is the chosen value, or with `multiple: true` the list of chosen values, and a press writes it back.
+# A chosen segment is `secondary_container` with a check that takes the place of its icon. Single-select behaves as a radio group (one Tab stop, the
+# arrows move the choice); multi-select is a group of toggles. What it looks like is mostly here, in the segments' own style, because each segment's
+# state is its own: restyle it by writing a view of the same name.
+params:
+  options: {type: list, default: [], doc: "The segments, each {value, label} and optionally {icon, disabled}."}
+  selected: {type: any, default: "", model: true, doc: "The chosen value; with multiple, the list of chosen values."}
+  multiple: {type: bool, default: false, doc: "Several segments can be chosen at once."}
+  disabled: {type: bool, default: false, doc: "Dimmed, and no segment can be pressed."}
+widget: Container
+focus_group: horizontal
+style: {flex_direction: horizontal, height: 40, corner_radius: full, clip_children: true, border_width: 1, border_color: outline}
+a11y: {role: group}
+children:
+  - widget: Container
+    for: i, o in enumerate(options)
+    key: o['value']
+    name: segment
+    interaction: true
+    style:
+      flex_direction: horizontal
+      align_content: center
+      gap: 8
+      padding: {left: 12, right: 12, top: 0, bottom: 0}
+      background: "{{ 'secondary_container' if ((o['value'] in selected) if multiple else (o['value'] == selected)) else 'transparent' }}"
+      opacity: "{{ 0.38 if (disabled or o.get('disabled', False)) else 1 }}"
+    handlers:
+      on_click: "selected = (o['value'] if not multiple else ([v for v in selected if v != o['value']] if o['value'] in selected else selected + [o['value']])) if not (disabled or o.get('disabled', False)) else selected"
+      on_focus_enter: "selected = o['value'] if (not multiple and not (disabled or o.get('disabled', False))) else selected"
+    a11y:
+      role: "{{ 'checkbox' if multiple else 'radio' }}"
+      label: "{{ o['label'] }}"
+      checked: "{{ (o['value'] in selected) if multiple else (o['value'] == selected) }}"
+    children:
+      - widget: Container
+        name: divider
+        if: "i > 0"
+        style: {position: absolute, x: 0, y: 0, width: 1, height: "100%", background: outline}
+      - widget: Icon
+        name: icon
+        if: "((o['value'] in selected) if multiple else (o['value'] == selected)) or o.get('icon', '') != ''"
+        icon: "{{ 'check' if ((o['value'] in selected) if multiple else (o['value'] == selected)) else o['icon'] }}"
+        style: {width: 18, height: 18, foreground: "{{ 'on_secondary_container' if ((o['value'] in selected) if multiple else (o['value'] == selected)) else 'on_surface' }}"}
+      - widget: Text
+        name: label
+        text: "{{ o['label'] }}"
+        typography_role: label_large
+        style: {foreground: "{{ 'on_secondary_container' if ((o['value'] in selected) if multiple else (o['value'] == selected)) else 'on_surface' }}"}

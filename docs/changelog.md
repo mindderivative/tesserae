@@ -147,6 +147,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   accessibility states (`checked`, `value`) to nothing.
 - **Slider** ([#178](https://github.com/mindderivative/tesserae/issues/178)). `min`, `max` and `step` (the builder ignored them), `ticks`, `value_indicator`, `label`, and `on_input` for every step of a drag;
   a bound `value` now follows the drag instead of waiting for its end. A bound value is written before the node's handlers run, so a handler reads what the user just did.
+- **SegmentedButton** ([#193](https://github.com/mindderivative/tesserae/issues/193)). `widget: SegmentedButton` with `options`, a two-way `selected` and `multiple`, written in the view language (the first shipped
+  component that is built from the language's own parts: per-corner pill, `focus_group`, icons, handlers that set a Signal). An `a11y: role` may be worked out from a param (never from a Signal), and a roving focus group starts on its checked item.
 
 ### Removed
 

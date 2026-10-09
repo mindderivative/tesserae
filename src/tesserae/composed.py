@@ -742,7 +742,8 @@ class ComposedView(View):
                 continue
             box = self._built.outer[group.id]
             ids = [inst.id for inst, _ in items]
-            active = ids.index(self._active[group.id]) if self._active.get(group.id) in ids else 0
+            chosen = next((i for i, (_, node) in enumerate(items) if node.get("checked") is True or node.get("selected") is True), 0)
+            active = ids.index(self._active[group.id]) if self._active.get(group.id) in ids else chosen  # the first tab stop is the chosen item
             self._active[group.id] = ids[active]
             for index, (_, node) in enumerate(items):
                 node.set(tab_index=0 if index == active else -1)

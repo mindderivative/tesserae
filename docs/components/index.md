@@ -60,7 +60,7 @@ Material Design 3's components, as Tesserae builds them. Each page says what the
 | [Spin box](spin-boxes.md) | `SpinBox` |
 | [Date picker](date-pickers.md) | `DatePickerDay`, `DatePickerDayToday`, `DatePickerDaySelected`, `DatePickerDayOutsideMonth` |
 | [Time picker](time-pickers.md) | `TimePickerDial`, `PeriodSelectorAM`, `PeriodSelectorPM` |
-| [Segmented buttons](segmented-buttons.md) | Python only |
+| [Segmented buttons](segmented-buttons.md) | `widget: SegmentedButton` |
 | [Time input](time-input.md) | Python only |
 
 ## Content

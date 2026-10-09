@@ -102,8 +102,7 @@ def test_the_loader_takes_the_states_fixed_or_bound_and_names_a_wrong_one():
     assert node.a11y["expanded"] is True and node.a11y["value"] == 3
     with pytest.raises(LoadError, match="a11y expanded must be true or false"):
         parse_view("widget: Rect\na11y: {expanded: open}", "T_View.yaml")
-    with pytest.raises(LoadError, match="a11y 'role' cannot be bound"):
-        parse_view("widget: Rect\na11y: {role: '{{ x }}'}", "T_View.yaml")
+    parse_view("widget: Rect\na11y: {role: '{{ x }}'}", "T_View.yaml")  # a role may be worked out from a view's params (see test_segmented_button)
 
 
 def test_a_composed_view_keeps_the_states_up_to_date():
