@@ -33,6 +33,15 @@ class Frame:
 
     def _routed(self) -> dict[str, tuple[str, Any, Any, str]]:
         found: dict[str, tuple[str, Any, Any, str]] = {}
+        if hasattr(self.view, "handle"):  # a view in the 0.5.0 language: a routed call is a screen named for the view it calls
+            for inst in self.view.handle.composition.walk():
+                if inst.route is None:
+                    continue
+                if inst.route_view in found:
+                    raise ValueError(f'widget "{inst.id}": the screen {inst.route_view!r} is already the routed view '
+                                     f'"{found[inst.route_view][0]}": a view is routed once')
+                found[inst.route_view] = (inst.id, self.view.screen_of(inst), None, inst.route)
+            return found
         for node_id, (component, viewmodel, request) in self.view._embedded.items():
             if "route" in request:
                 path = getattr(component, "path", None)
@@ -56,6 +65,8 @@ class Frame:
             if screen not in self.screens:
                 app._register_screen(screen, component, viewmodel, route)
                 self.screens[screen] = node_id
+        if app._playing is not None:
+            return  # a transition is showing both screens; it leaves the right one when it ends
         for screen, node_id in self.screens.items():  # only the current screen shows
             self.view.node(node_id).set(visible=(screen == app._current))
 

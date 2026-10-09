@@ -91,7 +91,7 @@ def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, b
 
 
 def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable[..., Optional[Callable[..., Any]]]:
-    """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)`, `surface.dismiss` and
+    """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen[, params])`, `navigate_route(path)`, `surface.dismiss` and
     `focus(name)`, `capture()`, `release()`, `cursor(name)`, `copy(text)`, `paste()`, `open_url(url)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts); `window` is the one it will be on, which is how `app` is found then."""
 
     def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
@@ -128,8 +128,10 @@ def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable
                 else:
                     app.navigate(rest)
             return navigate
-        if path == "navigate_to":
-            return lambda screen: app_of(view.window).navigate(screen) if app_of(view.window) is not None else None
+        if path == "navigate_to":  # a screen by name, with params for the screen to read as `app.params`
+            return lambda screen, params=None: app_of(view.window).navigate(screen, **(params or {})) if app_of(view.window) is not None else None
+        if path == "navigate_route":  # a route by its path (`'notes/' + str(id)`): the screen it names, with the params the path holds
+            return lambda route: app_of(view.window).navigate_to(route) if app_of(view.window) is not None else None
         if head == "surface" and rest in SURFACE_ACTIONS:
             from tesserae.overlays import dismiss_surface
 
@@ -146,6 +148,13 @@ class _SpecTip:
 
     def __init__(self, node_id: str, tooltip: dict[str, Any]) -> None:
         self.id, self.tooltip, self.a11y = node_id, tooltip, {}
+
+
+class _Screen:
+    """A routed call as the app keeps it: the node it is (the app shows and hides the node, and tells a screen by this object)."""
+
+    def __init__(self, root: Any) -> None:
+        self.root = root
 
 
 class ComposedView(View):
@@ -172,6 +181,7 @@ class ComposedView(View):
         self._link_undos: list[Callable[[], None]] = []
         self._field_undos: list[Callable[[], None]] = []
         self._frame_effects: list[Effect] = []
+        self._screens: dict[str, Any] = {}
         self._split_last_up: dict[str, float] = {}
         self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
@@ -491,6 +501,13 @@ class ComposedView(View):
             }, listen=self._listen))
 
     # labelled controls (#175)
+
+    def screen_of(self, inst: Instance) -> Any:
+        """The same stand-in each time for the routed view `inst` (the app tells a rebuilt screen by it): it has the node's root and no ViewModel of its own."""
+        screen = self._screens.get(inst.id)
+        if screen is None:
+            screen = self._screens[inst.id] = _Screen(self._built.outer[inst.id] if inst.id in self._built.outer else None)
+        return screen
 
     def _wire_frames(self) -> None:
         """An Image with a `frame` shows each new one as it is given (a video: the app pushes `(rgba, width, height)`); none yet leaves the last."""

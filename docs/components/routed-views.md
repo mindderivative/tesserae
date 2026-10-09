@@ -29,6 +29,13 @@ app.navigate("Settings")
 app.navigate_to("settings")
 ```
 
+In a view written in the current language, a call with a `route:` is the screen, named for the view it calls (`- {widget: Settings, name: settings, route: settings}`
+is the screen `Settings`). A route can read params from the path (`notes/{id:int}`), and the screen showing reads the ones it was reached with as
+`app.params` (`{{ app.params.get('id') }}`); going back or forward restores each step's params, and `show()` clears them. Handlers: `navigate.Settings`,
+`navigate.back`, `navigate.forward`, `navigate_to('Note', {'id': 3})` (a screen by name, with params) and `navigate_route('notes/' + str(id))` (a route by its
+path). The app's `transition` plays between routed screens. Not built: nested routes, navigation guards, loading a screen's view only when it is first reached, a
+push/pop stack apart from the history.
+
 This component has no `component:` fragment: build it in Python.
 
 ## See also

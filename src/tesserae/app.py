@@ -301,6 +301,10 @@ class App:
         #: `disabled` binding.
         self.can_go_back = Signal(False)
         self.can_go_forward = Signal(False)
+        #: The params the screen showing was reached with (`{}` for none): for a view to read as `app.params.get('id')`, which a route like
+        #: `notes/{id:int}` or `navigate_to('Note', {'id': 3})` fills, and back/forward restore.
+        self._route_params: Signal = Signal({})
+        self.params = Computed(self._route_params.get)
         self._routes: list[_Route] = []
         # M37: the app's one window exists from the start, so screens are built
         # straight into it. Like a `Window.from_view` root: no padding, and a
@@ -1160,6 +1164,7 @@ class App:
         def sync() -> None:  # together, so a follower never sees one updated and not the other
             self.can_go_back.set(self._at > 0)
             self.can_go_forward.set(self._at < len(self._history) - 1)
+            self._route_params.set(dict(self._history[self._at][1]) if self._at >= 0 else {})
         batch(sync)
 
     def _show(self, name: str, transition: str = "none", forward: bool = True, origin: Any = None) -> Window:

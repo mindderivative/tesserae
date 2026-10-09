@@ -116,6 +116,8 @@ children:
   the history, and `app.current_screen` is a value a binding can read.
 - `NavigationRailScreens` is a rail whose destinations navigate and fill while their screen is current.
 - A `route:` is an error outside the window view, and a view can be routed once.
+- In the current language a view call with a `route:` is the screen (named for the view it calls), the screen showing reads the params it was reached with as
+  `app.params`, and `navigate_to('Note', {'id': 3})` or `navigate_route('notes/' + str(id))` go there from a handler.
 
 Call `app.navigate_to("")` after loading the window; nothing shows until a screen is current.
 

@@ -29,7 +29,7 @@ __all__ = ["Bindings", "BindingError", "ViewHandle", "ViewHandles", "check_view"
 #: Names an expression may read that no ViewModel provides.
 _RESERVED_READS = frozenset({"app", "event", "hovered", "focused", "pressed", "True", "False", "None"})
 #: Built-in action families: `window.close`, `surface.dismiss`, `navigate.back`, `navigate_to(...)`.
-_ACTION_FAMILIES = ("window", "surface", "navigate", "navigate_to", "focus", "after", "every", "cancel", "capture", "release", "cursor", "copy", "paste", "open_url")
+_ACTION_FAMILIES = ("window", "surface", "navigate", "navigate_to", "navigate_route", "focus", "after", "every", "cancel", "capture", "release", "cursor", "copy", "paste", "open_url")
 _TYPES: dict[str, Callable[[Any], bool]] = {
     "int": lambda v: isinstance(v, int) and not isinstance(v, bool),
     "float": lambda v: isinstance(v, (int, float)) and not isinstance(v, bool),

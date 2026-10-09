@@ -217,6 +217,7 @@ class Instance:
         self.interaction: Any = node.interaction
         self.window_region: Optional[str] = node.window_region
         self.route: Optional[str] = node.route
+        self.route_view: Optional[str] = None
         self.focus_group: Optional[str] = node.focus_group
         #: `text`, `title`, `delay`, `placement` and `actions` of the tooltip, each a value or a `Computed`; empty when the node has none
         self.tooltip: dict[str, Any] = {}
@@ -966,6 +967,7 @@ class Composer:
             inst.window_region = node.window_region
         if node.route is not None:
             inst.route = node.route
+            inst.route_view = node.widget  # the view this call names: the screen's name
         if node.focus_group is not None:
             inst.focus_group = node.focus_group
         if node.name is not None:
