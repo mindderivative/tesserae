@@ -1,0 +1,43 @@
+# The inside of a side sheet (Material 3): a header with an optional back button, the title and a close button, a content area that scrolls, and a row of actions at
+# the bottom. `SideSheet` (standard, inline) and `SideSheetModal` (over a scrim) both put it in a sheet; use it on its own for a custom one. Children are the
+# content; children with `slot: actions` are the action buttons (a row, right-aligned).
+params:
+  title: {type: str, default: "", doc: "The sheet's title."}
+  back: {type: bool, default: false, doc: "A back button before the title; it runs `on_back`."}
+  on_back: {type: handler, doc: "What the back button does."}
+  closable: {type: bool, default: true, doc: "A close button after the title; it sets `open` to false."}
+  open: {type: bool, default: true, model: true, doc: "Whether the sheet is open; the close button writes false."}
+  width: {type: float, default: 360, doc: "From 256 to 400 pixels."}
+widget: Container
+state: {top: true}
+a11y: {role: group, label: "{{ title }}"}
+style:
+  flex_direction: vertical
+  width: "{{ min(400, max(256, width)) }}"
+  height: 100%
+children:
+  - widget: Container
+    name: header
+    style: {flex_direction: horizontal, align_content: left, gap: 8, height: 56, width: 100%}
+    children:
+      - {widget: IconButton, name: back, if: back, icon: arrow_back, label: Back, handlers: {on_click: "on_back()"}}
+      - {widget: Text, name: title, if: "title != ''", text: "{{ title }}", typography_role: title_large, heading: 2}
+      - widget: Container
+        name: spacer
+        style: {flex: expand_horizontal}
+      - {widget: IconButton, name: close, if: closable, icon: close, label: Close, handlers: {on_click: "open = False"}}
+  - widget: ScrollView
+    name: content
+    at_top: "{{ top }}"
+    style: {flex_direction: vertical, flex: fill}
+    children:
+      - widget: Slot
+  - widget: Divider
+    name: line
+    if: "not top"
+  - widget: Container
+    name: actions
+    style: {flex_direction: horizontal, align_content: right, gap: 8, width: 100%}
+    children:
+      - widget: Slot
+        name: actions

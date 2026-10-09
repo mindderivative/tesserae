@@ -1,0 +1,7 @@
+# The look of the inside of a side sheet: 24 pixels beside the header and the content, 16 above the actions, the title in on_surface.
+styles:
+  - widget: SideSheetPanel
+    style:
+      padding: {left: 24, right: 16, top: 0, bottom: 24}
+  - {widget: SideSheetPanel, part: title, style: {foreground: on_surface}}
+  - {widget: SideSheetPanel, part: actions, style: {padding: {left: 0, right: 8, top: 16, bottom: 0}}}

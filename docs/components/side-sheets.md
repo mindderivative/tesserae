@@ -9,7 +9,21 @@ a **modal** one covers it over a scrim and must be dismissed.
 
 ## In Tesserae
 
-The standard sheet is a `Rect`; the modal one adds the scrim. `tesserae.overlays.SideSheet` shows either.
+Three views Tesserae ships: `SideSheet` (standard, inline), `SideSheetModal` (over a scrim) and `SideSheetPanel` (the inside they share).
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `open` | true or false; two-way | whether it is showing; the close button, and for a modal one Escape and a press on the scrim, write `false` |
+| `title`, `back`, `on_back`, `closable` | text, true or false, a handler, true or false | the header: a `title_large` title, a back button that runs `on_back`, a close button |
+| `width` | a number | held between 256 and 400 pixels (default 360) |
+| `side`, `dismissible` | `start` or `end`; true or false | modal only: the edge it comes from, and whether Escape and the scrim close it |
+
+Children are the content, which scrolls (a line shows over the actions once it has); children with `slot: actions` are the buttons, in a row at the bottom right.
+A standard sheet is inline: it takes room from the content while `open` and its width eases open and shut; put it first in its row for the start side and last for
+the end. A modal sheet is `surface_container_low` at level 1 with 16 pixel corners on the open side, over the content. Not built: the detached sheet, and the modal
+sheet sliding in from the edge.
+
+`widget: SideSheet` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -56,17 +70,21 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: editor
+widget: Container
+style: {flex_direction: horizontal, width: 720, height: 420}
 children:
-  - id: filters
-    component: SideSheetStandard
-    with: {width: 280, height: 400}
+  - {widget: Container, name: page, style: {flex: fill, height: 100%}}
+  - widget: SideSheet
+    open: "{{ filtering }}"
+    title: Filters
+    children:
+      - {widget: Switch, label: Only mine}
+      - {widget: Button, slot: actions, label: Apply, handlers: {on_click: apply}}
 ```
+
+## Using it
 
 In Python:
 

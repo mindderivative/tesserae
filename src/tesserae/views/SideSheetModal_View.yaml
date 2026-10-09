@@ -1,0 +1,39 @@
+# The Material 3 modal side sheet: the same header, scrolling content and actions as the standard one, over a scrim and on top of the content. `side` is the end
+# (the default) or the start. Escape and a press on the scrim close it (they write false to `open`) unless `dismissible` is off; Tab stays inside it, and focus goes
+# back to where it was. Children are the content; children with `slot: actions` are the buttons.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether the sheet is showing."}
+  title: {type: str, default: "", doc: "The sheet's title."}
+  back: {type: bool, default: false, doc: "A back button before the title."}
+  on_back: {type: handler, doc: "What the back button does."}
+  closable: {type: bool, default: true, doc: "A close button."}
+  side: {type: enum, choices: [start, end], default: end, doc: "Which edge of the window it comes from."}
+  dismissible: {type: bool, default: true, doc: "Escape and a press on the scrim close it."}
+  width: {type: float, default: 360, doc: "From 256 to 400 pixels."}
+widget: Overlay
+open: "{{ open }}"
+modal: true
+dismissible: "{{ dismissible }}"
+style:
+  align_content: "{{ 'right' if side == 'end' else 'left' }}"
+children:
+  - widget: Container
+    name: sheet
+    a11y: {role: dialog, label: "{{ title }}"}
+    style:
+      flex_direction: vertical
+      height: 100%
+    children:
+      - widget: SideSheetPanel
+        name: panel
+        title: "{{ title }}"
+        back: "{{ back }}"
+        on_back: "on_back()"
+        closable: "{{ closable }}"
+        open: "{{ open }}"
+        width: "{{ width }}"
+        children:
+          - widget: Slot
+          - widget: Slot
+            name: actions
+            slot: actions

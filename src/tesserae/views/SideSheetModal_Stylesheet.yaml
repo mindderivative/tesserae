@@ -1,0 +1,8 @@
+# The look of the modal side sheet: surface_container_low at level 1, with 16 pixel corners on the side that opens onto the content.
+styles:
+  - widget: SideSheetModal
+    part: sheet
+    style:
+      background: surface_container_low
+      elevation: 1
+      corner_radius: "{{ {'top_left': 16, 'bottom_left': 16, 'top_right': 0, 'bottom_right': 0} if side == 'end' else {'top_right': 16, 'bottom_right': 16, 'top_left': 0, 'bottom_left': 0} }}"

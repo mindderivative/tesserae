@@ -1,0 +1,31 @@
+# The Material 3 standard side sheet: supplementary content beside the main content, inline, so it pushes the content and takes room only while it is `open`
+# (the width eases open and shut). Put it first in its row for the start side, last for the end. A header with a title, `back` and a close button, content that scrolls (children),
+# and actions at the bottom (children with `slot: actions`). A standard sheet is a landmark, not a dialog: it takes no focus and traps none.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether the sheet is open; the close button writes false."}
+  title: {type: str, default: "", doc: "The sheet's title."}
+  back: {type: bool, default: false, doc: "A back button before the title."}
+  on_back: {type: handler, doc: "What the back button does."}
+  closable: {type: bool, default: true, doc: "A close button."}
+  width: {type: float, default: 360, doc: "From 256 to 400 pixels."}
+widget: Container
+style:
+  flex_direction: horizontal
+  height: 100%
+  width: "{{ min(400, max(256, width)) if open else 0 }}"
+  clip_children: true
+  transition: {width: 250}
+children:
+  - widget: SideSheetPanel
+    name: panel
+    title: "{{ title }}"
+    back: "{{ back }}"
+    on_back: "on_back()"
+    closable: "{{ closable }}"
+    open: "{{ open }}"
+    width: "{{ width }}"
+    children:
+      - widget: Slot
+      - widget: Slot
+        name: actions
+        slot: actions
