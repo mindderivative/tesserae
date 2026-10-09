@@ -13,9 +13,11 @@ params:
   selected: {type: any, default: "", model: true, doc: "radio mode: the value that is checked."}
   placement: {type: enum, choices: [below, above, start, end], default: below, doc: "Which side of the anchor; it flips or shifts to fit."}
   width: {type: float, default: 200, doc: "How wide the menu is, from 112 to 280 pixels."}
+  focus_first: {type: bool, default: false, doc: "When it opens, the focus moves to its first row (a menu opened with the keyboard)."}
   on_pick: {type: handler, doc: "Called after an item has been chosen (a submenu uses it to close the menu it came from)."}
 widget: Overlay
 open: "{{ open }}"
+focus_first: "{{ focus_first }}"
 anchor: "{{ anchor }}"
 placement: "{{ placement }}"
 children:

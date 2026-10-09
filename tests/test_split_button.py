@@ -160,3 +160,34 @@ def test_the_trailing_part_is_named_for_a_screen_reader_and_says_whether_it_is_e
 def test_both_parts_are_tab_stops(tmp_path):
     view, _ = opened(tmp_path)
     assert main(view).get("focusable") and trailing(view).get("focusable")
+
+
+def test_arrow_down_on_either_part_opens_the_menu_and_focuses_its_first_row(tmp_path):
+    for part in (main, trailing):
+        (tmp_path / part.__name__).mkdir()
+        view, _ = opened(tmp_path / part.__name__)
+        part(view).focus()
+        view.window.simulate("key_down", key="arrow_down")
+        settle(view, 8)
+        assert view._shown_layers and view.node("root.sb.menu.surface.row[0].item").get("focused") is True
+
+
+def test_a_press_opens_the_menu_without_moving_the_focus_into_it(tmp_path):
+    view, _ = opened(tmp_path)
+    view.window.simulate("click", node=trailing(view))
+    settle(view, 8)
+    assert view._shown_layers and view.node("root.sb.menu.surface.row[0].item").get("focused") is not True
+
+
+def test_arrow_down_with_no_items_opens_nothing(tmp_path):
+    (tmp_path / "Views").mkdir()
+    (tmp_path / "Views" / "Main_View.yaml").write_text("name: main\nwidget: Container\nstyle: {width: 500, height: 400}\nchildren:\n  - {widget: SplitButton, name: sb, label: Save}\n")
+    app = App(root=tmp_path, width=500, height=400)
+    app.bind(VM)
+    view = app.open_view("Main")
+    app.show("main")
+    settle(view, 8)
+    main(view).focus()
+    view.window.simulate("key_down", key="arrow_down")
+    settle(view, 8)
+    assert not view._shown_layers

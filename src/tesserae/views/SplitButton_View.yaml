@@ -12,7 +12,7 @@ params:
   on_click: {type: handler, doc: "What the main part does."}
   disabled: {type: bool, default: false, doc: "Both parts are dimmed and do not respond."}
 widget: Container
-state: {menu_open: false}
+state: {menu_open: false, keyed: false}
 a11y: {role: group, label: "{{ label }}"}
 style:
   flex_direction: horizontal
@@ -26,7 +26,7 @@ children:
     variant: "{{ variant }}"
     size: "{{ size }}"
     disabled: "{{ disabled }}"
-    handlers: {on_click: "on_click()"}
+    handlers: {on_click: "on_click()", on_key: "keyed = True if event.key == 'arrow_down' else keyed; menu_open = True if event.key == 'arrow_down' else menu_open"}
     style:
       corner_radius: "{{ {'top_left': 'full', 'bottom_left': 'full', 'top_right': 4, 'bottom_right': 4} }}"
   - widget: Button
@@ -35,7 +35,7 @@ children:
     variant: "{{ variant }}"
     size: "{{ size }}"
     disabled: "{{ disabled }}"
-    handlers: {on_click: "menu_open = not menu_open"}
+    handlers: {on_click: "keyed = False; menu_open = not menu_open", on_key: "keyed = True if event.key == 'arrow_down' else keyed; menu_open = True if event.key == 'arrow_down' else menu_open"}
     a11y: {label: "{{ 'More options for ' + label }}", expanded: "{{ menu_open }}"}
     style:
       corner_radius: "{{ 'full' if menu_open else {'top_left': 4, 'bottom_left': 4, 'top_right': 'full', 'bottom_right': 'full'} }}"
@@ -43,6 +43,7 @@ children:
     name: menu
     if: "len(items) > 0"
     open: "{{ menu_open }}"
+    focus_first: "{{ keyed }}"
     anchor: trailing
     placement: below
     items: "{{ items }}"

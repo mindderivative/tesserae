@@ -777,9 +777,20 @@ class ComposedView(View):
         self.window.show_layer(layer, anchor=anchor, placement=inst.value("placement") or "below", modal=bool(inst.value("modal")),
                                dismissible=inst.value("dismissible") is not False)
         self._shown_layers[inst.id] = layer
+        if inst.value("focus_first") is True:
+            self._focus_into(inst)
         self._start_layer_timeout(inst, layer)
         if inst.value("modal"):  # the scrim follows the window's size while it is up
             self._layer_resize[inst.id] = listen_window(self.window, "resize", lambda event, inst=inst, layer=layer: self._fit_layer(inst, layer))
+
+    def _focus_into(self, inst: Instance) -> None:
+        """Moves the focus to the first thing under `inst`: the first item of its first focus group, else the first focusable node."""
+        groups = [g for g in inst.walk() if g.focus_group is not None]
+        items = self._focus_items(groups[0]) if groups else []
+        if not items:
+            items = [(c, n) for c in inst.walk() if c is not inst and (n := self._focus_node(c)) is not None and n.get("focusable") and not n.get("disabled")]
+        if items:
+            items[0][1].focus()
 
     def _start_layer_timeout(self, inst: Instance, layer: Any) -> None:
         """An `Overlay` with a `timeout` closes itself that long after it opens; the pointer on it holds the time off until it leaves."""
