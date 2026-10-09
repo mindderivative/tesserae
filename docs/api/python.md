@@ -2060,10 +2060,19 @@ icon_path(name: str) -> str | None
 
 The path data for `name`, or `None` if there's no such icon.
 
+### `icon_view_box`
+
+```python
+icon_view_box(name: str) -> tuple[float, float, float, float]
+```
+
+The view box `name`'s path is drawn in: MDI's 24 x 24 for an MDI icon, Material Symbols' otherwise.
+
 **Constants**
 
 - `ICON_VIEW_BOX` = `(0.0, -960.0, 960.0, 960.0)`
-- `ICONS` = `dict of 18`
+- `ICONS` = `dict of 157`
+- `MDI_VIEW_BOX` = `(0.0, 0.0, 24.0, 24.0)`
 
 ## Logging
 

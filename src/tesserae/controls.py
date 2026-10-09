@@ -25,7 +25,7 @@ from typing import Any, Callable, Optional
 
 from tesserae import a11y, tokens
 from tesserae.follow import initial_theme, unfollow
-from tesserae.icons import ICON_VIEW_BOX, icon_path
+from tesserae.icons import icon_path, icon_view_box
 from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.reactive import Effect, Signal, untrack
@@ -701,7 +701,7 @@ class SpinBox:
         button = self.window.create("box", width=self.BUTTON, height=self.BUTTON, corner_radius=self.BUTTON / 2,
                                     align_items="center", justify_content="center", focusable=True,
                                     role="button", label=label, cursor="pointer")
-        glyph = self.window.create("path", data=icon_path(icon), view_box=ICON_VIEW_BOX, width=24.0, height=24.0,
+        glyph = self.window.create("path", data=icon_path(icon), view_box=icon_view_box(icon), width=24.0, height=24.0,
                                    hit_testable=False, a11y_hidden=True)
         button.add_child(glyph)
         it = Interaction(self.window, button, self.color("on_surface_variant"), self._listen, self.color("secondary"))

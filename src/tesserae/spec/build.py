@@ -30,7 +30,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
 from tesserae import a11y, tokens
-from tesserae.icons import ICON_VIEW_BOX, icon_path
+from tesserae.icons import ICON_VIEW_BOX, icon_path, icon_view_box
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 from tesserae.spec import effects, layout, richtext, transition
 from tesserae.spec.canvas import painter as canvas_painter, plan as canvas_plan
@@ -822,7 +822,7 @@ def _icon_props(ctx, node, style):
         if not isinstance(data, str) or not data.strip():
             raise SpecBuildError(f'widget {_q(node["id"])}: icon path is SVG path data, not {data!r}')
     else:
-        data, view_box = icon_path(str(icon["name"])), ICON_VIEW_BOX
+        data, view_box = icon_path(str(icon["name"])), icon_view_box(str(icon["name"]))
         if data is None:
             raise SpecBuildError(f'widget {_q(node["id"])}: unknown icon "{icon["name"]}"')
         if icon.get("view_box") is not None:

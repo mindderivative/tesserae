@@ -9,10 +9,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-__all__ = ["ICON_VIEW_BOX", "ICONS", "icon_path"]
+__all__ = ["ICON_VIEW_BOX", "ICONS", "MDI_VIEW_BOX", "icon_path", "icon_view_box"]
 
 #: Every icon's view box, `(min_x, min_y, width, height)`.
 ICON_VIEW_BOX = (0.0, -960.0, 960.0, 960.0)
+#: The view box of the Material Design Icons (Pictogrammers' MDI, Apache-2.0) from `icon_data/mdi.json`, which `tools/import_mdi.py` writes.
+MDI_VIEW_BOX = (0.0, 0.0, 24.0, 24.0)
 
 ICONS = {
     "home": "M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z",
@@ -39,9 +41,9 @@ ICONS = {
 }
 
 
-def _bundled(folder: Path = Path(__file__).parent / "icon_data") -> dict[str, str]:
-    """The Material Symbols added by `tools/import_material_symbols.py`, if any (`icon_data/material_symbols.json`)."""
-    path = folder / "material_symbols.json"
+def _bundled(folder: Path = Path(__file__).parent / "icon_data", file: str = "material_symbols.json") -> dict[str, str]:
+    """The icons in `folder/file`, if there is one: Material Symbols from `tools/import_material_symbols.py`, or MDI from `tools/import_mdi.py`."""
+    path = folder / file
     return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
 
 
@@ -50,9 +52,17 @@ def _merge(bundled: dict[str, str], built_in: dict[str, str]) -> dict[str, str]:
     return {**bundled, **built_in}
 
 
-ICONS = _merge(_bundled(), ICONS)
+_SYMBOLS = _merge(_bundled(), ICONS)
+_MDI = {name: data for name, data in _bundled(Path(__file__).parent / "icon_data", "mdi.json").items() if name not in _SYMBOLS}
+#: Every icon name and its path data: the ones built in, then Material Symbols added by the importer, then MDI (a name in an earlier set wins).
+ICONS = {**_MDI, **_SYMBOLS}
 
 
 def icon_path(name: str) -> str | None:
     """The path data for `name`, or `None` if there's no such icon."""
     return ICONS.get(name)
+
+
+def icon_view_box(name: str) -> tuple[float, float, float, float]:
+    """The view box `name`'s path is drawn in: MDI's 24 x 24 for an MDI icon, Material Symbols' otherwise."""
+    return MDI_VIEW_BOX if name in _MDI else ICON_VIEW_BOX

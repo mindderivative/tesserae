@@ -66,7 +66,7 @@ Every widget declares its properties: a type, a default, the values it allows, w
 | `Text`, `Link` | `text`, `typography_role`, `font_family`, `font_size`, `font_weight`, `wrap`, `overflow`, `text_align` |
 | `TextInput` | `text` (model), `placeholder`, `multiline`, `obscured`, `max_length`, `read_only`, `typography_role`, `font_family`, `font_size`, `font_weight`, `disabled` |
 | `TextField` | the Material text field, a view Tesserae ships: see [Text fields](../components/text-fields.md) |
-| `Icon` | `icon` (a built-in icon name, required) |
+| `Icon` | `icon` (a built-in icon name, or `path` and `view_box`: one of them) |
 | `Image`, `Svg` | `src`, `fit`; `src`, `content` |
 | `Checkbox`, `Switch`, `RadioButton` | `checked` or `selected` (model), `group`, `disabled` |
 | `Slider`, `SpinBox` | `value` (model), `min`, `max`, `step`, `disabled` |
