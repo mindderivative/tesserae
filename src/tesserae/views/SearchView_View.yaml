@@ -1,0 +1,39 @@
+# The Material 3 docked search view: the panel that opens under a search bar (`anchor`, the bar's name in the calling view) and shows suggestions, history and results as list
+# rows. `results` is a list of {value, label} and optionally {supporting, icon}; pressing a row sets `chosen` to its `value` and closes the view. With a `query` and no
+# results the `empty` text shows. Escape and a press outside close it (writing false to `open`). The number of results is announced politely. Bind `open` to the bar's `active`.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether the view is showing; Escape and a press outside write false."}
+  anchor: {type: str, default: "", doc: "The name of the search bar in the calling view."}
+  results: {type: list, default: [], doc: "The rows: {value, label} and optionally {supporting, icon}."}
+  query: {type: str, default: "", doc: "What is typed, so the empty state can say there is nothing."}
+  chosen: {type: any, default: "", model: true, doc: "The value of the row pressed."}
+  empty: {type: str, default: No results, doc: "Shown when there is a query and no rows."}
+  width: {type: float, default: 360, doc: "How wide the view is (the bar's width)."}
+  max_height: {type: float, default: 400, doc: "The rows scroll beyond this."}
+  history_icon: {type: str, default: history, doc: "The icon of a row that gives none."}
+widget: Overlay
+open: "{{ open }}"
+anchor: "{{ anchor }}"
+placement: below
+children:
+  - widget: Container
+    name: panel
+    a11y: {role: group, label: Search results}
+    style: {flex_direction: vertical, width: "{{ width }}"}
+    children:
+      - {widget: Text, name: count, text: "{{ str(len(results)) + ' results' }}", typography_role: label_small, a11y: {live: polite}, style: {height: 0}}
+      - {widget: Text, name: none, if: "len(results) == 0 and query != ''", text: "{{ empty }}", typography_role: body_large}
+      - widget: ScrollView
+        name: rows
+        if: "len(results) > 0"
+        focus_group: vertical
+        style: {flex_direction: vertical, max_height: "{{ max_height }}"}
+        children:
+          - widget: ListItem
+            for: r in results
+            key: r['value']
+            name: row
+            headline: "{{ r['label'] }}"
+            supporting: "{{ r.get('supporting', '') }}"
+            leading_icon: "{{ r.get('icon', history_icon) }}"
+            handlers: {on_click: "chosen = r['value']; open = False"}

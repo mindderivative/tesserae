@@ -1,0 +1,10 @@
+# The look of SearchView (Material 3): a surface_container_high panel with 28 pixel corners, 8 pixels above and below the rows.
+styles:
+  - widget: SearchView
+    part: panel
+    style:
+      background: surface_container_high
+      corner_radius: 28
+      padding: {left: 0, right: 0, top: 8, bottom: 8}
+  - {widget: SearchView, part: none, style: {foreground: on_surface_variant, padding: {left: 16, right: 16, top: 12, bottom: 12}}}
+  - {widget: SearchView, part: count, style: {foreground: on_surface_variant}}

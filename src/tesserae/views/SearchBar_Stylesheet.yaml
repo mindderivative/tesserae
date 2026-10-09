@@ -1,0 +1,33 @@
+# The look of SearchBar (Material 3): a surface_container_high pill, 56 tall, at level 3; 4 pixels in from the edge, the icons 24 pixels in a 48 pixel button, the text
+# in on_surface and the placeholder dimmed, the avatar a 30 pixel circle in primary_container.
+styles:
+  - widget: SearchBar
+    style:
+      background: surface_container_high
+      corner_radius: full
+      elevation: 3
+      padding: {left: 4, right: 12, top: 0, bottom: 0}
+      gap: 4
+  - widget: SearchBar
+    part: back
+    style: {width: 48, height: 48, corner_radius: 24, align_content: center}
+  - widget: SearchBar
+    part: leading
+    style: {width: 48, height: 48, corner_radius: 24, align_content: center}
+  - widget: SearchBar
+    part: clear
+    style: {width: 48, height: 48, corner_radius: 24, align_content: center}
+  - widget: SearchBar
+    part: trailing
+    style: {width: 48, height: 48, corner_radius: 24, align_content: center}
+  - {widget: SearchBar, part: back_icon, style: {width: 24, height: 24, foreground: on_surface}}
+  - {widget: SearchBar, part: leading_glyph, style: {width: 24, height: 24, foreground: on_surface}}
+  - {widget: SearchBar, part: clear_icon, style: {width: 24, height: 24, foreground: on_surface_variant}}
+  - {widget: SearchBar, part: trailing_glyph, style: {width: 24, height: 24, foreground: on_surface_variant}}
+  - widget: SearchBar
+    part: input
+    style: {foreground: on_surface, background: transparent}
+  - widget: SearchBar
+    part: avatar
+    style: {width: 30, height: 30, corner_radius: full, background: primary_container, align_content: center}
+  - {widget: SearchBar, part: avatar_text, style: {foreground: on_primary_container}}

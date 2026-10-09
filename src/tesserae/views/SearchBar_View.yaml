@@ -1,0 +1,71 @@
+# The Material 3 search bar: a 56 pixel `surface_container_high` pill with a leading icon (a search glass, or a menu button), the text being typed, and trailing parts: a
+# clear button once there is a `query`, an optional `trailing_icon` (a microphone) and an optional avatar (`avatar_text`). Pressing it, or typing in it, makes it `active`
+# (two-way; a `SearchView` shows while it is), and while it is active the leading icon becomes a back arrow that deactivates it. Enter calls `on_search`. `query` is two-way.
+params:
+  query: {type: str, default: "", model: true, doc: "What has been typed."}
+  placeholder: {type: str, default: Search, doc: "Shown while the field is empty."}
+  active: {type: bool, default: false, model: true, doc: "Whether the search is under way (the view shows); focusing the bar sets it, the back arrow clears it."}
+  leading_icon: {type: str, default: magnify, doc: "The icon at the start while it is not active (menu, for a menu button)."}
+  on_leading: {type: handler, doc: "What the leading icon does when it is not a search glass (open a drawer)."}
+  trailing_icon: {type: str, default: "", doc: "An icon at the end, such as a microphone."}
+  on_trailing: {type: handler, doc: "What the trailing icon does."}
+  avatar_text: {type: str, default: "", doc: "Letters in a circle at the end."}
+  on_search: {type: handler, doc: "Called when Enter is pressed."}
+  disabled: {type: bool, default: false, doc: "Dimmed and not editable."}
+widget: Container
+disabled: "{{ disabled }}"
+interaction: false
+handlers: {on_click: "active = True"}
+a11y: {role: group, label: Search}
+style:
+  flex_direction: horizontal
+  align_content: left
+  height: 56
+  width: 100%
+children:
+  - widget: Container
+    name: back
+    if: active
+    interaction: true
+    handlers: {on_click: "active = False"}
+    a11y: {role: button, label: Back}
+    children:
+      - {widget: Icon, name: back_icon, icon: arrow_back}
+  - widget: Container
+    name: leading
+    if: "not active"
+    interaction: true
+    handlers: {on_click: "focus('input'); on_leading()"}
+    a11y: {role: button, label: "{{ 'Menu' if leading_icon == 'menu' else 'Search' }}"}
+    children:
+      - {widget: Icon, name: leading_glyph, icon: "{{ leading_icon }}"}
+  - widget: TextInput
+    name: input
+    text: "{{ query }}"
+    placeholder: "{{ placeholder }}"
+    typography_role: body_large
+    disabled: "{{ disabled }}"
+    handlers: {on_key: "active = True if event.key != 'escape' else active", on_submit: "on_search()"}
+    style: {flex: fill}
+    a11y: {label: "{{ placeholder }}"}
+  - widget: Container
+    name: clear
+    if: "query != ''"
+    interaction: true
+    handlers: {on_click: "query = ''"}
+    a11y: {role: button, label: Clear}
+    children:
+      - {widget: Icon, name: clear_icon, icon: close}
+  - widget: Container
+    name: trailing
+    if: "trailing_icon != '' and query == ''"
+    interaction: true
+    handlers: {on_click: "on_trailing()"}
+    a11y: {role: button, label: "{{ trailing_icon }}"}
+    children:
+      - {widget: Icon, name: trailing_glyph, icon: "{{ trailing_icon }}"}
+  - widget: Container
+    name: avatar
+    if: "avatar_text != ''"
+    children:
+      - {widget: Text, name: avatar_text, text: "{{ avatar_text }}", typography_role: title_small}

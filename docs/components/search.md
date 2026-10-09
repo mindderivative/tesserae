@@ -9,7 +9,22 @@ suggestions and results once it is focused.
 
 ## In Tesserae
 
-The bar is a container around a `TextField`; the view is a surface that `tesserae.overlays.SearchView` shows.
+Two views Tesserae ships. `widget: SearchBar` is a 56 pixel `surface_container_high` pill at level 3 with a leading icon, the text, and trailing parts. `widget: SearchView`
+is the docked panel that opens under it with the suggestions, history and results.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `query` | text; two-way | what has been typed |
+| `active` | true or false; two-way | the search is under way; pressing the bar or typing in it sets it, the back arrow clears it |
+| `placeholder`, `leading_icon`, `trailing_icon`, `avatar_text` | text, icon names, letters | the hint, the icon at the start (`menu` for a menu button), a microphone at the end, an avatar |
+| `on_leading`, `on_trailing`, `on_search` | handlers | the menu button, the trailing icon, Enter |
+| `results`, `chosen`, `open`, `anchor` (`SearchView`) | a list; a value, two-way; true or false, two-way; a node's name | `{value, label}` rows (optionally `supporting` and `icon`), the one pressed, whether it shows, the bar it sits under |
+
+A clear button shows once there is text. While active the leading icon is a back arrow. Bind the bar's `active` and the view's `open` to the same name, and the view's `results` to
+something that follows `query`. The view says how many results there are, politely, and `empty` text when a query finds none. Escape and a press outside close it. Not built:
+the full-screen search view for small windows, and a keyboard shortcut that focuses the bar.
+
+`widget: SearchBar` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -61,17 +76,21 @@ kind: Rect
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: notes
+widget: Container
+style: {flex_direction: vertical, width: 420, height: 420, padding: 16}
 children:
-  - id: search
-    component: SearchBar
-    with: {placeholder: Search notes, width: 360, corner_radius: 28}
+  - {widget: SearchBar, name: bar, query: "{{ q }}", active: "{{ searching }}", placeholder: Search notes, style: {width: 360}}
+  - widget: SearchView
+    anchor: bar
+    open: "{{ searching }}"
+    query: "{{ q }}"
+    results: "{{ matches }}"
+    chosen: "{{ picked }}"
 ```
+
+## Using it
 
 In Python:
 
