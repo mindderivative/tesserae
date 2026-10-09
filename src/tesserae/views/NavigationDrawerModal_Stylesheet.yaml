@@ -1,0 +1,8 @@
+# The look of the modal navigation drawer: surface_container_low at level 1, 16 pixel corners on the right (the side that opens onto the content).
+styles:
+  - widget: NavigationDrawerModal
+    part: sheet
+    style:
+      background: surface_container_low
+      elevation: 1
+      corner_radius: {top_right: 16, bottom_right: 16}

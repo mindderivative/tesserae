@@ -1,0 +1,32 @@
+# The Material 3 modal navigation drawer: the same destinations, slid over the content on a scrim from the start edge, `surface_container_low` at level 1 with 16 pixel
+# corners on the side that opens. Pressing a destination closes it (and writes the choice); Escape and a press on the scrim close it too, writing false to `open`, and
+# focus goes back to where it was. A menu button in the calling view opens it by writing `open`.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether the drawer is showing."}
+  items: {type: list, default: [], doc: "The rows: {value, label, icon} and optionally {badge, disabled}; {heading: Text}; {divider: true}."}
+  selected: {type: any, default: "", model: true, doc: "The value of the chosen destination."}
+  width: {type: float, default: 360, doc: "From 256 to 360 pixels."}
+widget: Overlay
+open: "{{ open }}"
+modal: true
+style:
+  align_content: left
+children:
+  - widget: Container
+    name: sheet
+    a11y: {role: dialog, label: Navigation}
+    style: {flex_direction: vertical, height: 100%}
+    children:
+      - widget: NavigationDrawerPanel
+        name: panel
+        items: "{{ items }}"
+        selected: "{{ selected }}"
+        width: "{{ width }}"
+        on_pick: "open = False"
+        children:
+          - widget: Slot
+            name: header
+            slot: header
+          - widget: Slot
+            name: footer
+            slot: footer

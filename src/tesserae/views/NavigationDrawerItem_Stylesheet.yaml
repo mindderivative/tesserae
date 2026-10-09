@@ -1,0 +1,13 @@
+# The look of NavigationDrawerItem (Material 3): a pill (28 pixel corners) that is secondary_container when selected, 16 pixels in on the left and 24 on the right, the
+# icon, label and badge in on_secondary_container when selected and on_surface_variant otherwise.
+styles:
+  - widget: NavigationDrawerItem
+    style:
+      corner_radius: 28
+      padding: {left: 16, right: 24, top: 0, bottom: 0}
+      gap: 12
+      background: "{{ 'secondary_container' if selected else 'transparent' }}"
+      transition: {background: 150}
+  - {widget: NavigationDrawerItem, part: icon, style: {width: 24, height: 24, foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationDrawerItem, part: label, style: {foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationDrawerItem, part: badge, style: {foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}

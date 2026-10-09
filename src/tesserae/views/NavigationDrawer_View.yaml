@@ -1,0 +1,28 @@
+# The Material 3 standard navigation drawer: a permanent column of destinations beside the content, 360 pixels wide (256 to 360), a `surface` column. While `open` it takes
+# its width from the content and when it is closed it takes none (the width eases): that is how it collapses, and a rail can take its place. Children with `slot: header`
+# and `slot: footer` go above and below the destinations. See `NavigationDrawerPanel` for the items and the keyboard.
+params:
+  open: {type: bool, default: true, model: true, doc: "Whether the drawer takes its room."}
+  items: {type: list, default: [], doc: "The rows: {value, label, icon} and optionally {badge, disabled}; {heading: Text}; {divider: true}."}
+  selected: {type: any, default: "", model: true, doc: "The value of the chosen destination."}
+  width: {type: float, default: 360, doc: "From 256 to 360 pixels."}
+widget: Container
+style:
+  flex_direction: horizontal
+  height: 100%
+  width: "{{ min(360, max(256, width)) if open else 0 }}"
+  clip_children: true
+  transition: {width: 250}
+children:
+  - widget: NavigationDrawerPanel
+    name: panel
+    items: "{{ items }}"
+    selected: "{{ selected }}"
+    width: "{{ width }}"
+    children:
+      - widget: Slot
+        name: header
+        slot: header
+      - widget: Slot
+        name: footer
+        slot: footer

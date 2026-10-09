@@ -1,0 +1,44 @@
+# The inside of a navigation drawer, which `NavigationDrawer` (standard) and `NavigationDrawerModal` both put in a sheet: a header slot, the destinations in a column
+# that scrolls when there are more than fit, and a footer slot. `items` is a list of {value, label, icon} and optionally {badge, disabled}; a {heading: Text} is a
+# section's title and a {divider: true} a line. `selected` is the value of the chosen one and a press writes it back. One Tab stop on the current destination; the
+# up and down arrows move the focus and choose it.
+params:
+  items: {type: list, default: [], doc: "The rows: {value, label, icon} and optionally {badge, disabled}; {heading: Text}; {divider: true}."}
+  selected: {type: any, default: "", model: true, doc: "The value of the chosen destination."}
+  on_pick: {type: handler, doc: "Called after a destination has been pressed (a modal drawer closes itself with it)."}
+  width: {type: float, default: 360, doc: "From 256 to 360 pixels."}
+widget: Container
+a11y: {role: group, label: Navigation}
+style:
+  flex_direction: vertical
+  width: "{{ min(360, max(256, width)) }}"
+  height: 100%
+children:
+  - widget: Slot
+    name: header
+  - widget: ScrollView
+    name: list
+    focus_group: vertical
+    style: {flex_direction: vertical, flex: fill}
+    children:
+      - widget: Container
+        for: i, it in enumerate(items)
+        key: i
+        name: row
+        style: {flex_direction: vertical, width: 100%}
+        children:
+          - {widget: Divider, name: divider, if: "it.get('divider', False)"}
+          - {widget: Text, name: heading, if: "it.get('heading', '') != ''", text: "{{ it.get('heading', '') }}", typography_role: title_small}
+          - widget: NavigationDrawerItem
+            name: item
+            if: "not it.get('divider', False) and it.get('heading', '') == ''"
+            label: "{{ it['label'] }}"
+            icon: "{{ it.get('icon', '') }}"
+            badge: "{{ it.get('badge', '') }}"
+            selected: "{{ it['value'] == selected }}"
+            disabled: "{{ it.get('disabled', False) }}"
+            handlers:
+              on_click: "selected = it['value']; on_pick()"
+              on_focus_enter: "selected = it['value']"
+  - widget: Slot
+    name: footer

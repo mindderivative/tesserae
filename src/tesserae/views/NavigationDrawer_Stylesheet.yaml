@@ -1,0 +1,5 @@
+# The look of the standard navigation drawer: a `surface` column.
+styles:
+  - widget: NavigationDrawer
+    style:
+      background: surface

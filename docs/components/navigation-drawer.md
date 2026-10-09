@@ -9,7 +9,23 @@ be permanent (standard) or slide over the content (modal).
 
 ## In Tesserae
 
-A column of `NavigationDrawerItem`s. `tesserae.overlays.NavigationDrawer` shows the modal form.
+Views Tesserae ships: `NavigationDrawer` (standard, beside the content), `NavigationDrawerModal` (over a scrim), `NavigationDrawerScreens` (the app's screens), and
+`NavigationDrawerItem` (one destination) and `NavigationDrawerPanel` (the inside the first two share).
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `items` | a list | rows: `{value, label, icon}` and optionally `{badge, disabled}`; `{heading: Text}`; `{divider: true}`. For `NavigationDrawerScreens`, `{screen, label, icon}` |
+| `selected` | a value; two-way | the chosen destination; a press (or an arrow key) writes it back |
+| `open` | true or false; two-way | standard: whether it takes its room (the width eases, which is how it collapses); modal: whether it is showing |
+| `width` | a number | held between 256 and 360 pixels (default 360) |
+
+A destination is a 56 pixel pill with 28 pixel corners, a 24 pixel icon, a `label_large` label and a badge at the end; the chosen one is `secondary_container`.
+Children with `slot: header` and `slot: footer` go above and below the destinations, which scroll when there are too many. A modal drawer is
+`surface_container_low` at level 1 with 16 pixel corners on the right; a press on a destination closes it, as do Escape and a press on the scrim. A screen reader hears
+a link per destination, the current one marked as the page. Not built: the modal drawer sliding in (an overlay is where its style says when first drawn), and a
+standard drawer that becomes a rail by itself when the window narrows.
+
+`widget: NavigationDrawer` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -77,22 +93,24 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: shell
+widget: Container
+style: {flex_direction: horizontal, width: 720, height: 480}
 children:
-  - id: drawer
-    component: NavigationDrawer
-    with:
-      width: 280
-      item_width: 256
-      items:
-        - {label: Inbox, icon: home, selected: true}
-        - {label: Search, icon: search}
+  - widget: NavigationDrawer
+    selected: "{{ page }}"
+    items:
+      - {value: inbox, label: Inbox, icon: home, badge: 24}
+      - {value: sent, label: Sent, icon: send}
+      - {divider: true}
+      - {heading: Labels}
+      - {value: work, label: Work, icon: tag}
+  - widget: NavigationDrawerScreens
+    items: [{screen: Main, label: Tasks, icon: home}, {screen: Settings, label: Settings, icon: cog}]
 ```
+
+## Using it
 
 In Python:
 

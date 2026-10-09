@@ -1,0 +1,6 @@
+# The look of the inside of a drawer: 12 pixels in from the edge, section headings in on_surface_variant, a little space above the first destination.
+styles:
+  - widget: NavigationDrawerPanel
+    style:
+      padding: {left: 12, right: 12, top: 12, bottom: 12}
+  - {widget: NavigationDrawerPanel, part: heading, style: {foreground: on_surface_variant, padding: {left: 16, right: 16, top: 18, bottom: 18}}}

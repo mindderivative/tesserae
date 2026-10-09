@@ -1,0 +1,31 @@
+# A standard navigation drawer whose destinations are the app's screens: `items` is a list of {screen, label, icon} and optionally {badge}, with {heading: Text} and
+# {divider: true} rows between them. The destination of the screen showing is selected, and pressing one navigates to its screen. It belongs in each screen (or in a window's shell).
+params:
+  items: {type: list, default: [], doc: "The rows: {screen, label, icon} and optionally {badge}; {heading: Text}; {divider: true}."}
+  width: {type: float, default: 360, doc: "From 256 to 360 pixels."}
+widget: Container
+a11y: {role: group, label: Navigation}
+style:
+  flex_direction: vertical
+  width: "{{ min(360, max(256, width)) }}"
+  height: 100%
+  background: surface
+  padding: {left: 12, right: 12, top: 12, bottom: 12}
+focus_group: vertical
+children:
+  - widget: Container
+    for: i, it in enumerate(items)
+    key: i
+    name: row
+    style: {flex_direction: vertical, width: 100%}
+    children:
+      - {widget: Divider, name: divider, if: "it.get('divider', False)"}
+      - {widget: Text, name: heading, if: "it.get('heading', '') != ''", text: "{{ it.get('heading', '') }}", typography_role: title_small}
+      - widget: NavigationDrawerItem
+        name: item
+        if: "not it.get('divider', False) and it.get('heading', '') == ''"
+        label: "{{ it['label'] }}"
+        icon: "{{ it.get('icon', '') }}"
+        badge: "{{ it.get('badge', '') }}"
+        selected: "{{ app.current_screen == it['screen'] }}"
+        handlers: {on_click: "navigate_to(it['screen'])"}
