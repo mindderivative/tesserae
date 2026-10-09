@@ -1,0 +1,17 @@
+# The look of Divider (Material 3): a line in outline_variant that fills the length it is in. The insets are margins at the ends it keeps clear.
+styles:
+  - widget: Divider
+    style:
+      background: outline_variant
+      width: "{{ thickness if orientation == 'vertical' else 'auto' }}"
+      height: "{{ thickness if orientation == 'horizontal' else 'auto' }}"
+
+  - widget: Divider
+    variant: inset
+    style:
+      margin: "{{ {'left': 16} if orientation == 'horizontal' else {'top': 16} }}"
+
+  - widget: Divider
+    variant: middle
+    style:
+      margin: "{{ {'left': 16, 'right': 16} if orientation == 'horizontal' else {'top': 16, 'bottom': 16} }}"

@@ -1,0 +1,9 @@
+# The Material 3 divider: a thin line that separates content. `variant: full | inset | middle`, `orientation: horizontal | vertical`.
+# What it looks like (the colour, the thickness, the insets) is in Divider_Stylesheet.yaml; this file is its structure. It is hidden from a screen
+# reader, as a decorative line is: tre has no `separator` role to give it.
+params:
+  variant: {type: enum, choices: [full, inset, middle], default: full, doc: "full spans the whole length; inset starts 16 in from the start; middle is 16 in from both ends."}
+  orientation: {type: enum, choices: [horizontal, vertical], default: horizontal, doc: "Horizontal separates rows and fills the width it is in; vertical separates columns and fills the height."}
+  thickness: {type: float, default: 1, doc: "How thick the line is."}
+widget: Container
+a11y: {hidden: true}

@@ -148,6 +148,9 @@ def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sh
     out = [f"# {entry['title']}", "", f"*{entry['group']}*", "", "## In Material Design 3", "", entry["md3"].strip(), ""]
     out += ["## In Tesserae", "", entry["built"].strip(), ""]
     frags = [fragments[name] for name in entry["fragments"]]
+    if frags and entry.get("shipped_view"):  # both forms: the view first, and the 0.4.x fragment it replaces
+        out += [f"`widget: {entry['shipped_view']}` is the view-language form (see [The View Language](../guide/view-language.md)); "
+                "the fragment below is the older `component:` form, which keeps working.", ""]
     if frags:
         out += ["| Fragment | What it is | Stylesheet |", "| --- | --- | --- |"]
         for frag in frags:
@@ -195,7 +198,7 @@ def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sh
     if entry.get("after"):
         out += entry["after"].rstrip("\n").split("\n") + [""]
     if entry.get("usage"):
-        out += ["## Using it", "", "In a view:", ""]
+        out += ["## Using the fragment" if entry.get("usage_view") else "## Using it", "", "In a view:", ""]
         out += _fence("# Home_View.yaml\nid: root\nkind: Container\nchildren:\n" + _indent(entry["usage"], 2), "yaml")
     if entry.get("python"):
         out += ["In Python:" if entry.get("usage") else "## Using it", ""] if entry.get("usage") else ["## Using it", "", "In Python:", ""]
