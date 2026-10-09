@@ -3,6 +3,7 @@ styles:
   - widget: NavigationDrawerModal
     part: sheet
     style:
-      background: surface_container_low
+      background: "{{ 'surface_container_low@72%' if frosted else 'surface_container_low' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
       elevation: 1
       corner_radius: {top_right: 16, bottom_right: 16}

@@ -2,6 +2,7 @@
 # corners on the side that opens. Pressing a destination closes it (and writes the choice); Escape and a press on the scrim close it too, writing false to `open`, and
 # focus goes back to where it was. A menu button in the calling view opens it by writing `open`.
 params:
+  frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   open: {type: bool, default: false, model: true, doc: "Whether the drawer is showing."}
   items: {type: list, default: [], doc: "The rows: {value, label, icon} and optionally {badge, disabled}; {heading: Text}; {divider: true}."}
   selected: {type: any, default: "", model: true, doc: "The value of the chosen destination."}

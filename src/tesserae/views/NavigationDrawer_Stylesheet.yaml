@@ -2,4 +2,5 @@
 styles:
   - widget: NavigationDrawer
     style:
-      background: surface
+      background: "{{ 'surface@72%' if frosted else 'surface' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"

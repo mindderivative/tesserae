@@ -4,6 +4,7 @@
 # `mode: radio` keeps one checked (`selected`). An item with a `submenu` list opens another menu beside it (with Right, or a press). Escape and a press outside
 # close it (writing false to `open`); the arrows move, Enter chooses, typing the start of a label jumps to it.
 params:
+  frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   open: {type: bool, default: false, model: true, doc: "Whether the menu is showing; Escape and a press outside write false."}
   anchor: {type: str, default: "", doc: "The name of the node in the calling view the menu sits against."}
   items: {type: list, default: [], doc: "The rows: {value, label} and optionally {icon, shortcut, checked, disabled, submenu}; {divider: true}; {heading: Text}."}

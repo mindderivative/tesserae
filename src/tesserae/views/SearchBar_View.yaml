@@ -2,6 +2,7 @@
 # clear button once there is a `query`, an optional `trailing_icon` (a microphone) and an optional avatar (`avatar_text`). Pressing it, or typing in it, makes it `active`
 # (two-way; a `SearchView` shows while it is), and while it is active the leading icon becomes a back arrow that deactivates it. Enter calls `on_search`. `query` is two-way.
 params:
+  frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   query: {type: str, default: "", model: true, doc: "What has been typed."}
   placeholder: {type: str, default: Search, doc: "Shown while the field is empty."}
   active: {type: bool, default: false, model: true, doc: "Whether the search is under way (the view shows); focusing the bar sets it, the back arrow clears it."}

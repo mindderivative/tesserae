@@ -3,7 +3,8 @@ styles:
   - widget: SearchView
     part: panel
     style:
-      background: surface_container_high
+      background: "{{ 'surface_container_high@72%' if frosted else 'surface_container_high' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
       corner_radius: 28
       padding: {left: 0, right: 0, top: 8, bottom: 8}
   - {widget: SearchView, part: none, style: {foreground: on_surface_variant, padding: {left: 16, right: 16, top: 12, bottom: 12}}}

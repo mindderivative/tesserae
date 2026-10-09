@@ -48,6 +48,9 @@ and `start` go with the kind. A gradient follows its box as the layout resizes i
 
 ## Elevation that moves
 
+`frosted: true` does this for the navigation surfaces: `NavigationRail`, `NavigationDrawer`, `NavigationDrawerModal`, `Menu`, `SearchBar`, `SearchView` and `TopAppBar` become 72% of their
+colour with a 20 pixel backdrop blur. It is off by default.
+
 An `Icon` whose glyph changes can morph into the next with `transition: {icon: 200}`: two closed shapes, or two open lines, in the same set of glyphs (Material Symbols or MDI) blend smoothly;
 shapes with different numbers of parts switch halfway, and glyphs of the other set switch at once. `IconButton` does this for its toggle icons.
 

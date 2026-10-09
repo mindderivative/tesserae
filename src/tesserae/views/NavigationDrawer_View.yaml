@@ -2,6 +2,7 @@
 # its width from the content and when it is closed it takes none (the width eases): that is how it collapses, and a rail can take its place. Children with `slot: header`
 # and `slot: footer` go above and below the destinations. See `NavigationDrawerPanel` for the items and the keyboard.
 params:
+  frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   open: {type: bool, default: true, model: true, doc: "Whether the drawer takes its room."}
   items: {type: list, default: [], doc: "The rows: {value, label, icon} and optionally {badge, disabled}; {heading: Text}; {divider: true}."}
   selected: {type: any, default: "", model: true, doc: "The value of the chosen destination."}

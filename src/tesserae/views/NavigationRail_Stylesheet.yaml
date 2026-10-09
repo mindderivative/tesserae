@@ -3,6 +3,7 @@
 styles:
   - widget: NavigationRail
     style:
-      background: surface
+      background: "{{ 'surface@72%' if frosted else 'surface' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
       padding: "{{ {'left': 20, 'right': 20, 'top': 44, 'bottom': 56} if expanded else {'left': 0, 'right': 0, 'top': 44, 'bottom': 56} }}"
       gap: 12

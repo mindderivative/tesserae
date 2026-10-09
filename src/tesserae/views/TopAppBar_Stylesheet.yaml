@@ -3,7 +3,8 @@
 styles:
   - widget: TopAppBar
     style:
-      background: "{{ 'surface_container' if scrolled else 'surface' }}"
+      background: "{{ ('surface_container' if scrolled else 'surface') + ('@72%' if frosted else '') }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
       padding: {left: 4, right: 4, top: 0, bottom: 0}
       clip_children: true
   - {widget: TopAppBar, part: title, style: {foreground: on_surface}}

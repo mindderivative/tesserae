@@ -4,6 +4,7 @@
 # `surface_container`. `leading_icon` is the navigation icon (`menu` or `arrow_back`) and its `on_leading` handler; `actions` is a list of {value, icon, label}, pressing one sets
 # `chosen` to its `value`. Every icon has a label (its name and its tooltip). Role: a banner.
 params:
+  frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   title: {type: str, default: "", doc: "The title."}
   variant: {type: enum, choices: [small, center, medium, large], default: small, doc: "How tall it is and where the title sits."}
   leading_icon: {type: str, default: "", doc: "The navigation icon (menu, arrow_back)."}

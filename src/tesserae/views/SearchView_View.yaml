@@ -2,6 +2,7 @@
 # rows. `results` is a list of {value, label} and optionally {supporting, icon}; pressing a row sets `chosen` to its `value` and closes the view. With a `query` and no
 # results the `empty` text shows. Escape and a press outside close it (writing false to `open`). The number of results is announced politely. Bind `open` to the bar's `active`.
 params:
+  frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   open: {type: bool, default: false, model: true, doc: "Whether the view is showing; Escape and a press outside write false."}
   anchor: {type: str, default: "", doc: "The name of the search bar in the calling view."}
   results: {type: list, default: [], doc: "The rows: {value, label} and optionally {supporting, icon}."}

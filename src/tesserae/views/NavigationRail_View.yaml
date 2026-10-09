@@ -3,6 +3,7 @@
 # (children with `slot: header`), a `footer` slot below them. `alignment` groups the destinations at the top (the default), centre or bottom. One Tab stop;
 # the up and down arrows move the focus and choose the destination.
 params:
+  frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   items: {type: list, default: [], doc: "The destinations, each {value, label, icon} and optionally {badge, disabled}."}
   selected: {type: any, default: "", model: true, doc: "The value of the chosen destination; a press writes it back."}
   expanded: {type: bool, default: false, doc: "220 pixels wide, with the labels beside the icons."}

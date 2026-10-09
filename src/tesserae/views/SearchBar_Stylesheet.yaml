@@ -3,7 +3,8 @@
 styles:
   - widget: SearchBar
     style:
-      background: surface_container_high
+      background: "{{ 'surface_container_high@72%' if frosted else 'surface_container_high' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
       corner_radius: full
       elevation: 3
       padding: {left: 4, right: 12, top: 0, bottom: 0}
