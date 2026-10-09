@@ -42,6 +42,7 @@ components:
       | `disabled` | true or false | dimmed, not focusable, handlers do not run |
       | `loading` | true or false | a spinner in the icon's place; does not respond |
       | `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the colours and the shape swap while it is on |
+      | `flip` | true or false | for a toggle: off, a press does not flip `selected` and the caller decides (a button group's buttons) |
 
       Padding is 24 pixels each side (16 on the side with an icon; a text button 12). The container is a pill and, while pressed, squares off; a toggle that is
       on takes the other shape. A filled or tonal button lifts to level 1 when hovered, an elevated one rests at level 1 and lifts to 2. The state layer, ripple and
@@ -125,17 +126,35 @@ components:
   - slug: icon-buttons
     title: Icon buttons
     group: Actions
+    shipped_view: IconButton
     fragments: [IconButtonStandard, IconButtonFilled, IconButtonFilledTonal, IconButtonOutlined]
     md3: |
       An icon button is an action shown as a glyph alone. Like buttons it has four emphases: standard (no
       container), filled, filled tonal and outlined. It is 40dp, with a 48dp touch target.
     built: |
-      A round `Rect` with an `Icon` inside. `corner_radius` is half the `size`.
-    usage: |
-      - id: settings
-        component: IconButtonStandard
-        with: {icon: settings, size: 40, corner_radius: 20}
-        handlers: {on_click: open_settings}
+      `widget: IconButton` is a view Tesserae ships (`IconButton_View.yaml`): one widget for the four types, in five sizes and three widths. The `label`
+      names it for a screen reader and is its tooltip. `handlers: {on_click: ...}` on the call is what a press does.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `icon`, `selected_icon` | an icon name | the glyph; the one shown while a toggle is on |
+      | `label` | text | what it does: its name and its tooltip |
+      | `variant` | `standard`, `filled`, `tonal`, `outlined` | the type (default `standard`) |
+      | `size` | `xs`, `s`, `m`, `l`, `xl` | 32, 40, 56, 96 or 136 pixels tall; the glyph is 20, 24, 24, 32 or 40 |
+      | `width_kind` | `narrow`, `default`, `wide` | as tall as it is, or narrower or wider |
+      | `shape` | `round`, `square` | a circle, or a rounded square |
+      | `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the glyph, the colours and the shape change while it is on |
+      | `disabled` | true or false | dimmed, not focusable, handlers do not run |
+
+      The state layer, ripple and focus ring are the node's interaction; a pressed circle squares off. Not built: the 12% container of a disabled filled
+      button, and the 48 pixel touch target around a 40 pixel button.
+    usage_view: |
+      name: toolbar
+      widget: Container
+      style: {flex_direction: horizontal, gap: 8, padding: 16}
+      children:
+        - {widget: IconButton, icon: settings, label: Settings, handlers: {on_click: open_settings}}
+        - {widget: IconButton, icon: home, selected_icon: search, label: Favourite, variant: filled, toggle: true, selected: "{{ favourite }}"}
     python: |
       from tesserae.widgets import icon_button
 

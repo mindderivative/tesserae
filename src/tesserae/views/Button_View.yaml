@@ -11,7 +11,8 @@ params:
   trailing_icon: {type: str, default: "", doc: "An icon after the label."}
   disabled: {type: bool, default: false, doc: "Dimmed, not focusable, and it does not respond."}
   loading: {type: bool, default: false, doc: "A spinner in the icon's place; it does not respond while it shows."}
-  toggle: {type: bool, default: false, doc: "A press flips `selected`."}
+  toggle: {type: bool, default: false, doc: "A toggle button: it has an on and an off look, and a press flips `selected`."}
+  flip: {type: bool, default: true, doc: "For a toggle: whether a press flips `selected` itself. Off, the caller decides (a group of buttons does)."}
   selected: {type: bool, default: false, model: true, doc: "For a toggle button: whether it is on."}
 widget: Container
 interaction: true
@@ -21,7 +22,7 @@ style:
   align_content: center
   clip_children: false
 handlers:
-  on_click: "selected = (not selected) if toggle else selected"
+  on_click: "selected = (not selected) if (toggle and flip) else selected"
 a11y:
   role: button
   label: "{{ label }}"

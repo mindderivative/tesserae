@@ -24,6 +24,7 @@ as its label and icons, and `handlers: {on_click: ...}` on the call is what a pr
 | `disabled` | true or false | dimmed, not focusable, handlers do not run |
 | `loading` | true or false | a spinner in the icon's place; does not respond |
 | `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the colours and the shape swap while it is on |
+| `flip` | true or false | for a toggle: off, a press does not flip `selected` and the caller decides (a button group's buttons) |
 
 Padding is 24 pixels each side (16 on the side with an icon; a text button 12). The container is a pill and, while pressed, squares off; a toggle that is
 on takes the other shape. A filled or tonal button lifts to level 1 when hovered, an elevated one rests at level 1 and lifts to 2. The state layer, ripple and

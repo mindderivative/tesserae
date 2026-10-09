@@ -1,0 +1,38 @@
+# The look of IconButton (Material 3, with the Expressive sizes, widths and shapes). The icon is 20, 24, 24, 32 or 40 pixels for the five sizes. A toggle
+# that is on takes the selected colours and the other shape; a press squares a round button off.
+styles:
+  - widget: IconButton
+    style:
+      height: 40
+      width: 40
+      transition: {corner_radius: 200, background: 150}
+  - {widget: IconButton, size: xs, style: {height: 32}}
+  - {widget: IconButton, size: s, style: {height: 40}}
+  - {widget: IconButton, size: m, style: {height: 56}}
+  - {widget: IconButton, size: l, style: {height: 96}}
+  - {widget: IconButton, size: xl, style: {height: 136}}
+  - widget: IconButton
+    style:
+      width: "{{ {'xs': {'narrow': 28, 'default': 32, 'wide': 40}, 's': {'narrow': 32, 'default': 40, 'wide': 52}, 'm': {'narrow': 48, 'default': 56, 'wide': 72}, 'l': {'narrow': 64, 'default': 96, 'wide': 128}, 'xl': {'narrow': 104, 'default': 136, 'wide': 184}}[size][width_kind] }}"
+  # shapes
+  - {widget: IconButton, shape: round, style: {corner_radius: full}}
+  - {widget: IconButton, shape: square, style: {corner_radius: "{{ {'xs': 12, 's': 12, 'm': 16, 'l': 28, 'xl': 28}[size] }}"}}
+  - {widget: IconButton, shape: round, state: selected, style: {corner_radius: "{{ {'xs': 12, 's': 12, 'm': 16, 'l': 28, 'xl': 28}[size] }}"}}
+  - {widget: IconButton, shape: square, state: selected, style: {corner_radius: full}}
+  - {widget: IconButton, shape: round, state: pressed, style: {corner_radius: "{{ {'xs': 12, 's': 12, 'm': 16, 'l': 28, 'xl': 28}[size] }}"}}
+  # variants
+  - {widget: IconButton, variant: standard, style: {background: transparent}}
+  - {widget: IconButton, variant: filled, style: {background: "{{ 'primary' if (not toggle or selected) else 'surface_container_highest' }}"}}
+  - {widget: IconButton, variant: tonal, style: {background: "{{ 'secondary_container' if (not toggle or not selected) else 'secondary' }}"}}
+  - widget: IconButton
+    variant: outlined
+    style:
+      background: "{{ 'transparent' if (not toggle or not selected) else 'inverse_surface' }}"
+      border_width: "{{ 1 if (not toggle or not selected) else 0 }}"
+      border_color: outline
+  # the icon
+  - {widget: IconButton, part: icon, style: {width: "{{ {'xs': 20, 's': 24, 'm': 24, 'l': 32, 'xl': 40}[size] }}", height: "{{ {'xs': 20, 's': 24, 'm': 24, 'l': 32, 'xl': 40}[size] }}"}}
+  - {widget: IconButton, variant: standard, part: icon, style: {foreground: "{{ 'primary' if (toggle and selected) else 'on_surface_variant' }}"}}
+  - {widget: IconButton, variant: filled, part: icon, style: {foreground: "{{ 'on_primary' if (not toggle or selected) else 'on_surface_variant' }}"}}
+  - {widget: IconButton, variant: tonal, part: icon, style: {foreground: "{{ 'on_secondary_container' if (not toggle or not selected) else 'on_secondary' }}"}}
+  - {widget: IconButton, variant: outlined, part: icon, style: {foreground: "{{ 'on_surface_variant' if (not toggle or not selected) else 'inverse_on_surface' }}"}}

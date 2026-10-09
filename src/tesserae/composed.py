@@ -604,7 +604,7 @@ class ComposedView(View):
 
     def _show_tip(self, inst: Instance) -> None:
         text = self._tip_value(inst, "text")
-        if inst.id in self._tips or not text or inst.id not in self._built.outer:
+        if inst.id in self._tips or not text or not str(text).strip() or inst.id not in self._built.outer:
             return
         scheme = self._scheme or tokens.BASELINE
         title = self._tip_value(inst, "title")

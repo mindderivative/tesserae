@@ -212,3 +212,27 @@ def test_a_pressed_pill_squares_off_while_the_button_is_held(tmp_path):
     view.window.simulate("pointer_up", node=b)
     settle(view)
     assert b.get("corner_radius") >= 20
+
+
+def test_a_toggle_flips_even_when_the_call_has_its_own_click_handler(tmp_path):
+    view, vm = opened(tmp_path, "  - {widget: Button, name: b, label: Mute, toggle: true, handlers: {on_click: bump}}\n")
+    click(view, node(view))
+    assert vm.clicks.get() == 1 and node(view).get("pressed") is True
+
+
+def test_a_toggle_that_does_not_flip_leaves_the_decision_to_the_caller(tmp_path):
+    view, vm = opened(tmp_path, "  - {widget: Button, name: b, label: Mute, toggle: true, flip: false, selected: \"{{ on }}\", handlers: {on_click: \"clicks += 1\"}}\n")
+    click(view, node(view))
+    assert node(view).get("pressed") is False and vm.on.get() is False
+
+
+def test_a_one_way_selected_follows_the_expression_and_may_be_flipped_in_between(tmp_path):
+    view, vm = opened(tmp_path, "  - {widget: Button, name: b, label: Mute, toggle: true, selected: \"{{ on or clicks > 5 }}\"}\n")
+    click(view, node(view))
+    assert node(view).get("pressed") is True  # its own copy flipped; nothing upstream changed
+    vm.on.set(True)
+    settle(view, 10)
+    assert node(view).get("pressed") is True
+    vm.on.set(False)
+    settle(view, 10)
+    assert node(view).get("pressed") is False  # the expression changed, so the button follows it again

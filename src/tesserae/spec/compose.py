@@ -186,6 +186,8 @@ class Instance:
         self.style: dict[str, Any] = {}
         self.classes: list[str] = list(node.classes)
         self.handlers: dict[str, tuple[Handler, Scope]] = {}
+        #: handlers a call gave for an event the called view's root handles itself: they run after it, in the caller's scope
+        self.chained: dict[str, list[tuple[Handler, Scope]]] = {}
         self.a11y: dict[str, Any] = {}
         self.interaction: Any = node.interaction
         self.window_region: Optional[str] = node.window_region
@@ -252,12 +254,12 @@ class Instance:
 
     def fire(self, event: str, payload: Any = None) -> None:
         """Runs the handler for `event` in the scope it was written in."""
-        handler, scope = self.handlers[event]
-        if handler.action is not None:
-            scope.call_action(handler.action, [], {})
-        else:
-            assert handler.statements is not None
-            handler.statements.run(scope, event=payload)
+        for handler, scope in [self.handlers[event], *self.chained.get(event, ())]:
+            if handler.action is not None:
+                scope.call_action(handler.action, [], {})
+            else:
+                assert handler.statements is not None
+                handler.statements.run(scope, event=payload)
 
     def walk(self) -> Iterator["Instance"]:
         yield self
@@ -699,6 +701,15 @@ class Composer:
             return computed
         return convert(value.evaluate(scope))
 
+    def _local_copy(self, bound: Any, holder: Instance) -> Signal:
+        """A Signal holding `bound`'s value, following it as it changes. A write to it stays here until the expression next changes."""
+        if not isinstance(bound, (Signal, Computed)):
+            return Signal(bound)
+        local = Signal(bound.get())
+        effect = Effect(lambda: local.set(bound.get()))
+        holder._release.append(effect.dispose)
+        return local
+
     def _coercer(self, ctx: _Ctx, node: Node, decl: Optional[WidgetDecl], name: str) -> Optional[Callable[[Any], Any]]:
         prop = decl.properties.get(name) if decl else None
         if prop is None or prop.type in ("node", "nodes"):
@@ -847,6 +858,9 @@ class Composer:
                     models.add(pname)
                     continue
                 values[pname] = self._bind(node.props[pname], call_scope, holder, self._coercer(ctx, node, decl, pname))
+                if prop.model:  # one-way: the view may write its own copy (its handlers do), and it follows the expression whenever that changes
+                    values[pname] = self._local_copy(values[pname], holder)
+                    models.add(pname)
             elif prop.required:
                 raise self._fail(ctx, node.at, f"{node.widget}: '{pname}' is required")
             elif prop.model and holder is not None:
@@ -885,7 +899,10 @@ class Composer:
             else:
                 inst.tooltip[name] = self._bind(value, call_scope, inst)
         for event, handler in node.handlers.items():
-            inst.handlers[event] = (handler, call_scope)
+            if event in inst.handlers:  # the view's own root handler runs first, then the call's
+                inst.chained.setdefault(event, []).append((handler, call_scope))
+            else:
+                inst.handlers[event] = (handler, call_scope)
         inst.classes = [*inst.classes, *node.classes]
         if node.interaction is not None:
             inst.interaction = node.interaction

@@ -28,6 +28,7 @@ children:
     variant: "{{ variant }}"
     size: "{{ size }}"
     toggle: "{{ mode != 'none' }}"
+    flip: false
     selected: "{{ ((o['value'] in selected) if mode == 'multiple' else (o['value'] == selected)) if mode != 'none' else False }}"
     disabled: "{{ disabled or o.get('disabled', False) }}"
     style:
