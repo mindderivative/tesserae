@@ -26,9 +26,11 @@ Fonts a view or theme names are checked against what `tre` can draw
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
+from loguru import logger
 
 from tesserae.fonts import check_font_families
 from tesserae.spec.expand import expand_with_dependencies
@@ -46,6 +48,20 @@ _FILE_ARGS = {
 }
 
 
+_NOTED: set[Path] = set()
+_OLD_ROOT = re.compile(r"^(kind|component|view|include):", re.M)
+
+
+def _note_old_syntax(path: Path, text: str) -> None:
+    """Says once per file that it is written in the 0.4.x syntax and how to move it (the old syntax still loads)."""
+    resolved = path.resolve()
+    if resolved in _NOTED or not _OLD_ROOT.search(text) or re.search(r"^widget:", text, re.M):
+        return
+    _NOTED.add(resolved)
+    logger.warning("{} is written in the 0.4.x view syntax (kind:, component:, id:); it still loads, and `tesserae migrate-yaml` moves "
+                   "the project to the current syntax", path.name)
+
+
 def build_view_spec(
     path: str | Path, *, component_dirs: list[Path] | None = None, project: Any = None
 ) -> tuple[Any, list[Frame], set[Path]]:
@@ -55,9 +71,9 @@ def build_view_spec(
     decoded images to push once it's built, and every file read along
     the way (the view itself included), resolved."""
     path = Path(path)
-    spec, deps = expand_with_dependencies(
-        path.read_text(encoding="utf-8"), component_dirs=component_dirs, base_dir=path.parent, project=project
-    )
+    text = path.read_text(encoding="utf-8")
+    _note_old_syntax(path, text)
+    spec, deps = expand_with_dependencies(text, component_dirs=component_dirs, base_dir=path.parent, project=project)
     deps.add(path.resolve())
     spec, frames = extract_images(spec, path.parent, dependencies=deps)
     check_font_families(view_font_families(spec), str(path))

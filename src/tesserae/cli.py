@@ -4,6 +4,7 @@
     tesserae add screen <Name> [--dir DIR]
     tesserae build [app.py] [--name N] [--icon F] [--console] [--include G] [--exclude G] [--check]
     tesserae schema [--settings]
+    tesserae migrate-yaml [PATH] [--write] [--force]
 
 `new` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair
 following the naming convention, runnable at once; `--window` makes the app
@@ -180,6 +181,10 @@ def _parser() -> argparse.ArgumentParser:
     screen_cmd = what.add_parser("screen", help="add a screen: a View/ViewModel pair")
     screen_cmd.add_argument("name", help="the screen's CamelCase name, e.g. Settings")
     screen_cmd.add_argument("--dir", type=Path, default=Path("."), help="the app's folder (default: here)")
+    migrate_cmd = commands.add_parser("migrate-yaml", help="move a project's view files to the current syntax")
+    migrate_cmd.add_argument("path", nargs="?", type=Path, default=Path("."), help="the project's folder (default: here)")
+    migrate_cmd.add_argument("--write", action="store_true", help="write the files (without it, only report what would change)")
+    migrate_cmd.add_argument("--force", action="store_true", help="with --write: write what translated even if some files did not")
     schema_cmd = commands.add_parser("schema", help="where the YAML schemas for editors are")
     schema_cmd.add_argument("--settings", action="store_true",
                             help="print the `yaml.schemas` setting for Red Hat's YAML language server")
@@ -218,6 +223,18 @@ def _schema(args: argparse.Namespace) -> int:
     print("\nFor Red Hat's YAML language server, `tesserae schema --settings` prints the setting. See "
           "https://mindderivative.github.io/tesserae/guide/editor-support/")
     return 0
+
+
+def _migrate(args: argparse.Namespace) -> int:
+    from tesserae.migrate import migrate_project
+
+    if not args.path.is_dir():
+        raise CliError(f"{args.path} is not a folder")
+    if args.force and not args.write:
+        raise CliError("--force goes with --write")
+    report = migrate_project(args.path, write=args.write, force=args.force)
+    print(report.render(args.path.resolve()))
+    return 1 if report.failed else 0
 
 
 def _build(args: argparse.Namespace) -> int:
@@ -261,6 +278,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return _build(args)
         if args.command == "schema":
             return _schema(args)
+        if args.command == "migrate-yaml":
+            return _migrate(args)
         if args.command == "new":
             folder = new(args.name, args.dir, window=args.window, custom_title_bar=args.custom_title_bar,
                          venv=not args.no_venv)

@@ -1,7 +1,7 @@
 # The Tesserae view language (0.5.0)
 
 Phase 1 of [#209](https://github.com/mindderivative/tesserae/issues/209). This is the spec the later phases build and test against.
-**Status: draft for the user's review.** Implemented so far: the expression language (phase 2), the node model (phase 3) and composition (phase 4), ViewModel binding with a renderer (phase 5) and style rules (phase 6).
+**Status: draft for the user's review.** Implemented so far: the expression language (phase 2), the node model (phase 3) and composition (phase 4), ViewModel binding with a renderer (phase 5), style rules (phase 6) and migration (phase 7).
 
 Conventions: **Decided** marks what the user decided (2026-10-08); **Proposed** marks what this document adds and the user may change;
 **Reserved** marks a place the language may grow without breaking what is written here. "Old" means 0.4.x.
@@ -540,6 +540,14 @@ removed in the release after, with clear messages, as the 0.4.5 and 0.4.6 patter
 - **YAML trap**: `name: no` or `name: yes` reads as a boolean; the error says to quote it.
 - A reactive `for:` over a list that is **replaced** is reconciled; a list changed **in place** is not seen (Signals notify on assignment). The ViewModel replaces lists, as `Signal.set` does everywhere.
 
+**Findings of phase 7** (migration):
+
+- **The old syntax keeps working** by being left alone: the 0.4.x loader, builder and `app.load` are untouched, so "the loader accepts the old syntax" costs nothing and a project moves one view at a time. A file in the old syntax says so once (a log warning) and names the command.
+- **Not rewritten: Python.** The tool translates YAML and lists what each ViewModel needs (`views`, no `view` argument, `app.bind`, `app.open_view`). A view with a `<Name>_ViewModel.py` beside it is named after it; a fragment never is.
+- **Round trip.** Primitive-only views from the examples (the counter, the four getting-started steps, the window-dock panels) migrate, compose and render the same laid-out and painted tree as the old builder gave. Getting there found that the builder reads a node's `handlers` to make it clickable (role, cursor, state layer), so `lower` carries a placeholder handler per event while the renderer wires the real ones.
+- **Shipped fragments.** All 79 fragments and their stylesheets translate and load as views and rules, except `ButtonGroup` (a widget name from a parameter); that is the starting point of the component pass (#115, #118 to #208), which replaces them one by one with widgets that declare their properties, and the examples and tutorials that call them stay on the old path until then.
+- **Not yet drawn by a composed view**: `Window`, `TitleBar`, `Dock` and `DockPanel` (the old expansion step gives them bindings and handlers that only a ViewModel-attached `View` wires), an Image `frame`, a ScrollView's `scroll_offset`, `on_key`. They belong to the windows-and-docks work (#114, #105, #106) and the component pass.
+
 **Findings of phase 6** (style):
 
 - **A new module, not a change to `cascade.py`.** The rule shape (`widget`, `variant`, `size`, `shape`, `classes`, `name`, `part`, `state`) is `spec/rules.py`; `cascade.py` keeps the 0.4.x shape (`kind`, `classes`, `id`) for the old builder and the themes. `is_rule_sheet` tells them apart by the keys; one app uses one shape for its stylesheet for now, and a rule-shaped stylesheet reaches composed views only.
@@ -607,7 +615,7 @@ this list fixes only the names the language and the registry are designed around
 | 4 composition | `src/tesserae/spec/compose.py` (`Composer`, `Composition`, `Instance`, `Scope`: params, the caller's scope, `Slot`, `for`, `if`, `state`, ids, disposal) | scope rules; slot placement and errors; reactive `for:` reconciliation (add, remove, reorder, update in place, 10 000 rows); state per row and across a recomposition; the call's keys over the callee's root; every subscription released on dispose; mutation-checked |
 | 5 binding | `src/tesserae/viewmodel.py` (`Bindings`, `ViewHandle`, `open_view`, `check_view`), `spec/lower.py` (instances to the builder's spec), `composed.py` (`ComposedView`, `open_composed`, built-in actions), `App.bind`/`open_view`/`check`, `ViewModel(view=None)` with `views`, `show`, `on_attached`, `on_detached` | the pie-and-list case (two views, one instance, one Signal) headless and on screen; the three ways to bind; unbound views; swap; the contract and `expects:`; lowering of every widget shape; handlers, two-way edits, `for:` and `if:` reaching real nodes; mutation-checked |
 | 6 style | `src/tesserae/spec/rules.py` (`RuleSheet`, `Rule`, `Identity`, the specificity order, `is_rule_sheet`, `load_rule_sheet`), `widgets.style_fields_of` (per-widget extras), rule resolution and the `hovered`/`focused`/`pressed` Signals in `spec/compose.py`, state wiring in `composed.py`; `spec/cascade.py` stays for the 0.4.x shape | the shape and its errors; the specificity table; layers; inline over rules for the fields it sets; variant, part and state selectors; rule values that read params; hover and press on screen; mutation-checked |
-| 7 migration | `tesserae/migrate.py`, the CLI command, docs, tutorials, built-ins in the new language | the translator on the whole repository; round trip (translated files load and build the same tree as before) |
+| 7 migration | `src/tesserae/migrate.py` (`migrate_project`, `Report`), `tesserae migrate-yaml` in `cli.py`, `translate.translate_rules` (stylesheets), the once-per-file notice in `spec/load.py`, `docs/guide/view-language.md`, `docs/migration.md` | dry run, write, all-or-nothing and `--force`; renames, header comments, bind key from the ViewModel, stylesheets to rules; the shipped fragments and their sheets (155 files, one known gap); migrated primitive-only example views draw the same tree as the old ones; every YAML block in the guide loads; mutation-checked |
 
 **Risks.** (1) A reactive `for:` over a list that is replaced often: reconciliation by `key` must be linear and tested at 10 000 rows against
 `tre`'s `virtual_list`. (2) The step budget makes a slow binding fail rather than hang; the default needs measuring on the real built-in

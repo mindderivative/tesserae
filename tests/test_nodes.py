@@ -83,7 +83,7 @@ def test_style_takes_universal_fields_a_widgets_extras_and_expressions():
     assert node("widget: Container\nstyle: row_Style.yaml").style_file == "row_Style.yaml"
     assert node("widget: Text\nstyle: {foreground: on_surface}").style["foreground"] == "on_surface"  # an extra of the widgets that draw text
     err = fails("widget: Container\nstyle: {foreground: red}", "Container: style 'foreground' is not valid here")
-    assert "widgets that accept it: Icon, Link, Svg, Text, TextField" in str(err)
+    assert "widgets that accept it: Icon, Link, LoadingIndicator, Svg, Text, TextField" in str(err)
     W.register_widget(WidgetDecl("Gauge", {}, extras=("track_height",)))
     try:
         assert node("widget: Gauge\nstyle: {track_height: 4}").style["track_height"] == 4

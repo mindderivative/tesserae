@@ -58,7 +58,7 @@ declare("SpinBox", {
 }, doc="A number with step buttons.")
 declare("CircularProgress", {"value": P("float", default=0.0, doc="0 to 1; leave out for indeterminate.")}, doc="A progress ring.")
 declare("LinearProgress", {"value": P("float", default=0.0, doc="0 to 1; leave out for indeterminate.")}, doc="A progress bar.")
-declare("LoadingIndicator", doc="An indeterminate wait indicator.")
+declare("LoadingIndicator", extras=("foreground",), doc="An indeterminate wait indicator.")
 declare("TimePickerDial", {"hour": P("float", default=0.0, model=True), "minute": P("float", default=0.0, model=True)},
         doc="The clock face of a time picker.")
 

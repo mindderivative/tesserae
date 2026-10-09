@@ -20,7 +20,7 @@ import yaml
 
 from tesserae.spec.cascade import STYLE_FIELDS
 
-__all__ = ["Translator", "to_yaml"]
+__all__ = ["Translator", "to_yaml", "translate_rules"]
 
 _BRACES = re.compile(r"^\s*\{\{(.*)\}\}\s*$", re.S)
 _GET = re.compile(r"^\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\.\s*get\s*\(\s*\)\s*\}\}$")
@@ -227,3 +227,43 @@ class Translator:
 def to_yaml(data: Any) -> str:
     """The mapping as YAML text, in order, with short mappings and lists on one line."""
     return yaml.safe_dump(data, sort_keys=False, default_flow_style=None, width=140, allow_unicode=True)
+
+
+def translate_rules(data: Any, widget: Optional[str] = None) -> tuple[Any, list[str]]:
+    """A 0.4.x stylesheet (`styles:` rules by `kind`, `classes` and `id`) in the rule shape (`spec/rules.py`), and what it could not carry over.
+
+    `widget` is the view a component's own stylesheet belongs to: each rule's `id` becomes a `part` of it (`root` is the widget itself).
+    Without it the sheet is an app's: `kind` becomes `widget` and `id` becomes `name`.
+    """
+    notes: list[str] = []
+    if not isinstance(data, dict) or not isinstance(data.get("styles"), list):
+        return data, notes
+    rules = []
+    for index, old in enumerate(data["styles"]):
+        if not isinstance(old, dict):
+            rules.append(old)
+            continue
+        new: dict[str, Any] = {}
+        node_id, kind = old.get("id"), old.get("kind")
+        if widget is not None:
+            new["widget"] = widget
+            if node_id not in (None, "root"):
+                new["part"] = node_id
+            if kind is not None:
+                notes.append(f"styles[{index}]: kind: {kind} was dropped (a component's rules name its parts)")
+        else:
+            if kind is not None:
+                new["widget"] = kind
+            if node_id is not None:
+                new["name"] = node_id
+        if old.get("classes"):
+            new["classes"] = old["classes"]
+        for key in old:
+            if key not in ("id", "kind", "classes", "style"):
+                notes.append(f"styles[{index}]: '{key}' has no equivalent and was dropped")
+        style = old.get("style")
+        if isinstance(style, str):
+            notes.append(f"styles[{index}]: style: {style} names a style file; a rule's style is a mapping, so write the fields in the rule")
+        new["style"] = style
+        rules.append(new)
+    return {**data, "styles": rules}, notes

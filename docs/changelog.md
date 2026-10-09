@@ -47,6 +47,13 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `expanded` read the widget's own property. `foreground` is no longer valid on every widget: the widgets that draw text or glyphs declare it, and
   the error names them. `self.show(new, old)` swaps one of a ViewModel's views for another.
 
+- **Migration** (phase 7). `tesserae migrate-yaml [PATH] [--write] [--force]` (`tesserae.migrate`) moves a project to the new syntax: views and
+  fragments are translated (a fragment becomes a `*_View.yaml`), stylesheets become rules (a component's by `part`, an app's by `widget` and
+  `name`), a view with a `*_ViewModel.py` is named after it, header comments are kept, every result is checked with the app's loader and nothing
+  is written unless all of it loads (`--force` writes what did). Python is not rewritten: the report lists what each ViewModel needs. A view in
+  the old syntax still loads and says once per file how to move on. New: the guide [The View Language](guide/view-language.md), whose YAML
+  examples are tested, and the migration table in [Migrating](migration.md#to-050).
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

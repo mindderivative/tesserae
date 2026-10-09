@@ -61,6 +61,7 @@ nav:
       - Rich Text & Links: guide/rich-text.md
       - Touch, Gestures & Files: guide/gestures.md
       - Window Options & the OS: guide/window-options.md
+      - The View Language: guide/view-language.md
       - Bindings: guide/bindings.md
       - Reactivity: guide/reactivity.md
       - Components & Embedding: guide/components.md

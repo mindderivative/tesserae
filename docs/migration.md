@@ -3,6 +3,72 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.5.0
+
+**This release changes the view language.** Everything you wrote before still loads: a view in the old syntax is read as it always was, and says
+once per file how to move on. The new language is one shape (a node with a `widget:`), a ViewModel that serves several named views, rules in
+stylesheets, and one expression language. [The View Language](guide/view-language.md) is the whole of it.
+
+### Move a project
+
+```bash
+tesserae migrate-yaml            # reports what would change; writes nothing
+tesserae migrate-yaml --write    # writes it, if every file checked out
+```
+
+It reads every `*_View.yaml`, `*_Component.yaml` and `*_Stylesheet.yaml` in the project, translates them, checks each result with the loader
+the app uses, and writes only if all of them load (`--force` writes the ones that did). Keep the project in version control: the old files are
+rewritten, and a fragment is renamed. The comments at the top of a file are kept; comments inside a file are not, and the report says which files had
+them. Themes (`*_Theme.yaml`) and style files are left as they are.
+
+| Before | After |
+| --- | --- |
+| `kind: X`, `component: X`, `view: X_View.yaml`, `include: X.yaml` | `widget: X` |
+| `*_Component.yaml` | `*_View.yaml` (a view with `params:`) |
+| `id: x` | `name: x`; the root's `id: root` is dropped |
+| `with: {a: 1}` on a call | `a: 1` |
+| `repeat: "{{ items }}"` | `for: item in items` with a `key:` (write the identity, `item.id`; the tool leaves a stand-in and says so) |
+| `when: "{{ x }}"`, `{if: ..., then: ..., else: ...}` | `if: x` on the node, or on two nodes |
+| `bindings: {text: "{{ x.get() }}"}` | `text: "{{ x.get() }}"` (and `{{ x }}` works) |
+| `two_way: checked` | a bare reference on a model property: `checked: "{{ done }}"` |
+| `text: {content: Hi, typography_role: ...}`, `icon: {name: home}`, `image: {...}` | `text: Hi`, `typography_role: ...`, `icon: home`, the keys of `image` as properties |
+| `bindings: {background: ...}` | `style: {background: ...}` |
+| `interaction: {color: X}` | `interaction: X` |
+| `navigate.{{ screen }}` | `navigate_to(screen)` |
+| a stylesheet rule `kind: Rect` / `id: go` / `classes: [a]` | `widget: Rect` / `name: go` / `classes: [a]` |
+| a component's `<Name>_Stylesheet.yaml`, rules by `id:` | rules `widget: Name`, with `part: <id>` (`root` is the widget itself) |
+
+A view that has a `<Name>_ViewModel.py` beside it is named `name: <Name>`, the bind key. **The ViewModels are Python and are not rewritten;** the
+report lists what each needs:
+
+```python
+class CounterViewModel(ViewModel):
+    views = "Counter"                 # the views it serves
+
+    def __init__(self):               # no `view` argument
+        super().__init__()
+        self.count = Signal(0)
+```
+
+```python
+app.bind(CounterViewModel)
+app.open_view("Counter")              # instead of app.load("Counter")
+```
+
+`ViewModel(view)` and `app.load(...)` still work for views in the old syntax, so a project can move one view at a time: migrate, then change that
+view's ViewModel and its line in `app.py`.
+
+### What the tool cannot do
+
+- A widget name that is a parameter (`component: "{{ button }}"`) has no equivalent: a `variant` property on one widget replaces it.
+- A call that sets a property its fragment does not declare (`disabled` on a `ButtonText`) is reported; the fragment needs to declare it.
+- The shipped fragments (`ButtonFilled`, `NavigationRail`, ...) are not views in the new language yet, so a view that calls one cannot be
+  opened with `app.open_view` yet; keep it on `app.load`.
+- `Window`, `TitleBar` and `Dock` views, an Image `frame` binding, a ScrollView's `scroll_offset` and `on_key` are not drawn by `app.open_view` yet.
+  The ones it cannot draw are errors that name the property, never silently dropped.
+- A `TextField` has no `placeholder`, `multiline` or `obscured` yet.
+- `foreground` is valid only on the widgets that draw text or glyphs; on a `Container` it is now an error that names them.
+
 ## To 0.4.6
 
 Nothing has to change if your app already runs on 0.4.5. The old names that 0.4.5 removed each raised an error saying what

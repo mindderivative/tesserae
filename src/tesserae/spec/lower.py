@@ -19,6 +19,7 @@ __all__ = ["lower"]
 _TEXT_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "wrap", "overflow", "text_align")
 _FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight")
 #: Properties the renderer does not draw yet: said by name, never dropped silently.
+_PLACEHOLDER = "composed"
 _NOT_RENDERED = {"frame": "a video frame", "scroll_offset": "a scroll position"}
 
 
@@ -56,6 +57,10 @@ def lower(inst: Instance) -> dict[str, Any]:
         node["a11y"] = {name: (held.get() if hasattr(held, "get") else held) for name, held in inst.a11y.items()}
     if inst.interaction is not None:
         node["interaction"] = {"color": inst.interaction} if isinstance(inst.interaction, str) else inst.interaction
+    if inst.handlers:
+        # The builder reads a node's handlers to make it clickable (role, cursor, state layer); the renderer wires the real ones from the
+        # instance, so the spec carries a name the 0.4.x wiring does not act on.
+        node["handlers"] = {event: _PLACEHOLDER for event in inst.handlers}
     if inst.window_region is not None:
         node["window_region"] = inst.window_region
     if inst.children:
