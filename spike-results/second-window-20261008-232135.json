@@ -1,0 +1,68 @@
+{
+"log": [
+{
+"t": 5.296,
+"kind": "add_window_raised",
+"how": "key handler",
+"error": "RuntimeError: Already borrowed"
+},
+{
+"t": 5.297,
+"kind": "after_add",
+"how": "key handler",
+"first_frames": 1,
+"second_frames": 0
+},
+{
+"t": 10.686,
+"kind": "add_window_raised",
+"how": "call_soon",
+"error": "RuntimeError: Already borrowed"
+},
+{
+"t": 10.686,
+"kind": "after_add",
+"how": "call_soon",
+"first_frames": 1,
+"second_frames": 0
+},
+{
+"t": 11.041,
+"kind": "second_close_called"
+},
+{
+"t": 11.734,
+"kind": "probe",
+"answers": {
+"parent": "ValueError: unknown window property \"parent\" -- settable: title, partial_redraw, show_damage, profile_",
+"owner": "ValueError: unknown window property \"owner\" -- settable: title, partial_redraw, show_damage, profile_n",
+"modal": "ValueError: unknown window property \"modal\" -- settable: title, partial_redraw, show_damage, profile_n",
+"transient_for": "ValueError: unknown window property \"transient_for\" -- settable: title, partial_redraw, show_damage, p",
+"always_on_top": "ValueError: unknown window property \"always_on_top\" -- settable: title, partial_redraw, show_damage, p",
+"skip_taskbar": "ValueError: unknown window property \"skip_taskbar\" -- settable: title, partial_redraw, show_damage, pr",
+"x": "ValueError: unknown window property \"x\" -- settable: title, partial_redraw, show_damage, profile_nodes",
+"y": "ValueError: unknown window property \"y\" -- settable: title, partial_redraw, show_damage, profile_nodes",
+"position": "ValueError: unknown window property \"position\" -- settable: title, partial_redraw, show_damage, profil",
+"title": "accepted",
+"min_width": "accepted"
+}
+},
+{
+"t": 14.372,
+"kind": "first_closed",
+"second_frames": 0
+},
+{
+"t": 14.386,
+"kind": "run_returned",
+"frames": {
+"first": 1,
+"second": 0
+}
+}
+],
+"frames": {
+"first": 1,
+"second": 0
+}
+}

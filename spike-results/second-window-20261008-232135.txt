@@ -1,0 +1,8 @@
+   5.296s add_window_raised how=key handler, error=RuntimeError: Already borrowed
+   5.297s after_add how=key handler, first_frames=1, second_frames=0
+  10.686s add_window_raised how=call_soon, error=RuntimeError: Already borrowed
+  10.686s after_add how=call_soon, first_frames=1, second_frames=0
+  11.041s second_close_called 
+  11.734s probe answers={'parent': 'ValueError: unknown window property "parent" -- settable: title, partial_redraw, show_damage, profile_', 'owner': 'ValueError: unknown window property "owner" -- settable: title, partial_redraw, show_damage, profile_n', 'modal': 'ValueError: unknown window property "modal" -- settable: title, partial_redraw, show_damage, profile_n', 'transient_for': 'ValueError: unknown window property "transient_for" -- settable: title, partial_redraw, show_damage, p', 'always_on_top': 'ValueError: unknown window property "always_on_top" -- settable: title, partial_redraw, show_damage, p', 'skip_taskbar': 'ValueError: unknown window property "skip_taskbar" -- settable: title, partial_redraw, show_damage, pr', 'x': 'ValueError: unknown window property "x" -- settable: title, partial_redraw, show_damage, profile_nodes', 'y': 'ValueError: unknown window property "y" -- settable: title, partial_redraw, show_damage, profile_nodes', 'position': 'ValueError: unknown window property "position" -- settable: title, partial_redraw, show_damage, profil', 'title': 'accepted', 'min_width': 'accepted'}
+  14.372s first_closed second_frames=0
+  14.386s run_returned frames={'first': 1, 'second': 0}
