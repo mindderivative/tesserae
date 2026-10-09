@@ -159,6 +159,8 @@ class ComposedView(View):
         self._split_dragging: set[str] = set()
         self._tips: dict[str, tuple[Any, Callable[[], None]]] = {}  # tooltips showing: the node id -> its layer and the Escape listener's undo
         self._tip_undos: list[Callable[[], None]] = []
+        self._link_hot: dict[str, set[str]] = {}  # a Link's reasons to be underlined now: 'pointer', 'focus'
+        self._link_undos: list[Callable[[], None]] = []
         self._split_last_up: dict[str, float] = {}
         self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
@@ -243,6 +245,7 @@ class ComposedView(View):
             untrack(self._wire_overlays)
             untrack(self._wire_splitters)
             untrack(self._wire_tooltips)
+            untrack(self._wire_links)
             untrack(self._wire_states)
             untrack(self._wire_focus_groups)
             untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -423,6 +426,56 @@ class ComposedView(View):
                 "decrement": lambda e, inst=inst, user=user: user(float(inst.value("position")) - self.SPLIT_STEP),
                 "set_value": lambda e, user=user: user(float(e.value)),
             }, listen=self._listen))
+
+    # links (#174)
+
+    def _wire_links(self) -> None:
+        """A Link's `href` (opened in the OS's browser or mail program when it is activated, which also marks it `visited`) and its underline (under
+        the pointer or the keyboard focus, always, or never)."""
+        for undo in self._link_undos:
+            undo()
+        self._link_undos = []
+        for inst in self.handle.composition.walk():
+            if inst.widget != "Link" or inst.id not in self._built.outer:
+                continue
+            box, text = self._built.outer[inst.id], self._built.nodes[inst.id]
+            mode = inst.value("underline")
+
+            def underline(inst: Instance = inst, text: Any = text, mode: str = mode) -> None:
+                on = mode == "always" or (mode == "hover" and bool(self._link_hot.get(inst.id)))
+                size = len(str(text.get("text")).encode("utf-8"))
+                text.set(spans=[(0, size, {"underline": True})] if on and size else [])
+
+            def heat(reason: str, on: bool, inst: Instance = inst, underline: Callable[[], None] = underline) -> Callable[[Any], None]:
+                def change(event: Any = None) -> None:
+                    if reason == "focus" and on and not getattr(event, "focus_visible", True):
+                        return  # focus a mouse click gave is not a reason to underline
+                    hot = self._link_hot.setdefault(inst.id, set())
+                    hot.add(reason) if on else hot.discard(reason)
+                    underline()
+                return change
+
+            underline()  # a re-sync put the text back as the spec has it
+            for event_name, reason, on in (("pointer_enter", "pointer", True), ("pointer_leave", "pointer", False),
+                                           ("focus", "focus", True), ("unfocus", "focus", False)):
+                self._link_undos.append(self._listen(box, event_name, heat(reason, on)))
+
+            def follow(event: Any = None, inst: Instance = inst) -> None:
+                href = inst.value("href")
+                if not href or inst.value("disabled"):
+                    return
+                try:
+                    opened = urls.open_url(href)
+                except ValueError as exc:
+                    from loguru import logger
+
+                    logger.warning("Link {}: {}", inst.id, exc)
+                    return
+                bound = inst.models.get("visited")
+                if opened and bound is not None:
+                    bound[1].assign(bound[0], True)
+
+            self._link_undos.append(self._listen(box, "click", follow))
 
     # tooltips (#238)
 
@@ -758,7 +811,7 @@ class ComposedView(View):
             self._timers.cancel_all()
         for inst_id in list(self._tips):
             self._hide_tip(inst_id)
-        for undo in self._tip_undos:
+        for undo in (*self._tip_undos, *self._link_undos):
             undo()
         for inst_id in list(self._shown_layers):
             self._hide_layer(inst_id)

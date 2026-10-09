@@ -8,7 +8,20 @@ A link takes the user somewhere else, or opens a related page. It is text, in th
 
 ## In Tesserae
 
-The `Link` node kind: text that takes focus, and that Enter or a click activates.
+`widget: Link` is text that takes focus, and that Enter or a click activates. It is `primary`, in `body_medium` unless you name another type role.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `text` | text | what it says; it also names the link for a screen reader |
+| `href` | a link | opened in the OS's browser or mail program when it is activated: `http`, `https`, `mailto` and `tel` only, anything else is refused |
+| `visited` | true or false, two-way | whether it has been followed; opening its `href` sets a bound one, and `state: visited` in a rule colours it (`secondary` by default) |
+| `disabled` | true or false | dimmed, out of the Tab order, and does nothing |
+| `underline` | `hover`, `always` or `never` | underlined while the pointer is over it or keyboard focus is on it (the default), always, or never |
+| `handlers` | | `on_click` runs as well as the `href` opens |
+
+The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. Inside a longer text, use `text.runs` with a `link`.
+
+`widget: Link` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -47,6 +60,18 @@ text:
 ```
 
 ## Using it
+
+```yaml
+name: help
+widget: Container
+style: {flex_direction: vertical, gap: 8, width: 300, height: 100}
+children:
+  - {widget: Link, text: Read the docs, href: "https://example.com/docs", visited: "{{ docs_seen }}"}
+  - {widget: Link, text: Not now, disabled: true}
+  - {widget: Link, text: Sign in, handlers: {on_click: sign_in}}
+```
+
+## Using the fragment
 
 In a view:
 

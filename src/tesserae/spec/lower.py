@@ -39,6 +39,10 @@ def lower(inst: Instance) -> dict[str, Any]:
     if widget in ("Text", "Link"):
         folded = {"text", "heading", *_TEXT_KEYS}
         node["text"] = {"content": values.get("text", ""), **{k: values[k] for k in _TEXT_KEYS if k in values}}
+        if widget == "Link":
+            folded |= {"href", "visited", "underline"}  # the renderer opens the href and underlines; the builder draws plain text
+            if not {"typography_role", "font_family", "font_size"} & set(node["text"]):
+                node["text"]["typography_role"] = "body_medium"
     elif widget == "TextInput":
         folded = {"text", *_FIELD_KEYS, *_RENDERER_ONLY["TextInput"]}
         node["text"] = {"content": values.get("text", ""), **{k: values[k] for k in _FIELD_KEYS if k in values}}

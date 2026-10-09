@@ -243,7 +243,7 @@ def test_hovered_focused_and_pressed_are_names_an_expression_can_read_but_not_wr
 
 
 def test_every_state_a_rule_can_name_is_documented():
-    assert STATES == ("hovered", "focused", "focus_visible", "pressed", "disabled", "selected", "checked", "expanded", "error", "read_only")
+    assert STATES == ("hovered", "focused", "focus_visible", "pressed", "disabled", "selected", "checked", "expanded", "error", "read_only", "visited")
 
 
 def test_an_instance_with_no_matching_rule_makes_no_computed_and_rules_are_released_on_dispose():

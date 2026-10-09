@@ -138,6 +138,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   (requested: tre#161), so they are set frame by frame along the curve; when tre can, its own animation is used without a change.
 - **Badge** ([#141](https://github.com/mindderivative/tesserae/issues/141), [#142](https://github.com/mindderivative/tesserae/issues/142)). `widget: Badge`: a dot, or a pill with a `value` capped at `limit` (`999+`), `show`, and `anchored: true` to
   sit over the top right corner of its host (the children). One view replaces `BadgeDot` and `BadgeLabeled`, which still work.
+- **Link** ([#174](https://github.com/mindderivative/tesserae/issues/174)). `widget: Link` is primary text in `body_medium` by default with `href` (opened by `open_url`, so only web and mail links), a two-way
+  `visited` (and `state: visited` in rules), `disabled`, and `underline` (`hover` by default: under the pointer or the keyboard focus, `always`, `never`).
 
 ### Removed
 

@@ -1725,6 +1725,58 @@
               }
             ],
             "description": "Extra space between letters, in pixels (tracking)."
+          },
+          "href": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A web or mail link (http, https, mailto, tel) opened in the OS's browser or mail program when it is activated."
+          },
+          "visited": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Whether it has been followed; opening its href sets it, and a rule can show it with `state: visited`."
+          },
+          "disabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Dimmed, and not activated."
+          },
+          "underline": {
+            "anyOf": [
+              {
+                "enum": [
+                  "hover",
+                  "always",
+                  "never"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "When the text is underlined: while the pointer is over it or it has the keyboard focus, always, or never."
           }
         },
         "required": [
@@ -1759,7 +1811,11 @@
             "overflow",
             "text_align",
             "max_lines",
-            "letter_spacing"
+            "letter_spacing",
+            "href",
+            "visited",
+            "disabled",
+            "underline"
           ]
         }
       }

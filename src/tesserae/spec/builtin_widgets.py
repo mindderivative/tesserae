@@ -34,7 +34,11 @@ _TEXT = {
 declare("Text", {**_TEXT, "selectable": P("bool", doc="The text can be selected and copied."),
                  "heading": P("int", choices=(1, 2, 3, 4, 5, 6), doc="Makes it a heading of this level for a screen reader.")},
         extras=("foreground",), doc="A run of text.")
-declare("Link", {**_TEXT, "text": P("str", default="", doc="The link's text, which names it for a screen reader.")},
+declare("Link", {**_TEXT, "text": P("str", default="", doc="The link's text, which names it for a screen reader."),
+                 "href": P("str", doc="A web or mail link (http, https, mailto, tel) opened in the OS's browser or mail program when it is activated."),
+                 "visited": P("bool", model=True, doc="Whether it has been followed; opening its href sets it, and a rule can show it with `state: visited`."),
+                 "disabled": P("bool", doc="Dimmed, and not activated."),
+                 "underline": P("enum", choices=("hover", "always", "never"), default="hover", doc="When the text is underlined: while the pointer is over it or it has the keyboard focus, always, or never.")},
         extras=("foreground",), doc="Text that can be activated.")
 declare("TextInput", {
     "text": P("str", default="", model=True, doc="What the user has typed."),

@@ -1,0 +1,11 @@
+# The look of Link: primary text, a different colour once it has been followed, dimmed while disabled. The underline is drawn by the renderer
+# (while the pointer is over it or it has the keyboard focus, unless `underline:` says otherwise).
+styles:
+  - widget: Link
+    style: {foreground: primary}
+  - widget: Link
+    state: visited
+    style: {foreground: secondary}
+  - widget: Link
+    state: disabled
+    style: {foreground: on_surface, opacity: 0.38}

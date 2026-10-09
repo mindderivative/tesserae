@@ -63,7 +63,7 @@ Every widget declares its properties: a type, a default, the values it allows, w
 | Widget | Properties |
 |---|---|
 | `Container`, `Rect` | none; they hold children (a `Rect` is the usual clickable box) |
-| `Text`, `Link` | `text`, `typography_role`, `font_family`, `font_size`, `font_weight`, `wrap`, `overflow`, `text_align` |
+| `Text`, `Link` | `text`, `typography_role`, `font_family`, `font_size`, `font_weight`, `wrap`, `overflow`, `text_align`, `max_lines`, `letter_spacing`; a `Text` also `selectable` and `heading`, a `Link` also `href`, `visited`, `disabled` and `underline` |
 | `TextInput` | `text` (model), `placeholder`, `multiline`, `obscured`, `max_length`, `read_only`, `typography_role`, `font_family`, `font_size`, `font_weight`, `disabled` |
 | `TextField` | the Material text field, a view Tesserae ships: see [Text fields](../components/text-fields.md) |
 | `Icon` | `icon` (a built-in icon name, or `path` and `view_box`: one of them) |
@@ -450,7 +450,7 @@ styles:
 ```
 
 A rule names a `widget` (a built-in or a view), and may add `variant`, `size`, `shape` (properties the widget declares), `classes`, `name`, a
-`part` (a named node inside that widget's view) and a `state` (`hovered focused focus_visible pressed disabled selected checked expanded error read_only`; the last six read the
+`part` (a named node inside that widget's view) and a `state` (`hovered focused focus_visible pressed disabled selected checked expanded error read_only visited`; the last seven read the
 widget's own property). The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the
 widget alone, and a later rule wins a tie. A widget's own shipped looks are the lowest layer and the app's stylesheet is above them. **A
 node's inline `style:` beats every rule, for the fields it sets and no others.** A rule's value may be an expression over the widget's params.

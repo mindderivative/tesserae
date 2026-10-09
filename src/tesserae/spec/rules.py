@@ -35,7 +35,7 @@ __all__ = ["INTERACTION_STATES", "Identity", "Rule", "RuleSheet", "STATES", "is_
            "style_fields_of"]
 
 #: The states a rule may select. The first three are interaction states; the rest read the node's own property of that name.
-STATES = ("hovered", "focused", "focus_visible", "pressed", "disabled", "selected", "checked", "expanded", "error", "read_only")
+STATES = ("hovered", "focused", "focus_visible", "pressed", "disabled", "selected", "checked", "expanded", "error", "read_only", "visited")
 INTERACTION_STATES = ("hovered", "focused", "focus_visible", "pressed")
 #: Properties a rule may select on, besides `classes` and `name`.
 SELECTOR_PROPERTIES = ("variant", "size", "shape")
