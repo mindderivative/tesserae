@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import math
 from typing import Any, Callable
-from tesserae import motion
+from tesserae import motion, ripple
 
 __all__ = ["DRAGGED", "FOCUSED", "HOVERED", "Interaction", "PRESSED"]
 
@@ -89,6 +89,12 @@ class Interaction:
         self.ring = window.create("box", stroke_color=ring_color, stroke_width=RING_WIDTH, visible=False,
                                   **decoration)
         self.clip.add_child(self.layer)
+        self.sparks: Any = None  # the ripple shader's node, when the window draws ripples that way (`tesserae.ripple`)
+        self._shader: Any = None
+        if ripple.uses_shader(window):
+            self.sparks = window.create("box", x=0, y=0, width="100%", height="100%", **decoration)
+            self.clip.add_child(self.sparks)
+            self._shader = ripple.RippleShader(window, self.sparks, tint)
         self.surface.add_child(self.clip)
         self.ring_around.add_child(self.ring)
         self.refresh()
@@ -124,14 +130,18 @@ class Interaction:
         if not enabled:
             self.hovered = self.focused = self.dragged = False
             self.ring.set(visible=False)
-            for ripple in self._ripples:
-                ripple.circle.set(opacity=0.0)
-                ripple.release()
+            for each in self._ripples:
+                each.circle.set(opacity=0.0)
+                each.release()
+            if self._shader is not None:
+                self._shader.clear()
             self.layer.animate("opacity", 0.0, 0)
 
     @property
     def ripples(self) -> list[Any]:
-        """The live ripples' circle nodes, oldest first."""
+        """The live ripples, oldest first: their circle nodes, or (drawn by the shader) the presses it holds."""
+        if self._shader is not None:
+            return list(self._shader.presses)
         return [ripple.circle for ripple in self._ripples]
 
     def set_dragged(self, dragged: bool) -> None:
@@ -149,8 +159,10 @@ class Interaction:
         self.tint, self.ring_color = tint, ring_color
         self.layer.set(fill=tint)
         self.ring.set(stroke_color=ring_color)
-        for ripple in self._ripples:
-            ripple.circle.set(fill=tint)
+        for each in self._ripples:
+            each.circle.set(fill=tint)
+        if self._shader is not None:
+            self._shader.retint(tint)
 
     def refresh(self) -> None:
         """Follows the node's corners (and, for the ring, its size)."""
@@ -177,6 +189,8 @@ class Interaction:
         for node in (self.clip, self.ring):
             _quietly(node.destroy)
         self._ripples = []
+        if self._shader is not None:
+            self._shader.detach()
         if self.node in _INTERACTIVE:
             _INTERACTIVE.remove(self.node)
 
@@ -212,7 +226,10 @@ class Interaction:
             if self.surface is not self.node:  # the event is local to the node; layout is window-wide
                 x -= (self.surface.get("layout_x") or 0.0) - (self.node.get("layout_x") or 0.0)
                 y -= (self.surface.get("layout_y") or 0.0) - (self.node.get("layout_y") or 0.0)
-            self._ripples.append(_Ripple(self, x, y))
+            if self._shader is not None:
+                self._shader.press(x, y, self.surface.get("layout_width") or 0.0, self.surface.get("layout_height") or 0.0)
+            else:
+                self._ripples.append(_Ripple(self, x, y))
 
     def _on_up(self, event: Any) -> None:
         self._release_all()
@@ -220,9 +237,12 @@ class Interaction:
     def _on_click(self, event: Any) -> None:
         # A keyboard click has no position, and no press came first.
         if self._enabled and event.x is None and self._mine(event):
-            ripple = _Ripple(self, None, None)
-            self._ripples.append(ripple)
-            ripple.release()
+            if self._shader is not None:
+                self._shader.release(self._shader.press(None, None, self.surface.get("layout_width") or 0.0, self.surface.get("layout_height") or 0.0))
+                return
+            each = _Ripple(self, None, None)
+            self._ripples.append(each)
+            each.release()
 
     def _on_focus(self, event: Any) -> None:
         if event.target == self.node and self._enabled:
@@ -239,8 +259,10 @@ class Interaction:
             self._update()
 
     def _release_all(self) -> None:
-        for ripple in list(self._ripples):
-            ripple.release()
+        for each in list(self._ripples):
+            each.release()
+        if self._shader is not None:
+            self._shader.release()
 
 
 class _Ripple:

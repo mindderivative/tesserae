@@ -66,7 +66,8 @@ class App(
     system_fonts: bool = False,
     reduced_motion: bool | str = 'system',
     high_contrast: bool | str = 'system',
-    transition: str = 'none'
+    transition: str = 'none',
+    ripple: str = 'nodes'
 ) -> None
 ```
 
@@ -1967,7 +1968,7 @@ The state layer, ripple and focus ring on one `box` node: the layer and ripple t
 - `refresh() -> None`: Follows the node's corners (and, for the ring, its size).
 - `retint(tint: RGBA, ring_color: RGBA) -> None`: New colours (a theme change), for the layer, live ripples and ring.
 - `ring_visible` *(property)*: Whether the focus ring is showing.
-- `ripples` *(property)*: The live ripples' circle nodes, oldest first.
+- `ripples` *(property)*: The live ripples, oldest first: their circle nodes, or (drawn by the shader) the presses it holds.
 - `set_dragged(dragged: bool) -> None`: For widgets that drag: MD3's dragged state.
 
 **Constants**

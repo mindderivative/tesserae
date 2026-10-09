@@ -34,6 +34,7 @@ from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.listeners import Listeners, listen_window
 from tesserae.naming import check_naming_convention
 from tesserae.project import Project, is_name, resolve_embedded, resolve_view
+from tesserae import ripple as _ripple
 from tesserae.spec.window import window_of
 from tesserae.window_view import Frame, WindowViewModel
 from tesserae import tokens
@@ -258,6 +259,7 @@ class App:
         reduced_motion: bool | str = "system",
         high_contrast: bool | str = "system",
         transition: str = "none",
+        ripple: str = "nodes",
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
@@ -416,6 +418,10 @@ class App:
         self._window.on("color_scheme", self._on_color_scheme)
         # the window's display options: the engine's (`tre` 0.5.4)
         self._set_window(dpi_scaling=bool(dpi_scaling), present_mode=present_mode, glyph_cache=bool(glyph_cache))
+        if ripple not in ("nodes", "shader"):
+            raise ValueError(f"App: ripple is 'nodes' (a circle per press) or 'shader' (one shader for them), got {ripple!r}")
+        self._ripple = ripple
+        _ripple.use_shader(self._window, ripple == "shader")
         if transparent:  # before the window opens: the OS fixes it then
             self._set_window(transparent=True)
             self._window.root.set(fill=(0, 0, 0, 0))
