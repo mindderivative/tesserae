@@ -83,7 +83,7 @@ glyphs, indicators and controls (`Text`, `Link`, `TextInput`, `Icon`, `Svg`, `Lo
 
 Everything inside `{{ }}` is one expression in a safe subset of Python: arithmetic, comparisons, `and`/`or`/`not`, `x if c else y`, f-strings,
 lists, dicts, comprehensions, indexing, and a short list of functions and methods (`len`, `min`, `max`, `sum`, `round`, `sorted`, `str`,
-`format_number`, `pluralize`, `clamp`, the usual text and list methods). Nothing else runs: no imports, no attribute that starts with `_`, no
+`format_number`, `pluralize`, `clamp`, the date functions `date_add_days`, `date_weekday`, `days_in_month`, `format_date` and `current_date`, the usual text and list methods). Nothing else runs: no imports, no attribute that starts with `_`, no
 calling an object's own methods, and every expression has limits on size, steps and the numbers it may make. See
 [Binding Expressions](bindings.md) for the full list.
 

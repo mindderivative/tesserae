@@ -1,0 +1,12 @@
+# The look of DatePickerDay: the selected day is a primary circle with on_primary text; today a 1 pixel primary outline with primary text; a day outside the month is
+# on_surface_variant; the rest on_surface.
+styles:
+  - widget: DatePickerDay
+    part: circle
+    style:
+      background: "{{ 'primary' if selected else 'transparent' }}"
+      border_width: "{{ 1 if (today and not selected) else 0 }}"
+      border_color: primary
+  - widget: DatePickerDay
+    part: number
+    style: {foreground: "{{ 'on_primary' if selected else ('primary' if today else ('on_surface_variant' if outside else 'on_surface')) }}"}

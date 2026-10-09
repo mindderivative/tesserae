@@ -175,6 +175,62 @@ def _clamp(x: Any, low: Any, high: Any) -> Any:
     return max(low, min(high, x))
 
 
+def _date(iso: Any) -> Any:
+    import datetime
+
+    try:
+        return datetime.date.fromisoformat(str(iso))
+    except ValueError:
+        raise ValueError(f"{iso!r} is not a date written year-month-day (2026-10-09)") from None
+
+
+def _date_add_days(iso: Any, days: Any) -> str:
+    """The date `days` after `iso` (before, when negative), as `year-month-day`."""
+    import datetime
+
+    return (_date(iso) + datetime.timedelta(days=int(days))).isoformat()
+
+
+def _date_weekday(iso: Any) -> int:
+    """0 for a Monday to 6 for a Sunday."""
+    return _date(iso).weekday()
+
+
+def _days_in_month(year: Any, month: Any) -> int:
+    import calendar
+
+    return calendar.monthrange(int(year), int(month))[1]
+
+
+def _today() -> str:
+    """Today's date, as `year-month-day`."""
+    import datetime
+
+    return datetime.date.today().isoformat()
+
+
+def _format_date(iso: Any, pattern: Any = "%a, %b %d") -> str:
+    """`iso` written as `pattern` (`%a` a short weekday, `%A` the weekday, `%b` a short month, `%B` the month, `%d` and `%e` the day, `%m`, `%Y`, `%y`, `%j` and `%%`), in English."""
+    d = _date(iso)
+    names = {"a": _WEEKDAYS[d.weekday()][:3], "A": _WEEKDAYS[d.weekday()], "b": _MONTHS[d.month - 1][:3], "B": _MONTHS[d.month - 1], "d": f"{d.day:02d}",
+             "e": str(d.day), "m": f"{d.month:02d}", "Y": str(d.year), "y": f"{d.year % 100:02d}", "j": f"{d.timetuple().tm_yday:03d}", "%": "%"}
+    text, out, i = str(pattern), [], 0
+    while i < len(text):
+        if text[i] == "%":
+            if i + 1 >= len(text) or text[i + 1] not in names:
+                raise ValueError(f"format_date: {text[i:i + 2]!r} is not a date field")
+            out.append(names[text[i + 1]])
+            i += 2
+        else:
+            out.append(text[i])
+            i += 1
+    return "".join(out)
+
+
+_WEEKDAYS = ("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+_MONTHS = ("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+
+
 #: The functions an expression may call (section 8.5). `isinstance` is special-cased: its second argument must be one of the
 #: types here.
 BUILTIN_FUNCTIONS: dict[str, Callable[..., Any]] = {
@@ -182,6 +238,7 @@ BUILTIN_FUNCTIONS: dict[str, Callable[..., Any]] = {
     "bool": bool, "sorted": sorted, "reversed": lambda x: list(reversed(x)), "range": range, "enumerate": lambda x, start=0: list(enumerate(x, start)),
     "zip": lambda *xs: list(zip(*xs)), "any": any, "all": all, "list": list, "dict": dict, "tuple": tuple, "set": set,
     "isinstance": isinstance, "format_number": _format_number, "pluralize": _pluralize, "clamp": _clamp,
+    "date_add_days": _date_add_days, "date_weekday": _date_weekday, "days_in_month": _days_in_month, "format_date": _format_date, "current_date": _today,
 }
 _ISINSTANCE_TYPES = {"str": str, "int": int, "float": float, "bool": bool, "list": list, "dict": dict}
 #: Functions that consume iterables: their iterable arguments are bounded and charged to the step budget first.

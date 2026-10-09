@@ -125,7 +125,8 @@ def test_a_comprehension_variable_cannot_be_called_and_a_name_that_is_not_a_func
 def test_the_built_in_list_is_the_documented_one():
     assert set(BUILTIN_FUNCTIONS) == {
         "len", "min", "max", "abs", "round", "sum", "str", "int", "float", "bool", "sorted", "reversed", "range", "enumerate", "zip", "any",
-        "all", "list", "dict", "tuple", "set", "isinstance", "format_number", "pluralize", "clamp"}
+        "all", "list", "dict", "tuple", "set", "isinstance", "format_number", "pluralize", "clamp",
+        "date_add_days", "date_weekday", "days_in_month", "format_date", "current_date"}
 
 
 # -- Signals read as values (8.4) --------------------------------------------------------------------------------------------

@@ -9,8 +9,23 @@ circle, and days of the neighbouring months are dimmed.
 
 ## In Tesserae
 
-The day cell only, in its four states; you lay the grid out (a `display: grid` container is the natural
-fit).
+Two views Tesserae ships: `DatePickerDay` (one day, in all its states) and `DatePicker` (the modal dialog).
+
+| Property of `DatePicker` | Type | Meaning |
+| --- | --- | --- |
+| `open` | true or false; two-way | whether it is showing; Escape and a press on the scrim close it |
+| `date` | text `year-month-day`; two-way | the date ("2026-10-09", or empty for none); changed only when OK is pressed |
+| `earliest`, `latest` | text `year-month-day` | the days outside them are disabled |
+| `week_starts` | `sunday`, `monday` | which day the weeks start on |
+| `title`, `on_ok` | text, a handler | the small heading; called after OK |
+
+The dialog shows the chosen date in `headline_large` and a keyboard button that swaps the grid for a typed field (`####-##-##`), the month with arrows between months, the
+weekday initials, six weeks of days, and Cancel and OK. Today is outlined, the chosen day is a `primary` circle, and the days of the months either side are faint and move
+the view to their month when pressed. The arrow keys move around the grid. A `DatePickerDay` has `day`, `selected`, `today`, `outside` and `disabled`. The dates are worked out with
+the expression language's `date_add_days`, `date_weekday`, `days_in_month`, `format_date` and `current_date`, which are there for any view. Not built: a range picker,
+a docked picker under a field, month and year selectors, Page Up and Page Down by month, and the names of the months and days in another language.
+
+`widget: DatePicker` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -46,17 +61,19 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: booking
+widget: Container
+style: {width: 480, height: 640}
 children:
-  - id: d7
-    component: DatePickerDaySelected
-    with: {day: "7"}
+  - widget: DatePicker
+    open: "{{ choosing }}"
+    date: "{{ day }}"
+    earliest: "2026-01-01"
+  - {widget: DatePickerDay, day: "7", selected: true}
 ```
+
+## Using it
 
 In Python:
 

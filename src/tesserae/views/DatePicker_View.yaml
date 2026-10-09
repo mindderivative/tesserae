@@ -1,0 +1,108 @@
+# The Material 3 modal date picker: a dialog with the chosen date at the top (and a button that swaps the grid for a typed field), the month with arrows to move between months, the weekday
+# initials and a grid of six weeks of `DatePickerDay`s, and Cancel and OK. `date` is a text `year-month-day` ("2026-10-09", or empty for none) and is two-way, changing only when OK is
+# pressed; `open` is two-way (Escape and a press on the scrim close it). `earliest` and `latest` bound the days that can be chosen; `week_starts` is `sunday` (the default) or `monday`. Today
+# is outlined. Days of the months either side show faintly and choosing one moves to its month. The arrows move the focus around the grid. `on_ok` is called after OK.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether the picker is showing."}
+  date: {type: str, default: "", model: true, doc: "The date, year-month-day; set by OK."}
+  earliest: {type: str, default: "", doc: "The first date that can be chosen, year-month-day; empty for no limit."}
+  latest: {type: str, default: "", doc: "The last date that can be chosen, year-month-day; empty for no limit."}
+  week_starts: {type: enum, choices: [sunday, monday], default: sunday, doc: "Which day the weeks start on."}
+  title: {type: str, default: Select date, doc: "The small heading."}
+  on_ok: {type: handler, doc: "Called after OK has set the date."}
+widget: Overlay
+open: "{{ open }}"
+modal: true
+children:
+  - widget: Container
+    name: panel
+    if: open
+    state:
+      dd: "{{ date }}"
+      vy: "{{ int((date if date != '' else current_date())[:4]) }}"
+      vm: "{{ int((date if date != '' else current_date())[5:7]) }}"
+      typing: false
+      typed: "{{ date }}"
+    a11y: {role: dialog, label: "{{ title }}"}
+    style: {flex_direction: vertical, width: 384, gap: 8}
+    children:
+      - {widget: Text, name: heading, text: "{{ title }}", typography_role: label_medium}
+      - widget: Container
+        name: header
+        style: {flex_direction: horizontal, align_content: left, width: 100%}
+        children:
+          - {widget: Text, name: chosen, text: "{{ format_date(dd, '%a, %b %e') if dd != '' else 'No date' }}", typography_role: headline_large, a11y: {live: polite}}
+          - widget: Container
+            name: header_filler
+            style: {flex: expand_horizontal}
+          - widget: IconButton
+            name: mode_button
+            icon: "{{ 'calendar' if typing else 'keyboard' }}"
+            label: "{{ 'Switch to the calendar' if typing else 'Switch to typing' }}"
+            handlers: {on_click: "typing = not typing"}
+      - widget: Divider
+        name: line
+      - widget: Container
+        name: month_bar
+        if: "not typing"
+        style: {flex_direction: horizontal, align_content: left, gap: 4, width: 100%}
+        children:
+          - {widget: Text, name: month, text: "{{ format_date(str(vy) + '-' + ('0' + str(vm))[-2:] + '-01', '%B %Y') }}", typography_role: title_small, a11y: {live: polite}}
+          - widget: Container
+            name: month_filler
+            style: {flex: expand_horizontal}
+          - widget: IconButton
+            name: previous
+            icon: chevron_left
+            label: Previous month
+            handlers: {on_click: "vy = vy - 1 if vm == 1 else vy; vm = 12 if vm == 1 else vm - 1"}
+          - widget: IconButton
+            name: next
+            icon: chevron_right
+            label: Next month
+            handlers: {on_click: "vy = vy + 1 if vm == 12 else vy; vm = 1 if vm == 12 else vm + 1"}
+      - widget: Container
+        name: weekdays
+        if: "not typing"
+        style: {flex_direction: horizontal, width: 100%}
+        children:
+          - widget: Container
+            for: k in range(7)
+            key: k
+            name: weekday
+            style: {width: 48, height: 40, align_content: center}
+            children:
+              - {widget: Text, name: initial, text: "{{ ['M', 'T', 'W', 'T', 'F', 'S', 'S'][(k + (6 if week_starts == 'sunday' else 0)) % 7] }}", typography_role: body_large, text_align: center}
+      - widget: Container
+        name: grid
+        if: "not typing"
+        focus_group: both
+        a11y: {role: group, label: Days}
+        style: {flex_direction: horizontal, flex_wrap: wrap, width: 336}
+        children:
+          - widget: DatePickerDay
+            for: "iso in [date_add_days(str(vy) + '-' + ('0' + str(vm))[-2:] + '-01', k - ((date_weekday(str(vy) + '-' + ('0' + str(vm))[-2:] + '-01') - (6 if week_starts == 'sunday' else 0)) % 7)) for k in range(42)]"
+            key: iso
+            name: day
+            day: "{{ str(int(iso[8:10])) }}"
+            outside: "{{ int(iso[5:7]) != vm }}"
+            selected: "{{ iso == dd }}"
+            today: "{{ iso == current_date() }}"
+            disabled: "{{ (earliest != '' and iso < earliest) or (latest != '' and iso > latest) }}"
+            handlers:
+              on_click: "dd = iso; vy = int(iso[:4]); vm = int(iso[5:7])"
+      - widget: TextField
+        name: entry
+        if: typing
+        variant: outlined
+        label: Date
+        supporting: "year-month-day"
+        mask: "####-##-##"
+        text: "{{ typed }}"
+        on_edit: "dd = typed if (len(typed) == 10 and 1 <= int(typed[5:7]) <= 12 and 1 <= int(typed[8:10]) <= days_in_month(int(typed[:4]), int(typed[5:7]))) else dd"
+      - widget: Container
+        name: footer
+        style: {flex_direction: horizontal, align_content: right, gap: 8, width: 100%}
+        children:
+          - {widget: Button, name: cancel, label: Cancel, variant: text, handlers: {on_click: "open = False"}}
+          - {widget: Button, name: ok, label: OK, variant: text, handlers: {on_click: "date = dd; open = False; on_ok()"}}
