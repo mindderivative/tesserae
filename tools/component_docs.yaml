@@ -1335,16 +1335,38 @@ components:
   - slug: status-bar
     title: Status bar
     group: Beyond MD3
+    shipped_view: StatusBar
     fragments: [StatusBar]
     md3: |
       Material Design 3 has no status bar. A desktop app often wants one, so this is a thin strip in MD3's
       surface and *label* style.
     built: |
-      A container with one `Text`. It keeps its height when the window is short, and takes a `style`.
-    usage: |
-      - id: status
-        component: StatusBar
-        with: {text: Ready, width: 640}
+      `widget: StatusBar` is a view Tesserae ships (`StatusBar_View.yaml`): a 24 pixel `surface_container` strip as wide as the place it is put in, with
+      `label_small` text in `on_surface_variant`.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `items` | a list | each `{text}` and optionally `{icon, side, value, tooltip}`; `side` is `start` (the default), `center` or `end` |
+      | `progress` | 0 to 1 | a 4 pixel determinate indicator along the top edge |
+      | `busy` | true or false | an indicator with no end along the top edge |
+      | `clicked` | a value; two-way | the `value` of the item last pressed |
+
+      An item with a `value` is a button: it has a state layer, a tooltip if it has one, and pressing it sets `clicked`. The centre section is centred on the
+      bar whatever the sides hold. The bar is announced politely when its items change. Not built: items that can be dragged or hidden when the window is
+      narrow.
+    usage_view: |
+      name: editor
+      widget: Container
+      style: {flex_direction: vertical, width: 640, height: 200}
+      children:
+        - widget: StatusBar
+          clicked: "{{ item }}"
+          busy: "{{ saving }}"
+          items:
+            - {text: Ready}
+            - {text: Saved, side: center}
+            - {text: "Ln 4, Col 2", side: end, value: goto, tooltip: Go to line}
+            - {text: UTF-8, side: end, icon: home, value: encoding}
     python: |
       from tesserae.widgets import status_bar
 

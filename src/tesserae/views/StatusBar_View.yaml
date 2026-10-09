@@ -1,0 +1,57 @@
+# A status bar (a desktop convention, not Material 3): a thin strip at the bottom of a window with short items on its left, centre and right. `items` is a
+# list of {text} and optionally {icon, side, value, tooltip}: `side` is start (the default), center or end; an item with a `value` can be pressed, and pressing
+# it sets `clicked` to the value; `tooltip` explains it. `progress` (0 to 1) or `busy` shows a 4 pixel indicator along the top edge. The bar is announced
+# politely when its text changes.
+params:
+  text: {type: str, default: "", doc: "One message at the start, for a bar that only says one thing; the same as a first item {text}."}
+  width: {type: any, default: null, doc: "The bar's width; the width of its place when not given."}
+  items: {type: list, default: [], doc: "The items, each {text} and optionally {icon, side, value, tooltip}."}
+  progress: {type: any, default: null, doc: "0 to 1: a determinate indicator along the top edge. Empty shows none."}
+  busy: {type: bool, default: false, doc: "An indicator with no end along the top edge."}
+  clicked: {type: any, default: "", model: true, doc: "The value of the item last pressed."}
+widget: Container
+a11y: {role: group, live: polite}
+style:
+  display: grid
+  grid_template_columns: "1fr auto 1fr"
+  height: 24
+  width: "{{ width if width is not None else '100%' }}"
+  align_cells: center
+children:
+  - widget: Container
+    for: side in ['start', 'center', 'end']
+    key: side
+    name: section
+    style:
+      flex_direction: horizontal
+      align_content: "{{ {'start': 'left', 'center': 'center', 'end': 'right'}[side] }}"
+      gap: 16
+      width: 100%
+    children:
+      - widget: Container
+        for: "it in [x for x in ([{'text': text}] if text != '' else []) + items if x.get('side', 'start') == side and x.get('value') is None]"
+        key: it['text']
+        name: note
+        style: {flex_direction: horizontal, align_content: center, gap: 4, padding: {left: 4, right: 4, top: 0, bottom: 0}}
+        tooltip: "{{ it.get('tooltip', '') }}"
+        children:
+          - {widget: Icon, name: note_icon, if: "it.get('icon', '') != ''", icon: "{{ it.get('icon', 'home') }}"}
+          - {widget: Text, name: note_text, text: "{{ it['text'] }}", typography_role: label_small}
+      - widget: Container
+        for: it in [x for x in items if x.get('side', 'start') == side and x.get('value') is not None]
+        key: it['value']
+        name: item
+        interaction: true
+        style: {flex_direction: horizontal, align_content: center, gap: 4, padding: {left: 4, right: 4, top: 0, bottom: 0}, corner_radius: 4}
+        tooltip: "{{ it.get('tooltip', '') }}"
+        handlers: {on_click: "clicked = it['value']"}
+        a11y: {role: button, label: "{{ it['text'] }}"}
+        children:
+          - {widget: Icon, name: icon, if: "it.get('icon', '') != ''", icon: "{{ it.get('icon', 'home') }}"}
+          - {widget: Text, name: text, text: "{{ it['text'] }}", typography_role: label_small}
+  - widget: Container
+    name: edge
+    if: "busy or progress is not None"
+    style: {position: absolute, x: 0, y: 0, width: 100%, height: 4}
+    children:
+      - {widget: LinearProgress, name: bar, value: "{{ None if busy else progress }}", style: {flex: fill, height: 4}}

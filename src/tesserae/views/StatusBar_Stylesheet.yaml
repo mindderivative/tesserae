@@ -1,0 +1,10 @@
+# The look of StatusBar: a thin surface_container strip with label_small text in on_surface_variant; an item that can be pressed has a state layer.
+styles:
+  - widget: StatusBar
+    style:
+      background: surface_container
+      padding: {left: 8, right: 8, top: 0, bottom: 0}
+  - {widget: StatusBar, part: text, style: {foreground: on_surface_variant}}
+  - {widget: StatusBar, part: note_text, style: {foreground: on_surface_variant}}
+  - {widget: StatusBar, part: icon, style: {foreground: on_surface_variant, width: 16, height: 16}}
+  - {widget: StatusBar, part: note_icon, style: {foreground: on_surface_variant, width: 16, height: 16}}

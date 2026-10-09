@@ -9,7 +9,21 @@ surface and *label* style.
 
 ## In Tesserae
 
-A container with one `Text`. It keeps its height when the window is short, and takes a `style`.
+`widget: StatusBar` is a view Tesserae ships (`StatusBar_View.yaml`): a 24 pixel `surface_container` strip as wide as the place it is put in, with
+`label_small` text in `on_surface_variant`.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `items` | a list | each `{text}` and optionally `{icon, side, value, tooltip}`; `side` is `start` (the default), `center` or `end` |
+| `progress` | 0 to 1 | a 4 pixel determinate indicator along the top edge |
+| `busy` | true or false | an indicator with no end along the top edge |
+| `clicked` | a value; two-way | the `value` of the item last pressed |
+
+An item with a `value` is a button: it has a state layer, a tooltip if it has one, and pressing it sets `clicked`. The centre section is centred on the
+bar whatever the sides hold. The bar is announced politely when its items change. Not built: items that can be dragged or hidden when the window is
+narrow.
+
+`widget: StatusBar` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -44,17 +58,22 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: editor
+widget: Container
+style: {flex_direction: vertical, width: 640, height: 200}
 children:
-  - id: status
-    component: StatusBar
-    with: {text: Ready, width: 640}
+  - widget: StatusBar
+    clicked: "{{ item }}"
+    busy: "{{ saving }}"
+    items:
+      - {text: Ready}
+      - {text: Saved, side: center}
+      - {text: "Ln 4, Col 2", side: end, value: goto, tooltip: Go to line}
+      - {text: UTF-8, side: end, icon: home, value: encoding}
 ```
+
+## Using it
 
 In Python:
 
