@@ -32,7 +32,7 @@ from typing import Any, Callable, Optional
 from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
-from tesserae.spec import effects, layout, richtext
+from tesserae.spec import effects, layout, richtext, transition
 from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED, LayoutError, engine_style
 
 __all__ = ["style_props", 
@@ -253,6 +253,10 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built, parent_id: Optiona
         raise SpecBuildError(f"widget {_q(node_id)}: style.zone is for a DockPanel in a Dock")
     _check_interaction(node)
     _a11y_fields(node)
+    try:
+        transition.plan(node_id, kind, style)
+    except ValueError as exc:
+        raise SpecBuildError(str(exc)) from None
     engine = _engine(node_id, style, ctx.parent)  # first: it says what replaces an engine name
     unknown_style = set(style) - STYLE_FIELDS - (set(REPLACED) | {"align_content", "align_self"} if layout.LEGACY_ENGINE_NAMES else set())
     if unknown_style:
@@ -324,6 +328,8 @@ _OPTIONAL_LAYOUT: dict[str, Any] = {
     "display": "flex", "grid_template_columns": "", "grid_template_rows": "", "grid_auto_columns": "",
     "grid_auto_rows": "", "grid_auto_flow": "row", "grid_column": "auto", "grid_row": "auto", "row_gap": 0.0,
     "column_gap": 0.0, "justify_items": "stretch", "justify_self": None, "align_content": "stretch",
+    # a transform (`style.scale` ...): drawn as the style says, and put back only if it was said before: Python code also turns a node (a chevron)
+    "scale": 1.0, "translate_x": 0.0, "translate_y": 0.0, "rotation_deg": 0.0,
 }
 
 
@@ -672,7 +678,7 @@ def _text_props(ctx, node, style):
     return props, None
 
 
-_PLACED = ("margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
+_PLACED = ("scale", "translate_x", "translate_y", "rotation_deg", "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
            "align_self", "position", "x", "y", "z_index", "min_width", "max_width", "min_height", "max_height",
            "aspect_ratio", "grid_column", "grid_row", "justify_self")
 
@@ -1021,14 +1027,40 @@ def patch(
         for key, value in resets.items():  # where `_layout` would have put it (a Link's text, a ScrollView's content)
             on_inner = (kind == "Link" and key not in _PLACED) or (kind == "ScrollView" and key in _CONTENT)
             (inner_props if on_inner else outer_props)[key] = value
+        eased = _eased(window, transition.plan(node["id"], kind, style), ((outer, outer_props), (inner, inner_props)))
         outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins
         if inner_props is not None:
             inner.set(**inner_props)
+        for target, prop, value, ms, easing in eased:
+            target.animate(prop, value, ms, easing)
     except ValueError as exc:
         if isinstance(exc, SpecBuildError):
             raise
         raise SpecBuildError(f"widget {_q(node['id'])}: {exc}") from None
     return given
+
+
+def _eased(window: Any, planned: dict[str, Any], targets: tuple[tuple[Any, Optional[dict[str, Any]]], ...]) -> list[tuple[Any, str, Any, int, Any]]:
+    """The changes a patch should ease (`style.transition`): each property in `planned` that is about to change on a node leaves that node's
+    props and comes back as `(node, property, value, milliseconds, easing)`, to be started once the rest is set. A change that would last
+    no time, because the app is to reduce motion, is left in the props to be set."""
+    if not planned:
+        return []
+    from tesserae import motion
+
+    eased = []
+    for target, props in targets:
+        if props is None:
+            continue
+        for prop in [p for p in props if p in planned]:
+            try:
+                changing = target.get(prop) != props[prop]
+            except ValueError:
+                continue
+            ms = motion.duration(window, planned[prop][0])
+            if changing and ms > 0:
+                eased.append((target, prop, props.pop(prop), ms, planned[prop][1]))
+    return eased
 
 
 def _role(ctx, name):

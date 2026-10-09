@@ -80,6 +80,10 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   is a handler for the pointer pressing a node (it does not make the node a button), so a container can focus the input inside it; `focus_group: horizontal | vertical | both`
   gives the focusable nodes under a node one tab stop, arrow-key, `Home`/`End` and type-ahead movement. The text field's box focuses its input when pressed.
 
+- **Transitions** ([#214](https://github.com/mindderivative/tesserae/issues/214)). `style: {transition: {background: 150, scale: {duration: 300, easing: spring}}}` makes a change to those
+  properties ease instead of jump (opacity, colours, border, corner radius, elevation, blur and the new `scale`, `translate_x`, `translate_y`, `rotation_deg`), with Material's easings, cubic
+  beziers or a spring; the first draw does not ease, an app that reduces motion gets the value at once, and a stylesheet rule can carry the transition.
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

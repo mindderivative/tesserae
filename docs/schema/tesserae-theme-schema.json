@@ -1169,6 +1169,21 @@
           "description": "`absolute` takes it out of the flow and places it at `x` and `y`. (Position.)",
           "x-group": "Position"
         },
+        "rotation_deg": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Turns the node by this many degrees, clockwise, about its centre. (Motion.)",
+          "x-group": "Motion"
+        },
         "row_gap": {
           "anyOf": [
             {
@@ -1184,6 +1199,22 @@
           ],
           "description": "Space between rows (defaults to `gap`). (Grid.)",
           "x-group": "Grid"
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Draws the node and what is in it at this multiple of its size (1 is unchanged), about its centre. (Motion.)",
+          "x-group": "Motion"
         },
         "spread": {
           "anyOf": [
@@ -1219,6 +1250,713 @@
           ],
           "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. (Position.)",
           "x-group": "Position"
+        },
+        "transition": {
+          "anyOf": [
+            {
+              "type": "object",
+              "description": "Which changes ease instead of jumping.",
+              "properties": {
+                "all": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "background": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "foreground": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "border_color": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "border_width": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "corner_radius": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "elevation": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "opacity": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "blur": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "backdrop_blur": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "scale": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "translate_x": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "translate_y": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "rotation_deg": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. `all` covers every one that can. A node is where it says when first drawn; only a change eases. (Motion.)",
+          "x-group": "Motion"
+        },
+        "translate_x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Draws the node this many pixels to the right of where it is laid out. (Motion.)",
+          "x-group": "Motion"
+        },
+        "translate_y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "Draws the node this many pixels lower than where it is laid out. (Motion.)",
+          "x-group": "Motion"
         },
         "width": {
           "anyOf": [

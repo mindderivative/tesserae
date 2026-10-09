@@ -108,6 +108,38 @@ while the container it is in scrolls past, and the end of that container pushes 
 The node is only moved when it is drawn: layout, hit testing and its siblings don't change. Content later in the
 section paints over a stuck header unless the header has a `z_index`.
 
+## Transitions and transforms
+
+`transition:` in a style says which changes ease to their new value instead of jumping. A node is where its style says when it is first drawn; the
+next time the style gives a property a new value, it travels there:
+
+```yaml
+- id: card
+  kind: Rect
+  style:
+    width: 200
+    height: 80
+    background: surface_container
+    corner_radius: 12
+    transition:
+      background: 150                                   # milliseconds, with the standard easing
+      corner_radius: {duration: 200, easing: emphasized_decelerate}
+      scale: {duration: 300, easing: spring, bounce: 0.3}
+      opacity: {duration: 100, easing: [0.2, 0, 0, 1]}  # or four numbers: a cubic bezier
+```
+
+- The keys are style fields: `background`, `foreground` (a Text's or Icon's colour), `border_color`, `border_width`, `corner_radius`, `elevation`,
+  `opacity`, `blur`, `backdrop_blur`, `scale`, `translate_x`, `translate_y` and `rotation_deg`. `all: 150` covers every one of them; a named key wins over `all`.
+- A value is a number of milliseconds, or `{duration, easing, bounce}`. The easings are `linear`, Material's `standard`, `standard_accelerate`,
+  `standard_decelerate`, `emphasized`, `emphasized_accelerate` and `emphasized_decelerate`, four numbers (a cubic bezier, as CSS writes
+  `cubic-bezier`), and `spring`, whose `duration` is its period and whose `bounce` runs from -1 to 1.
+- Width, height, position and padding do not ease yet; they change at once.
+- When the app has asked for reduced motion, a change happens at once.
+- A transition is part of a style, so a stylesheet rule can carry it: a rule for `state: hovered` that changes `background` eases if the rule for the widget gives a `transition`.
+
+`scale` (1 is unchanged), `translate_x`, `translate_y` (pixels) and `rotation_deg` (clockwise, about the node's centre) draw a node transformed, and
+can be eased too. They change how it is drawn, not how much room it takes.
+
 ## The pointer
 
 `cursor` is the name of a pointer shape (`pointer`, `text`, `grab`, `grabbing`, `move`, `not_allowed`, `wait`,
