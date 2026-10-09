@@ -32,7 +32,7 @@ from tesserae.view import _EVENTS, SURFACE_ACTIONS, WINDOW_ACTIONS, View
 
 #: Events the renderer adds to the engine's: a key press, Enter in a field that is not multiline, and a pointer press (which, unlike a click,
 #: does not make the node a button).
-_KEY_EVENTS = {"on_key": "key_down", "on_submit": "key_down", "on_press": "pointer_down"}
+_KEY_EVENTS = {"on_key": "key_down", "on_submit": "key_down", "on_press": "pointer_down", "on_move": "pointer_move", "on_release": "pointer_up"}
 #: The keys that move focus in a `focus_group`, by its mode, as (previous, next).
 _GROUP_KEYS = {"horizontal": (("arrow_left",), ("arrow_right",)), "vertical": (("arrow_up",), ("arrow_down",)),
                "both": (("arrow_left", "arrow_up"), ("arrow_right", "arrow_down"))}
@@ -79,12 +79,16 @@ def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, b
 
 def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Callable[..., Any]]]:
     """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)`, `surface.dismiss` and
-    `focus(name)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
+    `focus(name)`, `capture()`, `release()`, `cursor(name)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
 
     def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
         view = view_ref()
         if path == "focus":
             return lambda name: view.focus(scope, name)
+        if path in ("capture", "release"):
+            return lambda: getattr(view.firing_node(path), "capture_pointer" if path == "capture" else "release_pointer")()
+        if path == "cursor":
+            return lambda name: view.firing_node("cursor").set(cursor=name)
         if path in ("after", "every"):
             start = view.timers.after if path == "after" else view.timers.every
             return lambda ms, action, name=None: start(ms, view.timer_action(scope, action), view.timer_name(scope, name))
@@ -133,6 +137,7 @@ class ComposedView(View):
         self._effect: Optional[Effect] = None
         self._timers: Optional[Timers] = None
         self._scrolled: dict[str, dict[str, str]] = {}
+        self._firing: list[Instance] = []
         self._timer_code: dict[str, Any] = {}
         self._timer_scopes: weakref.WeakKeyDictionary[Any, int] = weakref.WeakKeyDictionary()
         spec, frames = self._lowered()
@@ -141,6 +146,13 @@ class ComposedView(View):
         handle.view = self
         self._effect = Effect(self._sync)
         self._synced = True
+
+    def firing_node(self, action: str) -> Any:
+        """The node whose handler is running, for an action that acts on it. Only a handler has one: a timer's action does not."""
+        if not self._firing:
+            raise ValueError(f"{action}() acts on the widget whose handler is running; it cannot be called from a timer or anywhere else")
+        inst = self._firing[-1]
+        return self._built.outer[inst.id] if inst.widget == "Link" else self._built.nodes[inst.id]
 
     # timers (#217)
 
@@ -235,7 +247,11 @@ class ComposedView(View):
                         return
                     if event == "on_submit" and not _is_submit(event_obj):
                         return
-                    inst.fire(event, event_obj)
+                    self._firing.append(inst)  # what `capture()`, `release()` and `cursor()` act on
+                    try:
+                        inst.fire(event, event_obj)
+                    finally:
+                        self._firing.pop()
 
                 if tre_event == "change" and control is not None and hasattr(control, "on_change"):
                     self._handler_undos.append(control.on_change(lambda value, call=call: call(None)))

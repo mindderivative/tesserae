@@ -169,8 +169,9 @@ handlers:
 
 An event is one of `on_click`, `on_hover_enter`, `on_hover_exit`, `on_change`, `on_focus_enter`, `on_focus_exit`, `on_tap`, `on_long_press`,
 `on_pan`, `on_pinch`, `on_touch_start`, `on_touch_move`, `on_touch_end`, `on_touch_cancel`, `on_file_hover`, `on_file_hover_cancel`,
-`on_file_drop`, `on_link`, `on_key` (a key pressed), `on_submit` (Enter in a field that is not multiline) and `on_press` (the pointer pressed on the node or
-anything in it; unlike `on_click` it does not make the node a button); a misspelt one is an error. A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
+`on_file_drop`, `on_link`, `on_key` (a key pressed), `on_submit` (Enter in a field that is not multiline), `on_press` (the pointer pressed on the node or
+anything in it; unlike `on_click` it does not make the node a button), `on_move` (the pointer moved over it, or anywhere while it holds the pointer) and `on_release` (the button let go); a misspelt one is an error.
+A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
 `navigate.back`, `navigate.Settings`), or statements, which may call `focus('name')` to give the focus to the node of that name in the view the handler
 is written in: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a ViewModel Signal, or a call
 of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a param, a loop variable or
@@ -229,6 +230,21 @@ logical pixels from the canvas's top-left; size the canvas with `style`. Write `
 widget: Canvas
 style: {width: 120, height: 24}
 draw: "{{ [{'rect': [0, 10, 120, 4], 'color': 'surface_variant'}, {'rect': [0, 10, 120 * progress, 4], 'color': 'primary'}] }}"
+```
+
+### Dragging
+
+`capture()` makes the node whose handler is running receive every pointer event until the button is let go or `release()` is called, so a drag
+keeps following the pointer outside the node. `cursor('grabbing')` sets that node's pointer shape (any of tre's names: `default`, `pointer`, `text`, `grab`,
+`grabbing`, `move`, `not_allowed`, `col_resize`, ...; `cursor(None)` puts back the one its style gives). Position and distance are in `event`
+(`event.x`, `event.y`; a pan's `event.delta_x`). They act on the widget the handler is written on, so a timer's action cannot call them.
+
+```yaml
+widget: Container
+handlers:
+  on_press: "dragging = True; capture(); cursor('grabbing')"
+  on_move: "x = event.x if dragging else x"
+  on_release: "dragging = False; release(); cursor(None)"
 ```
 
 ## Focus
