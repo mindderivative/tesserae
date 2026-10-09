@@ -2608,6 +2608,28 @@
           ],
           "description": "The colour role of the track behind a progress indicator."
         },
+        "ticks": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Slider marks each step."
+        },
+        "value_indicator": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Slider shows a bubble with its value over the handle."
+        },
         "icons": {
           "anyOf": [
             {
@@ -7622,6 +7644,17 @@
         "text": {
           "$ref": "#/definitions/text"
         },
+        "ticks": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Slider marks each step."
+        },
         "title": {
           "type": "string",
           "description": "A TitleBar's title, or a Window's."
@@ -7878,6 +7911,17 @@
             }
           ],
           "description": "A Slider's or SpinBox's value."
+        },
+        "value_indicator": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Slider shows a bubble with its value over the handle."
         },
         "view": {
           "type": "string",

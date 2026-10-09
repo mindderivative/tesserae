@@ -103,7 +103,13 @@ declare("RadioButton", {"selected": P("bool", model=True), "group": P("str", doc
         extras=("foreground",), doc="One choice of a group.")
 declare("Switch", {"selected": P("bool", model=True), "disabled": P("bool"), "label": _CONTROL_LABEL,
                    "icons": P("bool", doc="A check on the handle when on and a cross when off.")}, extras=("foreground",), doc="A toggle.")
-declare("Slider", {"value": P("float", default=0.0, model=True), "disabled": P("bool")}, doc="Picks a value from 0 to 1 by dragging.")
+declare("Slider", {"value": P("float", default=0.0, model=True, doc="From `min` to `max`; a bound Signal follows the drag."),
+                   "min": P("float", default=0.0), "max": P("float", default=1.0),
+                   "step": P("float", doc="Snap to multiples of this from `min`; the keys move by it."),
+                   "ticks": P("bool", doc="A mark at each step (needs `step`): a discrete slider."),
+                   "value_indicator": P("bool", doc="A bubble with the value over the handle while it is dragged or has the keyboard."),
+                   "label": P("str", doc="What a screen reader calls it."), "disabled": P("bool")},
+        extras=("foreground",), doc="Picks a value between `min` and `max` by dragging.")
 declare("SpinBox", {
     "value": P("float", default=0.0, model=True), "min": P("float"), "max": P("float"), "step": P("float", default=1.0),
     "disabled": P("bool"),

@@ -17,7 +17,7 @@ def test_the_built_in_widgets_are_declared_with_their_properties():
                  "Slider", "SpinBox", "CircularProgress", "LinearProgress", "LoadingIndicator", "TimePickerDial", "NodeGraph",
                  "GraphNode", "Window", "TitleBar", "Dock", "DockPanel", "Slot"):
         assert W.lookup(name) is not None, name
-    assert set(W.lookup("Slider").properties) == {"value", "disabled"}
+    assert set(W.lookup("Slider").properties) == {"value", "min", "max", "step", "ticks", "value_indicator", "label", "disabled"}
     assert W.lookup("Slider").properties["value"].model
     assert W.lookup("Container").container and not W.lookup("Text").container
     assert W.lookup("Nope") is None

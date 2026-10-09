@@ -121,7 +121,7 @@ def test_handlers_map_known_events_to_an_action_or_statements():
 def test_the_events_are_the_views_events_plus_on_key():
     from tesserae.view import _EVENTS
 
-    assert set(EVENTS) == set(_EVENTS) | {"on_key", "on_submit", "on_press", "on_move", "on_release"}
+    assert set(EVENTS) == set(_EVENTS) | {"on_key", "on_submit", "on_press", "on_move", "on_release", "on_input"}
 
 
 def test_a11y_takes_the_documented_fields_checked_and_bound():
@@ -174,7 +174,7 @@ def test_a_property_is_checked_against_its_widgets_declaration():
     assert node("widget: Slider\nvalue: 1").props["value"] == 1.0
     assert isinstance(node("widget: Slider\nvalue: '{{ volume }}'").props["value"], Template)
     err = fails("widget: Slider\nvalu: 1", "Slider: no property 'valu'")
-    assert "did you mean 'value'" in str(err) and "properties: value, disabled" in str(err)
+    assert "did you mean 'value'" in str(err) and "properties: value, min, max, step, ticks, value_indicator, label, disabled" in str(err)
     fails("widget: Slider\nvalue: loud", "Slider: 'value' takes a number")
     fails("widget: Checkbox\nchecked: 'yes'", "'checked' takes true or false")
     fails("widget: Icon", "Icon: give one of 'icon', 'path'")

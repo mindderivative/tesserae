@@ -34,7 +34,7 @@ from tesserae.view import _EVENTS, SURFACE_ACTIONS, WINDOW_ACTIONS, View
 
 #: Events the renderer adds to the engine's: a key press, Enter in a field that is not multiline, and a pointer press (which, unlike a click,
 #: does not make the node a button).
-_KEY_EVENTS = {"on_key": "key_down", "on_submit": "key_down", "on_press": "pointer_down", "on_move": "pointer_move", "on_release": "pointer_up"}
+_KEY_EVENTS = {"on_input": "input_value", "on_key": "key_down", "on_submit": "key_down", "on_press": "pointer_down", "on_move": "pointer_move", "on_release": "pointer_up"}
 #: The keys that move focus in a `focus_group`, by its mode, as (previous, next).
 _GROUP_KEYS = {"horizontal": (("arrow_left",), ("arrow_right",)), "vertical": (("arrow_up",), ("arrow_down",)),
                "both": (("arrow_left", "arrow_up"), ("arrow_right", "arrow_down"))}
@@ -277,6 +277,22 @@ class ComposedView(View):
             node = self._built.outer[inst.id] if inst.widget == "Link" else self._built.nodes[inst.id]
             control = self._built.controls.get(inst.id)
             self._enforce_input(inst, node)
+            # the bound Signal is written before a handler runs, so a handler reads what the user just did
+            for prop, (name, scope) in inst.models.items():
+                if inst.widget in ("ScrollView", "VirtualList") and prop in _SCROLL_OUTPUTS:
+                    continue  # `_wire_scroll`'s
+                state = getattr(control, prop, None) if control is not None else None
+                if state is not None and hasattr(control, "on_input"):  # a bound slider value follows the drag, not only its end
+                    self._handler_undos.append(control.on_input(
+                        lambda value, scope=scope, name=name, state=state: scope.assign(name, state.get())))
+                    self._handler_undos.append(control.on_change(
+                        lambda value, scope=scope, name=name, state=state: scope.assign(name, state.get())))
+                elif state is not None and hasattr(control, "on_change"):
+                    self._handler_undos.append(control.on_change(
+                        lambda value, scope=scope, name=name, state=state: scope.assign(name, state.get())))
+                else:
+                    self._handler_undos.append(self._listen(
+                        node, "change", lambda ev, scope=scope, name=name, node=node, prop=prop: scope.assign(name, node.get(prop))))
             for event in inst.handlers:
                 tre_event = _EVENTS.get(event) or _KEY_EVENTS.get(event)
                 if tre_event is None:
@@ -293,22 +309,16 @@ class ComposedView(View):
                     finally:
                         self._firing.pop()
 
-                if tre_event == "change" and control is not None and hasattr(control, "on_change"):
+                if tre_event == "input_value":  # a slider's value changing while it is dragged, as against `on_change`, once it is let go
+                    if control is None or not hasattr(control, "on_input"):
+                        raise ValueError(f"{inst.id}: on_input is for a Slider, which says it while it is dragged")
+                    self._handler_undos.append(control.on_input(lambda value, call=call: call(None)))
+                elif tre_event == "change" and control is not None and hasattr(control, "on_change"):
                     self._handler_undos.append(control.on_change(lambda value, call=call: call(None)))
                 elif tre_event == "click":
                     self._handler_undos.append(self._listen(node, tre_event, handled(call)))
                 else:
                     self._handler_undos.append(self._listen(node, tre_event, call))
-            for prop, (name, scope) in inst.models.items():
-                if inst.widget in ("ScrollView", "VirtualList") and prop in _SCROLL_OUTPUTS:
-                    continue  # `_wire_scroll`'s
-                state = getattr(control, prop, None) if control is not None else None
-                if state is not None and hasattr(control, "on_change"):
-                    self._handler_undos.append(control.on_change(
-                        lambda value, scope=scope, name=name, state=state: scope.assign(name, state.get())))
-                else:
-                    self._handler_undos.append(self._listen(
-                        node, "change", lambda ev, scope=scope, name=name, node=node, prop=prop: scope.assign(name, node.get(prop))))
 
     def _wire_scroll(self) -> None:
         """A ScrollView's outputs: `scroll_offset`, `at_top`, `at_end` and `scroll_direction`, each written to the Signal or state name it was

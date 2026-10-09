@@ -494,7 +494,7 @@ class Slider(Control):
 
     def __init__(self, window: Any, *, value: float = 0.0, min: float = 0.0, max: float = 1.0,
                  step: Optional[float] = None, width: float = 200.0, height: float = TARGET_SIZE,
-                 color: Optional[RGBA] = None, **kwargs: Any) -> None:
+                 color: Optional[RGBA] = None, ticks: bool = False, value_indicator: bool = False, **kwargs: Any) -> None:
         if not max > min:
             raise ValueError(f"a slider needs max > min, got min={min!r}, max={max!r}")
         if step is not None and not step > 0:
@@ -502,6 +502,10 @@ class Slider(Control):
         self.min, self.max, self.step = float(min), float(max), step
         self.width = float(width)
         self._color = color
+        self.ticks = bool(ticks and step)  # a mark at each step (a discrete slider); without a step there is nothing to mark
+        self.value_indicator = bool(value_indicator)  # a bubble over the handle with the value, while it is dragged or has the keyboard
+        self._live: list[Callable[[float], None]] = []
+        self._shown = False
         self._dragging = False
         self._start: float = 0.0
         self.value = Signal(self._snap(value))
@@ -549,7 +553,24 @@ class Slider(Control):
                                          a11y_hidden=True)
         for child in (self.inactive, self.active, self.handle):
             self.node.add_child(child)
+        self.tick_marks: list[Any] = []
+        count = round((self.max - self.min) / self.step) if self.ticks else 0
+        if 0 < count <= 100:
+            for i in range(count + 1):
+                mark = self.window.create("box", position="absolute", x=radius + self._span * i / count - 1.0, y=centre_y - 1.0, width=2.0, height=2.0,
+                                          corner_radius=1.0, hit_testable=False, a11y_hidden=True)
+                self.node.add_child(mark)
+                self.tick_marks.append(mark)
+        self.bubble = self.window.create("box", position="absolute", x=radius - 14.0, y=centre_y - radius - 8.0 - 28.0, width=28.0, height=28.0,
+                                         corner_radius=14.0, align_items="center", justify_content="center", visible=False,
+                                         hit_testable=False, a11y_hidden=True)
+        self.bubble_text = self.window.create("text", text="", font_family="Roboto", font_size=12.0, font_weight=500.0, hit_testable=False,
+                                              a11y_hidden=True)
+        self.bubble.add_child(self.bubble_text)
+        self.node.add_child(self.bubble)
         self.surface.set(x=radius - STATE_LAYER_SIZE / 2)  # centred on the handle at the start
+        for event, shown in (("focus", True), ("unfocus", False)):
+            self._undo.append(self._listen(self.node, event, lambda e, shown=shown: self._show_bubble(shown and bool(getattr(e, "focus_visible", True)))))
 
     def _on_colour(self) -> RGBA:
         return self._color or self.color("primary")
@@ -576,14 +597,36 @@ class Slider(Control):
         self.active.set(width=offset)
         self._to(self.handle, "translate_x", offset, 0)
         self._to(self.surface, "translate_x", offset, 0)
+        count = len(self.tick_marks) - 1
+        for i, mark in enumerate(self.tick_marks):  # a mark over the active part is the on-colour, over the rest the variant
+            reached = count > 0 and i / count <= self._fraction() + 1e-9
+            mark.set(fill=self.color("on_primary") if reached and not disabled else self.color("on_surface_variant"))
+        self.bubble.set(fill=self.color("inverse_surface"))
+        self.bubble_text.set(text=f"{value:g}", fill=self.color("inverse_on_surface"))
+        self._to(self.bubble, "translate_x", offset, 0)
 
     def _activate(self) -> None:
         pass  # a click has already set the value, at pointer_down
+
+    def on_input(self, fn: Callable[[float], None]) -> Callable[[], None]:
+        """Calls `fn(value)` on every change the user makes, while a drag is still going (`on_change` hears the end of one). Returns the function
+        that stops it."""
+        self._live.append(fn)
+        return lambda: self._live.remove(fn) if fn in self._live else None
+
+    def _input(self) -> None:
+        for fn in list(self._live):
+            fn(self.value.get())
+
+    def _show_bubble(self, shown: bool) -> None:
+        self._shown = shown
+        self.bubble.set(visible=self.value_indicator and (shown or self._dragging))
 
     def _user_set(self, value: float) -> None:
         before = self.value.get()
         self.value.set(self._snap(value))
         if self.value.get() != before:
+            self._input()
             self._changed(self.value.get())
 
     def _from_x(self, x: float) -> float:
@@ -596,11 +639,18 @@ class Slider(Control):
         self._start = self.value.get()
         self.node.capture_pointer()
         self.interaction.set_dragged(True)
+        self._show_bubble(self._shown)
+        before = self.value.get()
         self.value.set(self._snap(self._from_x(event.x)))
+        if self.value.get() != before:
+            self._input()
 
     def _on_move(self, event: Any) -> None:
         if self._dragging and event.x is not None:
+            before = self.value.get()
             self.value.set(self._snap(self._from_x(event.x)))
+            if self.value.get() != before:
+                self._input()
 
     def _on_up(self, event: Any) -> None:
         if not self._dragging:
@@ -608,6 +658,7 @@ class Slider(Control):
         self._dragging = False
         self.node.release_pointer()
         self.interaction.set_dragged(False)
+        self._show_bubble(self._shown)
         if self.value.get() != self._start:
             self._changed(self.value.get())
 

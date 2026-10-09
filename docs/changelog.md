@@ -145,6 +145,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Checkbox, RadioButton, Switch** ([#175](https://github.com/mindderivative/tesserae/issues/175), [#176](https://github.com/mindderivative/tesserae/issues/176), [#177](https://github.com/mindderivative/tesserae/issues/177)). `label` (beside the control, part of what you
   press), `error` (checkbox and radio), a Checkbox that is neither on nor off (`checked: null`), Switch `icons`, and the colour is `style.foreground`. A patch no longer reset a control's own
   accessibility states (`checked`, `value`) to nothing.
+- **Slider** ([#178](https://github.com/mindderivative/tesserae/issues/178)). `min`, `max` and `step` (the builder ignored them), `ticks`, `value_indicator`, `label`, and `on_input` for every step of a drag;
+  a bound `value` now follows the drag instead of waiting for its end. A bound value is written before the node's handlers run, so a handler reads what the user just did.
 
 ### Removed
 

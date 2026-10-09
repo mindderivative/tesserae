@@ -2971,7 +2971,78 @@
                 "type": "string",
                 "pattern": "\\{\\{"
               }
+            ],
+            "description": "From `min` to `max`; a bound Signal follows the drag."
+          },
+          "min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
             ]
+          },
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ]
+          },
+          "step": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Snap to multiples of this from `min`; the keys move by it."
+          },
+          "ticks": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A mark at each step (needs `step`): a discrete slider."
+          },
+          "value_indicator": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A bubble with the value over the handle while it is dragged or has the keyboard."
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "What a screen reader calls it."
           },
           "disabled": {
             "anyOf": [
@@ -3009,6 +3080,12 @@
             "params",
             "expects",
             "value",
+            "min",
+            "max",
+            "step",
+            "ticks",
+            "value_indicator",
+            "label",
             "disabled"
           ]
         }

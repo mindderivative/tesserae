@@ -61,7 +61,7 @@ def lower(inst: Instance) -> dict[str, Any]:
             node["virtual"] = {"count": inst.virtual.count, "extent": float(inst.virtual.extent())}
         if "scroll_offset" in values:
             node["scroll"] = {"offset": values["scroll_offset"]}
-    elif widget in ("Checkbox", "RadioButton", "Switch"):
+    elif widget in ("Checkbox", "RadioButton", "Switch", "Slider"):
         folded = {"label"}
         if widget == "Checkbox" and "checked" in values:
             node["checked"] = values["checked"]
@@ -88,7 +88,7 @@ def lower(inst: Instance) -> dict[str, Any]:
     if inst.classes:
         node["classes"] = list(inst.classes)
     a11y: dict[str, Any] = {}
-    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator", "Checkbox", "RadioButton", "Switch") and values.get("label"):
+    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator", "Checkbox", "RadioButton", "Switch", "Slider") and values.get("label"):
         a11y = {"label": values["label"]}
     if widget == "Text" and values.get("heading"):
         a11y = {"role": "heading", "level": values["heading"]}

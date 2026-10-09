@@ -1615,6 +1615,8 @@ class Slider(
     width: float = 200.0,
     height: float = 48.0,
     color: Optional[RGBA] = None,
+    ticks: bool = False,
+    value_indicator: bool = False,
     **kwargs: Any
 ) -> None  # extends Control
 ```
@@ -1622,6 +1624,8 @@ class Slider(
 MD3's slider: a 4 px track, `primary` up to the value and `surface_container_highest` after it, and a 20 px `primary` handle. Dragging the handle, or pressing anywhere on the track, sets the value (the pointer is captured, so a drag can leave the slider).
 
 Also has everything `Control` has.
+
+- `on_input(fn: Callable[[float], None]) -> Callable[[], None]`: Calls `fn(value)` on every change the user makes, while a drag is still going (`on_change` hears the end of one).
 
 ### `SpinBox`
 

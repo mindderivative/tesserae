@@ -8,7 +8,23 @@ A slider lets the user pick a value from a range by dragging a handle, or with t
 
 ## In Tesserae
 
-The `Slider` kind, a Tesserae control with `value`, `min`, `max` and `step`.
+`widget: Slider`, a Tesserae control: a 4 pixel track, a 20 pixel handle and a 40 pixel state layer in a 48 pixel target.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `value` | number, two-way | from `min` to `max`; a bound Signal follows the drag, not only its end |
+| `min`, `max` | numbers | the range; 0 to 1 by default |
+| `step` | number | snap to multiples of it from `min`; the keys move by it (else by a hundredth of the range) |
+| `ticks` | true or false | a mark at each step (needs `step`): a discrete slider |
+| `value_indicator` | true or false | a bubble with the value over the handle while it is dragged or has the keyboard |
+| `label` | text | what a screen reader calls it |
+| `disabled` | true or false | dimmed and does not move |
+
+Events: `on_input` while it is dragged (every step), `on_change` once it is let go and after each key. Dragging captures the pointer; the arrow keys
+step it, Page Up and Down move by ten steps, Home and End go to the ends, and a screen reader can increment, decrement and set it. The colour is
+`style.foreground` and the length is `style.width`. Range (two handles), vertical and inset icons are not built.
+
+`widget: Slider` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -37,6 +53,17 @@ value: "{{ value }}"
 ```
 
 ## Using it
+
+```yaml
+name: player
+widget: Container
+style: {flex_direction: vertical, gap: 16, width: 280, height: 160, padding: 16}
+children:
+  - {widget: Slider, value: "{{ volume }}", min: 0, max: 100, label: Volume, value_indicator: true, style: {width: 240}}
+  - {widget: Slider, value: "{{ stars }}", min: 1, max: 5, step: 1, ticks: true, style: {width: 240}}
+```
+
+## Using the fragment
 
 In a view:
 
