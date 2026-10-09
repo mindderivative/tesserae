@@ -133,9 +133,10 @@ def _bool(prop: Property, value: Any) -> bool:
 
 
 def _color(prop: Property, value: Any) -> str:
-    if isinstance(value, str) and (_HEX_COLOR.match(value) or _ROLE_OR_NAME.match(value) or "(" in value):
+    base = re.sub(r"\s*@\s*\d+(?:\.\d+)?\s*%$", "", value) if isinstance(value, str) else value  # `primary@12%`: a colour with its alpha scaled
+    if isinstance(base, str) and (_HEX_COLOR.match(base) or _ROLE_OR_NAME.match(base) or "(" in base):
         return value
-    raise _bad(prop, value, "a theme role, #RRGGBB[AA] or a CSS colour")
+    raise _bad(prop, value, "a theme role, #RRGGBB[AA] or a CSS colour, optionally ending in @N%")
 
 
 def _length(prop: Property, value: Any) -> Any:

@@ -35,7 +35,7 @@ from tesserae import _wide_gamut
 
 __all__ = [
     "BASELINE", "ELEVATION_LEVELS", "baseline_scheme", "ROLES", "SHAPES", "TYPE_SCALE", "TypeStyle", "color_scheme",
-    "elevation", "elevation_shadows", "parse_color", "resolve_scheme", "shape", "type_style",
+    "elevation", "elevation_shadows", "FULL_RADIUS", "parse_color", "resolve_color", "resolve_scheme", "shape", "type_style",
 ]
 
 RGBA = Tuple[int, int, int, int]
@@ -193,6 +193,24 @@ def parse_color(raw: str) -> RGBA:
     return tuple(value) if len(value) == 4 else (*value, 255)
 
 
+_ALPHA = re.compile(r"^(?P<base>.+?)\s*@\s*(?P<pct>\d+(?:\.\d+)?)\s*%$")
+
+
+def resolve_color(raw: str, roles: Optional[dict[str, RGBA]] = None) -> RGBA:
+    """A colour as a style says it: a theme role (from `roles`), or anything `parse_color` takes, optionally ending in `@N%` to scale its
+    alpha (`primary@12%`, `#6750A4@50%`; a colour that already has alpha keeps that fraction of it). Raises `ValueError`."""
+    text = raw.strip()
+    factor = None
+    match = _ALPHA.match(text)
+    if match:
+        percent = float(match.group("pct"))
+        if percent > 100:
+            raise ValueError(f"the alpha in {raw!r} is {match.group('pct')}%, which is over 100%")
+        text, factor = match.group("base"), percent / 100.0
+    rgba = roles[text] if roles is not None and text in roles else parse_color(text)
+    return rgba if factor is None else (rgba[0], rgba[1], rgba[2], round(rgba[3] * factor))
+
+
 def _seed_of(theme: Optional[dict[str, Any]]) -> Optional[RGBA]:
     raw = (theme or {}).get("seed")
     return parse_color(raw) if isinstance(raw, str) else None
@@ -230,9 +248,13 @@ SHAPES = {"none": 0.0, "extra_small": 4.0, "small": 8.0, "medium": 12.0, "large"
 ELEVATION_LEVELS = {f"level_{n}": float(n) for n in range(6)}
 
 
+#: The radius of the MD3 `full` shape (a pill, a circle): larger than any node, which the engine rounds down to half its shorter side.
+FULL_RADIUS = 9999.0
+
+
 def shape(name: str) -> Optional[float]:
-    """The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ...), or `None` if it isn't one."""
-    return SHAPES.get(name)
+    """The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ... `"full"`), or `None` if it isn't one."""
+    return FULL_RADIUS if name == "full" else SHAPES.get(name)
 
 
 def elevation(name: str) -> Optional[float]:

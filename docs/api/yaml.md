@@ -213,7 +213,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `border_color` | a color or a gradient | The colour of its border: a colour or a gradient. |
 | `border_width` | a number | The width of its border, in pixels. |
 | `clip_children` | `true` or `false` | Whether children are cut off at its edge. |
-| `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` | Pixels, or a shape token (`none` to `extra_large`). |
+| `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). |
 | `cursor` | one of 23 names or a mapping | The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). |
 | `cursor.src` *(required)* | text | A PNG (or any picture Pillow reads) next to the view. |
 | `cursor.hotspot` | a list | `[x, y]`: the pixel that is the pointer's place. |
@@ -231,7 +231,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 
 ## Colors
 
-Any field that takes a color takes a theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`.
+Any field that takes a color takes a theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`. End any of them with `@N%` to scale its alpha: `primary@12%`.
 
 ## Gradients
 

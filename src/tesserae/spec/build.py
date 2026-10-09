@@ -371,7 +371,7 @@ def _color(ctx: _Context, node_id: str, field_name: str, raw: Any) -> RGBA:
     if isinstance(raw, str) and raw in roles:
         return roles[raw]
     try:
-        return tokens.parse_color(str(raw))
+        return tokens.resolve_color(str(raw), roles)
     except ValueError as exc:
         hint = _did_you_mean([raw], roles) if isinstance(raw, str) else ""
         raise SpecBuildError(f'widget {_q(node_id)}: invalid style.{field_name} "{raw}": {exc}{hint}') from None

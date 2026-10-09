@@ -72,6 +72,10 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `Text` and `Link` in the new syntax and keys of `text:` in the old; `max_lines` cuts a long text to that many lines, `letter_spacing` is tracking in pixels, and
   a `Text` with a fixed `width` and no `height` is as tall as the lines it wraps to.
 
+- **Alpha on colours, and the `full` shape** ([#212](https://github.com/mindderivative/tesserae/issues/212)). A colour may end in `@N%` to scale its alpha: `primary@12%`,
+  `on_surface@38%`, `"#6750A4@50%"`, wherever a style, a rule, a bound `background`/`foreground`/`border_color` or a `color` property takes one.
+  `corner_radius: full` is a pill or a circle.
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

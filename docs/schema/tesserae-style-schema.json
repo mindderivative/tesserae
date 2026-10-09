@@ -63,7 +63,7 @@
           "type": "string"
         }
       ],
-      "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`."
+      "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`. End any of them with `@N%` to scale its alpha: `primary@12%`."
     },
     "fill": {
       "anyOf": [
@@ -275,11 +275,12 @@
                 "large",
                 "medium",
                 "none",
-                "small"
+                "small",
+                "full"
               ]
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `extra_large`). (Paint and effects.)",
+          "description": "Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). (Paint and effects.)",
           "x-group": "Paint and effects"
         },
         "cursor": {

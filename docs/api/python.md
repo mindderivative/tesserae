@@ -422,6 +422,14 @@ parse_color(raw: str) -> RGBA
 
 A colour string as `tre` parses it: hex (`#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`), a CSS colour name, `transparent`, or `rgb()`/`rgba()`/`hsl()`/`hsla()` in CSS Color 4's comma or space syntax with an optional alpha, and CSS's wide-gamut functions (`color()`, `lab()`, `lch()`, `oklab()`, `oklch()`, `hwb()`), clipped into sRGB. Raises `ValueError`.
 
+### `resolve_color`
+
+```python
+resolve_color(raw: str, roles: Optional[dict[str, RGBA]] = None) -> RGBA
+```
+
+A colour as a style says it: a theme role (from `roles`), or anything `parse_color` takes, optionally ending in `@N%` to scale its alpha (`primary@12%`, `#6750A4@50%`; a colour that already has alpha keeps that fraction of it). Raises `ValueError`.
+
 ### `resolve_scheme`
 
 ```python
@@ -442,7 +450,7 @@ The scheme a view resolves roles against, by `tre`'s `View` rules: the seed is `
 shape(name: str) -> Optional[float]
 ```
 
-The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ...), or `None` if it isn't one.
+The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ... `"full"`), or `None` if it isn't one.
 
 ### `type_style`
 
@@ -459,6 +467,7 @@ The font size, weight, line height and tracking of the MD3 type role `role`, or 
 - `ROLES` = `tuple of 49`
 - `SHAPES` = `dict of 6`
 - `TYPE_SCALE` = `dict of 15`
+- `FULL_RADIUS` = `9999.0`
 
 ## Widgets
 

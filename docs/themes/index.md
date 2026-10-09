@@ -108,6 +108,16 @@ style:
   foreground: "color(display-p3 0.2 0.3 0.1)"
 ```
 
+Any of these, and any theme role, may end in `@N%` to scale its alpha: `primary@12%` is the primary colour at 12% (a state layer's
+tint), `on_surface@38%` is disabled content, `"#6750A4@50%"` half of a hex colour, and a colour that already has alpha keeps that fraction
+of it. The percentage is 0 to 100.
+
+```yaml
+style:
+  background: primary@12%
+  border_color: on_surface@38%
+```
+
 Tesserae renders in sRGB, so a colour outside it is clipped channel by channel. A colour's own
 alpha renders (`"#FFFFFF80"` is half-transparent white), and `opacity:` fades a node and everything
 in it as one layer; to dim a background without dimming what sits on it, put the transparency in the
@@ -146,7 +156,8 @@ reads the entry for its variant (`card.elevated`), then its component's (`card`)
 Fragment names map as `CardElevated` to `card.elevated`, `ButtonFilledTonal` to `button.filled_tonal`,
 `SideSheetModal` to `side_sheet.modal` and `Dialog` to `dialog`. A FAB's variant is its size
 (`fab.small`, `fab.default`, `fab.large`). Values are numbers or MD3's tokens: shapes `none`,
-`extra_small`, `small`, `medium`, `large`, `extra_large`, and elevations `level_0` to `level_5`.
+`extra_small`, `small`, `medium`, `large`, `extra_large`, and `full` (a pill or a circle: half the node's shorter side), and elevations
+`level_0` to `level_5`.
 
 Tesserae's default theme has entries for MD3's own shapes. A custom theme's entry for a key replaces the
 default's. Buttons, icon buttons and toolbars have no default entry: their corner radius is a formula of
@@ -345,7 +356,7 @@ A resolved theme. Build one with `Theme.resolve(...)`.
 
 `tesserae.tokens`: Material Design 3's tokens as Python values.
 
-- `shape(name: str) -> Optional[float]`: The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ...), or `None` if it isn't one.
+- `shape(name: str) -> Optional[float]`: The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ...
 - `elevation(name: str) -> Optional[float]`: The level (0 to 5) of the MD3 elevation token `name`, or `None` if it isn't one.
 - `type_style(role: str) -> Optional[TypeStyle]`: The font size, weight, line height and tracking of the MD3 type role `role`, or `None` if it isn't one.
 - `color_scheme(seed: RGBA, dark: bool = False, contrast: float = 0.0) -> dict[str, RGBA]`: Every MD3 role for `seed`, light or dark.

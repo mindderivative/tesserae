@@ -546,6 +546,8 @@ removed in the release after, with clear messages, as the 0.4.5 and 0.4.6 patter
 
 - **#211, text extras.** `max_lines`, `letter_spacing` and (for `Text`) `selectable` are properties; the old builder takes them in `text:` and the text's natural size measures with them. A Text with a fixed `width` and no `height` is now as tall as its lines wrap to (it was one line). MD3's per-role tracking is **not** applied by default (it would change every text's width); a role's `letter_spacing` stays a follow-up to the type scale.
 
+- **#212, alpha on roles and the `full` shape.** A colour ends in `@N%` to scale its alpha (`tokens.resolve_color`, shared by the builder, bound colours and the loader's `color` properties); `corner_radius: full` is `tokens.FULL_RADIUS` (9999), which the engine rounds to half the shorter side. `SHAPES` itself is unchanged, so the recorded tre parity still holds. The reserved items of section 10 (`primary@12%`, `full`) are no longer reserved.
+
 **Findings of the component pass: TextField (#184)**, the first component, which also built what the others use:
 
 - **Shipped views.** `src/tesserae/views/` holds `<Name>_View.yaml` and `<Name>_Stylesheet.yaml` (section 4, step 4). `ViewLibrary` finds a view in the project, then there; a project view of the same name replaces the shipped one **and its shipped rules** (`RuleSheet.without`). Shipped rules are the lowest layer, then the app's.

@@ -1169,7 +1169,7 @@ def _apply(node: Any, kind: Optional[str], prop: str, value: Any, scheme: Option
                               "stroke_width" if prop == "border_width" else prop)
     if isinstance(value, str) and not isinstance(value, Handle) and prop in _COLOR_PROPS:
         try:
-            rgba = scheme[value] if scheme and value in scheme else tokens.parse_color(value)  # a theme role, or a CSS colour
+            rgba = tokens.resolve_color(value, scheme)  # a theme role, or a CSS colour, with an optional @N% alpha
         except ValueError as exc:
             raise ValueError(f'binding for property "{prop}" resolved to {exc}') from None
         if node.get(target) != rgba:

@@ -172,7 +172,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                    "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most "
                    "256 pixels a side; only in a node's own `style:`)."),
         "border_width": ({"type": "number", "minimum": 0}, "The width of its border, in pixels."),
-        "corner_radius": ({"anyOf": [number, {"enum": sorted(tokens.SHAPES)}]}, "Pixels, or a shape token (`none` to `extra_large`)."),
+        "corner_radius": ({"anyOf": [number, {"enum": [*sorted(tokens.SHAPES), "full"]}]}, "Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle)."),
         "opacity": ({"type": "number", "minimum": 0, "maximum": 1}, "From 0 (clear) to 1 (opaque)."),
         "elevation": ({"anyOf": [number, {"enum": sorted(tokens.ELEVATION_LEVELS)}]}, "A shadow level, 0 to 5."),
         "aspect_ratio": ({"type": "number", "exclusiveMinimum": 0}, "Width over height: gives the missing side from the one set."),
@@ -451,7 +451,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
             ]}
     color = {"anyOf": [{"enum": roles}, {"type": "string"}],
              "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, "
-                            "a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`."}
+                            "a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`. End any of them with `@N%` to scale its alpha: "
+                            "`primary@12%`."}
     gradient = {"anyOf": [{"type": "string", "pattern": r"^\s*(linear|radial|conic)-gradient\("},
                           {"type": "object", "required": ["gradient", "stops"], "additionalProperties": False,
                            "properties": {"gradient": {"enum": ["linear", "radial", "sweep"]},
