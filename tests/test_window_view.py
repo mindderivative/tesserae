@@ -201,3 +201,36 @@ def test_borderless_sets_the_os_window_and_its_resize_border():
 def test_a_window_view_with_no_app_is_just_a_container():
     view = View(yaml.safe_load(WINDOW))
     assert view.node("root").get("kind") == "box" and view.node("hello").get("text") == "Hello"
+
+
+# -- the OS window's options (#204) ---------------------------------------------------------------
+
+FLAGS = "fullscreen: true\nmaximized: true\ntransparent: true\nblur_behind: true\nclick_through: true\n"
+
+
+def test_the_flags_reach_the_window_spec_and_a_wrong_one_is_named():
+    spec = expand_windows(yaml.safe_load(WINDOW + FLAGS.replace("\n", "\n", 1)))
+    assert window_of(spec) == {"title": "Tasks", "borderless": True, "min_width": 320.0, "min_height": 200.0, "size": (640.0, 400.0),
+                               "fullscreen": True, "maximized": True, "transparent": True, "blur_behind": True, "click_through": True}
+    with pytest.raises(WindowError, match="fullscreen is true or false, got 'yes'"):
+        expand_windows({"id": "w", "kind": "Window", "fullscreen": "yes"})
+
+
+def test_a_window_without_flags_leaves_the_os_window_alone():
+    assert "fullscreen" not in window_of(expand_windows(yaml.safe_load(WINDOW)))
+
+
+def test_loading_a_window_with_flags_sets_the_os_window(tmp_path):
+    app = _app(_project(tmp_path, WINDOW + "fullscreen: true\ntransparent: true\nclick_through: true\n"))
+    app.load("Window")
+    assert app.fullscreen is True and app.window.get("transparent") is True and app.window.get("click_through") is True
+
+
+def test_a_window_view_in_the_new_syntax_takes_the_flags(tmp_path):
+    (tmp_path / "Views").mkdir()
+    (tmp_path / "Views" / "Main_View.yaml").write_text(
+        "name: main\nwidget: Window\ntitle: Tasks\nfullscreen: true\nmaximized: true\nstyle: {width: 300, height: 200}\nchildren:\n"
+        "  - {widget: Text, text: Hi, typography_role: body_medium, style: {foreground: on_surface}}\n")
+    app = _app(tmp_path)
+    app.open_view("Main")
+    assert app.fullscreen is True and app.maximized.get() is True

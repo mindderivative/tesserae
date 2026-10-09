@@ -4,6 +4,7 @@
     kind: Window
     title: Tasks                 # the window's title
     borderless: true             # no OS title bar or borders: the title bar below is the window's
+    fullscreen: false            # also maximized, transparent, blur_behind, click_through: the OS window's options, when given
     min_width: 480
     min_height: 320
     style: {width: 900, height: 600, background: surface}   # the window's size, and its background
@@ -26,7 +27,9 @@ from typing import Any
 __all__ = ["WindowError", "expand_windows", "window_of"]
 
 _KEYS = frozenset({"id", "kind", "title", "borderless", "min_width", "min_height", "title_bar", "style", "classes", "a11y",
-                   "children"})
+                   "children", *("fullscreen", "maximized", "transparent", "blur_behind", "click_through")})
+#: The yes/no options of the OS window: shown by the app when the view is loaded, only when the view gives them.
+_FLAGS = ("fullscreen", "maximized", "transparent", "blur_behind", "click_through")
 #: What a Window's `title_bar:` takes (a `TitleBar`'s keys, without its `kind` and `id`).
 _BAR_KEYS = frozenset({"id", "title", "icon", "buttons", "children", "style", "classes", "a11y"})
 
@@ -82,6 +85,11 @@ def _window(node: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(borderless, bool):
         raise WindowError(f"{where} borderless is true or false, got {borderless!r}")
     options: dict[str, Any] = {"title": title, "borderless": borderless}
+    for name in _FLAGS:
+        if name in node:
+            if not isinstance(node[name], bool):
+                raise WindowError(f"{where} {name} is true or false, got {node[name]!r}")
+            options[name] = node[name]
     for name in ("min_width", "min_height"):
         if name in node:
             options[name] = _number(where, name, node[name])

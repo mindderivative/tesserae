@@ -147,6 +147,11 @@ declare("GraphNode", {"label": P("str"), "x": P("float"), "y": P("float")}, cont
 
 declare("Window", {
     "title": P("str", required=True, doc="The OS window's title."), "borderless": P("bool", default=False),
+    "fullscreen": P("bool", doc="The window fills its monitor, borderless (set when the view loads)."),
+    "maximized": P("bool", doc="The window opens maximized."),
+    "transparent": P("bool", doc="A see-through window that draws only what the view paints; the OS fixes it before the window opens."),
+    "blur_behind": P("bool", doc="The desktop behind a transparent window is blurred (where the compositor does it)."),
+    "click_through": P("bool", doc="Clicks go to the window beneath; the window takes none."),
     "min_width": P("float"), "min_height": P("float"), "title_bar": P("dict", doc="Title, icon and buttons of a custom title bar."),
 }, container=True, doc="The root of an app window.")
 declare("TitleBar", {"title": P("str"), "icon": P("icon"), "buttons": P("list")}, container=True, doc="A custom title bar.")

@@ -5319,6 +5319,66 @@
               }
             ]
           },
+          "fullscreen": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The window fills its monitor, borderless (set when the view loads)."
+          },
+          "maximized": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The window opens maximized."
+          },
+          "transparent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A see-through window that draws only what the view paints; the OS fixes it before the window opens."
+          },
+          "blur_behind": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The desktop behind a transparent window is blurred (where the compositor does it)."
+          },
+          "click_through": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Clicks go to the window beneath; the window takes none."
+          },
           "min_width": {
             "anyOf": [
               {
@@ -5381,6 +5441,11 @@
             "children",
             "title",
             "borderless",
+            "fullscreen",
+            "maximized",
+            "transparent",
+            "blur_behind",
+            "click_through",
             "min_width",
             "min_height",
             "title_bar"

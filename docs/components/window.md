@@ -13,6 +13,14 @@ Before the view is built, the `Window` becomes a vertical container holding the 
 `App` reads its title, size, `borderless` and minimum size when it loads the view. There is one per app, and it
 can't be nested or embedded.
 
+| Property | Meaning |
+| --- | --- |
+| `title`, `borderless`, `min_width`, `min_height`, `title_bar`, `style` | as above; `style`'s `width` and `height` are the window's size |
+| `fullscreen`, `maximized` | set when the view loads, only when written |
+| `transparent`, `blur_behind`, `click_through` | set before the window opens, only when written; the platform may refuse one, and says so |
+
+A view branches on the window's size with `app.width_class` and `app.height_class` (Material 3's size classes). Not built: several windows, remembering the window's size between runs (`tre` has no window position to restore), a native menu bar.
+
 ```yaml
 id: root
 kind: Window

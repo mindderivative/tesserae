@@ -980,6 +980,13 @@ class App:
         for key in ("min_width", "min_height"):
             if key in options:
                 setattr(self, key, int(options[key]))
+        for name in ("transparent", "blur_behind", "click_through"):  # before the window opens: the OS fixes these then
+            if name in options:
+                self._set_window(**{name: bool(options[name])})
+        if "maximized" in options:
+            self.maximize() if options["maximized"] else self.restore()
+        if "fullscreen" in options:
+            self.fullscreen = bool(options["fullscreen"])
         if resize and options.get("size") is not None:
             width, height = options["size"]
             self._window.resize(int(width), int(height))
