@@ -1,0 +1,10 @@
+# The look of TopAppBar (Material 3): a `surface` bar that becomes `surface_container` once content has scrolled under it; 4 pixels in from the edge for the icons, the
+# title in on_surface (16 pixels from the left of a medium or large bar's title), 16 pixels of room at each end.
+styles:
+  - widget: TopAppBar
+    style:
+      background: "{{ 'surface_container' if scrolled else 'surface' }}"
+      padding: {left: 4, right: 4, top: 0, bottom: 0}
+      clip_children: true
+  - {widget: TopAppBar, part: title, style: {foreground: on_surface}}
+  - {widget: TopAppBar, part: big_title, style: {foreground: on_surface, padding: {left: 12, right: 12, top: 0, bottom: 0}}}

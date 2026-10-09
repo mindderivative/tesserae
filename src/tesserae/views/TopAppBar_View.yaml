@@ -1,0 +1,63 @@
+# The Material 3 top app bar: a navigation icon, a title and up to three action icons across the top of a screen. `variant`: `small` (64 tall, the title beside the icon),
+# `center` (64, the title in the middle), `medium` (112, the title under the row of icons) and `large` (152, a bigger title under them). The medium and large collapse to the
+# small form while `collapsed` is true (bind it to the way a list under it has scrolled), and `scrolled` (true once content is under the bar) turns its colour from `surface` to
+# `surface_container`. `leading_icon` is the navigation icon (`menu` or `arrow_back`) and its `on_leading` handler; `actions` is a list of {value, icon, label}, pressing one sets
+# `chosen` to its `value`. Every icon has a label (its name and its tooltip). Role: a banner.
+params:
+  title: {type: str, default: "", doc: "The title."}
+  variant: {type: enum, choices: [small, center, medium, large], default: small, doc: "How tall it is and where the title sits."}
+  leading_icon: {type: str, default: "", doc: "The navigation icon (menu, arrow_back)."}
+  leading_label: {type: str, default: Navigation, doc: "The navigation icon's name and tooltip."}
+  on_leading: {type: handler, doc: "What the navigation icon does."}
+  actions: {type: list, default: [], doc: "Up to three icons at the end, each {value, icon, label}."}
+  chosen: {type: any, default: "", model: true, doc: "The value of the action last pressed."}
+  collapsed: {type: bool, default: false, doc: "A medium or large bar shows as a small one."}
+  scrolled: {type: bool, default: false, doc: "Content is under the bar: its colour changes."}
+widget: Container
+a11y: {role: group, label: "{{ title }}"}
+style:
+  flex_direction: vertical
+  width: 100%
+  height: "{{ 64 if (variant in ('small', 'center') or collapsed) else (112 if variant == 'medium' else 152) }}"
+  transition: {height: 200, background: 200}
+children:
+  - widget: Container
+    name: row
+    style: {flex_direction: horizontal, align_content: left, height: 64, width: 100%}
+    children:
+      - {widget: IconButton, name: leading, if: "leading_icon != ''", icon: "{{ leading_icon }}", label: "{{ leading_label }}", handlers: {on_click: "on_leading()"}}
+      - widget: Container
+        name: lead_space
+        if: "leading_icon == ''"
+        style: {width: 16, height: 40}
+      - widget: Container
+        name: lead_filler
+        if: "variant == 'center'"
+        style: {flex: expand_horizontal}
+      - widget: Text
+        name: title
+        if: "variant in ('small', 'center') or collapsed"
+        text: "{{ title }}"
+        typography_role: title_large
+        max_lines: 1
+        overflow: ellipsis
+        heading: 1
+        style: {flex: "{{ 'none' if variant == 'center' else 'expand_horizontal' }}"}
+      - widget: Container
+        name: filler
+        style: {flex: expand_horizontal}
+      - widget: IconButton
+        for: a in actions[:3]
+        key: a['value']
+        name: action
+        icon: "{{ a['icon'] }}"
+        label: "{{ a['label'] }}"
+        handlers: {on_click: "chosen = a['value']"}
+  - widget: Text
+    name: big_title
+    if: "variant in ('medium', 'large') and not collapsed"
+    text: "{{ title }}"
+    typography_role: "{{ 'headline_small' if variant == 'medium' else 'headline_medium' }}"
+    max_lines: 1
+    overflow: ellipsis
+    heading: 1

@@ -9,8 +9,23 @@ start and up to a few action icons at the end.
 
 ## In Tesserae
 
-The fragment is the bar and its title; `top_app_bar()` adds the icon buttons, and keeps the bar's height
-when the window is short. With `App(borderless=True)` it can also be the window's own title bar.
+`widget: TopAppBar` is a view Tesserae ships (`TopAppBar_View.yaml`): a bar as wide as its place, built from `IconButton`s and a title.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `title` | text | the title |
+| `variant` | `small`, `center`, `medium`, `large` | 64 tall with the title beside the icon; 64 with the title in the middle; 112 or 152 with the title under the icons |
+| `leading_icon`, `leading_label`, `on_leading` | an icon, text, a handler | the navigation icon (`menu`, `arrow_back`), its name and tooltip, and what it does |
+| `actions` | a list | up to three icons at the end, each `{value, icon, label}`; pressing one sets `chosen` to its `value` |
+| `chosen` | a value; two-way | the action last pressed |
+| `collapsed` | true or false | a medium or large bar shows as a small one (the height eases) |
+| `scrolled` | true or false | content is under the bar: its colour goes from `surface` to `surface_container` |
+
+Bind `collapsed` and `scrolled` to how a list under the bar has scrolled (the `at_top` of a `ScrollView`). Every icon is a button with a label, which is its name and its
+tooltip. With `App(borderless=True)` a bar can sit in a window's title area; the title bar of a window is `TitleBar`. Not built: the contextual action mode (a selection bar
+that replaces it), and a search bar inside it (`SearchBar` is its own view).
+
+`widget: TopAppBar` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -45,17 +60,24 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: inbox
+widget: Container
+style: {flex_direction: vertical, width: 480, height: 400}
 children:
-  - id: bar
-    component: TopAppBar
-    with: {title: Notes, width: 640}
+  - widget: TopAppBar
+    title: Inbox
+    variant: large
+    leading_icon: menu
+    on_leading: open_drawer
+    collapsed: "{{ not at_top }}"
+    scrolled: "{{ not at_top }}"
+    chosen: "{{ command }}"
+    actions: [{value: search, icon: magnify, label: Search}, {value: more, icon: dots_vertical, label: More}]
+  - {widget: ScrollView, at_top: "{{ at_top }}", style: {flex: fill}}
 ```
+
+## Using it
 
 In Python:
 
