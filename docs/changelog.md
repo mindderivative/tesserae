@@ -151,6 +151,7 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   component that is built from the language's own parts: per-corner pill, `focus_group`, icons, handlers that set a Signal). An `a11y: role` may be worked out from a param (never from a Signal), and a roving focus group starts on its checked item.
 - **Tabs** ([#166](https://github.com/mindderivative/tesserae/issues/166), [#167](https://github.com/mindderivative/tesserae/issues/167)). `widget: Tabs` with `tabs`, a two-way `selected`, `variant` (primary, secondary) and `tab_width`: a shipped view with icons, badges,
   an indicator that slides, and arrows/Home/End that move and choose. A bar that scrolls waits for the engine to scroll sideways.
+- **ScrollView `orientation: horizontal`.** A strip that scrolls sideways: children in a row, the offset along x, `scroll_direction` `right` or `left`, `at_top`/`at_end` for the start and end of the strip.
 - **Requires tre 0.5.6.** Timers run on the window's own `after` and `every`; layout `transition:` is the engine's own animation (a change to or from `auto` or a percentage is made at once); the accessibility states (`pressed`, `invalid`, `description`, `current`, `busy`, `value_text`, relations) are set on the node, and a `Divider` is a `separator`. The hand-stepped layout transitions and the dropped-state tolerance are gone. Scroll snap points are asked of tre (mindderivative/tre#166); a `scroll_view` with `orientation="horizontal"` already scrolls sideways.
 
 ### Removed

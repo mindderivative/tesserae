@@ -678,12 +678,16 @@ def _scroll_props(ctx, node, style):
     if isinstance(virtual, dict):  # the content is as tall as the whole list; the rows that are built are placed in it
         content["height"] = float(virtual["count"]) * float(virtual["extent"])
     scroll = node.get("scroll")
+    horizontal = isinstance(scroll, dict) and scroll.get("orientation") == "horizontal"
+    outer["orientation"] = "horizontal" if horizontal else "vertical"
     if isinstance(scroll, dict) and scroll.get("offset") is not None:
         offset = scroll["offset"]
         if isinstance(offset, bool) or not isinstance(offset, (int, float)) or offset != offset or offset < 0:
             raise SpecBuildError(f'widget {_q(node["id"])}: scroll_offset is a distance in pixels, 0 or more, not {offset!r}')
         outer["scroll_offset"] = float(offset)
-    content.update(flex_direction=style.get("flex_direction", "vertical"), width="100%",
+    # the content fills the cross axis and is as long as its children along the scrolling one
+    fill = {"height": "100%"} if horizontal else {"width": "100%"}
+    content.update(flex_direction=style.get("flex_direction", "horizontal" if horizontal else "vertical"), **fill,
                    **{k: style.get(k, _ALIGNMENT_DEFAULTS[k]) for k in _ALIGNMENT_DEFAULTS})
     return outer, content
 

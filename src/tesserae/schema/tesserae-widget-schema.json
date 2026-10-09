@@ -2791,6 +2791,21 @@
               "$ref": "#"
             }
           },
+          "orientation": {
+            "anyOf": [
+              {
+                "enum": [
+                  "vertical",
+                  "horizontal"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Which way it scrolls. Horizontal lays its children out in a row and `scroll_direction` is 'right' or 'left'."
+          },
           "scroll_offset": {
             "anyOf": [
               {
@@ -2837,7 +2852,7 @@
                 "pattern": "\\{\\{"
               }
             ],
-            "description": "Output: 'down' or 'up' for the last scroll, 'none' before the first."
+            "description": "Output: 'down' or 'up' (a horizontal one: 'right' or 'left') for the last scroll, 'none' before the first."
           }
         },
         "required": [
@@ -2864,6 +2879,7 @@
             "params",
             "expects",
             "children",
+            "orientation",
             "scroll_offset",
             "at_top",
             "at_end",

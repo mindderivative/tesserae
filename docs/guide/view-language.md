@@ -217,7 +217,7 @@ children:
     if: top or way == 'up'              # a bar that hides while the list scrolls down
 ```
 
-A view scrolls vertically; a `ScrollView` that nothing is bound to keeps its own position.
+A view scrolls vertically, or sideways with `orientation: horizontal`; a `ScrollView` that nothing is bound to keeps its own position.
 
 ## Input masks
 

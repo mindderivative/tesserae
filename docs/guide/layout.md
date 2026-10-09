@@ -307,7 +307,7 @@ children:
   save and restore a position. An offset past the end is held at the end
   at once, and that is what's written back.
 - Its scrollbar is the theme's `outline`.
-- It scrolls vertically. The engine can scroll sideways too, but `ScrollView` does not offer that yet.
+- It scrolls vertically, or sideways with `orientation: horizontal` (its children then sit in a row, and `scroll_direction` is `right` or `left`).
 
 For a long list built from data, put a `Repeater`'s container
 (`tesserae.Repeater`) inside a `ScrollView`.

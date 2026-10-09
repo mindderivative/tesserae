@@ -74,11 +74,13 @@ def _clip(text: Any) -> str:
     raise ValueError(f"copy() takes text, not {text!r}")
 
 
-def scroll_direction(last: str, old: Any, new: Any) -> str:
-    """`'down'` or `'up'` from a scroll event's offsets; the last direction when it did not move or the event has none."""
+def scroll_direction(last: str, old: Any, new: Any, horizontal: bool = False) -> str:
+    """`'down'` or `'up'` (`'right'` or `'left'` when horizontal) from a scroll event's offsets; the last direction when it did not move or the
+    event has none."""
     if old is None or new is None or new == old:
         return last
-    return "down" if new > old else "up"
+    forward, back = ("right", "left") if horizontal else ("down", "up")
+    return forward if new > old else back
 
 
 def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, bool]:
@@ -334,8 +336,10 @@ class ComposedView(View):
             def report(event: Any = None, outputs: dict = outputs, outer: Any = outer, content: Any = content, last: dict = last,
                        inst: Instance = inst) -> None:
                 offset = float(outer.get("scroll_offset"))
-                last["direction"] = scroll_direction(last["direction"], getattr(event, "old_value", None), getattr(event, "new_value", None))
-                at_top, at_end = scroll_edges(offset, float(outer.get("layout_height")), float(content.get("layout_height")))
+                across = outer.get("orientation") == "horizontal"
+                side = "layout_width" if across else "layout_height"
+                last["direction"] = scroll_direction(last["direction"], getattr(event, "old_value", None), getattr(event, "new_value", None), across)
+                at_top, at_end = scroll_edges(offset, float(outer.get(side)), float(content.get(side)))
                 values = {"scroll_offset": offset, "at_top": at_top, "at_end": at_end, "scroll_direction": last["direction"]}
                 for prop, (name, scope) in outputs.items():
                     scope.assign(name, values[prop])
