@@ -701,10 +701,17 @@ class ComposedView(View):
         name = inst.value("anchor")
         if not name:
             return None
-        root = inst.view_root or self.handle.composition.root
-        for other in root.walk():
-            if other.name == name and other.id in self._built.outer:
-                return self._built.outer[other.id]
+        if name == "parent":  # the node the overlay is written inside (a submenu opens beside the row that has it)
+            if inst.parent is None or inst.parent.id not in self._built.outer:
+                raise ValueError(f"Overlay {inst.id!r}: anchor 'parent' needs the overlay to be inside another node")
+            return self._built.outer[inst.parent.id]
+        here = inst
+        while here is not None:  # the view the overlay is written in, then the one that called it, and so on out (a menu names its button in the caller's view)
+            root = here.view_root or self.handle.composition.root
+            for other in root.walk():
+                if other.name == name and other.id in self._built.outer:
+                    return self._built.outer[other.id]
+            here = root.parent  # the node the view was called from, in the view that called it (None at the top)
         raise ValueError(f"Overlay {inst.id!r}: anchor {name!r} is no node by that name in this view")
 
     def _fit_layer(self, inst: Instance, layer: Any) -> None:

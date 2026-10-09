@@ -1,0 +1,38 @@
+# One row of a menu (Material 3): 48 pixels tall, `label_large` text, an optional 24 pixel leading icon, trailing text such as a keyboard shortcut, and a chevron when
+# it opens a submenu. `checked` makes it a checkable item: true shows a check where the icon would be, false leaves the space, and nothing (null) is no check at all.
+# It is pressable (a state layer, a ripple, Enter); `handlers: {on_click: ...}` on the call is what a press does. Roles: a `menuitem`, with `checked` for a checkable one.
+params:
+  label: {type: str, default: "", doc: "The text."}
+  icon: {type: str, default: "", doc: "A leading icon."}
+  trailing_text: {type: str, default: "", doc: "Text at the end, such as a shortcut."}
+  checked: {type: any, default: null, doc: "true: a check shows; false: its space is kept; empty: not checkable."}
+  submenu: {type: bool, default: false, doc: "A chevron at the end: the item opens another menu."}
+  disabled: {type: bool, default: false, doc: "Dimmed, not focusable, and it does not respond."}
+widget: Container
+interaction: true
+disabled: "{{ disabled }}"
+a11y:
+  role: menuitem
+  label: "{{ label }}"
+  checked: "{{ checked }}"
+  expanded: "{{ submenu }}"
+style:
+  flex_direction: horizontal
+  align_content: left
+  height: 48
+  width: 100%
+children:
+  - widget: Icon
+    name: lead
+    if: "checked is True or icon != ''"
+    icon: "{{ 'check' if checked is True else icon }}"
+  - widget: Container
+    name: lead_space
+    if: "checked is False and icon == ''"
+    style: {width: 24, height: 24}
+  - {widget: Text, name: label, text: "{{ label }}", typography_role: label_large, max_lines: 1, overflow: ellipsis}
+  - widget: Container
+    name: filler
+    style: {flex: expand_horizontal}
+  - {widget: Text, name: trailing, if: "trailing_text != ''", text: "{{ trailing_text }}", typography_role: label_large}
+  - {widget: Icon, name: chevron, if: submenu, icon: chevron_right}

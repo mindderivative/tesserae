@@ -91,7 +91,7 @@ declare("Splitter", {
 }, container=True, doc="Two panes with a draggable, keyboard-operable handle between them.")
 declare("Overlay", {
     "open": P("bool", default=False, model=True, doc="Whether it is showing. Closing it (Escape, a press outside) writes false back to a Signal it is bound to."),
-    "anchor": P("str", doc="The name of a node in this view to sit against; without one it is centred in the window."),
+    "anchor": P("str", doc="The name of a node in this view to sit against, or `parent` for the node it is written inside; without one it is centred in the window."),
     "placement": P("enum", choices=("below", "above", "start", "end"), default="below", doc="Which side of the anchor; it flips or shifts to fit."),
     "modal": P("bool", doc="Dims the window behind it, blocks input to it, and keeps focus inside."),
     "dismissible": P("bool", default=True, doc="Escape and a press outside close it."),

@@ -1,0 +1,68 @@
+# The Material 3 menu: a list of choices on a temporary surface next to the node it comes from (`anchor`, the name of a node in the view that has the menu). `items` is
+# a list of {value, label} and optionally {icon, shortcut, checked, disabled, submenu}; a {divider: true} is a line and a {heading: "Text"} a small heading. Pressing
+# an item sets `chosen` to its `value` and closes the menu; `mode: check` makes pressing an item flip its check (kept in `checks`, the list of checked values) and
+# `mode: radio` keeps one checked (`selected`). An item with a `submenu` list opens another menu beside it (with Right, or a press). Escape and a press outside
+# close it (writing false to `open`); the arrows move, Enter chooses, typing the start of a label jumps to it.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether the menu is showing; Escape and a press outside write false."}
+  anchor: {type: str, default: "", doc: "The name of the node in the calling view the menu sits against."}
+  items: {type: list, default: [], doc: "The rows: {value, label} and optionally {icon, shortcut, checked, disabled, submenu}; {divider: true}; {heading: Text}."}
+  chosen: {type: any, default: "", model: true, doc: "The value of the item last pressed."}
+  mode: {type: enum, choices: [plain, check, radio], default: plain, doc: "plain: actions; check: items flip their checks; radio: one item is checked."}
+  checks: {type: list, default: [], model: true, doc: "check mode: the values that are checked."}
+  selected: {type: any, default: "", model: true, doc: "radio mode: the value that is checked."}
+  placement: {type: enum, choices: [below, above, start, end], default: below, doc: "Which side of the anchor; it flips or shifts to fit."}
+  width: {type: float, default: 200, doc: "How wide the menu is, from 112 to 280 pixels."}
+  on_pick: {type: handler, doc: "Called after an item has been chosen (a submenu uses it to close the menu it came from)."}
+widget: Overlay
+open: "{{ open }}"
+anchor: "{{ anchor }}"
+placement: "{{ placement }}"
+children:
+  - widget: Container
+    name: surface
+    focus_group: vertical
+    a11y: {role: menu}
+    style: {flex_direction: vertical, width: "{{ min(280, max(112, width)) }}"}
+    children:
+      - widget: Container
+        for: i, it in enumerate(items)
+        key: i
+        name: row
+        state: {subopen: false}
+        style: {flex_direction: vertical, width: 100%}
+        children:
+          - widget: Divider
+            name: divider
+            if: "it.get('divider', False)"
+          - {widget: Text, name: heading, if: "it.get('heading', '') != ''", text: "{{ it.get('heading', '') }}", typography_role: label_small}
+          - widget: MenuItem
+            name: item
+            if: "not it.get('divider', False) and it.get('heading', '') == '' and len(it.get('submenu', [])) == 0"
+            label: "{{ it['label'] }}"
+            icon: "{{ it.get('icon', '') }}"
+            trailing_text: "{{ it.get('shortcut', '') }}"
+            checked: "{{ ((it['value'] in checks) if mode == 'check' else (it['value'] == selected)) if mode != 'plain' else it.get('checked') }}"
+            disabled: "{{ it.get('disabled', False) }}"
+            handlers:
+              on_click: "chosen = it['value']; checks = ([v for v in checks if v != it['value']] if it['value'] in checks else checks + [it['value']]) if mode == 'check' else checks; selected = it['value'] if mode == 'radio' else selected; open = False; on_pick()"
+          - widget: MenuItem
+            name: parent_item
+            if: "len(it.get('submenu', [])) > 0"
+            label: "{{ it['label'] }}"
+            icon: "{{ it.get('icon', '') }}"
+            submenu: true
+            disabled: "{{ it.get('disabled', False) }}"
+            handlers:
+              on_click: "subopen = True"
+              on_key: "subopen = True if event.key == 'arrow_right' else subopen"
+          - widget: Menu
+            name: sub
+            if: "len(it.get('submenu', [])) > 0"
+            open: "{{ subopen }}"
+            anchor: parent
+            placement: end
+            items: "{{ it.get('submenu', []) }}"
+            width: "{{ width }}"
+            chosen: "{{ chosen }}"
+            on_pick: "open = False; on_pick()"

@@ -9,8 +9,22 @@ shortcut.
 
 ## In Tesserae
 
-A column of `MenuItem`s; `tesserae.overlays.Menu` opens it next to an anchor, at a point, or as a context
-menu, and handles the arrow keys.
+Two views Tesserae ships: `Menu`, an anchored `Overlay` holding the rows, and `MenuItem`, one 48 pixel row.
+
+| Property of `Menu` | Type | Meaning |
+| --- | --- | --- |
+| `open` | true or false; two-way | whether it is showing; Escape and a press outside write `false` |
+| `anchor`, `placement` | a node's name, `below`/`above`/`start`/`end` | the node in the calling view it sits against, and which side (it flips to fit) |
+| `items` | a list | rows: `{value, label}` and optionally `{icon, shortcut, checked, disabled, submenu}`; `{divider: true}`; `{heading: Text}` |
+| `chosen` | a value; two-way | the `value` of the item pressed; pressing one closes the menu |
+| `mode`, `checks`, `selected` | `plain`, `check`, `radio`; a list; a value | `check`: pressing flips an item's check (the checked values are `checks`); `radio`: one is checked (`selected`) |
+| `width`, `on_pick` | a number, a handler | 112 to 280 pixels; called after an item is chosen |
+
+A `MenuItem` has a `label`, an `icon`, `trailing_text` (a shortcut), `checked` (true shows a check, false keeps the room, empty is not checkable), `submenu` (a chevron) and
+`disabled`. An item with a `submenu` list opens another `Menu` beside it, on a press or the Right arrow, and choosing in it closes both. The arrows move between rows,
+Enter chooses, typing the start of a label jumps to it. A right-click or long-press opener, and the exposed dropdown under a text field, are not built.
+
+`widget: Menu` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -75,19 +89,24 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: editor
+widget: Container
+style: {width: 480, height: 360}
 children:
-  - id: actions
-    component: Menu
-    with:
-      width: 200
-      items: [{label: Cut}, {label: Copy}, {label: Paste}]
+  - {widget: Button, name: more, label: More, handlers: {on_click: "open = True"}}
+  - widget: Menu
+    open: "{{ open }}"
+    anchor: more
+    chosen: "{{ command }}"
+    items:
+      - {value: cut, label: Cut, shortcut: Ctrl+X}
+      - {value: copy, label: Copy, icon: content_copy}
+      - {divider: true}
+      - {value: share, label: Share, submenu: [{value: mail, label: Mail}, {value: link, label: Link}]}
 ```
+
+## Using it
 
 In Python:
 

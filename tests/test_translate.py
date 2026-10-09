@@ -124,17 +124,26 @@ def test_the_header_is_kept_first_and_the_output_is_yaml():
 FILES = sorted(f for f in ROOT.glob("**/*.yaml") if re.search(r"_(View|Component)\.yaml$", f.name)
                and not {".venv", "site", ".git", "node_modules"} & set(f.relative_to(ROOT).parts))
 STEM = re.compile(r"_(View|Component)\.yaml$")
-PARAMS = {}
+_FROM_COMPONENTS: dict = {}
+_FROM_VIEWS: dict = {}
 for _f in FILES:
     _d = yaml.safe_load(_f.read_text(encoding="utf-8"))
-    if _f.name.endswith("_View.yaml") or STEM.sub("", _f.name) not in PARAMS:  # a view of a name beats a 0.4 component of it (Divider, Tabs)
-        PARAMS[STEM.sub("", _f.name)] = _d.get("params") if isinstance(_d, dict) else None
+    (_FROM_VIEWS if _f.name.endswith("_View.yaml") else _FROM_COMPONENTS)[STEM.sub("", _f.name)] = _d.get("params") if isinstance(_d, dict) else None
 
 
-def _resolver(name):
-    if name in PARAMS:
-        return decl_from_params(name, PARAMS[name]) if PARAMS[name] is not None else WidgetDecl(name, container=True, view=True)
-    return None
+def params_for(path):
+    """The parameters of every name, as the file `path` sees them: a 0.4 component calls the other 0.4 components (Menu calls the old MenuItem), a view calls the
+    views of 0.5 (a shipped `Tabs` over the old `Tabs`), and either falls back to the other kind for a name that has only that."""
+    first, then = (_FROM_COMPONENTS, _FROM_VIEWS) if path.name.endswith("_Component.yaml") else (_FROM_VIEWS, _FROM_COMPONENTS)
+    return {**then, **first}
+
+
+def resolver_for(params):
+    def resolve(name):
+        if name in params:
+            return decl_from_params(name, params[name]) if params[name] is not None else WidgetDecl(name, container=True, view=True)
+        return None
+    return resolve
 
 
 #: What the translator reports and the loader rejects, for the component pass to settle: file -> a word in the note that says why.
@@ -151,10 +160,11 @@ def test_the_repository_has_the_files_the_sweep_expects():
 @pytest.mark.parametrize("path", FILES, ids=lambda p: str(p.relative_to(ROOT)))
 def test_every_file_translates_and_loads_in_the_new_syntax(path):
     old = yaml.safe_load(path.read_text(encoding="utf-8"))
-    translator = Translator(params_of=PARAMS.get)
+    params = params_for(path)
+    translator = Translator(params_of=params.get)
     text = to_yaml(translator.translate(old))
     try:
-        doc = parse_view(text, path.name, resolver=_resolver)
+        doc = parse_view(text, path.name, resolver=resolver_for(params))
     except LoadError as error:
         reason = KNOWN_GAPS.get(path.name)
         assert reason and any(reason in note for note in translator.notes), f"{error}\n\nnotes: {translator.notes}\n\n{text}"
@@ -166,9 +176,10 @@ def test_the_known_gaps_are_still_gaps():
     # when the component pass settles one, this fails and the entry goes
     failing = set()
     for path in FILES:
-        text = to_yaml(Translator(params_of=PARAMS.get).translate(yaml.safe_load(path.read_text(encoding="utf-8"))))
+        params = params_for(path)
+        text = to_yaml(Translator(params_of=params.get).translate(yaml.safe_load(path.read_text(encoding="utf-8"))))
         try:
-            parse_view(text, path.name, resolver=_resolver)
+            parse_view(text, path.name, resolver=resolver_for(params))
         except LoadError:
             failing.add(path.name)
     assert failing == set(KNOWN_GAPS)

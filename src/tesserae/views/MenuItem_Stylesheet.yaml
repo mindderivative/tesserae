@@ -1,0 +1,10 @@
+# The look of MenuItem (Material 3): 12 pixels each side and between the parts, the label in on_surface, the icon and the trailing text in on_surface_variant.
+styles:
+  - widget: MenuItem
+    style:
+      padding: {left: 12, right: 12, top: 0, bottom: 0}
+      gap: 12
+  - {widget: MenuItem, part: label, style: {foreground: on_surface}}
+  - {widget: MenuItem, part: lead, style: {width: 24, height: 24, foreground: on_surface_variant}}
+  - {widget: MenuItem, part: trailing, style: {foreground: on_surface_variant}}
+  - {widget: MenuItem, part: chevron, style: {width: 24, height: 24, foreground: on_surface_variant}}
