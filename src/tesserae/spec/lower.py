@@ -24,7 +24,7 @@ _KIND = {"TextInput": "TextField"}
 _RENDERER_ONLY = {"TextInput": {"max_length", "read_only"}}
 #: Properties the renderer does not draw yet: said by name, never dropped silently.
 _PLACEHOLDER = "composed"
-_NOT_RENDERED = {"frame": "a video frame", "scroll_offset": "a scroll position"}
+_NOT_RENDERED = {"frame": "a video frame"}
 
 
 def lower(inst: Instance) -> dict[str, Any]:
@@ -51,6 +51,10 @@ def lower(inst: Instance) -> dict[str, Any]:
     elif widget == "Svg":
         folded = {"src", "content"}
         node["svg"] = {k: values[k] for k in ("src", "content") if k in values}
+    elif widget == "ScrollView":
+        folded = {"scroll_offset", "at_top", "at_end", "scroll_direction"}  # the outputs are the renderer's to write, not part of the node
+        if "scroll_offset" in values:
+            node["scroll"] = {"offset": values["scroll_offset"]}
     elif widget == "Canvas":
         folded = {"draw"}
         node["canvas"] = {"draw": values.get("draw")}

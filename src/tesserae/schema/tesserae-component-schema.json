@@ -2745,6 +2745,18 @@
           },
           "additionalProperties": false
         },
+        "scroll": {
+          "type": "object",
+          "description": "A ScrollView's position.",
+          "properties": {
+            "offset": {
+              "type": "number",
+              "minimum": 0,
+              "description": "How far it is scrolled, in pixels."
+            }
+          },
+          "additionalProperties": false
+        },
         "icon": {
           "type": "object",
           "description": "An Icon's glyph.",
@@ -7789,6 +7801,18 @@
             }
           ],
           "description": "One call per entry, each merged over `with:`."
+        },
+        "scroll": {
+          "type": "object",
+          "description": "A ScrollView's position.",
+          "properties": {
+            "offset": {
+              "type": "number",
+              "minimum": 0,
+              "description": "How far it is scrolled, in pixels."
+            }
+          },
+          "additionalProperties": false
         },
         "selected": {
           "anyOf": [

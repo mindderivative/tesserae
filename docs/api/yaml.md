@@ -38,6 +38,8 @@ svg:
   content: <text>
 canvas:
   draw: <a list>
+scroll:
+  offset: <a number>
 icon:
   name: <one of 18 names>
   path: <text>
@@ -82,6 +84,8 @@ children: <a list>
 | `svg.content` | text | The SVG document itself, as text. |
 | `canvas` | a mapping | A Canvas's drawing commands. |
 | `canvas.draw` | a list | Commands painted in order: `rect: [x, y, w, h]`, `circle: [cx, cy, r]` or `path: [points]` (with `width`), each with a `color`. |
+| `scroll` | a mapping | A ScrollView's position. |
+| `scroll.offset` | a number | How far it is scrolled, in pixels. |
 | `icon` | a mapping | An Icon's glyph. |
 | `icon.name` | one of 18 names | An icon in Tesserae's set. |
 | `icon.path` | text | SVG path data, instead of a name. |

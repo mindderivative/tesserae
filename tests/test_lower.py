@@ -60,7 +60,7 @@ def test_values_are_read_at_lowering_so_a_new_lowering_sees_the_change():
     assert lower(comp.root)["text"]["content"] == "bye"
 
 
-@pytest.mark.parametrize("source, what", [("widget: Image\nframe: x", "a video frame"), ("widget: ScrollView\nscroll_offset: 0", "a scroll position")])
+@pytest.mark.parametrize("source, what", [("widget: Image\nframe: x", "a video frame")])
 def test_a_property_the_renderer_cannot_draw_is_an_error_naming_it(source, what):
     with pytest.raises(ValueError, match=what):
         spec(source)

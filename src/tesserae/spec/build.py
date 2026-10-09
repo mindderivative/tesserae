@@ -57,7 +57,7 @@ _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", 
                                            "ScrollView", "Canvas"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -639,6 +639,12 @@ def _scroll_props(ctx, node, style):
     content = {k: v for k, v in outer.items() if k in _CONTENT}
     outer = {k: v for k, v in outer.items() if k not in _CONTENT}
     outer.update(scrollbar_fill=_role(ctx, "outline"), focusable=True)
+    scroll = node.get("scroll")
+    if isinstance(scroll, dict) and scroll.get("offset") is not None:
+        offset = scroll["offset"]
+        if isinstance(offset, bool) or not isinstance(offset, (int, float)) or offset != offset or offset < 0:
+            raise SpecBuildError(f'widget {_q(node["id"])}: scroll_offset is a distance in pixels, 0 or more, not {offset!r}')
+        outer["scroll_offset"] = float(offset)
     content.update(flex_direction=style.get("flex_direction", "vertical"), width="100%",
                    **{k: style.get(k, _ALIGNMENT_DEFAULTS[k]) for k in _ALIGNMENT_DEFAULTS})
     return outer, content

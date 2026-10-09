@@ -312,6 +312,9 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                    "properties": {"draw": {"type": "array", "description": "Commands painted in order: `rect: [x, y, w, h]`, `circle: [cx, cy, r]` "
                                                                               "or `path: [points]` (with `width`), each with a `color`."}},
                    "additionalProperties": False},
+        "scroll": {"type": "object", "description": "A ScrollView's position.",
+                   "properties": {"offset": {"type": "number", "minimum": 0, "description": "How far it is scrolled, in pixels."}},
+                   "additionalProperties": False},
         "icon": {"type": "object", "description": "An Icon's glyph.",
                  "properties": {"name": {**loose({"enum": sorted(icons.ICONS)}), "description": "An icon in Tesserae's set."},
                                 "path": {"type": "string", "description": "SVG path data, instead of a name."},

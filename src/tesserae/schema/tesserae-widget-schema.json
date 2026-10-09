@@ -2269,7 +2269,43 @@
                 "pattern": "\\{\\{"
               }
             ],
-            "description": "The scrolled distance."
+            "description": "The scrolled distance; scrolling writes it back to a Signal it is bound to."
+          },
+          "at_top": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Output: whether it is scrolled to the start. Bind a Signal or a state name to read it."
+          },
+          "at_end": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Output: whether it is scrolled as far as it goes."
+          },
+          "scroll_direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Output: 'down' or 'up' for the last scroll, 'none' before the first."
           }
         },
         "required": [
@@ -2295,7 +2331,10 @@
             "params",
             "expects",
             "children",
-            "scroll_offset"
+            "scroll_offset",
+            "at_top",
+            "at_end",
+            "scroll_direction"
           ]
         }
       }

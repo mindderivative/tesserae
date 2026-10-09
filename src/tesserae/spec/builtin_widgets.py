@@ -55,7 +55,10 @@ declare("Icon", {"icon": P("icon", doc="A built-in icon name."),
 declare("Canvas", {"draw": P("list", doc="Drawing commands in order: rect, circle or path, each with a color.")}, doc="A drawing surface: rects, circles and paths from data.")
 declare("Svg", {"src": P("str"), "content": P("str", doc="The SVG text, instead of a file.")}, extras=("foreground",), doc="A vector picture.")
 declare("ScrollView", {
-    "scroll_offset": P("float", default=0.0, model=True, doc="The scrolled distance."),
+    "scroll_offset": P("float", default=0.0, model=True, doc="The scrolled distance; scrolling writes it back to a Signal it is bound to."),
+    "at_top": P("bool", model=True, doc="Output: whether it is scrolled to the start. Bind a Signal or a state name to read it."),
+    "at_end": P("bool", model=True, doc="Output: whether it is scrolled as far as it goes."),
+    "scroll_direction": P("str", model=True, doc="Output: 'down' or 'up' for the last scroll, 'none' before the first."),
 }, container=True, doc="A scrolling viewport for its children.")
 
 declare("Checkbox", {"checked": P("bool", model=True), "disabled": P("bool")}, doc="A box that is on or off.")

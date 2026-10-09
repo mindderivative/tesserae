@@ -37,6 +37,9 @@ _KEY_EVENTS = {"on_key": "key_down", "on_submit": "key_down", "on_press": "point
 _GROUP_KEYS = {"horizontal": (("arrow_left",), ("arrow_right",)), "vertical": (("arrow_up",), ("arrow_down",)),
                "both": (("arrow_left", "arrow_up"), ("arrow_right", "arrow_down"))}
 #: A pause this long (seconds) in typing starts a new type-ahead search.
+#: The ScrollView properties the renderer writes (the caller binds a Signal or a state name to read them), and how near an edge counts as at it.
+_SCROLL_OUTPUTS = frozenset({"scroll_offset", "at_top", "at_end", "scroll_direction"})
+SCROLL_EDGE = 0.5
 TYPEAHEAD_RESET = 1.0
 from tesserae.viewmodel import Bindings, ViewHandle, open_view
 
@@ -58,6 +61,20 @@ def _is_submit(event: Any) -> bool:
         return not event.target.get("multiline")
     except (AttributeError, ValueError):
         return True
+
+
+def scroll_direction(last: str, old: Any, new: Any) -> str:
+    """`'down'` or `'up'` from a scroll event's offsets; the last direction when it did not move or the event has none."""
+    if old is None or new is None or new == old:
+        return last
+    return "down" if new > old else "up"
+
+
+def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, bool]:
+    """`(at_top, at_end)` for a scroll view `viewport` tall over content `length` tall. Before the first layout (a size of 0) nothing is known
+    about the end, so it is not at it."""
+    laid_out = viewport > 0 and length > 0
+    return offset <= SCROLL_EDGE, laid_out and offset >= length - viewport - SCROLL_EDGE
 
 
 def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Callable[..., Any]]]:
@@ -115,6 +132,7 @@ class ComposedView(View):
         self._synced = False
         self._effect: Optional[Effect] = None
         self._timers: Optional[Timers] = None
+        self._scrolled: dict[str, dict[str, str]] = {}
         self._timer_code: dict[str, Any] = {}
         self._timer_scopes: weakref.WeakKeyDictionary[Any, int] = weakref.WeakKeyDictionary()
         spec, frames = self._lowered()
@@ -179,6 +197,7 @@ class ComposedView(View):
         if self._synced:
             untrack(lambda: self.reconcile(spec, frames))
         untrack(self._wire_instances)
+        untrack(self._wire_scroll)
         untrack(self._wire_states)
         untrack(self._wire_focus_groups)
         untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -225,6 +244,8 @@ class ComposedView(View):
                 else:
                     self._handler_undos.append(self._listen(node, tre_event, call))
             for prop, (name, scope) in inst.models.items():
+                if inst.widget == "ScrollView" and prop in _SCROLL_OUTPUTS:
+                    continue  # `_wire_scroll`'s
                 state = getattr(control, prop, None) if control is not None else None
                 if state is not None and hasattr(control, "on_change"):
                     self._handler_undos.append(control.on_change(
@@ -232,6 +253,37 @@ class ComposedView(View):
                 else:
                     self._handler_undos.append(self._listen(
                         node, "change", lambda ev, scope=scope, name=name, node=node, prop=prop: scope.assign(name, node.get(prop))))
+
+    def _wire_scroll(self) -> None:
+        """A ScrollView's outputs: `scroll_offset`, `at_top`, `at_end` and `scroll_direction`, each written to the Signal or state name it was
+        given, on every scroll and once the layout has settled."""
+        for inst in self.handle.composition.walk():
+            outputs = {prop: ref for prop, ref in inst.models.items() if prop in _SCROLL_OUTPUTS} if inst.widget == "ScrollView" else {}
+            if inst.widget != "ScrollView" or not (outputs or "scroll_offset" in inst.props) or inst.id not in self._built.outer:
+                continue
+            outer, content = self._built.outer[inst.id], self._built.nodes[inst.id]
+            last = self._scrolled.setdefault(inst.id, {"direction": "none"})  # kept across re-wiring: every write to a Signal re-syncs
+
+            def report(event: Any = None, outputs: dict = outputs, outer: Any = outer, content: Any = content, last: dict = last) -> None:
+                offset = float(outer.get("scroll_offset"))
+                last["direction"] = scroll_direction(last["direction"], getattr(event, "old_value", None), getattr(event, "new_value", None))
+                at_top, at_end = scroll_edges(offset, float(outer.get("layout_height")), float(content.get("layout_height")))
+                values = {"scroll_offset": offset, "at_top": at_top, "at_end": at_end, "scroll_direction": last["direction"]}
+                for prop, (name, scope) in outputs.items():
+                    scope.assign(name, values[prop])
+
+            if outputs:
+                self._handler_undos.append(self._listen(outer, "scroll", report))
+
+            def settle(inst: Instance = inst, outer: Any = outer, content: Any = content, report: Callable[..., None] = report) -> None:
+                """On the first frame after a build: the offset that was asked for. tre clamps an offset to the content, which has no size until it
+                has been laid out, and reading a layout property lays it out."""
+                content.get("layout_height")
+                if "scroll_offset" in inst.props:
+                    outer.set(scroll_offset=float(inst.value("scroll_offset")))
+                report()
+
+            self.timers.after(0, settle, name=f"scroll:{inst.id}")
 
     def _wire_states(self) -> None:
         """Feeds the interaction Signals (`hovered`, `focused`, `pressed`) of the instances a rule or an expression asked about."""

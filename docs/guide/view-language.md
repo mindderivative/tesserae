@@ -193,6 +193,31 @@ handlers:
 
 For Python, `tesserae.timers.Timers(window)` has the same `after`, `every`, `cancel` and `cancel_all`.
 
+## Scrolling
+
+A `ScrollView` draws its `scroll_offset` (pixels, 0 or more; tre clamps it to the content once the content has a size) and reports where it is to
+whatever you bind to it, so other widgets can react. Each of these is bound the way a two-way property is, to a ViewModel Signal or a `state:` name:
+
+| Property | Meaning |
+| --- | --- |
+| `scroll_offset` | Two-way: setting the Signal scrolls, and scrolling writes the Signal. |
+| `at_top`, `at_end` | Scrolled to the start, or as far as it goes. `at_end` is false until the content has been laid out. |
+| `scroll_direction` | `'down'` or `'up'` for the last scroll, `'none'` before the first. |
+
+```yaml
+widget: Container
+state: {top: true, way: none}
+children:
+  - widget: ScrollView
+    at_top: "{{ top }}"
+    scroll_direction: "{{ way }}"
+    children: []
+  - widget: Container
+    if: top or way == 'up'              # a bar that hides while the list scrolls down
+```
+
+A view scrolls vertically; a `ScrollView` that nothing is bound to keeps its own position.
+
 ## Drawing
 
 `widget: Canvas` is a surface you draw on with data. `draw:` lists commands painted in order: `{rect: [x, y, width, height]}`,

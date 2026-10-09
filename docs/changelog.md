@@ -92,6 +92,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Timers** ([#217](https://github.com/mindderivative/tesserae/issues/217)). Handlers can call `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`; `action` is an
   action name or statements run in the handler's scope, and a name restarts a timer of that name (a debounce). `tesserae.timers.Timers(window)` is the same for Python.
   They run on the frame loop until tre has timers (#235) and stop with the view.
+- **Scroll state** ([#218](https://github.com/mindderivative/tesserae/issues/218)). `ScrollView.scroll_offset` is drawn (a literal or a Signal; a bound Signal follows the user's scrolling, and
+  setting it scrolls), and `at_top`, `at_end` and `scroll_direction` write the position to the Signals or state names they are bound to, for collapse-on-scroll and hide-on-scroll.
 
 ### Removed
 
