@@ -62,7 +62,7 @@ def test_a_filled_field_has_its_parts_and_only_the_ones_asked_for(tmp_path):
     _, view, _ = opened(tmp_path, "  - {widget: TextField, name: f, label: Name}\n")
     ids = {i.id for i in view.handle.composition.walk()}
     assert {"root.f.box", "root.f.box.body.input", "root.f.box.label_box.label", "root.f.indicator"} <= ids
-    assert not ids & {"root.f.box.leading_icon", "root.f.box.error_icon", "root.f.box.trailing_icon", "root.f.box.reveal_button", "root.f.footer",
+    assert not ids & {"root.f.box.leading_icon", "root.f.box.error_icon", "root.f.box.trailing_icon", "root.f.box.reveal_button", "root.f.footer.supporting",
                       "root.f.box.body.prefix", "root.f.box.body.suffix"}
 
 
@@ -129,16 +129,23 @@ def test_the_label_is_raised_by_focus_or_text_and_comes_back(tmp_path):
     lowered = (label_box.get("y"), label.get("font_size"), field.get("placeholder"))
     assert lowered[0] == 18.0 and field.get("placeholder") == ""  # the hint is the label while the field is empty and idle
     field.focus()
-    view.window.advance(16)
+    for _ in range(3):
+        view.window.advance(16)
+    assert 8.0 < label_box.get("y") < 18.0  # it glides: part of the way after three frames
+    for _ in range(20):
+        view.window.advance(16)
     raised = (label_box.get("y"), label.get("font_size"), field.get("placeholder"))
     assert raised[0] == 8.0 and raised[1] < lowered[1] and raised[2] == "Type here"
     vm.name.set("Ada")  # with text it stays raised, focused or not
     view.window.simulate("pointer_down", x=700, y=700)
     view.window.simulate("pointer_up", x=700, y=700)
+    for _ in range(20):
+        view.window.advance(16)
     assert label_box.get("y") == 8.0
     vm.name.set("")
-    view.window.advance(16)
-    assert label_box.get("y") in (8.0, 18.0)
+    for _ in range(20):
+        view.window.advance(16)
+    assert label_box.get("y") in (8.0, 18.0)  # back down if the field has lost the focus too
 
 
 def test_an_outlined_label_sits_on_the_border_with_a_fill_behind_it(tmp_path):
@@ -146,6 +153,8 @@ def test_an_outlined_label_sits_on_the_border_with_a_fill_behind_it(tmp_path):
     label_box = view.node("root.f.box.label_box")
     assert label_box.get("y") == 18.0 and label_box.get("fill") in (None, (0, 0, 0, 0))
     vm.name.set("x")
+    for _ in range(20):
+        view.window.advance(16)
     assert label_box.get("y") == -8.0 and label_box.get("fill") == role(view, "surface")
 
 
@@ -295,7 +304,7 @@ def test_the_shipped_view_validates_against_the_widget_schema_all_the_way_down()
         errors = list(validator.iter_errors(unwrapped(yaml.safe_load(path.read_text(encoding="utf-8")))))
         assert not errors, f"{path.name}: {errors[0].message[:200]}"
     broken = yaml.safe_load(shipped.shipped_views()["TextField"].read_text(encoding="utf-8"))
-    broken["children"][0]["children"][1]["children"][1]["valu"] = 1  # a misspelt property deep inside
+    broken["children"][1]["children"][1]["children"][1]["valu"] = 1  # a misspelt property deep inside
     assert list(validator.iter_errors(broken))
     json.dumps(schema)
 
@@ -329,3 +338,85 @@ def test_lowering_leaves_out_what_only_the_renderer_acts_on():
 
     node = lower(Composer({}, VM()).compose(parse_view("widget: TextInput\nmax_length: 3\nread_only: true\nplaceholder: x\n", "T_View.yaml")).root)
     assert node["kind"] == "TextField" and node["text"]["placeholder"] == "x" and "max_length" not in node and "read_only" not in node
+
+
+# -- what was left (#244): the glide, the filled corners, describedby, autocomplete ---------------------------------------------
+
+
+def settle(view, n=20):
+    for _ in range(n):
+        view.window.advance(16)
+
+
+def test_a_filled_field_has_a_four_pixel_top_corner_and_a_square_bottom(tmp_path):
+    _, view, _ = opened(tmp_path, "  - {widget: TextField, name: f, label: Name}\n")
+    assert view.node("root.f.box").get("corner_radius") == (4.0, 4.0, 0.0, 0.0)
+    (tmp_path / "o").mkdir()
+    _, outlined, _ = opened(tmp_path / "o", "  - {widget: TextField, name: f, label: Name, variant: outlined}\n")
+    assert outlined.node("root.f.box").get("corner_radius") == 4.0
+
+
+def test_the_input_is_described_by_the_help_line_and_the_footer_is_there_even_with_no_help(tmp_path):
+    _, view, _ = opened(tmp_path, "  - {widget: TextField, name: f, label: Name, supporting: Your name}\n")
+    node = input_of(view)
+    assert node.get("describedby") == [view._built.outer["root.f.footer"]]
+    assert view.node("root.f.footer").get("layout_height") > 0
+    (tmp_path / "n").mkdir()
+    _, bare, _ = opened(tmp_path / "n", "  - {widget: TextField, name: f, label: Name}\n")
+    assert bare.node("root.f.footer").get("layout_height") == 0.0  # no room taken when there is nothing to say
+
+
+SUGGESTIONS = "[Alice, Alan, Albert, Bob, Carol]"
+
+
+def typed(view, text):
+    node = input_of(view)
+    node.focus()
+    settle(view, 2)
+    node.set(text="")
+    view.window.simulate("input", text=text)
+    settle(view, 8)
+
+
+def test_suggestions_show_in_a_menu_under_the_field_that_contain_what_is_typed(tmp_path):
+    _, view, vm = opened(tmp_path, f"  - {{widget: TextField, name: f, label: Name, text: '{{{{ name }}}}', suggestions: {SUGGESTIONS}}}\n")
+    assert not view._shown_layers
+    typed(view, "al")
+    assert view._shown_layers
+    labels = [view.node(k).get("text") for k in view._built.specs if k.startswith("root.f.offers.surface.row[") and k.endswith("].item.label")]
+    assert labels == ["Alice", "Alan", "Albert"]
+    surface = view.node("root.f.offers.surface")
+    box = view.node("root.f.box")
+    assert surface.get("layout_y") >= box.get("layout_y") + box.get("layout_height")
+
+
+def test_pressing_a_suggestion_fills_the_field_in_and_closes_the_menu(tmp_path):
+    _, view, vm = opened(tmp_path, f"  - {{widget: TextField, name: f, label: Name, text: '{{{{ name }}}}', suggestions: {SUGGESTIONS}}}\n")
+    typed(view, "al")
+    view.window.simulate("click", node=view.node("root.f.offers.surface.row[1].item"))
+    settle(view, 8)
+    assert vm.name.get() == "Alan" and not view._shown_layers
+
+
+def test_no_menu_when_nothing_matches_or_the_text_is_already_a_suggestion(tmp_path):
+    _, view, _ = opened(tmp_path, f"  - {{widget: TextField, name: f, label: Name, text: '{{{{ name }}}}', suggestions: {SUGGESTIONS}}}\n")
+    typed(view, "zz")
+    assert not view._shown_layers
+    typed(view, "Bob")
+    assert not view._shown_layers
+
+
+def test_a_field_without_suggestions_builds_no_menu(tmp_path):
+    _, view, _ = opened(tmp_path, "  - {widget: TextField, name: f, label: Name}\n")
+    assert "root.f.offers" not in view._built.specs
+
+
+def test_escape_closes_the_suggestions_and_typing_again_brings_them_back(tmp_path):
+    _, view, _ = opened(tmp_path, f"  - {{widget: TextField, name: f, label: Name, text: '{{{{ name }}}}', suggestions: {SUGGESTIONS}}}\n")
+    typed(view, "al")
+    assert view._shown_layers
+    view.window.simulate("key_down", key="escape")
+    settle(view, 6)
+    assert not view._shown_layers
+    typed(view, "alb")
+    assert view._shown_layers

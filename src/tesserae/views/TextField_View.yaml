@@ -23,10 +23,20 @@ params:
   disabled: {type: bool, default: false, doc: "Dimmed, and takes no typing."}
   read_only: {type: bool, default: false, doc: "The text can be selected and copied but not changed."}
   on_edit: {type: handler, doc: "Called after each edit the user makes, once `text` has been written."}
+  suggestions: {type: list, default: [], doc: "Texts to offer while typing: those that contain what is typed show in a menu under the field, and pressing one fills it in."}
 widget: Container
-state: {reveal: false}
+state: {reveal: false, ac_open: false, picked: ""}
 style: {flex_direction: vertical}
 children:
+  - widget: Menu
+    name: offers
+    if: "text != '' and len([s for s in suggestions if text.lower() in s.lower() and s != text]) > 0"
+    open: "{{ ac_open }}"
+    anchor: box
+    chosen: "{{ picked }}"
+    items: "{{ [{'value': s, 'label': s} for s in suggestions if text.lower() in s.lower() and s != text][:6] }}"
+    width: 280
+    on_pick: "text = picked; ac_open = False"
   - widget: Container
     name: box
     handlers: {on_press: "focus('input')"}
@@ -54,11 +64,12 @@ children:
             read_only: "{{ read_only }}"
             disabled: "{{ disabled }}"
             typography_role: body_large
-            handlers: {on_change: "on_edit()"}
+            handlers: {on_change: "ac_open = True; on_edit()"}
             style: {flex: fill, min_height: "{{ 72 if multiline else 24 }}"}
             a11y:
               label: "{{ label + (': ' + error if error != '' else '') }}"
               invalid: "{{ error != '' }}"
+              describedby: footer
               description: "{{ error if error != '' else supporting }}"   # sent to the screen reader when tre takes it; the label carries the error until then
           - {widget: Text, name: suffix, if: "suffix != ''", text: "{{ suffix }}", typography_role: body_large}
       - {widget: Icon, name: error_icon, if: "error != ''", icon: error, style: {width: 24, height: 24}}
@@ -76,6 +87,7 @@ children:
         name: label_box
         if: "label != ''"
         style:
+          transition: {x: 150, y: 150}   # the label glides up when the field is used and back down when it is empty again
           position: absolute
           x: "{{ 12 + (36 if leading != '' else 0) + (0 if (focused or text != '') and variant == 'outlined' else 4) }}"
           y: "{{ ((8 if variant == 'filled' else -8) if (focused or text != '') else 18) }}"
@@ -90,10 +102,9 @@ children:
   - {widget: Rect, name: indicator, if: "variant == 'filled'", style: {flex: expand_horizontal}}
   - widget: Container
     name: footer
-    if: "supporting != '' or error != '' or counter"
-    style: {flex_direction: horizontal, align_content: top_left, gap: 16, padding: {left: 16, right: 16, top: 4, bottom: 0}}
+    style: {flex_direction: horizontal, align_content: top_left, gap: 16, padding: "{{ {'left': 16, 'right': 16, 'top': 4 if (supporting != '' or error != '' or counter) else 0, 'bottom': 0} }}"}
     children:
-      - {widget: Text, name: supporting, text: "{{ error if error != '' else supporting }}", typography_role: body_small, style: {flex: fill}}
+      - {widget: Text, name: supporting, if: "supporting != '' or error != ''", text: "{{ error if error != '' else supporting }}", typography_role: body_small, style: {flex: fill}}
       - widget: Text
         name: counter
         if: counter

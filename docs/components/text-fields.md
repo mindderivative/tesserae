@@ -29,15 +29,20 @@ the `TextInput` widget, the bare input, and the nodes around it, so every part h
 | `multiline` | true or false | several lines; Enter makes a new one |
 | `obscured` | true or false | a password: dots, with a button that shows the text |
 | `disabled`, `read_only` | true or false | dimmed and takes no typing; the text can be selected and copied but not changed |
+| `suggestions` | a list of texts | those that contain what is typed show in a menu under the field (up to six); pressing one fills the field in; Escape closes the menu |
+| `mask` | a pattern | what is typed is fitted to it (`###-####`) |
+| `on_edit` | a handler | called after each edit, once `text` has been written |
 
-Events: `on_change` when the text changes, `on_key` for each key pressed in the field, and `on_submit` for Enter in a field that is not
+Events: `on_key` for each key pressed in the field, `on_edit` after each edit, and `on_submit` for Enter in a field that is not
 multiline. A handler written on the field is called as the user types.
 
 The parts a stylesheet can address are `box`, `label`, `input`, `prefix`, `suffix`, `leading_icon`, `trailing_icon`, `error_icon`,
 `reveal_button`, `reveal_icon`, `indicator` (the line under a filled field), `supporting` and `counter`. The state of a rule is the state of
 the whole field: `focused` is true while anything inside it has the focus, `hovered` while the pointer is over it, and `error` and
-`disabled` read the field's own properties. The label jumps between its two places; moving it smoothly needs `transition:`, which the
-language reserves.
+`disabled` read the field's own properties. The label glides between its two places (its position eases in 150 milliseconds; its size changes at once, as the
+engine cannot ease a font size). A filled field has 4 pixel top corners and a square bottom, over its line. The input says it is described by the help line, so a
+screen reader reads that too, and it is invalid while there is an error. Not built: moving into the suggestions with the arrow keys (press one with the pointer), the input method's
+composition drawn by Tesserae (the engine draws the candidate window at the caret), and an exposed dropdown that is a select.
 
 This component is a view Tesserae ships: use `widget: TextField` in a view (see [The View Language](../guide/view-language.md)).
 
