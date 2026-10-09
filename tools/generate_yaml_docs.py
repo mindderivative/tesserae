@@ -35,6 +35,7 @@ KINDS = (
     ("TextField", "A single-line text input in a box.", "`text:`, `two_way:`, `handlers: {on_change}`"),
     ("Image", "A picture from a file.", "`image:`"),
     ("Svg", "An SVG document, drawn by the engine: shapes, gradients, text, clips and masks. `style.foreground` is what `currentColor` means, so an icon follows the theme.", "`svg:`"),
+    ("VirtualList", "A scrolling list of equal rows that builds only the rows in view. Its one child is a `for:`.", "`virtual:`, `scroll:`"),
     ("Overlay", "A layer over the window while `open`: anchored to a node, or a modal scrim. Takes no room where it is written; its children are the layer's.", "`overlay:`"),
     ("Canvas", "A drawing surface: rectangles, circles and paths from a `draw:` list, repainted when the Signals it reads change.", "`canvas:`"),
     ("Icon", "A glyph from Tesserae's icon set, or from SVG path data, coloured by `style.foreground`.", "`icon:` (`name:`, or `path:` and `view_box:`)"),

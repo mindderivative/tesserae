@@ -65,6 +65,14 @@ declare("ScrollView", {
     "scroll_direction": P("str", model=True, doc="Output: 'down' or 'up' for the last scroll, 'none' before the first."),
 }, container=True, doc="A scrolling viewport for its children.")
 
+declare("VirtualList", {
+    "item_height": P("float", required=True, doc="How tall every row is, in pixels."),
+    "overscan": P("int", default=3, doc="Rows built beyond each edge of what is in view."),
+    "scroll_offset": P("float", default=0.0, model=True, doc="The scrolled distance; scrolling writes it back to a Signal it is bound to."),
+    "at_top": P("bool", model=True, doc="Output: whether it is scrolled to the start."),
+    "at_end": P("bool", model=True, doc="Output: whether it is scrolled as far as it goes."),
+    "scroll_direction": P("str", model=True, doc="Output: 'down' or 'up' for the last scroll, 'none' before the first."),
+}, container=True, doc="A scrolling list of equal rows that builds only the rows in view: its one child is a `for:`.")
 declare("Overlay", {
     "open": P("bool", default=False, model=True, doc="Whether it is showing. Closing it (Escape, a press outside) writes false back to a Signal it is bound to."),
     "anchor": P("str", doc="The name of a node in this view to sit against; without one it is centred in the window."),

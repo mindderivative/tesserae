@@ -288,6 +288,29 @@ text: Read the docs
 handlers: {on_click: "open_url('https://example.com/docs')"}
 ```
 
+## Long lists
+
+A `for:` builds every row it makes, which is fine for a screenful and not for ten thousand. `widget: VirtualList` is a scrolling list of equal-height
+rows that builds only the rows in view, and more as it scrolls. Its one child is the `for:`; write the row once.
+
+```yaml
+widget: VirtualList
+item_height: 48
+overscan: 3                           # rows built past each edge (the default)
+scroll_offset: "{{ y }}"              # as for a ScrollView, with at_top, at_end and scroll_direction
+children:
+  - widget: Container
+    for: row in rows
+    key: row.id
+    handlers: {on_click: "picked = row.id"}
+    children:
+      - {widget: Text, text: "{{ row.name }}", typography_role: body_large, style: {foreground: on_surface}}
+```
+
+The list is as tall as all its rows, and each row built sits at its place in it, so a row's own `style` sets its width, background and so on but not its
+height or position. Rows leave and come as the list scrolls: a row's local `state:` is not kept across that. Rows must all be `item_height` tall. Opening a
+list of 10 000 builds about a dozen rows.
+
 ## Overlays
 
 `widget: Overlay` shows its children in a layer over the window while `open` is true: a menu, a popover, a dialog. It takes no room where it is written.

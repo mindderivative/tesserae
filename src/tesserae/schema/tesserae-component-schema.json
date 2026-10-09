@@ -2943,6 +2943,23 @@
           },
           "additionalProperties": false
         },
+        "virtual": {
+          "type": "object",
+          "description": "A VirtualList's length: how many rows there are, and how tall each is.",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How many rows the list has."
+            },
+            "extent": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "How tall each row is, in pixels."
+            }
+          },
+          "additionalProperties": false
+        },
         "overlay": {
           "type": "object",
           "description": "An Overlay's shape.",
@@ -9028,6 +9045,23 @@
         "view": {
           "type": "string",
           "description": "The view to show: a `*_View.yaml` next to this file, or a name found in the project."
+        },
+        "virtual": {
+          "type": "object",
+          "description": "A VirtualList's length: how many rows there are, and how tall each is.",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "How many rows the list has."
+            },
+            "extent": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "How tall each row is, in pixels."
+            }
+          },
+          "additionalProperties": false
         },
         "when": {
           "description": "Keeps this child only when the value is true."

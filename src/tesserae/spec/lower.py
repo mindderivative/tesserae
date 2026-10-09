@@ -19,7 +19,7 @@ __all__ = ["lower"]
 _TEXT_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "wrap", "overflow", "text_align", "max_lines", "letter_spacing", "selectable")
 _FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "placeholder", "multiline", "obscured")
 #: The widget names that are not the builder's kind names.
-_KIND = {"TextInput": "TextField"}
+_KIND = {"TextInput": "TextField", "VirtualList": "ScrollView"}
 #: Properties the renderer acts on (it has no builder equivalent), so they are not part of the lowered spec.
 _RENDERER_ONLY = {"TextInput": {"max_length", "read_only", "mask"}}
 #: Properties the renderer does not draw yet: said by name, never dropped silently.
@@ -51,8 +51,10 @@ def lower(inst: Instance) -> dict[str, Any]:
     elif widget == "Svg":
         folded = {"src", "content", "alt"}
         node["svg"] = {k: values[k] for k in ("src", "content") if k in values}
-    elif widget == "ScrollView":
-        folded = {"scroll_offset", "at_top", "at_end", "scroll_direction"}  # the outputs are the renderer's to write, not part of the node
+    elif widget in ("ScrollView", "VirtualList"):
+        folded = {"scroll_offset", "at_top", "at_end", "scroll_direction", "item_height", "overscan"}  # the outputs are the renderer's to write
+        if inst.virtual is not None:  # the whole list's height is its length; the rows built are placed in it
+            node["virtual"] = {"count": inst.virtual.count, "extent": float(inst.virtual.extent())}
         if "scroll_offset" in values:
             node["scroll"] = {"offset": values["scroll_offset"]}
     elif widget == "Overlay":
@@ -63,6 +65,9 @@ def lower(inst: Instance) -> dict[str, Any]:
         node["canvas"] = {"draw": values.get("draw")}
     node.update({k: v for k, v in values.items() if k not in folded})  # the rest stay flat: `disabled`, `checked`, `value`, ...
     style = inst.effective_style()
+    if inst.virtual_index is not None and inst.parent is not None and inst.parent.virtual is not None:  # a row of a VirtualList sits at its place in it
+        extent = float(inst.parent.virtual.extent())
+        style = {"position": "absolute", "x": 0, "y": inst.virtual_index.get() * extent, "height": extent, "width": "100%", **style}
     if style:
         node["style"] = style
     if inst.classes:

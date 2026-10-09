@@ -57,7 +57,7 @@ _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", 
                                            "ScrollView", "Canvas", "Overlay"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "scroll", "overlay", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -674,6 +674,9 @@ def _scroll_props(ctx, node, style):
     content = {k: v for k, v in outer.items() if k in _CONTENT}
     outer = {k: v for k, v in outer.items() if k not in _CONTENT}
     outer.update(scrollbar_fill=_role(ctx, "outline"), focusable=True)
+    virtual = node.get("virtual")
+    if isinstance(virtual, dict):  # the content is as tall as the whole list; the rows that are built are placed in it
+        content["height"] = float(virtual["count"]) * float(virtual["extent"])
     scroll = node.get("scroll")
     if isinstance(scroll, dict) and scroll.get("offset") is not None:
         offset = scroll["offset"]

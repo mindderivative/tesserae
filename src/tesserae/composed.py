@@ -155,6 +155,7 @@ class ComposedView(View):
         self._timers: Optional[Timers] = None
         self._scrolled: dict[str, dict[str, str]] = {}
         self._firing: list[Instance] = []
+        self._syncing = False
         self._layer_resize: dict[str, Callable[[], None]] = {}
         self._shown_layers: dict[str, Any] = {}  # each Overlay showing: its id -> the layer node shown
         self._overlay_undos: list[Callable[[], None]] = []
@@ -227,14 +228,18 @@ class ComposedView(View):
         spec, frames = self._lowered()  # read inside the effect: these are the values the view depends on
         visible = self.handle.visible.get()
         self._observe()
-        if self._synced:
-            untrack(lambda: self.reconcile(spec, frames))
-        untrack(self._wire_instances)
-        untrack(self._wire_scroll)
-        untrack(self._wire_overlays)
-        untrack(self._wire_states)
-        untrack(self._wire_focus_groups)
-        untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
+        self._syncing = True  # the engine can report a scroll while the nodes are patched; what that changes waits for the next frame
+        try:
+            if self._synced:
+                untrack(lambda: self.reconcile(spec, frames))
+            untrack(self._wire_instances)
+            untrack(self._wire_scroll)
+            untrack(self._wire_overlays)
+            untrack(self._wire_states)
+            untrack(self._wire_focus_groups)
+            untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
+        finally:
+            self._syncing = False
 
     def _observe(self) -> None:
         """Asks each instance that is new to tell this view when its children change."""
@@ -282,7 +287,7 @@ class ComposedView(View):
                 else:
                     self._handler_undos.append(self._listen(node, tre_event, call))
             for prop, (name, scope) in inst.models.items():
-                if inst.widget == "ScrollView" and prop in _SCROLL_OUTPUTS:
+                if inst.widget in ("ScrollView", "VirtualList") and prop in _SCROLL_OUTPUTS:
                     continue  # `_wire_scroll`'s
                 state = getattr(control, prop, None) if control is not None else None
                 if state is not None and hasattr(control, "on_change"):
@@ -296,21 +301,29 @@ class ComposedView(View):
         """A ScrollView's outputs: `scroll_offset`, `at_top`, `at_end` and `scroll_direction`, each written to the Signal or state name it was
         given, on every scroll and once the layout has settled."""
         for inst in self.handle.composition.walk():
-            outputs = {prop: ref for prop, ref in inst.models.items() if prop in _SCROLL_OUTPUTS} if inst.widget == "ScrollView" else {}
-            if inst.widget != "ScrollView" or not (outputs or "scroll_offset" in inst.props) or inst.id not in self._built.outer:
+            scrolls = inst.widget in ("ScrollView", "VirtualList")
+            outputs = {prop: ref for prop, ref in inst.models.items() if prop in _SCROLL_OUTPUTS} if scrolls else {}
+            if not scrolls or not (outputs or inst.virtual or "scroll_offset" in inst.props) or inst.id not in self._built.outer:
                 continue
             outer, content = self._built.outer[inst.id], self._built.nodes[inst.id]
             last = self._scrolled.setdefault(inst.id, {"direction": "none"})  # kept across re-wiring: every write to a Signal re-syncs
 
-            def report(event: Any = None, outputs: dict = outputs, outer: Any = outer, content: Any = content, last: dict = last) -> None:
+            def report(event: Any = None, outputs: dict = outputs, outer: Any = outer, content: Any = content, last: dict = last,
+                       inst: Instance = inst) -> None:
                 offset = float(outer.get("scroll_offset"))
                 last["direction"] = scroll_direction(last["direction"], getattr(event, "old_value", None), getattr(event, "new_value", None))
                 at_top, at_end = scroll_edges(offset, float(outer.get("layout_height")), float(content.get("layout_height")))
                 values = {"scroll_offset": offset, "at_top": at_top, "at_end": at_end, "scroll_direction": last["direction"]}
                 for prop, (name, scope) in outputs.items():
                     scope.assign(name, values[prop])
+                if inst.virtual is not None:  # build the rows that are in view
+                    window = inst.virtual.window_for(offset, float(outer.get("layout_height")))
+                    if self._syncing:
+                        self.timers.after(0, lambda: inst.virtual.set_window(*window), name=f"window:{inst.id}")
+                    else:
+                        inst.virtual.set_window(*window)
 
-            if outputs:
+            if outputs or inst.virtual is not None:
                 self._handler_undos.append(self._listen(outer, "scroll", report))
 
             def settle(inst: Instance = inst, outer: Any = outer, content: Any = content, report: Callable[..., None] = report) -> None:

@@ -199,6 +199,9 @@ class Instance:
         self.children: list["Instance"] = []
         self.disposed = False
         self._regions: list[_Region] = []
+        #: a VirtualList's window, and the position in its list of an item of one
+        self.virtual: Optional[Virtual] = None
+        self.virtual_index: Optional[Signal] = None
         self._observers: list[Callable[["Instance", list["Instance"], list["Instance"]], None]] = []
         self._release: list[Callable[[], None]] = []
 
@@ -387,13 +390,45 @@ class _Element:
         self.signals, self.region = signals, region
 
 
+class Virtual:
+    """The window of a `VirtualList`: how many items there are, how tall each is, and which of them have instances. The renderer, which knows
+    the scroll position and the height of the viewport, sets the window; the list's `for:` realizes only the items in it (#228)."""
+
+    #: items realized before the renderer has said what is in view
+    INITIAL = 24
+
+    def __init__(self, extent: Callable[[], float], overscan: Callable[[], int]) -> None:
+        self.extent, self.overscan = extent, overscan
+        self.count = 0
+        self.first, self.last = 0, self.INITIAL - 1
+        self._reconcile: Optional[Callable[[], None]] = None
+
+    def window_for(self, offset: float, viewport: float) -> tuple[int, int]:
+        """The first and last item to realize for a viewport `viewport` tall scrolled `offset`, with the overscan on each side."""
+        height, margin = float(self.extent()), int(self.overscan())
+        first = max(0, int(offset // height) - margin)
+        last = min(self.count - 1, int((offset + viewport) // height) + margin)
+        return first, last
+
+    def set_window(self, first: int, last: int) -> None:
+        """Realize items `first` to `last`; does nothing if that is the window already."""
+        if (first, last) == (self.first, self.last):
+            return
+        self.first, self.last = first, last
+        if self._reconcile is not None:
+            self._reconcile()
+
+
 class _For(_Region):
     """A `for:`: one element per item, reconciled by key when the iterable is reactive."""
 
     def __init__(self, node: Node, scope: Scope, notify: Callable[[], None],
-                 make_element: Callable[[Scope, str, Callable[[], None]], _Region], fail: Callable[[str, Optional[str]], LoadError]) -> None:
+                 make_element: Callable[[Scope, str, Callable[[], None]], _Region], fail: Callable[[str, Optional[str]], LoadError],
+                 virtual: Optional[Virtual] = None) -> None:
         super().__init__(notify)
         assert node.loop is not None
+        self.virtual = virtual
+        self._items_now: list[Any] = []
         self.node, self.loop, self.scope = node, node.loop, scope
         self._make, self._fail = make_element, fail
         self.elements: dict[Any, _Element] = {}
@@ -405,6 +440,8 @@ class _For(_Region):
             if name in RESERVED:
                 raise fail(f"'{name}' is a reserved name and cannot be a loop variable", None)
         self._effect: Optional[Effect] = None
+        if virtual is not None:
+            virtual._reconcile = lambda: untrack(lambda: self._reconcile(self._items_now))
         if self.reactive:
             self._effect = Effect(self._run)
         else:
@@ -440,7 +477,12 @@ class _For(_Region):
     def _reconcile(self, items: list[Any]) -> None:
         order: list[Any] = []
         fresh: dict[Any, _Element] = {}
-        for index, item in enumerate(items):
+        self._items_now = items
+        window = range(len(items)) if self.virtual is None else range(self.virtual.first, min(self.virtual.last, len(items) - 1) + 1)
+        if self.virtual is not None:
+            self.virtual.count = len(items)
+        for index in window:
+            item = items[index]
             values = self._values(item)
             key = self._key(index, values)
             if key in fresh:
@@ -454,6 +496,12 @@ class _For(_Region):
                 for name, value in values.items():
                     if name in element.signals:
                         element.signals[name].set(value)
+            if self.virtual is not None:  # where in the list it is, for the renderer to place it
+                for inst in element.region.instances:
+                    if inst.virtual_index is None:
+                        inst.virtual_index = Signal(index)
+                    elif inst.virtual_index.get() != index:
+                        inst.virtual_index.set(index)
             fresh[key] = element
             order.append(key)
         removed = [e for k, e in self.elements.items() if k not in fresh]
@@ -561,14 +609,14 @@ class Composer:
     # regions
 
     def _region(self, node: Node, seg: str, parent_id: str, scope: Scope, ctx: _Ctx, notify: Callable[[], None], *,
-                suffix: str = "", looped: bool = False) -> _Region:
+                suffix: str = "", looped: bool = False, virtual: Optional[Virtual] = None) -> _Region:
         if node.widget == "Slot":
             return self._slot(node, ctx, notify)
         if node.loop is not None and not looped:
             def element(el_scope: Scope, key_suffix: str, changed: Callable[[], None]) -> _Region:
                 return self._region(node, seg, parent_id, el_scope, ctx, changed, suffix=key_suffix, looped=True)
 
-            return _For(node, scope, notify, element, lambda message, hint: self._fail(ctx, node.at, message, hint))
+            return _For(node, scope, notify, element, lambda message, hint: self._fail(ctx, node.at, message, hint), virtual)
 
         def make() -> Instance:
             return self._instance(node, seg, scope, ctx, parent_id=parent_id, suffix=suffix)
@@ -688,8 +736,14 @@ class Composer:
                                 for i, sub in enumerate(nodes)]
             for sub in inst.parts[name]:
                 sub.parent = inst
+        virtual: Optional[Virtual] = None
+        if node.widget == "VirtualList":
+            if len(node.children) != 1 or node.children[0].loop is None:
+                raise self._fail(ctx, node.at, "a VirtualList has one child, and it has a 'for:'",
+                                 "write the row once: children: [{for: row in rows, key: row.id, widget: ...}]")
+            virtual = inst.virtual = Virtual(lambda: float(inst.value("item_height")), lambda: int(inst.value("overscan")))
         for index, child in enumerate(node.children):
-            inst._regions.append(self._region(child, f"children[{index}]", iid, inner, ctx, inst._refresh))
+            inst._regions.append(self._region(child, f"children[{index}]", iid, inner, ctx, inst._refresh, virtual=virtual))
         inst._refresh()
         self._install_rules(inst)
         return inst
