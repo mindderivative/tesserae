@@ -1,0 +1,4 @@
+# The look of Pagination: the ellipsis and the "3 of 12" in on_surface_variant and on_surface.
+styles:
+  - {widget: Pagination, part: gap, style: {foreground: on_surface_variant}}
+  - {widget: Pagination, part: summary, style: {foreground: on_surface}}

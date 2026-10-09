@@ -72,7 +72,7 @@ Material Design 3's components, as Tesserae builds them. Each page says what the
 | [SVG](svg.md) | `kind: Svg` |
 | [Video](video.md) | `Video` |
 | [Carousel](carousel.md) | Python only |
-| [Pagination](pagination.md) | Python only |
+| [Pagination](pagination.md) | `widget: Pagination` |
 
 ## Beyond MD3
 

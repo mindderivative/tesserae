@@ -1,0 +1,69 @@
+# Page navigation (not Material 3 itself, which has page indicators and a pager): previous and next, and between them the page numbers with an ellipsis for
+# the stretches left out, the current page filled. `page` (two-way, from 1) is the page showing and `pages` how many there are; the first, the last and the
+# pages beside the current one always show. `compact` is a "3 of 12" between the arrows, and `dots` is a row of dots, one to a page, for a carousel.
+# Previous is disabled on the first page and next on the last. Tab visits each control; Enter or Space chooses.
+params:
+  page: {type: int, default: 1, model: true, doc: "The page showing, from 1; choosing another writes it back."}
+  pages: {type: int, default: 1, doc: "How many pages there are."}
+  compact: {type: bool, default: false, doc: "Show '3 of 12' instead of the numbers."}
+  dots: {type: bool, default: false, doc: "Show a dot for each page instead of the numbers (best under ten pages)."}
+widget: Container
+a11y: {role: group, label: Pagination}
+style:
+  flex_direction: horizontal
+  align_content: center
+  gap: 4
+children:
+  - widget: IconButton
+    name: previous
+    icon: chevron_left
+    label: Previous page
+    disabled: "{{ page <= 1 }}"
+    handlers: {on_click: "page = max(1, page - 1)"}
+  - widget: Text
+    name: summary
+    if: compact
+    text: "{{ str(page) + ' of ' + str(pages) }}"
+    typography_role: label_large
+    a11y: {live: polite}
+    style: {padding: {left: 8, right: 8, top: 0, bottom: 0}}
+  - widget: Container
+    name: dot
+    if: dots
+    for: n in range(1, pages + 1)
+    key: n
+    interaction: true
+    handlers: {on_click: "page = n"}
+    a11y: {role: button, label: "{{ 'Page ' + str(n) }}", current: "{{ 'page' if n == page else False }}"}
+    style: {width: 24, height: 24, align_content: center, corner_radius: full}
+    children:
+      - {widget: Container, name: mark, style: {width: 8, height: 8, corner_radius: full, background: "{{ 'primary' if n == page else 'outline_variant' }}"}}
+  - widget: Container
+    name: slot
+    if: "not compact and not dots and (pages <= 7 or n == 1 or n == pages or abs(n - page) <= 1 or (n == 2 and page == 4) or (n == pages - 1 and page == pages - 3))"
+    for: n in range(1, pages + 1)
+    key: n
+    style: {flex_direction: horizontal, align_content: center, gap: 4}
+    children:
+      - widget: Text
+        name: gap
+        if: "n > 1 and not (pages <= 7 or (n - 1) == 1 or (n - 1) == pages or abs((n - 1) - page) <= 1 or ((n - 1) == 2 and page == 4) or ((n - 1) == pages - 1 and page == pages - 3))"
+        text: "…"
+        typography_role: label_large
+        a11y: {hidden: true}
+        text_align: center
+        style: {width: 40}
+      - widget: Button
+        name: number
+        label: "{{ str(n) }}"
+        variant: "{{ 'filled' if n == page else 'text' }}"
+        size: s
+        a11y: {label: "{{ 'Page ' + str(n) }}", current: "{{ 'page' if n == page else False }}"}
+        style: {min_width: 40}
+        handlers: {on_click: "page = n"}
+  - widget: IconButton
+    name: next
+    icon: chevron_right
+    label: Next page
+    disabled: "{{ page >= pages }}"
+    handlers: {on_click: "page = min(pages, page + 1)"}
