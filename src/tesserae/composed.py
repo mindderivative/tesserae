@@ -88,9 +88,9 @@ def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, b
     return offset <= SCROLL_EDGE, laid_out and offset >= length - viewport - SCROLL_EDGE
 
 
-def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Callable[..., Any]]]:
+def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable[..., Optional[Callable[..., Any]]]:
     """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)`, `surface.dismiss` and
-    `focus(name)`, `capture()`, `release()`, `cursor(name)`, `copy(text)`, `paste()`, `open_url(url)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
+    `focus(name)`, `capture()`, `release()`, `cursor(name)`, `copy(text)`, `paste()`, `open_url(url)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts); `window` is the one it will be on, which is how `app` is found then."""
 
     def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
         view = view_ref()
@@ -134,6 +134,7 @@ def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Calla
             return lambda: dismiss_surface(view.root)
         return None
 
+    resolve.app = lambda: app_of(window if window is not None else getattr(view_ref(), "window", None))  # type: ignore[attr-defined]  # `app` in an expression
     resolve.wants_scope = True  # type: ignore[attr-defined]  # `focus` needs the widget the handler was written in
     return resolve
 
@@ -609,7 +610,7 @@ def open_composed(doc: ViewDoc, bindings: Bindings, views: Any = None, *, base_d
                   rules: Any = (), **kwargs: Any) -> ComposedView:
     """Opens `doc` against the ViewModel that serves its name and builds it: `kwargs` are `View`'s (theme seed, dark, ...)."""
     holder: list[ComposedView] = []
-    handle = open_view(doc, bindings, views, actions=builtin_actions(lambda: holder[0] if holder else None), rules=rules)
+    handle = open_view(doc, bindings, views, actions=builtin_actions(lambda: holder[0] if holder else None, window), rules=rules)
     view = ComposedView(handle, base_dir=base_dir, window=window, **kwargs)
     holder.append(view)
     return view

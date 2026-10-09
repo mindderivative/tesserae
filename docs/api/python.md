@@ -414,6 +414,22 @@ elevation_shadows(level: float) -> list[Shadow]
 
 MD3 elevation `level` (0–5, fractional allowed) as a `shadows` list, `(color, offset_x, offset_y, blur, spread)`: `tre`'s key shadow (30% black) first, so it paints on top, then its ambient shadow (15%). Level 0 is no shadow.
 
+### `height_class`
+
+```python
+height_class(height: float) -> str
+```
+
+The MD3 window size class for a window `height` tall: `compact` (under 480), `medium` or `expanded` (900).
+
+### `width_class`
+
+```python
+width_class(width: float) -> str
+```
+
+The MD3 window size class for a window `width` wide: `compact` (under 600), `medium`, `expanded` (840), `large` (1200) or `extra_large` (1600).
+
 ### `parse_color`
 
 ```python
@@ -468,6 +484,8 @@ The font size, weight, line height and tracking of the MD3 type role `role`, or 
 - `SHAPES` = `dict of 6`
 - `TYPE_SCALE` = `dict of 15`
 - `FULL_RADIUS` = `9999.0`
+- `HEIGHT_CLASSES` = `(('compact', 0.0), ('medium', 480.0), ('expanded', 900.0))`
+- `WIDTH_CLASSES` = `tuple of 5`
 
 ## Widgets
 

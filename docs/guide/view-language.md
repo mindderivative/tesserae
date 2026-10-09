@@ -288,6 +288,26 @@ text: Read the docs
 handlers: {on_click: "open_url('https://example.com/docs')"}
 ```
 
+## The window and the app
+
+`app` is readable in any expression and follows the window, so a layout can change with its size:
+
+| Name | Meaning |
+| --- | --- |
+| `app.window_width`, `app.window_height` | the window's size in logical pixels |
+| `app.width_class` | Material 3's window width class: `compact` (under 600), `medium`, `expanded` (840), `large` (1200) or `extra_large` (1600) |
+| `app.height_class` | `compact` (under 480), `medium` or `expanded` (900) |
+| `app.maximized`, `app.active` | whether the window is maximized, and has the focus |
+
+```yaml
+widget: Container
+children:
+  - {widget: Container, name: rail, if: "app.width_class != 'compact'", style: {width: 80, height: 40}}
+  - {widget: Container, name: bar, if: "app.width_class == 'compact'", style: {width: 80, height: 40}}
+```
+
+A ViewModel that has an `app` of its own keeps it. `tesserae.tokens.width_class(width)` and `height_class(height)` give the classes for a size in Python.
+
 ## Long lists
 
 A `for:` builds every row it makes, which is fine for a screenful and not for ten thousand. `widget: VirtualList` is a scrolling list of equal-height

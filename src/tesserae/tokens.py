@@ -35,7 +35,7 @@ from tesserae import _wide_gamut
 
 __all__ = [
     "BASELINE", "ELEVATION_LEVELS", "baseline_scheme", "ROLES", "SHAPES", "TYPE_SCALE", "TypeStyle", "color_scheme",
-    "elevation", "elevation_shadows", "FULL_RADIUS", "parse_color", "resolve_color", "resolve_scheme", "shape", "type_style",
+    "elevation", "elevation_shadows", "FULL_RADIUS", "HEIGHT_CLASSES", "WIDTH_CLASSES", "height_class", "width_class", "parse_color", "resolve_color", "resolve_scheme", "shape", "type_style",
 ]
 
 RGBA = Tuple[int, int, int, int]
@@ -255,6 +255,21 @@ FULL_RADIUS = 9999.0
 def shape(name: str) -> Optional[float]:
     """The corner radius of the MD3 shape token `name` (`"small"`, `"medium"`, ... `"full"`), or `None` if it isn't one."""
     return FULL_RADIUS if name == "full" else SHAPES.get(name)
+
+
+#: MD3's window size classes: the smallest width (dp) of each, and the same for heights.
+WIDTH_CLASSES = (("compact", 0.0), ("medium", 600.0), ("expanded", 840.0), ("large", 1200.0), ("extra_large", 1600.0))
+HEIGHT_CLASSES = (("compact", 0.0), ("medium", 480.0), ("expanded", 900.0))
+
+
+def width_class(width: float) -> str:
+    """The MD3 window size class for a window `width` wide: `compact` (under 600), `medium`, `expanded` (840), `large` (1200) or `extra_large` (1600)."""
+    return [name for name, least in WIDTH_CLASSES if width >= least][-1]
+
+
+def height_class(height: float) -> str:
+    """The MD3 window size class for a window `height` tall: `compact` (under 480), `medium` or `expanded` (900)."""
+    return [name for name, least in HEIGHT_CLASSES if height >= least][-1]
 
 
 def elevation(name: str) -> Optional[float]:

@@ -31,7 +31,7 @@ from tre import App as _TreApp
 from tre import Window
 
 from tesserae.follow import alive, app_of, register_app, retheme
-from tesserae.listeners import Listeners
+from tesserae.listeners import Listeners, listen_window
 from tesserae.naming import check_naming_convention
 from tesserae.project import Project, is_name, resolve_embedded, resolve_view
 from tesserae.spec.window import window_of
@@ -327,6 +327,14 @@ class App:
         self.active = Computed(self._active.get)
         self._window.on("maximized", lambda event: self._maximized.set(bool(event.maximized)))
         self._window.on("active", lambda event: self._active.set(bool(event.active)))
+        #: The window's size in logical pixels and its MD3 size classes (#230), for a view to read as `app.window_width.get()` and so on, or
+        #: `app.width_class` (`compact`, `medium`, `expanded`, `large`, `extra_large`) and `app.height_class` (`compact`, `medium`, `expanded`).
+        self._size = Signal((float(self._window.get("width")), float(self._window.get("height"))))
+        self.window_width = Computed(lambda: self._size.get()[0])
+        self.window_height = Computed(lambda: self._size.get()[1])
+        self.width_class = Computed(lambda: tokens.width_class(self._size.get()[0]))
+        self.height_class = Computed(lambda: tokens.height_class(self._size.get()[1]))
+        listen_window(self._window, "resize", lambda event: self._size.set((float(self._window.get("width")), float(self._window.get("height")))))
         #: macOS keeps its title bar, transparent, with the traffic lights
         #: (0.3.0 M3): `titlebar_inset` is `(height, width)` of the space
         #: they take -- `(0, 0)` elsewhere, decorated, and in fullscreen --

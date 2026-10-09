@@ -88,12 +88,18 @@ class Scope:
         frame = self._frame(name)
         if frame is not None:
             return frame.values[name]
-        if name.startswith("_") or self.root is None:
+        if name.startswith("_"):
             raise KeyError(name)
-        try:
-            return getattr(self.root, name)
-        except AttributeError:
-            raise KeyError(name) from None
+        if self.root is not None:
+            try:
+                return getattr(self.root, name)
+            except AttributeError:
+                pass
+        source = getattr(self.actions, "app", None) if name == "app" else None  # a ViewModel of the new kind has no `.app`: the renderer's is the window's
+        app = source() if source is not None else None
+        if app is not None:
+            return app
+        raise KeyError(name)
 
     def names(self) -> list[str]:
         out: list[str] = []
@@ -110,7 +116,7 @@ class Scope:
         if frame is not None:
             return isinstance(frame.values[name], (Signal, Computed))
         # the ViewModel: a Signal, a Computed or a plain attribute that may be replaced; a built-in function is static
-        return self.root is not None and not name.startswith("_") and hasattr(self.root, name)
+        return name == "app" or (self.root is not None and not name.startswith("_") and hasattr(self.root, name))
 
     def assign(self, name: str, value: Any) -> None:
         frame = self._frame(name)

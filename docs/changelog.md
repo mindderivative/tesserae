@@ -121,6 +121,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   layer over the window: anchored with flipping, or a modal scrim; Escape or a press outside closes it and writes `open` back; focus returns.
 - **VirtualList** ([#228](https://github.com/mindderivative/tesserae/issues/228)). `widget: VirtualList` with `item_height` and `overscan` and a single `for:` child builds only the rows in view and
   builds more as it scrolls (a list of 10 000 opens with about a dozen rows). It has a ScrollView's `scroll_offset`, `at_top`, `at_end` and `scroll_direction`.
+- **Window size classes** ([#230](https://github.com/mindderivative/tesserae/issues/230)). `app.window_width`, `app.window_height`, `app.width_class` (`compact` to `extra_large`) and `app.height_class` follow the
+  window's size and can be read in any expression. `app` itself is now readable in views whose ViewModel is the new kind (it had only worked for a 0.4.x ViewModel).
 
 ### Removed
 
