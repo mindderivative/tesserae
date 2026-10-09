@@ -84,3 +84,36 @@ def test_vertical_is_still_the_default(tmp_path):
 def test_another_orientation_is_refused(tmp_path):
     with pytest.raises((SpecBuildError, ValueError, Exception), match="vertical or horizontal|orientation"):
         opened(tmp_path, props="orientation: diagonal")
+
+
+def test_a_scroll_view_with_a_max_size_and_none_of_its_own_is_as_long_as_its_content_up_to_that(tmp_path):
+    view, _ = opened(tmp_path, props="orientation: horizontal")
+    strip = view._built.outer["root.strip"]
+    assert strip.get("layout_width") == 100.0  # its own width
+    (tmp_path / "Views" / "Main_View.yaml").write_text("""name: main
+widget: Container
+style: {flex_direction: vertical, align_content: top_left, width: 300, height: 300}
+children:
+  - widget: ScrollView
+    name: short
+    style: {max_height: 100}
+    children: [{widget: Container, name: a, style: {width: 50, height: 40}}]
+  - widget: ScrollView
+    name: tall
+    style: {max_height: 100}
+    children: [{widget: Container, name: b, style: {width: 50, height: 400}}]
+  - widget: ScrollView
+    name: wide
+    orientation: horizontal
+    style: {max_width: 120, height: 30}
+    children: [{widget: Container, name: c, style: {width: 500, height: 20}}]
+""")
+    app = App(root=tmp_path)
+    app.bind(VM)
+    view = app.open_view("Main")
+    app.show("main")
+    for _ in range(4):
+        view.window.advance(16)
+    assert view._built.outer["root.short"].get("layout_height") == 40.0
+    assert view._built.outer["root.tall"].get("layout_height") == 100.0
+    assert view._built.outer["root.wide"].get("layout_width") == 120.0

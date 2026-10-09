@@ -1,0 +1,68 @@
+# The Material 3 basic dialog: a modal panel over a scrim, with an optional icon, a headline, supporting text or your own content, and up to a few text
+# button actions. `open` is two-way (Escape and a press on the scrim close it, unless `dismissible: false`); pressing an action closes it and writes the
+# action's value to `result`, so the caller can tell which was chosen. A screen reader hears a `dialog` named by the headline (tre has no `alertdialog` role, so an alert is a `dialog` with
+# `dismissible: false`). The content scrolls when it is taller than the dialog, and a line shows above the actions then. Children are the content:
+# they follow the supporting text. Actions stack when they do not fit the width on one row.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether it is showing."}
+  headline: {type: str, default: "", doc: "The title."}
+  text: {type: str, default: "", doc: "Supporting text."}
+  icon: {type: str, default: "", doc: "An icon above the headline."}
+  actions: {type: list, default: [], doc: "Text buttons, each {label, value} and optionally {variant}. Pressing one closes the dialog and sets `result` to its value."}
+  result: {type: any, default: "", model: true, doc: "The value of the action last pressed; empty when it was dismissed."}
+  dismissible: {type: bool, default: true, doc: "Escape and a press on the scrim close it. Off, it is an alert dialog: only an action closes it."}
+  width: {type: float, default: 312, doc: "From 280 to 560 pixels."}
+  max_height: {type: float, default: 480, doc: "The content scrolls beyond this."}
+widget: Overlay
+open: "{{ open }}"
+modal: true
+dismissible: "{{ dismissible }}"
+children:
+  - widget: Container
+    name: panel
+    state: {top: true}
+    a11y: {role: dialog, label: "{{ headline }}"}
+    style:
+      flex_direction: vertical
+      width: "{{ min(560, max(280, width)) }}"
+    children:
+      - widget: Icon
+        name: icon
+        if: "icon != ''"
+        icon: "{{ icon }}"
+      - widget: Text
+        name: headline
+        if: "headline != ''"
+        text: "{{ headline }}"
+        typography_role: headline_small
+        heading: 2
+      - widget: ScrollView
+        name: content
+        at_top: "{{ top }}"
+        style: {flex_direction: vertical, max_height: "{{ max_height }}"}
+        children:
+          - widget: Text
+            name: body
+            if: "text != ''"
+            text: "{{ text }}"
+            typography_role: body_medium
+          - widget: Slot
+      - widget: Divider
+        name: line
+        if: "not top"
+      - widget: Container
+        name: actions
+        if: "len(actions) > 0"
+        style:
+          flex_direction: "{{ 'vertical' if sum([len(a['label']) * 8 + 24 for a in actions]) + 8 * (len(actions) - 1) > width - 48 else 'horizontal' }}"
+          align_content: bottom_right
+          gap: 8
+        children:
+          - widget: Button
+            for: a in actions
+            key: a['value']
+            name: action
+            variant: "{{ a.get('variant', 'text') }}"
+            label: "{{ a['label'] }}"
+            handlers:
+              on_click: "result = a['value']; open = False"

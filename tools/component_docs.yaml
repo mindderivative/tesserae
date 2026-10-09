@@ -321,17 +321,41 @@ components:
   - slug: dialogs
     title: Dialogs
     group: Containment
+    shipped_view: Dialog
     fragments: [Dialog]
     md3: |
       A dialog interrupts to ask for a decision or give needed information. It has a headline, supporting text and
       up to two actions, on a raised surface over a scrim, and blocks what is behind it.
     built: |
-      The fragment draws the scrim and the panel; `tesserae.overlays.Dialog` shows it as a modal layer, with
-      Escape and a click on the scrim closing it.
-    usage: |
-      - id: confirm
-        component: Dialog
-        with: {headline: "Discard changes?", text: "Your edits will be lost.", width: 320, height: 200, scrim_width: 800, scrim_height: 600}
+      `widget: Dialog` is a view Tesserae ships (`Dialog_View.yaml`): a modal [`Overlay`](../guide/view-language.md#overlays) holding a raised panel (28 pixel
+      corners, 24 of padding) with an optional icon, a headline, supporting text, your own content and text-button actions.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `open` | true or false; two-way | whether it is showing; Escape and a press on the scrim write `false` back |
+      | `headline`, `text`, `icon` | text | the title, the supporting text, an icon above the headline |
+      | `actions` | a list | text buttons, each `{label, value}` and optionally `{variant}` |
+      | `result` | a value; two-way | the `value` of the action pressed; pressing one also closes the dialog |
+      | `dismissible` | true or false | off, only an action closes it |
+      | `width`, `max_height` | numbers | the panel's width, held between 280 and 560 (default 312); the content scrolls beyond `max_height` |
+
+      Children are the content, after the supporting text. When the content scrolls, a line shows above the actions. Actions stack when they do not fit
+      one row. A screen reader hears a `dialog` named by the headline (tre has no `alertdialog` role). Not built: the full-screen dialog for small
+      windows, focusing a form dialog's first field.
+    usage_view: |
+      name: files
+      widget: Container
+      style: {flex_direction: vertical, width: 480, height: 360}
+      children:
+        - widget: Dialog
+          open: "{{ confirming }}"
+          result: "{{ choice }}"
+          headline: Discard draft?
+          text: This cannot be undone.
+          icon: home
+          actions:
+            - {label: Cancel, value: cancel}
+            - {label: Discard, value: discard}
     python: |
       from tesserae.widgets import dialog
 

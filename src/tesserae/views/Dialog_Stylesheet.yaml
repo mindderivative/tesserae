@@ -1,0 +1,14 @@
+# The look of Dialog (Material 3): a raised panel with 28 pixel corners, 24 pixels of padding, an icon in `secondary`, the supporting text in
+# `on_surface_variant`. The scrim is the modal Overlay's.
+styles:
+  - widget: Dialog
+    part: panel
+    style:
+      background: surface_container_high
+      corner_radius: 28
+      padding: 24
+      gap: 16
+      elevation: 3
+  - {widget: Dialog, part: icon, style: {foreground: secondary, width: 24, height: 24}}
+  - {widget: Dialog, part: headline, style: {foreground: on_surface}}
+  - {widget: Dialog, part: body, style: {foreground: on_surface_variant}}

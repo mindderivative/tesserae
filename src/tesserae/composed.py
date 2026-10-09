@@ -322,12 +322,32 @@ class ComposedView(View):
                 else:
                     self._handler_undos.append(self._listen(node, tre_event, call))
 
+    def _fit_scroll(self, inst: Instance) -> None:
+        """A ScrollView with a `max_height` (a `max_width` when horizontal) and no size of its own is as long as its content, up to that limit: the
+        engine gives a scroll view no size from what is in it. Done once the content has been laid out."""
+        horizontal = inst.value("orientation") == "horizontal"
+        size, limit = ("width", "max_width") if horizontal else ("height", "max_height")
+        cap = inst.style.get(limit)
+        cap = cap.get() if hasattr(cap, "get") else cap
+        own = inst.style.get(size)
+        own = own.get() if hasattr(own, "get") else own
+        if isinstance(cap, bool) or not isinstance(cap, (int, float)) or own not in (None, "auto"):
+            return
+        outer, content = self._built.outer[inst.id], self._built.nodes[inst.id]
+
+        def fit(outer: Any = outer, content: Any = content, size: str = size, cap: float = float(cap)) -> None:
+            outer.set(**{size: min(float(content.get(f"layout_{size}")), cap)})
+
+        self.timers.after(0, fit, name=f"fit:{inst.id}")
+
     def _wire_scroll(self) -> None:
         """A ScrollView's outputs: `scroll_offset`, `at_top`, `at_end` and `scroll_direction`, each written to the Signal or state name it was
         given, on every scroll and once the layout has settled."""
         for inst in self.handle.composition.walk():
             scrolls = inst.widget in ("ScrollView", "VirtualList")
             outputs = {prop: ref for prop, ref in inst.models.items() if prop in _SCROLL_OUTPUTS} if scrolls else {}
+            if inst.widget == "ScrollView" and inst.id in self._built.outer:
+                self._fit_scroll(inst)
             if not scrolls or not (outputs or inst.virtual or "scroll_offset" in inst.props) or inst.id not in self._built.outer:
                 continue
             outer, content = self._built.outer[inst.id], self._built.nodes[inst.id]
