@@ -151,6 +151,7 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   component that is built from the language's own parts: per-corner pill, `focus_group`, icons, handlers that set a Signal). An `a11y: role` may be worked out from a param (never from a Signal), and a roving focus group starts on its checked item.
 - **Tabs** ([#166](https://github.com/mindderivative/tesserae/issues/166), [#167](https://github.com/mindderivative/tesserae/issues/167)). `widget: Tabs` with `tabs`, a two-way `selected`, `variant` (primary, secondary) and `tab_width`: a shipped view with icons, badges,
   an indicator that slides, and arrows/Home/End that move and choose. A bar that scrolls waits for the engine to scroll sideways.
+- **tre 0.5.6 compatibility.** A transition to `auto` or a percentage is made at once on an engine that animates layout (0.5.6 refuses a non-pixel target), as it was on 0.5.4; the suite passes on both engines. Tesserae still uses its own timers and stepped layout transitions on both.
 
 ### Removed
 

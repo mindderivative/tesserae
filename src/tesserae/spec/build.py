@@ -1126,9 +1126,10 @@ def patch(
             try:
                 target.animate(prop, value, ms, easing)
             except ValueError as exc:
-                if "isn't animatable" not in str(exc):
+                if "isn't animatable" not in str(exc) and "animates to a number of pixels" not in str(exc):
                     raise
-                layout_steps.steps_of(window).start(target, prop, value, ms, easing)  # a layout property: stepped by hand until the engine can
+                # a layout property tre 0.5.4 cannot ease, or a target (`auto`, a percentage) tre 0.5.6 cannot: stepped by hand, or set at once
+                layout_steps.steps_of(window).start(target, prop, value, ms, easing)
     except ValueError as exc:
         if isinstance(exc, SpecBuildError):
             raise
