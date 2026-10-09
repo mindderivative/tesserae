@@ -1,6 +1,6 @@
 # Request to tre: open a second window while the app runs
 
-*Drafted for Tesserae 0.5.0 (#229). Not sent: sending it to tre is the project owner's decision.*
+*Drafted for Tesserae 0.5.0 (#229). Sent 2026-10-08 as mindderivative/tre#159.*
 
 ## What Tesserae needs
 
