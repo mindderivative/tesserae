@@ -797,8 +797,9 @@ class Indicator:
     it gets a value). Colours are theme roles; `color` replaces `primary`."""
 
     def __init__(self, window: Any, *, value: Optional[float] = None, theme: Optional[Theme] = None,
-                 label: Optional[str] = None, color: Optional[RGBA] = None) -> None:
+                 label: Optional[str] = None, color: Optional[RGBA] = None, track: Optional[str] = None) -> None:
         self.window = window
+        self.track = track  # the colour role of the track behind the indicator; each kind has its own when this is None
         self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
         self.value = Signal(value)
         self._color = color
@@ -840,6 +841,8 @@ class Indicator:
         if value is not None:
             value = _clamp(float(value), 0.0, 1.0)
         self.node.set(value=value)
+        # a screen reader hears a wait with no end as busy, and a value as a percentage (states tre may not have yet are skipped)
+        a11y.apply_extras(self.node, {"busy": value is None, "value_text": None if value is None else f"{round(value * 100)}%"})
         self._paint(animate=self._painted)
         if value is None and not self._looping:
             self._looping = True
@@ -877,9 +880,12 @@ class LinearProgress(Indicator):
     HEIGHT = 4.0
     SWEEP_MS = 1500
     SWEEP = 0.4
+    STOP = 4.0
 
-    def __init__(self, window: Any, *, width: float = 240.0, **kwargs: Any) -> None:
+    def __init__(self, window: Any, *, width: float = 240.0, stop_indicator: bool = False, buffer: Optional[float] = None, **kwargs: Any) -> None:
         self.width = float(width)
+        self.stop_indicator = bool(stop_indicator)  # MD3's dot at the track's end
+        self.buffer = Signal(buffer)  # a second, lighter bar behind the first: how much has loaded, 0..1
         super().__init__(window, **kwargs)
 
     def _build(self) -> Any:
@@ -889,12 +895,23 @@ class LinearProgress(Indicator):
         self.bar = self.window.create("box", position="absolute", x=0.0, y=0.0, width=self.width,
                                       height=self.HEIGHT, corner_radius=self.HEIGHT / 2, translate_x=-self.width,
                                       hit_testable=False, a11y_hidden=True)
+        self.loaded = self.window.create("box", position="absolute", x=0.0, y=0.0, width=self.width, height=self.HEIGHT,
+                                         corner_radius=self.HEIGHT / 2, translate_x=-self.width, hit_testable=False, a11y_hidden=True)
+        node.add_child(self.loaded)  # behind the bar
         node.add_child(self.bar)
+        self.stop = self.window.create("box", position="absolute", x=self.width - self.STOP - 0.0, y=(self.HEIGHT - self.STOP) / 2,
+                                       width=self.STOP, height=self.STOP, corner_radius=self.STOP / 2, hit_testable=False,
+                                       a11y_hidden=True, visible=self.stop_indicator)
+        node.add_child(self.stop)
         return node
 
     def _paint(self, animate: bool) -> None:
-        self.node.set(fill=self.color("surface_container_highest"))
+        self.node.set(fill=self.color(self.track or "surface_container_highest"))
         self.bar.set(fill=self._on_colour())
+        self.stop.set(fill=self._on_colour())
+        self.loaded.set(fill=self._on_colour() if self.buffer.get() is None else self._on_colour()[:3] + (96,), visible=self.buffer.get() is not None)
+        if self.buffer.get() is not None:
+            self.loaded.set(translate_x=(_clamp(float(self.buffer.get()), 0.0, 1.0) - 1.0) * self.width)
         value = self.value.get()
         if value is not None:
             Control._to(self.bar, "translate_x", (_clamp(float(value), 0.0, 1.0) - 1.0) * self.width,
@@ -935,6 +952,10 @@ class CircularProgress(Indicator):
 
     def _build(self) -> Any:
         node = self.window.create("box", width=self.size, height=self.size)
+        self.ring = self.window.create("path", data=self.CIRCLE, view_box=(0, 0, self.SIZE, self.SIZE), width=self.size, height=self.size,
+                                       stroke_width=self.STROKE, fill=_CLEAR, trim_start=0.0, trim_end=1.0, hit_testable=False, a11y_hidden=True,
+                                       visible=self.track is not None)  # the track, when there is one: the whole circle behind the arc
+        node.add_child(self.ring)
         self.arc = self.window.create("path", data=self.CIRCLE, view_box=(0, 0, self.SIZE, self.SIZE),
                                       width=self.size, height=self.size, stroke_width=self.STROKE, fill=_CLEAR,
                                       trim_start=0.0, trim_end=0.0, hit_testable=False, a11y_hidden=True)
@@ -943,6 +964,8 @@ class CircularProgress(Indicator):
 
     def _paint(self, animate: bool) -> None:
         self.arc.set(stroke_color=self._on_colour())
+        if self.track is not None:
+            self.ring.set(stroke_color=self.color(self.track))
         value = self.value.get()
         if value is not None:
             Control._to(self.arc, "trim_end", _clamp(float(value), 0.0, 1.0),

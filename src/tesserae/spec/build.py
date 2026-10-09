@@ -57,7 +57,7 @@ _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", 
                                            "ScrollView", "Canvas", "Overlay"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -1188,6 +1188,17 @@ def _control_colour(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) 
 _INDICATOR_KINDS = frozenset({"CircularProgress", "LinearProgress", "LoadingIndicator"})
 
 
+def _progress_value(node: dict[str, Any]) -> Optional[float]:
+    """A progress indicator's value: a number from 0 to 1, or `None` (indeterminate) when the node says `value` and it is empty. A node that does not
+    mention `value` (the 0.4.x syntax) is a bar at 0."""
+    if "value" in node and node["value"] is None:
+        return None
+    value = node.get("value")
+    if isinstance(value, bool) or (value is not None and not isinstance(value, (int, float))):
+        raise SpecBuildError(f'widget {_q(node["id"])}: value is a number from 0 to 1, or empty for a wait with no end, got {value!r}')
+    return float(value or 0.0)
+
+
 def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: Built) -> Any:
     """The MD3 control for one of the eight control kinds."""
     from tesserae import controls
@@ -1204,16 +1215,16 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
     common = dict(theme=_theme(ctx), color=_control_colour(ctx, node, style))
     size = {k: float(v) for k, v in (("width", width), ("height", height)) if v is not None}
     if kind in _INDICATOR_KINDS:
-        value = node.get("value")
+        value = _progress_value(node)
+        common["track"] = node.get("track")
         if kind == "LinearProgress":
-            control = controls.LinearProgress(ctx.window, value=float(value or 0.0), width=size.get("width", 240.0),
-                                              **common)
+            control = controls.LinearProgress(ctx.window, value=value, width=size.get("width", 240.0),
+                                              stop_indicator=bool(node.get("stop_indicator")), buffer=node.get("buffer"), **common)
             if "height" in size:
                 control.node.set(height=size["height"])
                 control.bar.set(height=size["height"])
         elif kind == "CircularProgress":
-            control = controls.CircularProgress(ctx.window, value=float(value or 0.0), size=size.get("width", 48.0),
-                                                **common)
+            control = controls.CircularProgress(ctx.window, value=value, size=size.get("width", 48.0), **common)
         else:
             control = controls.LoadingIndicator(ctx.window, size=size.get("width", 48.0), **common)
     else:
@@ -1322,12 +1333,17 @@ def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], c
     if not state:
         return
     kind = node["kind"]
-    control.disabled.set(bool(node.get("disabled") or False))  # M70
+    if hasattr(control, "disabled"):  # a progress indicator is never disabled
+        control.disabled.set(bool(node.get("disabled") or False))  # M70
     if kind == "Checkbox":
         control.checked.set(bool(node.get("checked") or False))
     elif kind in ("Switch", "RadioButton"):
         control.selected.set(bool(node.get("selected") or False))
-    elif kind in ("Slider", "CircularProgress", "LinearProgress"):
+    elif kind in ("CircularProgress", "LinearProgress"):
+        control.value.set(_progress_value(node))
+        if kind == "LinearProgress":
+            control.buffer.set(node.get("buffer"))
+    elif kind == "Slider":
         control.value.set(float(node.get("value") or 0.0))
     elif kind == "SpinBox":
         control.value.set(control._fit(_spin_number(node.get("value") or 0, control.step)))
@@ -1341,4 +1357,4 @@ def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> 
     the reconciler rebuilds the control rather than patching it."""
     style = resolve_style(node, layers)
     return (node.get("kind"), style.get("width"), style.get("height"), node.get("group"),
-            node.get("min"), node.get("max"), node.get("step"))  # a SpinBox's bounds are built in (M58)
+            node.get("min"), node.get("max"), node.get("step"), node.get("track"), node.get("stop_indicator"))  # a SpinBox's bounds are built in (M58)

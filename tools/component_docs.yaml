@@ -188,14 +188,36 @@ components:
   - slug: progress-indicators
     title: Progress indicators
     group: Communication
+    widget: LinearProgress
     fragments: [LinearProgress, CircularProgress, LoadingIndicator]
     md3: |
       Progress indicators show that something is happening. **Determinate** ones fill as a value from 0 to 1
       grows; **indeterminate** ones keep moving when there's no value to show. The loading indicator is MD3's
       shape-morphing one, for short waits.
     built: |
-      Each is a Tesserae control (`tesserae.controls`), not a drawing of `tre`'s: the node kinds `LinearProgress`,
-      `CircularProgress` and `LoadingIndicator`. Leave `value` out for the indeterminate form.
+      Each is a Tesserae control (`tesserae.controls`), not a drawing of `tre`'s: `widget: LinearProgress`, `widget: CircularProgress` and
+      `widget: LoadingIndicator`. Leave `value` out, or let an expression give nothing, for a wait with no end; a number from 0 to 1 is determinate and
+      eases to each new value.
+
+      | Property | Widget | Meaning |
+      | --- | --- | --- |
+      | `value` | linear, circular | 0 to 1, or nothing for a wait with no end; an expression follows its Signals |
+      | `track` | linear, circular | the colour role of the track behind the indicator (a bar has `surface_container_highest`, a ring none) |
+      | `buffer` | linear | 0 to 1: how much has loaded, a lighter bar behind the value |
+      | `stop_indicator` | linear | a dot at the end of the track |
+      | `label` | all | what a screen reader calls it |
+
+      The colour is `style.foreground`; the bar's length is `style.width` and a ring's size is `style.width` too. A screen reader hears a progress bar
+      with its value as a percentage, or as busy when there is none. An app that reduces motion gets a still bar and arc instead of the endless motion.
+      Material 3's wavy shapes, the two-bar sweep and the contained loading indicator are not built.
+    usage_view: |
+      name: upload
+      widget: Container
+      style: {flex_direction: vertical, gap: 16, width: 280, height: 140, padding: 16}
+      children:
+        - {widget: LinearProgress, value: "{{ sent }}", buffer: "{{ queued }}", label: Uploading, style: {width: 240}}
+        - {widget: LinearProgress, style: {width: 240}}                  # no value: a wait with no end
+        - {widget: CircularProgress, value: "{{ sent }}", track: secondary_container}
     usage: |
       - id: upload
         component: LinearProgress

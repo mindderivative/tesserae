@@ -103,9 +103,14 @@ declare("SpinBox", {
     "value": P("float", default=0.0, model=True), "min": P("float"), "max": P("float"), "step": P("float", default=1.0),
     "disabled": P("bool"),
 }, doc="A number with step buttons.")
-declare("CircularProgress", {"value": P("float", default=0.0, doc="0 to 1; leave out for indeterminate.")}, doc="A progress ring.")
-declare("LinearProgress", {"value": P("float", default=0.0, doc="0 to 1; leave out for indeterminate.")}, doc="A progress bar.")
-declare("LoadingIndicator", extras=("foreground",), doc="An indeterminate wait indicator.")
+_TRACK = P("str", doc="The colour role of the track behind the indicator.")
+declare("CircularProgress", {"value": P("float", doc="0 to 1; leave out, or give nothing, for a wait with no end."), "track": _TRACK,
+                             "label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="A progress ring.")
+declare("LinearProgress", {"value": P("float", doc="0 to 1; leave out, or give nothing, for a wait with no end."), "track": _TRACK,
+                           "buffer": P("float", doc="0 to 1: how much has loaded, drawn as a lighter bar behind the value."),
+                           "stop_indicator": P("bool", doc="A dot at the end of the track (Material 3)."),
+                           "label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="A progress bar.")
+declare("LoadingIndicator", {"label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="An indeterminate wait indicator.")
 declare("TimePickerDial", {"hour": P("float", default=0.0, model=True), "minute": P("float", default=0.0, model=True)},
         doc="The clock face of a time picker.")
 

@@ -1576,7 +1576,14 @@ Also has everything `Indicator` has.
 ### `LinearProgress`
 
 ```python
-class LinearProgress(window: Any, *, width: float = 240.0, **kwargs: Any) -> None  # extends Indicator
+class LinearProgress(
+    window: Any,
+    *,
+    width: float = 240.0,
+    stop_indicator: bool = False,
+    buffer: Optional[float] = None,
+    **kwargs: Any
+) -> None  # extends Indicator
 ```
 
 MD3's linear progress indicator: a 4 px `surface_container_highest` track and a `primary` bar. Determinate, the bar fills to the value (sliding in over `medium1`); indeterminate, a bar 40% of the width sweeps across again and again (MD3's two-bar sweep, simplified to one).

@@ -140,6 +140,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   sit over the top right corner of its host (the children). One view replaces `BadgeDot` and `BadgeLabeled`, which still work.
 - **Link** ([#174](https://github.com/mindderivative/tesserae/issues/174)). `widget: Link` is primary text in `body_medium` by default with `href` (opened by `open_url`, so only web and mail links), a two-way
   `visited` (and `state: visited` in rules), `disabled`, and `underline` (`hover` by default: under the pointer or the keyboard focus, `always`, `never`).
+- **Progress indicators** ([#143](https://github.com/mindderivative/tesserae/issues/143), [#144](https://github.com/mindderivative/tesserae/issues/144), [#145](https://github.com/mindderivative/tesserae/issues/145)). `LinearProgress` and `CircularProgress` with no `value` (or an expression
+  that gives nothing) are a wait with no end (the builder had always made them a bar at 0); new `track`, linear `buffer` and `stop_indicator`, and `label`; a screen reader hears busy, or the value as a percentage.
 
 ### Removed
 

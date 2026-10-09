@@ -61,6 +61,10 @@ def lower(inst: Instance) -> dict[str, Any]:
             node["virtual"] = {"count": inst.virtual.count, "extent": float(inst.virtual.extent())}
         if "scroll_offset" in values:
             node["scroll"] = {"offset": values["scroll_offset"]}
+    elif widget in ("LinearProgress", "CircularProgress", "LoadingIndicator"):
+        if widget != "LoadingIndicator" and "value" not in values:
+            node["value"] = None  # no value is a wait with no end
+        folded = {"label"}
     elif widget == "Splitter":
         folded = {"orientation", "position", "min_first", "min_second", "collapsible", "label"}
         node["kind"] = "Container"
@@ -80,6 +84,8 @@ def lower(inst: Instance) -> dict[str, Any]:
     if inst.classes:
         node["classes"] = list(inst.classes)
     a11y: dict[str, Any] = {}
+    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator") and values.get("label"):
+        a11y = {"label": values["label"]}
     if widget == "Text" and values.get("heading"):
         a11y = {"role": "heading", "level": values["heading"]}
     if widget in ("Image", "Svg"):  # described by `alt`, else decorative -- unless it is pressed, when hiding it would hide a control
