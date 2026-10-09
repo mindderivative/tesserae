@@ -685,15 +685,24 @@ class SpinBox:
     arrows in the field, and assistive technology's increment/decrement;
     typing a number sets it once it parses and fits `min`..`max`, and
     leaving the field puts back the value's text if what was typed didn't.
-    A button whose step would pass a bound is disabled. `on_change` hears
-    the user's changes. Not a `Control`: it's three targets, not one."""
+    A button whose step would pass a bound is disabled, unless `wrap` is
+    on (a step past one bound lands on the other). Holding a button
+    repeats the step after `HOLD` milliseconds, every `REPEAT`; Page Up and
+    Page Down step by ten. `decimals` fixes
+    how many places show, and `prefix` and `suffix` (a unit, a currency
+    sign) are shown with the number and accepted, or not, when it is typed.
+    `on_change` hears the user's changes. Not a `Control`: it's three
+    targets, not one."""
 
     BUTTON = 40.0
     FIELD = (64.0, 40.0)
+    #: how long a held button waits before it repeats, and how often it then steps (milliseconds)
+    HOLD, REPEAT = 400.0, 80.0
 
     def __init__(self, window: Any, *, value: float = 0, min: Optional[float] = None, max: Optional[float] = None,
                  step: float = 1, theme: Optional[Theme] = None, label: Optional[str] = None,
-                 disabled: bool = False, listen: Optional[Listen] = None) -> None:
+                 disabled: bool = False, listen: Optional[Listen] = None, decimals: Optional[int] = None,
+                 prefix: str = "", suffix: str = "", wrap: bool = False) -> None:
         if step <= 0:
             raise ValueError(f"a spin box's step must be positive, got {step!r}")
         if min is not None and max is not None and max < min:
@@ -701,6 +710,9 @@ class SpinBox:
         self.window = window
         self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
         self.min, self.max, self.step = min, max, step
+        self.decimals, self.prefix, self.suffix, self.wrap = decimals, prefix, suffix, bool(wrap)
+        self._holds: dict[int, Any] = {}  # direction -> the running timer of a held button
+        self._repeated = False  # a hold stepped: the click that ends it must not step again
         self.value = Signal(self._fit(value))
         self.disabled = Signal(bool(disabled))
         self._listen: Listen = listen if listen is not None else Listeners().listen
@@ -770,8 +782,40 @@ class SpinBox:
                                    hit_testable=False, a11y_hidden=True)
         button.add_child(glyph)
         it = Interaction(self.window, button, self.color("on_surface_variant"), self._listen, self.color("secondary"))
-        self._undo.append(self._listen(button, "click", handled(lambda e: self._bump(direction))))
+        self._undo.append(self._listen(button, "click", handled(lambda e: self._clicked(direction))))
+        self._undo.append(self._listen(button, "pointer_down", lambda e: self._hold(direction)))
+        for event in ("pointer_up", "pointer_cancel", "pointer_leave", "touch_end", "touch_cancel"):
+            self._undo.append(self._listen(button, event, lambda e: self._release()))
         return button, glyph, it
+
+    def _clicked(self, direction: int) -> None:
+        if self._repeated:  # the press was a hold that has already stepped: the release is not another step
+            self._repeated = False
+            return
+        self._bump(direction)
+
+    def _hold(self, direction: int) -> None:
+        """A button held down steps again, after `HOLD` ms and then every `REPEAT` ms, until it is let go or cannot step."""
+        self._release()
+        self._repeated = False
+
+        def start() -> None:
+            def step() -> None:
+                if not self._can(direction):
+                    self._release()
+                    return
+                self._repeated = True
+                self._bump(direction)
+
+            self._holds[direction] = self.window.every(self.REPEAT, step)
+            step()
+
+        self._holds[direction] = self.window.after(self.HOLD, start)
+
+    def _release(self) -> None:
+        for timer in self._holds.values():
+            timer.cancel()
+        self._holds.clear()
 
     def _fit(self, value: float) -> float:
         """`value` held within `min`..`max`."""
@@ -782,18 +826,31 @@ class SpinBox:
         return value
 
     def _format(self, value: float) -> str:
-        whole = all(isinstance(n, int) or float(n).is_integer() for n in (value, self.step))
-        return str(int(value)) if whole else f"{value:g}"
+        if self.decimals is not None:
+            body = f"{value:.{self.decimals}f}"
+        else:
+            whole = all(isinstance(n, int) or float(n).is_integer() for n in (value, self.step))
+            body = str(int(value)) if whole else f"{value:g}"
+        return f"{self.prefix}{body}{self.suffix}"
 
     def _can(self, direction: int) -> bool:
         if self.disabled.get():
             return False
+        if self.wrap and self.min is not None and self.max is not None:
+            return True
         bound = self.max if direction > 0 else self.min
         return bound is None or (self.value.get() + direction * self.step) * direction <= bound * direction
 
-    def _bump(self, direction: int) -> None:
-        if self._can(direction):
-            self._user_set(self.value.get() + direction * self.step)
+    def _bump(self, direction: int, times: int = 1) -> None:
+        if not self._can(direction):
+            return
+        target = self.value.get() + direction * self.step * times
+        if self.wrap and self.min is not None and self.max is not None:
+            if target > self.max:
+                target = self.min
+            elif target < self.min:
+                target = self.max
+        self._user_set(target)
 
     def _user_set(self, value: float) -> None:
         before = self.value.get()
@@ -807,8 +864,13 @@ class SpinBox:
                 fn(self.value.get())
 
     def _parse(self, text: str) -> Optional[float]:
+        text = text.strip()
+        if self.prefix and text.startswith(self.prefix.strip()):
+            text = text[len(self.prefix.strip()):]
+        if self.suffix and text.endswith(self.suffix.strip()):
+            text = text[:-len(self.suffix.strip())]
         try:
-            number = float(text)
+            number = float(text.strip())
         except ValueError:
             return None
         if (self.min is not None and number < self.min) or (self.max is not None and number > self.max):
@@ -827,10 +889,16 @@ class SpinBox:
             self.input.set(text=self._format(self.value.get()))
 
     def _on_key(self, event: Any) -> None:
-        if event.key == "arrow_up":
+        key = str(event.key).lower()
+        if key == "arrow_up":
             self._bump(1)
-        elif event.key == "arrow_down":
+        elif key == "arrow_down":
             self._bump(-1)
+        elif key == "page_up":
+            self._bump(1, 10)
+        elif key == "page_down":
+            self._bump(-1, 10)
+
 
     def _render(self) -> None:
         self.value.get()

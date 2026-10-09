@@ -77,6 +77,9 @@ def lower(inst: Instance) -> dict[str, Any]:
     elif widget == "Overlay":
         folded = {"open", "anchor", "placement", "modal", "dismissible", "timeout"}  # the renderer shows the layer; the builder needs only to know it is modal
         node["overlay"] = {"modal": bool(values.get("modal"))}
+    elif widget == "SpinBox":
+        folded = {"decimals", "prefix", "suffix", "wrap", "label"}
+        node["spin"] = {k: values[k] for k in ("decimals", "prefix", "suffix", "wrap") if values.get(k) not in (None, "")}
     elif widget == "Canvas":
         folded = {"draw"}
         node["canvas"] = {"draw": values.get("draw")}
@@ -90,7 +93,7 @@ def lower(inst: Instance) -> dict[str, Any]:
     if inst.classes:
         node["classes"] = list(inst.classes)
     a11y: dict[str, Any] = {}
-    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator", "Checkbox", "RadioButton", "Switch", "Slider") and values.get("label"):
+    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator", "Checkbox", "RadioButton", "Switch", "Slider", "SpinBox") and values.get("label"):
         a11y = {"label": values["label"]}
     if widget == "Text" and values.get("heading"):
         a11y = {"role": "heading", "level": values["heading"]}

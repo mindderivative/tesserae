@@ -115,8 +115,12 @@ declare("Slider", {"value": P("float", default=0.0, model=True, doc="From `min` 
         extras=("foreground",), doc="Picks a value between `min` and `max` by dragging.")
 declare("SpinBox", {
     "value": P("float", default=0.0, model=True), "min": P("float"), "max": P("float"), "step": P("float", default=1.0),
-    "disabled": P("bool"),
-}, doc="A number with step buttons.")
+    "disabled": P("bool"), "label": P("str", doc="What a screen reader calls it."),
+    "decimals": P("int", doc="How many decimal places show (empty: only as many as the number needs)."),
+    "prefix": P("str", default="", doc="Shown before the number, such as a currency sign."),
+    "suffix": P("str", default="", doc="Shown after the number, such as a unit."),
+    "wrap": P("bool", doc="A step past one bound lands on the other (needs min and max)."),
+}, doc="A number with step buttons. Holding a button repeats the step; Page Up and Page Down step by ten.")
 _TRACK = P("str", doc="The colour role of the track behind the indicator.")
 declare("CircularProgress", {"value": P("float", doc="0 to 1; leave out, or give nothing, for a wait with no end."), "track": _TRACK,
                              "label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="A progress ring.")

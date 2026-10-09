@@ -380,7 +380,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     if fragment:
         for key in ("style", "text", "bindings", "handlers", "a11y", "interaction"):
             node_props[key] = {"anyOf": [node_props[key], {"$ref": "#/definitions/conditional"}]}
-    uncovered = build._NODE_KEYS - set(node_props) - {"children", "embed", "window", "dock", "dock_panel", "split_handle", "tooltip"}  # what `view:`, `Window`, `Dock` and `DockPanel` become, not keys a file has; a title bar button's `tooltip` is a generated node's
+    uncovered = build._NODE_KEYS - set(node_props) - {"children", "embed", "window", "dock", "dock_panel", "split_handle", "tooltip", "spin"}  # what `view:`, `Window`, `Dock` and `DockPanel` become, not keys a file has; a title bar button's `tooltip` is a generated node's
     if uncovered:
         raise SystemExit(f"the node keys changed: add {sorted(uncovered)} in {__file__}")
     node_props["children"] = {"type": "array", "items": {"$ref": "#/definitions/node"},

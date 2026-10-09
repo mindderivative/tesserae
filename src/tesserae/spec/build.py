@@ -63,6 +63,7 @@ _NODE_KEYS = frozenset({
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
     "dock", "dock_panel", "split_handle",  # a Dock, a DockPanel and the handle between split panels, made containers (0.4.4)
     "min", "max", "step",  # a SpinBox's (M58)
+    "spin",  # a SpinBox's decimals, prefix, suffix and wrap
     "disabled",  # any node's (M70): the View applies it, or a control's own
     "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not
     "tooltip",  # any node's text on a rest of the pointer (a title bar's buttons): the view that has it shows it
@@ -1261,7 +1262,7 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
             common.pop("color")
             control = controls.SpinBox(ctx.window, value=_spin_number(node.get("value") or 0, node.get("step") or 1),
                                        min=node.get("min"), max=node.get("max"), step=node.get("step") or 1,
-                                       **common)
+                                       **(node.get("spin") or {}), **common)
         else:  # TimePickerDial
             common.pop("color")
             control = controls.TimePickerDial(ctx.window, hour=int(node.get("hour") or 0),
@@ -1376,4 +1377,4 @@ def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> 
     the reconciler rebuilds the control rather than patching it."""
     style = resolve_style(node, layers)
     return (node.get("kind"), style.get("width"), style.get("height"), node.get("group"),
-            node.get("min"), node.get("max"), node.get("step"), node.get("track"), node.get("stop_indicator"), node.get("icons"), node.get("ticks"), node.get("value_indicator"))  # a SpinBox's bounds are built in (M58)
+            node.get("min"), node.get("max"), node.get("step"), repr(node.get("spin")), node.get("track"), node.get("stop_indicator"), node.get("icons"), node.get("ticks"), node.get("value_indicator"))  # a SpinBox's bounds are built in (M58)

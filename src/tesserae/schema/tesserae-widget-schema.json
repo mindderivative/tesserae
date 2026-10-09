@@ -3408,6 +3408,66 @@
                 "pattern": "\\{\\{"
               }
             ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "What a screen reader calls it."
+          },
+          "decimals": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "How many decimal places show (empty: only as many as the number needs)."
+          },
+          "prefix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Shown before the number, such as a currency sign."
+          },
+          "suffix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Shown after the number, such as a unit."
+          },
+          "wrap": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A step past one bound lands on the other (needs min and max)."
           }
         },
         "required": [
@@ -3437,7 +3497,12 @@
             "min",
             "max",
             "step",
-            "disabled"
+            "disabled",
+            "label",
+            "decimals",
+            "prefix",
+            "suffix",
+            "wrap"
           ]
         }
       }

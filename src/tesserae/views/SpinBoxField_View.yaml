@@ -1,0 +1,32 @@
+# A spin box with a visible label above it and a line of supporting or error text under it, as a text field has them. `value` is two-way. The label also names the
+# spin box for a screen reader; when `error` is not empty it replaces the supporting text, in the error colour.
+params:
+  label: {type: str, default: "", doc: "The name above the spin box."}
+  supporting: {type: str, default: "", doc: "Help under it."}
+  error: {type: str, default: "", doc: "An error message; it replaces the supporting text."}
+  value: {type: float, default: 0, model: true, doc: "The number; stepping and typing write it back."}
+  least: {type: float, default: null, doc: "The least it takes (`min` is a reserved name)."}
+  most: {type: float, default: null, doc: "The most it takes."}
+  step: {type: float, default: 1, doc: "How far a button moves it."}
+  decimals: {type: int, default: null, doc: "How many decimal places show."}
+  prefix: {type: str, default: "", doc: "Shown before the number."}
+  suffix: {type: str, default: "", doc: "Shown after the number (a unit)."}
+  wrap: {type: bool, default: false, doc: "A step past one bound lands on the other."}
+  disabled: {type: bool, default: false, doc: "Dimmed and not steppable."}
+widget: Container
+style: {flex_direction: vertical, gap: 4}
+children:
+  - {widget: Text, name: label, if: "label != ''", text: "{{ label }}", typography_role: label_medium}
+  - widget: SpinBox
+    name: box
+    value: "{{ value }}"
+    min: "{{ least }}"
+    max: "{{ most }}"
+    step: "{{ step }}"
+    decimals: "{{ decimals }}"
+    prefix: "{{ prefix }}"
+    suffix: "{{ suffix }}"
+    wrap: "{{ wrap }}"
+    disabled: "{{ disabled }}"
+    label: "{{ label }}"
+  - {widget: Text, name: help, if: "error != '' or supporting != ''", text: "{{ error if error != '' else supporting }}", typography_role: body_small, a11y: {live: polite}}

@@ -1640,7 +1640,11 @@ class SpinBox(
     theme: Optional[Theme] = None,
     label: Optional[str] = None,
     disabled: bool = False,
-    listen: Optional[Listen] = None
+    listen: Optional[Listen] = None,
+    decimals: Optional[int] = None,
+    prefix: str = '',
+    suffix: str = '',
+    wrap: bool = False
 ) -> None
 ```
 

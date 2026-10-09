@@ -1,0 +1,5 @@
+# The look of SpinBoxField: the label in on_surface_variant, the supporting text in on_surface_variant and an error in error; 16 pixels in from the edge, as a
+# text field's are.
+styles:
+  - {widget: SpinBoxField, part: label, style: {foreground: "{{ 'error' if error != '' else 'on_surface_variant' }}", margin: {left: 4}}}
+  - {widget: SpinBoxField, part: help, style: {foreground: "{{ 'error' if error != '' else 'on_surface_variant' }}", margin: {left: 4}}}
