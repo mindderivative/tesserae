@@ -21,7 +21,7 @@ slides to the next one.
 
 The bar is 48 pixels tall, or 64 when a primary bar has an icon. The chosen tab's label and icon are `primary`, the others `on_surface_variant`. The bar
 is a `tablist` with one Tab stop; the arrow keys, Home and End move the focus and choose the tab. The panel each tab shows is yours: put an
-`if: "selected == 'trips'"` on it. Not built: a bar that scrolls when the tabs do not fit (the engine's scroll view scrolls only vertically).
+`if: "selected == 'trips'"` on it. Not built yet: a bar that scrolls when the tabs do not fit.
 
 `widget: Tabs` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 

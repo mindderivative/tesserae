@@ -1,6 +1,6 @@
 # Request to tre: horizontal scrolling and scroll snap points
 
-*Sent as mindderivative/tre#166. From Tesserae 0.5.0 (#240). Re-checked on tre 0.5.6 (86f847b): nothing below exists yet.*
+*Sent as mindderivative/tre#166. CORRECTION: the first part is wrong -- a `scroll_view` with `orientation="horizontal"` scrolls sideways already (the draft tested a vertical one); only snap points and `virtual_list` offsets are missing. From Tesserae 0.5.0 (#240). Re-checked on tre 0.5.6 (86f847b): nothing below exists yet.*
 
 ## What Tesserae needs
 

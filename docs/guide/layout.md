@@ -307,7 +307,7 @@ children:
   save and restore a position. An offset past the end is held at the end
   at once, and that is what's written back.
 - Its scrollbar is the theme's `outline`.
-- It scrolls vertically only.
+- It scrolls vertically. (tre 0.5.6 can scroll sideways with `orientation="horizontal"`; Tesserae does not expose that on `ScrollView` yet.)
 
 For a long list built from data, put a `Repeater`'s container
 (`tesserae.Repeater`) inside a `ScrollView`.
