@@ -10,6 +10,7 @@
 | `blur_behind` | `False` | The OS blurs the desktop behind a transparent window. |
 | `click_through` | `False` | Presses fall through the window to what is under it. |
 | `ripple` | `"nodes"` | How a press ripple is drawn: `nodes` grows a circle per press and lets the engine animate it; `shader` draws up to three at once with one fill shader (soft edges, one node per clickable thing), moved a frame at a time. A real window shows the difference; the headless renderer draws no shaders. |
+| `focus_ring` | `"solid"` | The ring around a keyboard-focused node: `solid` is one colour; `gradient` is a sweep through `secondary`, `primary` and `tertiary` that turns once every three seconds (standing still when motion is reduced). tre does not animate a gradient border, so Python sets the angle 30 times a second while a ring shows. |
 | `glyph_cache` | `False` | Keeps the shapes of letters between frames: less work for a lot of text. |
 | `system_fonts` | `False` | Lets a font family that isn't registered be found among the system's. |
 

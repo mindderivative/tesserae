@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import math
 from typing import Any, Callable
-from tesserae import motion, ripple
+from tesserae import focusring, motion, ripple
 
 __all__ = ["DRAGGED", "FOCUSED", "HOVERED", "Interaction", "PRESSED"]
 
@@ -71,9 +71,10 @@ class Interaction:
     change, and `detach()` to remove everything this added."""
 
     def __init__(self, window: Any, node: Any, tint: RGBA, listen: Listen, ring_color: RGBA,
-                 surface: Any = None, ring_around: Any = None) -> None:
+                 surface: Any = None, ring_around: Any = None, glow: tuple[RGBA, RGBA] | None = None) -> None:
         self.window = window
         self.node = node
+        self.glow = glow  # the two colours after the ring's own in a turning gradient ring (`tesserae.focusring`)
         self.surface = node if surface is None else surface
         self.ring_around = self.surface if ring_around is None else ring_around
         self._enabled = True
@@ -89,6 +90,7 @@ class Interaction:
         self.ring = window.create("box", stroke_color=ring_color, stroke_width=RING_WIDTH, visible=False,
                                   **decoration)
         self.clip.add_child(self.layer)
+        self._glow: Any = None
         self.sparks: Any = None  # the ripple shader's node, when the window draws ripples that way (`tesserae.ripple`)
         self._shader: Any = None
         if ripple.uses_shader(window):
@@ -97,6 +99,8 @@ class Interaction:
             self._shader = ripple.RippleShader(window, self.sparks, tint)
         self.surface.add_child(self.clip)
         self.ring_around.add_child(self.ring)
+        if focusring.uses_gradient(window):
+            self._glow = focusring.GradientRing(window, self.ring, self._glow_colors())
         self.refresh()
         _INTERACTIVE.append(node)
         self._undo = [listen(node, event, handler) for event, handler in (
@@ -130,6 +134,8 @@ class Interaction:
         if not enabled:
             self.hovered = self.focused = self.dragged = False
             self.ring.set(visible=False)
+            if self._glow is not None:
+                self._glow.hide()
             for each in self._ripples:
                 each.circle.set(opacity=0.0)
                 each.release()
@@ -154,11 +160,20 @@ class Interaction:
         """Whether the focus ring is showing."""
         return bool(self.ring.get("visible"))
 
-    def retint(self, tint: RGBA, ring_color: RGBA) -> None:
+    def _glow_colors(self) -> tuple[RGBA, RGBA, RGBA]:
+        """The turning ring's three colours: the ring's own, then the two `glow` gives (the theme's primary and tertiary), else the ring's own again."""
+        second, third = self.glow if self.glow is not None else (self.ring_color, self.ring_color)
+        return self.ring_color, second, third
+
+    def retint(self, tint: RGBA, ring_color: RGBA, glow: tuple[RGBA, RGBA] | None = None) -> None:
         """New colours (a theme change), for the layer, live ripples and ring."""
         self.tint, self.ring_color = tint, ring_color
+        if glow is not None:
+            self.glow = glow
         self.layer.set(fill=tint)
         self.ring.set(stroke_color=ring_color)
+        if self._glow is not None:
+            self._glow.recolor(self._glow_colors(), paint=self.ring_visible)
         for each in self._ripples:
             each.circle.set(fill=tint)
         if self._shader is not None:
@@ -189,6 +204,8 @@ class Interaction:
         for node in (self.clip, self.ring):
             _quietly(node.destroy)
         self._ripples = []
+        if self._glow is not None:
+            self._glow.hide()
         if self._shader is not None:
             self._shader.detach()
         if self.node in _INTERACTIVE:
@@ -250,12 +267,16 @@ class Interaction:
             if self.focused:
                 self._place_ring()  # the node may have been resized since
             self.ring.set(visible=self.focused)
+            if self._glow is not None:
+                self._glow.show() if self.focused else self._glow.hide()
             self._update()
 
     def _on_unfocus(self, event: Any) -> None:
         if event.target == self.node:
             self.focused = False
             self.ring.set(visible=False)
+            if self._glow is not None:
+                self._glow.hide()
             self._update()
 
     def _release_all(self) -> None:

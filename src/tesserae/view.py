@@ -499,14 +499,17 @@ class View:
                 current.detach()
                 del self._interactions[node_id]
         ring = focus_ring_color(scheme)
+        roles = scheme or tokens.BASELINE
+        primary = roles.get("primary", ring)
+        glow = (primary, roles.get("tertiary", roles.get("tertiary_container", primary)))  # a turning focus ring (`tesserae.focusring`)
         for node_id, tint in wanted.items():
             current = self._interactions.get(node_id)
             if current is None:
                 self._interactions[node_id] = Interaction(self.window, self._built.outer[node_id], tint,
-                                                          self._listen, ring)
+                                                          self._listen, ring, glow=glow)
                 continue
-            if (current.tint, current.ring_color) != (tint, ring):
-                current.retint(tint, ring)
+            if (current.tint, current.ring_color, current.glow) != (tint, ring, glow if glow is not None else current.glow):
+                current.retint(tint, ring, glow)
             current.refresh()
         self._sync_scrolls()
         self._sync_disabled()

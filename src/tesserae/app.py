@@ -34,7 +34,7 @@ from tesserae.follow import alive, app_of, register_app, retheme
 from tesserae.listeners import Listeners, listen_window
 from tesserae.naming import check_naming_convention
 from tesserae.project import Project, is_name, resolve_embedded, resolve_view
-from tesserae import ripple as _ripple
+from tesserae import focusring as _focusring, ripple as _ripple
 from tesserae.spec.window import window_of
 from tesserae.window_view import Frame, WindowViewModel
 from tesserae import tokens
@@ -260,6 +260,7 @@ class App:
         high_contrast: bool | str = "system",
         transition: str = "none",
         ripple: str = "nodes",
+        focus_ring: str = "solid",
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
@@ -422,6 +423,10 @@ class App:
             raise ValueError(f"App: ripple is 'nodes' (a circle per press) or 'shader' (one shader for them), got {ripple!r}")
         self._ripple = ripple
         _ripple.use_shader(self._window, ripple == "shader")
+        if focus_ring not in ("solid", "gradient"):
+            raise ValueError(f"App: focus_ring is 'solid' (the default) or 'gradient' (a turning gradient), got {focus_ring!r}")
+        self._focus_ring = focus_ring
+        _focusring.use_gradient(self._window, focus_ring == "gradient")
         if transparent:  # before the window opens: the OS fixes it then
             self._set_window(transparent=True)
             self._window.root.set(fill=(0, 0, 0, 0))
