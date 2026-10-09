@@ -8,8 +8,10 @@ A tooltip names or explains a control when the pointer rests on it, or it has ke
 
 ## In Tesserae
 
-The fragment is a small inverse surface with `body_small` text; `tesserae.overlays.Tooltip` places it next
-to its anchor.
+Any node takes a `tooltip:`. A plain one is text on the inverse surface; a rich one has a `title`, up to two `actions` and a `placement`
+(`below`, `above`, `start`, `end`), is a raised surface the pointer can move onto, and closes when an action is pressed. It shows after the
+pointer rests for `delay` (500 ms), at once on keyboard focus, or after a long press; Escape, a press, or leaving closes it. The text also names
+the node for a screen reader. Not built: reaching the actions by keyboard, and testing the long press (the headless engine cannot simulate it).
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -44,17 +46,21 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: file
+widget: Container
+style: {width: 240, height: 120, padding: 24}
 children:
-  - id: hint
-    component: Tooltip
-    with: {text: Save the file, width: 120}
+  - widget: Button
+    label: Delete
+    tooltip: {title: Delete, text: Removes the file for good, actions: [{label: Undo, on_click: undo}]}
+  - widget: Button
+    label: Save
+    variant: tonal
+    tooltip: Save the file
 ```
+
+## Using it
 
 In Python:
 

@@ -520,6 +520,19 @@ class ComposedView(View):
     #: how long the pointer rests on a node before its tooltip shows (Material 3: 500 ms), and the widest a plain one is
     TIP_DELAY = 500.0
     TIP_WIDTH = 200.0
+    #: how long a rich tooltip waits for the pointer to move onto it, after it leaves the node
+    TIP_GRACE = 150.0
+
+    def _tip_rich(self, inst: Instance) -> bool:
+        """A rich tooltip has a subhead or actions (Material 3): it is a card the pointer can enter."""
+        return bool(self._tip_value(inst, "title") or inst.tooltip.get("actions"))
+
+    def _run_handler(self, held: tuple[Any, Any]) -> None:
+        handler, scope = held
+        if handler.action is not None:
+            scope.call_action(handler.action, [], {})
+        else:
+            handler.statements.run(scope, event=None)
 
     def _tip_value(self, inst: Instance, name: str, default: Any = None) -> Any:
         held = inst.tooltip.get(name, default)
@@ -552,7 +565,16 @@ class ComposedView(View):
                 self.timers.cancel(f"tip:{inst.id}")
                 self._hide_tip(inst.id)
 
-            for event_name, fn in (("pointer_enter", start), ("pointer_leave", away), ("pointer_down", away), ("focus", now), ("unfocus", away)):
+            def leave(event: Any = None, inst: Instance = inst) -> None:
+                """A rich tooltip stays while the pointer moves onto it: it goes a moment after the pointer leaves the node, unless it has arrived."""
+                if inst.id in self._tips and self._tip_rich(inst):
+                    self.timers.cancel(f"tip:{inst.id}")
+                    self.timers.after(self.TIP_GRACE, lambda: self._hide_tip(inst.id), name=f"tipclose:{inst.id}")
+                else:
+                    away(event)
+
+            for event_name, fn in (("pointer_enter", start), ("pointer_leave", leave), ("pointer_down", away), ("focus", now), ("unfocus", away),
+                                   ("long_press", now)):
                 self._tip_undos.append(self._listen(node, event_name, fn))
         for gone in set(self._tips) - live:
             self._hide_tip(gone)
@@ -563,27 +585,46 @@ class ComposedView(View):
             return
         scheme = self._scheme or tokens.BASELINE
         title = self._tip_value(inst, "title")
-        rich = bool(title)
+        actions = inst.tooltip.get("actions") or []
+        rich = self._tip_rich(inst)
         ink = scheme["on_surface" if rich else "inverse_on_surface"]
         pad_x, pad_y = (16.0, 12.0) if rich else (8.0, 4.0)
         layer = self.window.create(
             "box", flex_direction="vertical", gap=4.0, fill=scheme["surface_container" if rich else "inverse_surface"],
             corner_radius=12.0 if rich else 4.0, max_width=self.TIP_WIDTH, padding_left=pad_x, padding_right=pad_x, padding_top=pad_y,
-            padding_bottom=pad_y, hit_testable=False, a11y_hidden=True,
+            padding_bottom=pad_y, hit_testable=rich, a11y_hidden=True,
             shadows=tokens.elevation_shadows(2) if rich else [])
-        if rich:
+        if title:
             layer.add_child(self.window.create("text", text=str(title), font_family="Roboto", font_size=14.0, font_weight=500.0, fill=ink))
         layer.add_child(self.window.create("text", text=str(text), font_family="Roboto", font_size=12.0, fill=ink, wrap="word"))
-        self.window.show_layer(layer, anchor=self._built.outer[inst.id], placement="below", modal=False, dismissible=False)
+        undos = []
+        if actions:
+            row = self.window.create("box", flex_direction="horizontal", gap=8.0, margin_top=8.0, justify_content="end")
+            for label, held in actions:
+                button = self.window.create("box", padding_left=12.0, padding_right=12.0, padding_top=6.0, padding_bottom=6.0, corner_radius=16.0,
+                                            focusable=True, role="button", label=str(label.get() if hasattr(label, "get") else label))
+                button.add_child(self.window.create("text", text=str(label.get() if hasattr(label, "get") else label), font_family="Roboto",
+                                                    font_size=14.0, font_weight=500.0, fill=scheme["primary"]))
+                undos.append(self._listen(button, "click", lambda event, held=held, inst_id=inst.id: (self._run_handler(held), self._hide_tip(inst_id))))
+                row.add_child(button)
+            layer.add_child(row)
+        if rich:  # the pointer on the card keeps it; leaving it closes it
+            undos.append(self._listen(layer, "pointer_enter", lambda event, inst_id=inst.id: self.timers.cancel(f"tipclose:{inst_id}")))
+            undos.append(self._listen(layer, "pointer_leave", lambda event, inst_id=inst.id: self.timers.after(
+                self.TIP_GRACE, lambda: self._hide_tip(inst_id), name=f"tipclose:{inst_id}")))
+        self.window.show_layer(layer, anchor=self._built.outer[inst.id], placement=self._tip_value(inst, "placement", "below"), modal=False,
+                               dismissible=False)
 
         def escape(event: Any, inst_id: str = inst.id) -> None:
             if event.key == "escape":
                 self._hide_tip(inst_id)
 
-        self._tips[inst.id] = (layer, self._listen(self.window.root, "key_down", escape))
+        undos.append(self._listen(self.window.root, "key_down", escape))
+        self._tips[inst.id] = (layer, lambda: [undo() for undo in undos])
 
     def _hide_tip(self, inst_id: str) -> None:
         shown = self._tips.pop(inst_id, None)
+        self.timers.cancel(f"tipclose:{inst_id}")
         if shown is not None:
             shown[1]()
             self.window.hide_layer(shown[0])

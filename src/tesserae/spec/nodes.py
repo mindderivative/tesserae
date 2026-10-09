@@ -26,6 +26,9 @@ from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from
 __all__ = ["EVENTS", "ForSpec", "Handler", "LoadError", "Node", "ViewDoc", "load_marked", "parse_view"]
 
 #: Keys every node may have, besides its widget's properties (section 2).
+#: What a `tooltip:` mapping may hold, and where it may sit against its node.
+TOOLTIP_FIELDS = ("text", "title", "delay", "placement", "actions")
+TOOLTIP_PLACEMENTS = ("below", "above", "start", "end")
 UNIVERSAL_KEYS = ("widget", "name", "if", "for", "key", "slot", "state", "style", "classes", "handlers", "a11y", "interaction",
                   "window_region", "route", "focus_group", "tooltip", "children")
 #: Keys only the root of a view file may have.
@@ -202,7 +205,7 @@ class Node:
     window_region: Optional[str] = None
     route: Optional[str] = None
     focus_group: Optional[str] = None
-    #: `tooltip:` as `{text, title, delay}`, each text possibly a `Template`
+    #: `tooltip:` as `{text, title, delay, placement, actions}`, each text possibly a `Template`; `actions` is a list of (label, `Handler`)
     tooltip: dict[str, Any] = field(default_factory=dict)
 
     def subnodes(self) -> Iterator[tuple[str, int, "Node"]]:
@@ -438,17 +441,23 @@ class _Parser:
                 raise self.expr_error(exc) from None
 
     def tooltip(self, node: Node, value: Any, vat: Position) -> None:
-        """`tooltip: text`, or `tooltip: {text, title, delay}` for a rich one."""
+        """`tooltip: text`, or `tooltip: {text, title, delay, placement, actions}` for a rich one."""
         if isinstance(value, str):
             node.tooltip = {"text": self.template(value, vat)}
             return
         if not isinstance(value, PMap):
-            raise self.fail(vat, f"'tooltip:' takes text, or a mapping of text, title and delay, got {_describe(value)}")
+            raise self.fail(vat, f"'tooltip:' takes text, or a mapping of text, title, delay, placement and actions, got {_describe(value)}")
         for key, item in value.items():
-            if key not in ("text", "title", "delay"):
-                raise self.fail(value.key_at[key], f"no tooltip field '{key}'", _near(key, ("text", "title", "delay")))
+            if key not in TOOLTIP_FIELDS:
+                raise self.fail(value.key_at[key], f"no tooltip field '{key}'", _near(key, TOOLTIP_FIELDS))
             iat = value.val_at[key]
-            if key == "delay":
+            if key == "placement":
+                if item not in TOOLTIP_PLACEMENTS:
+                    raise self.fail(iat, f"tooltip placement is one of {', '.join(TOOLTIP_PLACEMENTS)}, got {_describe(item)}")
+                node.tooltip[key] = item
+            elif key == "actions":
+                node.tooltip[key] = self.tooltip_actions(item, iat)
+            elif key == "delay":
                 if isinstance(item, bool) or not isinstance(item, (int, float)) or item < 0:
                     raise self.fail(iat, f"tooltip delay is milliseconds, 0 or more, got {_describe(item)}")
                 node.tooltip[key] = item
@@ -458,6 +467,27 @@ class _Parser:
                 node.tooltip[key] = self.template(item, iat)
         if "text" not in node.tooltip:
             raise self.fail(vat, "a tooltip needs text", "write tooltip: {text: ..., title: ...}")
+
+    def tooltip_actions(self, value: Any, vat: Position) -> list[tuple[Any, Handler]]:
+        """The text buttons of a rich tooltip: up to two of `{label, on_click}`, `on_click` an action name or statements as a handler is."""
+        if not isinstance(value, list) or not 1 <= len(value) <= 2:
+            raise self.fail(vat, f"tooltip actions are a list of one or two {{label, on_click}}, got {_describe(value)}")
+        actions = []
+        for item in value:
+            if not isinstance(item, PMap) or set(item) - {"label", "on_click"} or not {"label", "on_click"} <= set(item):
+                raise self.fail(getattr(item, "at", vat), "a tooltip action is {label: ..., on_click: ...}")
+            label, click = item["label"], item["on_click"]
+            if not isinstance(label, str) or not isinstance(click, str) or not click.strip():
+                raise self.fail(item.val_at["label"], "a tooltip action's label is text and its on_click an action name or statements")
+            if is_action_name(click):
+                handler = Handler(click.strip(), action=click.strip())
+            else:
+                try:
+                    handler = Handler(click, statements=compile_statements(click, origin=self.origin(item.val_at["on_click"])))
+                except ExprError as exc:
+                    raise self.expr_error(exc) from None
+            actions.append((self.template(label, item.val_at["label"]), handler))
+        return actions
 
     def a11y(self, node: Node, value: Any, vat: Position) -> None:
         if not isinstance(value, PMap):

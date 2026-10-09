@@ -257,3 +257,101 @@ def test_a_node_that_leaves_the_view_takes_its_tooltip_with_it(tmp_path):
     app.bindings.viewmodel_for("main").here.set(False)
     view.window.advance(16)
     assert not view._tips
+
+
+# -- rich tooltips (#147): actions, placement, a card the pointer can enter ---------------------------------------------------
+
+RICH = '{text: "Removes it for good", title: Delete, actions: [{label: Undo, on_click: "clicks += 10"}, {label: Close, on_click: "hint = \'closed\'"}]}'
+
+
+def layer_of(view):
+    return next(iter(view._tips.values()))[0]
+
+
+def action_nodes(view):
+    row = layer_of(view).children()[-1]
+    return row.children()
+
+
+def far(view):
+    view.window.simulate("pointer_move", x=290, y=190)  # off the node and off the card
+
+
+def move_to(view, node):
+    view.window.simulate("pointer_move", x=node.get("layout_x") + 4, y=node.get("layout_y") + 4)
+
+
+def test_a_rich_tooltip_shows_a_subhead_text_and_its_actions(tmp_path):
+    view, _ = opened(tmp_path, RICH)
+    hover(view)
+    run(view, 800)
+    layer = layer_of(view)
+    assert [c.get("text") for c in layer.children()[:2]] == ["Delete", "Removes it for good"]
+    assert [a.children()[0].get("text") for a in action_nodes(view)] == ["Undo", "Close"]
+    assert layer.get("hit_testable") is True and layer.get("shadows")
+
+
+def test_a_plain_tooltip_cannot_be_entered(tmp_path):
+    view, _ = opened(tmp_path)
+    hover(view)
+    run(view, 800)
+    assert layer_of(view).get("hit_testable") is False
+
+
+def test_pressing_an_action_runs_its_handler_and_closes_the_tooltip(tmp_path):
+    view, vm = opened(tmp_path, RICH)
+    hover(view)
+    run(view, 800)
+    view.window.simulate("click", node=action_nodes(view)[0])
+    assert vm.clicks.get() == 10 and not view._tips
+    far(view)
+    run(view, 32)
+    hover(view)
+    run(view, 800)
+    view.window.simulate("click", node=action_nodes(view)[1])
+    assert vm.hint.get() == "closed" and not view._tips
+
+
+def test_a_rich_tooltip_stays_while_the_pointer_moves_onto_it_and_goes_when_it_leaves_both(tmp_path):
+    view, _ = opened(tmp_path, RICH)
+    hover(view)
+    run(view, 800)
+    move_to(view, layer_of(view))  # off the node, onto the card
+    run(view, 400)
+    assert view._tips
+    far(view)
+    run(view, 400)
+    assert not view._tips
+
+
+def test_a_rich_tooltip_goes_if_the_pointer_neither_returns_nor_arrives(tmp_path):
+    view, _ = opened(tmp_path, RICH)
+    hover(view)
+    run(view, 800)
+    far(view)
+    run(view, 32)
+    assert view._tips  # a moment's grace
+    run(view, 400)
+    assert not view._tips
+
+
+def test_it_can_sit_above_the_node(tmp_path):
+    view, _ = opened(tmp_path, '{text: Hi, placement: above}', extra="")
+    view.node("root.b").set(position="absolute", x=100.0, y=100.0)
+    view.window.advance(16)
+    hover(view)
+    run(view, 800)
+    assert layer_of(view).get("layout_y") < view.node("root.b").get("layout_y")
+
+
+@pytest.mark.parametrize("tooltip, message", [
+    ('{text: x, placement: left}', "placement is one of below, above, start, end"),
+    ('{text: x, actions: []}', "one or two"),
+    ('{text: x, actions: [{label: A, on_click: a}, {label: B, on_click: b}, {label: C, on_click: c}]}', "one or two"),
+    ('{text: x, actions: [{label: A}]}', "{label: ..., on_click: ...}"),
+    ('{text: x, action: []}', "no tooltip field 'action'"),
+])
+def test_these_are_refused_at_load(tooltip, message):
+    with pytest.raises(LoadError, match=message.replace("{", r"\{").replace("}", r"\}").replace(".", r"\.")):
+        parse_view(view_text(tooltip), "Main_View.yaml")
+

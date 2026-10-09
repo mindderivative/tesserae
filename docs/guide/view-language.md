@@ -290,7 +290,7 @@ handlers: {on_click: "open_url('https://example.com/docs')"}
 
 ## Tooltips
 
-Any node can have a `tooltip:`. A plain one is text; a rich one adds a title.
+Any node can have a `tooltip:`. A plain one is text; a rich one adds a title, up to two actions, or both.
 
 ```yaml
 widget: Container
@@ -302,11 +302,23 @@ widget: Container
 tooltip: {title: Delete, text: Removes the file for good, delay: 300}
 ```
 
+```yaml
+widget: Container
+tooltip:
+  title: Delete
+  text: Removes the file for good
+  placement: above                                # below (the default), above, start or end
+  actions:                                        # one or two text buttons; each is a handler
+    - {label: Undo, on_click: undo}
+    - {label: Close, on_click: "hint = 'closed'"}
+```
+
 It shows next to the node after the pointer has rested on it for `delay` milliseconds (500 by default), or at once when keyboard focus arrives (a click
 that focuses it does not show it). It goes when the pointer leaves, when the node is pressed, when focus leaves or on Escape, and it never takes the
-pointer or a press. A plain tooltip is the inverse surface; a rich one is a raised surface with the title above the text. The text is also given to a
-screen reader as the node's `description` where the node has none. A tooltip on a view call goes to the root of the view called. Rich tooltips with
-actions need the Button and come with the Tooltip component.
+pointer or a press. A plain tooltip is the inverse surface and cannot be entered; a rich one (a title or actions) is a raised surface with the title above the text, and it
+stays while the pointer moves onto it, going a moment after the pointer has left both. Pressing an action runs its handler and closes the tooltip. A touch
+held in place shows it too. The text is also given to a screen reader as the node's `description` where the node has none. A tooltip on a view call goes to
+the root of the view called. The actions are for the pointer: the keyboard shows the tooltip and Escape closes it.
 
 ## Accessibility
 
