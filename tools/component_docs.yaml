@@ -166,7 +166,7 @@ components:
       | `size` | `xs`, `s`, `m`, `l`, `xl` | 32, 40, 56, 96 or 136 pixels tall; the glyph is 20, 24, 24, 32 or 40 |
       | `width_kind` | `narrow`, `default`, `wide` | as tall as it is, or narrower or wider |
       | `shape` | `round`, `square` | a circle, or a rounded square |
-      | `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the glyph, the colours and the shape change while it is on |
+      | `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the glyph, the colours and the shape change while it is on; the glyph morphs into the other over 200 ms when the two are shapes of the same kind (add and remove do; play and pause have different numbers of parts, so they switch halfway) |
       | `disabled` | true or false | dimmed, not focusable, handlers do not run |
 
       The state layer, ripple and focus ring are the node's interaction; a pressed circle squares off. Not built: the 12% container of a disabled filled

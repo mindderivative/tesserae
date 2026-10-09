@@ -1164,6 +1164,8 @@ def _eased(window: Any, planned: dict[str, Any], targets: tuple[tuple[Any, Optio
             except ValueError:
                 continue
             ms = motion.duration(window, planned[prop][0])
+            if prop == "data" and props.get("view_box") is not None and tuple(target.get("view_box")) != tuple(props["view_box"]):
+                continue  # another set of glyphs (another view box) cannot morph: the new one is set at once
             if changing and ms > 0:
                 eased.append((target, prop, props.pop(prop), ms, planned[prop][1]))
     return eased

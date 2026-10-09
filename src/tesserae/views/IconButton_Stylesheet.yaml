@@ -31,6 +31,7 @@ styles:
       border_width: "{{ 1 if (not toggle or not selected) else 0 }}"
       border_color: outline
   # the icon
+  - {widget: IconButton, part: icon, style: {transition: {icon: 200}}}
   - {widget: IconButton, part: icon, style: {width: "{{ {'xs': 20, 's': 24, 'm': 24, 'l': 32, 'xl': 40}[size] }}", height: "{{ {'xs': 20, 's': 24, 'm': 24, 'l': 32, 'xl': 40}[size] }}"}}
   - {widget: IconButton, variant: standard, part: icon, style: {foreground: "{{ tint if tint != '' else ('primary' if (toggle and selected) else 'on_surface_variant') }}"}}
   - {widget: IconButton, variant: filled, part: icon, style: {foreground: "{{ 'on_primary' if (not toggle or selected) else 'on_surface_variant' }}"}}

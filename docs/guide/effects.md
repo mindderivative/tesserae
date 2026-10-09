@@ -48,6 +48,9 @@ and `start` go with the kind. A gradient follows its box as the layout resizes i
 
 ## Elevation that moves
 
+An `Icon` whose glyph changes can morph into the next with `transition: {icon: 200}`: two closed shapes, or two open lines, in the same set of glyphs (Material Symbols or MDI) blend smoothly;
+shapes with different numbers of parts switch halfway, and glyphs of the other set switch at once. `IconButton` does this for its toggle icons.
+
 A raised surface lifts when the pointer is over it and again when it is pressed. Give the levels in rules by state, and `transition: {elevation: 200}`
 eases the shadows between them. The base level belongs in a rule too: an `elevation` written on the node itself beats every rule.
 

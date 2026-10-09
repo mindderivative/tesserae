@@ -12,7 +12,7 @@ style:
 
 Only a *change* eases: the first time a node is built it is where it says. The properties are the ones tre can animate (`background`,
 `foreground` for text and glyphs, `border_color`, `border_width`, `corner_radius`, `elevation`, `opacity`, `blur`, `backdrop_blur`, `scale`,
-`translate_x`, `translate_y`, `rotation_deg`); layout properties (`width`, `height`, `x`, `y`, `gap`, `padding`, `margin`) ease too, in pixels (a change to or from `auto` or a percentage is made at once). An app that asked for reduced
+`translate_x`, `translate_y`, `rotation_deg`, and `icon` on an `Icon`: one glyph morphing into the next); layout properties (`width`, `height`, `x`, `y`, `gap`, `padding`, `margin`) ease too, in pixels (a change to or from `auto` or a percentage is made at once). An app that asked for reduced
 motion gets the new value at once.
 
 `plan(...)` turns the style's `transition:` into `{node property: (milliseconds, easing)}`; the builder's `patch` animates those.
@@ -42,6 +42,7 @@ TRANSITIONABLE: dict[str, str] = {
     "background": "fill", "foreground": "fill", "border_color": "stroke_color", "border_width": "stroke_width", "corner_radius": "corner_radius",
     "elevation": "shadows", "opacity": "opacity", "blur": "blur", "backdrop_blur": "backdrop_blur", "scale": "scale", "translate_x": "translate_x",
     "translate_y": "translate_y", "rotation_deg": "rotation_deg",
+    "icon": "data",  # an Icon's glyph morphs into the next one's (two closed shapes, or two open lines, in one view box); `all` does not include it
 }
 #: The layout fields that ease too, each the node properties it is. The engine animates them in pixels (tre 0.5.6); `all` leaves them out, since a layout that changes is not always meant to glide.
 LAYOUT_TRANSITIONABLE: dict[str, tuple[str, ...]] = {
@@ -103,7 +104,7 @@ def plan(node_id: str, kind: str, style: dict[str, Any]) -> dict[str, tuple[floa
     fill_field = "foreground" if kind in _FOREGROUND_FILL else "background"
     if "all" in raw:
         every = _entry(f"{where}.all", raw["all"])
-        out.update({prop: every for field, prop in TRANSITIONABLE.items() if field not in ("background", "foreground")})
+        out.update({prop: every for field, prop in TRANSITIONABLE.items() if field not in ("background", "foreground", "icon")})
         out["fill"] = every
     for field, value in raw.items():
         if field == "all":
@@ -113,6 +114,8 @@ def plan(node_id: str, kind: str, style: dict[str, Any]) -> dict[str, tuple[floa
             out.update({prop: entry for prop in LAYOUT_TRANSITIONABLE[field]})
             continue
         prop = TRANSITIONABLE[field]
+        if prop == "data" and kind != "Icon":
+            continue  # only an Icon has a glyph to morph
         if prop == "fill" and field != fill_field:
             continue  # a Text's `fill` is its foreground and a box's its background; the other is not this node's to ease
         out[prop] = _entry(f"{where}.{field}", value)
