@@ -57,6 +57,9 @@ def lower(inst: Instance) -> dict[str, Any]:
             node["virtual"] = {"count": inst.virtual.count, "extent": float(inst.virtual.extent())}
         if "scroll_offset" in values:
             node["scroll"] = {"offset": values["scroll_offset"]}
+    elif widget == "Splitter":
+        folded = {"orientation", "position", "min_first", "min_second", "collapsible", "label"}
+        node["kind"] = "Container"
     elif widget == "Overlay":
         folded = {"open", "anchor", "placement", "modal", "dismissible"}  # the renderer shows the layer; the builder needs only to know it is modal
         node["overlay"] = {"modal": bool(values.get("modal"))}
@@ -89,6 +92,37 @@ def lower(inst: Instance) -> dict[str, Any]:
         node["handlers"] = {event: _PLACEHOLDER for event in inst.handlers}
     if inst.window_region is not None:
         node["window_region"] = inst.window_region
-    if inst.children:
+    if widget == "Splitter":
+        _split(inst, node, values)
+    elif inst.children:
         node["children"] = [lower(child) for child in inst.children]
     return node
+
+
+#: The handle between a Splitter's panes: its width along the split, and the grip drawn in it (MD3's 4 x 48 drag handle).
+SPLIT_HANDLE = 16.0
+SPLIT_GRIP = (4.0, 48.0)
+
+
+def _split(inst: Instance, node: dict[str, Any], values: dict[str, Any]) -> None:
+    """A Splitter is a row (or column) of the first pane, the handle and the second pane; the renderer wires the handle."""
+    horizontal = values.get("orientation", "horizontal") == "horizontal"
+    share = min(max(float(values.get("position", 0.5)), 0.0), 1.0)
+    main, least = ("width", "min_width") if horizontal else ("height", "min_height")
+    tracks = f"{share:g}fr {SPLIT_HANDLE:g} {1.0 - share:g}fr"  # the panes share what the handle leaves, in proportion
+    node["style"] = {**node.get("style", {}), "display": "grid", "grid_template_columns" if horizontal else "grid_template_rows": tracks}
+    mins = (float(values.get("min_first", 0.0)), float(values.get("min_second", 0.0)))
+
+    def pane(part: str, child: Instance, minimum: float) -> dict[str, Any]:
+        return {"id": f"{inst.id}.{part}", "kind": "Container", "children": [lower(child)],
+                "style": {"clip_children": True, least: minimum}}
+
+    grip = SPLIT_GRIP if horizontal else SPLIT_GRIP[::-1]
+    handle = {"id": f"{inst.id}.handle", "kind": "Container",
+              "style": {main: SPLIT_HANDLE, "background": "transparent", "align_content": "center",
+                        "cursor": "col_resize" if horizontal else "row_resize"},
+              "handlers": {"on_click": _PLACEHOLDER},  # what makes the builder give it a Tab stop; the renderer wires its real events
+              "a11y": {"role": "slider", "label": values.get("label", "Resize panes"), "value": share, "value_min": 0.0, "value_max": 1.0, "value_step": 0.05},
+              "children": [{"id": f"{inst.id}.handle.grip", "kind": "Rect",
+                            "style": {"width": grip[0], "height": grip[1], "corner_radius": 2, "background": "outline"}}]}
+    node["children"] = [pane("first", inst.children[0], mins[0]), handle, pane("second", inst.children[1], mins[1])]

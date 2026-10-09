@@ -75,6 +75,14 @@ declare("VirtualList", {
     "at_end": P("bool", model=True, doc="Output: whether it is scrolled as far as it goes."),
     "scroll_direction": P("str", model=True, doc="Output: 'down' or 'up' for the last scroll, 'none' before the first."),
 }, container=True, doc="A scrolling list of equal rows that builds only the rows in view: its one child is a `for:`.")
+declare("Splitter", {
+    "orientation": P("enum", choices=("horizontal", "vertical"), default="horizontal", doc="horizontal puts the panes side by side, vertical one above the other."),
+    "position": P("float", default=0.5, model=True, doc="How much of the room the first pane has, from 0 to 1. Dragging the handle writes it back to a Signal it is bound to."),
+    "min_first": P("float", default=0.0, doc="The least the first pane can be, in pixels."),
+    "min_second": P("float", default=0.0, doc="The least the second pane can be, in pixels."),
+    "collapsible": P("bool", doc="A double click on the handle closes the first pane, and opens it again."),
+    "label": P("str", default="Resize panes", doc="What a screen reader calls the handle."),
+}, container=True, doc="Two panes with a draggable, keyboard-operable handle between them.")
 declare("Overlay", {
     "open": P("bool", default=False, model=True, doc="Whether it is showing. Closing it (Escape, a press outside) writes false back to a Signal it is bound to."),
     "anchor": P("str", doc="The name of a node in this view to sit against; without one it is centred in the window."),

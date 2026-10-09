@@ -19,15 +19,15 @@ import weakref
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from tesserae import urls
+from tesserae import a11y as a11y_module, urls
 from tesserae.follow import app_of
 from tesserae.listeners import handled, listen_window
-from tesserae.reactive import Effect, untrack
+from tesserae.reactive import Effect, Signal, untrack
 from tesserae.expr import compile_statements, is_action_name
 from tesserae.spec.compose import Instance
 from tesserae.timers import Timers
 from tesserae.spec.images import extract_images
-from tesserae.spec.lower import lower
+from tesserae.spec.lower import SPLIT_HANDLE, lower
 from tesserae.spec.mask import Mask
 from tesserae.spec.nodes import ViewDoc
 from tesserae.view import _EVENTS, SURFACE_ACTIONS, WINDOW_ACTIONS, View
@@ -156,6 +156,9 @@ class ComposedView(View):
         self._timers: Optional[Timers] = None
         self._scrolled: dict[str, dict[str, str]] = {}
         self._firing: list[Instance] = []
+        self._split_dragging: set[str] = set()
+        self._split_last_up: dict[str, float] = {}
+        self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
         self._layer_resize: dict[str, Callable[[], None]] = {}
         self._shown_layers: dict[str, Any] = {}  # each Overlay showing: its id -> the layer node shown
@@ -236,6 +239,7 @@ class ComposedView(View):
             untrack(self._wire_instances)
             untrack(self._wire_scroll)
             untrack(self._wire_overlays)
+            untrack(self._wire_splitters)
             untrack(self._wire_states)
             untrack(self._wire_focus_groups)
             untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -336,6 +340,86 @@ class ComposedView(View):
                 report()
 
             self.timers.after(0, settle, name=f"scroll:{inst.id}")
+
+    # splitters (#228)
+
+    SPLIT_STEP = 0.05
+    #: two releases of the handle this close together are a double click
+    DOUBLE_CLICK = 0.4
+
+    def _wire_splitters(self) -> None:
+        """The handle of each `Splitter`: a drag with the pointer captured, the arrow keys, Home and End, the screen reader's actions, and (when the
+        splitter is `collapsible`) a double click that closes the first pane and opens it again."""
+        for inst in self.handle.composition.walk():
+            handle_id = f"{inst.id}.handle"
+            if inst.widget != "Splitter" or handle_id not in self._built.nodes:
+                continue
+            handle, first = self._built.nodes[handle_id], self._built.nodes[f"{inst.id}.first"]
+            horizontal = inst.value("orientation") == "horizontal"
+
+            def room(inst: Instance = inst, horizontal: bool = horizontal) -> float:
+                """The length the two panes share: the splitter less the handle."""
+                key = "layout_width" if horizontal else "layout_height"
+                return float(self._built.outer[inst.id].get(key) or 0.0) - float(self._built.nodes[f"{inst.id}.handle"].get(key) or 0.0)
+
+            def user(share: float, inst: Instance = inst, room: Callable[[], float] = room) -> None:
+                length = room()
+                low = float(inst.value("min_first")) / length if length > 0 else 0.0
+                high = 1.0 - float(inst.value("min_second")) / length if length > 0 else 1.0
+                share = round(min(max(share, low, 0.0), max(low, min(high, 1.0))), 6)
+                if share == float(inst.value("position")):
+                    return
+                bound = inst.models.get("position")
+                if bound is not None:
+                    bound[1].assign(bound[0], share)
+                elif isinstance(inst.props.get("position"), Signal):
+                    inst.props["position"].set(share)
+
+            def down(event: Any, inst: Instance = inst, handle: Any = handle) -> None:
+                self._split_dragging.add(inst.id)
+                handle.capture_pointer()
+
+            def move(event: Any, inst: Instance = inst, first: Any = first, horizontal: bool = horizontal, room: Callable[[], float] = room,
+                     user: Callable[[float], None] = user) -> None:
+                pointer = event.window_x if horizontal else event.window_y
+                length = room()
+                if inst.id not in self._split_dragging or pointer is None or length <= 0:
+                    return
+                start = float(first.get("layout_x" if horizontal else "layout_y"))
+                user((pointer - start - SPLIT_HANDLE / 2) / length)  # the handle's middle under the pointer
+
+            def up(event: Any, inst: Instance = inst, handle: Any = handle, user: Callable[[float], None] = user) -> None:
+                if inst.id not in self._split_dragging:
+                    return
+                self._split_dragging.discard(inst.id)
+                handle.release_pointer()
+                now = time.monotonic()
+                if inst.value("collapsible") and now - self._split_last_up.get(inst.id, -1e9) <= self.DOUBLE_CLICK:
+                    share = float(inst.value("position"))
+                    if share > 0:
+                        self._split_kept[inst.id] = share
+                        user(0.0)
+                    else:
+                        user(self._split_kept.get(inst.id, 0.5))
+                    self._split_last_up.pop(inst.id, None)
+                else:
+                    self._split_last_up[inst.id] = now
+
+            forward, back = ("arrow_right", "arrow_left") if horizontal else ("arrow_down", "arrow_up")
+
+            def key(event: Any, inst: Instance = inst, forward: str = forward, back: str = back, user: Callable[[float], None] = user) -> None:
+                share = float(inst.value("position"))
+                moves = {forward: share + self.SPLIT_STEP, back: share - self.SPLIT_STEP, "home": 0.0, "end": 1.0}
+                if event.key in moves:
+                    user(moves[event.key])
+
+            for event_name, fn in (("pointer_down", down), ("pointer_move", move), ("pointer_up", up), ("pointer_cancel", up), ("key_down", key)):
+                self._handler_undos.append(self._listen(handle, event_name, fn))
+            self._handler_undos.append(a11y_module.on_action(handle, {
+                "increment": lambda e, inst=inst, user=user: user(float(inst.value("position")) + self.SPLIT_STEP),
+                "decrement": lambda e, inst=inst, user=user: user(float(inst.value("position")) - self.SPLIT_STEP),
+                "set_value": lambda e, user=user: user(float(e.value)),
+            }, listen=self._listen))
 
     # overlays (#227)
 

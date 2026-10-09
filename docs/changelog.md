@@ -127,6 +127,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `shared_axis_z` or `container_transform`, played by `navigate`, `back` and `forward` (reversed going back); `app.navigate_with(name, transition=..., origin=node)` picks one for a single navigation.
 - **Text** ([#195](https://github.com/mindderivative/tesserae/issues/195)). `widget: Text` takes `heading: 1` to `6` (a heading of that level for a screen reader). Type roles have a `tracking`
   field: `tokens.MD3_TRACKING` is Material 3's per role, off unless a theme's `typography:` sets it (`tokens.MD3_TRACKING_TYPOGRAPHY` for all). Every role's size and line height is tested against the MD3 scale.
+- **Splitter** ([#203](https://github.com/mindderivative/tesserae/issues/203)). `widget: Splitter` with two child panes, `orientation`, a two-way `position`, `min_first`, `min_second` and `collapsible`: a handle you drag
+  (the pointer is captured), move with the arrow keys, Home and End, a screen reader can set, and double click to collapse.
 
 ### Removed
 

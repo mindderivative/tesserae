@@ -742,6 +742,12 @@ class Composer:
                                 for i, sub in enumerate(nodes)]
             for sub in inst.parts[name]:
                 sub.parent = inst
+        if node.widget == "Splitter":
+            if len(node.children) != 2 or any(c.loop is not None or c.when is not None for c in node.children):
+                raise self._fail(ctx, node.at, "a Splitter has two panes: exactly two children, with no 'for:' or 'if:'")
+            held = inst.props.get("position", 0.5)  # a number is where it starts; the handle moves it, so it is held in a Signal
+            if not isinstance(held, (Signal, Computed)):
+                inst.props["position"] = Signal(float(held))
         virtual: Optional[Virtual] = None
         if node.widget == "VirtualList":
             if len(node.children) != 1 or node.children[0].loop is None:
