@@ -39,6 +39,7 @@ its name, with the params as plain keys. There is no other difference.
 | `interaction` | the hover, focus and press feedback: `true`, `false` or a colour role |
 | `window_region` | `drag` or `none`, for a custom title bar |
 | `route` | on a view call inside a window: makes it a screen |
+| `focus_group` | `horizontal`, `vertical` or `both`: the focusable nodes under it share one tab stop and the arrow keys move among them |
 | `children` | child nodes |
 | anything else | a **property** of the widget |
 
@@ -168,10 +169,22 @@ handlers:
 
 An event is one of `on_click`, `on_hover_enter`, `on_hover_exit`, `on_change`, `on_focus_enter`, `on_focus_exit`, `on_tap`, `on_long_press`,
 `on_pan`, `on_pinch`, `on_touch_start`, `on_touch_move`, `on_touch_end`, `on_touch_cancel`, `on_file_hover`, `on_file_hover_cancel`,
-`on_file_drop`, `on_link`, `on_key` (a key pressed) and `on_submit` (Enter in a field that is not multiline); a misspelt one is an error. A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
-`navigate.back`, `navigate.Settings`), or statements: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a ViewModel Signal, or a call
+`on_file_drop`, `on_link`, `on_key` (a key pressed), `on_submit` (Enter in a field that is not multiline) and `on_press` (the pointer pressed on the node or
+anything in it; unlike `on_click` it does not make the node a button); a misspelt one is an error. A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
+`navigate.back`, `navigate.Settings`), or statements, which may call `focus('name')` to give the focus to the node of that name in the view the handler
+is written in: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a ViewModel Signal, or a call
 of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a param, a loop variable or
 anything else is an error; so is `if`, `for` or any other statement. A disabled node's handlers do not run.
+
+## Focus
+
+`focus('input')` in a handler gives the focus to the node named `input` in the same view (names are unique in a view, and a view never reaches into
+the one it calls). `on_press: "focus('input')"` on a container makes a click anywhere in it, padding included, land in the field inside it.
+
+A `focus_group` makes a toolbar, a tab strip, a menu or a radio set behave as one control: Tab visits **one** of its items (the one that last had
+the focus), the arrow keys of its axis move the focus to the next and the previous item (wrapping), `Home` and `End` go to the first and last, and typing
+the start of an item's name jumps to it (the same letter again goes on to the next item that starts with it; a pause of a second starts a new search; typing in
+a text field inside the group is the field's). Disabled items are skipped, and a group inside a group looks after its own items.
 
 ## Two-way properties
 

@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import time
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -26,11 +27,24 @@ from tesserae.spec.lower import lower
 from tesserae.spec.nodes import ViewDoc
 from tesserae.view import _EVENTS, SURFACE_ACTIONS, WINDOW_ACTIONS, View
 
-#: Events the renderer adds to the engine's: a key press, and Enter in a field that is not multiline.
-_KEY_EVENTS = {"on_key": "key_down", "on_submit": "key_down"}
+#: Events the renderer adds to the engine's: a key press, Enter in a field that is not multiline, and a pointer press (which, unlike a click,
+#: does not make the node a button).
+_KEY_EVENTS = {"on_key": "key_down", "on_submit": "key_down", "on_press": "pointer_down"}
+#: The keys that move focus in a `focus_group`, by its mode, as (previous, next).
+_GROUP_KEYS = {"horizontal": (("arrow_left",), ("arrow_right",)), "vertical": (("arrow_up",), ("arrow_down",)),
+               "both": (("arrow_left", "arrow_up"), ("arrow_right", "arrow_down"))}
+#: A pause this long (seconds) in typing starts a new type-ahead search.
+TYPEAHEAD_RESET = 1.0
 from tesserae.viewmodel import Bindings, ViewHandle, open_view
 
 __all__ = ["ComposedView", "builtin_actions", "open_composed"]
+
+
+def _is_text_input(node: Any) -> bool:
+    try:
+        return node.get("kind") == "text_input"
+    except (AttributeError, ValueError):
+        return False
 
 
 def _is_submit(event: Any) -> bool:
@@ -43,12 +57,14 @@ def _is_submit(event: Any) -> bool:
         return True
 
 
-def builtin_actions(view_ref: Callable[[], Any]) -> Callable[[str], Optional[Callable[..., Any]]]:
-    """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)` and
-    `surface.dismiss`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
+def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Callable[..., Any]]]:
+    """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)`, `surface.dismiss` and
+    `focus(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
 
-    def resolve(path: str) -> Optional[Callable[..., Any]]:
+    def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
         view = view_ref()
+        if path == "focus":
+            return lambda name: view.focus(scope, name)
         head, _, rest = path.partition(".")
         if head == "window" and rest in WINDOW_ACTIONS:
             return lambda: getattr(app_of(view.window), rest)() if app_of(view.window) is not None else None
@@ -72,6 +88,7 @@ def builtin_actions(view_ref: Callable[[], Any]) -> Callable[[str], Optional[Cal
             return lambda: dismiss_surface(view.root)
         return None
 
+    resolve.wants_scope = True  # type: ignore[attr-defined]  # `focus` needs the widget the handler was written in
     return resolve
 
 
@@ -83,6 +100,9 @@ class ComposedView(View):
         self._base_dir = Path(base_dir) if base_dir is not None else Path.cwd()
         self._handler_undos: list[Callable[[], None]] = []
         self._state_undos: list[Callable[[], None]] = []
+        self._group_undos: list[Callable[[], None]] = []
+        self._active: dict[str, str] = {}  # a focus group's id -> the id of the item that holds its tab stop
+        self._typed: tuple[str, float] = ("", 0.0)
         self._observed: set[int] = set()
         self._synced = False
         self._effect: Optional[Effect] = None
@@ -108,6 +128,7 @@ class ComposedView(View):
             untrack(lambda: self.reconcile(spec, frames))
         untrack(self._wire_instances)
         untrack(self._wire_states)
+        untrack(self._wire_focus_groups)
         untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
 
     def _observe(self) -> None:
@@ -182,6 +203,133 @@ class ComposedView(View):
                 if name in signals:
                     self._state_undos.append(self._listen(node, event, setter(name, value)))
 
+    # focus
+
+    def _focus_node(self, inst: Instance) -> Optional[Any]:
+        """The node that takes focus for `inst` (a text field's input, a link's box), or `None` if it has none built."""
+        if inst.id not in self._built.nodes:
+            return None
+        return self._built.outer[inst.id] if inst.widget == "Link" else self._built.nodes[inst.id]
+
+    def focus(self, scope: Any, name: str) -> None:
+        """`focus(name)` in a handler: gives the focus to the node called `name` in the view the handler was written in."""
+        origin = scope.nearest_instance() if scope is not None else None
+        root = (origin.view_root or self.handle.composition.root) if origin is not None else self.handle.composition.root
+        for inst in root.walk():
+            if inst.name == name:
+                node = self._focus_node(inst)
+                if node is None:
+                    raise ValueError(f"focus({name!r}): that node is not on the screen")
+                node.focus()
+                return
+        raise ValueError(f"focus({name!r}): no node by that name in this view")
+
+    def _focus_items(self, group: Instance) -> list[tuple[Instance, Any]]:
+        """The focus group's items: every focusable node under it, in order, not counting what a group inside it looks after."""
+        items: list[tuple[Instance, Any]] = []
+
+        def visit(inst: Instance) -> None:
+            for child in inst.children:
+                node = self._focus_node(child)
+                if node is not None and child.focus_group is None and node.get("focusable") and child.id not in self._disabled_on \
+                        and not node.get("disabled"):
+                    items.append((child, node))
+                if child.focus_group is None:
+                    visit(child)
+
+        visit(group)
+        return items
+
+    def _item_label(self, inst: Instance, node: Any) -> str:
+        label = node.get("label")
+        if label:
+            return str(label)
+        for sub in inst.walk():
+            if sub.widget in ("Text", "Link") and "text" in sub.props:
+                return str(sub.value("text"))
+        return ""
+
+    def _wire_focus_groups(self) -> None:
+        """Roving tab stops and arrow keys for each `focus_group`: one item is in the Tab order, the arrow keys (by the group's mode), Home, End and
+        typing the start of an item's name move the focus among them, and whichever item has the focus holds the tab stop."""
+        for undo in self._group_undos:
+            undo()
+        self._group_undos = []
+        for group in self.handle.composition.walk():
+            if group.focus_group is None or group.id not in self._built.outer:
+                continue
+            items = self._focus_items(group)
+            if not items:
+                continue
+            box = self._built.outer[group.id]
+            ids = [inst.id for inst, _ in items]
+            active = ids.index(self._active[group.id]) if self._active.get(group.id) in ids else 0
+            self._active[group.id] = ids[active]
+            for index, (_, node) in enumerate(items):
+                node.set(tab_index=0 if index == active else -1)
+
+            def index_of(target: Any, items: list = items) -> Optional[int]:
+                while target is not None:
+                    for index, (_, node) in enumerate(items):
+                        if target == node:
+                            return index
+                    target = target.parent()
+                return None
+
+            def hold(index: int, group: Instance = group, items: list = items) -> None:
+                self._active[group.id] = items[index][0].id
+                for other, (_, node) in enumerate(items):
+                    node.set(tab_index=0 if other == index else -1)
+
+            def on_focus(event: Any, hold: Callable = hold, index_of: Callable = index_of) -> None:
+                index = index_of(event.target)
+                if index is not None:
+                    hold(index)
+
+            def on_key(event: Any, group: Instance = group, items: list = items, hold: Callable = hold, index_of: Callable = index_of) -> None:
+                key = getattr(event, "key", "")
+                current = index_of(event.target)
+                if current is None:
+                    return
+                before, after = _GROUP_KEYS[group.focus_group]  # type: ignore[index]
+                if key in before:
+                    target = (current - 1) % len(items)
+                elif key in after:
+                    target = (current + 1) % len(items)
+                elif key == "Home":
+                    target = 0
+                elif key == "End":
+                    target = len(items) - 1
+                elif len(key) == 1 and key.isprintable() and not _is_text_input(event.target):
+                    found = self._typeahead(key, current, items)
+                    if found is None:
+                        return
+                    target = found
+                else:
+                    return
+                hold(target)
+                items[target][1].focus()
+
+            self._group_undos.append(self._listen(box, "focus", on_focus))
+            self._group_undos.append(self._listen(box, "key_down", on_key))
+
+    def _typeahead(self, key: str, current: int, items: list[tuple[Instance, Any]]) -> Optional[int]:
+        """The item whose name starts with what has been typed (a pause starts over), searching on from the current one. The same letter
+        typed again and again goes on to the next item that starts with it."""
+        typed, when = self._typed
+        now = time.monotonic()
+        text = (typed if now - when < TYPEAHEAD_RESET else "") + key.lower()
+        self._typed = (text, now)
+        labels = [self._item_label(inst, node).lower() for inst, node in items]
+        repeated = len(text) > 1 and len(set(text)) == 1
+        wanted = text[0] if repeated else text
+        start = current + 1 if repeated else current
+        for step in range(len(items)):
+            index = (start + step) % len(items)
+            if labels[index].startswith(wanted):
+                return index
+        return None
+
     def _enforce_input(self, inst: Instance, node: Any) -> None:
         """A `TextInput`'s `max_length` and `read_only`, which the engine's input does not have: an edit that breaks either is put right as it
         arrives, before any listener that writes the text back hears of it."""
@@ -204,9 +352,9 @@ class ComposedView(View):
         """Stops following the composition and releases it."""
         if self._effect is not None:
             self._effect.dispose()
-        for undo in (*self._handler_undos, *self._state_undos):
+        for undo in (*self._handler_undos, *self._state_undos, *self._group_undos):
             undo()
-        self._handler_undos, self._state_undos = [], []
+        self._handler_undos, self._state_undos, self._group_undos = [], [], []
         self.handle.close()
 
 

@@ -76,6 +76,10 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `on_surface@38%`, `"#6750A4@50%"`, wherever a style, a rule, a bound `background`/`foreground`/`border_color` or a `color` property takes one.
   `corner_radius: full` is a pill or a circle.
 
+- **Focus control and keyboard navigation** ([#213](https://github.com/mindderivative/tesserae/issues/213)). `focus('name')` in a handler gives the focus to a named node in the view; `on_press`
+  is a handler for the pointer pressing a node (it does not make the node a button), so a container can focus the input inside it; `focus_group: horizontal | vertical | both`
+  gives the focusable nodes under a node one tab stop, arrow-key, `Home`/`End` and type-ahead movement. The text field's box focuses its input when pressed.
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

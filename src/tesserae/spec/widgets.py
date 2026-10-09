@@ -25,7 +25,7 @@ PROPERTY_TYPES = ("str", "int", "float", "bool", "color", "length", "icon", "enu
 #: Keys every node has (spec section 2) and the header keys: a property may not use one of these names.
 RESERVED_KEYS = frozenset({
     "widget", "name", "if", "for", "key", "slot", "state", "style", "classes", "handlers", "a11y", "interaction", "window_region",
-    "route", "children", "params", "expects",
+    "route", "focus_group", "children", "params", "expects",
 })
 
 def _style_fields() -> frozenset[str]:
@@ -329,7 +329,7 @@ _UNIVERSAL: dict[str, dict[str, Any]] = {
     "state": {"type": "object"}, "style": {"type": "object"}, "classes": {"type": "array", "items": {"type": "string"}},
     "handlers": {"type": "object", "additionalProperties": {"type": "string"}}, "a11y": {"type": "object"},
     "interaction": {"type": ["boolean", "string"]}, "window_region": {"enum": ["drag", "none"]},
-    "route": {"type": "string"},
+    "route": {"type": "string"}, "focus_group": {"enum": ["horizontal", "vertical", "both"]},
     # the header of a view file, valid on its root
     "params": {"type": ["array", "object"]}, "expects": {"type": "object"},
 }

@@ -29,7 +29,7 @@ __all__ = ["Bindings", "BindingError", "ViewHandle", "ViewHandles", "check_view"
 #: Names an expression may read that no ViewModel provides.
 _RESERVED_READS = frozenset({"app", "event", "hovered", "focused", "pressed", "True", "False", "None"})
 #: Built-in action families: `window.close`, `surface.dismiss`, `navigate.back`, `navigate_to(...)`.
-_ACTION_FAMILIES = ("window", "surface", "navigate", "navigate_to")
+_ACTION_FAMILIES = ("window", "surface", "navigate", "navigate_to", "focus")
 _TYPES: dict[str, Callable[[Any], bool]] = {
     "int": lambda v: isinstance(v, int) and not isinstance(v, bool),
     "float": lambda v: isinstance(v, (int, float)) and not isinstance(v, bool),
@@ -304,7 +304,7 @@ def check_view(doc: ViewDoc, viewmodel: Any) -> list[str]:
                 reads = set(item.statements.names)
                 calls = list(_called_names(item.statements))
             for name in sorted(reads):
-                if name in local or name in _RESERVED_READS or name in BUILTIN_FUNCTIONS or ("read", name) in seen:
+                if name in local or name in _RESERVED_READS or name in BUILTIN_FUNCTIONS or name in _ACTION_FAMILIES or ("read", name) in seen:
                     continue
                 seen.add(("read", name))
                 if viewmodel is None:

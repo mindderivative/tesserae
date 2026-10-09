@@ -27,15 +27,17 @@ __all__ = ["EVENTS", "ForSpec", "Handler", "LoadError", "Node", "ViewDoc", "load
 
 #: Keys every node may have, besides its widget's properties (section 2).
 UNIVERSAL_KEYS = ("widget", "name", "if", "for", "key", "slot", "state", "style", "classes", "handlers", "a11y", "interaction",
-                  "window_region", "route", "children")
+                  "window_region", "route", "focus_group", "children")
 #: Keys only the root of a view file may have.
 HEADER_KEYS = ("params", "expects")
-#: The handler events (section 9.1): `view._EVENTS` plus `on_key` and `on_submit`. `tests/test_nodes.py` keeps the two in step.
+#: The handler events (section 9.1): `view._EVENTS` plus `on_key`, `on_submit` and `on_press`. `tests/test_nodes.py` keeps the two in step.
 EVENTS = ("on_click", "on_hover_enter", "on_hover_exit", "on_change", "on_focus_enter", "on_focus_exit", "on_tap", "on_long_press",
           "on_pan", "on_pinch", "on_touch_start", "on_touch_move", "on_touch_end", "on_touch_cancel", "on_file_hover",
-          "on_file_hover_cancel", "on_file_drop", "on_link", "on_key", "on_submit")
+          "on_file_hover_cancel", "on_file_drop", "on_link", "on_key", "on_submit", "on_press")
 A11Y_FIELDS = ("label", "role", "hidden", "live", "level", "expanded", "selected", "checked", "value", "value_min", "value_max", "value_step")
 WINDOW_REGIONS = ("drag", "none")
+#: How arrow keys move focus among a `focus_group`'s items: along one axis, or both.
+FOCUS_GROUPS = ("horizontal", "vertical", "both")
 #: 0.4.x keys that no longer exist, and what to write.
 OLD_KEYS = {
     "kind": "write 'widget: X'", "component": "write 'widget: X'", "view": "write 'widget: X' (a view is called by its name)",
@@ -198,6 +200,7 @@ class Node:
     interaction: Any = None
     window_region: Optional[str] = None
     route: Optional[str] = None
+    focus_group: Optional[str] = None
 
     def subnodes(self) -> Iterator[tuple[str, int, "Node"]]:
         """The nodes directly under this one, as `(segment, index, node)`: the `node`/`nodes` properties, then the children."""
@@ -376,6 +379,10 @@ class _Parser:
             if value not in WINDOW_REGIONS:
                 raise self.fail(vat, f"'window_region:' is one of {', '.join(WINDOW_REGIONS)}, got {value!r}", _near(value, WINDOW_REGIONS))
             node.window_region = value
+        elif key == "focus_group":
+            if value not in FOCUS_GROUPS:
+                raise self.fail(vat, f"'focus_group:' is one of {', '.join(FOCUS_GROUPS)}, got {value!r}", _near(value, FOCUS_GROUPS))
+            node.focus_group = value
         elif key == "route":
             if not isinstance(value, str):
                 raise self.fail(vat, f"'route:' takes a path (\"\" for the home screen), got {_describe(value)}")

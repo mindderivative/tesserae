@@ -73,6 +73,8 @@ class Scope:
         self.root = root if root is not None or parent is None else parent.root
         #: built-in actions (`window.close`, `navigate.back`, `navigate_to(...)`): a function from a dotted name to a callable or None
         self.actions = actions if actions is not None or parent is None else parent.actions
+        #: the instance whose own names and handlers these are (set on the scope of each built-in widget)
+        self.instance: Optional["Instance"] = None
 
     def _frame(self, name: str) -> Optional["Scope"]:
         scope: Optional[Scope] = self
@@ -126,7 +128,7 @@ class Scope:
 
     def _action(self, path: str) -> Optional[Callable[..., Any]]:
         if self.actions is not None:
-            built_in = self.actions(path)
+            built_in = self.actions(path, self) if getattr(self.actions, "wants_scope", False) else self.actions(path)
             if built_in is not None:
                 return built_in
         if self.root is None:
@@ -137,6 +139,15 @@ class Scope:
                 return None
             target = getattr(target, part)
         return target if callable(target) and not isinstance(target, (Signal, Computed)) else None
+
+    def nearest_instance(self) -> Optional["Instance"]:
+        """The instance of the closest widget this scope belongs to."""
+        scope: Optional[Scope] = self
+        while scope is not None:
+            if scope.instance is not None:
+                return scope.instance
+            scope = scope.parent
+        return None
 
     def is_writable(self, name: str) -> bool:
         frame = self._frame(name)
@@ -173,6 +184,9 @@ class Instance:
         self.interaction: Any = node.interaction
         self.window_region: Optional[str] = node.window_region
         self.route: Optional[str] = node.route
+        self.focus_group: Optional[str] = node.focus_group
+        #: the root of the view this node was written in (names are unique within it): where `focus(name)` looks
+        self.view_root: Optional["Instance"] = None
         self.state: dict[str, Signal] = {}
         #: model properties given a bare writable reference: property -> (name, scope); what the user's edit is written back to
         self.models: dict[str, tuple[str, Scope]] = {}
@@ -646,9 +660,11 @@ class Composer:
         self._register(inst, ctx)
         if forced and ctx.owner is not None:
             ctx.owner.root = inst
+        inst.view_root = ctx.owner.root if ctx.owner is not None else None
         inner = self._with_state(node, scope, iid, "node", ctx, inst)
         if node.interaction or forced:  # `hovered`, `focused` and `pressed` are the nearest interactive widget's (a call may make a root so)
             inner = Scope(inner, states=inst, readonly=True)
+        inner.instance = inst
         inst.identities.append(Identity(node.widget, None, lambda name, inst=inst: _read(inst, name), inner, inst.interaction_signal))
         if ctx.owner is not None and node.name and not forced:
             owner = ctx.owner
@@ -790,6 +806,8 @@ class Composer:
             inst.window_region = node.window_region
         if node.route is not None:
             inst.route = node.route
+        if node.focus_group is not None:
+            inst.focus_group = node.focus_group
         if node.name is not None:
             inst.name = node.name
         inst.state = {**inst.state, **holder.state}

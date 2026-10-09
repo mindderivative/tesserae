@@ -113,7 +113,7 @@ def test_handlers_map_known_events_to_an_action_or_statements():
 def test_the_events_are_the_views_events_plus_on_key():
     from tesserae.view import _EVENTS
 
-    assert set(EVENTS) == set(_EVENTS) | {"on_key", "on_submit"}
+    assert set(EVENTS) == set(_EVENTS) | {"on_key", "on_submit", "on_press"}
 
 
 def test_a11y_takes_the_documented_fields_checked_and_bound():

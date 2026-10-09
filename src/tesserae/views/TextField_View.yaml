@@ -27,6 +27,7 @@ style: {flex_direction: vertical}
 children:
   - widget: Container
     name: box
+    handlers: {on_press: "focus('input')"}
     style: {flex_direction: horizontal, align_content: left, gap: 12, padding: {left: 16, right: 16, top: 0, bottom: 0}, min_height: 56}
     children:
       - {widget: Icon, name: leading_icon, if: "leading != ''", icon: "{{ leading }}", style: {width: 24, height: 24}}
