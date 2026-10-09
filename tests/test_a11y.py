@@ -160,7 +160,7 @@ def test_reconcile_resets_dropped_a11y_fields():
 @pytest.mark.parametrize("value, message", [
     ("Save", "`a11y:` takes a mapping"),
     ({"name": "Save"}, r"unknown a11y field\(s\) \['name'\]"),
-    ({"checked": True}, r"unknown a11y field\(s\) \['checked'\]"),  # widget state: M40's
+    ({"description": "x"}, r"unknown a11y field\(s\) \['description'\]"),  # not a state tre has yet
     ({"role": "banner"}, "a11y role 'banner' isn't one of"),
     ({"level": 0}, "a11y level must be a positive whole number"),
     ({"live": "rude"}, "a11y live 'rude' isn't one of"),

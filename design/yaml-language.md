@@ -540,6 +540,10 @@ removed in the release after, with clear messages, as the 0.4.5 and 0.4.6 patter
 - **YAML trap**: `name: no` or `name: yes` reads as a boolean; the error says to quote it.
 - A reactive `for:` over a list that is **replaced** is reconciled; a list changed **in place** is not seen (Signals notify on assignment). The ViewModel replaces lists, as `Signal.set` does everywhere.
 
+**Findings of the foundations (level 0 of the build order)**:
+
+- **#210, the accessibility states tre already has.** `a11y:` takes `expanded`, `selected`, `checked`, `value`, `value_min`, `value_max` and `value_step` beside the original five, fixed or bound (everything but `role` and `live` can follow an expression), and `null` clears one (tre holds them unset until a node says; `hidden` is always one or the other). A control kind sets its own `checked`, `selected` and `value`, so `a11y:` refuses them there. What tre lacks (`pressed`, `invalid`, `description`, `controls`, `current`, `value_text`, `busy`) is #232 and #237.
+
 **Findings of the component pass: TextField (#184)**, the first component, which also built what the others use:
 
 - **Shipped views.** `src/tesserae/views/` holds `<Name>_View.yaml` and `<Name>_Stylesheet.yaml` (section 4, step 4). `ViewLibrary` finds a view in the project, then there; a project view of the same name replaces the shipped one **and its shipped rules** (`RuleSheet.without`). Shipped rules are the lowest layer, then the app's.

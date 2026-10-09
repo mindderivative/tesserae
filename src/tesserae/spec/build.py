@@ -799,12 +799,16 @@ def focus_ring_color(scheme: Optional[dict[str, RGBA]]) -> RGBA:
 
 #: The `a11y:` fields a YAML node may set; widget states (`checked`, ...)
 #: belong to Tesserae's widgets (M40).
-_A11Y_YAML = ("label", "role", "hidden", "live", "level")
+_A11Y_YAML = ("label", "role", "hidden", "live", "level", "expanded", "selected", "checked", "value", "value_min", "value_max", "value_step")
+#: The states `a11y:` may set on a node that is not a control; a control kind sets its own (a Checkbox is checked or not by its state).
+_A11Y_STATES = frozenset({"expanded", "selected", "checked", "value", "value_min", "value_max", "value_step"})
 #: What each `a11y:` field resets to when a patch drops it.
-_A11Y_RESET = {"label": None, "a11y_hidden": False, "live": None, "level": None}
+_A11Y_RESET = {"label": None, "a11y_hidden": False, "live": None, "level": None, "expanded": None, "selected": None, "checked": None,
+               "value": None, "value_min": None, "value_max": None, "value_step": None}
 #: The `a11y:` fields a `{{ }}` binding may set (M47 Q2), and the
 #: property each is; `role` and `live` stay fixed.
-A11Y_BINDABLE = {"label": "label", "hidden": "a11y_hidden", "level": "level"}
+A11Y_BINDABLE = {"label": "label", "hidden": "a11y_hidden", "level": "level", "expanded": "expanded", "selected": "selected", "checked": "checked",
+                 "value": "value", "value_min": "value_min", "value_max": "value_max", "value_step": "value_step"}
 
 
 def is_binding(value: Any) -> bool:
@@ -833,6 +837,9 @@ def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
                              + _did_you_mean(unknown, _A11Y_YAML))
     if "role" in value and node["kind"] in _OWN_ROLE:
         raise SpecBuildError(f"{where}: a {node['kind']} has its own role; `a11y:` can't set `role`")
+    own = sorted(_A11Y_STATES & set(value)) if node["kind"] in _CONTROL_KINDS else []
+    if own:
+        raise SpecBuildError(f"{where}: a {node['kind']} sets its own {own[0]}; `a11y:` can't")
     bound = [k for k, v in value.items() if is_binding(v)]
     fixed_only = [k for k in bound if k not in A11Y_BINDABLE]
     if fixed_only:

@@ -35,7 +35,7 @@ its name, with the params as plain keys. There is no other difference.
 | `style` | layout and paint, and the extras the widget declares |
 | `classes` | extra names a stylesheet rule can select |
 | `handlers` | events to actions |
-| `a11y` | accessibility: `label`, `role`, `hidden`, `live`, `level` |
+| `a11y` | accessibility: `label`, `role`, `hidden`, `live`, `level`, `expanded`, `selected`, `checked`, `value`, `value_min`, `value_max`, `value_step` |
 | `interaction` | the hover, focus and press feedback: `true`, `false` or a colour role |
 | `window_region` | `drag` or `none`, for a custom title bar |
 | `route` | on a view call inside a window: makes it a screen |

@@ -288,6 +288,13 @@ overflow: <clip | ellipsis>
 | `hidden` | `true` or `false` | Hide it from assistive technology. |
 | `live` | `assertive` \| `off` \| `polite` | How changes to it are announced. |
 | `level` | an integer | A heading's level. |
+| `expanded` | `true` or `false` or any value or text | Open or closed, on something that opens and closes. |
+| `selected` | `true` or `false` or any value or text | One of a set, chosen. |
+| `checked` | `true` or `false` or any value or text | On or off. |
+| `value` | a number or any value or text | A number the node holds. |
+| `value_min` | a number or any value or text | Its least. |
+| `value_max` | a number or any value or text | Its most. |
+| `value_step` | a number or any value or text | One step. |
 
 ## The title bar
 

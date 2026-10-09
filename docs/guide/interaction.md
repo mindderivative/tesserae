@@ -140,16 +140,20 @@ A node's `a11y:` field sets what assistive technology hears:
 | `hidden` | `true` hides a decorative node from assistive technology. |
 | `live` | `polite` or `assertive`, so changes to the node's content are announced. |
 | `level` | A heading's level, from 1. |
+| `expanded` | `true` or `false` on something that opens and closes (a disclosure, a menu button); leave it out on what cannot. |
+| `selected` | `true` or `false` on one of a set (a tab, a list row). |
+| `checked` | `true` or `false` on something that is on or off; `null` is neither. |
+| `value`, `value_min`, `value_max`, `value_step` | A number and its range, for something that has one (a progress bar, a custom slider). |
 
 On a TextField, the fields apply to its input; on a control (a
-checkbox, a switch and so on), to the control. A field you remove is
-reset when the view reloads. Anything else is an error that names the
-widget. Widget states such as `checked` belong to Tesserae's own
-[controls](controls.md).
+checkbox, a switch and so on), to the control, which sets its own
+`checked`, `selected` and `value`, so those three are an error there.
+A field you remove is reset when the view reloads. Anything else is an
+error that names the widget.
 
 ### Bound fields
 
-`label`, `hidden` and `level` can follow the ViewModel: give the
+Every field but `role` and `live` can follow the ViewModel: give the
 field a `{{ }}` binding, as in `bindings:`, and it's kept up to date:
 
 ```yaml
@@ -166,8 +170,9 @@ field a `{{ }}` binding, as in `bindings:`, and it's kept up to date:
 The whole value is the binding. To mix text with a value, build the
 string in the ViewModel (a `Computed`, say:
 `self.unread_summary = Computed(lambda: f"{self.unread.get()} unread")`).
-A label must come out a string, `hidden` true or false, and `level` a
-whole number from 1; `None` clears a label or level. A wrong value is an
+A label must come out a string, `hidden`, `expanded`, `selected` and
+`checked` true or false, a `value` a number, and `level` a whole number
+from 1; `None` clears a label, a level, a state or a number (not `hidden`). A wrong value is an
 error naming the widget and field. `role` and `live` can't be bound: a
 role is what the node is, and `live` is how its changes are announced.
 A bound label on a Link is its name, whatever its text says.
@@ -198,7 +203,7 @@ isn't one of them: `tre` doesn't route it through `a11y_action`.
 and clicks. Tesserae's [controls](controls.md) make it behave: a disabled control
 can't be focused or used, and draws in MD3's disabled colours.
 
-`bind` keeps a widget's `label`, `hidden` or `level` up to date, as a
+`bind` keeps a widget's `label`, `hidden`, `level`, `expanded`, `selected`, `checked` or `value` (with its range) up to date, as a
 bound YAML field does. Each is a `Signal`, a `Computed`, a
 function of no arguments or a plain value:
 

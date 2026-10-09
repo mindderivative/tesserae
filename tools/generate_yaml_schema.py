@@ -248,7 +248,15 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                   "role": {"enum": sorted(a11y.ROLES), "description": "What kind of thing it is."},
                                   "hidden": {"type": "boolean", "description": "Hide it from assistive technology."},
                                   "live": {"enum": sorted(a11y.LIVE), "description": "How changes to it are announced."},
-                                  "level": {"type": "integer", "minimum": 1, "description": "A heading's level."}},
+                                  "level": {"type": "integer", "minimum": 1, "description": "A heading's level."},
+                                  "expanded": {"anyOf": [{"type": "boolean"}, {"type": "null"}, {"type": "string"}],
+                                               "description": "Open or closed, on something that opens and closes."},
+                                  "selected": {"anyOf": [{"type": "boolean"}, {"type": "null"}, {"type": "string"}], "description": "One of a set, chosen."},
+                                  "checked": {"anyOf": [{"type": "boolean"}, {"type": "null"}, {"type": "string"}], "description": "On or off."},
+                                  "value": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "A number the node holds."},
+                                  "value_min": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "Its least."},
+                                  "value_max": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "Its most."},
+                                  "value_step": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "One step."}},
                    "additionalProperties": False}
     style_file = {"type": "string", "pattern": r"_Style\.yaml$", "description": "A `*_Style.yaml` file next to this one."}
     maybe_bool = {"anyOf": [{"type": "boolean"}, {"type": "string"}]}

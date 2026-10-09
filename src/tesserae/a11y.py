@@ -12,7 +12,7 @@ one of them in 0.3.4.
 `tre`'s `disabled` is only what's announced: a disabled node still takes
 focus and clicks. Tesserae's widgets make it behave.
 
-`bind` keeps a node's `label`, `hidden` or `level` following a
+`bind` keeps a node's `label`, `hidden`, `level`, `checked`, `selected`, `expanded` or `value` (with `value_min`, `value_max`, `value_step`) following a
 `Signal`, a `Computed` or a function, as a YAML `a11y:` binding does.
 """
 
@@ -35,6 +35,9 @@ ACTIONS = frozenset({"increment", "decrement", "expand", "collapse", "scroll_int
 
 _BOOLS = ("checked", "selected", "expanded", "disabled", "hidden")
 _NUMBERS = ("value", "value_min", "value_max", "value_step")
+#: The states and numbers tre holds as "not set" (`None`) until a node says: `expanded` is absent on a node that cannot expand, and
+#: `checked: null` is a box that is neither on nor off to a screen reader. `hidden` and `disabled` are always one or the other.
+_OPTIONAL = frozenset({"checked", "selected", "expanded", "value", "value_min", "value_max", "value_step"})
 
 
 def check(fields: dict[str, Any], where: str = "") -> dict[str, Any]:
@@ -55,6 +58,8 @@ def check(fields: dict[str, Any], where: str = "") -> dict[str, Any]:
         elif name == "level":
             if value is not None and (isinstance(value, bool) or not isinstance(value, int) or value < 1):
                 raise ValueError(f"{prefix}a11y level must be a positive whole number, got {value!r}")
+        elif name in _OPTIONAL and value is None:
+            pass
         elif name in _BOOLS:
             if not isinstance(value, bool):
                 raise ValueError(f"{prefix}a11y {name} must be true or false, got {value!r}")
@@ -102,7 +107,7 @@ def on_action(node: Any, handlers: dict[str, Callable[[Any], Any]],
 #: The fields `bind` can keep up to date (M47 Q2): values that change as
 #: the app runs. `role` and `live` say what a node is and how it's
 #: announced, so they're set once, with `describe`.
-BINDABLE = ("label", "hidden", "level")
+BINDABLE = ("label", "hidden", "level", "checked", "selected", "expanded", "value", "value_min", "value_max", "value_step")
 
 
 def bind(node: Any, **fields: Any) -> Callable[[], None]:

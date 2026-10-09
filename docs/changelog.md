@@ -64,6 +64,10 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `error` and `read_only` as states a rule can select, a widget's state read by its parts' rules, and the icons `visibility`, `visibility_off` and
   `error`.
 
+- **More accessibility states** ([#210](https://github.com/mindderivative/tesserae/issues/210)). `a11y:` takes `expanded`, `selected`, `checked`, `value`,
+  `value_min`, `value_max` and `value_step`, in both syntaxes and in `tesserae.a11y`; every field but `role` and `live` can be bound, and `null`
+  clears a state tre holds unset. A control still sets its own `checked`, `selected` and `value`.
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).
