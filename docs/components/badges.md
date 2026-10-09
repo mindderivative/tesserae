@@ -9,7 +9,20 @@ text. It sits on the corner of what it describes.
 
 ## In Tesserae
 
-The dot is a small `Rect`; the labelled badge is a pill with `label_small` text.
+`widget: Badge` is a view Tesserae ships (`Badge_View.yaml`) with its look as rules (`Badge_Stylesheet.yaml`): a 6 pixel `error` dot, or with a
+`value` a 16 pixel pill in `label_small` on `on_error`, at least 16 wide and growing with its text.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `value` | a number or a few characters | what it shows; empty is a dot |
+| `limit` | whole number | a number over it shows as the limit and a plus (`999+`); `999` by default |
+| `show` | true or false | whether it shows; `show: "{{ unread > 0 }}"` hides a zero count |
+| `anchored` | true or false | its children are the host, and the badge sits over the host's top right corner |
+
+Anchored, a dot overlaps the corner by 4 and a pill starts 12 in from the corner and 4 above it. The badge is hidden from a screen reader: put the
+count in the host's label ("Inbox, 3 unread"). The parts a stylesheet can address are `mark` and `label`.
+
+`widget: Badge` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -53,6 +66,25 @@ children:
 ```
 
 ## Using it
+
+```yaml
+name: nav
+widget: Container
+style: {flex_direction: horizontal, gap: 24, width: 200, height: 60, padding: 16}
+children:
+  - widget: Badge
+    value: "{{ unread }}"
+    show: "{{ unread > 0 }}"
+    anchored: true
+    children:
+      - {widget: Icon, icon: email, style: {width: 24, height: 24, foreground: on_surface}}
+  - widget: Badge
+    anchored: true
+    children:
+      - {widget: Icon, icon: home, style: {width: 24, height: 24, foreground: on_surface}}
+```
+
+## Using the fragment
 
 In a view:
 

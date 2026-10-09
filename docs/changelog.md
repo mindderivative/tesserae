@@ -136,6 +136,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   focus, gone on leave, press, blur or Escape; the text is the node's accessibility `description` where it has none.
 - **`transition:` for layout** ([#239](https://github.com/mindderivative/tesserae/issues/239)). `width`, `height`, `x`, `y`, `gap`, `padding` and `margin` ease like the rest. tre cannot animate them yet
   (requested: tre#161), so they are set frame by frame along the curve; when tre can, its own animation is used without a change.
+- **Badge** ([#141](https://github.com/mindderivative/tesserae/issues/141), [#142](https://github.com/mindderivative/tesserae/issues/142)). `widget: Badge`: a dot, or a pill with a `value` capped at `limit` (`999+`), `show`, and `anchored: true` to
+  sit over the top right corner of its host (the children). One view replaces `BadgeDot` and `BadgeLabeled`, which still work.
 
 ### Removed
 

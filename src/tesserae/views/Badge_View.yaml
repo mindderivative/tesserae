@@ -1,0 +1,27 @@
+# The Material 3 badge: a 6 dp dot (no value) or a 16 dp pill holding a count or short text. Alone it is the mark itself, to place where you like;
+# with `anchored: true` its children are the host (an icon, a button, a tab) and the mark sits over the host's top right corner.
+# The look is in Badge_Stylesheet.yaml; this file is the structure. A count over `limit` shows as `999+`. Hide a zero count with `show: "{{ n > 0 }}"`.
+# The mark is hidden from a screen reader: put the count in the host's label ("Inbox, 3 unread").
+params:
+  value: {type: any, default: "", doc: "A number or a few characters. Empty is a dot."}
+  limit: {type: int, default: 999, doc: "A number over this shows as the limit and a plus."}
+  show: {type: bool, default: true, doc: "Whether the badge shows."}
+  anchored: {type: bool, default: false, doc: "The children are the host, and the mark sits on its top right corner."}
+widget: Container
+children:
+  - widget: Container
+    name: host
+    if: anchored
+    children:
+      - widget: Slot
+  - widget: Container
+    name: mark
+    if: show
+    a11y: {hidden: true}
+    children:
+      - widget: Text
+        name: label
+        if: "value != ''"
+        text: "{{ (str(limit) + '+') if (isinstance(value, int) and value > limit) else str(value) }}"
+        typography_role: label_small
+        text_align: center

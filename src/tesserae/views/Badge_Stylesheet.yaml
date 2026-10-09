@@ -1,0 +1,18 @@
+# The look of Badge (Material 3): an error-coloured dot or pill, with the label in on_error. Anchored, the mark is placed over the host's top right
+# corner: a dot overlaps it by 4, a pill starts 12 in from the corner and sits 4 above it.
+styles:
+  - widget: Badge
+    part: mark
+    style:
+      background: error
+      width: "{{ 6 if value == '' else (16 if len(str(value)) < 2 else 8 + 6 * len(str(value))) }}"
+      height: "{{ 6 if value == '' else 16 }}"
+      corner_radius: "{{ 3 if value == '' else 8 }}"
+      align_content: center
+      position: "{{ 'absolute' if anchored else 'relative' }}"
+      x: "{{ '100%' if anchored else 'auto' }}"
+      y: "{{ (0 if value == '' else -4) if anchored else 'auto' }}"
+      translate_x: "{{ (-4 if value == '' else -12) if anchored else 0 }}"
+  - widget: Badge
+    part: label
+    style: {foreground: on_error}
