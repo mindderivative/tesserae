@@ -176,6 +176,23 @@ is written in: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a V
 of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a param, a loop variable or
 anything else is an error; so is `if`, `for` or any other statement. A disabled node's handlers do not run.
 
+### Timers
+
+`after(ms, action)` runs `action` once after `ms` milliseconds; `every(ms, action)` runs it every `ms` until cancelled. `action` is text, run in the
+scope the handler was written in: an action name (`'bump'`) or statements (`'shown = False'`). A third argument names the timer so `cancel('name')`
+can stop it, and starting one of the same name again restarts it (a hover delay, a debounce). A name belongs to the scope that wrote it, as a local
+name does: two items of a `for:` each have their own. A timer stops when its view closes or the widget that started it is gone. Times are
+frame-quantized: a timer fires on the first frame after its time is up. A mistake in a literal action text is found when the view loads.
+
+```yaml
+widget: Container
+handlers:
+  on_click: "shown = True; after(2000, 'shown = False', 'dismiss')"
+  on_hover_exit: "cancel('dismiss')"
+```
+
+For Python, `tesserae.timers.Timers(window)` has the same `after`, `every`, `cancel` and `cancel_all`.
+
 ## Drawing
 
 `widget: Canvas` is a surface you draw on with data. `draw:` lists commands painted in order: `{rect: [x, y, width, height]}`,

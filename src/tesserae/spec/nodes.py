@@ -19,7 +19,7 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 
 from tesserae import a11y as a11y_module
-from tesserae.expr import Expr, ExprError, Origin, Statements, compile_expr, compile_statements, compile_template, is_action_name
+from tesserae.expr import Expr, ExprError, Origin, Statements, compile_expr, compile_statements, compile_template, is_action_name, timer_handlers
 from tesserae.spec import widgets as registry
 from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from_params, is_expression, style_fields_of
 
@@ -424,7 +424,11 @@ class _Parser:
                 node.handlers[event] = Handler(action.strip(), action=action.strip())
                 continue
             try:
-                node.handlers[event] = Handler(action, statements=compile_statements(action, origin=self.origin(avat)))
+                statements = compile_statements(action, origin=self.origin(avat))
+                for later in timer_handlers(statements):
+                    if not is_action_name(later):
+                        compile_statements(later, origin=self.origin(avat))
+                node.handlers[event] = Handler(action, statements=statements)
             except ExprError as exc:
                 raise self.expr_error(exc) from None
 

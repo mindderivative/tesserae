@@ -15,13 +15,16 @@
 from __future__ import annotations
 
 import time
+import weakref
 from pathlib import Path
 from typing import Any, Callable, Optional
 
 from tesserae.follow import app_of
 from tesserae.listeners import handled
 from tesserae.reactive import Effect, untrack
+from tesserae.expr import compile_statements, is_action_name
 from tesserae.spec.compose import Instance
+from tesserae.timers import Timers
 from tesserae.spec.images import extract_images
 from tesserae.spec.lower import lower
 from tesserae.spec.nodes import ViewDoc
@@ -59,12 +62,17 @@ def _is_submit(event: Any) -> bool:
 
 def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Callable[..., Any]]]:
     """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)`, `surface.dismiss` and
-    `focus(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
+    `focus(name)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
 
     def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
         view = view_ref()
         if path == "focus":
             return lambda name: view.focus(scope, name)
+        if path in ("after", "every"):
+            start = view.timers.after if path == "after" else view.timers.every
+            return lambda ms, action, name=None: start(ms, view.timer_action(scope, action), view.timer_name(scope, name))
+        if path == "cancel":
+            return lambda name: view.timers.cancel(view.timer_name(scope, name))
         head, _, rest = path.partition(".")
         if head == "window" and rest in WINDOW_ACTIONS:
             return lambda: getattr(app_of(view.window), rest)() if app_of(view.window) is not None else None
@@ -106,12 +114,56 @@ class ComposedView(View):
         self._observed: set[int] = set()
         self._synced = False
         self._effect: Optional[Effect] = None
+        self._timers: Optional[Timers] = None
+        self._timer_code: dict[str, Any] = {}
+        self._timer_scopes: weakref.WeakKeyDictionary[Any, int] = weakref.WeakKeyDictionary()
         spec, frames = self._lowered()
         super().__init__(spec, window=window, frames=frames, **kwargs)
         handle.window = self.window  # the ViewModel finds its app through the view's window
         handle.view = self
         self._effect = Effect(self._sync)
         self._synced = True
+
+    # timers (#217)
+
+    @property
+    def timers(self) -> Timers:
+        """The view's timers; they stop when it closes."""
+        if self._timers is None:
+            self._timers = Timers(self.window)
+        return self._timers
+
+    def timer_name(self, scope: Any, name: Any) -> Optional[str]:
+        """A timer's name as the scope that wrote it owns it, as a local name is: the same name in two items of a `for:` is two timers, and in
+        two widgets of one view is one."""
+        if name is None:
+            return None
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"a timer's name is text, not {name!r}")
+        if scope is None:
+            return name
+        if scope not in self._timer_scopes:
+            self._timer_scopes[scope] = len(self._timer_scopes) + 1
+        return f"{self._timer_scopes[scope]}:{name}"
+
+    def timer_action(self, scope: Any, action: Any) -> Callable[[], None]:
+        """What `after`/`every` run: `action` (an action name or statements) in the scope it was written in, unless its widget has gone."""
+        if not isinstance(action, str) or not action.strip():
+            raise ValueError(f"after/every run an action name or statements, not {action!r}")
+        if action not in self._timer_code:
+            self._timer_code[action] = None if is_action_name(action) else compile_statements(action)
+        code = self._timer_code[action]
+        instance = scope.nearest_instance()
+
+        def run() -> None:
+            if instance is not None and instance.disposed:
+                return
+            if code is None:
+                scope.call_action(action.strip(), [], {})
+            else:
+                code.run(scope)
+
+        return run
 
     # lowering and syncing
 
@@ -352,6 +404,8 @@ class ComposedView(View):
         """Stops following the composition and releases it."""
         if self._effect is not None:
             self._effect.dispose()
+        if self._timers is not None:
+            self._timers.cancel_all()
         for undo in (*self._handler_undos, *self._state_undos, *self._group_undos):
             undo()
         self._handler_undos, self._state_undos, self._group_undos = [], [], []

@@ -89,6 +89,9 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Icons from a path** ([#216](https://github.com/mindderivative/tesserae/issues/216)). `widget: Icon` takes `path:` (SVG path data) and `view_box:` instead of a name, so any
   glyph can be drawn and tinted like the built-in ones. `tools/import_material_symbols.py DIR` turns a folder of Material Symbols SVGs into
   `src/tesserae/icon_data/material_symbols.json`, which `tesserae.icons` merges under the icons built in. The 18 built-in names are unchanged; no Symbols are bundled yet (see the issue).
+- **Timers** ([#217](https://github.com/mindderivative/tesserae/issues/217)). Handlers can call `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`; `action` is an
+  action name or statements run in the handler's scope, and a name restarts a timer of that name (a debounce). `tesserae.timers.Timers(window)` is the same for Python.
+  They run on the frame loop until tre has timers (#235) and stop with the view.
 
 ### Removed
 

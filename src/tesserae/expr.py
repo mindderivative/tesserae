@@ -492,6 +492,21 @@ def compile_statements(source: str, *, origin: Optional[Origin] = None, limits: 
     return Statements(text, tree.body, frozenset(checker.names | names), origin, limits)
 
 
+#: The calls whose second argument is a handler of its own, run later: `after(ms, "statements")`, `every(ms, "statements")`.
+TIMER_CALLS = frozenset({"after", "every"})
+
+
+def timer_handlers(statements: "Statements") -> list[str]:
+    """The handler texts written as literals in the statements' calls to `after` and `every`, so a mistake in one is found when the view loads."""
+    found: list[str] = []
+    for statement in statements.body:
+        for node in ast.walk(statement):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id in TIMER_CALLS and len(node.args) >= 2
+                    and isinstance(node.args[1], ast.Constant) and isinstance(node.args[1].value, str)):
+                found.append(node.args[1].value)
+    return found
+
+
 def _private_target(checker: _Checker, target: ast.Name) -> None:
     if target.id.startswith("_"):
         raise checker.error(target, f"the name '{target.id}' is private")
