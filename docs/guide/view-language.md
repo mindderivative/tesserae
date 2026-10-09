@@ -234,7 +234,7 @@ mask: "(###) ###-####"          # 5551234567 becomes (555) 123-4567; so does 555
 The text is read left to right and each slot takes the next character it accepts, so a paste in any format is fitted. A literal is added only
 when more input follows it (`123` is `(123`, the `) ` comes with the fourth digit), so backspace is never stuck on one; one the user typed is kept; what
 does not fit is dropped. The bound Signal holds the formatted text. The mask is applied to edits, not to a value a ViewModel sets, and tre's input
-has no caret control yet, so an edit in the middle of the text moves the caret to the end.
+has no caret control yet, so where the caret ends up after the text is rewritten is tre's to decide.
 
 ## Drawing
 

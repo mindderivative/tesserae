@@ -8,7 +8,7 @@ A text field that behaves the way Material 3 and the platforms expect: a limit o
 
 ## What exists today (tre 0.5.4)
 
-A `text_input` node has `placeholder`, `multiline` and `obscured`. It has no `max_length`, `read_only`, `input_mode`, `mask`, `submit` or composition property (each raises "unknown node property"). Tesserae works round three of them in the renderer: `max_length` and `read_only` by putting the text back on `change`, a `mask` by rewriting it (#222), `on_submit` by watching Enter on `key_down`. Those workarounds flicker for a frame on a real input, lose the caret position (setting `text` moves the caret to the end), and cannot reject an edit before it is drawn.
+A `text_input` node has `placeholder`, `multiline` and `obscured`. It has no `max_length`, `read_only`, `input_mode`, `mask`, `submit` or composition property (each raises "unknown node property"). Tesserae works round three of them in the renderer: `max_length` and `read_only` by putting the text back on `change`, a `mask` by rewriting it (#222), `on_submit` by watching Enter on `key_down`. Those workarounds run after the edit has been applied (so they cannot reject it first) and cannot say where the caret goes, because tre has no caret or selection API. Where the caret lands after the text is rewritten was not checked here (it needs a person typing).
 
 ## The ask
 

@@ -11,8 +11,7 @@ of `1234567890`, of `123-456-7890` or of `(123) 456-7890` all become `(123) 456-
 follows them: `123` is `(123` and the `) ` appears with the fourth digit, so backspace is never stuck on one. A literal the user typed is kept.
 What does not fit after the last slot is dropped.
 
-`Mask(pattern).apply(text)` is the whole of it. tre's input has no caret control yet (#234), so an edit in the middle of the text leaves the caret at
-the end.
+`Mask(pattern).apply(text)` is the whole of it. tre's input has no caret control yet (#234), so where the caret ends up after the text is rewritten is tre's to decide.
 """
 
 from __future__ import annotations
