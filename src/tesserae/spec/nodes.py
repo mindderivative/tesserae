@@ -27,7 +27,7 @@ __all__ = ["EVENTS", "ForSpec", "Handler", "LoadError", "Node", "ViewDoc", "load
 
 #: Keys every node may have, besides its widget's properties (section 2).
 UNIVERSAL_KEYS = ("widget", "name", "if", "for", "key", "slot", "state", "style", "classes", "handlers", "a11y", "interaction",
-                  "window_region", "route", "focus_group", "children")
+                  "window_region", "route", "focus_group", "tooltip", "children")
 #: Keys only the root of a view file may have.
 HEADER_KEYS = ("params", "expects")
 #: The handler events (section 9.1): `view._EVENTS` plus `on_key`, `on_submit` and `on_press`. `tests/test_nodes.py` keeps the two in step.
@@ -202,6 +202,8 @@ class Node:
     window_region: Optional[str] = None
     route: Optional[str] = None
     focus_group: Optional[str] = None
+    #: `tooltip:` as `{text, title, delay}`, each text possibly a `Template`
+    tooltip: dict[str, Any] = field(default_factory=dict)
 
     def subnodes(self) -> Iterator[tuple[str, int, "Node"]]:
         """The nodes directly under this one, as `(segment, index, node)`: the `node`/`nodes` properties, then the children."""
@@ -384,6 +386,8 @@ class _Parser:
             if value not in FOCUS_GROUPS:
                 raise self.fail(vat, f"'focus_group:' is one of {', '.join(FOCUS_GROUPS)}, got {value!r}", _near(value, FOCUS_GROUPS))
             node.focus_group = value
+        elif key == "tooltip":
+            self.tooltip(node, value, vat)
         elif key == "route":
             if not isinstance(value, str):
                 raise self.fail(vat, f"'route:' takes a path (\"\" for the home screen), got {_describe(value)}")
@@ -432,6 +436,28 @@ class _Parser:
                 node.handlers[event] = Handler(action, statements=statements)
             except ExprError as exc:
                 raise self.expr_error(exc) from None
+
+    def tooltip(self, node: Node, value: Any, vat: Position) -> None:
+        """`tooltip: text`, or `tooltip: {text, title, delay}` for a rich one."""
+        if isinstance(value, str):
+            node.tooltip = {"text": self.template(value, vat)}
+            return
+        if not isinstance(value, PMap):
+            raise self.fail(vat, f"'tooltip:' takes text, or a mapping of text, title and delay, got {_describe(value)}")
+        for key, item in value.items():
+            if key not in ("text", "title", "delay"):
+                raise self.fail(value.key_at[key], f"no tooltip field '{key}'", _near(key, ("text", "title", "delay")))
+            iat = value.val_at[key]
+            if key == "delay":
+                if isinstance(item, bool) or not isinstance(item, (int, float)) or item < 0:
+                    raise self.fail(iat, f"tooltip delay is milliseconds, 0 or more, got {_describe(item)}")
+                node.tooltip[key] = item
+            elif not isinstance(item, str):
+                raise self.fail(iat, f"tooltip {key} is text, got {_describe(item)}")
+            else:
+                node.tooltip[key] = self.template(item, iat)
+        if "text" not in node.tooltip:
+            raise self.fail(vat, "a tooltip needs text", "write tooltip: {text: ..., title: ...}")
 
     def a11y(self, node: Node, value: Any, vat: Position) -> None:
         if not isinstance(value, PMap):

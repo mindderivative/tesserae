@@ -191,6 +191,8 @@ class Instance:
         self.window_region: Optional[str] = node.window_region
         self.route: Optional[str] = node.route
         self.focus_group: Optional[str] = node.focus_group
+        #: `text`, `title` and `delay` of the tooltip, each a value or a `Computed`; empty when the node has none
+        self.tooltip: dict[str, Any] = {}
         #: the root of the view this node was written in (names are unique within it): where `focus(name)` looks
         self.view_root: Optional["Instance"] = None
         self.state: dict[str, Signal] = {}
@@ -728,6 +730,8 @@ class Composer:
             inst.style[name] = self._bind(value, inner, inst)
         for name, value in node.a11y.items():
             inst.a11y[name] = self._bind(value, inner, inst)
+        for name, value in node.tooltip.items():
+            inst.tooltip[name] = self._bind(value, inner, inst)
         for event, handler in node.handlers.items():
             inst.handlers[event] = (handler, inner)
         for name, value in node.props.items():
@@ -863,6 +867,8 @@ class Composer:
             inst.style[name] = self._bind(value, call_scope, inst)
         for name, value in node.a11y.items():
             inst.a11y[name] = self._bind(value, call_scope, inst)
+        for name, value in node.tooltip.items():
+            inst.tooltip[name] = self._bind(value, call_scope, inst)
         for event, handler in node.handlers.items():
             inst.handlers[event] = (handler, call_scope)
         inst.classes = [*inst.classes, *node.classes]

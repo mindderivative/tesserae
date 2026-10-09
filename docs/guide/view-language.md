@@ -288,6 +288,26 @@ text: Read the docs
 handlers: {on_click: "open_url('https://example.com/docs')"}
 ```
 
+## Tooltips
+
+Any node can have a `tooltip:`. A plain one is text; a rich one adds a title.
+
+```yaml
+widget: Container
+tooltip: Delete                                   # or a {{ }} expression
+```
+
+```yaml
+widget: Container
+tooltip: {title: Delete, text: Removes the file for good, delay: 300}
+```
+
+It shows next to the node after the pointer has rested on it for `delay` milliseconds (500 by default), or at once when keyboard focus arrives (a click
+that focuses it does not show it). It goes when the pointer leaves, when the node is pressed, when focus leaves or on Escape, and it never takes the
+pointer or a press. A plain tooltip is the inverse surface; a rich one is a raised surface with the title above the text. The text is also given to a
+screen reader as the node's `description` where the node has none. A tooltip on a view call goes to the root of the view called. Rich tooltips with
+actions need the Button and come with the Tooltip component.
+
 ## Accessibility
 
 `a11y:` says what a node tells assistive technology: `label`, `role`, `hidden`, `live`, `level`, and the states `expanded`, `selected`, `checked`,

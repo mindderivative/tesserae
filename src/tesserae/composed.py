@@ -19,7 +19,7 @@ import weakref
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from tesserae import a11y as a11y_module, urls
+from tesserae import a11y as a11y_module, tokens, urls
 from tesserae.follow import app_of
 from tesserae.listeners import handled, listen_window
 from tesserae.reactive import Effect, Signal, untrack
@@ -157,6 +157,8 @@ class ComposedView(View):
         self._scrolled: dict[str, dict[str, str]] = {}
         self._firing: list[Instance] = []
         self._split_dragging: set[str] = set()
+        self._tips: dict[str, tuple[Any, Callable[[], None]]] = {}  # tooltips showing: the node id -> its layer and the Escape listener's undo
+        self._tip_undos: list[Callable[[], None]] = []
         self._split_last_up: dict[str, float] = {}
         self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
@@ -240,6 +242,7 @@ class ComposedView(View):
             untrack(self._wire_scroll)
             untrack(self._wire_overlays)
             untrack(self._wire_splitters)
+            untrack(self._wire_tooltips)
             untrack(self._wire_states)
             untrack(self._wire_focus_groups)
             untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -420,6 +423,79 @@ class ComposedView(View):
                 "decrement": lambda e, inst=inst, user=user: user(float(inst.value("position")) - self.SPLIT_STEP),
                 "set_value": lambda e, user=user: user(float(e.value)),
             }, listen=self._listen))
+
+    # tooltips (#238)
+
+    #: how long the pointer rests on a node before its tooltip shows (Material 3: 500 ms), and the widest a plain one is
+    TIP_DELAY = 500.0
+    TIP_WIDTH = 200.0
+
+    def _tip_value(self, inst: Instance, name: str, default: Any = None) -> Any:
+        held = inst.tooltip.get(name, default)
+        return held.get() if hasattr(held, "get") else held
+
+    def _wire_tooltips(self) -> None:
+        """A node's `tooltip:` shows in a layer next to it when the pointer rests on it for `delay` (500 ms) or at once when keyboard focus lands on
+        it, and goes when the pointer leaves, it is pressed, focus leaves, or Escape is pressed. The text also goes to the node as its accessibility
+        `description` where it has none."""
+        for undo in self._tip_undos:
+            undo()
+        self._tip_undos = []
+        live: set[str] = set()
+        for inst in self.handle.composition.walk():
+            if not inst.tooltip or inst.id not in self._built.outer:
+                continue
+            live.add(inst.id)
+            node = self._built.outer[inst.id]
+            if "description" not in inst.a11y and self._tip_value(inst, "text"):
+                a11y_module.apply_extras(node, {"description": str(self._tip_value(inst, "text"))})
+
+            def start(event: Any = None, inst: Instance = inst) -> None:
+                self.timers.after(float(self._tip_value(inst, "delay", self.TIP_DELAY)), lambda: self._show_tip(inst), name=f"tip:{inst.id}")
+
+            def now(event: Any = None, inst: Instance = inst) -> None:
+                if getattr(event, "focus_visible", True):  # a mouse click that focuses it is not a reason to show it
+                    self._show_tip(inst)
+
+            def away(event: Any = None, inst: Instance = inst) -> None:
+                self.timers.cancel(f"tip:{inst.id}")
+                self._hide_tip(inst.id)
+
+            for event_name, fn in (("pointer_enter", start), ("pointer_leave", away), ("pointer_down", away), ("focus", now), ("unfocus", away)):
+                self._tip_undos.append(self._listen(node, event_name, fn))
+        for gone in set(self._tips) - live:
+            self._hide_tip(gone)
+
+    def _show_tip(self, inst: Instance) -> None:
+        text = self._tip_value(inst, "text")
+        if inst.id in self._tips or not text or inst.id not in self._built.outer:
+            return
+        scheme = self._scheme or tokens.BASELINE
+        title = self._tip_value(inst, "title")
+        rich = bool(title)
+        ink = scheme["on_surface" if rich else "inverse_on_surface"]
+        pad_x, pad_y = (16.0, 12.0) if rich else (8.0, 4.0)
+        layer = self.window.create(
+            "box", flex_direction="vertical", gap=4.0, fill=scheme["surface_container" if rich else "inverse_surface"],
+            corner_radius=12.0 if rich else 4.0, max_width=self.TIP_WIDTH, padding_left=pad_x, padding_right=pad_x, padding_top=pad_y,
+            padding_bottom=pad_y, hit_testable=False, a11y_hidden=True,
+            shadows=tokens.elevation_shadows(2) if rich else [])
+        if rich:
+            layer.add_child(self.window.create("text", text=str(title), font_family="Roboto", font_size=14.0, font_weight=500.0, fill=ink))
+        layer.add_child(self.window.create("text", text=str(text), font_family="Roboto", font_size=12.0, fill=ink, wrap="word"))
+        self.window.show_layer(layer, anchor=self._built.outer[inst.id], placement="below", modal=False, dismissible=False)
+
+        def escape(event: Any, inst_id: str = inst.id) -> None:
+            if event.key == "escape":
+                self._hide_tip(inst_id)
+
+        self._tips[inst.id] = (layer, self._listen(self.window.root, "key_down", escape))
+
+    def _hide_tip(self, inst_id: str) -> None:
+        shown = self._tips.pop(inst_id, None)
+        if shown is not None:
+            shown[1]()
+            self.window.hide_layer(shown[0])
 
     # overlays (#227)
 
@@ -680,6 +756,10 @@ class ComposedView(View):
             self._effect.dispose()
         if self._timers is not None:
             self._timers.cancel_all()
+        for inst_id in list(self._tips):
+            self._hide_tip(inst_id)
+        for undo in self._tip_undos:
+            undo()
         for inst_id in list(self._shown_layers):
             self._hide_layer(inst_id)
         for undo in self._overlay_undos:

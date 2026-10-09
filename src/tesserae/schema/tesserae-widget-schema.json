@@ -98,6 +98,12 @@
         "both"
       ]
     },
+    "tooltip": {
+      "type": [
+        "string",
+        "object"
+      ]
+    },
     "params": {
       "type": [
         "array",
@@ -184,6 +190,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -226,6 +238,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "draw"
@@ -308,6 +321,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -360,6 +379,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "checked",
@@ -443,6 +463,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -485,6 +511,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "value"
@@ -567,6 +594,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -603,6 +636,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children"
@@ -685,6 +719,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -721,6 +761,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children"
@@ -803,6 +844,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -851,6 +898,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -934,6 +982,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -1003,6 +1057,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -1088,6 +1143,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -1154,6 +1215,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "icon",
@@ -1238,6 +1300,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -1311,6 +1379,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "src",
@@ -1396,6 +1465,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -1438,6 +1513,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "value"
@@ -1518,6 +1594,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -1665,6 +1747,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "text",
@@ -1756,6 +1839,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -1786,6 +1875,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects"
           ]
@@ -1867,6 +1957,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -1915,6 +2011,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -1996,6 +2093,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -2099,6 +2202,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -2186,6 +2290,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -2250,6 +2360,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "selected",
@@ -2334,6 +2445,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -2370,6 +2487,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children"
@@ -2450,6 +2568,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -2536,6 +2660,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -2622,6 +2747,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -2674,6 +2805,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "value",
@@ -2757,6 +2889,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -2787,6 +2925,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects"
           ]
@@ -2866,6 +3005,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -2953,6 +3098,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "value",
@@ -3037,6 +3183,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -3150,6 +3302,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -3238,6 +3391,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -3304,6 +3463,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "src",
@@ -3388,6 +3548,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -3440,6 +3606,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "selected",
@@ -3521,6 +3688,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -3692,6 +3865,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "text",
@@ -3783,6 +3957,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -3944,6 +4124,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "text",
@@ -4037,6 +4218,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -4089,6 +4276,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "hour",
@@ -4172,6 +4360,12 @@
               "both"
             ]
           },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
           "params": {
             "type": [
               "array",
@@ -4241,6 +4435,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -4324,6 +4519,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -4435,6 +4636,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
@@ -4521,6 +4723,12 @@
               "horizontal",
               "vertical",
               "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
             ]
           },
           "params": {
@@ -4617,6 +4825,7 @@
             "window_region",
             "route",
             "focus_group",
+            "tooltip",
             "params",
             "expects",
             "children",
