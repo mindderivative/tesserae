@@ -46,7 +46,8 @@ declare("TextInput", {
 }, extras=("foreground",), doc="A bare text input (the part of a TextField that takes the typing).")
 declare("Image", {
     "src": P("str", doc="A path relative to the file."),
-    "fit": P("str", default="cover", doc="How the picture fills its box: cover, contain, fill ..."),
+    "fit": P("enum", default="cover", choices=("cover", "contain", "fill"), doc="How the picture fills its box."),
+    "alt": P("str", doc="What the picture shows, for a screen reader. Without it the picture is decorative and hidden from one."),
     "frame": P("any", doc="A video frame, (rgba, width, height), pushed from a ViewModel."),
 }, doc="A picture.")
 declare("Icon", {"icon": P("icon", doc="A built-in icon name."),

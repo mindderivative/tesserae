@@ -46,7 +46,7 @@ def lower(inst: Instance) -> dict[str, Any]:
         folded = {"icon", "path", "view_box"}
         node["icon"] = {name: values[key] for name, key in (("name", "icon"), ("path", "path"), ("view_box", "view_box")) if values.get(key) is not None}
     elif widget == "Image":
-        folded = {"src", "fit"}
+        folded = {"src", "fit", "alt"}
         node["image"] = {k: values[k] for k in ("src", "fit") if k in values}
     elif widget == "Svg":
         folded = {"src", "content"}
@@ -64,8 +64,13 @@ def lower(inst: Instance) -> dict[str, Any]:
         node["style"] = style
     if inst.classes:
         node["classes"] = list(inst.classes)
-    if inst.a11y:
-        node["a11y"] = {name: (held.get() if hasattr(held, "get") else held) for name, held in inst.a11y.items()}
+    a11y: dict[str, Any] = {}
+    if widget == "Image":  # described by `alt`, else decorative -- unless it is pressed, when hiding it would hide a control
+        a11y = {"role": "img", "label": values["alt"]} if values.get("alt") else {} if inst.handlers else {"hidden": True}
+    if inst.a11y:  # what the node says itself beats what `alt` makes of it
+        a11y.update({name: (held.get() if hasattr(held, "get") else held) for name, held in inst.a11y.items()})
+    if a11y:
+        node["a11y"] = a11y
     if inst.interaction is not None:
         node["interaction"] = {"color": inst.interaction} if isinstance(inst.interaction, str) else inst.interaction
     if inst.handlers:

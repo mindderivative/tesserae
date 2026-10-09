@@ -267,7 +267,9 @@ class View:
     def reconcile(self, spec: dict[str, Any], frames: Optional[dict[str, tuple[bytes, int, int]]] = None) -> None:
         """Brings the live tree in line with `spec`, in place."""
         spec = expand_embeds(expand_title_bars(expand_docks(expand_windows(spec))))  # as in `__init__`
+        self._new_frames: set[str] = set()  # the pictures that are not the ones the nodes show: a changed `src`, which the spec no longer names
         if frames is not None:
+            self._new_frames = {node_id for node_id, frame in frames.items() if self._frames.get(node_id) != frame}
             self._frames = dict(frames)
         # All or nothing: build the new spec on the side first, so an error
         # (a bad kind, colour or token) leaves the live tree as it was.
@@ -555,7 +557,7 @@ class View:
     def _reconcile_node(self, old: dict[str, Any], new: dict[str, Any]) -> None:
         node_id = new["id"]
         outer = self._built.outer[node_id]
-        if not _props_equal(old, new):
+        if not _props_equal(old, new) or node_id in self._new_frames:
             self._built.layout_keys[node_id] = patch(
                 self.window, new, outer, self._built.nodes[node_id], scheme=self._scheme, layers=self._layers,
                 frames=self._frames, control=self._built.controls.get(node_id),

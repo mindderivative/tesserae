@@ -148,8 +148,8 @@ def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sh
     out = [f"# {entry['title']}", "", f"*{entry['group']}*", "", "## In Material Design 3", "", entry["md3"].strip(), ""]
     out += ["## In Tesserae", "", entry["built"].strip(), ""]
     frags = [fragments[name] for name in entry["fragments"]]
-    if frags and entry.get("shipped_view"):  # both forms: the view first, and the 0.4.x fragment it replaces
-        out += [f"`widget: {entry['shipped_view']}` is the view-language form (see [The View Language](../guide/view-language.md)); "
+    if frags and (entry.get("shipped_view") or entry.get("widget")):  # both forms: the view first, and the older fragment it replaces
+        out += [f"`widget: {entry.get('shipped_view') or entry['widget']}` is the view-language form (see [The View Language](../guide/view-language.md)); "
                 "the fragment below is the older `component:` form, which keeps working.", ""]
     if frags:
         out += ["| Fragment | What it is | Stylesheet |", "| --- | --- | --- |"]

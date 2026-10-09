@@ -108,6 +108,9 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `mailto` and `tel` links are opened. `tesserae.urls.open_url` is the same for Python.
 - **Divider** ([#152](https://github.com/mindderivative/tesserae/issues/152)). `widget: Divider` with `variant: full | inset | middle`, `orientation: horizontal | vertical` and `thickness`,
   a shipped view with a shipped look (a line in `outline_variant`, hidden from a screen reader). The 0.4.x `component: Divider` fragment still works.
+- **Image** ([#196](https://github.com/mindderivative/tesserae/issues/196)). `widget: Image` takes `alt` (a screen reader's description; without it the picture is decorative and hidden from one,
+  unless it handles clicks) and checks `fit`; its shape is `style.corner_radius`, per corner too, which the engine clips the picture to. A `src` that follows a Signal now changes the picture
+  shown (a changed picture was missed by the reconcile).
 
 ### Removed
 

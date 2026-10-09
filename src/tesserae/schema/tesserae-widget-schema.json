@@ -1259,6 +1259,22 @@
           "fit": {
             "anyOf": [
               {
+                "enum": [
+                  "cover",
+                  "contain",
+                  "fill"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "How the picture fills its box."
+          },
+          "alt": {
+            "anyOf": [
+              {
                 "type": "string"
               },
               {
@@ -1266,7 +1282,7 @@
                 "pattern": "\\{\\{"
               }
             ],
-            "description": "How the picture fills its box: cover, contain, fill ..."
+            "description": "What the picture shows, for a screen reader. Without it the picture is decorative and hidden from one."
           },
           "frame": {
             "description": "A video frame, (rgba, width, height), pushed from a ViewModel."
@@ -1296,6 +1312,7 @@
             "expects",
             "src",
             "fit",
+            "alt",
             "frame"
           ]
         }

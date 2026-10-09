@@ -5,11 +5,23 @@
 ## In Material Design 3
 
 An image shows a picture, fitted to its box. Material Design 3 describes how to crop and round it in a
-container.
+container: a corner from the shape scale, a circle for an avatar.
 
 ## In Tesserae
 
-The `Image` kind: Tesserae reads and decodes the file, and `fit` says how it fills the box.
+`widget: Image` is the engine's picture node: Tesserae reads and decodes the file (Pillow), and `fit` says how it fills the box.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `src` | file | the picture, relative to the view; an expression, so it follows a Signal |
+| `fit` | `cover`, `contain` or `fill` | how it fills its box; `cover` by default |
+| `alt` | text | what the picture shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks |
+
+Its shape is `style.corner_radius`: a number, a shape token, `full` for a circle on a square picture, or a different radius on each
+corner (`{top_left: 24}`). The engine clips the picture to it. A shape that is not a rounded rectangle needs a mask the engine does not have.
+A missing or unreadable file stops the view opening, with the widget's name and the file in the message.
+
+`widget: Image` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -40,6 +52,24 @@ image:
 ```
 
 ## Using it
+
+```yaml
+name: profile
+widget: Container
+style: {flex_direction: vertical, gap: 16, width: 240, height: 320}
+children:
+  - widget: Image
+    src: cat.png
+    alt: A grey cat asleep on a windowsill
+    fit: cover
+    style: {width: 240, height: 160, corner_radius: medium}
+  - widget: Image
+    src: avatar.png
+    alt: Your photo
+    style: {width: 64, height: 64, corner_radius: full}
+```
+
+## Using the fragment
 
 In a view:
 
