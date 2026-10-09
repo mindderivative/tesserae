@@ -86,6 +86,9 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Canvas** ([#215](https://github.com/mindderivative/tesserae/issues/215)). `widget: Canvas` with `draw:`, a list of `{rect: [x, y, w, h]}`, `{circle: [cx, cy, r]}` and
   `{path: [points], width: N}` commands, each with a `color` (a role, a CSS colour or `role@N%`). `draw:` may be one `{{ }}` expression, so a canvas
   repaints when the Signals it reads change. It is how a widget draws wavy progress, ticks and graph edges.
+- **Icons from a path** ([#216](https://github.com/mindderivative/tesserae/issues/216)). `widget: Icon` takes `path:` (SVG path data) and `view_box:` instead of a name, so any
+  glyph can be drawn and tinted like the built-in ones. `tools/import_material_symbols.py DIR` turns a folder of Material Symbols SVGs into
+  `src/tesserae/icon_data/material_symbols.json`, which `tesserae.icons` merges under the icons built in. The 18 built-in names are unchanged; no Symbols are bundled yet (see the issue).
 
 ### Removed
 

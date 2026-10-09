@@ -774,14 +774,31 @@ def _canvas_props(ctx, node, style):
 
 def _icon_props(ctx, node, style):
     icon = node.get("icon")
-    if not isinstance(icon, dict):
-        raise SpecBuildError(f'widget {_q(node["id"])}: Icon requires icon, none given')
-    data = icon_path(str(icon.get("name")))
-    if data is None:
-        raise SpecBuildError(f'widget {_q(node["id"])}: unknown icon "{icon.get("name")}"')
+    if not isinstance(icon, dict) or ("name" in icon) == ("path" in icon):
+        raise SpecBuildError(f'widget {_q(node["id"])}: Icon takes icon (a name) or path (SVG path data), one of them')
+    if "path" in icon:
+        data, view_box = icon["path"], _view_box(node["id"], icon.get("view_box"))
+        if not isinstance(data, str) or not data.strip():
+            raise SpecBuildError(f'widget {_q(node["id"])}: icon path is SVG path data, not {data!r}')
+    else:
+        data, view_box = icon_path(str(icon["name"])), ICON_VIEW_BOX
+        if data is None:
+            raise SpecBuildError(f'widget {_q(node["id"])}: unknown icon "{icon["name"]}"')
+        if icon.get("view_box") is not None:
+            view_box = _view_box(node["id"], icon["view_box"])
     tint = _required_foreground(ctx, node, style, "Icon")
     return {**_layout(style), **_paint(ctx, node["id"], style, corner_radius=False),
-            "data": data, "view_box": ICON_VIEW_BOX, "fill": tint}, None
+            "data": data, "view_box": view_box, "fill": tint}, None
+
+
+def _view_box(node_id, raw):
+    """An icon's `view_box`: four numbers, the width and height above 0. Material Symbols' own when not given."""
+    if raw is None:
+        return ICON_VIEW_BOX
+    if (not isinstance(raw, (list, tuple)) or len(raw) != 4
+            or any(isinstance(n, bool) or not isinstance(n, (int, float)) for n in raw) or raw[2] <= 0 or raw[3] <= 0):
+        raise SpecBuildError(f"widget {_q(node_id)}: icon view_box is [min_x, min_y, width, height] with a width and height above 0, not {raw!r}")
+    return tuple(float(n) for n in raw)
 
 
 _PRIMITIVE = {

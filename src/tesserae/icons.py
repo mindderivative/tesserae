@@ -6,6 +6,9 @@ shared view box `0 -960 960 960`, drawn by a `tre` `path` node."""
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 __all__ = ["ICON_VIEW_BOX", "ICONS", "icon_path"]
 
 #: Every icon's view box, `(min_x, min_y, width, height)`.
@@ -34,6 +37,20 @@ ICONS = {
     "window_maximize": "M200-200v-560h560v560H200Zm80-80h400v-400H280v400Z",
     "window_restore": "M160-160v-480h480v480H160Zm80-80h320v-320H240v320Zm480-160v-320H400v-80h400v400h-80Z",
 }
+
+
+def _bundled(folder: Path = Path(__file__).parent / "icon_data") -> dict[str, str]:
+    """The Material Symbols added by `tools/import_material_symbols.py`, if any (`icon_data/material_symbols.json`)."""
+    path = folder / "material_symbols.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+
+
+def _merge(bundled: dict[str, str], built_in: dict[str, str]) -> dict[str, str]:
+    """The set: an icon built in above wins over a bundled one of the same name."""
+    return {**bundled, **built_in}
+
+
+ICONS = _merge(_bundled(), ICONS)
 
 
 def icon_path(name: str) -> str | None:

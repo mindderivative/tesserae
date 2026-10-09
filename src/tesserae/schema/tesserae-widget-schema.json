@@ -1105,11 +1105,34 @@
               }
             ],
             "description": "A built-in icon name."
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "SVG path data to draw instead of a named icon."
+          },
+          "view_box": {
+            "anyOf": [
+              {
+                "type": "array"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "[min_x, min_y, width, height] the path is drawn in; Material Symbols' 0 -960 960 960 when not given."
           }
         },
         "required": [
-          "widget",
-          "icon"
+          "widget"
         ],
         "propertyNames": {
           "enum": [
@@ -1130,7 +1153,9 @@
             "focus_group",
             "params",
             "expects",
-            "icon"
+            "icon",
+            "path",
+            "view_box"
           ]
         }
       }

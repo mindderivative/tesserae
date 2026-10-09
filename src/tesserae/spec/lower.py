@@ -43,8 +43,8 @@ def lower(inst: Instance) -> dict[str, Any]:
         folded = {"text", *_FIELD_KEYS, *_RENDERER_ONLY["TextInput"]}
         node["text"] = {"content": values.get("text", ""), **{k: values[k] for k in _FIELD_KEYS if k in values}}
     elif widget == "Icon":
-        folded = {"icon"}
-        node["icon"] = {"name": values.get("icon")}
+        folded = {"icon", "path", "view_box"}
+        node["icon"] = {name: values[key] for name, key in (("name", "icon"), ("path", "path"), ("view_box", "view_box")) if values.get(key) is not None}
     elif widget == "Image":
         folded = {"src", "fit"}
         node["image"] = {k: values[k] for k in ("src", "fit") if k in values}

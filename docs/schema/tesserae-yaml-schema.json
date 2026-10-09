@@ -2017,11 +2017,21 @@
                 "window_restore"
               ],
               "description": "An icon in Tesserae's set."
+            },
+            "path": {
+              "type": "string",
+              "description": "SVG path data, instead of a name."
+            },
+            "view_box": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "[min_x, min_y, width, height] the path is drawn in (default 0 -960 960 960)."
             }
           },
-          "required": [
-            "name"
-          ],
           "additionalProperties": false
         },
         "bindings": {
@@ -5887,11 +5897,21 @@
                     "window_restore"
                   ],
                   "description": "An icon in Tesserae's set."
+                },
+                "path": {
+                  "type": "string",
+                  "description": "SVG path data, instead of a name."
+                },
+                "view_box": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 4,
+                  "maxItems": 4,
+                  "description": "[min_x, min_y, width, height] the path is drawn in (default 0 -960 960 960)."
                 }
               },
-              "required": [
-                "name"
-              ],
               "additionalProperties": false
             },
             {

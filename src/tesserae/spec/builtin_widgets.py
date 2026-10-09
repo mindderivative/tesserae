@@ -48,7 +48,10 @@ declare("Image", {
     "fit": P("str", default="cover", doc="How the picture fills its box: cover, contain, fill ..."),
     "frame": P("any", doc="A video frame, (rgba, width, height), pushed from a ViewModel."),
 }, doc="A picture.")
-declare("Icon", {"icon": P("icon", required=True, doc="A built-in icon name.")}, extras=("foreground",), doc="A glyph from the built-in set.")
+declare("Icon", {"icon": P("icon", doc="A built-in icon name."),
+                 "path": P("str", doc="SVG path data to draw instead of a named icon."),
+                 "view_box": P("list", doc="[min_x, min_y, width, height] the path is drawn in; Material Symbols' 0 -960 960 960 when not given.")},
+        extras=("foreground",), one_of=[("icon", "path")], doc="A glyph from the built-in set, or from SVG path data.")
 declare("Canvas", {"draw": P("list", doc="Drawing commands in order: rect, circle or path, each with a color.")}, doc="A drawing surface: rects, circles and paths from data.")
 declare("Svg", {"src": P("str"), "content": P("str", doc="The SVG text, instead of a file.")}, extras=("foreground",), doc="A vector picture.")
 declare("ScrollView", {

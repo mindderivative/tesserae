@@ -40,6 +40,8 @@ canvas:
   draw: <a list>
 icon:
   name: <one of 18 names>
+  path: <text>
+  view_box: <a list>
 bindings: <a mapping>
 handlers: <a mapping>
 two_way: <text>
@@ -81,7 +83,9 @@ children: <a list>
 | `canvas` | a mapping | A Canvas's drawing commands. |
 | `canvas.draw` | a list | Commands painted in order: `rect: [x, y, w, h]`, `circle: [cx, cy, r]` or `path: [points]` (with `width`), each with a `color`. |
 | `icon` | a mapping | An Icon's glyph. |
-| `icon.name` *(required)* | one of 18 names | An icon in Tesserae's set. |
+| `icon.name` | one of 18 names | An icon in Tesserae's set. |
+| `icon.path` | text | SVG path data, instead of a name. |
+| `icon.view_box` | a list | [min_x, min_y, width, height] the path is drawn in (default 0 -960 960 960). |
 | `bindings` | a mapping | Properties kept live from the ViewModel: `{{ expression }}`. |
 | `handlers` | a mapping | What a user's action calls: the name of a ViewModel method, or `window.<action>`. |
 | `two_way` | text | The one bound property whose user edits write back to the ViewModel. |
@@ -113,7 +117,7 @@ children: <a list>
 | `Image` | A picture from a file. | `image:` |
 | `Svg` | An SVG document, drawn by the engine: shapes, gradients, text, clips and masks. `style.foreground` is what `currentColor` means, so an icon follows the theme. | `svg:` |
 | `Canvas` | A drawing surface: rectangles, circles and paths from a `draw:` list, repainted when the Signals it reads change. | `canvas:` |
-| `Icon` | A glyph from Tesserae's icon set, coloured by `style.foreground`. | `icon:` |
+| `Icon` | A glyph from Tesserae's icon set, or from SVG path data, coloured by `style.foreground`. | `icon:` (`name:`, or `path:` and `view_box:`) |
 | `Checkbox` | MD3's checkbox. | `checked:`, `disabled:`, `handlers: {on_change}` |
 | `RadioButton` | MD3's radio button; the ones with one `group:` exclude each other. | `selected:`, `group:`, `disabled:` |
 | `Switch` | MD3's switch. | `selected:`, `disabled:` |

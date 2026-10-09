@@ -192,6 +192,8 @@ class WidgetDecl:
     container: bool = False
     view: bool = False
     doc: str = ""
+    #: groups of properties of which exactly one must be given (an Icon's `icon` or `path`)
+    one_of: tuple[tuple[str, ...], ...] = ()
 
     def check_properties(self, given: Iterable[str]) -> list[tuple[str, Optional[str]]]:
         """Problems with a set of property names: `(message, hint)`, unknown first, then required but missing."""
@@ -205,6 +207,12 @@ class WidgetDecl:
         for name, prop in self.properties.items():
             if prop.required and name not in given:
                 problems.append((f"{self.name}: '{name}' is required", None))
+        for group in self.one_of:
+            chosen = [name for name in group if name in given]
+            if not chosen:
+                problems.append((f"{self.name}: give one of {', '.join(repr(n) for n in group)}", None))
+            elif len(chosen) > 1:
+                problems.append((f"{self.name}: {' and '.join(repr(n) for n in chosen)} cannot both be given", None))
         return problems
 
 
@@ -220,13 +228,13 @@ def _load_builtins() -> None:
 
 
 def declare(name: str, properties: Optional[dict[str, Property]] = None, *, extras: Iterable[str] = (), parts: Iterable[str] = (),
-            container: bool = False, doc: str = "") -> WidgetDecl:
+            container: bool = False, doc: str = "", one_of: Iterable[Iterable[str]] = ()) -> WidgetDecl:
     """Declares a built-in widget. A duplicate name is an error: replace one on purpose with `register_widget(..., replace=True)`."""
     props = dict(properties or {})
     for prop_name, prop in props.items():
         prop.name = prop_name
     _check_reserved(name, props)
-    decl = WidgetDecl(name, props, tuple(extras), tuple(parts), container, False, doc)
+    decl = WidgetDecl(name, props, tuple(extras), tuple(parts), container, False, doc, tuple(tuple(g) for g in one_of))
     if name in _REGISTRY:
         raise ValueError(f"widget {name!r} is already declared")
     _REGISTRY[name] = decl
