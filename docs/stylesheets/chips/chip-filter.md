@@ -46,7 +46,7 @@ styles:
 | `padding` | left `16`, right `16`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `gap` | `8` | Space between its children. |
 | `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `corner_radius` | `small` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). |
+| `corner_radius` | `small` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
 | `border_color` | `outline` | The colour of its border: a colour or a gradient. |
 | `border_width` | `1.0` | The width of its border, in pixels. |
 

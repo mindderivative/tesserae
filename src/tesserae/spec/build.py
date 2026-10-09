@@ -405,6 +405,41 @@ def _token(node_id: str, field_name: str, value: Any, lookup: Callable[[str], Op
     return float(value)
 
 
+_CORNERS = ("top_left", "top_right", "bottom_right", "bottom_left")
+#: An edge's two corners, for `corner_radius: {top: 12}`.
+_EDGES = {"top": ("top_left", "top_right"), "right": ("top_right", "bottom_right"), "bottom": ("bottom_right", "bottom_left"),
+          "left": ("bottom_left", "top_left")}
+
+
+def _corner_radius(node_id: str, value: Any) -> Any:
+    """A style's `corner_radius` as the node property: one radius (a number or a shape token) for every corner, or four, one per corner, as a list
+    `[top_left, top_right, bottom_right, bottom_left]` or a mapping of corners and edges (`top`, `right`, `bottom`, `left`; a corner named
+    beats its edge) with the corners it leaves out square. Four equal radii are one."""
+    if isinstance(value, dict):
+        unknown = [k for k in value if k not in _CORNERS and k not in _EDGES]
+        if unknown:
+            raise SpecBuildError(f'widget {_q(node_id)}: style.corner_radius has no "{unknown[0]}" (corners: {", ".join(_CORNERS)}; '
+                                 f'edges: {", ".join(_EDGES)})')
+        corners = dict.fromkeys(_CORNERS, 0.0)
+        for key in [*(k for k in value if k in _EDGES), *(k for k in value if k in _CORNERS)]:  # edges first, then the corners that override them
+            for corner in _EDGES.get(key, (key,)):
+                corners[corner] = _radius(node_id, value[key])
+        radii = list(corners.values())
+    elif isinstance(value, (list, tuple)):
+        if len(value) != 4:
+            raise SpecBuildError(f'widget {_q(node_id)}: style.corner_radius takes four radii ({", ".join(_CORNERS)}), not {len(value)}')
+        radii = [_radius(node_id, v) for v in value]
+    else:
+        return _radius(node_id, value)
+    return radii[0] if len(set(radii)) == 1 else tuple(radii)
+
+
+def _radius(node_id: str, value: Any) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise SpecBuildError(f'widget {_q(node_id)}: style.corner_radius is pixels or a shape token, not {value!r}')
+    return _token(node_id, "corner_radius", value, tokens.shape)
+
+
 #: The style fields that are a node property of the same name (0.3.3, #81).
 _STYLE_PASSTHROUGH = frozenset({
     "width", "height", "min_width", "max_width", "min_height", "max_height", "flex_direction", "flex_wrap",
@@ -445,7 +480,7 @@ def style_props(style: dict[str, Any], scheme: Optional[dict[str, RGBA]], where:
         elif key == "border_width":
             props["stroke_width"] = float(value)
         elif key == "corner_radius":
-            props["corner_radius"] = _token(where, "corner_radius", value, tokens.shape)
+            props["corner_radius"] = _corner_radius(where, value)
         elif key == "opacity":
             props["opacity"] = float(value)
         elif key == "elevation":
@@ -465,7 +500,7 @@ def _paint(ctx: _Context, node_id: str, style: dict[str, Any], *, corner_radius:
     elevation as `shadows`."""
     paint: dict[str, Any] = {"opacity": float(style.get("opacity", 1.0))}
     if corner_radius:
-        paint["corner_radius"] = _token(node_id, "corner_radius", style.get("corner_radius", 0.0), tokens.shape)
+        paint["corner_radius"] = _corner_radius(node_id, style.get("corner_radius", 0.0))
     paint["stroke_color"] = _fill(ctx, node_id, "border_color", style["border_color"]) if "border_color" in style else _TRANSPARENT
     paint["stroke_width"] = float(style.get("border_width", 0.0))
     level = _token(node_id, "elevation", style.get("elevation", 0.0), tokens.elevation)

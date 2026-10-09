@@ -119,7 +119,7 @@ styles:
 | Field | Value | What it does |
 | --- | --- | --- |
 | `height` | `3` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `corner_radius` | `3` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). |
+| `corner_radius` | `3` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
 | `background` | `primary` if `selected`, else `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 
 ## What it makes

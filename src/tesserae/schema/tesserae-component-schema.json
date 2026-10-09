@@ -427,18 +427,203 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "enum": [
+                        "extra_large",
+                        "extra_small",
+                        "large",
+                        "medium",
+                        "none",
+                        "small",
+                        "full"
+                      ]
+                    }
+                  ]
                 },
                 {
-                  "enum": [
-                    "extra_large",
-                    "extra_small",
-                    "large",
-                    "medium",
-                    "none",
-                    "small",
-                    "full"
-                  ]
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "enum": [
+                          "extra_large",
+                          "extra_small",
+                          "large",
+                          "medium",
+                          "none",
+                          "small",
+                          "full"
+                        ]
+                      }
+                    ]
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "top_left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the top left corner."
+                    },
+                    "top_right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the top right corner."
+                    },
+                    "bottom_right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the bottom right corner."
+                    },
+                    "bottom_left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the bottom left corner."
+                    },
+                    "top": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both top corners."
+                    },
+                    "right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both right corners."
+                    },
+                    "bottom": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both bottom corners."
+                    },
+                    "left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both left corners."
+                    }
+                  }
                 }
               ]
             },
@@ -449,7 +634,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). (Paint and effects.)",
+          "description": "Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. (Paint and effects.)",
           "x-group": "Paint and effects"
         },
         "cursor": {

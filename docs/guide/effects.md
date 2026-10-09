@@ -46,6 +46,19 @@ style:
 and `start` go with the kind. A gradient follows its box as the layout resizes it. A control's own colour (a
 `Switch`, a `Slider`) takes a plain colour only.
 
+## Corner radius
+
+`corner_radius` is one radius for every corner (pixels, or a shape token `none` ... `extra_large`, `full`). Give four to round the corners
+differently, as a list `[top_left, top_right, bottom_right, bottom_left]` or as a mapping of corners and edges, where an edge (`top`, `right`,
+`bottom`, `left`) is its two corners, a corner named beats its edge and the corners left out are square:
+
+```yaml
+widget: Container
+style: {width: 120, height: 48, background: primary, corner_radius: {left: full, top_right: 4}}   # a pill end on the left
+```
+
+It is a style field like the others, so a rule can give it, a `transition:` eases it, and the state layer and focus ring follow the shape.
+
 ## Blur, and a frosted surface
 
 `blur` blurs the node and what it draws, by that many pixels. `backdrop_blur` blurs what is *behind* it, so a node

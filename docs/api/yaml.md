@@ -237,7 +237,15 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `border_color` | a color or a gradient | The colour of its border: a colour or a gradient. |
 | `border_width` | a number | The width of its border, in pixels. |
 | `clip_children` | `true` or `false` | Whether children are cut off at its edge. |
-| `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). |
+| `corner_radius` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` or a list or a mapping | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
+| `corner_radius.top_left` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of the top left corner. |
+| `corner_radius.top_right` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of the top right corner. |
+| `corner_radius.bottom_right` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of the bottom right corner. |
+| `corner_radius.bottom_left` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of the bottom left corner. |
+| `corner_radius.top` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of both top corners. |
+| `corner_radius.right` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of both right corners. |
+| `corner_radius.bottom` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of both bottom corners. |
+| `corner_radius.left` | a number or `extra_large` \| `extra_small` \| `large` \| `medium` \| `none` \| `small` \| `full` | The radius of both left corners. |
 | `cursor` | one of 23 names or a mapping | The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). |
 | `cursor.src` *(required)* | text | A PNG (or any picture Pillow reads) next to the view. |
 | `cursor.hotspot` | a list | `[x, y]`: the pixel that is the pointer's place. |

@@ -37,7 +37,7 @@ styles:
 | `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 | `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
 | `background` | `surface_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `corner_radius` | `extra_small` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). |
+| `corner_radius` | `extra_small` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
 | `elevation` | `level_2` | A shadow level, 0 to 5. |
 | `padding` | left `0`, right `0`, top `8`, bottom `8` | Space inside it: one number, or `{left, right, top, bottom}`. |
 

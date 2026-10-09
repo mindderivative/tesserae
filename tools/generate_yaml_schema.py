@@ -101,6 +101,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         return {"anyOf": [schema, {"$ref": "#/definitions/parameter"}, {"$ref": "#/definitions/conditional"}]}
 
     number = {"type": "number"}
+    radius = {"anyOf": [number, {"enum": [*sorted(tokens.SHAPES), "full"]}]}
     dimension = {"anyOf": [number, {"enum": ["auto"]}, {"type": "string", "pattern": r"^-?\d+(\.\d+)?%$"}]}
     sides = ("top", "right", "bottom", "left")
     spacing = {"anyOf": [loose(number), {"type": "object", "properties": {side: loose(number) for side in sides},
@@ -190,7 +191,15 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                    "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most "
                    "256 pixels a side; only in a node's own `style:`)."),
         "border_width": ({"type": "number", "minimum": 0}, "The width of its border, in pixels."),
-        "corner_radius": ({"anyOf": [number, {"enum": [*sorted(tokens.SHAPES), "full"]}]}, "Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle)."),
+        "corner_radius": ({"anyOf": [radius, {"type": "array", "items": radius, "minItems": 4, "maxItems": 4},
+                                     {"type": "object", "additionalProperties": False,
+                                      "properties": {key: {**radius, "description": f"The radius of {what}."} for key, what in (
+                                          ("top_left", "the top left corner"), ("top_right", "the top right corner"),
+                                          ("bottom_right", "the bottom right corner"), ("bottom_left", "the bottom left corner"),
+                                          ("top", "both top corners"), ("right", "both right corners"),
+                                          ("bottom", "both bottom corners"), ("left", "both left corners"))}}]},
+                          "Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, "
+                          "bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square."),
         "opacity": ({"type": "number", "minimum": 0, "maximum": 1}, "From 0 (clear) to 1 (opaque)."),
         "elevation": ({"anyOf": [number, {"enum": sorted(tokens.ELEVATION_LEVELS)}]}, "A shadow level, 0 to 5."),
         "aspect_ratio": ({"type": "number", "exclusiveMinimum": 0}, "Width over height: gives the missing side from the one set."),

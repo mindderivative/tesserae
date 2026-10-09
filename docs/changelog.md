@@ -96,6 +96,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   setting it scrolls), and `at_top`, `at_end` and `scroll_direction` write the position to the Signals or state names they are bound to, for collapse-on-scroll and hide-on-scroll.
 - **Pointer capture, cursor and drag events** ([#219](https://github.com/mindderivative/tesserae/issues/219)). New events `on_move` and `on_release`, and handler actions `capture()`,
   `release()` and `cursor(name)` that act on the widget whose handler is running, so a drag keeps following the pointer outside the node.
+- **Per-corner `corner_radius`** ([#220](https://github.com/mindderivative/tesserae/issues/220)). `style.corner_radius` takes a list of four (`top_left`, `top_right`, `bottom_right`,
+  `bottom_left`) or a mapping of corners and edges (`{top: 12}`, `{left: full, top_right: 4}`), with tokens or pixels; one value is unchanged.
 
 ### Removed
 
