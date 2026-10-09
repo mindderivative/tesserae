@@ -8,8 +8,23 @@ A list is a column of rows, each a headline with optional leading and trailing c
 
 ## In Tesserae
 
-One fragment for the row; a list is a container of them. For a list that changes while the app runs, use a
-[Repeater](../guide/repeater.md).
+`widget: ListItem` is a view Tesserae ships (`ListItem_View.yaml`): a row as wide as its place, 56, 72 or 88 pixels tall by its lines. A list is a
+container of them (or a `for:`, or a `VirtualList`, over your data).
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `headline`, `supporting`, `overline` | text | the first line, the line under it, a small line above it |
+| `leading_icon`, `leading_text`, `leading_image` | an icon, letters, a picture | before the text: a 24 pixel icon, a 40 pixel circle holding letters, a 56 pixel picture |
+| `trailing_text`, `trailing_icon` | text, an icon | after it |
+| `lines` | 1, 2 or 3 | the height; 0 works it out from the text |
+| `selectable`, `selected` | true or false; `selected` is two-way | a press flips `selected`; a selected row is `secondary_container` |
+| `disabled` | true or false | dimmed, not focusable, handlers do not run |
+| `divider` | true or false | a line along the bottom edge |
+
+Your own content goes in the `leading` and `trailing` slots (`slot: trailing` on a child): a switch, a checkbox, a button. `handlers: {on_click: ...}` on
+the call is what a press does. Not built: swipe actions, drag to reorder, sticky headers, and the dragged state.
+
+`widget: ListItem` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -44,17 +59,20 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: mail
+widget: Container
+style: {flex_direction: vertical, width: 360, height: 300}
 children:
-  - id: first
-    component: ListItem
-    with: {headline: Inbox, width: 320}
+  - {widget: ListItem, headline: Inbox, supporting: 12 unread, leading_icon: home, trailing_text: 5m, divider: true, handlers: {on_click: open_inbox}}
+  - widget: ListItem
+    headline: Wi-Fi
+    supporting: Connected
+    children:
+      - {widget: Switch, slot: trailing, selected: "{{ wifi }}"}
 ```
+
+## Using it
 
 In Python:
 

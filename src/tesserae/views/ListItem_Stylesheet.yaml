@@ -1,0 +1,19 @@
+# The look of ListItem (Material 3): 16 pixels of padding each side, 16 between the parts; the headline in on_surface, the supporting text and the
+# small text in on_surface_variant; a selected item is secondary_container.
+styles:
+  - widget: ListItem
+    style:
+      padding: {left: 16, right: 16, top: 8, bottom: 8}
+      gap: 16
+      background: "{{ 'secondary_container' if selected else 'transparent' }}"
+  - {widget: ListItem, part: headline, style: {foreground: on_surface}}
+  - {widget: ListItem, part: supporting, style: {foreground: on_surface_variant}}
+  - {widget: ListItem, part: overline, style: {foreground: on_surface_variant}}
+  - {widget: ListItem, part: trailing_text, style: {foreground: on_surface_variant}}
+  - {widget: ListItem, part: leading_icon, style: {foreground: on_surface_variant, width: 24, height: 24}}
+  - {widget: ListItem, part: trailing_icon, style: {foreground: on_surface_variant, width: 24, height: 24}}
+  - widget: ListItem
+    part: avatar
+    style: {width: 40, height: 40, corner_radius: full, background: primary_container, align_content: center}
+  - {widget: ListItem, part: avatar_text, style: {foreground: on_primary_container}}
+  - {widget: ListItem, part: picture, style: {width: 56, height: 56, corner_radius: 4}}

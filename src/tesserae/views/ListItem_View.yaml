@@ -1,0 +1,72 @@
+# The Material 3 list item: one, two or three lines of text with something before it and something after it. `headline` is the first line, `supporting`
+# the second, and an `overline` goes above the headline; the item is 56, 72 or 88 pixels tall by how many of those it has (`lines` overrides). Before the
+# text: a `leading_icon`, a `leading_text` in a circle (an avatar), a `leading_image` (56 pixels), or your own content in the `leading` slot. After it: a
+# `trailing_text`, a `trailing_icon`, or your own content in the `trailing` slot (a switch, a checkbox, a button). It is pressable (a state layer, a
+# ripple, Enter); `handlers: {on_click: open}` on the call is what a press does. With `selectable` a press flips `selected`, and a selected item is
+# `secondary_container`. `divider` draws a line along its bottom edge.
+params:
+  headline: {type: str, default: "", doc: "The first line."}
+  supporting: {type: str, default: "", doc: "The line under the headline."}
+  overline: {type: str, default: "", doc: "A small line above the headline."}
+  leading_icon: {type: str, default: "", doc: "An icon before the text."}
+  leading_text: {type: str, default: "", doc: "One or two letters in a circle before the text (an avatar)."}
+  leading_image: {type: str, default: "", doc: "A picture before the text, 56 pixels, relative to the view."}
+  trailing_text: {type: str, default: "", doc: "Small text after it."}
+  trailing_icon: {type: str, default: "", doc: "An icon after it."}
+  lines: {type: int, default: 0, doc: "1, 2 or 3 lines; 0 works it out from the text it has."}
+  selectable: {type: bool, default: false, doc: "A press flips `selected`."}
+  selected: {type: bool, default: false, model: true, doc: "Whether it is selected."}
+  disabled: {type: bool, default: false, doc: "Dimmed, not focusable, and it does not respond."}
+  divider: {type: bool, default: false, doc: "A line along the bottom edge."}
+widget: Container
+interaction: true
+disabled: "{{ disabled }}"
+style:
+  flex_direction: horizontal
+  align_content: left
+  width: 100%
+  height: "{{ {1: 56, 2: 72, 3: 88}[lines if lines in (1, 2, 3) else (3 if (overline != '' and supporting != '') else (2 if (overline != '' or supporting != '') else 1))] }}"
+handlers:
+  on_click: "selected = (not selected) if selectable else selected"
+a11y:
+  role: listitem
+  label: "{{ headline }}"
+  selected: "{{ selected if selectable else None }}"
+  description: "{{ supporting }}"
+children:
+  - widget: Slot
+    name: leading
+  - widget: Icon
+    name: leading_icon
+    if: "leading_icon != ''"
+    icon: "{{ leading_icon }}"
+  - widget: Container
+    name: avatar
+    if: "leading_text != ''"
+    children:
+      - {widget: Text, name: avatar_text, text: "{{ leading_text }}", typography_role: title_medium}
+  - widget: Image
+    name: picture
+    if: "leading_image != ''"
+    src: "{{ leading_image }}"
+  - widget: Container
+    name: text
+    style: {flex_direction: vertical, flex: fill}
+    children:
+      - {widget: Text, name: overline, if: "overline != ''", text: "{{ overline }}", typography_role: label_small}
+      - {widget: Text, name: headline, if: "headline != ''", text: "{{ headline }}", typography_role: body_large, max_lines: 1, overflow: ellipsis}
+      - widget: Text
+        name: supporting
+        if: "supporting != ''"
+        text: "{{ supporting }}"
+        typography_role: body_medium
+        max_lines: "{{ 2 if lines == 3 or (lines == 0 and overline != '' and supporting != '') else 1 }}"
+        overflow: ellipsis
+  - {widget: Text, name: trailing_text, if: "trailing_text != ''", text: "{{ trailing_text }}", typography_role: label_small}
+  - {widget: Icon, name: trailing_icon, if: "trailing_icon != ''", icon: "{{ trailing_icon }}"}
+  - widget: Slot
+    name: trailing
+  - widget: Divider
+    name: line
+    if: divider
+    style: {position: absolute, x: 16, y: "100%", translate_y: -1}
