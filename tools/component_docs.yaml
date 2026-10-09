@@ -996,11 +996,12 @@ components:
       | `chosen` | a value; two-way | the `value` of the item or overflow row pressed |
       | `overflow` | a list | `Menu` rows under a more button at the end |
       | `fab_icon`, `fab_label`, `on_fab` | | an action button at the end, and what it does |
+      | `fit`, `max_length` | true or false; pixels | items that do not fit move, in order, into the overflow menu under the more button; a docked toolbar measures itself, a floating one uses `max_length` |
       | `hidden` | true or false | fades it out and takes its buttons out of the tab order (bind it to the way a list scrolls) |
       | `label`, `width`, `disabled` | | its accessible name; a docked toolbar's width; no button responds |
 
       Your own content goes in the default slot after the items. The arrow keys move between the buttons (one Tab stop). The role is `group`: the engine has no toolbar role.
-      Not built: moving the buttons that do not fit into the overflow menu by width (list them in `overflow` yourself), and sliding out of the way (it fades).
+      With `fit`, the items that spill and the rows of `overflow` share one menu, a divider between. Not built: sliding out of the way (it fades).
     usage_view: |
       name: editor
       widget: Container

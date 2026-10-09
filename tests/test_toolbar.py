@@ -22,7 +22,7 @@ class VM(ViewModel):
         self.log.append("add")
 
 
-def opened(tmp_path, props="", width=600):
+def opened(tmp_path, props="", width=600, items=ITEMS):
     (tmp_path / "Views").mkdir(exist_ok=True)
     lines = "\n    ".join(props.split("; ")) if props else ""
     (tmp_path / "Views" / "Main_View.yaml").write_text(f"""name: main
@@ -31,7 +31,7 @@ style: {{width: 600, height: 400, align_content: top_left, flex_direction: verti
 children:
   - widget: Toolbar
     name: tb
-    items: {ITEMS}
+    items: {items}
     chosen: "{{{{ chosen }}}}"
     hidden: "{{{{ hide }}}}"
     {lines}
@@ -177,3 +177,63 @@ children:
     app.show("main")
     settle(view, 8)
     assert view.node("root.tb.extra").get("layout_x") > view.node("root.tb.group.item[italic]").get("layout_x")
+
+
+# -- fit: what does not fit moves into the overflow menu -----------------------------------------------------------------------
+
+MANY = "[" + ", ".join(f"{{value: v{i}, icon: star, label: Item {i}}}" for i in range(10)) + "]"
+
+
+def count(view):
+    return len([k for k in view._built.specs if k.startswith("root.tb.group.item[") and k.endswith("]")])
+
+
+def test_without_fit_every_item_shows_however_narrow(tmp_path):
+    (tmp_path / "a").mkdir()
+    view, _ = opened(tmp_path / "a", "width: 200", items=MANY)
+    assert count(view) == 10 and "root.tb.more" not in view._built.specs
+
+
+def test_fit_keeps_the_items_that_fit_and_puts_the_rest_in_the_menu_under_a_more_button(tmp_path):
+    view, vm = opened(tmp_path, "fit: true; width: 300", items=MANY)
+    n = count(view)
+    assert 0 < n < 10 and "root.tb.more" in view._built.specs
+    more = view.node("root.tb.more")
+    assert more.get("layout_x") + more.get("layout_width") <= 300 - 16 + 0.5
+    view.window.simulate("click", node=more)
+    settle(view, 8)
+    rows = [k for k in view._built.specs if k.startswith("root.tb.menu.surface.row[") and k.endswith(".item")]
+    assert len(rows) == 10 - n
+    view.window.simulate("click", node=view.node(rows[0]))
+    settle(view, 8)
+    assert vm.chosen.get() == f"v{n}"
+
+
+def test_fit_with_room_for_everything_shows_everything_and_no_more_button(tmp_path):
+    view, _ = opened(tmp_path, "fit: true; width: 400")
+    assert count(view) == 3 and "root.tb.more" not in view._built.specs
+
+
+def test_fit_follows_the_width_it_is_given(tmp_path):
+    view, vm = opened(tmp_path, "fit: true; width: 600", items=MANY)
+    assert count(view) == 10
+    (tmp_path / "b").mkdir()
+    narrow, _ = opened(tmp_path / "b", "fit: true; width: 200", items=MANY)
+    assert count(narrow) < count(view)
+
+
+def test_a_floating_toolbar_fits_to_max_length_and_the_fab_takes_room(tmp_path):
+    view, _ = opened(tmp_path, "fit: true; variant: floating; max_length: 300", items=MANY)
+    with_fab_dir = tmp_path / "f"
+    with_fab_dir.mkdir()
+    fab, _ = opened(with_fab_dir, "fit: true; variant: floating; max_length: 300; fab_icon: plus; fab_label: Add", items=MANY)
+    assert 0 < count(fab) < count(view) < 10 and tb(view).get("layout_width") <= 300.5
+
+
+def test_spilled_items_and_the_callers_overflow_rows_share_one_menu_with_a_divider(tmp_path):
+    view, _ = opened(tmp_path, f"fit: true; width: 300; overflow: {MORE}", items=MANY)
+    view.window.simulate("click", node=view.node("root.tb.more"))
+    settle(view, 8)
+    labels = [view.node(k).get("label") for k in view._built.specs if k.startswith("root.tb.menu.surface.row[") and k.endswith(".item")]
+    assert labels[-2:] == ["Print", "Share"] and len(labels) == 10 - count(view) + 2
+    assert any(k.endswith(".divider") for k in view._built.specs if k.startswith("root.tb.menu"))

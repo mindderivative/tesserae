@@ -48,6 +48,8 @@ def lower(inst: Instance) -> dict[str, Any]:
     elif widget == "Image":
         folded = {"src", "fit", "alt", "frame"}
         node["image"] = {k: values[k] for k in ("src", "fit") if k in values}
+    elif widget == "Container":
+        folded = {"measured_width", "measured_height"}  # outputs the view writes after layout (`ComposedView._wire_measures`)
     elif widget == "Svg":
         folded = {"src", "content", "alt"}
         node["svg"] = {k: values[k] for k in ("src", "content") if k in values}

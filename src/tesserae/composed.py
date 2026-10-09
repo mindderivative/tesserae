@@ -40,6 +40,7 @@ _GROUP_KEYS = {"horizontal": (("arrow_left",), ("arrow_right",)), "vertical": ((
                "both": (("arrow_left", "arrow_up"), ("arrow_right", "arrow_down"))}
 #: A pause this long (seconds) in typing starts a new type-ahead search.
 #: The ScrollView properties the renderer writes (the caller binds a Signal or a state name to read them), and how near an edge counts as at it.
+_MEASURED = ("measured_width", "measured_height")
 _SCROLL_OUTPUTS = frozenset({"scroll_offset", "at_top", "at_end", "scroll_direction"})
 SCROLL_EDGE = 0.5
 TYPEAHEAD_RESET = 1.0
@@ -182,6 +183,7 @@ class ComposedView(View):
         self._field_undos: list[Callable[[], None]] = []
         self._frame_effects: list[Effect] = []
         self._screens: dict[str, Any] = {}
+        self._measure_undo: Optional[Callable[[], None]] = None
         self._split_last_up: dict[str, float] = {}
         self._split_kept: dict[str, float] = {}  # a collapsed splitter's position before it closed
         self._syncing = False
@@ -271,6 +273,7 @@ class ComposedView(View):
             untrack(self._wire_links)
             untrack(self._wire_fields)
             untrack(self._wire_frames)
+            untrack(self._wire_measures)
             untrack(self._wire_states)
             untrack(self._wire_focus_groups)
             untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -304,6 +307,8 @@ class ComposedView(View):
             for prop, (name, scope) in inst.models.items():
                 if inst.widget in ("ScrollView", "VirtualList") and prop in _SCROLL_OUTPUTS:
                     continue  # `_wire_scroll`'s
+                if inst.widget == "Container" and prop in _MEASURED:
+                    continue  # `_wire_measures`'s
                 if inst.widget == "Dock" and prop == "closed":  # a closable panel's close button: the names of the panels that are shut
                     host = self._docks.get(inst.id)
                     if host is not None:
@@ -508,6 +513,28 @@ class ComposedView(View):
         if screen is None:
             screen = self._screens[inst.id] = _Screen(self._built.outer[inst.id] if inst.id in self._built.outer else None)
         return screen
+
+    def _wire_measures(self) -> None:
+        """A Container with `measured_width` / `measured_height` bound is told how big it is laid out, once the layout has run and whenever the window resizes."""
+        if self._measure_undo is not None:
+            self._measure_undo()
+            self._measure_undo = None
+        measured = [(inst, prop, name, scope) for inst in self.handle.composition.walk() if inst.widget == "Container" and inst.id in self._built.nodes
+                    for prop, (name, scope) in inst.models.items() if prop in _MEASURED]
+        if not measured:
+            return
+
+        def report(event: Any = None) -> None:
+            for inst, prop, name, scope in measured:
+                if inst.disposed or inst.id not in self._built.nodes:
+                    continue
+                size = float(self._built.nodes[inst.id].get("layout_width" if prop == "measured_width" else "layout_height") or 0.0)
+                held = scope.lookup(name)
+                if (held.get() if isinstance(held, Signal) else held) != size:
+                    scope.assign(name, size)
+
+        self.timers.after(0, report, name="measure")
+        self._measure_undo = listen_window(self.window, "resize", lambda event: self.timers.after(0, report, name="measure"))
 
     def _wire_frames(self) -> None:
         """An Image with a `frame` shows each new one as it is given (a video: the app pushes `(rgba, width, height)`); none yet leaves the last."""

@@ -679,6 +679,30 @@
               }
             ],
             "description": "Dimmed, not focusable, and its handlers do not run."
+          },
+          "measured_width": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Output: how wide it is laid out. Bind a Signal or a state name to read it (written after layout and when the window resizes)."
+          },
+          "measured_height": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Output: how tall it is laid out."
           }
         },
         "required": [
@@ -705,7 +729,9 @@
             "params",
             "expects",
             "children",
-            "disabled"
+            "disabled",
+            "measured_width",
+            "measured_height"
           ]
         }
       }

@@ -18,7 +18,9 @@ _TEXT_OVERFLOWS = ("clip", "ellipsis")
 declare("Slot", doc="Where a caller's children go in a view (a default slot, or a named one).")
 _DISABLED = {"disabled": P("bool", doc="Dimmed, not focusable, and its handlers do not run.")}
 declare("Rect", _DISABLED, container=True, doc="A filled box that can hold children.")
-declare("Container", _DISABLED, container=True, doc="A box with an optional fill that lays out its children.")
+declare("Container", {**_DISABLED,
+                       "measured_width": P("float", model=True, doc="Output: how wide it is laid out. Bind a Signal or a state name to read it (written after layout and when the window resizes)."),
+                       "measured_height": P("float", model=True, doc="Output: how tall it is laid out.")}, container=True, doc="A box with an optional fill that lays out its children.")
 
 _TEXT = {
     "text": P("str", default="", doc="The text shown."),

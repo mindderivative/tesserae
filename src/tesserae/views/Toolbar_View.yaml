@@ -16,10 +16,13 @@ params:
   fab_icon: {type: str, default: "", doc: "An action button at the end (empty shows none)."}
   fab_label: {type: str, default: "", doc: "Its name and tooltip."}
   on_fab: {type: handler, doc: "What the action button does."}
+  fit: {type: bool, default: false, doc: "Items that do not fit move into the overflow menu, after the ones that do (a docked toolbar measures itself; a floating one uses `max_length`)."}
+  max_length: {type: any, default: null, doc: "A floating toolbar's longest length in pixels, for `fit`."}
   hidden: {type: bool, default: false, doc: "Faded out of the way and out of the tab order."}
   disabled: {type: bool, default: false, doc: "No button responds."}
 widget: Container
-state: {menu_open: false}
+measured_width: "{{ avail }}"
+state: {menu_open: false, avail: 0}
 focus_group: both
 a11y: {role: group, label: "{{ label }}", hidden: "{{ hidden }}"}
 style:
@@ -35,10 +38,10 @@ children:
     style:
       flex_direction: "{{ 'vertical' if (variant == 'floating' and orientation == 'vertical') else 'horizontal' }}"
       align_content: center
-      flex: "{{ 'expand_horizontal' if (variant == 'docked' and (fab_icon != '' or len(overflow) > 0)) else 'none' }}"
+      flex: "{{ 'expand_horizontal' if (variant == 'docked' and (fab_icon != '' or len(overflow) > 0 or fit)) else 'none' }}"
     children:
       - widget: IconButton
-        for: o in items
+        for: o in items[:(len(items) if (not fit or (max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) <= 0 or len(items) * 44 - 4 + (48 if len(overflow) > 0 else 0) <= ((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0))) else max(0, int((((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0)) - 44) // 44)))]
         key: o['value']
         name: item
         icon: "{{ o['icon'] }}"
@@ -49,7 +52,7 @@ children:
       - widget: Slot
   - widget: IconButton
     name: more
-    if: "len(overflow) > 0"
+    if: "len(overflow) > 0 or len(items) > (len(items) if (not fit or (max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) <= 0 or len(items) * 44 - 4 + (48 if len(overflow) > 0 else 0) <= ((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0))) else max(0, int((((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0)) - 44) // 44)))"
     icon: "{{ 'dots_vertical' if orientation == 'vertical' else 'dots_horizontal' }}"
     label: More actions
     tint: "{{ 'on_primary_container' if vibrant else '' }}"
@@ -58,11 +61,11 @@ children:
     handlers: {on_click: "menu_open = not menu_open"}
   - widget: Menu
     name: menu
-    if: "len(overflow) > 0"
+    if: "len(overflow) > 0 or len(items) > (len(items) if (not fit or (max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) <= 0 or len(items) * 44 - 4 + (48 if len(overflow) > 0 else 0) <= ((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0))) else max(0, int((((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0)) - 44) // 44)))"
     open: "{{ menu_open }}"
     anchor: more
     placement: "{{ 'start' if orientation == 'vertical' else 'above' }}"
-    items: "{{ overflow }}"
+    items: "{{ [{'value': o['value'], 'label': o['label'], 'icon': o.get('icon', ''), 'disabled': o.get('disabled', False)} for o in items[(len(items) if (not fit or (max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) <= 0 or len(items) * 44 - 4 + (48 if len(overflow) > 0 else 0) <= ((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0))) else max(0, int((((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0)) - 44) // 44))):]] + ([{'divider': True}] if (len(items) > (len(items) if (not fit or (max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) <= 0 or len(items) * 44 - 4 + (48 if len(overflow) > 0 else 0) <= ((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0))) else max(0, int((((max_length if (variant == 'floating' and max_length is not None) else (avail if variant == 'docked' else 0)) - (32 if variant == 'docked' else 16) - (48 if fab_icon != '' else 0)) - 44) // 44))) and len(overflow) > 0) else []) + overflow }}"
     chosen: "{{ chosen }}"
   - widget: Fab
     name: fab
