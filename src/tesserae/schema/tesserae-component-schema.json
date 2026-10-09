@@ -2937,6 +2937,7 @@
             "none",
             "progressbar",
             "radio",
+            "separator",
             "slider",
             "switch",
             "tab",

@@ -346,7 +346,7 @@ letter_spacing: <a number>
 | Key | Values | What it does |
 | --- | --- | --- |
 | `label` | text | The name a screen reader says. |
-| `role` | one of 23 names | What kind of thing it is. |
+| `role` | one of 24 names | What kind of thing it is. |
 | `hidden` | `true` or `false` | Hide it from assistive technology. |
 | `live` | `assertive` \| `off` \| `polite` | How changes to it are announced. |
 | `level` | an integer | A heading's level. |

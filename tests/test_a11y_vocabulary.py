@@ -1,4 +1,4 @@
-"""#237: the whole accessibility vocabulary as `a11y:` fields -- the states tre has no property for yet are accepted, checked, and sent as far as tre takes them."""
+"""#237: the whole accessibility vocabulary as `a11y:` fields -- the states tre 0.5.6 added are accepted, checked and set on the node."""
 
 import pytest
 
@@ -42,13 +42,10 @@ def test_these_are_refused_naming_the_field(fields, message):
         a11y.check(fields)
 
 
-def test_describe_sends_what_the_node_takes_and_skips_the_rest_once(caplog):
-    a11y._WARNED.clear()
-    node = Recorder({"label", "a11y_hidden", "invalid"})
+def test_describe_sets_the_fields_on_the_node():
+    node = Recorder({"label", "a11y_hidden", "invalid", "pressed", "busy"})
     a11y.describe(node, label="Email", invalid=True, pressed=True, busy=False)
-    assert node.set_calls == [{"label": "Email"}, {"invalid": True}]
-    a11y.describe(node, pressed=False)  # said once, not again
-    assert a11y._WARNED == {"pressed", "busy"}
+    assert node.set_calls == [{"label": "Email"}, {"invalid": True, "pressed": True, "busy": False}]
 
 
 def test_describe_refuses_relations_in_python():
@@ -87,23 +84,12 @@ def page(a11y_fields, extra_children=()):
                          {"id": "panel", "kind": "Rect", "style": {"width": 40, "height": 40, "background": "secondary"}}, *extra_children]}
 
 
-def lacking(node, names):
-    """The properties among `names` this tre has no such property for (0.5.4 lacks them all, 0.5.6 has them)."""
-    missing = set()
-    for name in names:
-        try:
-            node.get(name)
-        except ValueError:
-            missing.add(name)
-    return missing
-
-
-def test_a_view_with_the_fields_builds_on_this_tre_and_leaves_the_rest_alone():
-    a11y._WARNED.clear()
+def test_a_view_with_the_fields_builds_and_the_node_holds_them():
     view = View(page({"label": "Toggle", "pressed": True, "invalid": False, "description": "Turns it on", "current": "page", "busy": True,
                       "value_text": "on", "value_now": 1, "controls": "panel", "describedby": ["panel"]}), theme_seed=SEED)
     assert view.node("b").get("label") == "Toggle"
-    assert a11y._WARNED == lacking(view.node("b"), ["pressed", "invalid", "description", "current", "busy", "value_text", "value_now", "controls", "describedby"])
+    node = view.node("b")
+    assert [node.get(n) for n in ("pressed", "invalid", "description", "current", "busy", "value_text", "value_now")] == [True, False, "Turns it on", "page", True, "on", 1.0]
 
 
 def test_the_view_sends_them_to_a_node_that_takes_them(monkeypatch):
@@ -171,11 +157,11 @@ def opened(tmp_path, text=VIEW):
 
 
 def test_the_view_language_takes_the_whole_vocabulary(tmp_path):
-    a11y._WARNED.clear()
     view, vm = opened(tmp_path)
     vm.error.set("Required")
     view.window.advance(16)
-    assert a11y._WARNED == lacking(view.node("root.toggle"), ["pressed", "controls", "describedby", "description", "invalid"])
+    node = view.node("root.toggle")
+    assert node.get("pressed") is True and node.get("description") == "Required" and node.get("invalid") is True
 
 
 def test_the_view_language_sends_resolved_relations_and_bound_values(tmp_path, monkeypatch):

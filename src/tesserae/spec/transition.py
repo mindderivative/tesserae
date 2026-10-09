@@ -12,7 +12,7 @@ style:
 
 Only a *change* eases: the first time a node is built it is where it says. The properties are the ones tre can animate (`background`,
 `foreground` for text and glyphs, `border_color`, `border_width`, `corner_radius`, `elevation`, `opacity`, `blur`, `backdrop_blur`, `scale`,
-`translate_x`, `translate_y`, `rotation_deg`); layout properties (`width`, `height`, `x`, `y`, `gap`, `padding`, `margin`) ease too: the engine cannot animate them yet, so they are set frame by frame (`layout_steps`). An app that asked for reduced
+`translate_x`, `translate_y`, `rotation_deg`); layout properties (`width`, `height`, `x`, `y`, `gap`, `padding`, `margin`) ease too, in pixels (a change to or from `auto` or a percentage is made at once). An app that asked for reduced
 motion gets the new value at once.
 
 `plan(...)` turns the style's `transition:` into `{node property: (milliseconds, easing)}`; the builder's `patch` animates those.
@@ -43,8 +43,7 @@ TRANSITIONABLE: dict[str, str] = {
     "elevation": "shadows", "opacity": "opacity", "blur": "blur", "backdrop_blur": "backdrop_blur", "scale": "scale", "translate_x": "translate_x",
     "translate_y": "translate_y", "rotation_deg": "rotation_deg",
 }
-#: The layout fields that ease too, each the node properties it is. The engine cannot animate these yet, so `patch` steps them frame by frame
-#: (`layout_steps`) when it says so; `all` leaves them out, since a layout that changes is not always meant to glide.
+#: The layout fields that ease too, each the node properties it is. The engine animates them in pixels (tre 0.5.6); `all` leaves them out, since a layout that changes is not always meant to glide.
 LAYOUT_TRANSITIONABLE: dict[str, tuple[str, ...]] = {
     "width": ("width",), "height": ("height",), "x": ("x",), "y": ("y",), "gap": ("gap",),
     "padding": ("padding_top", "padding_right", "padding_bottom", "padding_left"),

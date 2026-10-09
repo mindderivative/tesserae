@@ -10,7 +10,7 @@ A divider is a thin line that groups and separates content in lists and containe
 ## In Tesserae
 
 `widget: Divider` is a view Tesserae ships (`Divider_View.yaml`) with its look as rules (`Divider_Stylesheet.yaml`): a line in the
-`outline_variant` colour that fills the length it is in, and is hidden from a screen reader (tre has no `separator` role to give it).
+`outline_variant` colour that fills the length it is in, and is a `separator` to a screen reader.
 
 | Property | Type | Meaning |
 | --- | --- | --- |

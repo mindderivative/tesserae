@@ -151,7 +151,7 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   component that is built from the language's own parts: per-corner pill, `focus_group`, icons, handlers that set a Signal). An `a11y: role` may be worked out from a param (never from a Signal), and a roving focus group starts on its checked item.
 - **Tabs** ([#166](https://github.com/mindderivative/tesserae/issues/166), [#167](https://github.com/mindderivative/tesserae/issues/167)). `widget: Tabs` with `tabs`, a two-way `selected`, `variant` (primary, secondary) and `tab_width`: a shipped view with icons, badges,
   an indicator that slides, and arrows/Home/End that move and choose. A bar that scrolls waits for the engine to scroll sideways.
-- **tre 0.5.6 compatibility.** A transition to `auto` or a percentage is made at once on an engine that animates layout (0.5.6 refuses a non-pixel target), as it was on 0.5.4; the suite passes on both engines. Tesserae still uses its own timers and stepped layout transitions on both.
+- **Requires tre 0.5.6.** Timers run on the window's own `after` and `every`; layout `transition:` is the engine's own animation (a change to or from `auto` or a percentage is made at once); the accessibility states (`pressed`, `invalid`, `description`, `current`, `busy`, `value_text`, relations) are set on the node, and a `Divider` is a `separator`. The hand-stepped layout transitions and the dropped-state tolerance are gone. Horizontal scrolling and snap points are asked of tre (mindderivative/tre#166).
 
 ### Removed
 

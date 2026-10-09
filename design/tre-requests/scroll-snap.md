@@ -1,12 +1,12 @@
 # Request to tre: horizontal scrolling and scroll snap points
 
-*Drafted for Tesserae 0.5.0 (#240). Not sent: sending it to tre is the project owner's decision.*
+*Sent as mindderivative/tre#166. From Tesserae 0.5.0 (#240). Re-checked on tre 0.5.6 (86f847b): nothing below exists yet.*
 
 ## What Tesserae needs
 
 Carousels and scrolling tab strips: a row of items that scrolls sideways and comes to rest with an item aligned (snap), by wheel, drag or touch. Also a vertical list that snaps to its rows (a picker).
 
-## What exists today (tre 0.5.4)
+## What exists today (tre 0.5.4 and 0.5.6)
 
 - **A `scroll_view` scrolls vertically only.** With a content box wider than the view (`flex_direction="horizontal"`, 500 wide in a 100 wide view), `scroll_offset=150` reads back as 0.0, and a wheel event with `delta_x=60` does nothing. There is one `scroll_offset`, no `scroll_offset_x`, no axis property. So a sideways carousel or tab strip cannot scroll at all, snap or not.
 - No snap: `scroll_snap`, `snap_points`, `scroll_snap_type`, `snap_align` and `scroll_behavior` all raise "unknown node property", on a `scroll_view` and on a `virtual_list`.

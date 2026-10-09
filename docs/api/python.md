@@ -1977,7 +1977,7 @@ The state layer, ripple and focus ring on one `box` node: the layer and ripple t
 apply_extras(node: Any, props: dict[str, Any]) -> None
 ```
 
-Sets the accessibility states tre may not have yet (`EXTRAS`, and relations resolved to nodes) one at a time, so a property tre does not know costs only that property: it is skipped, with one warning naming it.
+Sets the accessibility states of `EXTRAS` (and relations resolved to nodes) on `node`.
 
 ### `bind`
 
@@ -2023,7 +2023,7 @@ Routes `node`'s `a11y_action` events to `handlers[action]`, each given the event
 - `EXTRAS` = `('pressed', 'invalid', 'description', 'current', 'value_now', 'value_text', 'busy')`
 - `LIVE` = `{'assertive', 'off', 'polite'}`
 - `RELATIONS` = `('describedby', 'controls')`
-- `ROLES` = `frozenset of 23`
+- `ROLES` = `frozenset of 24`
 
 ## Bindings
 

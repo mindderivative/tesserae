@@ -26,15 +26,14 @@ __all__ = ["ACTIONS", "BINDABLE", "CURRENT", "EXTRAS", "LIVE", "RELATIONS", "ROL
 ROLES = frozenset({
     "button", "checkbox", "radio", "switch", "slider", "progressbar", "link", "textbox", "tab", "tablist",
     "tabpanel", "menu", "menuitem", "dialog", "alert", "list", "listitem", "tree", "treeitem", "heading",
-    "img", "group", "none",
+    "img", "group", "separator", "none",
 })
 #: How a changing node is announced.
 LIVE = frozenset({"off", "polite", "assertive"})
 #: The requests assistive technology can make of a node.
 ACTIONS = frozenset({"increment", "decrement", "expand", "collapse", "scroll_into_view", "set_value"})
 
-#: The states tre 0.5.4 has no property for yet (requested: mindderivative/tre#160). The language and Tesserae's widgets set them; they reach the
-#: engine when it takes them, and until then each is dropped, said once by name.
+#: The states tre added in 0.5.6 (mindderivative/tre#160), beyond `checked`, `selected`, `expanded` and `value`. The language and Tesserae's widgets set them.
 EXTRAS = ("pressed", "invalid", "description", "current", "value_now", "value_text", "busy")
 #: `describedby` and `controls` name other nodes of the view (by their `name:`), or a list of them; the view resolves them to nodes.
 RELATIONS = ("describedby", "controls")
@@ -95,30 +94,17 @@ def check(fields: dict[str, Any], where: str = "") -> dict[str, Any]:
     return props
 
 
-_WARNED: set[str] = set()
-
-
 def apply_extras(node: Any, props: dict[str, Any]) -> None:
-    """Sets the accessibility states tre may not have yet (`EXTRAS`, and relations resolved to nodes) one at a time, so a property tre does not
-    know costs only that property: it is skipped, with one warning naming it."""
-    for name, value in props.items():
-        try:
-            node.set(**{name: value})
-        except ValueError as exc:
-            if "unknown node property" not in str(exc) and "unknown property" not in str(exc):
-                raise
-            if name not in _WARNED:
-                _WARNED.add(name)
-                from loguru import logger
-
-                logger.warning("a11y {}: this tre has no such property, so it is not sent to the screen reader", name)
+    """Sets the accessibility states of `EXTRAS` (and relations resolved to nodes) on `node`."""
+    if props:
+        node.set(**props)
 
 
 def describe(node: Any, **fields: Any) -> None:
     """Sets what `node` tells assistive technology, for example
     `describe(node, role="switch", label="Wi-Fi", checked=True)`. Every
-    field is checked before any is set. States tre does not have yet
-    (`EXTRAS`) are applied as far as it takes them."""
+    field is checked before any is set. States beyond tre's first few
+    (`EXTRAS`) are set as the others are."""
     if any(name in RELATIONS for name in fields):
         raise ValueError("a11y.describe: describedby and controls name nodes of a view; write them in the view's `a11y:`")
     props = check(fields)

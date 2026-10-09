@@ -71,10 +71,10 @@ def test_the_inset_of_a_vertical_divider_is_at_the_top(tmp_path):
     assert (d.get("layout_y"), d.get("layout_height")) == (16.0, 168.0)
 
 
-def test_it_is_hidden_from_a_screen_reader_and_cannot_be_tabbed_to(tmp_path):
+def test_it_is_a_separator_to_a_screen_reader_and_cannot_be_tabbed_to(tmp_path):
     view = opened(tmp_path, "  - {widget: Divider, name: d}\n")
     d = line(view)
-    assert d.get("a11y_hidden") is True and not d.get("focusable")
+    assert d.get("role") == "separator" and not d.get("a11y_hidden") and not d.get("focusable")
 
 
 def test_a_divider_between_rows_separates_them(tmp_path):

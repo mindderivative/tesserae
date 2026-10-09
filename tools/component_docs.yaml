@@ -320,7 +320,7 @@ components:
       16 dp in from the start (**inset**), or is 16 dp in from both ends (**middle inset**), and is horizontal or vertical.
     built: |
       `widget: Divider` is a view Tesserae ships (`Divider_View.yaml`) with its look as rules (`Divider_Stylesheet.yaml`): a line in the
-      `outline_variant` colour that fills the length it is in, and is hidden from a screen reader (tre has no `separator` role to give it).
+      `outline_variant` colour that fills the length it is in, and is a `separator` to a screen reader.
 
       | Property | Type | Meaning |
       | --- | --- | --- |
