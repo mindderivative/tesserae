@@ -1,6 +1,6 @@
 # Request to tre: what a typing effect needs from the text input
 
-*Drafted for Tesserae (a wish, not yet scheduled). Not sent: sending it to tre is the project owner's decision.*
+*Drafted for Tesserae (#248). Sent 2026-10-08 as mindderivative/tre#165.*
 
 ## What Tesserae wants (eventually)
 
