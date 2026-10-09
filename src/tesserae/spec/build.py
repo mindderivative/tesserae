@@ -559,7 +559,19 @@ def _text_style(ctx: _Context, node: dict[str, Any], kind: str) -> dict[str, Any
         "overflow": overflow,
         "spans": [],
         "selectable": False,
+        "letter_spacing": 0.0,
+        "max_lines": None,
     }
+    spacing = text.get("letter_spacing")
+    if spacing is not None:
+        if isinstance(spacing, bool) or not isinstance(spacing, (int, float)):
+            raise SpecBuildError(f'widget {_q(node["id"])}: text.letter_spacing is a number of pixels, got {spacing!r}')
+        props["letter_spacing"] = float(spacing)
+    lines = text.get("max_lines")
+    if lines is not None:
+        if isinstance(lines, bool) or not isinstance(lines, int) or lines < 1:
+            raise SpecBuildError(f'widget {_q(node["id"])}: text.max_lines is a whole number from 1, got {lines!r}')
+        props["max_lines"] = lines
     if "selectable" in text:
         if not isinstance(text["selectable"], bool):
             raise SpecBuildError(f'widget {_q(node["id"])}: text.selectable must be true or false, got {text["selectable"]!r}')
@@ -635,9 +647,13 @@ def natural_size(window: Any, props: dict[str, Any], style: dict[str, Any]) -> d
     if "_pieces" in props:  # rich text: each run in its own weight and size
         width, height = richtext.measure(window, props["_pieces"], props)
     else:
+        fixed = style.get("width")  # a text with a width and no height is as tall as its lines wrap to (and `max_lines` allows)
+        wrapped = {"max_width": float(fixed), "wrap": props.get("wrap", "word"), "overflow": props.get("overflow", "clip")} \
+            if isinstance(fixed, (int, float)) and not isinstance(fixed, bool) else {}
         width, height = window.measure_text(props["text"], font_family=props["font_family"],
                                             font_size=props["font_size"], font_weight=props["font_weight"],
-                                            line_height=props.get("line_height"))
+                                            line_height=props.get("line_height"), letter_spacing=props.get("letter_spacing", 0.0),
+                                            max_lines=props.get("max_lines"), **wrapped)
     # Whole pixels, rounded up: the engine rounds an explicit width down, and text a fraction of a pixel
     # wider than its node wraps ("Add a / task").
     return {d: float(math.ceil(v)) for d, v in (("width", width), ("height", height)) if d in missing}
@@ -683,6 +699,9 @@ def _text_field_props(ctx, node, style):
     for key in ("wrap", "overflow"):
         if key in node["text"]:
             raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.{key} (it is a single line that scrolls)')
+    for key in ("max_lines", "letter_spacing"):
+        if key in node["text"]:
+            raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.{key} (the engine\'s input takes neither)')
     for key in ("runs", "selectable"):
         if key in node["text"]:
             raise SpecBuildError(f'widget {_q(node["id"])}: a TextField has no text.{key} (what is typed is one style)')
@@ -693,6 +712,8 @@ def _text_field_props(ctx, node, style):
     text.pop("overflow")
     text.pop("spans")
     text.pop("selectable")
+    text.pop("letter_spacing")
+    text.pop("max_lines")
     outer = {**_layout(style), **_paint(ctx, node["id"], style), "fill": background}
     # What is typed is the theme's `on_surface` (or the style's `foreground`), and the caret its `primary`, so a
     # dark scheme's field is light on dark: the engine's own default is the light scheme's dark ink.

@@ -118,7 +118,8 @@ Give the text a width (a number, or `flex: expand_horizontal` in a row with `min
 something to truncate to. A `TextField` has neither key.
 
 The labels of the built-in [components](../components/index.md) are single lines that end in an
-ellipsis when they don't fit. A `Text` component takes `wrap` and `overflow` as parameters, and a `Link`
+ellipsis when they don't fit. `max_lines: 2` stops a long text at two lines (with `overflow: ellipsis` the second ends in an
+ellipsis), and a Text with a width and no height is as tall as the lines it wraps to; `letter_spacing: 0.5` adds space between the letters, in pixels. A `Text` component takes `wrap` and `overflow` as parameters, and a `Link`
 too, if you want them to wrap.
 
 ## Sharing a row

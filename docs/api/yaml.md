@@ -253,6 +253,8 @@ wrap: <word | none>
 selectable: <true or false>
 runs: <a list>
 overflow: <clip | ellipsis>
+max_lines: <an integer>
+letter_spacing: <a number>
 ```
 
 | Key | Values | What it does |
@@ -268,6 +270,8 @@ overflow: <clip | ellipsis>
 | `selectable` | `true` or `false` | A Text only: the user can select it with the pointer and copy it (Ctrl+C). |
 | `runs` | a list | A Text only: the text as styled pieces, instead of `content`. A piece is a string, or `{text, color, weight, italic, underline, strikethrough, font_size, font_family, link}`. A piece with a `link` is `primary` and underlined, and a click on it calls `on_link` with `event.href`. |
 | `overflow` | `clip` \| `ellipsis` | What happens to a line that doesn't fit its node: `clip` (the default) cuts it off, `ellipsis` ends it with an ellipsis. Not for a TextField. |
+| `max_lines` | an integer | The most lines shown; a longer text is cut there (with `overflow: ellipsis`, the last line ends with an ellipsis). A Text with a width and no height is as tall as these lines. Not for a TextField. |
+| `letter_spacing` | a number | Extra space between letters, in pixels (tracking); negative tightens. Not for a TextField. |
 
 ## Handlers
 

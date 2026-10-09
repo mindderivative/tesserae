@@ -544,6 +544,8 @@ removed in the release after, with clear messages, as the 0.4.5 and 0.4.6 patter
 
 - **#210, the accessibility states tre already has.** `a11y:` takes `expanded`, `selected`, `checked`, `value`, `value_min`, `value_max` and `value_step` beside the original five, fixed or bound (everything but `role` and `live` can follow an expression), and `null` clears one (tre holds them unset until a node says; `hidden` is always one or the other). A control kind sets its own `checked`, `selected` and `value`, so `a11y:` refuses them there. What tre lacks (`pressed`, `invalid`, `description`, `controls`, `current`, `value_text`, `busy`) is #232 and #237.
 
+- **#211, text extras.** `max_lines`, `letter_spacing` and (for `Text`) `selectable` are properties; the old builder takes them in `text:` and the text's natural size measures with them. A Text with a fixed `width` and no `height` is now as tall as its lines wrap to (it was one line). MD3's per-role tracking is **not** applied by default (it would change every text's width); a role's `letter_spacing` stays a follow-up to the type scale.
+
 **Findings of the component pass: TextField (#184)**, the first component, which also built what the others use:
 
 - **Shipped views.** `src/tesserae/views/` holds `<Name>_View.yaml` and `<Name>_Stylesheet.yaml` (section 4, step 4). `ViewLibrary` finds a view in the project, then there; a project view of the same name replaces the shipped one **and its shipped rules** (`RuleSheet.without`). Shipped rules are the lowest layer, then the app's.

@@ -16,7 +16,7 @@ from tesserae.spec.compose import Instance
 
 __all__ = ["lower"]
 
-_TEXT_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "wrap", "overflow", "text_align")
+_TEXT_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "wrap", "overflow", "text_align", "max_lines", "letter_spacing", "selectable")
 _FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "placeholder", "multiline", "obscured")
 #: The widget names that are not the builder's kind names.
 _KIND = {"TextInput": "TextField"}

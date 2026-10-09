@@ -1363,6 +1363,30 @@
                 "pattern": "\\{\\{"
               }
             ]
+          },
+          "max_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The most lines shown, from 1; a longer text is cut (with `overflow: ellipsis`, an ellipsis ends the last line)."
+          },
+          "letter_spacing": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Extra space between letters, in pixels (tracking)."
           }
         },
         "required": [
@@ -1393,7 +1417,9 @@
             "font_weight",
             "wrap",
             "overflow",
-            "text_align"
+            "text_align",
+            "max_lines",
+            "letter_spacing"
           ]
         }
       }
@@ -2812,6 +2838,42 @@
                 "pattern": "\\{\\{"
               }
             ]
+          },
+          "max_lines": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The most lines shown, from 1; a longer text is cut (with `overflow: ellipsis`, an ellipsis ends the last line)."
+          },
+          "letter_spacing": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Extra space between letters, in pixels (tracking)."
+          },
+          "selectable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The text can be selected and copied."
           }
         },
         "required": [
@@ -2842,7 +2904,10 @@
             "font_weight",
             "wrap",
             "overflow",
-            "text_align"
+            "text_align",
+            "max_lines",
+            "letter_spacing",
+            "selectable"
           ]
         }
       }

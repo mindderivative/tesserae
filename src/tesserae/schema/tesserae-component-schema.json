@@ -1547,6 +1547,35 @@
               "$ref": "#/definitions/conditional"
             }
           ]
+        },
+        "max_lines": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "description": "The most lines shown; a longer text is cut there (with `overflow: ellipsis`, the last line ends with an ellipsis). A Text with a width and no height is as tall as these lines. Not for a TextField."
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
+        },
+        "letter_spacing": {
+          "anyOf": [
+            {
+              "type": "number",
+              "description": "Extra space between letters, in pixels (tracking); negative tightens. Not for a TextField."
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ]
         }
       },
       "additionalProperties": false

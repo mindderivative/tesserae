@@ -233,6 +233,11 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                 "overflow": loose({"enum": ["clip", "ellipsis"],
                                    "description": "What happens to a line that doesn't fit its node: `clip` (the default) cuts it off, "
                                                   "`ellipsis` ends it with an ellipsis. Not for a TextField."}),
+                "max_lines": loose({"type": "integer", "minimum": 1,
+                                    "description": "The most lines shown; a longer text is cut there (with `overflow: ellipsis`, the last line ends with "
+                                                   "an ellipsis). A Text with a width and no height is as tall as these lines. Not for a TextField."}),
+                "letter_spacing": loose({"type": "number",
+                                         "description": "Extra space between letters, in pixels (tracking); negative tightens. Not for a TextField."}),
             },
             "additionalProperties": False}
     window_actions = ", ".join("`window." + action + "`" for action in view_module.WINDOW_ACTIONS)
