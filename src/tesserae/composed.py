@@ -154,8 +154,13 @@ class _SpecTip:
 class _Screen:
     """A routed call as the app keeps it: the node it is (the app shows and hides the node, and tells a screen by this object)."""
 
-    def __init__(self, root: Any) -> None:
-        self.root = root
+    def __init__(self, view: Any, record: Any) -> None:
+        self.view, self.record = view, record
+
+    @property
+    def root(self) -> Any:
+        inst = self.record.instance
+        return self.view._built.outer.get(inst.id) if inst is not None else None
 
 
 class ComposedView(View):
@@ -507,11 +512,11 @@ class ComposedView(View):
 
     # labelled controls (#175)
 
-    def screen_of(self, inst: Instance) -> Any:
-        """The same stand-in each time for the routed view `inst` (the app tells a rebuilt screen by it): it has the node's root and no ViewModel of its own."""
-        screen = self._screens.get(inst.id)
-        if screen is None:
-            screen = self._screens[inst.id] = _Screen(self._built.outer[inst.id] if inst.id in self._built.outer else None)
+    def screen_of(self, record: Any) -> Any:
+        """The same stand-in each time for the routed call `record` (the app tells a rebuilt screen by it): it has the node's root, once there is one, and no ViewModel of its own."""
+        screen = self._screens.get(id(record))
+        if screen is None or screen.record is not record:
+            screen = self._screens[id(record)] = _Screen(self, record)
         return screen
 
     def _wire_measures(self) -> None:

@@ -24,7 +24,7 @@ import time
 import weakref
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from loguru import logger
 from tre import App as _TreApp
@@ -384,6 +384,9 @@ class App:
         self._current: str | None = None
         #: The window view (`kind: Window`) once one is loaded: its `Frame` (0.4.4)
         self._frame: Any = None
+        self._guards: dict[str, list[Callable[[dict[str, Any]], Any]]] = {}
+        self._frame_guards: dict[str, Callable[[dict[str, Any]], Any]] = {}
+        self._redirects = 0
         #: The screen showing, as a value a binding can read: `{{ app.current_screen.get() == 'Main' }}`.
         self._screen_name = Signal(None)
         self.current_screen = Computed(self._screen_name.get)
@@ -1068,6 +1071,17 @@ class App:
         entry = (name, params)
         if 0 <= self._at and self._history[self._at] == entry:
             return self._window
+        verdict = self._verdict(name, params)
+        if verdict is not True:  # a guard refused: stay where we are, or go where it sends us
+            if isinstance(verdict, str):
+                if self._redirects >= 8:
+                    raise ValueError(f"guards send the app round in a circle (at {name!r}, being sent to {verdict!r})")
+                self._redirects += 1
+                try:
+                    return self.navigate_to(verdict)
+                finally:
+                    self._redirects -= 1
+            return self._window
         window = self._arrive(entry)
         del self._history[self._at + 1:]
         self._history.append(entry)
@@ -1077,6 +1091,21 @@ class App:
             del self._arrivals[stale]
         self._sync_history()
         return window
+
+    def guard(self, screen: str, check: Callable[[dict[str, Any]], Any]) -> None:
+        """`check(params)` runs before the app goes to `screen` (by `navigate`, `navigate_to`, `back` or `forward`; `show` is a jump and skips it): `True` lets it in,
+        `False` keeps the app where it is, and a route (a string) sends it there instead. A view's `route: {guard: ...}` is the same check, written in the view."""
+        self._guards.setdefault(screen, []).append(check)
+
+    def _set_guards(self, guards: dict[str, Callable[[dict[str, Any]], Any]]) -> None:
+        self._frame_guards = guards
+
+    def _verdict(self, name: str, params: dict[str, Any]) -> Any:
+        for check in (*([self._frame_guards[name]] if name in self._frame_guards else []), *self._guards.get(name, [])):
+            result = check(dict(params))
+            if result is not True:
+                return result if isinstance(result, str) else False
+        return True
 
     def route(self, pattern: str, name: str) -> None:
         """Adds a route: a pattern like `"notes/{id}"` for the screen
@@ -1167,6 +1196,8 @@ class App:
         to = self._at + by
         if not 0 <= to < len(self._history):
             return False
+        if self._verdict(*self._history[to]) is not True:
+            return False  # a guard now keeps that screen out
         # going back undoes how the screen being left was reached; going forward repeats how the next one was
         self._one_shot = self._arrivals.get(self._at if by < 0 else to)
         try:
@@ -1226,7 +1257,10 @@ class App:
         if self._frame is not None:  # a window view: its routed views are the screens (0.4.4)
             if name != self._frame.name:
                 came_from = self._current if self._current not in (None, name, self._frame.name) else None
-                if came_from in self._frame.screens and name in self._frame.screens and transition != "none":
+                self._frame.activate(name)
+                if (came_from in self._frame.screens and name in self._frame.screens and transition != "none"
+                        and self._frame.screens[came_from] is not None and self._frame.screens[name] is not None
+                        and self._frame.parents.get(came_from) == self._frame.parents.get(name)):
                     outgoing = self._frame.view.node(self._frame.screens[came_from])
                     incoming = self._frame.view.node(self._frame.screens[name])
                     self._playing = screen_transition.play(

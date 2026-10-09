@@ -33,8 +33,20 @@ In a view written in the current language, a call with a `route:` is the screen,
 is the screen `Settings`). A route can read params from the path (`notes/{id:int}`), and the screen showing reads the ones it was reached with as
 `app.params` (`{{ app.params.get('id') }}`); going back or forward restores each step's params, and `show()` clears them. Handlers: `navigate.Settings`,
 `navigate.back`, `navigate.forward`, `navigate_to('Note', {'id': 3})` (a screen by name, with params) and `navigate_route('notes/' + str(id))` (a route by its
-path). The app's `transition` plays between routed screens. Not built: nested routes, navigation guards, loading a screen's view only when it is first reached, a
-push/pop stack apart from the history.
+path). The app's `transition` plays between routed screens. Not built: a push/pop stack apart from the history.
+
+A route can be written as a mapping, `route: {path: admin, guard: signed_in, redirect: "", lazy: true}`:
+
+| Key | Meaning |
+| --- | --- |
+| `path` | the route (`""` for the home screen) |
+| `guard` | an expression read when the app goes to the screen (`navigate`, `navigate_to`, `back`, `forward`); falsy keeps the app where it is. `show()` is a jump and skips it |
+| `redirect` | a route to go to when the guard says no |
+| `lazy` | the view is built when the screen is first reached (its route exists from the start), then kept; it cannot have an `if:` |
+
+A routed call inside a routed view is a nested screen: its path is under its parent's (`settings` holding `profile` is `settings/profile`; a path that starts with `/` is from the root),
+the parent shows while a child is current, a parent's guard covers its children, and the app's `transition` plays between screens of one parent. In Python, `app.guard(screen, check)`
+adds a check, `check(params)` giving `True`, `False` or a route to go to instead; guards that send the app round in a circle are an error after 8 steps.
 
 This component has no `component:` fragment: build it in Python.
 

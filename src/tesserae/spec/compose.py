@@ -576,10 +576,65 @@ class _Ctx:
 
     def __init__(self, doc: ViewDoc, depth: int, chain: tuple[str, ...], slots: Optional[dict[str, list[tuple[int, Node]]]] = None,
                  slot_scope: Optional[Scope] = None, slot_ctx: Optional["_Ctx"] = None, call_id: str = "",
-                 owner: Optional[_Owner] = None) -> None:
+                 owner: Optional[_Owner] = None, route_parent: Optional[RouteRecord] = None) -> None:
+        self.route_parent = route_parent
         self.doc, self.depth, self.chain = doc, depth, chain
         self.owner = owner
         self.slots, self.slot_scope, self.slot_ctx, self.call_id = slots or {}, slot_scope, slot_ctx, call_id
+
+
+class RouteRecord:
+    """A routed call as the app needs it, which is before the view is built when the call is `lazy`: the screen's name (the view it calls), its path
+    (joined to its parent's), its guard, where a refusal goes, and the instance once there is one."""
+
+    def __init__(self, node: Node, scope: "Scope", parent: Optional["RouteRecord"]) -> None:
+        self.view = node.widget
+        self.relative = node.route or ""
+        self.parent = parent
+        self.guard: Optional[Expr] = node.route_options.get("guard")
+        self.redirect: Optional[str] = node.route_options.get("redirect")
+        self.lazy: bool = bool(node.route_options.get("lazy"))
+        self.scope = scope
+        self.instance: Optional[Instance] = None
+        self.activated = Signal(not self.lazy)
+
+    @property
+    def path(self) -> str:
+        """The whole path: a child's is under its parent's (`settings` then `profile` is `settings/profile`); one that starts with `/` is from the root."""
+        if self.relative.startswith("/") or self.parent is None:
+            return self.relative.strip("/")
+        return "/".join(p for p in (self.parent.path, self.relative.strip("/")) if p)
+
+    def chain(self) -> list["RouteRecord"]:
+        """This screen and the ones it is inside, the outermost first."""
+        return [*(self.parent.chain() if self.parent is not None else []), self]
+
+    def refused_by(self) -> Optional["RouteRecord"]:
+        """The outermost screen on the way here whose guard says no, or None."""
+        return next((r for r in self.chain() if r.guard is not None and not bool(r.guard.evaluate(r.scope))), None)
+
+    def activate(self) -> None:
+        """Builds a lazy screen's view (the first time it is needed)."""
+        for record in self.chain():
+            if not record.activated.get():
+                record.activated.set(True)
+
+
+class _Lazy(_Region):
+    """A routed call that is built the first time it is reached, and kept for good after."""
+
+    def __init__(self, notify: Callable[[], None], record: RouteRecord, make: Callable[[], Instance]) -> None:
+        super().__init__(notify)
+        self._record, self._make = record, make
+        self._effect = Effect(self._run)
+
+    def _run(self) -> None:
+        if self._record.activated.get() and not self.instances:
+            self._set([untrack(self._make)])
+
+    def dispose(self) -> None:
+        self._effect.dispose()
+        super().dispose()
 
 
 class Composition:
@@ -588,6 +643,11 @@ class Composition:
     def __init__(self, root: Instance, composer: "Composer") -> None:
         self.root = root
         self._composer = composer
+
+    @property
+    def routes(self) -> list[RouteRecord]:
+        """The routed calls, in the order they were met (a lazy one that is not built yet is here too)."""
+        return list(self._composer.routes)
 
     def find(self, id: str) -> Optional[Instance]:
         found = self._composer.by_id.get(id)
@@ -621,6 +681,8 @@ class Composer:
         #: stylesheet layers, lowest first (a widget's shipped looks, then the app's)
         self.rules = [sheet for sheet in rules if sheet.rules]
         self.by_id: dict[str, Instance] = {}
+        self.routes: list[RouteRecord] = []
+        self._records: dict[int, RouteRecord] = {}  # a routed node (by identity) -> its record, for the call that is being made
         self.states: dict[tuple[str, str, str], Signal] = {}
         self._previous = previous._composer.states if previous is not None else {}
 
@@ -658,11 +720,30 @@ class Composer:
             return _For(node, scope, notify, element, lambda message, hint: self._fail(ctx, node.at, message, hint), virtual)
 
         def make() -> Instance:
+            if node.route is not None and not node.route_options.get("lazy"):  # a screen exists while its call does (an `if:` may come and go)
+                record = RouteRecord(node, scope, ctx.route_parent)
+                self.routes.append(record)
+                self._records[id(node)] = record
             return self._instance(node, seg, scope, ctx, parent_id=parent_id, suffix=suffix)
 
+        if node.route is not None and node.route_options.get("lazy"):
+            if node.when is not None:
+                raise self._fail(ctx, node.at, "a lazy route takes no 'if:'", "it is built when first reached")
+            if True:
+                record = RouteRecord(node, scope, ctx.route_parent)
+                self.routes.append(record)
+                self._records[id(node)] = record
+                region = _Lazy(notify, record, make)
+                region_dispose = region.dispose
+                region.dispose = lambda: (region_dispose(), self._drop(record))  # type: ignore[method-assign]
+                return region
         if node.when is not None:
             return _If(notify, node.when, scope, make)
         return _Single(notify, make())
+
+    def _drop(self, record: RouteRecord) -> None:
+        if record in self.routes:
+            self.routes.remove(record)
 
     def _slot(self, node: Node, ctx: _Ctx, notify: Callable[[], None]) -> _Region:
         for directive, label in ((node.loop, "for"), (node.when, "if")):
@@ -936,7 +1017,9 @@ class Composer:
             held = values.get(name)
             return held.get() if isinstance(held, (Signal, Computed)) else held
 
-        sub = _Ctx(doc, ctx.depth + 1, (*ctx.chain, node.widget), content, call_scope, ctx, iid, owner=_Owner(node.widget, param, callee_scope))
+        record = self._records.get(id(node)) if node.route is not None else None
+        sub = _Ctx(doc, ctx.depth + 1, (*ctx.chain, node.widget), content, call_scope, ctx, iid, owner=_Owner(node.widget, param, callee_scope),
+                   route_parent=record if record is not None else ctx.route_parent)
         self._check_root(doc.root, sub)
         inst = self._instance(doc.root, "root", callee_scope, sub, forced_id=iid)
         # the call's own keys lie over the callee's root; a handler written at the call runs in the caller's scope
@@ -968,6 +1051,10 @@ class Composer:
         if node.route is not None:
             inst.route = node.route
             inst.route_view = node.widget  # the view this call names: the screen's name
+            if record is not None:
+                record.instance = inst
+                if not record.lazy:  # a lazy one is dropped with its region; this one goes when its instance does (an `if:` that turned false)
+                    inst._release.append(lambda: self._drop(record))
         if node.focus_group is not None:
             inst.focus_group = node.focus_group
         if node.name is not None:

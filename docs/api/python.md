@@ -88,6 +88,7 @@ class App(
 - `frame_stats(reset: bool = False) -> dict[str, Any]`: What the window's frames cost: `frames`, `skipped`, `last` (the last frame's stage times in milliseconds) and `recent` (the last 240 frames: `fps`, and the mean, 95th percentile and maximum of the total and the CPU time).
 - `fullscreen` *(property)*: Whether the window fills its monitor, borderless.
 - `glyph_cache` *(property)*: Whether text is drawn from a glyph cache: about four times cheaper a label, with slightly different edge pixels.
+- `guard(screen: str, check: Callable[[dict[str, Any]], Any]) -> None`: `check(params)` runs before the app goes to `screen` (by `navigate`, `navigate_to`, `back` or `forward`; `show` is a jump and skips it): `True` lets it in, `False` keeps the app where it is, and a route (a string) sends it there instead.
 - `high_contrast` *(property)*: Whether the app uses MD3's highest-contrast colours: the user asked the OS for more contrast (or the app says so).
 - `high_contrast_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True` or `False`.
 - `load(view_path: str | Path, viewmodel_cls: type | None = None, name: str | None = None, *, stylesheet: str | Path | None = None, stylesheet_spec: dict[str, Any] | None = None) -> tuple[Any, Any]`: Loads a `*_View.yaml` + `*_ViewModel.py` pair and registers it.

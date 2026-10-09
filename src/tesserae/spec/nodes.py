@@ -204,6 +204,8 @@ class Node:
     interaction: Any = None
     window_region: Optional[str] = None
     route: Optional[str] = None
+    #: a route written as a mapping: `guard` (an `Expr`: a falsy value refuses the screen), `redirect` (a route to go to instead) and `lazy` (the view is built when first reached)
+    route_options: dict[str, Any] = field(default_factory=dict)
     focus_group: Optional[str] = None
     #: `tooltip:` as `{text, title, delay, placement, actions}`, each text possibly a `Template`; `actions` is a list of (label, `Handler`)
     tooltip: dict[str, Any] = field(default_factory=dict)
@@ -393,15 +395,36 @@ class _Parser:
         elif key == "tooltip":
             self.tooltip(node, value, vat)
         elif key == "route":
-            if not isinstance(value, str):
-                raise self.fail(vat, f"'route:' takes a path (\"\" for the home screen), got {_describe(value)}")
-            node.route = value
+            if isinstance(value, PMap):
+                self.route_mapping(node, value, vat)
+            elif not isinstance(value, str):
+                raise self.fail(vat, f"'route:' takes a path (\"\" for the home screen) or {{path, guard, redirect, lazy}}, got {_describe(value)}")
+            else:
+                node.route = value
         elif key == "children":
             if not isinstance(value, PSeq):
                 raise self.fail(vat, f"'children:' takes a list of nodes, got {_describe(value)}")
             if not node.decl.container:
                 raise self.fail(where, f"{node.decl.name} takes no children")
             node.children = [self.node(child, depth + 1) for child in value]
+
+    def route_mapping(self, node: Node, value: Any, vat: Position) -> None:
+        unknown = [k for k in value if k not in ("path", "guard", "redirect", "lazy")]
+        if unknown:
+            raise self.fail(value.key_at[unknown[0]], f"'route:' takes path, guard, redirect and lazy, not '{unknown[0]}'", _near(unknown[0], ["path", "guard", "redirect", "lazy"]))
+        if "path" not in value or not isinstance(value["path"], str):
+            raise self.fail(vat, "'route:' as a mapping needs a 'path' (\"\" for the home screen)")
+        node.route = value["path"]
+        if "guard" in value:
+            node.route_options["guard"] = self.expression(value["guard"], value.val_at["guard"], "route guard")
+        if "redirect" in value:
+            if not isinstance(value["redirect"], str) or "guard" not in value:
+                raise self.fail(value.val_at["redirect"], "'redirect:' is a route to go to, and goes with a 'guard:'")
+            node.route_options["redirect"] = value["redirect"]
+        if "lazy" in value:
+            if not isinstance(value["lazy"], bool):
+                raise self.fail(value.val_at["lazy"], "'lazy:' is true or false")
+            node.route_options["lazy"] = value["lazy"]
 
     def style(self, node: Node, value: Any, vat: Position) -> None:
         if isinstance(value, str) and value.endswith((".yaml", ".yml")):  # a style file shared by nodes (M75)

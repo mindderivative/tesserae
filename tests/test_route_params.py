@@ -119,7 +119,7 @@ def test_a_view_routed_twice_is_named(tmp_path):
     (tmp_path / "Views" / "Shell_View.yaml").write_text(
         "name: shell\nwidget: Window\ntitle: T\nstyle: {width: 300, height: 200}\nchildren:\n  - {widget: Home, name: a, route: ''}\n  - {widget: Home, name: b, route: other}\n")
     (tmp_path / "Views" / "Home_View.yaml").write_text(SCREEN.format(n="home"))
-    with pytest.raises(ValueError, match="the screen 'Home' is already the routed view"):
+    with pytest.raises(ValueError, match="the screen 'Home' is already a routed view"):
         App(root=tmp_path).open_view("Shell")
 
 
