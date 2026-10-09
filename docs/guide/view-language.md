@@ -288,6 +288,25 @@ text: Read the docs
 handlers: {on_click: "open_url('https://example.com/docs')"}
 ```
 
+## Moving between screens
+
+`app.transition` sets how `navigate`, `back` and `forward` change screens; the default, `none`, is a swap, and `show()` is a jump that never animates.
+
+| Transition | What the user sees |
+| --- | --- |
+| `fade_through` | the old screen fades out (90 ms), then the new one fades in and settles from 92% (210 ms) |
+| `shared_axis_x`, `shared_axis_y` | the screens slide 30 px along the axis as they fade, forward one way and back the other |
+| `shared_axis_z` | the old screen grows away as it fades, and the new one grows in from 80% |
+| `container_transform` | the new screen grows from a node to fill its place, and going back shrinks into it |
+
+```python
+app.transition = "shared_axis_x"
+app.navigate_with("detail", transition="container_transform", origin=card_node, params={"id": 3})
+```
+
+`back()` undoes how the screen it leaves was reached, and `forward()` repeats it. A navigation while one is playing finishes that one first, and an app that
+reduces motion swaps at once. The screens of a window view (routed views) change the same way.
+
 ## The window and the app
 
 `app` is readable in any expression and follows the window, so a layout can change with its size:

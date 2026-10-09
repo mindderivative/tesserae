@@ -65,7 +65,8 @@ class App(
     glyph_cache: bool = False,
     system_fonts: bool = False,
     reduced_motion: bool | str = 'system',
-    high_contrast: bool | str = 'system'
+    high_contrast: bool | str = 'system',
+    transition: str = 'none'
 ) -> None
 ```
 
@@ -97,6 +98,7 @@ class App(
 - `minimize() -> None`: Minimizes the window (before `run()`, it opens minimized).
 - `navigate(name: str, **params: Any) -> Window`: Shows the screen registered under `name` as a step in the history : `back()` returns from it.
 - `navigate_to(route: str) -> Window`: Navigates to the screen the first matching route names, with the params it reads from `route` (a deep link, say `"notes/42"`).
+- `navigate_with(name: str, *, transition: str, origin: Any = None, params: dict[str, Any] | None = None) -> Window`: `navigate(name, **params)` with this `transition` instead of the app's.
 - `of(view: Any) -> 'App | None'`: The live app whose window `view` (a view, a component, or a window) is on, or `None`: for a ViewModel's constructor, before `super().__init__(view)` gives it `self.app`.
 - `on_file_drop(handler: Any) -> None`: Calls `handler(event)` when files are dropped anywhere on the window (`event.paths`); `None` stops it.
 - `open_view(view: str | Path, name: str | None = None) -> Any`: Opens a view written with `widget:` nodes against the ViewModel that serves its name, and registers it under `name` (default: its root `name:`, else its file's name) for `show(name)`.
@@ -127,6 +129,7 @@ class App(
 - `theme` *(property)*: The app's resolved theme (`tesserae.Theme`): roles, component shape and elevation, typography, and motion tokens.
 - `thread_handle() -> Any`: `tre`'s thread-safe `LoopHandle` for this app: the one object that may cross threads.
 - `toggle_maximized() -> None`: Maximizes the window, or restores it if it's maximized: a title bar's maximize button.
+- `transition` *(property)*: How `navigate`, `back` and `forward` change screens: `none` (the default, a swap), `fade_through`, `shared_axis_x`, `shared_axis_y`, `shared_axis_z` or `container_transform` (see `tesserae.screen_transition`).
 - `transparent` *(property)*: Whether the window was made see-through (`App(transparent=True)`); `transparent_active` says whether it took.
 - `transparent_active` *(property)*: Whether the window really is see-through (the platform may not allow it); `None` until it opens.
 - `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change; `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.

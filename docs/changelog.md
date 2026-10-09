@@ -123,6 +123,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   builds more as it scrolls (a list of 10 000 opens with about a dozen rows). It has a ScrollView's `scroll_offset`, `at_top`, `at_end` and `scroll_direction`.
 - **Window size classes** ([#230](https://github.com/mindderivative/tesserae/issues/230)). `app.window_width`, `app.window_height`, `app.width_class` (`compact` to `extra_large`) and `app.height_class` follow the
   window's size and can be read in any expression. `app` itself is now readable in views whose ViewModel is the new kind (it had only worked for a 0.4.x ViewModel).
+- **Screen transitions** ([#231](https://github.com/mindderivative/tesserae/issues/231)). `app.transition` (or `App(transition=...)`) is `none`, `fade_through`, `shared_axis_x`, `shared_axis_y`,
+  `shared_axis_z` or `container_transform`, played by `navigate`, `back` and `forward` (reversed going back); `app.navigate_with(name, transition=..., origin=node)` picks one for a single navigation.
 
 ### Removed
 

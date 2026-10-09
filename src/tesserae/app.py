@@ -257,6 +257,7 @@ class App:
         system_fonts: bool = False,
         reduced_motion: bool | str = "system",
         high_contrast: bool | str = "system",
+        transition: str = "none",
     ) -> None:
         #: The app's shared state (M65): any object, typically a class of
         #: `Signal`s every screen reads. A ViewModel reaches it as
@@ -353,6 +354,11 @@ class App:
         self._stats_frames = 0
         self._reduced_motion_mode: bool | str = reduced_motion
         self._high_contrast_mode: bool | str = high_contrast
+        self._transition = "none"
+        self._playing: Any = None  # the screen transition in progress (#231)
+        self._one_shot: tuple[str, Any] | None = None
+        self._arrivals: dict[int, tuple[str, Any]] = {}  # history index -> the transition (and origin) that navigated to it
+        self.transition = transition
         self._reduced_motion: bool = self._wanted("reduced_motion", reduced_motion)
         self._high_contrast: bool = self._wanted("high_contrast", high_contrast)
         self._window.on("reduced_motion", self._on_reduced_motion)
@@ -1010,6 +1016,9 @@ class App:
         del self._history[self._at + 1:]
         self._history.append(entry)
         self._at = len(self._history) - 1
+        self._arrivals[self._at] = self._one_shot or (self._transition, None)  # how it got here: back() undoes that, forward() repeats it
+        for stale in [i for i in self._arrivals if i > self._at]:
+            del self._arrivals[stale]
         self._sync_history()
         return window
 
@@ -1071,16 +1080,48 @@ class App:
         """Shows the entry `back()` left, if any. Returns whether it moved."""
         return self._step(1)
 
+    @property
+    def transition(self) -> str:
+        """How `navigate`, `back` and `forward` change screens: `none` (the default, a swap), `fade_through`, `shared_axis_x`, `shared_axis_y`,
+        `shared_axis_z` or `container_transform` (see `tesserae.screen_transition`). `show()` is a jump and never animates."""
+        return self._transition
+
+    @transition.setter
+    def transition(self, kind: str) -> None:
+        from tesserae.screen_transition import TRANSITIONS
+
+        if kind not in TRANSITIONS:
+            raise ValueError(f"App.transition: one of {', '.join(TRANSITIONS)}, not {kind!r}")
+        self._transition = kind
+
+    def navigate_with(self, name: str, *, transition: str, origin: Any = None, params: dict[str, Any] | None = None) -> Window:
+        """`navigate(name, **params)` with this `transition` instead of the app's. For `container_transform`, `origin` is the node the new screen
+        grows from (and, going back, shrinks into)."""
+        from tesserae.screen_transition import TRANSITIONS
+
+        if transition not in TRANSITIONS:
+            raise ValueError(f"App.navigate_with: transition is one of {', '.join(TRANSITIONS)}, not {transition!r}")
+        self._one_shot = (transition, origin)
+        try:
+            return self.navigate(name, **(params or {}))
+        finally:
+            self._one_shot = None
+
     def _step(self, by: int) -> bool:
         to = self._at + by
         if not 0 <= to < len(self._history):
             return False
-        self._arrive(self._history[to])
+        # going back undoes how the screen being left was reached; going forward repeats how the next one was
+        self._one_shot = self._arrivals.get(self._at if by < 0 else to)
+        try:
+            self._arrive(self._history[to], forward=by > 0, animate=True)
+        finally:
+            self._one_shot = None
         self._at = to
         self._sync_history()
         return True
 
-    def _arrive(self, entry: tuple[str, dict[str, Any]]) -> Window:
+    def _arrive(self, entry: tuple[str, dict[str, Any]], forward: bool = True, animate: bool = True) -> Window:
         name, params = entry
         registered = self._registered.get(name)
         if registered is None:
@@ -1088,7 +1129,8 @@ class App:
         hook = getattr(registered.viewmodel, "on_navigated", None)
         if hook is not None:
             hook(dict(params))  # a copy: the history's entry stays as it was
-        return self._show(name)
+        kind, origin = getattr(self, "_one_shot", None) or (self._transition, None)
+        return self._show(name, kind if animate else "none", forward, origin)
 
     def _history_key(self, event: Any) -> None:
         if not event.alt or event.ctrl or event.meta or event.shift or event.key not in ("arrow_left", "arrow_right"):
@@ -1113,20 +1155,33 @@ class App:
             self.can_go_forward.set(self._at < len(self._history) - 1)
         batch(sync)
 
-    def _show(self, name: str) -> Window:
+    def _show(self, name: str, transition: str = "none", forward: bool = True, origin: Any = None) -> Window:
+        from tesserae import screen_transition
+
         registered = self._registered.get(name)
         if registered is None:
             raise KeyError(f"no view registered under {name!r} -- call register() first")
         previous = self._registered[self._current].view.root if self._current not in (None, name) else None
         root = registered.view.root
+        if self._playing is not None:
+            self._playing.finish()  # a screen change while one is playing ends that one where it was going
+            self._playing = None
         if self._frame is not None:  # a window view: its routed views are the screens (0.4.4)
             if name != self._frame.name:
-                self._frame.show_screen(name, self._current if self._current not in (None, name, self._frame.name) else None)
+                came_from = self._current if self._current not in (None, name, self._frame.name) else None
+                if came_from in self._frame.screens and name in self._frame.screens and transition != "none":
+                    outgoing = self._frame.view.node(self._frame.screens[came_from])
+                    incoming = self._frame.view.node(self._frame.screens[name])
+                    self._playing = screen_transition.play(
+                        self._window, outgoing, incoming, transition, forward=forward, origin=origin,
+                        reveal=lambda: incoming.set(visible=True), hide_outgoing=lambda: outgoing.set(visible=False))
+                else:
+                    self._frame.show_screen(name, came_from)
         else:
-            if previous is not None:
-                previous.remove()  # detached, kept alive with its state
-            if root.parent() is None:
-                self._window.root.add_child(root)
+            self._playing = screen_transition.play(
+                self._window, previous, root, transition, forward=forward, origin=origin,
+                reveal=lambda: root.parent() is None and self._window.root.add_child(root),
+                hide_outgoing=lambda: previous.remove())  # detached, kept alive with its state
         self._current = name
         self._screen_name.set(name)
         logger.debug("showing {!r}", name)
