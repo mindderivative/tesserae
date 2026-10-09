@@ -330,7 +330,7 @@ class App:
         self._active = Signal(bool(self._window.get("active")))
         self.maximized = Computed(self._maximized.get)
         self.active = Computed(self._active.get)
-        self._window.on("maximized", lambda event: self._maximized.set(bool(event.maximized)))
+        listen_window(self._window, "maximized", lambda event: self._maximized.set(bool(event.maximized)))
         self._window.on("active", lambda event: self._active.set(bool(event.active)))
         #: The window's size in logical pixels and its MD3 size classes (#230), for a view to read as `app.window_width.get()` and so on, or
         #: `app.width_class` (`compact`, `medium`, `expanded`, `large`, `extra_large`) and `app.height_class` (`compact`, `medium`, `expanded`).
@@ -994,6 +994,51 @@ class App:
         if resize and options.get("size") is not None:
             width, height = options["size"]
             self._window.resize(int(width), int(height))
+        if resize and options.get("remember"):
+            key = options["remember"] if isinstance(options["remember"], str) else (options.get("title") or self._title or "app")
+            self.remember_window(key)
+
+    def remember_window(self, key: str) -> None:
+        """Puts the window back as it was left under `key` (see `tesserae.windowstate`) and keeps the file up to date as it changes: its size and, where
+        the platform gives one, its place, while it is not maximized or fullscreen, and whether it is maximized."""
+        from tesserae import windowstate
+
+        if getattr(self, "_remembered", None) == key:
+            return
+        self._remembered = key
+        saved = windowstate.load(key)
+        if "width" in saved:
+            self._window.resize(int(saved["width"]), int(saved["height"]))
+        if "x" in saved:
+            try:
+                self._window.set(x=int(saved["x"]), y=int(saved["y"]))
+            except (ValueError, TypeError):
+                pass  # a platform that cannot place a window (Wayland)
+        if saved.get("maximized"):
+            self.maximize()
+        self._remember_state: dict[str, Any] = dict(saved)
+        pending = [False]
+
+        def write() -> None:
+            pending[0] = False
+            state = self._remember_state
+            maximized = self._maximized.get()
+            if not maximized and not self._window.get("fullscreen"):
+                state["width"], state["height"] = float(self._window.get("width")), float(self._window.get("height"))
+                x, y = self._window.get("x"), self._window.get("y")
+                if x is not None and y is not None:
+                    state["x"], state["y"] = float(x), float(y)
+            state["maximized"] = maximized
+            windowstate.save(key, state)
+
+        def later(event: Any = None) -> None:
+            if not pending[0]:
+                pending[0] = True
+                self._window.after(400, write)
+
+        listen_window(self._window, "resize", later)
+        listen_window(self._window, "maximized", later)
+        self._window_write = write
 
     def show(self, name: str) -> Window:
         """Shows the view registered under `name` in the app's window: its

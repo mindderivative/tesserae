@@ -5358,6 +5358,9 @@
               }
             ]
           },
+          "remember": {
+            "description": "true, or a name: the window's size, place (where the platform lets an app say) and maximized state are kept between runs."
+          },
           "fullscreen": {
             "anyOf": [
               {
@@ -5480,6 +5483,7 @@
             "children",
             "title",
             "borderless",
+            "remember",
             "fullscreen",
             "maximized",
             "transparent",

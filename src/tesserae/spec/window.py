@@ -27,7 +27,7 @@ from typing import Any
 __all__ = ["WindowError", "expand_windows", "window_of"]
 
 _KEYS = frozenset({"id", "kind", "title", "borderless", "min_width", "min_height", "title_bar", "style", "classes", "a11y",
-                   "children", *("fullscreen", "maximized", "transparent", "blur_behind", "click_through")})
+                   "children", "remember", *("fullscreen", "maximized", "transparent", "blur_behind", "click_through")})
 #: The yes/no options of the OS window: shown by the app when the view is loaded, only when the view gives them.
 _FLAGS = ("fullscreen", "maximized", "transparent", "blur_behind", "click_through")
 #: What a Window's `title_bar:` takes (a `TitleBar`'s keys, without its `kind` and `id`).
@@ -85,6 +85,12 @@ def _window(node: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(borderless, bool):
         raise WindowError(f"{where} borderless is true or false, got {borderless!r}")
     options: dict[str, Any] = {"title": title, "borderless": borderless}
+    remember = node.get("remember")
+    if remember is not None:
+        if not isinstance(remember, (bool, str)) or remember == "":
+            raise WindowError(f"{where} remember is true, or a name to keep the state under, got {remember!r}")
+        if remember is not False:
+            options["remember"] = remember
     for name in _FLAGS:
         if name in node:
             if not isinstance(node[name], bool):

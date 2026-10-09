@@ -234,3 +234,85 @@ def test_a_window_view_in_the_new_syntax_takes_the_flags(tmp_path):
     app = _app(tmp_path)
     app.open_view("Main")
     assert app.fullscreen is True and app.maximized.get() is True
+
+
+# -- remembering the window (#204) ---------------------------------------------------------------------------------------------
+
+import json  # noqa: E402
+
+from tesserae import windowstate  # noqa: E402
+
+
+def _remembering(tmp_path, monkeypatch, value="true"):
+    monkeypatch.setenv("TESSERAE_STATE_DIR", str(tmp_path / "state"))
+    return _app(_project(tmp_path, WINDOW + f"remember: {value}\n"))
+
+
+def _settle(app, n=40):
+    for _ in range(n):
+        app.window.advance(16)
+
+
+def test_the_size_is_written_a_moment_after_it_changes(tmp_path, monkeypatch):
+    app = _remembering(tmp_path, monkeypatch)
+    app.load("Window")
+    app.window.resize(700, 450)
+    app.window.simulate("resize", width=700, height=450)
+    _settle(app)
+    saved = json.loads((tmp_path / "state" / "tasks.window.json").read_text())
+    assert (saved["width"], saved["height"], saved["maximized"]) == (700.0, 450.0, False)
+
+
+def test_the_next_run_opens_at_the_saved_size(tmp_path, monkeypatch):
+    monkeypatch.setenv("TESSERAE_STATE_DIR", str(tmp_path / "state"))
+    windowstate.save("Tasks", {"width": 777.0, "height": 333.0, "maximized": False})
+    app = _app(_project(tmp_path, WINDOW + "remember: true\n"))
+    app.load("Window")
+    assert (app.window.get("width"), app.window.get("height")) == (777.0, 333.0)
+
+
+def test_a_name_keeps_the_state_under_that_name(tmp_path, monkeypatch):
+    app = _remembering(tmp_path, monkeypatch, "notes")
+    app.load("Window")
+    app.window.simulate("resize", width=640, height=400)
+    _settle(app)
+    assert (tmp_path / "state" / "notes.window.json").exists() and not (tmp_path / "state" / "tasks.window.json").exists()
+
+
+def test_a_maximized_window_is_remembered_and_keeps_the_size_it_had_before(tmp_path, monkeypatch):
+    app = _remembering(tmp_path, monkeypatch)
+    app.load("Window")
+    app.window.resize(700, 450)
+    app.window.simulate("resize", width=700, height=450)
+    _settle(app)
+    app.window.simulate("maximized", maximized=True)  # the user maximized it
+    app.window.resize(1200, 800)
+    app.window.simulate("resize", width=1200, height=800)  # the screen-sized window
+    _settle(app)
+    saved = json.loads((tmp_path / "state" / "tasks.window.json").read_text())
+    assert saved["maximized"] is True and (saved["width"], saved["height"]) == (700.0, 450.0)
+
+
+def test_a_damaged_or_wild_file_gives_less_not_an_error(tmp_path, monkeypatch):
+    monkeypatch.setenv("TESSERAE_STATE_DIR", str(tmp_path / "state"))
+    (tmp_path / "state").mkdir()
+    (tmp_path / "state" / "tasks.window.json").write_text("{not json")
+    assert windowstate.load("Tasks") == {}
+    (tmp_path / "state" / "tasks.window.json").write_text(json.dumps({"width": 1e9, "height": "tall", "x": 5, "y": 6, "maximized": "yes"}))
+    assert windowstate.load("Tasks") == {"x": 5.0, "y": 6.0}  # the good fields stay
+    app = _app(_project(tmp_path, WINDOW + "remember: true\n"))
+    app.load("Window")  # runs
+
+
+def test_a_window_that_does_not_ask_leaves_no_file(tmp_path, monkeypatch):
+    monkeypatch.setenv("TESSERAE_STATE_DIR", str(tmp_path / "state"))
+    app = _app(_project(tmp_path))
+    app.load("Window")
+    app.window.simulate("resize", width=500, height=300)
+    _settle(app)
+    assert not (tmp_path / "state").exists()
+
+
+def test_remember_must_be_true_or_a_name():
+    with pytest.raises(WindowError, match="remember is true, or a name"):
+        expand_windows({"id": "w", "kind": "Window", "remember": 3})

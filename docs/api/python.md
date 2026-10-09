@@ -108,6 +108,7 @@ class App(
 - `reduced_motion` *(property)*: Whether the app is to reduce motion: the user asked the OS for it (or the app says so).
 - `reduced_motion_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True` or `False`.
 - `register(name: str, view: Any, viewmodel: Any) -> None`: Registers `view` (already loaded) and its already-`_attach`ed `viewmodel` (e.g. `FooViewModel(view)`) under `name`, for a later `show(name)` to display.
+- `remember_window(key: str) -> None`: Puts the window back as it was left under `key` (see `tesserae.windowstate`) and keeps the file up to date as it changes: its size and, where the platform gives one, its place, while it is not maximized or fullscreen, and whether it is maximized.
 - `resize_border` *(property)*: How many pixels along each edge resize a borderless window (`tre` turns it off while maximized or fullscreen, and on macOS).
 - `restore() -> None`: Restores the window from maximized or minimized.
 - `route(pattern: str, name: str) -> None`: Adds a route: a pattern like `"notes/{id}"` for the screen registered (now or later) under `name`.

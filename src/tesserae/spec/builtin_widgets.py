@@ -150,6 +150,7 @@ declare("GraphNode", {"label": P("str"), "x": P("float"), "y": P("float")}, cont
 
 declare("Window", {
     "title": P("str", required=True, doc="The OS window's title."), "borderless": P("bool", default=False),
+    "remember": P("any", doc="true, or a name: the window's size, place (where the platform lets an app say) and maximized state are kept between runs."),
     "fullscreen": P("bool", doc="The window fills its monitor, borderless (set when the view loads)."),
     "maximized": P("bool", doc="The window opens maximized."),
     "transparent": P("bool", doc="A see-through window that draws only what the view paints; the OS fixes it before the window opens."),

@@ -1921,10 +1921,11 @@ components:
       | Property | Meaning |
       | --- | --- |
       | `title`, `borderless`, `min_width`, `min_height`, `title_bar`, `style` | as above; `style`'s `width` and `height` are the window's size |
+      | `remember` | true, or a name | the size, the place (where the platform lets an app say: not Wayland) and the maximized state are kept in a small file in the user's config directory (named for the title, or the name) and put back next run; a maximized window keeps the size it had before |
       | `fullscreen`, `maximized` | set when the view loads, only when written |
       | `transparent`, `blur_behind`, `click_through` | set before the window opens, only when written; the platform may refuse one, and says so |
 
-      A view branches on the window's size with `app.width_class` and `app.height_class` (Material 3's size classes). Not built: several windows, remembering the window's size between runs (`tre` has no window position to restore), a native menu bar.
+      A view branches on the window's size with `app.width_class` and `app.height_class` (Material 3's size classes). Not built: several windows, a native menu bar.
 
       ```yaml
       id: root
