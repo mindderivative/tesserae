@@ -115,6 +115,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   shown (a changed picture was missed by the reconcile).
 - **Svg** ([#197](https://github.com/mindderivative/tesserae/issues/197)). `widget: Svg` takes `alt` as `Image` does, and needs one of `src` and `content` (a load error otherwise); `currentColor` is the
   `foreground`, so a monochrome icon follows the theme.
+- **Elevation that moves** ([#226](https://github.com/mindderivative/tesserae/issues/226)). No new language: `elevation` in `hovered` and `pressed` rules with `transition: {elevation: ms}` eases the
+  shadows (also from a level a view computes, for a drag). Documented in Gradients & Effects and tested.
 
 ### Removed
 

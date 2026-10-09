@@ -46,6 +46,27 @@ style:
 and `start` go with the kind. A gradient follows its box as the layout resizes it. A control's own colour (a
 `Switch`, a `Slider`) takes a plain colour only.
 
+## Elevation that moves
+
+A raised surface lifts when the pointer is over it and again when it is pressed. Give the levels in rules by state, and `transition: {elevation: 200}`
+eases the shadows between them. The base level belongs in a rule too: an `elevation` written on the node itself beats every rule.
+
+```yaml
+styles:
+  - widget: Card
+    style: {elevation: 1, transition: {elevation: 200}}
+  - widget: Card
+    state: hovered
+    style: {elevation: 3}
+  - widget: Card
+    state: pressed
+    style: {elevation: 5}
+```
+
+A press during a hover carries on from where the shadow is. A level a view works out itself, such as a lift while dragging, eases the same way:
+`style: {elevation: "{{ 4 if dragging else 1 }}", transition: {elevation: 200}}`. An app that reduces motion gets the level at once. Levels are 0 to 5, or
+`level_0` to `level_5`.
+
 ## Corner radius
 
 `corner_radius` is one radius for every corner (pixels, or a shape token `none` ... `extra_large`, `full`). Give four to round the corners
