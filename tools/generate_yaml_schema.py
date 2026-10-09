@@ -308,6 +308,10 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                                                           "The pictures it refers to are decoded and found next to it."},
                                "content": {"type": "string", "description": "The SVG document itself, as text."}},
                 "additionalProperties": False},
+        "canvas": {"type": "object", "description": "A Canvas's drawing commands.",
+                   "properties": {"draw": {"type": "array", "description": "Commands painted in order: `rect: [x, y, w, h]`, `circle: [cx, cy, r]` "
+                                                                              "or `path: [points]` (with `width`), each with a `color`."}},
+                   "additionalProperties": False},
         "icon": {"type": "object", "description": "An Icon's glyph.",
                  "properties": {"name": {**loose({"enum": sorted(icons.ICONS)}), "description": "An icon in Tesserae's set."}},
                  "required": ["name"], "additionalProperties": False},

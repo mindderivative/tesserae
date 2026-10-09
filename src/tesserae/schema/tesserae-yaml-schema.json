@@ -1815,6 +1815,7 @@
         },
         "kind": {
           "enum": [
+            "Canvas",
             "Checkbox",
             "CircularProgress",
             "Container",
@@ -1975,6 +1976,17 @@
             "content": {
               "type": "string",
               "description": "The SVG document itself, as text."
+            }
+          },
+          "additionalProperties": false
+        },
+        "canvas": {
+          "type": "object",
+          "description": "A Canvas's drawing commands.",
+          "properties": {
+            "draw": {
+              "type": "array",
+              "description": "Commands painted in order: `rect: [x, y, w, h]`, `circle: [cx, cy, r]` or `path: [points]` (with `width`), each with a `color`."
             }
           },
           "additionalProperties": false
@@ -5683,6 +5695,17 @@
           },
           "description": "Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in."
         },
+        "canvas": {
+          "type": "object",
+          "description": "A Canvas's drawing commands.",
+          "properties": {
+            "draw": {
+              "type": "array",
+              "description": "Commands painted in order: `rect: [x, y, w, h]`, `circle: [cx, cy, r]` or `path: [points]` (with `width`), each with a `color`."
+            }
+          },
+          "additionalProperties": false
+        },
         "checked": {
           "anyOf": [
             {
@@ -5939,6 +5962,7 @@
         },
         "kind": {
           "enum": [
+            "Canvas",
             "Checkbox",
             "CircularProgress",
             "Container",

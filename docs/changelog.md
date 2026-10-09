@@ -83,6 +83,9 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Transitions** ([#214](https://github.com/mindderivative/tesserae/issues/214)). `style: {transition: {background: 150, scale: {duration: 300, easing: spring}}}` makes a change to those
   properties ease instead of jump (opacity, colours, border, corner radius, elevation, blur and the new `scale`, `translate_x`, `translate_y`, `rotation_deg`), with Material's easings, cubic
   beziers or a spring; the first draw does not ease, an app that reduces motion gets the value at once, and a stylesheet rule can carry the transition.
+- **Canvas** ([#215](https://github.com/mindderivative/tesserae/issues/215)). `widget: Canvas` with `draw:`, a list of `{rect: [x, y, w, h]}`, `{circle: [cx, cy, r]}` and
+  `{path: [points], width: N}` commands, each with a `color` (a role, a CSS colour or `role@N%`). `draw:` may be one `{{ }}` expression, so a canvas
+  repaints when the Signals it reads change. It is how a widget draws wavy progress, ticks and graph edges.
 
 ### Removed
 

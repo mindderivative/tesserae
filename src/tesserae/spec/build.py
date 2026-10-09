@@ -33,6 +33,7 @@ from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
 from tesserae.spec import effects, layout, richtext, transition
+from tesserae.spec.canvas import painter as canvas_painter, plan as canvas_plan
 from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED, LayoutError, engine_style
 
 __all__ = ["style_props", 
@@ -53,10 +54,10 @@ _CONTROL_KINDS = frozenset({
 #: Kinds built with a `tesserae.widgets` widget (M60): a node graph and its nodes.
 _WIDGET_KINDS = frozenset({"NodeGraph", "GraphNode"})
 _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon", "Svg",
-                                           "ScrollView"}
+                                           "ScrollView", "Canvas"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -764,6 +765,13 @@ def _svg_props(ctx, node, style):
     return props, None
 
 
+def _canvas_props(ctx, node, style):
+    canvas = node.get("canvas")
+    draw = canvas.get("draw") if isinstance(canvas, dict) else None
+    commands = canvas_plan(draw, lambda raw: _color(ctx, node["id"], "color", raw))
+    return {**_layout(style), **_paint(ctx, node["id"], style), "draw": canvas_painter(commands)}, None
+
+
 def _icon_props(ctx, node, style):
     icon = node.get("icon")
     if not isinstance(icon, dict):
@@ -779,7 +787,7 @@ def _icon_props(ctx, node, style):
 _PRIMITIVE = {
     "Rect": ("box", _box_props), "Container": ("box", _box_props), "Text": ("text", _text_props),
     "Link": ("box", _link_props), "TextField": ("box", _text_field_props), "Image": ("image", _image_props),
-    "Svg": ("svg", _svg_props), "Icon": ("path", _icon_props), "ScrollView": ("scroll_view", _scroll_props),
+    "Svg": ("svg", _svg_props), "Canvas": ("canvas", _canvas_props), "Icon": ("path", _icon_props), "ScrollView": ("scroll_view", _scroll_props),
 }
 
 
@@ -1029,6 +1037,8 @@ def patch(
             (inner_props if on_inner else outer_props)[key] = value
         eased = _eased(window, transition.plan(node["id"], kind, style), ((outer, outer_props), (inner, inner_props)))
         outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins
+        if kind == "Canvas":
+            outer.redraw()  # the new commands replace what it shows
         if inner_props is not None:
             inner.set(**inner_props)
         for target, prop, value, ms, easing in eased:

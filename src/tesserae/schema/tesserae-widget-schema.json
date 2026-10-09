@@ -8,6 +8,7 @@
   "properties": {
     "widget": {
       "enum": [
+        "Canvas",
         "Checkbox",
         "CircularProgress",
         "Container",
@@ -105,6 +106,130 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "widget": {
+            "const": "Canvas"
+          }
+        },
+        "required": [
+          "widget"
+        ]
+      },
+      "then": {
+        "properties": {
+          "widget": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "if": {
+            "type": "string"
+          },
+          "for": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "state": {
+            "type": "object"
+          },
+          "style": {
+            "type": "object"
+          },
+          "classes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "handlers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "a11y": {
+            "type": "object"
+          },
+          "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "window_region": {
+            "enum": [
+              "drag",
+              "none"
+            ]
+          },
+          "route": {
+            "type": "string"
+          },
+          "focus_group": {
+            "enum": [
+              "horizontal",
+              "vertical",
+              "both"
+            ]
+          },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
+          "draw": {
+            "anyOf": [
+              {
+                "type": "array"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Drawing commands in order: rect, circle or path, each with a color."
+          }
+        },
+        "required": [
+          "widget"
+        ],
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "focus_group",
+            "params",
+            "expects",
+            "draw"
+          ]
+        }
+      }
+    },
     {
       "if": {
         "properties": {

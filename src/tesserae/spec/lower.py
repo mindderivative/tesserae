@@ -51,6 +51,9 @@ def lower(inst: Instance) -> dict[str, Any]:
     elif widget == "Svg":
         folded = {"src", "content"}
         node["svg"] = {k: values[k] for k in ("src", "content") if k in values}
+    elif widget == "Canvas":
+        folded = {"draw"}
+        node["canvas"] = {"draw": values.get("draw")}
     node.update({k: v for k, v in values.items() if k not in folded})  # the rest stay flat: `disabled`, `checked`, `value`, ...
     style = inst.effective_style()
     if style:

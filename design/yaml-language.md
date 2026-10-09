@@ -653,3 +653,4 @@ All **Proposed** above; each stands unless the user changes it.
 4. **`on_key`** added (9.1): yes.
 5. **`classes:` kept** alongside `variant:` for stylesheet targeting (section 2): yes.
 6. **The names** `Slot`, `Disclosure`, `Toggle`, `Navigation`, `AppBar`, `Split` (section 16): yours to change.
+- **#215, `Canvas`.** A built-in widget whose `draw:` is a list of rect/circle/path command mappings (`tesserae.spec.canvas.plan` checks and resolves colours; `painter` makes tre's `draw` callback). It lowers to a `canvas` node key; the builder makes a tre `canvas` and, on a patch, sets the new `draw` callback and calls `redraw()` (setting `draw` alone does not repaint). `View._props_equal` compares `canvas`, or a changed drawing would be skipped. Errors name the widget and `draw[i]`. Gradients and hit-test shapes are not in the command set yet.

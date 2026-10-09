@@ -100,7 +100,7 @@ _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius"
 def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     """`tre`'s `node_props_equal`, plus the state fields Tesserae builds from."""
     # `handlers` and `a11y` too: they change focus, role and label (M39)
-    keys = ("kind", "classes", "style", "text", "image", "icon", "svg", "checked", "selected", "value", "hour", "minute",
+    keys = ("kind", "classes", "style", "text", "image", "icon", "svg", "canvas", "checked", "selected", "value", "hour", "minute",
             "handlers", "a11y", "component_of", "min", "max", "step", "label", "x", "y",  # M57, M58, M60
             "disabled",  # M70: a control's is its own
             "window_region")  # 0.3.0 M3

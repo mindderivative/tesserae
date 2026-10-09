@@ -35,6 +35,7 @@ KINDS = (
     ("TextField", "A single-line text input in a box.", "`text:`, `two_way:`, `handlers: {on_change}`"),
     ("Image", "A picture from a file.", "`image:`"),
     ("Svg", "An SVG document, drawn by the engine: shapes, gradients, text, clips and masks. `style.foreground` is what `currentColor` means, so an icon follows the theme.", "`svg:`"),
+    ("Canvas", "A drawing surface: rectangles, circles and paths from a `draw:` list, repainted when the Signals it reads change.", "`canvas:`"),
     ("Icon", "A glyph from Tesserae's icon set, coloured by `style.foreground`.", "`icon:`"),
     ("Checkbox", "MD3's checkbox.", "`checked:`, `disabled:`, `handlers: {on_change}`"),
     ("RadioButton", "MD3's radio button; the ones with one `group:` exclude each other.", "`selected:`, `group:`, `disabled:`"),

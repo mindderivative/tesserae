@@ -49,6 +49,7 @@ declare("Image", {
     "frame": P("any", doc="A video frame, (rgba, width, height), pushed from a ViewModel."),
 }, doc="A picture.")
 declare("Icon", {"icon": P("icon", required=True, doc="A built-in icon name.")}, extras=("foreground",), doc="A glyph from the built-in set.")
+declare("Canvas", {"draw": P("list", doc="Drawing commands in order: rect, circle or path, each with a color.")}, doc="A drawing surface: rects, circles and paths from data.")
 declare("Svg", {"src": P("str"), "content": P("str", doc="The SVG text, instead of a file.")}, extras=("foreground",), doc="A vector picture.")
 declare("ScrollView", {
     "scroll_offset": P("float", default=0.0, model=True, doc="The scrolled distance."),

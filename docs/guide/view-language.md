@@ -176,6 +176,19 @@ is written in: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a V
 of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a param, a loop variable or
 anything else is an error; so is `if`, `for` or any other statement. A disabled node's handlers do not run.
 
+## Drawing
+
+`widget: Canvas` is a surface you draw on with data. `draw:` lists commands painted in order: `{rect: [x, y, width, height]}`,
+`{circle: [cx, cy, radius]}` and `{path: [point, ...], width: 2}`, each with a `color` (a theme role, a CSS colour or `role@N%`). In a path the
+first point is `[x, y]` and each later one is a line `[x, y]`, a quadratic `[cx, cy, x, y]` or a cubic `[c1x, c1y, c2x, c2y, x, y]`. Numbers are
+logical pixels from the canvas's top-left; size the canvas with `style`. Write `draw: "{{ [...] }}"` and it repaints when a Signal it reads changes.
+
+```yaml
+widget: Canvas
+style: {width: 120, height: 24}
+draw: "{{ [{'rect': [0, 10, 120, 4], 'color': 'surface_variant'}, {'rect': [0, 10, 120 * progress, 4], 'color': 'primary'}] }}"
+```
+
 ## Focus
 
 `focus('input')` in a handler gives the focus to the node named `input` in the same view (names are unique in a view, and a view never reaches into
