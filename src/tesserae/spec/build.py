@@ -65,6 +65,7 @@ _NODE_KEYS = frozenset({
     "min", "max", "step",  # a SpinBox's (M58)
     "disabled",  # any node's (M70): the View applies it, or a control's own
     "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not
+    "tooltip",  # any node's text on a rest of the pointer (a title bar's buttons): the view that has it shows it
 
     "label", "x", "y", "edges",  # a GraphNode's title and place, a NodeGraph's edges (M60)
 })

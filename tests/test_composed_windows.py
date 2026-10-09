@@ -13,7 +13,7 @@ title: Notes
 min_width: 320
 min_height: 200
 borderless: true
-style: {width: 700, height: 500}
+style: {width: 700, height: 500, flex_direction: vertical}
 children:
   - {widget: TitleBar, name: bar, title: Notes, icon: home}
   - widget: Dock

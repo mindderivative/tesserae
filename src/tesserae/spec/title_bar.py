@@ -50,6 +50,8 @@ SURFACE_BUTTONS = ("dismiss",)
 _KEYS = {"id", "kind", "title", "icon", "buttons", "children", "style", "classes", "a11y"}
 _ACTIONS = {"minimize": "window.minimize", "maximize": "window.toggle_maximized", "close": "window.close"}
 _LABELS = {"minimize": "Minimize", "maximize": "Maximize", "close": "Close"}
+#: What each button says when the pointer rests on it (a node's `tooltip`, shown by the view that has the bar).
+_TIPS = {"minimize": "Minimize", "maximize": "Maximize", "close": "Close", "dismiss": "Close"}
 #: The bar's height and each button's width: the size desktops use. The
 #: height is a default: `style: {height: ...}` on the TitleBar sets it,
 #: and every part takes the bar's height.
@@ -148,6 +150,7 @@ def _dismiss(bar_id: str) -> dict[str, Any]:
     button_id = f"{bar_id}.dismiss"
     return {"id": button_id, "kind": "Container", "classes": ["title_bar_button", "title_bar_close"],
             "interaction": {"color": "error"}, "handlers": {"on_click": "surface.dismiss"}, "a11y": {"label": "Close"},
+            "tooltip": {"text": _TIPS["dismiss"]},
             "style": {"width": BUTTON_WIDTH, "height": "100%", "align_content": "center"},
             "children": [_glyph(button_id, "close")]}
 
@@ -197,6 +200,6 @@ def _button(bar_id: str, name: str) -> dict[str, Any]:
     # (`error`: `error_container` is too pale at a state layer's 8%).
     tint = {"interaction": {"color": "error"}} if name == "close" else {}
     return {"id": button_id, "kind": "Container", "classes": classes, **tint,
-            "handlers": {"on_click": _ACTIONS[name]}, "a11y": {"label": _LABELS[name]},
+            "handlers": {"on_click": _ACTIONS[name]}, "a11y": {"label": _LABELS[name]}, "tooltip": {"text": _TIPS[name]},
             "style": {"width": BUTTON_WIDTH, "height": "100%", "align_content": "center"},
             "children": glyphs}

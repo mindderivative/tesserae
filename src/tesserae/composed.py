@@ -141,6 +141,13 @@ def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable
     return resolve
 
 
+class _SpecTip:
+    """The tooltip of a node the language did not write (a title bar's buttons), in the shape `_wire_tooltips` reads."""
+
+    def __init__(self, node_id: str, tooltip: dict[str, Any]) -> None:
+        self.id, self.tooltip, self.a11y = node_id, tooltip, {}
+
+
 class ComposedView(View):
     """A `View` built and kept up to date from a `ViewHandle`. See the module docstring."""
 
@@ -566,7 +573,9 @@ class ComposedView(View):
             undo()
         self._tip_undos = []
         live: set[str] = set()
-        for inst in self.handle.composition.walk():
+        tipped = list(self.handle.composition.walk()) + [_SpecTip(node_id, spec["tooltip"]) for node_id, spec in self._built.specs.items()
+                                                         if isinstance(spec.get("tooltip"), dict)]
+        for inst in tipped:  # the instances that have a `tooltip:`, and the generated nodes (a title bar's buttons) whose spec says so
             if not inst.tooltip or inst.id not in self._built.outer:
                 continue
             live.add(inst.id)
