@@ -1,0 +1,38 @@
+# One section of an accordion: a 56 pixel header button (the title, and a chevron that turns over when it opens) and, while `expanded`, the content (the children). A press,
+# Enter or Space toggles it; `expanded` is two-way. A screen reader hears a button that says whether it is expanded and what it controls. `AccordionGroup` makes several
+# of them behave as one set.
+params:
+  title: {type: str, default: "", doc: "The header's text."}
+  expanded: {type: bool, default: false, model: true, doc: "Whether the content shows."}
+  disabled: {type: bool, default: false, doc: "Dimmed, and it does not toggle."}
+  on_toggle: {type: handler, doc: "Called after the header has been pressed (a group uses it to close the others)."}
+widget: Container
+style: {flex_direction: vertical, width: 100%}
+children:
+  - widget: Container
+    name: header
+    interaction: true
+    disabled: "{{ disabled }}"
+    handlers: {on_click: "expanded = not expanded; on_toggle()"}
+    a11y: {role: button, label: "{{ title }}", expanded: "{{ expanded }}", controls: content}
+    style: {flex_direction: horizontal, align_content: left, height: 56, width: 100%}
+    children:
+      - {widget: Text, name: title, text: "{{ title }}", typography_role: title_medium, max_lines: 1, overflow: ellipsis}
+      - widget: Container
+        name: filler
+        style: {flex: expand_horizontal}
+      - widget: Icon
+        name: chevron
+        icon: chevron_down
+        style: {rotation_deg: "{{ 180 if expanded else 0 }}", transition: {rotation_deg: 200}}
+  - widget: Container
+    name: content
+    a11y: {role: group, label: "{{ title }}", hidden: "{{ not expanded }}"}
+    style: {flex_direction: vertical, width: 100%}
+    children:
+      - widget: Container
+        name: inner
+        if: expanded
+        style: {flex_direction: vertical, width: 100%}
+        children:
+          - widget: Slot

@@ -607,16 +607,39 @@ components:
   - slug: accordions
     title: Accordions
     group: Containment
+    shipped_view: Accordion
     fragments: [AccordionHeader]
     md3: |
       Material Design 3 has no accordion of its own. Tesserae's is built in MD3's terms: a list row with a chevron
       that turns when the section opens.
     built: |
-      The header only; the section under it is yours to show and hide, usually with a binding.
-    usage: |
-      - id: details
-        component: AccordionHeader
-        with: {title: Details, width: 320}
+      Two views Tesserae ships. `widget: Accordion` is one section: a 56 pixel header button (the `title` and a chevron that turns over in 200 milliseconds) and, while `expanded`
+      (two-way), its content (the children). `widget: AccordionGroup` makes several behave as one set with dividers between them.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `title`, `expanded`, `disabled` | text, true or false (two-way), true or false | the header, whether the content shows, dimmed and not toggling |
+      | `on_toggle` | a handler | called after the header has been pressed |
+      | `items`, `mode`, `open` (`AccordionGroup`) | a list of `{value, title, text}`, `single` or `multiple`, a value or a list; two-way | the sections, whether one or several can be open, and which are |
+
+      A screen reader hears a button that says whether it is expanded and what it controls; the content is hidden from it while closed and its parts are not built, so they
+      take no Tab stop. The up and down arrows move between the headers, and Home and End go to the first and last. Not built: the content's height easing open
+      (the engine cannot ease a height to `auto`).
+    usage_view: |
+      name: faq
+      widget: Container
+      style: {flex_direction: vertical, gap: 16, width: 420, height: 360}
+      children:
+        - widget: Accordion
+          title: Details
+          expanded: "{{ showing }}"
+          children:
+            - {widget: Text, text: More about it, typography_role: body_medium, style: {foreground: on_surface_variant}}
+        - widget: AccordionGroup
+          open: "{{ which }}"
+          items:
+            - {value: a, title: Shipping, text: Two days.}
+            - {value: b, title: Returns, text: Thirty days.}
     python: |
       from tesserae.widgets import accordion_header
 
@@ -841,16 +864,38 @@ components:
   - slug: search
     title: Search
     group: Navigation
+    shipped_view: SearchBar
     fragments: [SearchBar, SearchView]
     md3: |
       A search bar is a rounded field that starts a search; the search view is the full-size surface that shows
       suggestions and results once it is focused.
     built: |
-      The bar is a container around a `TextField`; the view is a surface that `tesserae.overlays.SearchView` shows.
-    usage: |
-      - id: search
-        component: SearchBar
-        with: {placeholder: Search notes, width: 360, corner_radius: 28}
+      Two views Tesserae ships. `widget: SearchBar` is a 56 pixel `surface_container_high` pill at level 3 with a leading icon, the text, and trailing parts. `widget: SearchView`
+      is the docked panel that opens under it with the suggestions, history and results.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `query` | text; two-way | what has been typed |
+      | `active` | true or false; two-way | the search is under way; pressing the bar or typing in it sets it, the back arrow clears it |
+      | `placeholder`, `leading_icon`, `trailing_icon`, `avatar_text` | text, icon names, letters | the hint, the icon at the start (`menu` for a menu button), a microphone at the end, an avatar |
+      | `on_leading`, `on_trailing`, `on_search` | handlers | the menu button, the trailing icon, Enter |
+      | `results`, `chosen`, `open`, `anchor` (`SearchView`) | a list; a value, two-way; true or false, two-way; a node's name | `{value, label}` rows (optionally `supporting` and `icon`), the one pressed, whether it shows, the bar it sits under |
+
+      A clear button shows once there is text. While active the leading icon is a back arrow. Bind the bar's `active` and the view's `open` to the same name, and the view's `results` to
+      something that follows `query`. The view says how many results there are, politely, and `empty` text when a query finds none. Escape and a press outside close it. Not built:
+      the full-screen search view for small windows, and a keyboard shortcut that focuses the bar.
+    usage_view: |
+      name: notes
+      widget: Container
+      style: {flex_direction: vertical, width: 420, height: 420, padding: 16}
+      children:
+        - {widget: SearchBar, name: bar, query: "{{ q }}", active: "{{ searching }}", placeholder: Search notes, style: {width: 360}}
+        - widget: SearchView
+          anchor: bar
+          open: "{{ searching }}"
+          query: "{{ q }}"
+          results: "{{ matches }}"
+          chosen: "{{ picked }}"
     python: |
       from tesserae.widgets import search_bar
 

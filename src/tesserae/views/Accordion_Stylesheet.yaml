@@ -1,0 +1,10 @@
+# The look of Accordion: the header's title in on_surface and its chevron in on_surface_variant, 16 pixels in from each side; the content 16 pixels in and 16 below.
+styles:
+  - widget: Accordion
+    part: header
+    style: {padding: {left: 16, right: 16, top: 0, bottom: 0}, gap: 12}
+  - {widget: Accordion, part: title, style: {foreground: on_surface}}
+  - {widget: Accordion, part: chevron, style: {width: 24, height: 24, foreground: on_surface_variant}}
+  - widget: Accordion
+    part: content
+    style: {padding: {left: 16, right: 16, top: 0, bottom: 16}}

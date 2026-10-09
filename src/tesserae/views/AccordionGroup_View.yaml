@@ -1,0 +1,25 @@
+# Several accordion sections as one set, with a divider between them. `items` is a list of {value, title, text} (the text is the section's content; for more than text,
+# use `Accordion` sections yourself). `mode: single` keeps one open (opening one closes the rest), `multiple` lets any number be; `open` is the value that is open, or the list
+# of values with `multiple`, and is two-way. The up and down arrows move between the headers, and Home and End go to the first and last.
+params:
+  items: {type: list, default: [], doc: "The sections, each {value, title, text}."}
+  mode: {type: enum, choices: [single, multiple], default: single, doc: "single: at most one open; multiple: any number."}
+  open: {type: any, default: "", model: true, doc: "single: the value that is open (empty for none); multiple: the list of values that are open."}
+widget: Container
+focus_group: vertical
+style: {flex_direction: vertical, width: 100%}
+children:
+  - widget: Container
+    for: i, it in enumerate(items)
+    key: it['value']
+    name: section
+    style: {flex_direction: vertical, width: 100%}
+    children:
+      - {widget: Divider, name: divider, if: "i > 0"}
+      - widget: Accordion
+        name: panel
+        title: "{{ it['title'] }}"
+        expanded: "{{ (it['value'] in open) if mode == 'multiple' else (it['value'] == open) }}"
+        on_toggle: "open = ([v for v in open if v != it['value']] if it['value'] in open else open + [it['value']]) if mode == 'multiple' else ('' if open == it['value'] else it['value'])"
+        children:
+          - {widget: Text, name: text, text: "{{ it.get('text', '') }}", typography_role: body_medium, style: {foreground: on_surface_variant}}

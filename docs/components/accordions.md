@@ -9,7 +9,20 @@ that turns when the section opens.
 
 ## In Tesserae
 
-The header only; the section under it is yours to show and hide, usually with a binding.
+Two views Tesserae ships. `widget: Accordion` is one section: a 56 pixel header button (the `title` and a chevron that turns over in 200 milliseconds) and, while `expanded`
+(two-way), its content (the children). `widget: AccordionGroup` makes several behave as one set with dividers between them.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `title`, `expanded`, `disabled` | text, true or false (two-way), true or false | the header, whether the content shows, dimmed and not toggling |
+| `on_toggle` | a handler | called after the header has been pressed |
+| `items`, `mode`, `open` (`AccordionGroup`) | a list of `{value, title, text}`, `single` or `multiple`, a value or a list; two-way | the sections, whether one or several can be open, and which are |
+
+A screen reader hears a button that says whether it is expanded and what it controls; the content is hidden from it while closed and its parts are not built, so they
+take no Tab stop. The up and down arrows move between the headers, and Home and End go to the first and last. Not built: the content's height easing open
+(the engine cannot ease a height to `auto`).
+
+`widget: Accordion` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -47,17 +60,24 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: faq
+widget: Container
+style: {flex_direction: vertical, gap: 16, width: 420, height: 360}
 children:
-  - id: details
-    component: AccordionHeader
-    with: {title: Details, width: 320}
+  - widget: Accordion
+    title: Details
+    expanded: "{{ showing }}"
+    children:
+      - {widget: Text, text: More about it, typography_role: body_medium, style: {foreground: on_surface_variant}}
+  - widget: AccordionGroup
+    open: "{{ which }}"
+    items:
+      - {value: a, title: Shipping, text: Two days.}
+      - {value: b, title: Returns, text: Thirty days.}
 ```
+
+## Using it
 
 In Python:
 
