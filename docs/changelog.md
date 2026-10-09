@@ -103,6 +103,7 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   buttons) are wired without a ViewModel. Docks already worked and are now covered by tests.
 - **Input masks** ([#222](https://github.com/mindderivative/tesserae/issues/222)). `mask: "(###) ###-####"` on a `TextInput` or `TextField` formats what is typed or pasted (`#` digit, `A` letter,
   `*` either, `\\` a literal); `tesserae.spec.mask.Mask` is the same for Python.
+- **Clipboard actions** ([#223](https://github.com/mindderivative/tesserae/issues/223)). Handlers can call `copy(text)` (true if it reached the OS clipboard) and `paste()` (the text on it, or `''`).
 
 ### Removed
 

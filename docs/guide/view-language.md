@@ -264,6 +264,18 @@ handlers:
   on_release: "dragging = False; release(); cursor(None)"
 ```
 
+### The clipboard
+
+`copy(text)` puts text on the OS clipboard (a number is copied as text) and says whether it could; `paste()` is the text on it, or `''` when it holds none or
+cannot be reached. Both work in a handler, and `paste()` can be used where a value is wanted:
+
+```yaml
+widget: Container
+handlers:
+  on_click: "ok = copy(name)"
+  on_long_press: "name = paste()"
+```
+
 ## Focus
 
 `focus('input')` in a handler gives the focus to the node named `input` in the same view (names are unique in a view, and a view never reaches into

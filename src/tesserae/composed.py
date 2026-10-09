@@ -64,6 +64,15 @@ def _is_submit(event: Any) -> bool:
         return True
 
 
+def _clip(text: Any) -> str:
+    """What `copy(...)` puts on the clipboard: text, or a number or a bool as text; anything else is a mistake."""
+    if isinstance(text, str):
+        return text
+    if isinstance(text, (int, float)):
+        return str(text)
+    raise ValueError(f"copy() takes text, not {text!r}")
+
+
 def scroll_direction(last: str, old: Any, new: Any) -> str:
     """`'down'` or `'up'` from a scroll event's offsets; the last direction when it did not move or the event has none."""
     if old is None or new is None or new == old:
@@ -80,12 +89,16 @@ def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, b
 
 def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Callable[..., Any]]]:
     """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)`, `surface.dismiss` and
-    `focus(name)`, `capture()`, `release()`, `cursor(name)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
+    `focus(name)`, `capture()`, `release()`, `cursor(name)`, `copy(text)`, `paste()`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
 
     def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
         view = view_ref()
         if path == "focus":
             return lambda name: view.focus(scope, name)
+        if path == "copy":
+            return lambda text: bool(view.window.write_clipboard(_clip(text)))
+        if path == "paste":
+            return lambda: view.window.read_clipboard() or ""
         if path in ("capture", "release"):
             return lambda: getattr(view.firing_node(path), "capture_pointer" if path == "capture" else "release_pointer")()
         if path == "cursor":
