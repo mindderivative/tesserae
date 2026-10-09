@@ -2275,6 +2275,7 @@
             "Link",
             "LoadingIndicator",
             "NodeGraph",
+            "Overlay",
             "RadioButton",
             "Rect",
             "ScrollView",

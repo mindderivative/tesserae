@@ -2761,6 +2761,7 @@
             "Link",
             "LoadingIndicator",
             "NodeGraph",
+            "Overlay",
             "RadioButton",
             "Rect",
             "ScrollView",
@@ -2938,6 +2939,17 @@
               "type": "number",
               "minimum": 0,
               "description": "How far it is scrolled, in pixels."
+            }
+          },
+          "additionalProperties": false
+        },
+        "overlay": {
+          "type": "object",
+          "description": "An Overlay's shape.",
+          "properties": {
+            "modal": {
+              "type": "boolean",
+              "description": "Whether the layer is a scrim over the whole window."
             }
           },
           "additionalProperties": false
@@ -8589,6 +8601,7 @@
             "Link",
             "LoadingIndicator",
             "NodeGraph",
+            "Overlay",
             "RadioButton",
             "Rect",
             "ScrollView",
@@ -8650,6 +8663,17 @@
             }
           ],
           "description": "A TimePickerDial's minute."
+        },
+        "overlay": {
+          "type": "object",
+          "description": "An Overlay's shape.",
+          "properties": {
+            "modal": {
+              "type": "boolean",
+              "description": "Whether the layer is a scrim over the whole window."
+            }
+          },
+          "additionalProperties": false
         },
         "params": {
           "type": "array",

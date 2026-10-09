@@ -65,6 +65,13 @@ declare("ScrollView", {
     "scroll_direction": P("str", model=True, doc="Output: 'down' or 'up' for the last scroll, 'none' before the first."),
 }, container=True, doc="A scrolling viewport for its children.")
 
+declare("Overlay", {
+    "open": P("bool", default=False, model=True, doc="Whether it is showing. Closing it (Escape, a press outside) writes false back to a Signal it is bound to."),
+    "anchor": P("str", doc="The name of a node in this view to sit against; without one it is centred in the window."),
+    "placement": P("enum", choices=("below", "above", "start", "end"), default="below", doc="Which side of the anchor; it flips or shifts to fit."),
+    "modal": P("bool", doc="Dims the window behind it, blocks input to it, and keeps focus inside."),
+    "dismissible": P("bool", default=True, doc="Escape and a press outside close it."),
+}, container=True, doc="A layer over the window: a menu, a dialog, a popover.")
 declare("Checkbox", {"checked": P("bool", model=True), "disabled": P("bool")}, doc="A box that is on or off.")
 declare("RadioButton", {"selected": P("bool", model=True), "group": P("str", doc="Buttons with one group are exclusive."),
                         "disabled": P("bool")}, doc="One choice of a group.")

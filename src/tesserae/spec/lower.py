@@ -55,6 +55,9 @@ def lower(inst: Instance) -> dict[str, Any]:
         folded = {"scroll_offset", "at_top", "at_end", "scroll_direction"}  # the outputs are the renderer's to write, not part of the node
         if "scroll_offset" in values:
             node["scroll"] = {"offset": values["scroll_offset"]}
+    elif widget == "Overlay":
+        folded = {"open", "anchor", "placement", "modal", "dismissible"}  # the renderer shows the layer; the builder needs only to know it is modal
+        node["overlay"] = {"modal": bool(values.get("modal"))}
     elif widget == "Canvas":
         folded = {"draw"}
         node["canvas"] = {"draw": values.get("draw")}

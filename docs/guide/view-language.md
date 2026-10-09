@@ -288,6 +288,27 @@ text: Read the docs
 handlers: {on_click: "open_url('https://example.com/docs')"}
 ```
 
+## Overlays
+
+`widget: Overlay` shows its children in a layer over the window while `open` is true: a menu, a popover, a dialog. It takes no room where it is written.
+
+```yaml
+widget: Overlay
+open: "{{ menu_open }}"
+anchor: trigger            # the name of a node in this view; the layer sits against it
+placement: below           # or above, start, end; it flips or shifts to fit
+style: {width: 160, background: surface_container}
+children:
+  - {widget: Text, text: Rename, typography_role: label_large, style: {foreground: on_surface}}
+```
+
+Escape and a press outside close it, and write `false` to the Signal `open` is bound to; with an `open` that is not a Signal it stays closed until `open`
+goes false. Focus goes back to where it was. `dismissible: false` turns both off.
+
+`modal: true` makes the layer a scrim (the `scrim` colour at 32%) over the whole window, blocking input to what is under it and keeping Tab inside; it
+follows the window's size and centres its children unless the style places them (`align_content`). Put the dialog itself in a child, with its own size
+and background. A press on the scrim closes a dismissible modal; a press on its content does not. Without an `anchor` and not modal, the layer sits at its own `x` and `y`.
+
 ## Focus
 
 `focus('input')` in a handler gives the focus to the node named `input` in the same view (names are unique in a view, and a view never reaches into

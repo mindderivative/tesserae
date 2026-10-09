@@ -21,7 +21,7 @@ from typing import Any, Callable, Optional
 
 from tesserae import urls
 from tesserae.follow import app_of
-from tesserae.listeners import handled
+from tesserae.listeners import handled, listen_window
 from tesserae.reactive import Effect, untrack
 from tesserae.expr import compile_statements, is_action_name
 from tesserae.spec.compose import Instance
@@ -155,6 +155,10 @@ class ComposedView(View):
         self._timers: Optional[Timers] = None
         self._scrolled: dict[str, dict[str, str]] = {}
         self._firing: list[Instance] = []
+        self._layer_resize: dict[str, Callable[[], None]] = {}
+        self._shown_layers: dict[str, Any] = {}  # each Overlay showing: its id -> the layer node shown
+        self._overlay_undos: list[Callable[[], None]] = []
+        self._dismissed_open: set[str] = set()  # overlays closed by the user whose `open` is not a Signal: not reopened until `open` goes false
         self._timer_code: dict[str, Any] = {}
         self._timer_scopes: weakref.WeakKeyDictionary[Any, int] = weakref.WeakKeyDictionary()
         spec, frames = self._lowered()
@@ -227,6 +231,7 @@ class ComposedView(View):
             untrack(lambda: self.reconcile(spec, frames))
         untrack(self._wire_instances)
         untrack(self._wire_scroll)
+        untrack(self._wire_overlays)
         untrack(self._wire_states)
         untrack(self._wire_focus_groups)
         untrack(lambda: self.root.get("visible") != visible and self.root.set(visible=visible))
@@ -317,6 +322,82 @@ class ComposedView(View):
                 report()
 
             self.timers.after(0, settle, name=f"scroll:{inst.id}")
+
+    # overlays (#227)
+
+    def _wire_overlays(self) -> None:
+        """Shows and hides the layer of each `Overlay` as its `open` says, and hears the layer asked to close (Escape, a press outside)."""
+        for undo in self._overlay_undos:
+            undo()
+        self._overlay_undos = []
+        live: set[str] = set()
+        for inst in self.handle.composition.walk():
+            if inst.widget != "Overlay" or inst.id not in self._built.outer:
+                continue
+            live.add(inst.id)
+            layer = self._built.nodes[inst.id]
+            wanted = bool(inst.value("open"))
+            if not wanted:
+                self._dismissed_open.discard(inst.id)
+            elif inst.id in self._dismissed_open:
+                wanted = False
+            shown = self._shown_layers.get(inst.id)
+            if wanted and shown is None:
+                self._show_layer(inst, layer)
+            elif not wanted and shown is not None:
+                self._hide_layer(inst.id)
+            elif wanted:
+                self._fit_layer(inst, layer)  # a patch put the layer's own size back
+            self._overlay_undos.append(self._listen(layer, "dismiss", lambda event, inst=inst: self._dismiss_layer(inst)))
+            if inst.value("modal") and inst.value("dismissible") is not False:  # the scrim is the layer, so a press on it is not "outside"
+                self._overlay_undos.append(self._listen(layer, "pointer_down", lambda event, inst=inst, layer=layer: (
+                    self._dismiss_layer(inst) if getattr(event, "target", None) == layer else None)))
+        for gone in set(self._shown_layers) - live:
+            self._hide_layer(gone)
+
+    def _anchor_node(self, inst: Instance) -> Optional[Any]:
+        name = inst.value("anchor")
+        if not name:
+            return None
+        root = inst.view_root or self.handle.composition.root
+        for other in root.walk():
+            if other.name == name and other.id in self._built.outer:
+                return self._built.outer[other.id]
+        raise ValueError(f"Overlay {inst.id!r}: anchor {name!r} is no node by that name in this view")
+
+    def _fit_layer(self, inst: Instance, layer: Any) -> None:
+        if inst.value("modal"):  # the scrim fills the window
+            root = self.window.root
+            layer.set(width=float(root.get("layout_width") or 0.0), height=float(root.get("layout_height") or 0.0), position="absolute", x=0.0, y=0.0)
+
+    def _show_layer(self, inst: Instance, layer: Any) -> None:
+        self._fit_layer(inst, layer)
+        anchor = None if inst.value("modal") else self._anchor_node(inst)
+        self.window.show_layer(layer, anchor=anchor, placement=inst.value("placement") or "below", modal=bool(inst.value("modal")),
+                               dismissible=inst.value("dismissible") is not False)
+        self._shown_layers[inst.id] = layer
+        if inst.value("modal"):  # the scrim follows the window's size while it is up
+            self._layer_resize[inst.id] = listen_window(self.window, "resize", lambda event, inst=inst, layer=layer: self._fit_layer(inst, layer))
+
+    def _hide_layer(self, inst_id: str) -> None:
+        layer = self._shown_layers.pop(inst_id, None)
+        undo = self._layer_resize.pop(inst_id, None)
+        if undo is not None:
+            undo()
+        if layer is not None:
+            self.window.hide_layer(layer)
+
+    def _dismiss_layer(self, inst: Instance) -> None:
+        """The user closed the layer: hide it, and write false to the Signal `open` is bound to (else keep it closed until `open` goes false)."""
+        if inst.id not in self._shown_layers:
+            return
+        self._hide_layer(inst.id)
+        bound = inst.models.get("open")
+        if bound is not None:
+            name, scope = bound
+            scope.assign(name, False)
+        else:
+            self._dismissed_open.add(inst.id)
 
     def _wire_states(self) -> None:
         """Feeds the interaction Signals (`hovered`, `focused`, `pressed`) of the instances a rule or an expression asked about."""
@@ -501,6 +582,10 @@ class ComposedView(View):
             self._effect.dispose()
         if self._timers is not None:
             self._timers.cancel_all()
+        for inst_id in list(self._shown_layers):
+            self._hide_layer(inst_id)
+        for undo in self._overlay_undos:
+            undo()
         for undo in (*self._handler_undos, *self._state_undos, *self._group_undos):
             undo()
         self._handler_undos, self._state_undos, self._group_undos = [], [], []

@@ -54,10 +54,10 @@ _CONTROL_KINDS = frozenset({
 #: Kinds built with a `tesserae.widgets` widget (M60): a node graph and its nodes.
 _WIDGET_KINDS = frozenset({"NodeGraph", "GraphNode"})
 _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", "TextField", "Image", "Icon", "Svg",
-                                           "ScrollView", "Canvas"}
+                                           "ScrollView", "Canvas", "Overlay"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "scroll", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "overlay", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -289,7 +289,7 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built, parent_id: Optiona
         connect_edges(built.controls[node_id], node, built)
         return outer
     # a GraphNode's content goes in its body, a ScrollView's in its content box (M71)
-    parent = inner if kind in ("GraphNode", "ScrollView") else outer
+    parent = inner if kind in ("GraphNode", "ScrollView", "Overlay") else outer
     above, ctx.parent = ctx.parent, (style.get("flex_direction", "horizontal"), style.get("display", "flex"))
     try:
         for child in node.get("children") or []:
@@ -685,6 +685,20 @@ def _scroll_props(ctx, node, style):
     return outer, content
 
 
+def _overlay_props(ctx, node, style):
+    """An Overlay is two nodes: a placeholder that takes no room where it is written, and the layer, which is the box its children are in and
+    which `ComposedView` shows over the window while it is open. A modal layer is the scrim: it fills the window (the renderer sizes it) and
+    centres its children unless the style places them."""
+    modal = bool((node.get("overlay") or {}).get("modal"))
+    if modal and "align_items" not in style and "justify_content" not in style:
+        style = {**style, "align_items": "center", "justify_content": "center"}
+    layer, _ = _box_props(ctx, node, style)
+    if modal:
+        layer["fill"] = _color(ctx, node["id"], "scrim", "scrim@32%") if "background" not in style else layer["fill"]
+    placeholder = {"width": 0.0, "height": 0.0, "position": "absolute", "x": 0.0, "y": 0.0, "hit_testable": False, "a11y_hidden": True}
+    return placeholder, layer
+
+
 def natural_size(window: Any, props: dict[str, Any], style: dict[str, Any]) -> dict[str, float]:
     """A Text or Link's measured `width`/`height` for whichever its style
     leaves out: `tre` 0.3.4's text has no intrinsic size, so text
@@ -845,7 +859,7 @@ def _view_box(node_id, raw):
 _PRIMITIVE = {
     "Rect": ("box", _box_props), "Container": ("box", _box_props), "Text": ("text", _text_props),
     "Link": ("box", _link_props), "TextField": ("box", _text_field_props), "Image": ("image", _image_props),
-    "Svg": ("svg", _svg_props), "Canvas": ("canvas", _canvas_props), "Icon": ("path", _icon_props), "ScrollView": ("scroll_view", _scroll_props),
+    "Svg": ("svg", _svg_props), "Overlay": ("box", _overlay_props), "Canvas": ("canvas", _canvas_props), "Icon": ("path", _icon_props), "ScrollView": ("scroll_view", _scroll_props),
 }
 
 
@@ -857,7 +871,7 @@ def _a11y_for(node: dict[str, Any], kind: str, *, patching: bool) -> dict[str, A
 
 
 #: The node inside a two-node kind's box: what it's drawn with.
-_INNER = {"TextField": "text_input", "Link": "text", "ScrollView": "box"}
+_INNER = {"TextField": "text_input", "Link": "text", "ScrollView": "box", "Overlay": "box"}
 
 
 #: Kinds with their own role and focus (a Link, a TextField's input, and
@@ -1029,13 +1043,14 @@ def _create(ctx, node, style, built):
     outer_props, inner_props = props_of(ctx, node, style)
     # M39: as `tre`'s `set_on_click` did, a clickable node is a focusable
     # Tab stop that Enter and Space activate -- and a button.
-    (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=False))
+    (inner_props if kind in ("TextField", "Overlay") else outer_props).update(_a11y_for(node, kind, patching=False))
     outer_props.update(_window_region(node, patching=False))
     outer = ctx.window.create(tre_kind, **outer_props)
     if inner_props is None:
         return outer, outer
     inner = ctx.window.create(_INNER[kind], **inner_props)
-    outer.add_child(inner)
+    if kind != "Overlay":  # an overlay's layer is shown over the window, not placed in the tree
+        outer.add_child(inner)
     return outer, inner
 
 
@@ -1088,10 +1103,10 @@ def patch(
             return given
         _, props_of = _PRIMITIVE[kind]
         outer_props, inner_props = props_of(ctx, node, style)
-        (inner_props if kind == "TextField" else outer_props).update(_a11y_for(node, kind, patching=True))
+        (inner_props if kind in ("TextField", "Overlay") else outer_props).update(_a11y_for(node, kind, patching=True))
         outer_props.update(_window_region(node, patching=True))
         for key, value in resets.items():  # where `_layout` would have put it (a Link's text, a ScrollView's content)
-            on_inner = (kind == "Link" and key not in _PLACED) or (kind == "ScrollView" and key in _CONTENT)
+            on_inner = (kind == "Link" and key not in _PLACED) or (kind == "ScrollView" and key in _CONTENT) or kind == "Overlay"
             (inner_props if on_inner else outer_props)[key] = value
         eased = _eased(window, transition.plan(node["id"], kind, style), ((outer, outer_props), (inner, inner_props)))
         outer.set(**{**_ALIGNMENT_DEFAULTS, **outer_props})  # the node's own alignment wins

@@ -117,6 +117,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `foreground`, so a monochrome icon follows the theme.
 - **Elevation that moves** ([#226](https://github.com/mindderivative/tesserae/issues/226)). No new language: `elevation` in `hovered` and `pressed` rules with `transition: {elevation: ms}` eases the
   shadows (also from a level a view computes, for a drag). Documented in Gradients & Effects and tested.
+- **Overlay** ([#227](https://github.com/mindderivative/tesserae/issues/227)). `widget: Overlay` with `open` (two-way), `anchor`, `placement`, `modal` and `dismissible` shows its children in a
+  layer over the window: anchored with flipping, or a modal scrim; Escape or a press outside closes it and writes `open` back; focus returns.
 
 ### Removed
 
