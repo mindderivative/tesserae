@@ -1,0 +1,45 @@
+# The Material 3 card: a surface that holds content about one subject. `variant` is elevated, filled or outlined. It can have a `media` picture across the top, a
+# `headline`, a `subhead` and supporting `text`; your own content goes in the default slot, and a row of `actions` (buttons) in the `actions` slot. An
+# `actionable` card is one pressable surface (a state layer, a ripple, Enter, a lift for the elevated one): `handlers: {on_click: open}` on the call is what a press
+# does, and the buttons inside one are a conflict MD3 asks you to avoid. `selected` shows a chosen card; the caller decides when (`on_click: "picked = not picked"`). Colours, corners and how it lifts are in Card_Stylesheet.yaml.
+params:
+  variant: {type: enum, choices: [elevated, filled, outlined], default: elevated, doc: "elevated has a shadow, filled a higher surface, outlined a border."}
+  headline: {type: str, default: "", doc: "The title."}
+  subhead: {type: str, default: "", doc: "A line under the title."}
+  text: {type: str, default: "", doc: "Supporting text."}
+  media: {type: str, default: "", doc: "A picture across the top, relative to the view."}
+  media_height: {type: float, default: 160, doc: "How tall the picture is."}
+  actionable: {type: bool, default: false, doc: "The whole card is one pressable surface."}
+  selected: {type: bool, default: false, doc: "Whether the card is chosen (the caller decides when)."}
+  disabled: {type: bool, default: false, doc: "Dimmed, and an actionable card does not respond."}
+widget: Container
+interaction: "{{ actionable }}"
+disabled: "{{ disabled }}"
+style:
+  flex_direction: vertical
+  clip_children: true
+a11y:
+  role: "{{ 'button' if actionable else 'group' }}"
+  label: "{{ headline }}"
+  selected: "{{ selected if selected else None }}"
+children:
+  - widget: Image
+    name: picture
+    if: "media != ''"
+    src: "{{ media }}"
+    fit: cover
+    style: {width: 100%, height: "{{ media_height }}"}
+  - widget: Container
+    name: body
+    style: {flex_direction: vertical}
+    children:
+      - {widget: Text, name: headline, if: "headline != ''", text: "{{ headline }}", typography_role: title_large}
+      - {widget: Text, name: subhead, if: "subhead != ''", text: "{{ subhead }}", typography_role: title_small}
+      - {widget: Text, name: text, if: "text != ''", text: "{{ text }}", typography_role: body_medium}
+      - widget: Slot
+      - widget: Container
+        name: actions
+        style: {flex_direction: horizontal, align_content: right, gap: 8}
+        children:
+          - widget: Slot
+            name: actions

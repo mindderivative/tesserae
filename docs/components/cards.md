@@ -9,7 +9,21 @@ higher surface) or **outlined** (a border). All have a medium (12dp) corner radi
 
 ## In Tesserae
 
-A content-free `Rect`: add children inside it in your view, or with `.node.add_child` in Python.
+`widget: Card` is a view Tesserae ships (`Card_View.yaml`): a surface with 12 pixel corners that is as tall as what is in it.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `variant` | `elevated`, `filled`, `outlined` | a shadow, a higher surface, or a 1 pixel border |
+| `headline`, `subhead`, `text` | text | a `title_large` title, a `title_small` line, `body_medium` supporting text, with 16 pixels around them |
+| `media`, `media_height` | a picture, a number | a picture across the top, clipped to the corners (default 160 tall) |
+| `actionable` | true or false | the whole card is one pressable surface: a state layer, a ripple, Enter, and a lift for the elevated one |
+| `selected` | true or false | a chosen card: `secondary_container` (an outlined one gets an `outline` border); the caller decides when |
+| `disabled` | true or false | dimmed |
+
+Your own content goes in the default slot, after the text, and buttons in the `actions` slot (a row at the end). `handlers: {on_click: ...}` on the call is
+what a press of an actionable card does. A plain card is a group and takes no focus. Not built: dragging and swiping a card, and the dragged state.
+
+`widget: Card` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -38,17 +52,23 @@ kind: Rect
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: trips
+widget: Container
+style: {flex_direction: horizontal, gap: 16, padding: 16, width: 560, height: 360}
 children:
-  - id: summary
-    component: CardElevated
-    with: {width: 240, height: 120}
+  - widget: Card
+    headline: Paris
+    subhead: Three days
+    text: Flights and a hotel.
+    media: paris.png
+    style: {width: 240}
+    children:
+      - {widget: Button, label: Book, variant: text, slot: actions}
+  - {widget: Card, variant: outlined, headline: Rome, actionable: true, selected: "{{ picked }}", style: {width: 240}, handlers: {on_click: pick}}
 ```
+
+## Using it
 
 In Python:
 

@@ -380,7 +380,8 @@ class _Parser:
                 raise self.fail(vat, "'interaction:' takes true, false or a colour role", "write interaction: <colour> instead of {color: ...}")
             if value is not None and not isinstance(value, (bool, str)):
                 raise self.fail(vat, f"'interaction:' takes true, false or a colour role, got {_describe(value)}")
-            node.interaction = value
+            # an expression is worked out once, when the view is composed (it may read the view's params, not a Signal)
+            node.interaction = self.template(value, vat) if is_expression(value) else value
         elif key == "window_region":
             if value not in WINDOW_REGIONS:
                 raise self.fail(vat, f"'window_region:' is one of {', '.join(WINDOW_REGIONS)}, got {value!r}", _near(value, WINDOW_REGIONS))

@@ -732,7 +732,12 @@ class Composer:
             ctx.owner.root = inst
         inst.view_root = ctx.owner.root if ctx.owner is not None else None
         inner = self._with_state(node, scope, iid, "node", ctx, inst)
-        if node.interaction or forced:  # `hovered`, `focused` and `pressed` are the nearest interactive widget's (a call may make a root so)
+        if hasattr(node.interaction, "evaluate"):  # worked out now, once: whether (or in what colour) it answers a press cannot change while the view is open
+            if node.interaction.is_reactive(inner):
+                raise self._fail(ctx, node.at, "interaction cannot change while the view is open",
+                                 "it may be worked out from the view's params, but not from a Signal")
+            inst.interaction = node.interaction.evaluate(inner)
+        if inst.interaction or forced:  # `hovered`, `focused` and `pressed` are the nearest interactive widget's (a call may make a root so)
             inner = Scope(inner, states=inst, readonly=True)
         inner.instance = inst
         inst.identities.append(Identity(node.widget, None, lambda name, inst=inst: _read(inst, name), inner, inst.interaction_signal))
@@ -905,7 +910,13 @@ class Composer:
                 inst.handlers[event] = (handler, call_scope)
         inst.classes = [*inst.classes, *node.classes]
         if node.interaction is not None:
-            inst.interaction = node.interaction
+            if hasattr(node.interaction, "evaluate"):
+                if node.interaction.is_reactive(call_scope):
+                    raise self._fail(ctx, node.at, "interaction cannot change while the view is open",
+                                     "it may be worked out from the view's params, but not from a Signal")
+                inst.interaction = node.interaction.evaluate(call_scope)
+            else:
+                inst.interaction = node.interaction
         if node.window_region is not None:
             inst.window_region = node.window_region
         if node.route is not None:

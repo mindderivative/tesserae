@@ -1,0 +1,23 @@
+# The look of Card (Material 3): 12 pixel corners, 16 pixels of padding around the text. Elevated is surface_container_low at level 1 (2 when an
+# actionable one is hovered), filled is surface_container_highest, outlined is surface with a 1 pixel outline_variant border. A selected outlined card has
+# an outline border; a selected filled or elevated one is secondary_container.
+styles:
+  - widget: Card
+    style:
+      corner_radius: 12
+      transition: {elevation: 200, background: 150}
+  - widget: Card
+    variant: elevated
+    style: {background: "{{ 'secondary_container' if selected else 'surface_container_low' }}", elevation: 1}
+  - {widget: Card, variant: elevated, state: hovered, style: {elevation: "{{ 2 if actionable else 1 }}"}}
+  - {widget: Card, variant: filled, style: {background: "{{ 'secondary_container' if selected else 'surface_container_highest' }}"}}
+  - widget: Card
+    variant: outlined
+    style:
+      background: surface
+      border_width: 1
+      border_color: "{{ 'outline' if selected else 'outline_variant' }}"
+  - {widget: Card, part: body, style: {padding: 16, gap: 4}}
+  - {widget: Card, part: headline, style: {foreground: on_surface}}
+  - {widget: Card, part: subhead, style: {foreground: on_surface_variant}}
+  - {widget: Card, part: text, style: {foreground: on_surface_variant}}
