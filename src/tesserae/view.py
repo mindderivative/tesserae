@@ -42,6 +42,7 @@ from __future__ import annotations
 
 import copy
 import inspect
+import types
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -859,6 +860,14 @@ class View:
                         method_name.startswith("surface.") and action in SURFACE_ACTIONS) or (
                         method_name.startswith("navigate.") and has_app and action):
                     self._wire_handler(node_spec, event, method_name)  # a wrong one is said when a ViewModel attaches
+            if has_app:
+                for prop, raw in (node_spec.get("bindings") or {}).items():
+                    try:
+                        names = parse_binding(raw).expr.names
+                    except BindingError:
+                        continue  # said when a ViewModel attaches
+                    if names and names <= {"app"}:  # a title bar's: follow the app (focus, maximized, the OS's inset), which needs no ViewModel
+                        self._wire_binding(node_spec, prop, raw, types.SimpleNamespace(app=app_of(self.window)))
 
     def _add_listener(self, node: Any, event: str, fn: Callable[[Any], None]) -> None:
         """A ViewModel's listener: removed when the view is unwired."""
@@ -869,7 +878,8 @@ class View:
         node and event shares one dispatcher. Returns the undo."""
         return self._events.listen(node, event, fn)
 
-    def _wire_binding(self, node_spec: dict[str, Any], prop: str, raw: str) -> None:
+    def _wire_binding(self, node_spec: dict[str, Any], prop: str, raw: str, context: Any = None) -> None:
+        context = self._viewmodel if context is None else context  # what the expression's names are looked up on
         node_id = node_spec["id"]
         where = f'widget "{node_id}" binding on "{prop}" ({_quoted(raw)})'
         try:
@@ -890,7 +900,7 @@ class View:
                 dependency._unsubscribe(run)
             reactive._begin_recording()
             try:
-                value = evaluate_value(expr, self._viewmodel)
+                value = evaluate_value(expr, context)
             except BindingError as exc:
                 raise ValueError(f"{where}: {exc}") from None
             finally:

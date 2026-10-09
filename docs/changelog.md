@@ -98,6 +98,9 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   `release()` and `cursor(name)` that act on the widget whose handler is running, so a drag keeps following the pointer outside the node.
 - **Per-corner `corner_radius`** ([#220](https://github.com/mindderivative/tesserae/issues/220)). `style.corner_radius` takes a list of four (`top_left`, `top_right`, `bottom_right`,
   `bottom_left`) or a mapping of corners and edges (`{top: 12}`, `{left: full, top_right: 4}`), with tokens or pixels; one value is unchanged.
+- **Windows, title bars and docks in composed views** ([#221](https://github.com/mindderivative/tesserae/issues/221)). A `widget: Window` root opened with `app.open_view` sets the OS
+  window (it becomes the app's window view, as `kind: Window` is for `app.load`), and the bindings a `TitleBar` expands to (inactive dimming, the maximize/restore glyph, the OS's inset and
+  buttons) are wired without a ViewModel. Docks already worked and are now covered by tests.
 
 ### Removed
 

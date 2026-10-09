@@ -841,6 +841,8 @@ class App:
         self.register(key, opened, opened.handle.viewmodel)
         self._built.append(_Built(opened))
         self._opened[key] = opened
+        if window_of(opened.spec) is not None:  # a `widget: Window` root is the app's window, as `kind: Window` is for `load`
+            self._adopt_window_view(key, opened)
         return opened
 
     def _rule_sheet(self) -> Any:

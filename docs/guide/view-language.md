@@ -73,7 +73,7 @@ Every widget declares its properties: a type, a default, the values it allows, w
 | `CircularProgress`, `LinearProgress`, `LoadingIndicator` | `value` |
 | `TimePickerDial` | `hour`, `minute` (model) |
 | `ScrollView`, `NodeGraph`, `GraphNode` | a scrolling box; a canvas of linked nodes; a node of it |
-| `Window`, `TitleBar`, `Dock`, `DockPanel` | see [Windows, Docks & Embedded Views](windows-and-docks.md) |
+| `Window`, `TitleBar`, `Dock`, `DockPanel` | see [Windows, Docks & Embedded Views](windows-and-docks.md); written with `widget:` in a view opened with `app.open_view`, a `Window` root sets the OS window (title, borderless, minimum sizes) and a title bar's buttons, dimming and glyphs follow the app |
 | `Slot` | where a calling view's children go |
 
 State is a property (`checked`, `selected`, `value`, `disabled`), never a style. `foreground` is a style extra of the widgets that draw text or
