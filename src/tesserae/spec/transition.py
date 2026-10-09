@@ -12,7 +12,7 @@ style:
 
 Only a *change* eases: the first time a node is built it is where it says. The properties are the ones tre can animate (`background`,
 `foreground` for text and glyphs, `border_color`, `border_width`, `corner_radius`, `elevation`, `opacity`, `blur`, `backdrop_blur`, `scale`,
-`translate_x`, `translate_y`, `rotation_deg`); layout properties (width, position, padding) wait for the engine. An app that asked for reduced
+`translate_x`, `translate_y`, `rotation_deg`); layout properties (`width`, `height`, `x`, `y`, `gap`, `padding`, `margin`) ease too: the engine cannot animate them yet, so they are set frame by frame (`layout_steps`). An app that asked for reduced
 motion gets the new value at once.
 
 `plan(...)` turns the style's `transition:` into `{node property: (milliseconds, easing)}`; the builder's `patch` animates those.
@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from typing import Any, Optional, Union
 
-__all__ = ["EASINGS", "TRANSITIONABLE", "plan"]
+__all__ = ["EASINGS", "LAYOUT_TRANSITIONABLE", "TRANSITIONABLE", "plan"]
 
 Easing = Union[str, tuple[float, float, float, float], tuple[str, float]]
 
@@ -42,6 +42,13 @@ TRANSITIONABLE: dict[str, str] = {
     "background": "fill", "foreground": "fill", "border_color": "stroke_color", "border_width": "stroke_width", "corner_radius": "corner_radius",
     "elevation": "shadows", "opacity": "opacity", "blur": "blur", "backdrop_blur": "backdrop_blur", "scale": "scale", "translate_x": "translate_x",
     "translate_y": "translate_y", "rotation_deg": "rotation_deg",
+}
+#: The layout fields that ease too, each the node properties it is. The engine cannot animate these yet, so `patch` steps them frame by frame
+#: (`layout_steps`) when it says so; `all` leaves them out, since a layout that changes is not always meant to glide.
+LAYOUT_TRANSITIONABLE: dict[str, tuple[str, ...]] = {
+    "width": ("width",), "height": ("height",), "x": ("x",), "y": ("y",), "gap": ("gap",),
+    "padding": ("padding_top", "padding_right", "padding_bottom", "padding_left"),
+    "margin": ("margin_top", "margin_right", "margin_bottom", "margin_left"),
 }
 #: The kinds whose `fill` is the text or glyph colour (`foreground`); on every other kind `fill` is the `background`.
 _FOREGROUND_FILL = frozenset({"Text", "Link", "Icon", "Svg"})
@@ -90,9 +97,9 @@ def plan(node_id: str, kind: str, style: dict[str, Any]) -> dict[str, tuple[floa
     where = f'widget "{node_id}": style.transition'
     if not isinstance(raw, dict):
         raise ValueError(f"{where} is a mapping of style fields to durations, not {raw!r}")
-    unknown = [k for k in raw if k != "all" and k not in TRANSITIONABLE]
+    unknown = [k for k in raw if k != "all" and k not in TRANSITIONABLE and k not in LAYOUT_TRANSITIONABLE]
     if unknown:
-        raise ValueError(f"{where}: '{unknown[0]}' cannot ease (it can: {', '.join(TRANSITIONABLE)}; or 'all')")
+        raise ValueError(f"{where}: '{unknown[0]}' cannot ease (it can: {', '.join([*TRANSITIONABLE, *LAYOUT_TRANSITIONABLE])}; or 'all')")
     out: dict[str, tuple[float, Easing]] = {}
     fill_field = "foreground" if kind in _FOREGROUND_FILL else "background"
     if "all" in raw:
@@ -101,6 +108,10 @@ def plan(node_id: str, kind: str, style: dict[str, Any]) -> dict[str, tuple[floa
         out["fill"] = every
     for field, value in raw.items():
         if field == "all":
+            continue
+        if field in LAYOUT_TRANSITIONABLE:
+            entry = _entry(f"{where}.{field}", value)
+            out.update({prop: entry for prop in LAYOUT_TRANSITIONABLE[field]})
             continue
         prop = TRANSITIONABLE[field]
         if prop == "fill" and field != fill_field:

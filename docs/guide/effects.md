@@ -167,7 +167,9 @@ next time the style gives a property a new value, it travels there:
 - A value is a number of milliseconds, or `{duration, easing, bounce}`. The easings are `linear`, Material's `standard`, `standard_accelerate`,
   `standard_decelerate`, `emphasized`, `emphasized_accelerate` and `emphasized_decelerate`, four numbers (a cubic bezier, as CSS writes
   `cubic-bezier`), and `spring`, whose `duration` is its period and whose `bounce` runs from -1 to 1.
-- Width, height, position and padding do not ease yet; they change at once.
+- Layout eases too: `width`, `height`, `x`, `y`, `gap`, `padding` and `margin` (`all` leaves these out, since a layout that changes is not always meant
+  to glide). The engine cannot animate layout yet, so Tesserae sets the value each frame along the same curve (a spring is drawn as a settling curve); a
+  value that is not a number, such as `auto` or `50%`, changes at once, and a change begun in the middle of another goes on from where the first had got to.
 - When the app has asked for reduced motion, a change happens at once.
 - A transition is part of a style, so a stylesheet rule can carry it: a rule for `state: hovered` that changes `background` eases if the rule for the widget gives a `transition`.
 

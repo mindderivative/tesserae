@@ -32,7 +32,7 @@ from typing import Any, Callable, Optional
 from tesserae import a11y, tokens
 from tesserae.icons import ICON_VIEW_BOX, icon_path, icon_view_box
 from tesserae.spec.cascade import STYLE_FIELDS, Sheet, resolve_style
-from tesserae.spec import effects, layout, richtext, transition
+from tesserae.spec import effects, layout, layout_steps, richtext, transition
 from tesserae.spec.canvas import painter as canvas_painter, plan as canvas_plan
 from tesserae.spec.layout import LAYOUT_FIELDS, REPLACED, LayoutError, engine_style
 
@@ -1121,7 +1121,12 @@ def patch(
         if inner_props is not None:
             inner.set(**inner_props)
         for target, prop, value, ms, easing in eased:
-            target.animate(prop, value, ms, easing)
+            try:
+                target.animate(prop, value, ms, easing)
+            except ValueError as exc:
+                if "isn't animatable" not in str(exc):
+                    raise
+                layout_steps.steps_of(window).start(target, prop, value, ms, easing)  # a layout property: stepped by hand until the engine can
     except ValueError as exc:
         if isinstance(exc, SpecBuildError):
             raise

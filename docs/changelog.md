@@ -134,6 +134,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   and `busy`, checked and bindable; the engine has no property for them yet (requested: tre#160), so they are sent one at a time as far as it takes them, with one warning naming each it lacks.
 - **`tooltip:` on every node** ([#238](https://github.com/mindderivative/tesserae/issues/238)). Text, or `{text, title, delay}` for a rich one: shown after a hover delay (500 ms) or at once on keyboard
   focus, gone on leave, press, blur or Escape; the text is the node's accessibility `description` where it has none.
+- **`transition:` for layout** ([#239](https://github.com/mindderivative/tesserae/issues/239)). `width`, `height`, `x`, `y`, `gap`, `padding` and `margin` ease like the rest. tre cannot animate them yet
+  (requested: tre#161), so they are set frame by frame along the curve; when tre can, its own animation is used without a change.
 
 ### Removed
 

@@ -1528,6 +1528,335 @@
                   }
                 }
               ]
+            },
+            "width": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "linear",
+                            "standard",
+                            "standard_accelerate",
+                            "standard_decelerate",
+                            "emphasized",
+                            "emphasized_accelerate",
+                            "emphasized_decelerate",
+                            "spring"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ]
+                    },
+                    "bounce": {
+                      "type": "number",
+                      "exclusiveMinimum": -1,
+                      "exclusiveMaximum": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "height": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "linear",
+                            "standard",
+                            "standard_accelerate",
+                            "standard_decelerate",
+                            "emphasized",
+                            "emphasized_accelerate",
+                            "emphasized_decelerate",
+                            "spring"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ]
+                    },
+                    "bounce": {
+                      "type": "number",
+                      "exclusiveMinimum": -1,
+                      "exclusiveMaximum": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "x": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "linear",
+                            "standard",
+                            "standard_accelerate",
+                            "standard_decelerate",
+                            "emphasized",
+                            "emphasized_accelerate",
+                            "emphasized_decelerate",
+                            "spring"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ]
+                    },
+                    "bounce": {
+                      "type": "number",
+                      "exclusiveMinimum": -1,
+                      "exclusiveMaximum": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "y": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "linear",
+                            "standard",
+                            "standard_accelerate",
+                            "standard_decelerate",
+                            "emphasized",
+                            "emphasized_accelerate",
+                            "emphasized_decelerate",
+                            "spring"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ]
+                    },
+                    "bounce": {
+                      "type": "number",
+                      "exclusiveMinimum": -1,
+                      "exclusiveMaximum": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "gap": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "linear",
+                            "standard",
+                            "standard_accelerate",
+                            "standard_decelerate",
+                            "emphasized",
+                            "emphasized_accelerate",
+                            "emphasized_decelerate",
+                            "spring"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ]
+                    },
+                    "bounce": {
+                      "type": "number",
+                      "exclusiveMinimum": -1,
+                      "exclusiveMaximum": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "padding": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "linear",
+                            "standard",
+                            "standard_accelerate",
+                            "standard_decelerate",
+                            "emphasized",
+                            "emphasized_accelerate",
+                            "emphasized_decelerate",
+                            "spring"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ]
+                    },
+                    "bounce": {
+                      "type": "number",
+                      "exclusiveMinimum": -1,
+                      "exclusiveMaximum": 1
+                    }
+                  }
+                }
+              ]
+            },
+            "margin": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "duration": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "easing": {
+                      "anyOf": [
+                        {
+                          "enum": [
+                            "linear",
+                            "standard",
+                            "standard_accelerate",
+                            "standard_decelerate",
+                            "emphasized",
+                            "emphasized_accelerate",
+                            "emphasized_decelerate",
+                            "spring"
+                          ]
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 4,
+                          "maxItems": 4
+                        }
+                      ]
+                    },
+                    "bounce": {
+                      "type": "number",
+                      "exclusiveMinimum": -1,
+                      "exclusiveMaximum": 1
+                    }
+                  }
+                }
+              ]
             }
           },
           "additionalProperties": false,

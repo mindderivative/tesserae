@@ -1,4 +1,4 @@
-"""#214: `transition:` in a style -- a change eases instead of jumping; the first draw does not; reduced motion snaps; layout waits for the engine."""
+"""#214: `transition:` in a style -- a change eases instead of jumping; the first draw does not; reduced motion snaps. (Layout is #239: tests/test_layout_transition.py.)"""
 
 import pytest
 
@@ -50,7 +50,7 @@ def test_all_covers_what_can_ease_and_a_named_field_wins():
 
 
 @pytest.mark.parametrize("transition, message", [
-    ("slow", "is a mapping of style fields to durations"), ({"width": 100}, "'width' cannot ease"), ({"opacity": True}, "a duration in milliseconds"),
+    ("slow", "is a mapping of style fields to durations"), ({"cursor": 100}, "'cursor' cannot ease"), ({"opacity": True}, "a duration in milliseconds"),
     ({"opacity": -5}, "duration is milliseconds, 0 or more"), ({"opacity": "fast"}, "a duration in milliseconds"),
     ({"opacity": {"duration": 10, "easing": "wobble"}}, "easing is one of"), ({"opacity": {"duration": 10, "easing": [1, 2, 3]}}, "easing is one of"),
     ({"opacity": {"duration": 10, "bounce": 0.3}}, "bounce goes with easing: spring"),
@@ -126,8 +126,8 @@ def test_a_zero_duration_is_a_jump():
 
 
 def test_a_bad_transition_stops_the_build_naming_the_widget():
-    with pytest.raises(SpecBuildError, match='widget "n": style.transition: .width. cannot ease'):
-        View(spec({"transition": {"width": 100}}), theme_seed=SEED)
+    with pytest.raises(SpecBuildError, match='widget "n": style.transition: .cursor. cannot ease'):
+        View(spec({"transition": {"cursor": 100}}), theme_seed=SEED)
 
 
 def test_a_transform_is_drawn_changed_and_put_back_when_dropped_and_a_python_one_is_left_alone():
@@ -172,4 +172,4 @@ def test_the_loader_takes_transform_and_transition_as_style_fields_and_names_a_b
     assert node.style["scale"] == 1.1 and node.style["transition"] == {"opacity": 100}
     RuleSheet.of({"styles": [{"widget": "Rect", "style": {"translate_y": 4, "transition": {"all": 100}}}]})
     with pytest.raises(SpecBuildError, match="style.transition"):
-        open_composed(parse_view("widget: Rect\nstyle: {width: 10, height: 10, background: '#112233', transition: {width: 100}}\n", "T_View.yaml"), Bindings(), theme_seed=SEED)
+        open_composed(parse_view("widget: Rect\nstyle: {width: 10, height: 10, background: '#112233', transition: {cursor: 100}}\n", "T_View.yaml"), Bindings(), theme_seed=SEED)

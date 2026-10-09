@@ -174,7 +174,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                                                                               {"type": "array", "items": {"type": "number"}, "minItems": 4, "maxItems": 4}]},
                                                                          "bounce": {"type": "number", "exclusiveMinimum": -1, "exclusiveMaximum": 1}}}]}
                                        for name in ("all", "background", "foreground", "border_color", "border_width", "corner_radius", "elevation",
-                                                    "opacity", "blur", "backdrop_blur", "scale", "translate_x", "translate_y", "rotation_deg")},
+                                                    "opacity", "blur", "backdrop_blur", "scale", "translate_x", "translate_y", "rotation_deg",
+                                                    "width", "height", "x", "y", "gap", "padding", "margin")},
                         "additionalProperties": False},
                        "Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. "
                        "`all` covers every one that can. A node is where it says when first drawn; only a change eases."),

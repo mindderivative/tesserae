@@ -234,7 +234,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `rotation_deg` | a number | Turns the node by this many degrees, clockwise, about its centre. |
 | `scale` | a number | Draws the node and what is in it at this multiple of its size (1 is unchanged), about its centre. |
 | `transition` | a mapping | Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. `all` covers every one that can. A node is where it says when first drawn; only a change eases. |
-| `transition.<name>` | a number or a mapping | One for each of 14 names, such as `all`, `background`, `foreground`, `border_color`. |
+| `transition.<name>` | a number or a mapping | One for each of 21 names, such as `all`, `background`, `foreground`, `border_color`. |
 | `translate_x` | a number | Draws the node this many pixels to the right of where it is laid out. |
 | `translate_y` | a number | Draws the node this many pixels lower than where it is laid out. |
 
