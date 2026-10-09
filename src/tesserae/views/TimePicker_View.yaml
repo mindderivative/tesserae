@@ -1,0 +1,86 @@
+# The Material 3 modal time picker: a dialog with the time at the top (an hour and a minute you press to choose which the dial sets, and an AM / PM selector), a
+# 256 pixel dial, a keyboard button that swaps the dial for typed fields, and Cancel and OK. `hour` (0 to 23) and `minute` are two-way and change only when OK is
+# pressed; Cancel, Escape and a press on the scrim leave them. `open` is two-way. `on_ok` is called after OK. 24-hour time has no dial here (the face is the twelve
+# hours): `twelve: false` opens straight on the typed fields.
+params:
+  open: {type: bool, default: false, model: true, doc: "Whether the picker is showing."}
+  hour: {type: int, default: 0, model: true, doc: "0 to 23; set by OK."}
+  minute: {type: int, default: 0, model: true, doc: "0 to 59; set by OK."}
+  twelve: {type: bool, default: true, doc: "12-hour time with a dial and an AM / PM selector; otherwise only the typed fields."}
+  title: {type: str, default: Select time, doc: "The small heading."}
+  on_ok: {type: handler, doc: "Called after OK has set hour and minute."}
+widget: Overlay
+open: "{{ open }}"
+modal: true
+children:
+  - widget: Container
+    name: panel
+    if: open
+    state:
+      dh: "{{ hour }}"
+      dm: "{{ minute }}"
+      dp: "{{ 'PM' if hour >= 12 else 'AM' }}"
+      dmode: hour
+      typing: "{{ not twelve }}"
+    a11y: {role: dialog, label: "{{ title }}"}
+    style:
+      flex_direction: vertical
+      width: 328
+      gap: 20
+    children:
+      - {widget: Text, name: heading, text: "{{ title }}", typography_role: label_medium}
+      - widget: Container
+        name: header
+        if: "not typing"
+        style: {flex_direction: horizontal, align_content: left, gap: 12}
+        children:
+          - widget: Container
+            name: hour_button
+            interaction: true
+            handlers: {on_click: "dmode = 'hour'"}
+            a11y: {role: button, label: Hour, selected: "{{ dmode == 'hour' }}"}
+            style: {width: 96, height: 80, align_content: center, corner_radius: 8, background: "{{ 'primary_container' if dmode == 'hour' else 'surface_container_highest' }}"}
+            children:
+              - {widget: Text, name: hour_text, text: "{{ ('0' + str(dh % 12 or 12))[-2:] }}", typography_role: display_large, style: {foreground: "{{ 'on_primary_container' if dmode == 'hour' else 'on_surface' }}"}}
+          - {widget: Text, name: colon, text: ":", typography_role: display_large}
+          - widget: Container
+            name: minute_button
+            interaction: true
+            handlers: {on_click: "dmode = 'minute'"}
+            a11y: {role: button, label: Minute, selected: "{{ dmode == 'minute' }}"}
+            style: {width: 96, height: 80, align_content: center, corner_radius: 8, background: "{{ 'primary_container' if dmode == 'minute' else 'surface_container_highest' }}"}
+            children:
+              - {widget: Text, name: minute_text, text: "{{ ('0' + str(dm))[-2:] }}", typography_role: display_large, style: {foreground: "{{ 'on_primary_container' if dmode == 'minute' else 'on_surface' }}"}}
+          - widget: PeriodSelector
+            name: period
+            period: "{{ dp }}"
+            on_change: "dh = (dh % 12) + (12 if dp == 'PM' else 0)"
+      - widget: TimePickerDial
+        name: dial
+        if: "not typing"
+        hour: "{{ dh }}"
+        minute: "{{ dm }}"
+        mode: "{{ dmode }}"
+        label: Clock
+        style: {width: 256, height: 256}
+      - widget: TimeInput
+        name: fields
+        if: typing
+        hour: "{{ dh }}"
+        minute: "{{ dm }}"
+        twelve: "{{ twelve }}"
+      - widget: Container
+        name: footer
+        style: {flex_direction: horizontal, align_content: left, gap: 8, width: 100%}
+        children:
+          - widget: IconButton
+            name: mode_button
+            if: twelve
+            icon: "{{ 'clock_outline' if typing else 'keyboard' }}"
+            label: "{{ 'Switch to the clock' if typing else 'Switch to typing' }}"
+            handlers: {on_click: "typing = not typing"}
+          - widget: Container
+            name: spacer
+            style: {flex: expand_horizontal}
+          - {widget: Button, name: cancel, label: Cancel, variant: text, handlers: {on_click: "open = False"}}
+          - {widget: Button, name: ok, label: OK, variant: text, handlers: {on_click: "hour = dh; minute = dm; open = False; on_ok()"}}

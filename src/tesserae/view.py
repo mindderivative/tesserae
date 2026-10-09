@@ -104,6 +104,7 @@ def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     keys = ("kind", "classes", "style", "text", "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "value", "error", "icons", "ticks", "value_indicator", "checked", "selected", "value", "hour", "minute",
             "handlers", "a11y", "component_of", "min", "max", "step", "label", "x", "y",  # M57, M58, M60
             "disabled",  # M70: a control's is its own
+            "spin", "dial", "tooltip",  # a SpinBox's options, a dial's mode, a generated node's tooltip
             "window_region")  # 0.3.0 M3
     return all(a.get(k) == b.get(k) for k in keys)
 

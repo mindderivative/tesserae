@@ -4665,7 +4665,8 @@
                 "type": "string",
                 "pattern": "\\{\\{"
               }
-            ]
+            ],
+            "description": "0 to 23; a press keeps the half of the day it is in."
           },
           "minute": {
             "anyOf": [
@@ -4676,7 +4677,47 @@
                 "type": "string",
                 "pattern": "\\{\\{"
               }
-            ]
+            ],
+            "description": "0 to 59, in fives on the face."
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "hour",
+                  "minute"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Which hand the face shows and sets; letting go in hour mode moves on to minutes."
+          },
+          "auto_advance": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Letting go in hour mode moves on to the minutes."
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "What a screen reader calls it."
           }
         },
         "required": [
@@ -4703,7 +4744,10 @@
             "params",
             "expects",
             "hour",
-            "minute"
+            "minute",
+            "mode",
+            "auto_advance",
+            "label"
           ]
         }
       }

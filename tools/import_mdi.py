@@ -33,6 +33,7 @@ login logout magnify map-marker menu menu-down menu-left menu-right menu-up micr
 play plus plus-circle redo refresh repeat rewind send share share-variant shuffle skip-next skip-previous star star-outline stop swap-horizontal
 swap-vertical sync tag text-box thumb-down thumb-up timer tune undo unfold-less-horizontal unfold-more-horizontal upload view-grid view-list
 volume-high volume-low volume-medium volume-off wifi window-close window-maximize window-minimize window-restore
+keyboard keyboard-outline calendar-edit calendar-today view-carousel file-tree folder-outline
 """.split()
 _NAME = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 

@@ -1213,17 +1213,41 @@ components:
   - slug: time-pickers
     title: Time picker
     group: Selection and input
+    shipped_view: TimePicker
     fragments: [TimePickerDial, PeriodSelectorAM, PeriodSelectorPM]
     md3: |
       A time picker lets the user choose an hour and a minute on a dial, with an AM/PM selector in a 12-hour
       format.
     built: |
-      The dial is a Tesserae control (`TimePickerDial`): drag or use the keys to point the hand at the hour, then
-      the minute. The AM and PM selectors are two fragments, one for each selected state.
-    usage: |
-      - id: dial
-        component: TimePickerDial
-        with: {size: 256, hour: 9, minute: 30}
+      Four pieces. `TimePickerDial` is a Tesserae control (`widget: TimePickerDial`): `hour`, `minute` and `mode` (`hour` or `minute`; letting go on an hour moves on to the
+      minutes unless `auto_advance` is off). `PeriodSelector` is a view: two halves, `period` `AM` or `PM` (two-way), with an `on_change` handler for after a choice.
+      `TimeInput` is a view: an hour field, a colon, a minute field and, in 12-hour time, a period selector, where `hour` and `minute` are two-way and a number that does
+      not fit is left out (the fields are filled from the time when they appear). `TimePicker` is the dialog of Material 3.
+
+      | Property of `TimePicker` | Type | Meaning |
+      | --- | --- | --- |
+      | `open` | true or false; two-way | whether it is showing; Escape and a press on the scrim close it |
+      | `hour`, `minute` | whole numbers; two-way | the time, 0 to 23; changed only when OK is pressed |
+      | `twelve` | true or false | 12-hour time with a dial and a period selector; off, only the typed fields |
+      | `title`, `on_ok` | text, a handler | the small heading; called after OK |
+
+      The picker shows the time as an hour and a minute you press to choose which the dial sets, the period selector, the 256 pixel dial, a keyboard button that
+      swaps the dial for the typed fields (and back), and Cancel and OK. Reopening it starts from the time as it then is. Not built: a 24-hour dial with an inner ring,
+      limits on the times that can be chosen, and the times as a locale writes them.
+    usage_view: |
+      name: alarm
+      widget: Container
+      style: {width: 480, height: 520}
+      children:
+        - widget: TimePicker
+          open: "{{ choosing }}"
+          hour: "{{ alarm_hour }}"
+          minute: "{{ alarm_minute }}"
+          on_ok: alarm_set
+        - widget: TimeInput
+          hour: "{{ alarm_hour }}"
+          minute: "{{ alarm_minute }}"
+        - {widget: PeriodSelector, period: "{{ half }}"}
     python: |
       from tesserae.widgets import time_picker_dial
 

@@ -1692,6 +1692,8 @@ MD3's time picker dial: a 256 px `surface_container_highest` face with the twelv
 
 Also has everything `Control` has.
 
+- `on_mode(fn: Callable[[str], None]) -> Callable[[], None]`: Calls `fn(mode)` when the dial moves itself on from the hour to the minutes after the user lets go.
+
 **Constants**
 
 - `DISABLED_CONTAINER` = `0.12`
@@ -2124,7 +2126,7 @@ The view box `name`'s path is drawn in: MDI's 24 x 24 for an MDI icon, Material 
 **Constants**
 
 - `ICON_VIEW_BOX` = `(0.0, -960.0, 960.0, 960.0)`
-- `ICONS` = `dict of 157`
+- `ICONS` = `dict of 164`
 - `MDI_VIEW_BOX` = `(0.0, 0.0, 24.0, 24.0)`
 
 ## Logging

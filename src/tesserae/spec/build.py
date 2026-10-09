@@ -64,6 +64,7 @@ _NODE_KEYS = frozenset({
     "dock", "dock_panel", "split_handle",  # a Dock, a DockPanel and the handle between split panels, made containers (0.4.4)
     "min", "max", "step",  # a SpinBox's (M58)
     "spin",  # a SpinBox's decimals, prefix, suffix and wrap
+    "dial",  # a TimePickerDial's mode and auto_advance
     "disabled",  # any node's (M70): the View applies it, or a control's own
     "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not
     "tooltip",  # any node's text on a rest of the pointer (a title bar's buttons): the view that has it shows it
@@ -1267,6 +1268,7 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
             common.pop("color")
             control = controls.TimePickerDial(ctx.window, hour=int(node.get("hour") or 0),
                                               minute=int(node.get("minute") or 0), size=size.get("width", 256.0),
+                                              mode=(node.get("dial") or {}).get("mode") or "hour", auto_advance=(node.get("dial") or {}).get("auto_advance") is not False,
                                               **common)
     if node.get("disabled") is not None:  # M70: a control's static `disabled:` is its own
         control.disabled.set(bool(node["disabled"]))
@@ -1370,6 +1372,8 @@ def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], c
     elif kind == "TimePickerDial":
         control.hour.set(int(node.get("hour") or 0) % 24)
         control.minute.set(int(node.get("minute") or 0) % 60)
+        if (node.get("dial") or {}).get("mode") in ("hour", "minute"):
+            control.mode.set(node["dial"]["mode"])
 
 
 def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> tuple[Any, ...]:

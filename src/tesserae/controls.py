@@ -1208,6 +1208,7 @@ class TimePickerDial(Control):
         self.minute = Signal(int(minute) % 60)
         self.mode = Signal(mode)
         self.auto_advance = auto_advance
+        self._mode_listeners: list[Callable[[str], None]] = []
         self._dragging = False
         self._start: tuple[int, int] = (0, 0)
         super().__init__(window, **kwargs)
@@ -1335,6 +1336,13 @@ class TimePickerDial(Control):
             self._changed((self.hour.get(), self.minute.get()))
         if self.mode.get() == "hour" and self.auto_advance:
             self.mode.set("minute")
+            for fn in list(self._mode_listeners):
+                fn("minute")
+
+    def on_mode(self, fn: Callable[[str], None]) -> Callable[[], None]:
+        """Calls `fn(mode)` when the dial moves itself on from the hour to the minutes after the user lets go. Returns the function that stops it."""
+        self._mode_listeners.append(fn)
+        return lambda: self._mode_listeners.remove(fn) if fn in self._mode_listeners else None
 
     def _step(self, by: int) -> None:
         if self.disabled.get():

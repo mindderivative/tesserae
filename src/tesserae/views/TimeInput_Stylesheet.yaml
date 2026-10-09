@@ -1,0 +1,3 @@
+# The look of TimeInput: the colon in on_surface, centred on the fields.
+styles:
+  - {widget: TimeInput, part: colon, style: {foreground: on_surface}}

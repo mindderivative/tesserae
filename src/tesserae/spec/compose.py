@@ -181,6 +181,11 @@ class Scope:
             return not frame.readonly or name in frame.writable
         return self.root is not None and not name.startswith("_") and isinstance(getattr(self.root, name, None), Signal)
 
+    def params_hold(self, name: str) -> bool:
+        """Whether `name` is one a view was called with (a read-only frame of params or loop variables), not a ViewModel's or a local state's."""
+        frame = self._frame(name)
+        return frame is not None and frame.readonly
+
     def is_action(self, path: str) -> bool:
         return self._action(path) is not None
 
@@ -698,8 +703,11 @@ class Composer:
             if name in RESERVED:
                 raise self._fail(ctx, node.at, f"'{name}' is a reserved name and cannot be a state variable")
             if hasattr(initial, "is_reactive") and initial.is_reactive(scope):
-                raise self._fail(ctx, node.at, f"the starting value of state '{name}' must be static")
-            value = initial.evaluate(scope) if hasattr(initial, "evaluate") else initial
+                # a starting value may read the view's own params (the value they have when the state is made), but not a ViewModel's names
+                if not all(n in BUILTIN_FUNCTIONS or scope.params_hold(n) for n in initial.names):
+                    raise self._fail(ctx, node.at, f"the starting value of state '{name}' must be static",
+                                     "it may read the view's params, which seed it once; not a ViewModel's names")
+            value = untrack(lambda: initial.evaluate(scope)) if hasattr(initial, "evaluate") else initial
             key = (inst_id, name, level)
             previous = self._previous.get(key)
             signal = Signal(previous._value if previous is not None else value)

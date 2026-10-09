@@ -1,0 +1,12 @@
+# The look of TimePicker (Material 3): a surface_container_high dialog with 28 pixel corners and 24 pixels of padding; the heading in on_surface_variant,
+# the time in on_surface.
+styles:
+  - widget: TimePicker
+    part: panel
+    style:
+      background: surface_container_high
+      corner_radius: 28
+      padding: 24
+      elevation: 3
+  - {widget: TimePicker, part: heading, style: {foreground: on_surface_variant}}
+  - {widget: TimePicker, part: colon, style: {foreground: on_surface}}

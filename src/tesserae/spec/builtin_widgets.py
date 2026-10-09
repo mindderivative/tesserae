@@ -129,7 +129,12 @@ declare("LinearProgress", {"value": P("float", doc="0 to 1; leave out, or give n
                            "stop_indicator": P("bool", doc="A dot at the end of the track (Material 3)."),
                            "label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="A progress bar.")
 declare("LoadingIndicator", {"label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="An indeterminate wait indicator.")
-declare("TimePickerDial", {"hour": P("float", default=0.0, model=True), "minute": P("float", default=0.0, model=True)},
+declare("TimePickerDial", {"hour": P("float", default=0.0, model=True, doc="0 to 23; a press keeps the half of the day it is in."),
+                           "minute": P("float", default=0.0, model=True, doc="0 to 59, in fives on the face."),
+                           "mode": P("enum", choices=("hour", "minute"), default="hour", model=True,
+                                     doc="Which hand the face shows and sets; letting go in hour mode moves on to minutes."),
+                           "auto_advance": P("bool", default=True, doc="Letting go in hour mode moves on to the minutes."),
+                           "label": P("str", doc="What a screen reader calls it.")},
         doc="The clock face of a time picker.")
 
 declare("NodeGraph", {"edges": P("list", doc="Pairs of node and port names to connect.")}, container=True, doc="A canvas of linked nodes.")

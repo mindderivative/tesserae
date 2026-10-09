@@ -292,7 +292,10 @@ class ComposedView(View):
                 if inst.widget in ("ScrollView", "VirtualList") and prop in _SCROLL_OUTPUTS:
                     continue  # `_wire_scroll`'s
                 state = getattr(control, prop, None) if control is not None else None
-                if state is not None and hasattr(control, "on_input"):  # a bound slider value follows the drag, not only its end
+                if state is not None and prop == "mode" and hasattr(control, "on_mode"):  # the dial moving itself on to the minutes
+                    self._handler_undos.append(control.on_mode(
+                        lambda mode, scope=scope, name=name: scope.assign(name, mode)))
+                elif state is not None and hasattr(control, "on_input"):  # a bound slider value follows the drag, not only its end
                     self._handler_undos.append(control.on_input(
                         lambda value, scope=scope, name=name, state=state: scope.assign(name, state.get())))
                     self._handler_undos.append(control.on_change(

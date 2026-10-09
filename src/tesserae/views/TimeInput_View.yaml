@@ -1,0 +1,46 @@
+# The keyboard form of a time picker (Material 3's "input mode"): an hour field, a colon, a minute field and, in 12-hour time, an AM / PM selector. `hour` (0 to 23)
+# and `minute` (0 to 59) are two-way; the fields take the digits, and a number that does not fit is left out until it does. The fields are filled from `hour` and
+# `minute` when the input appears, and follow what is typed after that. `twelve` shows 1 to 12 and the period selector, otherwise the hour is 0 to 23.
+params:
+  hour: {type: int, default: 0, model: true, doc: "0 to 23."}
+  minute: {type: int, default: 0, model: true, doc: "0 to 59."}
+  twelve: {type: bool, default: true, doc: "12-hour time with an AM / PM selector."}
+  disabled: {type: bool, default: false, doc: "Dimmed and not editable."}
+widget: Container
+state:
+  ht: "{{ ('0' + str(hour % 12 or 12))[-2:] if twelve else ('0' + str(hour))[-2:] }}"
+  mt: "{{ ('0' + str(minute))[-2:] }}"
+  period: "{{ 'PM' if hour >= 12 else 'AM' }}"
+a11y: {role: group, label: Time}
+style:
+  flex_direction: horizontal
+  align_content: left
+  gap: 12
+children:
+  - widget: TextField
+    name: hour_field
+    variant: outlined
+    label: Hour
+    text: "{{ ht }}"
+    mask: "##"
+    max_length: 2
+    disabled: "{{ disabled }}"
+    on_edit: "hour = ((int(ht) % 12) + (12 if period == 'PM' else 0)) if (twelve and ht != '' and 1 <= int(ht) <= 12) else (int(ht) if (not twelve and ht != '' and 0 <= int(ht) <= 23) else hour)"
+    style: {width: 96}
+  - {widget: Text, name: colon, text: ":", typography_role: display_medium}
+  - widget: TextField
+    name: minute_field
+    variant: outlined
+    label: Minute
+    text: "{{ mt }}"
+    mask: "##"
+    max_length: 2
+    disabled: "{{ disabled }}"
+    on_edit: "minute = int(mt) if (mt != '' and 0 <= int(mt) <= 59) else minute"
+    style: {width: 96}
+  - widget: PeriodSelector
+    name: period_selector
+    if: twelve
+    period: "{{ period }}"
+    disabled: "{{ disabled }}"
+    on_change: "hour = (hour % 12) + (12 if period == 'PM' else 0)"

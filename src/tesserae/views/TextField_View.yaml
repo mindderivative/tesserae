@@ -22,6 +22,7 @@ params:
   obscured: {type: bool, default: false, doc: "A password: dots instead of the text, with a button that shows it."}
   disabled: {type: bool, default: false, doc: "Dimmed, and takes no typing."}
   read_only: {type: bool, default: false, doc: "The text can be selected and copied but not changed."}
+  on_edit: {type: handler, doc: "Called after each edit the user makes, once `text` has been written."}
 widget: Container
 state: {reveal: false}
 style: {flex_direction: vertical}
@@ -53,6 +54,7 @@ children:
             read_only: "{{ read_only }}"
             disabled: "{{ disabled }}"
             typography_role: body_large
+            handlers: {on_change: "on_edit()"}
             style: {flex: fill, min_height: "{{ 72 if multiline else 24 }}"}
             a11y:
               label: "{{ label + (': ' + error if error != '' else '') }}"

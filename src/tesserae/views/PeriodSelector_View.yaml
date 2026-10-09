@@ -1,0 +1,28 @@
+# The AM / PM selector of a time picker (Material 3): two 40 pixel halves in a 52 pixel wide, 1 pixel `outline` frame with 8 pixel corners. The chosen half is
+# `tertiary_container`. `period` is "AM" or "PM" and a press writes it back. One Tab stop on the chosen half; the up and down arrows move and choose.
+params:
+  period: {type: enum, choices: [AM, PM], default: AM, model: true, doc: "The half of the day."}
+  disabled: {type: bool, default: false, doc: "Dimmed and not pressable."}
+  on_change: {type: handler, doc: "Called after a press or an arrow key has chosen a half."}
+widget: Container
+focus_group: vertical
+a11y: {role: group, label: Period}
+style:
+  flex_direction: vertical
+  width: 52
+  height: 80
+  clip_children: true
+children:
+  - widget: Container
+    for: p in ['AM', 'PM']
+    key: p
+    name: half
+    interaction: true
+    disabled: "{{ disabled }}"
+    a11y: {role: radio, label: "{{ p }}", checked: "{{ period == p }}"}
+    handlers:
+      on_click: "period = p; on_change()"
+      on_focus_enter: "period = p; on_change()"
+    style: {height: 40, width: 100%, align_content: center, background: "{{ 'tertiary_container' if period == p else 'transparent' }}"}
+    children:
+      - {widget: Text, name: label, text: "{{ p }}", typography_role: title_medium, style: {foreground: "{{ 'on_tertiary_container' if period == p else 'on_surface_variant' }}"}}

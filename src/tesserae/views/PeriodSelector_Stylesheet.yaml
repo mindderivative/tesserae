@@ -1,0 +1,5 @@
+# The look of PeriodSelector: an outlined frame with 8 pixel corners. The halves' colours are in the view, because a rule cannot see the loop variable that
+# says which half is which.
+styles:
+  - widget: PeriodSelector
+    style: {corner_radius: 8, border_width: 1, border_color: outline}

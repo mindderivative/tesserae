@@ -153,7 +153,7 @@ children:
   stays are kept, new keys are built, removed keys are gone, and the order follows the list. A list changed in place is not noticed; replace it.
 - `if:` builds the node only while its expression is true, and a node under a false `if:` runs nothing. With both on one node, the `if:` is
   tested for each element.
-- `state:` makes a Signal for each name, for this node and everything under it. It belongs to the node (to each row under a `for:`), is written
+- `state:` makes a Signal for each name, for this node and everything under it. A starting value may be an expression over the view's own params, which seed it once when the state is made (`state: {draft: "{{ hour }}"}`); it may not read a ViewModel's names. It belongs to the node (to each row under a `for:`), is written
   by handlers, and survives a hot reload for a node that keeps its name or key. Use it for presentation (open, on); what the app cares about belongs
   in the ViewModel.
 - `for:`, `if:` and `slot:` are not allowed on the root of a view.
