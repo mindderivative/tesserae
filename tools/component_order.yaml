@@ -1,0 +1,235 @@
+# The dependency graph of the 0.5.0 components (#115, #118 to #208): what each needs, so they are built in an order that never goes back.
+# tools/generate_component_order.py reads this and writes design/component-order.md; tests/test_component_order.py checks it
+# (every component issue is in exactly one unit, every need exists, there is no cycle).
+#
+# Two kinds of entry:
+#   foundations  work that is not one component: the language and renderer in Tesserae (kind: tesserae), things the engine tre would have
+#                to add (kind: tre), and tre capabilities that exist and that Tesserae could adopt once the pieces under them are built
+#                (kind: adopt, optional polish).
+#   units        a component or a group of components built together (their issues are listed). `done: true` marks finished work.
+#
+# `needs` names foundations and units that must be finished first. `gated` on a tre item says Tesserae cannot finish what needs it until
+# tre ships it (the item is a request to tre, not work in this repository).
+
+foundations:
+  # ---- Tesserae: independent -------------------------------------------------------------------------------------------------------
+  - id: icons
+    title: A full icon set
+    kind: tesserae
+    note: "`Icon` knows 18 names; MD3 components use dozens. Bundle a Material Symbols subset (and an `Icon` from a path). Data and `icons.py`."
+  - id: alpha-roles
+    title: Colour roles with alpha, and the `full` shape token
+    kind: tesserae
+    note: "`primary@12%` for state layers, 38% disabled content and outlines; `corner_radius: full`. Tokens and the builder."
+  - id: corner-radius
+    title: Per-corner `corner_radius`
+    kind: tesserae
+    note: "tre already takes a 4-tuple. Needed for filled text fields, connected button groups, split buttons, segmented buttons, sheets."
+  - id: text-extras
+    title: "`max_lines`, `letter_spacing` and `selectable` on text"
+    kind: tesserae
+    note: "tre has them on text nodes; expose them as properties of Text and Link."
+  - id: a11y-now
+    title: The accessibility states tre already has
+    kind: tesserae
+    note: "`expanded`, `selected`, `checked`, `value_min`/`value_max`, `live`, `level`, `role`, `label`, `hidden`: make them properties/fields in the view language and set by the built-in widgets."
+  - id: focus
+    title: Focus control and keyboard navigation
+    kind: tesserae
+    note: "`focus(name)` action (a click on a field's padding focuses its input), roving `tab_index` groups, arrow-key and type-ahead helpers. `on_key` exists."
+  - id: timers
+    title: Timers in handlers
+    kind: tesserae
+    note: "`after(ms, action)`, `every`, cancel; on the frame loop until the engine has timers. Auto-dismiss, hover delay, hold-to-repeat, autoplay."
+  - id: scroll-state
+    title: Scroll state as a readable source
+    kind: tesserae
+    note: "ScrollView `scroll_offset` drawn (not yet) and scroll direction / at-top / at-end readable in expressions. Collapse-on-scroll, hide-on-scroll."
+  - id: pointer-drag
+    title: Pointer capture, cursor and drag helpers in handlers
+    kind: tesserae
+    note: "`capture`/`release` and `cursor` from a handler, with `on_pan` values (they are in `event` already)."
+  - id: clipboard
+    title: Clipboard actions
+    kind: tesserae
+    note: "`copy(text)` and `paste()`; tre has `write_clipboard`/`read_clipboard`. Low priority."
+  - id: input-mask
+    title: Input masks on `TextInput`
+    kind: tesserae
+    note: "A `mask` (digits, groups, patterns) applied as the user types, in the renderer; tre's input has none."
+  - id: open-url
+    title: An `open_url` action
+    kind: tesserae
+    note: "For `Link`; the OS opener."
+  - id: canvas-drawing
+    title: Drawing with tre's canvas and painter
+    kind: tesserae
+    note: "A way for a widget to draw paths (wavy progress, slider ticks, dial ticks, graph edges)."
+  - id: composed-windows
+    title: Windows, title bars and docks in composed views
+    kind: tesserae
+    note: "`ComposedView` does not wire the bindings and handlers the Window/TitleBar/Dock expansion produces (found in phase 7). The windows track: #114, #106."
+  # ---- Tesserae: after something ----------------------------------------------------------------------------------------------------
+  - id: transition-paint
+    title: "`transition:` for what tre can animate"
+    kind: tesserae
+    note: "opacity, fill, corner radius, shadows, scale and translate go through `node.animate` instead of `set`, with durations, easing and springs. Reserved in the language today."
+  - id: virtual-list
+    title: "`for:` backed by tre's `virtual_list`"
+    kind: tesserae
+    needs: [scroll-state]
+    note: "Long lists (10 000 rows) without building every row."
+  - id: overlay
+    title: The overlay widget
+    kind: tesserae
+    needs: [focus]
+    note: "A layer anchored to a node (placement, flip), modal scrim, focus trap, Escape, outside press, focus return, an `open` model property that closing writes back. tre layers exist."
+  - id: tooltip-prop
+    title: "A `tooltip:` property on every node"
+    kind: tesserae
+    needs: [overlay, timers]
+    note: "Hover and focus delay, plain and rich."
+  - id: shadow-transitions
+    title: Elevation that animates on hover, press and drag
+    kind: tesserae
+    needs: [transition-paint]
+    note: "tre animates `shadows`."
+  # ---- tre: additions the engine would have to make ---------------------------------------------------------------------------------
+  - id: engine-a11y
+    title: "tre: more accessibility states"
+    kind: tre
+    gated: true
+    needs: [a11y-now]
+    note: "`pressed`, `invalid`, `description` and `describedby`, `controls`, `current`, `value_now`/`value_text`, `busy`. tre has expanded, selected, checked, value_min/max already; ask once Tesserae has fixed the vocabulary."
+  - id: engine-layout-animation
+    title: "tre: animatable layout properties"
+    kind: tre
+    gated: true
+    needs: [transition-paint]
+    note: "width, height, x, y, padding, gap and font size are not animatable today (opacity, fill, corner radius, scale, translate are), plus an animation-finished event. Without it a collapse is done with a transform or frame by frame."
+  - id: engine-input
+    title: "tre: more on the text input"
+    kind: tre
+    gated: true
+    needs: [input-mask]
+    note: "`max_length`, `read_only`, an input mode, a `submit` event and the IME composition event (the renderer works round the first three; composition has no workaround)."
+  - id: engine-timers
+    title: "tre: timers"
+    kind: tre
+    needs: [timers]
+    note: "`window.after`/`every`, cancellable. Tesserae's frame-loop timers work until then."
+  - id: engine-scroll-snap
+    title: "tre: scroll snap points"
+    kind: tre
+    needs: [virtual-list]
+    note: "Snap on a ScrollView or virtual list. Carousels and tab strips snap in Tesserae with an animated `scroll_offset` until then."
+  - id: engine-masks
+    title: "tre: rounded and circular masks"
+    kind: tre
+    note: "Clip any node, images included, to a shape. Images use the container's corner radius until then."
+  # ---- Tesserae: needs the engine's additions -----------------------------------------------------------------------------------------
+  - id: a11y-full
+    title: The full accessibility vocabulary
+    kind: tesserae
+    needs: [a11y-now, engine-a11y]
+    note: "`pressed`, `invalid`, `description`, `controls`/`describedby`, `current`, `value_text`, `busy` as `a11y:` fields (spec section 12), set by the widgets."
+  - id: transition-layout
+    title: "`transition:` for layout properties"
+    kind: tesserae
+    needs: [transition-paint, engine-layout-animation]
+    note: "Width, height, position, padding: drawer and rail collapse, accordion, FAB collapse, tab indicator, sheet slide, the text field's label."
+  - id: window-classes
+    title: Window size classes as a binding source
+    kind: tesserae
+    needs: [composed-windows]
+  - id: multi-window
+    title: More than one window
+    kind: mixed
+    needs: [composed-windows]
+    note: "#105; a real-window spike (tools/spikes/second_window.py) needs the user at the machine."
+  - id: route-transitions
+    title: "Screen transitions: fade through, shared axis, container transform"
+    kind: tesserae
+    needs: [transition-paint, composed-windows]
+  # ---- adopt: tre has it; Tesserae could use it once the pieces under it exist (optional polish) -------------------------------------
+  - id: shader-ripple
+    title: "Ripple and state layer as a shader (T2, T3)"
+    kind: adopt
+    optional: true
+    needs: [alpha-roles, transition-paint, button]
+    note: "One pass instead of boxes."
+  - id: glass
+    title: "Frosted navigation, search and menus (T16, T5)"
+    kind: adopt
+    optional: true
+    needs: [alpha-roles, nav-rail, search, menu, tooltip]
+    note: "`backdrop_blur` with a translucent fill."
+  - id: path-morph
+    title: "Icon toggles that morph (T14)"
+    kind: adopt
+    optional: true
+    needs: [icons, icon-button, transition-paint]
+  - id: gradient-focus
+    title: "Animated gradient focus borders (T12)"
+    kind: adopt
+    optional: true
+    needs: [transition-paint, textfield-finish, fab]
+
+units:
+  # ---- components that need nothing but the foundations -----------------------------------------------------------------------------
+  - {id: text, title: Text, issues: [195], needs: [text-extras], note: "Every component uses it."}
+  - {id: svg, title: Svg, issues: [197], needs: []}
+  - {id: image, title: Image, issues: [196], needs: [], note: "Rounded masks follow the engine: see image-masks."}
+  - {id: divider, title: Divider, issues: [152], needs: []}
+  - {id: link, title: Link, issues: [174], needs: [open-url, text]}
+  - {id: badge, title: "Badge (dot, labeled)", issues: [141, 142], needs: [text], note: "Placed over a host with a wrapper and absolute position."}
+  - {id: textfield-base, title: "TextField: the base", issues: [184], needs: [], done: true, note: "Built on the TextInput primitive; the rest of it is textfield-finish."}
+  # ---- controls ----------------------------------------------------------------------------------------------------------------------
+  - {id: progress, title: "Progress (linear, circular, loading indicator)", issues: [143, 144, 145], needs: [a11y-full, canvas-drawing]}
+  - {id: checkbox, title: Checkbox, issues: [175], needs: [text, alpha-roles, a11y-full]}
+  - {id: radio, title: RadioButton, issues: [176], needs: [text, alpha-roles, a11y-full, focus]}
+  - {id: switch, title: Switch, issues: [177], needs: [text, alpha-roles, a11y-full]}
+  - {id: slider, title: Slider, issues: [178], needs: [text, alpha-roles, a11y-full, pointer-drag, overlay, canvas-drawing], note: "The value indicator is an overlay."}
+  - {id: segmented, title: Segmented buttons, issues: [193], needs: [text, icons, alpha-roles, a11y-full, corner-radius, focus], note: "The shared selection pattern (a state, items that set it) is written here first."}
+  # ---- actions ---------------------------------------------------------------------------------------------------------------------
+  - {id: button, title: "Button (filled, tonal, elevated, outlined, text)", issues: [118, 119, 120, 121, 122], needs: [text, icons, alpha-roles, a11y-full, progress, shadow-transitions], note: "Five fragments become one view with `variant:`."}
+  - {id: tooltip, title: Tooltip, issues: [147], needs: [overlay, tooltip-prop, text, button]}
+  - {id: icon-button, title: "IconButton (standard, filled, tonal, outlined)", issues: [129, 130, 131, 132], needs: [icons, alpha-roles, a11y-full, tooltip, badge]}
+  - {id: fab, title: "FAB and extended FAB", issues: [133, 134, 135, 136, 137, 138, 139, 140], needs: [text, icons, alpha-roles, shadow-transitions, scroll-state, transition-layout, tooltip]}
+  - {id: button-group, title: ButtonGroup, issues: [123], needs: [button, segmented, corner-radius, focus, transition-paint], note: "Takes its button as a property, not a widget name from a parameter (the gap the translator found)."}
+  - {id: chip, title: "Chips (assist, filter, input, suggestion)", issues: [179, 180, 181, 182, 183], needs: [text, icons, alpha-roles, image, icon-button, textfield-base, focus, transition-paint, clipboard]}
+  # ---- containers and rows -------------------------------------------------------------------------------------------------------------
+  - {id: card, title: "Card (elevated, filled, outlined)", issues: [148, 149, 150], needs: [text, image, button, icon-button, divider, alpha-roles, shadow-transitions]}
+  - {id: list-item, title: ListItem, issues: [153], needs: [text, text-extras, icons, image, checkbox, switch, radio, badge, divider, icon-button, alpha-roles, virtual-list, focus], note: "The one row component: MenuItem, drawer items, tree nodes, accordion headers and search results are built from it."}
+  - {id: menu, title: "Menu and MenuItem", issues: [168, 169], needs: [list-item, divider, overlay, focus, a11y-full, checkbox, radio, icon-button]}
+  - {id: split-button, title: "SplitButton (five variants)", issues: [124, 125, 126, 127, 128], needs: [button, menu, overlay, corner-radius, a11y-full]}
+  - {id: dialog, title: Dialog, issues: [151], needs: [overlay, text, button, divider, scroll-state, transition-paint, focus], note: "The full-screen form waits for the top app bar: dialog-fullscreen."}
+  - {id: snackbar, title: Snackbar, issues: [146], needs: [text, button, icon-button, overlay, timers, transition-paint]}
+  - {id: top-app-bar, title: TopAppBar, issues: [165], needs: [text, icon-button, tooltip, menu, scroll-state, transition-layout, alpha-roles], note: "The search app bar variant follows search."}
+  - {id: dialog-fullscreen, title: "Dialog: the full-screen form", issues: [], needs: [dialog, top-app-bar]}
+  - {id: side-sheet, title: "SideSheet (standard, modal)", issues: [154, 155], needs: [overlay, icon-button, button, divider, scroll-state, transition-layout, corner-radius]}
+  - {id: accordion, title: AccordionHeader, issues: [156], needs: [list-item, divider, transition-layout, a11y-full, focus]}
+  - {id: tree, title: "Tree (branch, leaf)", issues: [157, 158], needs: [list-item, checkbox, virtual-list, transition-layout, a11y-full, focus]}
+  # ---- navigation ------------------------------------------------------------------------------------------------------------------
+  - {id: tabs, title: "Tabs and TabsItem", issues: [166, 167], needs: [text, icons, badge, divider, focus, transition-layout, a11y-full, scroll-state]}
+  - {id: nav-rail, title: "NavigationRail (rail, item, screens, screen)", issues: [159, 160, 161, 162], needs: [text, icons, badge, fab, icon-button, tooltip, focus, transition-layout, a11y-full]}
+  - {id: nav-drawer, title: "NavigationDrawer and item", issues: [163, 164], needs: [nav-rail, list-item, divider, overlay, transition-layout]}
+  - {id: toolbar, title: "Toolbar (docked, floating)", issues: [172, 173], needs: [icon-button, fab, menu, divider, tooltip, scroll-state, focus]}
+  # ---- text entry and pickers -------------------------------------------------------------------------------------------------------
+  - {id: search, title: "SearchBar and SearchView", issues: [170, 171], needs: [textfield-base, icon-button, list-item, divider, overlay, virtual-list, focus], note: "The search app bar for TopAppBar is built here."}
+  - {id: textfield-finish, title: "TextField: what is left", issues: [], needs: [textfield-base, transition-layout, corner-radius, a11y-full, focus, input-mask, menu, engine-input], note: "The label glides (transition), filled's 4dp-top corner, aria-invalid and describedby, a click on the padding focuses the input (focus), input masks, autocomplete as an exposed dropdown (menu), IME composition visuals (engine-input)."}
+  - {id: spin-box, title: SpinBox, issues: [185], needs: [icon-button, textfield-base, slider, timers, a11y-full], note: "Hold-to-repeat is a timer."}
+  - {id: date-picker, title: "DatePicker (day cells and the picker)", issues: [186, 187, 188, 189], needs: [button, icon-button, dialog, overlay, textfield-base, menu, segmented, button-group, virtual-list, focus, a11y-full], note: "The four day fragments become one cell in four states."}
+  - {id: time-picker, title: "TimePicker: dial, period selector, time input", issues: [190, 191, 192, 194], needs: [dialog, button, icon-button, segmented, textfield-base, slider, text, canvas-drawing, focus], note: "The dial and the time input each name the other, so they are one unit."}
+  - {id: pagination, title: Pagination, issues: [200], needs: [icon-button, text, button, textfield-base], note: "Includes the page dots, so the carousel uses them and not the other way round."}
+  - {id: carousel, title: Carousel, issues: [199], needs: [card, image, text, pagination, scroll-state, transition-paint, pointer-drag, virtual-list]}
+  - {id: video, title: Video, issues: [198], needs: [slider, icon-button, menu, progress, text, timers]}
+  - {id: status-bar, title: StatusBar, issues: [201], needs: [text, icons, progress, tooltip, divider]}
+  - {id: node-graph, title: NodeGraph, issues: [202], needs: [card, menu, slider, pointer-drag, canvas-drawing]}
+  - {id: image-masks, title: "Image: rounded and circular masks", issues: [], needs: [image, engine-masks]}
+  # ---- windows and docks (the windows track) -----------------------------------------------------------------------------------------
+  - {id: splitter, title: Splitter, issues: [203], needs: [divider, pointer-drag, focus]}
+  - {id: title-bar, title: Title bar, issues: [205], needs: [icon-button, text, icons, tooltip, composed-windows]}
+  - {id: dock, title: "Dock and DockPanel", issues: [206, 207], needs: [tabs, menu, splitter, pointer-drag, composed-windows], note: "Each names the other, so they are one unit."}
+  - {id: window, title: Window, issues: [204], needs: [title-bar, dock, composed-windows, window-classes, multi-window]}
+  - {id: routed, title: Routed views, issues: [208], needs: [nav-rail, nav-drawer, tabs, window, route-transitions]}
