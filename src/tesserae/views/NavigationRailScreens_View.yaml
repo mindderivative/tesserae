@@ -1,0 +1,27 @@
+# A navigation rail whose destinations are the app's screens: `items` is a list of {screen, label, icon} and optionally {badge}. The destination of the
+# screen showing is selected, and pressing one navigates to its screen. The up and down arrows move the focus along the rail.
+params:
+  items: {type: list, default: [], doc: "The destinations, each {screen, label, icon} and optionally {badge}."}
+  expanded: {type: bool, default: false, doc: "220 pixels wide, with the labels beside the icons."}
+  alignment: {type: enum, choices: [top, center, bottom], default: top, doc: "Where the destinations sit in the column."}
+widget: Container
+a11y: {role: group, label: Navigation}
+focus_group: vertical
+style:
+  flex_direction: vertical
+  width: "{{ 220 if expanded else 80 }}"
+  height: 100%
+  gap: 12
+  align_content: "{{ {'top': 'top', 'center': 'center', 'bottom': 'bottom'}[alignment] if not expanded else 'top_left' }}"
+  background: surface
+  padding: "{{ {'left': 20, 'right': 20, 'top': 44, 'bottom': 56} if expanded else {'left': 0, 'right': 0, 'top': 44, 'bottom': 56} }}"
+children:
+  - widget: NavigationRailScreen
+    for: s in items
+    key: s['screen']
+    name: item
+    screen: "{{ s['screen'] }}"
+    label: "{{ s['label'] }}"
+    icon: "{{ s['icon'] }}"
+    badge: "{{ s.get('badge', '') }}"
+    expanded: "{{ expanded }}"

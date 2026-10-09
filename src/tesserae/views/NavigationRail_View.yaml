@@ -1,0 +1,42 @@
+# The Material 3 navigation rail: a column of 3 to 7 destinations, 80 pixels wide (220 when `expanded`, with the labels beside the icons). `items` is a list of
+# {value, label, icon, badge}; `selected` is the value of the chosen one and a press writes it back. A `header` slot above the items holds a menu button or a FAB
+# (children with `slot: header`), a `footer` slot below them. `alignment` groups the destinations at the top (the default), centre or bottom. One Tab stop;
+# the up and down arrows move the focus and choose the destination.
+params:
+  items: {type: list, default: [], doc: "The destinations, each {value, label, icon} and optionally {badge, disabled}."}
+  selected: {type: any, default: "", model: true, doc: "The value of the chosen destination; a press writes it back."}
+  expanded: {type: bool, default: false, doc: "220 pixels wide, with the labels beside the icons."}
+  alignment: {type: enum, choices: [top, center, bottom], default: top, doc: "Where the destinations sit in the column."}
+widget: Container
+a11y: {role: group, label: Navigation}
+style:
+  flex_direction: vertical
+  width: "{{ 220 if expanded else 80 }}"
+  height: 100%
+children:
+  - widget: Slot
+    name: header
+  - widget: Container
+    name: destinations
+    focus_group: vertical
+    style:
+      flex_direction: vertical
+      gap: 12
+      align_content: "{{ {'top': 'top', 'center': 'center', 'bottom': 'bottom'}[alignment] if not expanded else 'top_left' }}"
+      flex: fill
+    children:
+      - widget: NavigationRailItem
+        for: it in items
+        key: it['value']
+        name: item
+        icon: "{{ it['icon'] }}"
+        label: "{{ it['label'] }}"
+        badge: "{{ it.get('badge', '') }}"
+        selected: "{{ it['value'] == selected }}"
+        expanded: "{{ expanded }}"
+        disabled: "{{ it.get('disabled', False) }}"
+        handlers:
+          on_click: "selected = it['value']"
+          on_focus_enter: "selected = it['value']"
+  - widget: Slot
+    name: footer

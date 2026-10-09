@@ -1,0 +1,16 @@
+# One destination of a navigation rail that goes to a screen of the app (Tesserae's, not Material 3's): a `NavigationRailItem` that is selected while
+# its `screen` is the app's current one, and whose press is `navigate_to(screen)`. The view needs an App, which is what holds the screens.
+params:
+  screen: {type: str, default: "", doc: "The name of the screen it goes to."}
+  label: {type: str, default: "", doc: "The destination's name."}
+  icon: {type: str, default: "", doc: "The icon."}
+  badge: {type: any, default: "", doc: "A count or text on the icon."}
+  expanded: {type: bool, default: false, doc: "The label beside the icon."}
+widget: NavigationRailItem
+icon: "{{ icon }}"
+label: "{{ label }}"
+badge: "{{ badge }}"
+expanded: "{{ expanded }}"
+selected: "{{ app.current_screen == screen }}"
+handlers:
+  on_click: "navigate_to(screen)"

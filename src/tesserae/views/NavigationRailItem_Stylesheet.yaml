@@ -1,0 +1,21 @@
+# The look of NavigationRailItem (Material 3): a 56 by 32 pill that is secondary_container when selected, with a 24 pixel icon in on_secondary_container
+# (on_surface_variant otherwise) and the label in on_surface (on_surface_variant otherwise). In an expanded rail the pill is 56 high and as wide as the
+# item, with the label inside it.
+styles:
+  - widget: NavigationRailItem
+    style:
+      corner_radius: 16
+      transition: {background: 150}
+  - widget: NavigationRailItem
+    part: pill
+    style:
+      width: "{{ 'auto' if expanded else 56 }}"
+      height: "{{ 56 if expanded else 32 }}"
+      corner_radius: "{{ 28 if expanded else 16 }}"
+      padding: "{{ {'left': 16, 'right': 24, 'top': 0, 'bottom': 0} if expanded else 0 }}"
+      background: "{{ 'secondary_container' if selected else 'transparent' }}"
+      transition: {background: 150}
+  - {widget: NavigationRailItem, part: icon, style: {width: 24, height: 24, foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationRailItem, part: badged_icon, style: {width: 24, height: 24, foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationRailItem, part: label, style: {foreground: "{{ 'on_surface' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationRailItem, part: inline_label, style: {foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}

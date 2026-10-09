@@ -9,10 +9,24 @@ large windows. Each is an icon in a pill with a label; the selected one's pill i
 
 ## In Tesserae
 
-The rail is a column of `NavigationRailItem`s, one for each entry of `items`. `NavigationRailScreens` is the same
-rail whose destinations go to screens of the app: each entry of `items` has a `screen`, choosing one is
-`navigate.<screen>`, and the destination is filled while that screen is the app's current one (a Window view's routed
-views are the screens).
+Four views Tesserae ships: `NavigationRail` (the column), `NavigationRailItem` (one destination), `NavigationRailScreens` (a rail whose destinations are the
+app's screens) and `NavigationRailScreen` (one such destination).
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `items` | a list | the destinations of a `NavigationRail`, each `{value, label, icon}` and optionally `{badge, disabled}` |
+| `selected` | a value; two-way | the value of the chosen destination; a press (or an arrow key) writes it back |
+| `expanded` | true or false | 220 pixels wide with the labels beside the icons, instead of 80 with them under |
+| `alignment` | `top`, `center`, `bottom` | where the destinations sit in the column |
+| `items` | a list | the destinations of a `NavigationRailScreens` (and of a `NavigationRail`, above), each `{screen, label, icon}` and optionally `{badge}` |
+
+A destination is a 24 pixel icon in a 56 by 32 pill (`secondary_container` when it is the chosen one) over a `label_medium` label, 12 pixels from the
+next, starting 44 pixels down. Children with `slot: header` (a menu button, a FAB) go above the destinations and `slot: footer` below. There is one Tab stop;
+the up and down arrows move the focus and choose the destination. A screen reader hears a link named by the label, the current one marked as the page.
+The screens rail follows `app.current_screen` and a press is `navigate_to(screen)`; it belongs in each screen (or in a window's shell). Not built: the
+modal expanded rail, sections with headings, the pill's fade and scale as it is selected, and the destinations' `tab` role (tre has no `navigation` role).
+
+`widget: NavigationRail` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -137,27 +151,23 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: shell
+widget: Container
+style: {flex_direction: horizontal, width: 480, height: 400}
 children:
-  - id: rail
-    component: NavigationRail
-    with:
-      items:
-        - {label: Home, icon: home, selected: true}
-        - {label: Search, icon: search}
-  # in a window view, a rail that navigates and follows the current screen:
-  - id: nav
-    component: NavigationRailScreens
-    with:
-      items:
-        - {label: Tasks, icon: home, screen: Main}
-        - {label: Settings, icon: settings, screen: Settings}
+  - widget: NavigationRail
+    selected: "{{ page }}"
+    items:
+      - {value: home, label: Home, icon: home}
+      - {value: search, label: Search, icon: search, badge: 3}
+  - widget: NavigationRailScreens
+    items:
+      - {screen: Main, label: Tasks, icon: home}
+      - {screen: Settings, label: Settings, icon: settings}
 ```
+
+## Using it
 
 In Python:
 

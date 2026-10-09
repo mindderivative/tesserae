@@ -1,0 +1,36 @@
+# One destination of a navigation rail: an icon in a 56 by 32 pill with its label under it (or, in an expanded rail, a 56 high pill with the label beside the
+# icon). A selected item has a `secondary_container` pill; a `badge` sits on the icon. A screen reader hears a link named by the label, current when it is
+# selected. `handlers: {on_click: ...}` on the call is what a press does.
+params:
+  icon: {type: str, default: "", doc: "The icon."}
+  label: {type: str, default: "", doc: "The destination's name."}
+  selected: {type: bool, default: false, doc: "Whether this is where the user is."}
+  badge: {type: any, default: "", doc: "A count or text on the icon; empty for none, and `true` for a dot."}
+  expanded: {type: bool, default: false, doc: "The label beside the icon, as in an expanded rail."}
+  disabled: {type: bool, default: false, doc: "Dimmed and not pressable."}
+widget: Container
+interaction: true
+disabled: "{{ disabled }}"
+a11y:
+  role: link
+  label: "{{ label }}"
+  current: "{{ 'page' if selected else False }}"
+style:
+  flex_direction: "{{ 'horizontal' if expanded else 'vertical' }}"
+  align_content: "{{ 'left' if expanded else 'top' }}"
+  gap: 4
+children:
+  - widget: Container
+    name: pill
+    style: {flex_direction: horizontal, align_content: center, gap: 8}
+    children:
+      - widget: Badge
+        name: badged
+        if: "badge != ''"
+        value: "{{ '' if badge is True else badge }}"
+        anchored: true
+        children:
+          - {widget: Icon, name: badged_icon, icon: "{{ icon }}"}
+      - {widget: Icon, name: icon, if: "badge == ''", icon: "{{ icon }}"}
+      - {widget: Text, name: inline_label, if: expanded, text: "{{ label }}", typography_role: label_large}
+  - {widget: Text, name: label, if: "not expanded", text: "{{ label }}", typography_role: label_medium, text_align: center}

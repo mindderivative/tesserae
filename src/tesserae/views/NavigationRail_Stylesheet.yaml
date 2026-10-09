@@ -1,0 +1,8 @@
+# The look of NavigationRail (Material 3): a surface column 80 pixels wide, with 44 pixels above the first destination (less when there is a header),
+# 12 between destinations. An expanded rail has 20 pixels of padding each side.
+styles:
+  - widget: NavigationRail
+    style:
+      background: surface
+      padding: "{{ {'left': 20, 'right': 20, 'top': 44, 'bottom': 56} if expanded else {'left': 0, 'right': 0, 'top': 44, 'bottom': 56} }}"
+      gap: 12
