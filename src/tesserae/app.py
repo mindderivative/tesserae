@@ -387,7 +387,6 @@ class App:
         #: The ViewModels that serve named views (`bind`) and the views opened against them (`open_view`), by name (0.5.0).
         self.bindings = Bindings()
         self._opened: dict[str, Any] = {}
-        self._view_docs: dict[str, Any] = {}
         self._watchers: list[Any] = []
         self._component_watchers: dict[Path, Any] = {}
         #: Every component `tesserae.instantiate` made on this window, in any
@@ -823,41 +822,21 @@ class App:
         `name` (default: its root `name:`, else its file's name) for `show(name)`. `view` is a path or a name found in the project;
         the views it calls are found in the project too. Returns the `ComposedView`; its `.handle` is what the ViewModel holds."""
         from tesserae.composed import open_composed
-        from tesserae.spec.nodes import parse_view
-        from tesserae.spec.widgets import WidgetDecl, decl_from_params
-
-        import yaml
-
-        path = Path(self._named("view", view))
-        index = self.project.index("view")
-
-        def decl(called: str) -> WidgetDecl | None:
-            found = index.get(called)
-            if found is None:
-                return None
-            params = (yaml.safe_load(found.read_text(encoding="utf-8")) or {}).get("params")
-            return decl_from_params(called, params) if params is not None else WidgetDecl(called, view=True, container=True)
-
-        def callee(called: str) -> Any:
-            found = index.get(called)
-            if found is None:
-                return None
-            if found not in self._view_docs:
-                self._view_docs[found] = parse_view(found.read_text(encoding="utf-8"), str(found), resolver=decl, view_name=called)
-            return self._view_docs[found]
-
-        doc = parse_view(path.read_text(encoding="utf-8"), str(path), resolver=decl, view_name=path.name.removesuffix("_View.yaml"))
-        kwargs = self._view_theme()
-        if self._stylesheet_spec is not None:
-            kwargs["stylesheet_spec"] = self._stylesheet_spec
+        from tesserae.shipped import ViewLibrary, shipped_rules
         from tesserae.spec.rules import is_rule_sheet
 
-        if self._stylesheet_spec is not None and is_rule_sheet(self._stylesheet_spec):  # rules by widget, variant, part and state
-            kwargs.pop("stylesheet_spec")
-            rules = [self._rule_sheet()]
-        else:
-            rules = []
-        opened = open_composed(doc, self.bindings, callee, base_dir=path.parent, window=self._window, rules=rules, **kwargs)
+        path = Path(self._named("view", view))
+        library = ViewLibrary(self.project.index("view"))  # the project's views, then the ones Tesserae ships
+        doc = library.parse(path)
+        kwargs = self._view_theme()
+        rules = [sheet.without(library.replaced) for sheet in shipped_rules()]  # the lowest layer: what the shipped components look like
+        if self._stylesheet_spec is not None:
+            if is_rule_sheet(self._stylesheet_spec):  # the app's rules by widget, variant, part and state
+                kwargs.pop("stylesheet_spec", None)
+                rules.append(self._rule_sheet())
+            else:
+                kwargs["stylesheet_spec"] = self._stylesheet_spec
+        opened = open_composed(doc, self.bindings, library.doc, base_dir=path.parent, window=self._window, rules=rules, **kwargs)
         key = name or doc.name or path.name.removesuffix("_View.yaml")
         self.register(key, opened, opened.handle.viewmodel)
         self._built.append(_Built(opened))

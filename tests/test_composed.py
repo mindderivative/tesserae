@@ -228,7 +228,7 @@ def test_a_name_no_view_or_binding_serves_is_still_an_error_at_open(tmp_path):
 
 
 def test_a_disabled_nodes_handlers_do_not_run():
-    view, vm, _ = render(BASE + "  - widget: TextField\n    name: f\n    disabled: '{{ not show_extra }}'\n    typography_role: body_large\n"
+    view, vm, _ = render(BASE + "  - widget: TextInput\n    name: f\n    disabled: '{{ not show_extra }}'\n    typography_role: body_large\n"
                          "    style: {width: 100, height: 30, background: '#FFFFFF'}\n    handlers: {on_click: bump}\n")
     view.window.advance(16)
     view.window.simulate("click", node=view.node("root.f"))

@@ -30,10 +30,10 @@ UNIVERSAL_KEYS = ("widget", "name", "if", "for", "key", "slot", "state", "style"
                   "window_region", "route", "children")
 #: Keys only the root of a view file may have.
 HEADER_KEYS = ("params", "expects")
-#: The handler events (section 9.1): `view._EVENTS` plus `on_key`. `tests/test_nodes.py` keeps the two in step.
+#: The handler events (section 9.1): `view._EVENTS` plus `on_key` and `on_submit`. `tests/test_nodes.py` keeps the two in step.
 EVENTS = ("on_click", "on_hover_enter", "on_hover_exit", "on_change", "on_focus_enter", "on_focus_exit", "on_tap", "on_long_press",
           "on_pan", "on_pinch", "on_touch_start", "on_touch_move", "on_touch_end", "on_touch_cancel", "on_file_hover",
-          "on_file_hover_cancel", "on_file_drop", "on_link", "on_key")
+          "on_file_hover_cancel", "on_file_drop", "on_link", "on_key", "on_submit")
 A11Y_FIELDS = ("label", "role", "hidden", "live", "level")
 WINDOW_REGIONS = ("drag", "none")
 #: 0.4.x keys that no longer exist, and what to write.

@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_the_built_in_widgets_are_declared_with_their_properties():
-    for name in ("Rect", "Container", "Text", "Link", "TextField", "Image", "Icon", "Svg", "ScrollView", "Checkbox", "RadioButton", "Switch",
+    for name in ("Rect", "Container", "Text", "Link", "TextInput", "Image", "Icon", "Svg", "ScrollView", "Checkbox", "RadioButton", "Switch",
                  "Slider", "SpinBox", "CircularProgress", "LinearProgress", "LoadingIndicator", "TimePickerDial", "NodeGraph",
                  "GraphNode", "Window", "TitleBar", "Dock", "DockPanel", "Slot"):
         assert W.lookup(name) is not None, name
@@ -26,7 +26,7 @@ def test_the_built_in_widgets_are_declared_with_their_properties():
 def test_state_is_a_property_never_style():
     # the 0.4.x node keys that were state are properties of the widgets that declare them
     assert "checked" in W.lookup("Checkbox").properties and "selected" in W.lookup("Switch").properties
-    assert "value" in W.lookup("SpinBox").properties and "text" in W.lookup("TextField").properties
+    assert "value" in W.lookup("SpinBox").properties and "text" in W.lookup("TextInput").properties
 
 
 @pytest.mark.parametrize("type_, good, kept", [
@@ -161,5 +161,5 @@ def test_the_schema_has_a_branch_per_widget_and_is_what_the_tool_writes():
     spec.loader.exec_module(tool)
     assert tool.PATH.read_text(encoding="utf-8") == tool.render(), "run `python tools/generate_widget_schema.py`"
     slider = next(b for b in schema["allOf"] if b["if"]["properties"]["widget"]["const"] == "Slider")["then"]
-    assert "value" in slider["properties"] and slider["additionalProperties"] is False
+    assert "value" in slider["properties"] and "value" in slider["propertyNames"]["enum"] and "valu" not in slider["propertyNames"]["enum"]
     json.dumps(schema)

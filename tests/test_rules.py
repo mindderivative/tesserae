@@ -90,7 +90,7 @@ def test_selectors_must_be_properties_the_widget_declares_and_values_it_allows()
 def test_foreground_is_an_extra_and_the_error_names_who_accepts_it():
     sheet("styles:\n  - widget: Text\n    style: {foreground: primary}\n  - widget: SomeView\n    style: {foreground: primary}")
     err = bad("styles:\n  - widget: Container\n    style: {foreground: primary}", "Container: style 'foreground' is not valid here")
-    assert "widgets that accept it: Icon, Link, LoadingIndicator, Svg, Text, TextField" in str(err) and (err.line, err.column) == (3, 12)
+    assert "widgets that accept it: Icon, Link, LoadingIndicator, Svg, Text, TextInput" in str(err) and (err.line, err.column) == (3, 12)
     err = bad("styles:\n  - widget: Container\n    style: {widht: 1}", "style 'widht' is not valid here")
     assert "did you mean 'width'" in str(err)
 
@@ -243,7 +243,7 @@ def test_hovered_focused_and_pressed_are_names_an_expression_can_read_but_not_wr
 
 
 def test_every_state_a_rule_can_name_is_documented():
-    assert STATES == ("hovered", "focused", "pressed", "disabled", "selected", "checked", "expanded")
+    assert STATES == ("hovered", "focused", "focus_visible", "pressed", "disabled", "selected", "checked", "expanded", "error", "read_only")
 
 
 def test_an_instance_with_no_matching_rule_makes_no_computed_and_rules_are_released_on_dispose():

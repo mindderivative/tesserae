@@ -37,7 +37,7 @@ svg:
   src: <text>
   content: <text>
 icon:
-  name: <one of 15 names>
+  name: <one of 18 names>
 bindings: <a mapping>
 handlers: <a mapping>
 two_way: <text>
@@ -77,7 +77,7 @@ children: <a list>
 | `svg.src` | text | An SVG file (`.svg` or `.svgz`), relative to this view. The pictures it refers to are decoded and found next to it. |
 | `svg.content` | text | The SVG document itself, as text. |
 | `icon` | a mapping | An Icon's glyph. |
-| `icon.name` *(required)* | one of 15 names | An icon in Tesserae's set. |
+| `icon.name` *(required)* | one of 18 names | An icon in Tesserae's set. |
 | `bindings` | a mapping | Properties kept live from the ViewModel: `{{ expression }}`. |
 | `handlers` | a mapping | What a user's action calls: the name of a ViewModel method, or `window.<action>`. |
 | `two_way` | text | The one bound property whose user edits write back to the ViewModel. |
@@ -297,7 +297,7 @@ overflow: <clip | ellipsis>
 id: <text>
 kind: <TitleBar>
 title: <text>
-icon: <one of 15 names>
+icon: <one of 18 names>
 buttons: <a list>
 children: <a list>
 style: <a style mapping or text>
@@ -310,7 +310,7 @@ a11y: <a mapping>
 | `id` *(required)* | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
 | `kind` *(required)* | `TitleBar` | Always `TitleBar`. |
 | `title` | text | The window's title. |
-| `icon` | one of 15 names | An icon name, shown before the title. |
+| `icon` | one of 18 names | An icon name, shown before the title. |
 | `buttons` | a list | Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in. |
 | `children` | a list | The nodes inside this one. |
 | `style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |
@@ -376,7 +376,7 @@ min_height: <a number>
 title_bar:
   id: <text>
   title: <text>
-  icon: <one of 15 names>
+  icon: <one of 18 names>
   buttons: <a list>
   children: <a list>
   style: <a style mapping or text>
@@ -399,7 +399,7 @@ children: <a list>
 | `title_bar` | `true` or `false` or a mapping | The window's title bar, a `TitleBar`'s keys: its `title` is the window's by default, and it has the window buttons when the window is `borderless`. |
 | `title_bar.id` | text | A name for this node, unique in the view. Handlers, bindings and `view.node(id)` use it. |
 | `title_bar.title` | text | The window's title. |
-| `title_bar.icon` | one of 15 names | An icon name, shown before the title. |
+| `title_bar.icon` | one of 18 names | An icon name, shown before the title. |
 | `title_bar.buttons` | a list | Which window buttons, in order: minimize, maximize, close (all by default); or just `dismiss`, a button that closes the dialog or sheet the bar is in. |
 | `title_bar.children` | a list | The nodes inside this one. |
 | `title_bar.style` | a `style` mapping or text | How a node looks: a mapping, or the name of a `*_Style.yaml` file. |

@@ -329,6 +329,8 @@ _UNIVERSAL: dict[str, dict[str, Any]] = {
     "handlers": {"type": "object", "additionalProperties": {"type": "string"}}, "a11y": {"type": "object"},
     "interaction": {"type": ["boolean", "string"]}, "window_region": {"enum": ["drag", "none"]},
     "route": {"type": "string"},
+    # the header of a view file, valid on its root
+    "params": {"type": ["array", "object"]}, "expects": {"type": "object"},
 }
 _EXPRESSION = {"type": "string", "pattern": r"\{\{"}
 _JSON_TYPE = {
@@ -340,9 +342,9 @@ _JSON_TYPE = {
 
 def _schema_of(prop: Property) -> dict[str, Any]:
     if prop.type == "node":
-        out: dict[str, Any] = {"type": "object"}
+        out: dict[str, Any] = {"$ref": "#"}
     elif prop.type == "nodes":
-        out = {"type": "array"}
+        out = {"type": "array", "items": {"$ref": "#"}}
     elif prop.type == "enum":
         out = {"anyOf": [{"enum": list(prop.choices or ())}, _EXPRESSION]}
     elif prop.type == "any":
@@ -359,13 +361,13 @@ def json_schema() -> dict[str, Any]:
     for name in sorted(_REGISTRY):
         decl = _REGISTRY[name]
         props = {k: _schema_of(p) for k, p in decl.properties.items()}
-        extra = {"children": {"type": "array"}} if decl.container else {}
+        extra = {"children": {"type": "array", "items": {"$ref": "#"}}} if decl.container else {}
         branches.append({
             "if": {"properties": {"widget": {"const": name}}, "required": ["widget"]},
             "then": {
                 "properties": {**_UNIVERSAL, **extra, **props},
                 "required": ["widget"] + [k for k, p in decl.properties.items() if p.required],
-                "additionalProperties": False,
+                "propertyNames": {"enum": [*_UNIVERSAL, *extra, *props]},
             },
         })
     return {

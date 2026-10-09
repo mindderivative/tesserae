@@ -17,7 +17,11 @@ from tesserae.spec.compose import Instance
 __all__ = ["lower"]
 
 _TEXT_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "wrap", "overflow", "text_align")
-_FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight")
+_FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "placeholder", "multiline", "obscured")
+#: The widget names that are not the builder's kind names.
+_KIND = {"TextInput": "TextField"}
+#: Properties the renderer acts on (it has no builder equivalent), so they are not part of the lowered spec.
+_RENDERER_ONLY = {"TextInput": {"max_length", "read_only"}}
 #: Properties the renderer does not draw yet: said by name, never dropped silently.
 _PLACEHOLDER = "composed"
 _NOT_RENDERED = {"frame": "a video frame", "scroll_offset": "a scroll position"}
@@ -25,7 +29,7 @@ _NOT_RENDERED = {"frame": "a video frame", "scroll_offset": "a scroll position"}
 
 def lower(inst: Instance) -> dict[str, Any]:
     """The 0.4.x node mapping for `inst` and everything under it, at the values the instances hold now."""
-    node: dict[str, Any] = {"id": inst.id, "kind": inst.widget}
+    node: dict[str, Any] = {"id": inst.id, "kind": _KIND.get(inst.widget, inst.widget)}
     values = {name: inst.value(name) for name in inst.props}
     for name, what in _NOT_RENDERED.items():
         if name in values:
@@ -35,8 +39,8 @@ def lower(inst: Instance) -> dict[str, Any]:
     if widget in ("Text", "Link"):
         folded = {"text", *_TEXT_KEYS}
         node["text"] = {"content": values.get("text", ""), **{k: values[k] for k in _TEXT_KEYS if k in values}}
-    elif widget == "TextField":
-        folded = {"text", *_FIELD_KEYS}
+    elif widget == "TextInput":
+        folded = {"text", *_FIELD_KEYS, *_RENDERER_ONLY["TextInput"]}
         node["text"] = {"content": values.get("text", ""), **{k: values[k] for k in _FIELD_KEYS if k in values}}
     elif widget == "Icon":
         folded = {"icon"}

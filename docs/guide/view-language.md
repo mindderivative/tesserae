@@ -63,7 +63,8 @@ Every widget declares its properties: a type, a default, the values it allows, w
 |---|---|
 | `Container`, `Rect` | none; they hold children (a `Rect` is the usual clickable box) |
 | `Text`, `Link` | `text`, `typography_role`, `font_family`, `font_size`, `font_weight`, `wrap`, `overflow`, `text_align` |
-| `TextField` | `text` (model), `typography_role`, `font_family`, `font_size`, `font_weight`, `disabled` |
+| `TextInput` | `text` (model), `placeholder`, `multiline`, `obscured`, `max_length`, `read_only`, `typography_role`, `font_family`, `font_size`, `font_weight`, `disabled` |
+| `TextField` | the Material text field, a view Tesserae ships: see [Text fields](../components/text-fields.md) |
 | `Icon` | `icon` (a built-in icon name, required) |
 | `Image`, `Svg` | `src`, `fit`; `src`, `content` |
 | `Checkbox`, `Switch`, `RadioButton` | `checked` or `selected` (model), `group`, `disabled` |
@@ -75,7 +76,7 @@ Every widget declares its properties: a type, a default, the values it allows, w
 | `Slot` | where a calling view's children go |
 
 State is a property (`checked`, `selected`, `value`, `disabled`), never a style. `foreground` is a style extra of the widgets that draw text or
-glyphs (`Text`, `Link`, `TextField`, `Icon`, `Svg`, `LoadingIndicator`); anywhere else it is an error that names who accepts it.
+glyphs (`Text`, `Link`, `TextInput`, `Icon`, `Svg`, `LoadingIndicator`); anywhere else it is an error that names who accepts it.
 
 ## Expressions
 
@@ -167,7 +168,7 @@ handlers:
 
 An event is one of `on_click`, `on_hover_enter`, `on_hover_exit`, `on_change`, `on_focus_enter`, `on_focus_exit`, `on_tap`, `on_long_press`,
 `on_pan`, `on_pinch`, `on_touch_start`, `on_touch_move`, `on_touch_end`, `on_touch_cancel`, `on_file_hover`, `on_file_hover_cancel`,
-`on_file_drop`, `on_link`; a misspelt one is an error. A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
+`on_file_drop`, `on_link`, `on_key` (a key pressed) and `on_submit` (Enter in a field that is not multiline); a misspelt one is an error. A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
 `navigate.back`, `navigate.Settings`), or statements: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a ViewModel Signal, or a call
 of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a param, a loop variable or
 anything else is an error; so is `if`, `for` or any other statement. A disabled node's handlers do not run.
@@ -204,7 +205,7 @@ styles:
 ```
 
 A rule names a `widget` (a built-in or a view), and may add `variant`, `size`, `shape` (properties the widget declares), `classes`, `name`, a
-`part` (a named node inside that widget's view) and a `state` (`hovered focused pressed disabled selected checked expanded`; the last four read the
+`part` (a named node inside that widget's view) and a `state` (`hovered focused focus_visible pressed disabled selected checked expanded error read_only`; the last six read the
 widget's own property). The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the
 widget alone, and a later rule wins a tie. A widget's own shipped looks are the lowest layer and the app's stylesheet is above them. **A
 node's inline `style:` beats every rule, for the fields it sets and no others.** A rule's value may be an expression over the widget's params.

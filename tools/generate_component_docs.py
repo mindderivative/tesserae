@@ -182,11 +182,18 @@ def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sh
             if len(group) > 1:
                 out += [f"These {len(group)} have one structure; only their stylesheets, above, differ.", ""]
             out += _fence(first.body, "yaml")
+    elif entry.get("shipped_view"):
+        out += [f"This component is a view Tesserae ships: use `widget: {entry['shipped_view']}` in a view "
+                "(see [The View Language](../guide/view-language.md)).", ""]
     elif entry.get("node_kind"):
         out += [f"This component is the `{entry['node_kind']}` node kind, not a fragment: use `kind: {entry['node_kind']}` in a view "
                 "(the [YAML reference](../api/yaml.md#the-kinds))" + (", or build it in Python." if entry.get("python") else "."), ""]
     else:
         out += ["This component has no `component:` fragment: build it in Python.", ""]
+    if entry.get("usage_view"):
+        out += ["## Using it", ""] + _fence(entry["usage_view"].rstrip("\n"), "yaml")
+    if entry.get("after"):
+        out += entry["after"].rstrip("\n").split("\n") + [""]
     if entry.get("usage"):
         out += ["## Using it", "", "In a view:", ""]
         out += _fence("# Home_View.yaml\nid: root\nkind: Container\nchildren:\n" + _indent(entry["usage"], 2), "yaml")
@@ -252,6 +259,7 @@ def overview_components(data: dict[str, Any]) -> str:
         for entry in data["components"]:
             if entry["group"] == group:
                 frags = ", ".join(f"`{f}`" for f in entry["fragments"]) or (
+                    f"`widget: {entry['shipped_view']}`" if entry.get("shipped_view") else
                     f"`kind: {entry['node_kind']}`" if entry.get("node_kind") else "Python only")
                 out.append(f"| [{entry['title']}]({entry['slug']}.md) | {frags} |")
         out.append("")

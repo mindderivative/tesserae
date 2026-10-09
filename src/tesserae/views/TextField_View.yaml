@@ -1,0 +1,93 @@
+# The Material 3 text field: a labelled box around a text input, with an optional leading icon, prefix, suffix, trailing icon, supporting text,
+# character counter and an error state. `variant: filled | outlined`. What it looks like is in TextField_Stylesheet.yaml; this file is its
+# structure. `text` is two-way: give it a bare reference (`text: "{{ query }}"`) and typing writes `query`.
+#
+# The label is raised (small, at the top) while the field has focus or text, and sits in the middle as a hint otherwise; it jumps between the
+# two, because moving it smoothly needs `transition:`, which the language reserves.
+params:
+  variant: {type: enum, choices: [filled, outlined], default: filled, doc: "filled has a fill and a line under it; outlined has a border."}
+  label: {type: str, default: "", doc: "The field's name; it also names the field for a screen reader."}
+  text: {type: str, default: "", model: true, doc: "What the user has typed."}
+  placeholder: {type: str, default: "", doc: "Shown while the field is empty and focused (or has no label)."}
+  supporting: {type: str, default: "", doc: "Help under the field."}
+  error: {type: str, default: "", doc: "An error message. When it is not empty the field shows the error look and the message replaces the supporting text."}
+  leading: {type: str, default: "", doc: "A built-in icon name shown before the text."}
+  trailing: {type: str, default: "", doc: "A built-in icon name shown after the text."}
+  prefix: {type: str, default: "", doc: "Text before the typing, such as a currency sign."}
+  suffix: {type: str, default: "", doc: "Text after the typing, such as a unit."}
+  max_length: {type: int, default: 0, doc: "The most characters it takes; 0 is no limit."}
+  counter: {type: bool, default: false, doc: "Shows how many characters are typed (of max_length, when there is one)."}
+  multiline: {type: bool, default: false, doc: "Several lines; Enter makes a new one, so on_submit does not fire."}
+  obscured: {type: bool, default: false, doc: "A password: dots instead of the text, with a button that shows it."}
+  disabled: {type: bool, default: false, doc: "Dimmed, and takes no typing."}
+  read_only: {type: bool, default: false, doc: "The text can be selected and copied but not changed."}
+widget: Container
+state: {reveal: false}
+style: {flex_direction: vertical}
+children:
+  - widget: Container
+    name: box
+    style: {flex_direction: horizontal, align_content: left, gap: 12, padding: {left: 16, right: 16, top: 0, bottom: 0}, min_height: 56}
+    children:
+      - {widget: Icon, name: leading_icon, if: "leading != ''", icon: "{{ leading }}", style: {width: 24, height: 24}}
+      - widget: Container
+        name: body
+        style:
+          flex_direction: horizontal
+          flex: fill
+          align_content: left
+          gap: 4
+          padding: "{{ {'left': 0, 'right': 0, 'top': 16 if label != '' else 0, 'bottom': 0} }}"
+        children:
+          - {widget: Text, name: prefix, if: "prefix != ''", text: "{{ prefix }}", typography_role: body_large}
+          - widget: TextInput
+            name: input
+            text: "{{ text }}"
+            placeholder: "{{ placeholder if (focused or label == '') else '' }}"
+            multiline: "{{ multiline }}"
+            obscured: "{{ obscured and not reveal }}"
+            max_length: "{{ max_length }}"
+            read_only: "{{ read_only }}"
+            disabled: "{{ disabled }}"
+            typography_role: body_large
+            style: {flex: fill, min_height: "{{ 72 if multiline else 24 }}"}
+            a11y: {label: "{{ label + (': ' + error if error != '' else '') }}"}
+          - {widget: Text, name: suffix, if: "suffix != ''", text: "{{ suffix }}", typography_role: body_large}
+      - {widget: Icon, name: error_icon, if: "error != ''", icon: error, style: {width: 24, height: 24}}
+      - {widget: Icon, name: trailing_icon, if: "trailing != '' and error == '' and not obscured", icon: "{{ trailing }}", style: {width: 24, height: 24}}
+      - widget: Rect
+        name: reveal_button
+        if: "obscured and error == ''"
+        style: {width: 40, height: 40, corner_radius: 20, align_content: center}
+        handlers: {on_click: "reveal = not reveal"}
+        a11y: {label: "{{ 'Hide' if reveal else 'Show' }} {{ label.lower() or 'text' }}", role: button}
+        interaction: true
+        children:
+          - {widget: Icon, name: reveal_icon, icon: "{{ 'visibility' if reveal else 'visibility_off' }}", style: {width: 24, height: 24}}
+      - widget: Container
+        name: label_box
+        if: "label != ''"
+        style:
+          position: absolute
+          x: "{{ 12 + (36 if leading != '' else 0) + (0 if (focused or text != '') and variant == 'outlined' else 4) }}"
+          y: "{{ ((8 if variant == 'filled' else -8) if (focused or text != '') else 18) }}"
+          padding: {left: 4, right: 4, top: 0, bottom: 0}
+          # an outlined label sits on the border when raised, and a fill behind it hides the line there
+          background: "{{ 'surface' if (variant == 'outlined' and (focused or text != '')) else 'transparent' }}"
+        children:
+          - widget: Text
+            name: label
+            text: "{{ label }}"
+            typography_role: "{{ 'body_small' if (focused or text != '') else 'body_large' }}"
+  - {widget: Rect, name: indicator, if: "variant == 'filled'", style: {flex: expand_horizontal}}
+  - widget: Container
+    name: footer
+    if: "supporting != '' or error != '' or counter"
+    style: {flex_direction: horizontal, align_content: top_left, gap: 16, padding: {left: 16, right: 16, top: 4, bottom: 0}}
+    children:
+      - {widget: Text, name: supporting, text: "{{ error if error != '' else supporting }}", typography_role: body_small, style: {flex: fill}}
+      - widget: Text
+        name: counter
+        if: counter
+        text: "{{ len(text) }}{{ '/' + str(max_length) if max_length > 0 else '' }}"
+        typography_role: body_small

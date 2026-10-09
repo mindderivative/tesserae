@@ -29,7 +29,7 @@
         "Svg",
         "Switch",
         "Text",
-        "TextField",
+        "TextInput",
         "TimePickerDial",
         "TitleBar",
         "Window"
@@ -86,6 +86,15 @@
     },
     "route": {
       "type": "string"
+    },
+    "params": {
+      "type": [
+        "array",
+        "object"
+      ]
+    },
+    "expects": {
+      "type": "object"
     }
   },
   "allOf": [
@@ -157,6 +166,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "checked": {
             "anyOf": [
               {
@@ -183,7 +201,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "checked",
+            "disabled"
+          ]
+        }
       }
     },
     {
@@ -254,6 +293,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "value": {
             "anyOf": [
               {
@@ -270,7 +318,27 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "value"
+          ]
+        }
       }
     },
     {
@@ -341,14 +409,46 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           }
         },
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children"
+          ]
+        }
       }
     },
     {
@@ -419,14 +519,46 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           }
         },
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children"
+          ]
+        }
       }
     },
     {
@@ -497,8 +629,20 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           },
           "title": {
             "anyOf": [
@@ -516,7 +660,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children",
+            "title"
+          ]
+        }
       }
     },
     {
@@ -587,8 +752,20 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           },
           "label": {
             "anyOf": [
@@ -627,7 +804,30 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children",
+            "label",
+            "x",
+            "y"
+          ]
+        }
       }
     },
     {
@@ -698,6 +898,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "icon": {
             "anyOf": [
               {
@@ -715,7 +924,27 @@
           "widget",
           "icon"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "icon"
+          ]
+        }
       }
     },
     {
@@ -786,6 +1015,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "src": {
             "anyOf": [
               {
@@ -817,7 +1055,29 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "src",
+            "fit",
+            "frame"
+          ]
+        }
       }
     },
     {
@@ -888,6 +1148,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "value": {
             "anyOf": [
               {
@@ -904,7 +1173,27 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "value"
+          ]
+        }
       }
     },
     {
@@ -974,6 +1263,15 @@
           },
           "route": {
             "type": "string"
+          },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
           },
           "text": {
             "anyOf": [
@@ -1070,7 +1368,34 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "text",
+            "typography_role",
+            "font_family",
+            "font_size",
+            "font_weight",
+            "wrap",
+            "overflow",
+            "text_align"
+          ]
+        }
       }
     },
     {
@@ -1140,12 +1465,40 @@
           },
           "route": {
             "type": "string"
+          },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
           }
         },
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects"
+          ]
+        }
       }
     },
     {
@@ -1216,8 +1569,20 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           },
           "edges": {
             "anyOf": [
@@ -1235,7 +1600,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children",
+            "edges"
+          ]
+        }
       }
     },
     {
@@ -1306,6 +1692,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "selected": {
             "anyOf": [
               {
@@ -1344,7 +1739,29 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "selected",
+            "group",
+            "disabled"
+          ]
+        }
       }
     },
     {
@@ -1415,14 +1832,46 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           }
         },
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children"
+          ]
+        }
       }
     },
     {
@@ -1493,8 +1942,20 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           },
           "scroll_offset": {
             "anyOf": [
@@ -1512,7 +1973,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children",
+            "scroll_offset"
+          ]
+        }
       }
     },
     {
@@ -1583,6 +2065,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "value": {
             "anyOf": [
               {
@@ -1609,7 +2100,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "value",
+            "disabled"
+          ]
+        }
       }
     },
     {
@@ -1679,12 +2191,40 @@
           },
           "route": {
             "type": "string"
+          },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
           }
         },
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects"
+          ]
+        }
       }
     },
     {
@@ -1755,6 +2295,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "value": {
             "anyOf": [
               {
@@ -1814,7 +2363,31 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "value",
+            "min",
+            "max",
+            "step",
+            "disabled"
+          ]
+        }
       }
     },
     {
@@ -1885,6 +2458,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "src": {
             "anyOf": [
               {
@@ -1912,7 +2494,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "src",
+            "content"
+          ]
+        }
       }
     },
     {
@@ -1983,6 +2586,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "selected": {
             "anyOf": [
               {
@@ -2009,7 +2621,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "selected",
+            "disabled"
+          ]
+        }
       }
     },
     {
@@ -2079,6 +2712,15 @@
           },
           "route": {
             "type": "string"
+          },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
           },
           "text": {
             "anyOf": [
@@ -2175,14 +2817,41 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "text",
+            "typography_role",
+            "font_family",
+            "font_size",
+            "font_weight",
+            "wrap",
+            "overflow",
+            "text_align"
+          ]
+        }
       }
     },
     {
       "if": {
         "properties": {
           "widget": {
-            "const": "TextField"
+            "const": "TextInput"
           }
         },
         "required": [
@@ -2246,6 +2915,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "text": {
             "anyOf": [
               {
@@ -2257,6 +2935,66 @@
               }
             ],
             "description": "What the user has typed."
+          },
+          "placeholder": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Shown, dimmed, while the field is empty."
+          },
+          "multiline": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Several lines; Enter makes a new one."
+          },
+          "obscured": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Shows dots instead of the text, and blocks copy and cut (a password)."
+          },
+          "max_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The most characters it takes; 0 is no limit."
+          },
+          "read_only": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The text can be selected and copied but not changed."
           },
           "typography_role": {
             "anyOf": [
@@ -2307,7 +3045,37 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "text",
+            "placeholder",
+            "multiline",
+            "obscured",
+            "max_length",
+            "read_only",
+            "typography_role",
+            "font_family",
+            "font_size",
+            "font_weight",
+            "disabled"
+          ]
+        }
       }
     },
     {
@@ -2378,6 +3146,15 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "hour": {
             "anyOf": [
               {
@@ -2404,7 +3181,28 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "hour",
+            "minute"
+          ]
+        }
       }
     },
     {
@@ -2475,8 +3273,20 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           },
           "title": {
             "anyOf": [
@@ -2515,7 +3325,30 @@
         "required": [
           "widget"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children",
+            "title",
+            "icon",
+            "buttons"
+          ]
+        }
       }
     },
     {
@@ -2586,8 +3419,20 @@
           "route": {
             "type": "string"
           },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
           "children": {
-            "type": "array"
+            "type": "array",
+            "items": {
+              "$ref": "#"
+            }
           },
           "title": {
             "anyOf": [
@@ -2651,7 +3496,32 @@
           "widget",
           "title"
         ],
-        "additionalProperties": false
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "params",
+            "expects",
+            "children",
+            "title",
+            "borderless",
+            "min_width",
+            "min_height",
+            "title_bar"
+          ]
+        }
       }
     }
   ]

@@ -32,10 +32,15 @@ _TEXT = {
 declare("Text", dict(_TEXT), extras=("foreground",), doc="A run of text.")
 declare("Link", {**_TEXT, "text": P("str", default="", doc="The link's text, which names it for a screen reader.")},
         extras=("foreground",), doc="Text that can be activated.")
-declare("TextField", {
+declare("TextInput", {
     "text": P("str", default="", model=True, doc="What the user has typed."),
+    "placeholder": P("str", default="", doc="Shown, dimmed, while the field is empty."),
+    "multiline": P("bool", doc="Several lines; Enter makes a new one."),
+    "obscured": P("bool", doc="Shows dots instead of the text, and blocks copy and cut (a password)."),
+    "max_length": P("int", default=0, doc="The most characters it takes; 0 is no limit."),
+    "read_only": P("bool", doc="The text can be selected and copied but not changed."),
     "typography_role": P("str"), "font_family": P("str"), "font_size": P("float"), "font_weight": P("any"), "disabled": P("bool"),
-}, extras=("foreground",), doc="A single-line text input.")
+}, extras=("foreground",), doc="A bare text input (the part of a TextField that takes the typing).")
 declare("Image", {
     "src": P("str", doc="A path relative to the file."),
     "fit": P("str", default="cover", doc="How the picture fills its box: cover, contain, fill ..."),

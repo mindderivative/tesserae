@@ -2054,7 +2054,7 @@ The path data for `name`, or `None` if there's no such icon.
 **Constants**
 
 - `ICON_VIEW_BOX` = `(0.0, -960.0, 960.0, 960.0)`
-- `ICONS` = `dict of 15`
+- `ICONS` = `dict of 18`
 
 ## Logging
 

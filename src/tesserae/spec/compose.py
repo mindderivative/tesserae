@@ -280,8 +280,8 @@ def _read(inst: Instance, name: str) -> Any:
 def _state_holds(rule: Rule, inst: Instance, ident: Identity) -> bool:
     if rule.state is None:
         return True
-    if rule.state in INTERACTION_STATES:
-        return bool(inst.interaction_signal(rule.state).get())
+    if rule.state in INTERACTION_STATES:  # the state of the widget the rule names, which for a part is the whole widget
+        return bool((ident.interaction or inst.interaction_signal)(rule.state).get())
     return bool(ident.get(rule.state))
 
 
@@ -467,6 +467,7 @@ class _Owner:
 
     def __init__(self, widget: str, get: Callable[[str], Any], scope: Scope) -> None:
         self.widget, self.get, self.scope = widget, get, scope
+        self.root: Optional[Instance] = None  # the view's root instance, whose interaction state a part's rules read
 
 
 class _Ctx:
@@ -643,12 +644,16 @@ class Composer:
     def _builtin(self, node: Node, iid: str, scope: Scope, ctx: _Ctx, forced: bool = False) -> Instance:
         inst = Instance(node, node.widget, iid, node.decl)
         self._register(inst, ctx)
+        if forced and ctx.owner is not None:
+            ctx.owner.root = inst
         inner = self._with_state(node, scope, iid, "node", ctx, inst)
         if node.interaction or forced:  # `hovered`, `focused` and `pressed` are the nearest interactive widget's (a call may make a root so)
             inner = Scope(inner, states=inst, readonly=True)
-        inst.identities.append(Identity(node.widget, None, lambda name, inst=inst: _read(inst, name), inner))
+        inst.identities.append(Identity(node.widget, None, lambda name, inst=inst: _read(inst, name), inner, inst.interaction_signal))
         if ctx.owner is not None and node.name and not forced:
-            inst.identities.append(Identity(ctx.owner.widget, node.name, ctx.owner.get, ctx.owner.scope))
+            owner = ctx.owner
+            inst.identities.append(Identity(owner.widget, node.name, owner.get, owner.scope,
+                                            lambda state, owner=owner: owner.root.interaction_signal(state) if owner.root else Signal(False)))
         for name, value in node.style.items():
             inst.style[name] = self._bind(value, inner, inst)
         for name, value in node.a11y.items():
@@ -789,6 +794,6 @@ class Composer:
             inst.name = node.name
         inst.state = {**inst.state, **holder.state}
         inst._release.extend(holder._release)
-        inst.identities.append(Identity(node.widget, None, param, callee_scope))
+        inst.identities.append(Identity(node.widget, None, param, callee_scope, inst.interaction_signal))
         self._install_rules(inst)
         return inst

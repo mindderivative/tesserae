@@ -22,7 +22,7 @@ def test_text_icon_image_and_svg_take_the_builders_nested_shapes():
     assert spec("widget: Text\ntext: '{{ label }}'\ntypography_role: body_large\nwrap: none\nfont_size: 14") == {
         "id": "root", "kind": "Text", "text": {"content": "hi", "typography_role": "body_large", "wrap": "none", "font_size": 14.0}}
     assert spec("widget: Link\ntext: go\nfont_family: Roboto")["text"] == {"content": "go", "font_family": "Roboto"}
-    assert spec("widget: TextField\ntext: typed\ntypography_role: body_large")["text"] == {"content": "typed", "typography_role": "body_large"}
+    assert spec("widget: TextInput\ntext: typed\ntypography_role: body_large\nplaceholder: Name\nobscured: true")["text"] == {"content": "typed", "typography_role": "body_large", "placeholder": "Name", "obscured": True}
     assert spec("widget: Icon\nicon: home")["icon"] == {"name": "home"}
     assert spec("widget: Image\nsrc: a.png\nfit: contain")["image"] == {"src": "a.png", "fit": "contain"}
     assert spec("widget: Svg\ncontent: '<svg/>'")["svg"] == {"content": "<svg/>"}
@@ -67,5 +67,5 @@ def test_a_property_the_renderer_cannot_draw_is_an_error_naming_it(source, what)
 
 
 def test_flat_properties_of_a_widget_with_a_nested_shape_are_kept():
-    assert spec("widget: TextField\ntext: x\ndisabled: true")["disabled"] is True
+    assert spec("widget: TextInput\ntext: x\ndisabled: true")["disabled"] is True
     assert spec("widget: Icon\nicon: home") == {"id": "root", "kind": "Icon", "icon": {"name": "home"}}  # a folded property is not repeated flat

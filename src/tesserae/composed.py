@@ -25,9 +25,22 @@ from tesserae.spec.images import extract_images
 from tesserae.spec.lower import lower
 from tesserae.spec.nodes import ViewDoc
 from tesserae.view import _EVENTS, SURFACE_ACTIONS, WINDOW_ACTIONS, View
+
+#: Events the renderer adds to the engine's: a key press, and Enter in a field that is not multiline.
+_KEY_EVENTS = {"on_key": "key_down", "on_submit": "key_down"}
 from tesserae.viewmodel import Bindings, ViewHandle, open_view
 
 __all__ = ["ComposedView", "builtin_actions", "open_composed"]
+
+
+def _is_submit(event: Any) -> bool:
+    """Enter pressed in something that is not a multiline input."""
+    if getattr(event, "key", None) != "Enter":
+        return False
+    try:
+        return not event.target.get("multiline")
+    except (AttributeError, ValueError):
+        return True
 
 
 def builtin_actions(view_ref: Callable[[], Any]) -> Callable[[str], Optional[Callable[..., Any]]]:
@@ -119,14 +132,18 @@ class ComposedView(View):
                 continue
             node = self._built.outer[inst.id] if inst.widget == "Link" else self._built.nodes[inst.id]
             control = self._built.controls.get(inst.id)
+            self._enforce_input(inst, node)
             for event in inst.handlers:
-                tre_event = _EVENTS.get(event)
+                tre_event = _EVENTS.get(event) or _KEY_EVENTS.get(event)
                 if tre_event is None:
-                    continue  # `on_key` is checked when the file loads and drawn when the renderer has it
+                    continue
 
                 def call(event_obj: Any, inst: Instance = inst, event: str = event) -> Any:
-                    if inst.id not in self._disabled_on:  # a disabled node's handlers do not run
-                        inst.fire(event, event_obj)
+                    if inst.id in self._disabled_on:  # a disabled node's handlers do not run
+                        return
+                    if event == "on_submit" and not _is_submit(event_obj):
+                        return
+                    inst.fire(event, event_obj)
 
                 if tre_event == "change" and control is not None and hasattr(control, "on_change"):
                     self._handler_undos.append(control.on_change(lambda value, call=call: call(None)))
@@ -159,9 +176,29 @@ class ComposedView(View):
 
             for event, name, value in (("pointer_enter", "hovered", True), ("pointer_leave", "hovered", False),
                                        ("pointer_down", "pressed", True), ("pointer_up", "pressed", False), ("pointer_cancel", "pressed", False),
-                                       ("focus", "focused", lambda e: bool(getattr(e, "focus_visible", False))), ("unfocus", "focused", False)):
+                                       # focus events bubble: a widget is focused when something inside it is
+                                       ("focus", "focused", True), ("unfocus", "focused", False),
+                                       ("focus", "focus_visible", lambda e: bool(getattr(e, "focus_visible", False))), ("unfocus", "focus_visible", False)):
                 if name in signals:
                     self._state_undos.append(self._listen(node, event, setter(name, value)))
+
+    def _enforce_input(self, inst: Instance, node: Any) -> None:
+        """A `TextInput`'s `max_length` and `read_only`, which the engine's input does not have: an edit that breaks either is put right as it
+        arrives, before any listener that writes the text back hears of it."""
+        if inst.widget != "TextInput":
+            return
+
+        def enforce(event: Any = None) -> None:
+            text = node.get("text")
+            if inst.value("read_only") and text != inst.value("text"):
+                node.set(text=inst.value("text"))
+                return
+            limit = inst.value("max_length")
+            if limit and len(text) > limit:
+                node.set(text=text[:limit])
+
+        if inst.value("read_only") or inst.value("max_length"):
+            self._handler_undos.append(self._listen(node, "change", enforce))
 
     def close(self) -> None:
         """Stops following the composition and releases it."""

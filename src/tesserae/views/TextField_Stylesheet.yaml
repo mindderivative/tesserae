@@ -1,0 +1,101 @@
+# The look of TextField (Material 3). A state here is the state of the whole field: `focused` is true while anything inside it has the focus.
+# A later rule wins a tie, so error comes after focused and hovered: a field in error keeps the error colour while it is used.
+styles:
+  - widget: TextField
+    style: {width: 280, background: transparent}  # a fill, even a clear one, is what lets the pointer find the field
+  - widget: TextField
+    state: disabled
+    style: {opacity: 0.38}
+
+  # the box
+  - widget: TextField
+    part: box
+    variant: filled
+    style: {background: surface_container_highest, corner_radius: 4}
+  - widget: TextField
+    part: box
+    variant: outlined
+    style: {border_width: 1, border_color: outline, corner_radius: 4}
+  - widget: TextField
+    part: box
+    variant: outlined
+    state: hovered
+    style: {border_color: on_surface}
+  - widget: TextField
+    part: box
+    variant: outlined
+    state: focused
+    style: {border_width: 2, border_color: primary}
+  - widget: TextField
+    part: box
+    variant: outlined
+    state: error
+    style: {border_color: error}
+
+  # the line under a filled field
+  - widget: TextField
+    part: indicator
+    style: {height: 1, background: on_surface_variant}
+  - widget: TextField
+    part: indicator
+    state: hovered
+    style: {background: on_surface}
+  - widget: TextField
+    part: indicator
+    state: focused
+    style: {height: 2, background: primary}
+  - widget: TextField
+    part: indicator
+    state: error
+    style: {background: error}
+
+  # the label
+  - widget: TextField
+    part: label
+    style: {foreground: on_surface_variant}
+  - widget: TextField
+    part: label
+    state: focused
+    style: {foreground: primary}
+  - widget: TextField
+    part: label
+    state: error
+    style: {foreground: error}
+
+  # the typing, and the text around it
+  - widget: TextField
+    part: input
+    style: {foreground: on_surface, background: transparent}  # the box around the typing is the field's own
+  - widget: TextField
+    part: prefix
+    style: {foreground: on_surface_variant}
+  - widget: TextField
+    part: suffix
+    style: {foreground: on_surface_variant}
+  - widget: TextField
+    part: supporting
+    style: {foreground: on_surface_variant}
+  - widget: TextField
+    part: supporting
+    state: error
+    style: {foreground: error}
+  - widget: TextField
+    part: counter
+    style: {foreground: on_surface_variant}
+
+  # the icons
+  - widget: TextField
+    part: leading_icon
+    style: {foreground: on_surface_variant}
+  - widget: TextField
+    part: trailing_icon
+    style: {foreground: on_surface_variant}
+  - widget: TextField
+    part: reveal_button
+    style: {background: transparent}
+  - widget: TextField
+    part: reveal_icon
+    style: {foreground: on_surface_variant}
+  - widget: TextField
+    part: error_icon
+    style: {foreground: error}

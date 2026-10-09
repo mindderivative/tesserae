@@ -41,6 +41,10 @@ def _generator():
 
 def _kind_of(path: Path, data) -> str | None:
     name = path.name
+    if isinstance(data, dict) and ("widget" in data or "params" in data and "kind" not in data and "component" not in data and "view" not in data):
+        return None  # the current view syntax has its own schema (tesserae-widget-schema.json, tests/test_text_field.py)
+    if isinstance(data, dict) and isinstance(data.get("styles"), list) and any(isinstance(r, dict) and set(r) & {"widget", "part", "state", "variant"} for r in data["styles"]):
+        return None  # a stylesheet in the rule shape
     if name.endswith("_View.yaml"):
         return "view"
     if name.endswith("_Component.yaml"):

@@ -56,7 +56,7 @@ Material Design 3's components, as Tesserae builds them. Each page says what the
 | [Switch](switches.md) | `Switch` |
 | [Slider](sliders.md) | `Slider` |
 | [Chips](chips.md) | `ChipAssist`, `ChipFilter`, `ChipFilterSelected`, `ChipInput`, `ChipSuggestion` |
-| [Text fields](text-fields.md) | `kind: TextField` |
+| [Text fields](text-fields.md) | `widget: TextField` |
 | [Spin box](spin-boxes.md) | `SpinBox` |
 | [Date picker](date-pickers.md) | `DatePickerDay`, `DatePickerDayToday`, `DatePickerDaySelected`, `DatePickerDayOutsideMonth` |
 | [Time picker](time-pickers.md) | `TimePickerDial`, `PeriodSelectorAM`, `PeriodSelectorPM` |

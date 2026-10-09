@@ -54,6 +54,16 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
   the old syntax still loads and says once per file how to move on. New: the guide [The View Language](guide/view-language.md), whose YAML
   examples are tested, and the migration table in [Migrating](migration.md#to-050).
 
+- **The text field component** ([#184](https://github.com/mindderivative/tesserae/issues/184), the first of the components). `widget: TextField` is
+  the Material text field, a view Tesserae ships with its look as rules: filled and outlined, a label that rises with focus or text, placeholder,
+  leading and trailing icons, prefix and suffix, supporting text, a character counter, an error state with its message, disabled, read-only,
+  multiline, and a password field with a button that shows the text. `text` is two-way; `on_change`, `on_key` and `on_submit` are events. The bare
+  input is the new widget `TextInput` (`placeholder`, `multiline`, `obscured`, `max_length`, `read_only`); the old builder's `kind: TextField` takes
+  `placeholder`, `multiline` and `obscured` in its `text:` as well, and `tesserae migrate-yaml` writes the old kind as `widget: TextInput`.
+  New with it: shipped views (`tesserae/views/`, found after the project's, replaceable by a view of the same name), `focused`, `focus_visible`,
+  `error` and `read_only` as states a rule can select, a widget's state read by its parts' rules, and the icons `visibility`, `visibility_off` and
+  `error`.
+
 ### Removed
 
 - `tests/test_binding_parity.py` and its recording: they asserted `tre`'s quirks (`1 == 1.0` false, 64-bit wraparound, no unary minus).

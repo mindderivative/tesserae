@@ -698,6 +698,19 @@ def _text_field_props(ctx, node, style):
     # dark scheme's field is light on dark: the engine's own default is the light scheme's dark ink.
     ink = _fill(ctx, node["id"], "foreground", style["foreground"]) if "foreground" in style else _role(ctx, "on_surface")
     inner = {**text, "fill": ink, "caret_color": _role(ctx, "primary"), "flex_grow": 1.0, "align_self": "stretch", "role": "textbox", "focusable": True}
+    given = node["text"]
+    for key in ("multiline", "obscured"):
+        if key in given:
+            if not isinstance(given[key], bool):
+                raise SpecBuildError(f'widget {_q(node["id"])}: text.{key} is true or false, got {given[key]!r}')
+            inner[key] = given[key]
+    if given.get("placeholder"):
+        if not isinstance(given["placeholder"], str):
+            raise SpecBuildError(f'widget {_q(node["id"])}: text.placeholder is text, got {given["placeholder"]!r}')
+        inner["placeholder"] = given["placeholder"]
+        inner["placeholder_fill"] = _role(ctx, "on_surface_variant")
+    if given.get("multiline"):  # a field of several lines grows from the top, not the middle
+        inner["align_self"] = "stretch"
     return outer, inner
 
 

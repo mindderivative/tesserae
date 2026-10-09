@@ -26,6 +26,8 @@ _BRACES = re.compile(r"^\s*\{\{(.*)\}\}\s*$", re.S)
 _GET = re.compile(r"^\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\.\s*get\s*\(\s*\)\s*\}\}$")
 _VIEW_FILE = re.compile(r"^(.*?)(?:_View)?\.ya?ml$")
 _DIRECTIVES = ("for", "key", "if")
+#: Old kinds whose new widget has another name: the bare input is `TextInput`; `TextField` is the Material component.
+_KIND = {"TextField": "TextInput"}
 #: A parameter spliced into text inside an expression: `'{{ screen }}'` in `{{ a == '{{ screen }}' }}` is just `screen`.
 _NESTED = re.compile(r"""(['"])\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}\1""")
 _NAVIGATE = re.compile(r"^navigate\.\{\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}\}$")
@@ -162,7 +164,7 @@ class Translator:
 
     def _widget(self, old: dict[str, Any], where: Any) -> Optional[str]:
         if "kind" in old:
-            return old["kind"]
+            return _KIND.get(old["kind"], old["kind"])
         if "component" in old:
             if "{{" in str(old["component"]):
                 self.notes.append(f"{where}: the widget name {old['component']!r} is a parameter; 0.5.0 has no dynamic widget names "

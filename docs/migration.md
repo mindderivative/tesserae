@@ -31,6 +31,7 @@ them. Themes (`*_Theme.yaml`) and style files are left as they are.
 | `when: "{{ x }}"`, `{if: ..., then: ..., else: ...}` | `if: x` on the node, or on two nodes |
 | `bindings: {text: "{{ x.get() }}"}` | `text: "{{ x.get() }}"` (and `{{ x }}` works) |
 | `two_way: checked` | a bare reference on a model property: `checked: "{{ done }}"` |
+| `kind: TextField` (the bare input) | `widget: TextInput`; the Material text field is now `widget: TextField` |
 | `text: {content: Hi, typography_role: ...}`, `icon: {name: home}`, `image: {...}` | `text: Hi`, `typography_role: ...`, `icon: home`, the keys of `image` as properties |
 | `bindings: {background: ...}` | `style: {background: ...}` |
 | `interaction: {color: X}` | `interaction: X` |
@@ -66,7 +67,7 @@ view's ViewModel and its line in `app.py`.
   opened with `app.open_view` yet; keep it on `app.load`.
 - `Window`, `TitleBar` and `Dock` views, an Image `frame` binding, a ScrollView's `scroll_offset` and `on_key` are not drawn by `app.open_view` yet.
   The ones it cannot draw are errors that name the property, never silently dropped.
-- A `TextField` has no `placeholder`, `multiline` or `obscured` yet.
+- A view written with `kind: TextField` was the bare input. It becomes `widget: TextInput`, and `widget: TextField` is the Material text field, so a migrated view keeps what it had; move to `TextField` when you want the label, supporting text and the rest.
 - `foreground` is valid only on the widgets that draw text or glyphs; on a `Container` it is now an error that names them.
 
 ## To 0.4.6

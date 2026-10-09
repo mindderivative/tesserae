@@ -35,8 +35,8 @@ __all__ = ["INTERACTION_STATES", "Identity", "Rule", "RuleSheet", "STATES", "is_
            "style_fields_of"]
 
 #: The states a rule may select. The first three are interaction states; the rest read the node's own property of that name.
-STATES = ("hovered", "focused", "pressed", "disabled", "selected", "checked", "expanded")
-INTERACTION_STATES = ("hovered", "focused", "pressed")
+STATES = ("hovered", "focused", "focus_visible", "pressed", "disabled", "selected", "checked", "expanded", "error", "read_only")
+INTERACTION_STATES = ("hovered", "focused", "focus_visible", "pressed")
 #: Properties a rule may select on, besides `classes` and `name`.
 SELECTOR_PROPERTIES = ("variant", "size", "shape")
 _RULE_KEYS = ("widget", "variant", "size", "shape", "classes", "name", "part", "state", "style")
@@ -58,6 +58,8 @@ class Identity:
     part: Optional[str]
     get: Callable[[str], Any]
     scope: Any
+    #: the interaction Signal (`hovered`, `focused`, ...) of the widget this names: for a part, the widget's, not the part's own
+    interaction: Optional[Callable[[str], Any]] = None
 
 
 @dataclass
@@ -100,6 +102,11 @@ class RuleSheet:
     def of(cls, spec: Any, file: str = "<stylesheet>", text: str = "") -> "RuleSheet":
         """Checks and prepares `{styles: [...]}`. Every problem is a `LoadError` naming the rule."""
         return _build(spec, file, text)
+
+    def without(self, widgets: Iterable[str]) -> "RuleSheet":
+        """The sheet less the rules that name any of `widgets` (the looks of components a project has replaced)."""
+        gone = set(widgets)
+        return RuleSheet([r for r in self.rules if r.widget not in gone], self.file)
 
     def candidates(self, widgets: Iterable[str]) -> list[Rule]:
         """The rules that could apply to a node known by these widget names (and the ones with no widget)."""
