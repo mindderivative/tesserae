@@ -108,16 +108,39 @@ components:
   - slug: split-buttons
     title: Split buttons
     group: Actions
+    shipped_view: SplitButton
     fragments: [SplitButtonFilled, SplitButtonFilledTonal, SplitButtonElevated, SplitButtonOutlined, SplitButtonText]
     md3: |
       A split button joins a main action to a menu of related ones: the leading part does the usual thing, and the
       trailing chevron opens the others.
     built: |
-      One container with a leading and a trailing part; the two parts are separate click targets.
-    usage: |
-      - id: send
-        component: SplitButtonFilled
-        with: {label: Send, width: 160, height: 40, corner_radius: 20}
+      `widget: SplitButton` is a view Tesserae ships (`SplitButton_View.yaml`): two `Button`s 2 pixels apart and a `Menu` for the trailing one. One widget covers all five types.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `label`, `icon` | text, an icon | the main part's text and leading icon |
+      | `variant`, `size` | as on `Button` | `filled`, `tonal`, `elevated`, `outlined`, `text`; `xs` to `xl`; both parts take them |
+      | `items` | a list | the menu's rows, as `Menu` takes them |
+      | `chosen` | a value; two-way | the value of the menu row pressed |
+      | `on_click` | a handler | what the main part does |
+      | `disabled` | true or false | both parts are dimmed and do not respond |
+
+      The inner corners are small (4 pixels) and the outer ones round; while the menu is open the trailing part is round on every corner and its chevron is turned over. Each part is its
+      own Tab stop; the trailing part says it is expanded while its menu shows. Not built: arrow-down on the main part opening the menu, the menu's first row taking the focus, and a
+      toggle form.
+    usage_view: |
+      name: compose
+      widget: Container
+      style: {width: 420, height: 240, padding: 16}
+      children:
+        - widget: SplitButton
+          label: Send
+          icon: send
+          on_click: send_now
+          chosen: "{{ when }}"
+          items:
+            - {value: later, label: Send later}
+            - {value: draft, label: Save as draft}
     python: |
       from tesserae.widgets import split_button
 

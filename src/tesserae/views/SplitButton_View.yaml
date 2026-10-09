@@ -1,0 +1,49 @@
+# The Material 3 split button: a main action and, 2 pixels beside it, a menu button whose chevron turns over while its menu is open. `variant` and `size` are Button's (filled, tonal,
+# elevated, outlined, text; xs to xl). The main part has a `label` and an optional `icon` and calls `on_click`; the trailing part opens a `Menu` of `items` ({value, label} and the
+# rest of Menu's rows) and pressing a row sets `chosen`. The inner corners are small and the outer ones round, and the trailing part is round on both sides while its menu is open.
+# Tab reaches both parts; Enter or Space on either does what pressing it does.
+params:
+  label: {type: str, default: "", doc: "The main action's text."}
+  icon: {type: str, default: "", doc: "A leading icon in the main part."}
+  variant: {type: enum, choices: [filled, tonal, elevated, outlined, text], default: filled, doc: "Passed to both parts."}
+  size: {type: enum, choices: [xs, s, m, l, xl], default: s, doc: "Passed to both parts."}
+  items: {type: list, default: [], doc: "The menu's rows, as Menu takes them."}
+  chosen: {type: any, default: "", model: true, doc: "The value of the menu row last pressed."}
+  on_click: {type: handler, doc: "What the main part does."}
+  disabled: {type: bool, default: false, doc: "Both parts are dimmed and do not respond."}
+widget: Container
+state: {menu_open: false}
+a11y: {role: group, label: "{{ label }}"}
+style:
+  flex_direction: horizontal
+  align_content: left
+  gap: 2
+children:
+  - widget: Button
+    name: main
+    label: "{{ label }}"
+    icon: "{{ icon }}"
+    variant: "{{ variant }}"
+    size: "{{ size }}"
+    disabled: "{{ disabled }}"
+    handlers: {on_click: "on_click()"}
+    style:
+      corner_radius: "{{ {'top_left': 'full', 'bottom_left': 'full', 'top_right': 4, 'bottom_right': 4} }}"
+  - widget: Button
+    name: trailing
+    icon: "{{ 'chevron_up' if menu_open else 'chevron_down' }}"
+    variant: "{{ variant }}"
+    size: "{{ size }}"
+    disabled: "{{ disabled }}"
+    handlers: {on_click: "menu_open = not menu_open"}
+    a11y: {label: "{{ 'More options for ' + label }}", expanded: "{{ menu_open }}"}
+    style:
+      corner_radius: "{{ 'full' if menu_open else {'top_left': 4, 'bottom_left': 4, 'top_right': 'full', 'bottom_right': 'full'} }}"
+  - widget: Menu
+    name: menu
+    if: "len(items) > 0"
+    open: "{{ menu_open }}"
+    anchor: trailing
+    placement: below
+    items: "{{ items }}"
+    chosen: "{{ chosen }}"
