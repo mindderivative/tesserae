@@ -117,3 +117,26 @@ def test_it_matches_the_python_widgets_picture(tmp_path):
     for prop in ("fit", "pixel_width", "pixel_height"):
         assert py.node.get(prop) == view.node("root.i").get(prop), prop
     assert py.node.get("rgba")[:4] == view.node("root.i").get("rgba")[:4]
+
+
+def test_a_full_radius_on_a_picture_that_is_not_square_makes_a_pill(tmp_path):
+    view, _ = opened(tmp_path, "  - {widget: Image, name: i, src: red.png, style: {width: 60, height: 30, corner_radius: full}}\n")
+    node = view.node("root.i")
+    assert alpha_at(view, node, 30, 15) == 255 and alpha_at(view, node, 1, 1) == 0 and alpha_at(view, node, 58, 28) == 0
+    assert alpha_at(view, node, 15, 15) == 255 and alpha_at(view, node, 45, 15) == 255  # the ends are round, the middle is straight
+    assert alpha_at(view, node, 30, 1) == 255 and alpha_at(view, node, 30, 28) == 255
+
+
+def test_a_mask_in_a_rule_applies_to_every_picture_with_the_class(tmp_path):
+    (tmp_path / "Views").mkdir()
+    make(tmp_path, "red.png", (255, 0, 0, 255))
+    (tmp_path / "Views" / "Main_View.yaml").write_text(
+        "name: main\nwidget: Container\nstyle: {flex_direction: vertical, align_content: top_left, width: 100, height: 100}\nchildren:\n"
+        "  - {widget: Image, name: i, src: red.png, classes: [avatar], style: {width: 40, height: 40}}\n")
+    app = App(root=tmp_path, stylesheet_spec={"styles": [{"widget": "Image", "classes": ["avatar"], "style": {"corner_radius": "full"}}]})
+    app.bind(VM)
+    view = app.open_view("Main")
+    app.show("main")
+    view.window.advance(16)
+    node = view.node("root.i")
+    assert alpha_at(view, node, 20, 20) == 255 and alpha_at(view, node, 1, 1) == 0

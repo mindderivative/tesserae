@@ -910,7 +910,8 @@ components:
       | `alt` | text | what the picture shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks |
 
       Its shape is `style.corner_radius`: a number, a shape token, `full` for a circle on a square picture, or a different radius on each
-      corner (`{top_left: 24}`). The engine clips the picture to it. A shape that is not a rounded rectangle needs a mask the engine does not have.
+      corner (`{top_left: 24}`). The engine clips the picture to it: `full` on a square picture is a circle (an avatar), and on any other a pill. Put it in a rule
+      (`classes: [avatar]`) and every picture with the class takes the shape. A shape that is not a rounded rectangle needs a mask the engine does not have.
       A missing or unreadable file stops the view opening, with the widget's name and the file in the message.
     usage_view: |
       name: profile
