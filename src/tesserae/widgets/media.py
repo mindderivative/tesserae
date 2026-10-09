@@ -196,6 +196,9 @@ def node_graph(
     viewport.add_child(content)
     widget.content, widget._edges_layer = content, edges
     widget.offset, widget.zoom = Signal((0.0, 0.0)), Signal(1.0)
+    widget.snap = Signal(0.0)  # a node the user moves lands on a multiple of this many pixels (0 for no grid)
+    widget.arrows = Signal(False)  # an edge ends in an arrowhead
+    widget.selected = Signal(None)  # the graph node the user chose, or None
     widget.graph_nodes: list[Any] = []
     widget.edges: list[tuple[Any, Any, Any]] = []
 
@@ -218,6 +221,7 @@ def node_graph(
     def down(event: Any) -> None:
         if event.window_x is None or in_a_node(event.target):
             return
+        widget.selected.set(None)  # a press on the background chooses nothing
         drag.update(start=(event.window_x, event.window_y), offset=widget.offset.get())
         viewport.capture_pointer()
 
@@ -254,7 +258,10 @@ def node_graph(
         x1, y1 = ax + a.size[0], ay + a.size[1] / 2
         x2, y2 = bx, by + b.size[1] / 2
         bend = max(40.0, abs(x2 - x1) / 2)
-        path.set(data=f"M{x1:.2f},{y1:.2f} C{x1 + bend:.2f},{y1:.2f} {x2 - bend:.2f},{y2:.2f} {x2:.2f},{y2:.2f}")
+        data = f"M{x1:.2f},{y1:.2f} C{x1 + bend:.2f},{y1:.2f} {x2 - bend:.2f},{y2:.2f} {x2:.2f},{y2:.2f}"
+        if widget.arrows.get():  # an open arrowhead where the edge reaches the node
+            data += f" M{x2 - 9:.2f},{y2 - 5:.2f} L{x2:.2f},{y2:.2f} L{x2 - 9:.2f},{y2 + 5:.2f}"
+        path.set(data=data)
 
     def edge(a: Any, b: Any) -> Any:
         """A curve from `a`'s right side to `b`'s left, following them as
@@ -274,7 +281,25 @@ def node_graph(
             if moved is a or moved is b:
                 route(a, b, path)
 
+    def fit_to_view(padding: float = 24.0) -> None:
+        """Pans and zooms (never beyond actual size) so every node shows, centred, with `padding` around them."""
+        nodes = widget.graph_nodes
+        if not nodes:
+            return
+        left = min(n.position.get()[0] for n in nodes)
+        top = min(n.position.get()[1] for n in nodes)
+        right = max(n.position.get()[0] + n.size[0] for n in nodes)
+        bottom = max(n.position.get()[1] + n.size[1] for n in nodes)
+        view_w, view_h = float(viewport.get("layout_width") or 0.0), float(viewport.get("layout_height") or 0.0)
+        if view_w <= 0 or view_h <= 0:
+            return
+        zoom = min(1.0, (view_w - 2 * padding) / max(right - left, 1.0), (view_h - 2 * padding) / max(bottom - top, 1.0))
+        zoom = min(max(zoom, ZOOM_RANGE[0]), ZOOM_RANGE[1])
+        widget.zoom.set(zoom)
+        widget.offset.set(((view_w - (right - left) * zoom) / 2 - left * zoom, (view_h - (bottom - top) * zoom) / 2 - top * zoom))
+
     widget.edge = edge
+    widget.fit_to_view = fit_to_view
     widget._reroute = reroute
     widget.after_theme(lambda: [p.set(stroke_color=widget.color("outline")) for _, _, p in widget.edges])
     widget.after_theme(lambda: [n.set_theme(widget.theme) for n in widget.graph_nodes])  # its nodes follow
@@ -349,7 +374,18 @@ def graph_node(
     effect = Effect(place)  # a re-colour leaves it: its place isn't in its style
     widget._undo.append(effect.dispose)
 
+    def paint_selection() -> None:
+        on = graph.selected.get() is widget
+        node.set(stroke_width=2.0 if on else 1.0, stroke_color=widget.color("primary" if on else "outline_variant"), selected=on)
+
+    selection = Effect(paint_selection)
+    widget._undo.append(selection.dispose)
+    widget.after_theme(paint_selection)
+
     def user_move(to: tuple[float, float]) -> None:
+        grid = graph.snap.get()
+        if grid > 0:
+            to = (round(to[0] / grid) * grid, round(to[1] / grid) * grid)
         if widget.position.get() != to:
             widget.position.set(to)
             for fn in list(moves):
@@ -357,9 +393,13 @@ def graph_node(
 
     drag: dict[str, Any] = {}
 
+    def choose() -> None:
+        graph.selected.set(widget)
+
     def down(event: Any) -> None:
         if event.window_x is None:
             return
+        choose()
         drag.update(start=(event.window_x, event.window_y), position=widget.position.get())
         node.capture_pointer()
         node.set(cursor="grabbing")
@@ -379,7 +419,8 @@ def graph_node(
             widget.interaction().set_dragged(False)
 
     def key(event: Any) -> None:
-        step = {"arrow_left": (-8, 0), "arrow_right": (8, 0), "arrow_up": (0, -8), "arrow_down": (0, 8)}.get(event.key)
+        by = graph.snap.get() or 8  # a key steps one grid square, or 8 pixels when there is no grid
+        step = {"arrow_left": (-by, 0), "arrow_right": (by, 0), "arrow_up": (0, -by), "arrow_down": (0, by)}.get(event.key)
         if step is not None:
             px, py = widget.position.get()
             user_move((px + step[0], py + step[1]))

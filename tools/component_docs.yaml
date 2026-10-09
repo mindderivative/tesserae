@@ -1748,7 +1748,19 @@ components:
     md3: |
       Material Design 3 has no node graph. This is a pannable canvas of titled boxes joined by edges, for tools.
     built: |
-      The `NodeGraph` kind, with `GraphNode` children.
+      The `NodeGraph` kind (`widget: NodeGraph` in a view), with `GraphNode` children at an `x` and a `y`. Drag the background to pan, the wheel zooms about the pointer, drag a node (or
+      press the arrow keys on a focused one) to move it, and its edges follow.
+
+      | Property | Type | Meaning |
+      | --- | --- | --- |
+      | `edges` | a list | the links, each `{from: id, to: id}`, the ids of the `GraphNode`s |
+      | `snap` | pixels | a node the user moves lands on a multiple of this; a key then steps one square; `0` is no grid |
+      | `arrows` | true or false | each edge ends in an arrowhead |
+      | `fit` | true or false | when it opens, pan and zoom so every node shows (never past actual size) |
+
+      Pressing a node chooses it (a `primary` border, and it is selected to a screen reader); pressing the background chooses none. From Python the widget has `fit_to_view(padding)`,
+      `zoom`, `offset`, `snap`, `arrows` and `selected` (a `Signal` of the node chosen). Not built: ports and dragging to connect, labels on edges, selecting several, a minimap, undo, and
+      building only the nodes in view.
     usage: |
       - id: graph
         component: NodeGraph

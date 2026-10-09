@@ -65,6 +65,7 @@ _NODE_KEYS = frozenset({
     "min", "max", "step",  # a SpinBox's (M58)
     "spin",  # a SpinBox's decimals, prefix, suffix and wrap
     "dial",  # a TimePickerDial's mode and auto_advance
+    "graph",  # a NodeGraph's snap, arrows and fit
     "disabled",  # any node's (M70): the View applies it, or a control's own
     "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not
     "tooltip",  # any node's text on a rest of the pointer (a title bar's buttons): the view that has it shows it
@@ -1300,7 +1301,9 @@ def _graph_widget(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) ->
         raise SpecBuildError(f"widget {_q(node_id)}: a {kind} needs a numeric style width and height, got {size}")
     width, height = float(size[0]), float(size[1])
     if kind == "NodeGraph":
-        return node_graph(ctx.window, width, height, theme=_theme(ctx))  # `add_child` moves it into the view
+        graph = node_graph(ctx.window, width, height, theme=_theme(ctx))  # `add_child` moves it into the view
+        _set_graph_options(graph, node)
+        return graph
     if ctx.graph is None:
         raise SpecBuildError(f"widget {_q(node_id)}: a GraphNode belongs inside a NodeGraph")
     x, y = float(node.get("x") or 0.0), float(node.get("y") or 0.0)
@@ -1308,6 +1311,15 @@ def _graph_widget(ctx: _Context, node: dict[str, Any], style: dict[str, Any]) ->
     widget.declared = (x, y)  # where the file puts it: a reload moves it only if this changes
     widget.on_change = widget.on_move  # `on_change` hears the user's moves
     return widget
+
+
+def _set_graph_options(graph: Any, node: dict[str, Any]) -> None:
+    options = node.get("graph") or {}
+    graph.snap.set(float(options.get("snap") or 0.0))
+    graph.arrows.set(bool(options.get("arrows")))
+    graph.fit_wanted = bool(options.get("fit"))
+    for a, b, path in graph.edges:  # the arrowheads follow
+        graph._reroute(a)
 
 
 def connect_edges(graph: Any, node: dict[str, Any], built: Built) -> None:
@@ -1328,6 +1340,9 @@ def connect_edges(graph: Any, node: dict[str, Any], built: Built) -> None:
 
 def _patch_graph_widget(ctx: _Context, node: dict[str, Any], widget: Any, state: bool) -> None:
     widget.set_theme(_theme(ctx))
+    if node["kind"] == "NodeGraph":
+        _set_graph_options(widget, node)
+        return
     if node["kind"] != "GraphNode":
         return
     label = str(node.get("label") or "")

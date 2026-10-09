@@ -84,6 +84,9 @@ def lower(inst: Instance) -> dict[str, Any]:
     elif widget == "SpinBox":
         folded = {"decimals", "prefix", "suffix", "wrap", "label"}
         node["spin"] = {k: values[k] for k in ("decimals", "prefix", "suffix", "wrap") if values.get(k) not in (None, "")}
+    elif widget == "NodeGraph":
+        folded = {"snap", "arrows", "fit"}
+        node["graph"] = {k: values[k] for k in folded if values.get(k) not in (None, False, 0, 0.0)}
     elif widget == "Canvas":
         folded = {"draw"}
         node["canvas"] = {"draw": values.get("draw")}

@@ -138,7 +138,11 @@ declare("TimePickerDial", {"hour": P("float", default=0.0, model=True, doc="0 to
                            "label": P("str", doc="What a screen reader calls it.")},
         doc="The clock face of a time picker.")
 
-declare("NodeGraph", {"edges": P("list", doc="Pairs of node and port names to connect.")}, container=True, doc="A canvas of linked nodes.")
+declare("NodeGraph", {"edges": P("list", doc="The links: each {from: id, to: id}, the ids of the GraphNodes."),
+                      "snap": P("float", default=0.0, doc="A node the user moves lands on a multiple of this many pixels; 0 is no grid."),
+                      "arrows": P("bool", doc="Each edge ends in an arrowhead."),
+                      "fit": P("bool", doc="Pan and zoom, when it opens, so every node shows (never beyond actual size).")},
+        container=True, doc="A canvas of linked nodes you can pan, zoom and move.")
 declare("GraphNode", {"label": P("str"), "x": P("float"), "y": P("float")}, container=True, doc="A node of a NodeGraph.")
 
 declare("Window", {

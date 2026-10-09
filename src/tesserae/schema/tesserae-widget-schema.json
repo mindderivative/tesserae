@@ -2201,7 +2201,43 @@
                 "pattern": "\\{\\{"
               }
             ],
-            "description": "Pairs of node and port names to connect."
+            "description": "The links: each {from: id, to: id}, the ids of the GraphNodes."
+          },
+          "snap": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A node the user moves lands on a multiple of this many pixels; 0 is no grid."
+          },
+          "arrows": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Each edge ends in an arrowhead."
+          },
+          "fit": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Pan and zoom, when it opens, so every node shows (never beyond actual size)."
           }
         },
         "required": [
@@ -2228,7 +2264,10 @@
             "params",
             "expects",
             "children",
-            "edges"
+            "edges",
+            "snap",
+            "arrows",
+            "fit"
           ]
         }
       }

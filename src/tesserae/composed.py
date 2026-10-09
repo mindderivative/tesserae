@@ -253,6 +253,7 @@ class ComposedView(View):
                 untrack(lambda: self.reconcile(spec, frames))
             untrack(self._wire_instances)
             untrack(self._wire_scroll)
+            untrack(self._fit_graphs)
             untrack(self._wire_overlays)
             untrack(self._wire_splitters)
             untrack(self._wire_tooltips)
@@ -356,6 +357,13 @@ class ComposedView(View):
             outer.set(**{size: min(float(content.get(f"layout_{size}")), cap)})
 
         self.timers.after(0, fit, name=f"fit:{inst.id}")
+
+    def _fit_graphs(self) -> None:
+        """A NodeGraph with `fit` pans and zooms to show every node once it has been laid out."""
+        for inst in self.handle.composition.walk():
+            graph = self._built.controls.get(inst.id) if inst.widget == "NodeGraph" else None
+            if graph is not None and getattr(graph, "fit_wanted", False):
+                self.timers.after(0, graph.fit_to_view, name=f"fit-graph:{inst.id}")
 
     def _wire_scroll(self) -> None:
         """A ScrollView's outputs: `scroll_offset`, `at_top`, `at_end` and `scroll_direction`, each written to the Signal or state name it was
