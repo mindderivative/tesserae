@@ -232,7 +232,10 @@ class Instance:
         """The style at the values things hold now: the stylesheet rules that match, then the inline fields over them."""
         resolved = dict(self._rules.get()) if self._rules is not None else {}
         for name in self.style:
-            resolved[name] = self.style_value(name)
+            value = self.style_value(name)
+            if value is None:  # an expression that works out to nothing leaves the field to the rules
+                continue
+            resolved[name] = value
         return resolved
 
     def interaction_signal(self, name: str) -> Signal:
@@ -846,6 +849,9 @@ class Composer:
                 values[pname] = self._bind(node.props[pname], call_scope, holder, self._coercer(ctx, node, decl, pname))
             elif prop.required:
                 raise self._fail(ctx, node.at, f"{node.widget}: '{pname}' is required")
+            elif prop.model and holder is not None:
+                values[pname] = Signal(prop.default)  # a model param nobody bound holds its own value: the view's handlers may write it
+                models.add(pname)
             else:
                 values[pname] = prop.default
 

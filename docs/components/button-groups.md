@@ -8,8 +8,23 @@ A button group lays related buttons side by side, with an even gap, so they read
 
 ## In Tesserae
 
-A row of buttons, each made from the fragment named by `button` (filled by default), one for each entry of
-`items`.
+`widget: ButtonGroup` is a view Tesserae ships (`ButtonGroup_View.yaml`): `Button`s side by side, one for each of `items`.
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `items` | a list | the buttons, each `{value, label}` and optionally `{icon, disabled}` |
+| `mode` | `none`, `single`, `multiple` | actions; a choice of one; any number chosen |
+| `selected` | a value, or a list with `multiple`; two-way | what is chosen |
+| `chosen` | a value; two-way | for `none`: the value of the button last pressed (nothing needs to be bound) |
+| `variant`, `size` | as on `Button` | passed to every button |
+| `connected` | true or false | a 2 pixel gap and square inner corners, instead of 8 pixels apart |
+| `orientation` | `horizontal`, `vertical` | a row or a column |
+| `disabled` | true or false | no button responds |
+
+In `single` mode a chosen button is a toggle that is on, and the arrow keys move the choice; `multiple` toggles each button and the arrows only move the
+focus. There is one Tab stop. Not built: the pressed button widening and its neighbours giving way, and an overflow button.
+
+`widget: ButtonGroup` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
 | Fragment | What it is | Stylesheet |
 | --- | --- | --- |
@@ -52,21 +67,23 @@ children:
 
 ## Using it
 
-In a view:
-
 ```yaml
-# Home_View.yaml
-id: root
-kind: Container
+name: calendar
+widget: Container
+style: {flex_direction: vertical, gap: 12, padding: 16, width: 360, height: 160}
 children:
-  - id: choices
-    component: ButtonGroup
-    with:
-      items: [{label: Day}, {label: Week}, {label: Month}]
-      width: 90
-      height: 40
-      corner_radius: 20
+  - widget: ButtonGroup
+    mode: single
+    connected: true
+    variant: tonal
+    selected: "{{ range }}"
+    items: [{value: day, label: Day}, {value: week, label: Week}, {value: month, label: Month}]
+  - widget: ButtonGroup
+    chosen: "{{ last_action }}"
+    items: [{value: copy, label: Copy, icon: home}, {value: paste, label: Paste}]
 ```
+
+## Using it
 
 In Python:
 

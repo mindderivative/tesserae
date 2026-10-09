@@ -1,0 +1,37 @@
+# The Material 3 button group: buttons that behave as a set. `mode: none` is a row of actions (the last one pressed goes to `chosen`), `single` is a
+# choice of one (`selected` is the chosen value) and `multiple` a set (`selected` is the list of chosen values). `connected: true` joins the buttons with
+# a 2 pixel gap and square inner corners; otherwise they stand 8 pixels apart. One Tab stop; the arrow keys move the focus (and, for
+# `single`, the choice). The look of each button is Button's: `variant` and `size` pass to every one.
+params:
+  items: {type: list, default: [], doc: "The buttons, each {value, label} and optionally {icon, disabled}."}
+  mode: {type: enum, choices: [none, single, multiple], default: none, doc: "none: actions; single: one chosen; multiple: any number chosen."}
+  selected: {type: any, default: "", model: true, doc: "single: the chosen value; multiple: the list of chosen values."}
+  chosen: {type: any, default: "", model: true, doc: "none: the value of the button last pressed."}
+  variant: {type: enum, choices: [filled, tonal, elevated, outlined, text], default: filled, doc: "Passed to every button."}
+  size: {type: enum, choices: [xs, s, m, l, xl], default: s, doc: "Passed to every button."}
+  connected: {type: bool, default: false, doc: "Joined, with square inner corners."}
+  orientation: {type: enum, choices: [horizontal, vertical], default: horizontal, doc: "A row, or a column."}
+  disabled: {type: bool, default: false, doc: "No button can be pressed."}
+widget: Container
+focus_group: both
+a11y: {role: group}
+style:
+  flex_direction: "{{ 'vertical' if orientation == 'vertical' else 'horizontal' }}"
+  gap: "{{ 2 if connected else 8 }}"
+children:
+  - widget: Button
+    for: i, o in enumerate(items)
+    key: o['value']
+    name: item
+    label: "{{ o['label'] }}"
+    icon: "{{ o.get('icon', '') }}"
+    variant: "{{ variant }}"
+    size: "{{ size }}"
+    toggle: "{{ mode != 'none' }}"
+    selected: "{{ ((o['value'] in selected) if mode == 'multiple' else (o['value'] == selected)) if mode != 'none' else False }}"
+    disabled: "{{ disabled or o.get('disabled', False) }}"
+    style:
+      corner_radius: "{{ ({'top_left': 'full' if i == 0 else 4, 'bottom_left': 'full' if i == 0 else 4, 'top_right': 'full' if i == len(items) - 1 else 4, 'bottom_right': 'full' if i == len(items) - 1 else 4} if orientation == 'horizontal' else {'top_left': 'full' if i == 0 else 4, 'top_right': 'full' if i == 0 else 4, 'bottom_left': 'full' if i == len(items) - 1 else 4, 'bottom_right': 'full' if i == len(items) - 1 else 4}) if connected else None }}"
+    handlers:
+      on_click: "chosen = o['value'] if mode == 'none' else chosen; selected = (o['value'] if mode == 'single' else ([v for v in selected if v != o['value']] if o['value'] in selected else selected + [o['value']])) if mode != 'none' else selected"
+      on_focus_enter: "selected = o['value'] if (mode == 'single' and not (disabled or o.get('disabled', False))) else selected"
