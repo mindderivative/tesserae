@@ -276,6 +276,18 @@ handlers:
   on_long_press: "name = paste()"
 ```
 
+### Opening a link
+
+`open_url(url)` hands a link to the OS (the default browser or mail program) and says whether it could. Only `http`, `https`, `mailto` and `tel` links
+are opened: a view's text can come from anywhere, and `file:`, `javascript:` or an application's own scheme would run something rather than show a page, so
+those are an error naming the call. For Python, `tesserae.urls.open_url(url)` is the same.
+
+```yaml
+widget: Link
+text: Read the docs
+handlers: {on_click: "open_url('https://example.com/docs')"}
+```
+
 ## Focus
 
 `focus('input')` in a handler gives the focus to the node named `input` in the same view (names are unique in a view, and a view never reaches into

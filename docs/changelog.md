@@ -104,6 +104,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Input masks** ([#222](https://github.com/mindderivative/tesserae/issues/222)). `mask: "(###) ###-####"` on a `TextInput` or `TextField` formats what is typed or pasted (`#` digit, `A` letter,
   `*` either, `\\` a literal); `tesserae.spec.mask.Mask` is the same for Python.
 - **Clipboard actions** ([#223](https://github.com/mindderivative/tesserae/issues/223)). Handlers can call `copy(text)` (true if it reached the OS clipboard) and `paste()` (the text on it, or `''`).
+- **`open_url`** ([#224](https://github.com/mindderivative/tesserae/issues/224)). Handlers can call `open_url(url)` to open a link in the OS's browser or mail program; only `http`, `https`,
+  `mailto` and `tel` links are opened. `tesserae.urls.open_url` is the same for Python.
 
 ### Removed
 

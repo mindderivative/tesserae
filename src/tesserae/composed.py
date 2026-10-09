@@ -19,6 +19,7 @@ import weakref
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+from tesserae import urls
 from tesserae.follow import app_of
 from tesserae.listeners import handled
 from tesserae.reactive import Effect, untrack
@@ -89,12 +90,14 @@ def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, b
 
 def builtin_actions(view_ref: Callable[[], Any]) -> Callable[..., Optional[Callable[..., Any]]]:
     """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen)`, `surface.dismiss` and
-    `focus(name)`, `capture()`, `release()`, `cursor(name)`, `copy(text)`, `paste()`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
+    `focus(name)`, `capture()`, `release()`, `cursor(name)`, `copy(text)`, `paste()`, `open_url(url)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts)."""
 
     def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
         view = view_ref()
         if path == "focus":
             return lambda name: view.focus(scope, name)
+        if path == "open_url":
+            return lambda url: urls.open_url(url)
         if path == "copy":
             return lambda text: bool(view.window.write_clipboard(_clip(text)))
         if path == "paste":
