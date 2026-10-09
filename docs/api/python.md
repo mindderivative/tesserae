@@ -1957,6 +1957,14 @@ The state layer, ripple and focus ring on one `box` node: the layer and ripple t
 
 `tesserae.a11y`: What a node tells assistive technology.
 
+### `apply_extras`
+
+```python
+apply_extras(node: Any, props: dict[str, Any]) -> None
+```
+
+Sets the accessibility states tre may not have yet (`EXTRAS`, and relations resolved to nodes) one at a time, so a property tre does not know costs only that property: it is skipped, with one warning naming it.
+
 ### `bind`
 
 ```python
@@ -1996,8 +2004,11 @@ Routes `node`'s `a11y_action` events to `handlers[action]`, each given the event
 **Constants**
 
 - `ACTIONS` = `{'collapse', 'decrement', 'expand', 'increment', 'scroll_into_view', 'set_value'}`
-- `BINDABLE` = `tuple of 10`
+- `BINDABLE` = `tuple of 17`
+- `CURRENT` = `{'date', 'location', 'page', 'step', 'time'}`
+- `EXTRAS` = `('pressed', 'invalid', 'description', 'current', 'value_now', 'value_text', 'busy')`
 - `LIVE` = `{'assertive', 'off', 'polite'}`
+- `RELATIONS` = `('describedby', 'controls')`
 - `ROLES` = `frozenset of 23`
 
 ## Bindings

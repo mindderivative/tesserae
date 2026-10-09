@@ -82,6 +82,9 @@ def lower(inst: Instance) -> dict[str, Any]:
         a11y = {"role": "img", "label": values["alt"]} if values.get("alt") else {} if inst.handlers else {"hidden": True}
     if inst.a11y:  # what the node says itself beats what `alt` makes of it
         a11y.update({name: (held.get() if hasattr(held, "get") else held) for name, held in inst.a11y.items()})
+        for relation in ("describedby", "controls"):  # names of nodes in this view, as the ids the builder knows them by
+            if relation in a11y:
+                a11y[relation] = _node_ids(inst, relation, a11y[relation])
     if a11y:
         node["a11y"] = a11y
     if inst.interaction is not None:
@@ -102,6 +105,21 @@ def lower(inst: Instance) -> dict[str, Any]:
 #: The handle between a Splitter's panes: its width along the split, and the grip drawn in it (MD3's 4 x 48 drag handle).
 SPLIT_HANDLE = 16.0
 SPLIT_GRIP = (4.0, 48.0)
+
+
+def _node_ids(inst: Instance, field: str, names: Any) -> list[str]:
+    """The ids of the nodes of `inst`'s view called `names` (one name or a list)."""
+    wanted = [names] if isinstance(names, str) else list(names)
+    root = inst.view_root
+    if root is None:  # the view that is open itself has no owner: its root is the top of the tree
+        root = inst
+        while root.parent is not None:
+            root = root.parent
+    found = {other.name: other.id for other in root.walk() if other.name} if root is not None else {}
+    missing = [n for n in wanted if n not in found]
+    if missing:
+        raise ValueError(f"{inst.id}: a11y {field} names {missing[0]!r}, which is no node by that name in this view")
+    return [found[n] for n in wanted]
 
 
 def _split(inst: Instance, node: dict[str, Any], values: dict[str, Any]) -> None:

@@ -288,7 +288,20 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                                   "value": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "A number the node holds."},
                                   "value_min": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "Its least."},
                                   "value_max": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "Its most."},
-                                  "value_step": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "One step."}},
+                                  "value_step": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "One step."},
+                                  "pressed": {"anyOf": [{"type": "boolean"}, {"const": "mixed"}, {"type": "null"}, {"type": "string"}],
+                                              "description": "A toggle button's state: true, false or `mixed`."},
+                                  "invalid": {"anyOf": [{"type": "boolean"}, {"type": "null"}, {"type": "string"}], "description": "The value is not acceptable."},
+                                  "description": {"anyOf": [{"type": "string"}, {"type": "null"}], "description": "A longer description than the label."},
+                                  "describedby": {"anyOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
+                                                  "description": "The `name:` of a node in this view that describes this one, or a list."},
+                                  "controls": {"anyOf": [{"type": "string"}, {"type": "array", "items": {"type": "string"}}],
+                                               "description": "The `name:` of a node in this view that this one controls, or a list."},
+                                  "current": {"anyOf": [{"type": "boolean"}, {"enum": sorted(a11y.CURRENT)}, {"type": "null"}, {"type": "string"}],
+                                              "description": "The current item of a set: `page`, `step`, `location`, `date`, `time` or true."},
+                                  "value_now": {"anyOf": [{"type": "number"}, {"type": "null"}, {"type": "string"}], "description": "The value of a range."},
+                                  "value_text": {"anyOf": [{"type": "string"}, {"type": "null"}], "description": "How a range's value is said."},
+                                  "busy": {"anyOf": [{"type": "boolean"}, {"type": "null"}, {"type": "string"}], "description": "The node is updating."}},
                    "additionalProperties": False}
     style_file = {"type": "string", "pattern": r"_Style\.yaml$", "description": "A `*_Style.yaml` file next to this one."}
     maybe_bool = {"anyOf": [{"type": "boolean"}, {"type": "string"}]}

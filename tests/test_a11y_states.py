@@ -39,7 +39,8 @@ def test_the_states_and_numbers_are_checked_and_may_be_cleared():
 
 
 def test_every_state_is_bindable_and_the_fixed_ones_are_not():
-    assert {"checked", "selected", "expanded", "value", "value_min", "value_max", "value_step", "label", "hidden", "level"} == set(a11y.BINDABLE)
+    assert {"checked", "selected", "expanded", "value", "value_min", "value_max", "value_step", "label", "hidden", "level",
+            "pressed", "invalid", "description", "current", "value_now", "value_text", "busy"} == set(a11y.BINDABLE)  # the relations name nodes: fixed
     assert "role" not in a11y.BINDABLE and "live" not in a11y.BINDABLE
 
 

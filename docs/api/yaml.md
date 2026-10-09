@@ -343,6 +343,15 @@ letter_spacing: <a number>
 | `value_min` | a number or any value or text | Its least. |
 | `value_max` | a number or any value or text | Its most. |
 | `value_step` | a number or any value or text | One step. |
+| `pressed` | `true` or `false` or `mixed` or any value or text | A toggle button's state: true, false or `mixed`. |
+| `invalid` | `true` or `false` or any value or text | The value is not acceptable. |
+| `description` | text or any value | A longer description than the label. |
+| `describedby` | text or a list | The `name:` of a node in this view that describes this one, or a list. |
+| `controls` | text or a list | The `name:` of a node in this view that this one controls, or a list. |
+| `current` | `true` or `false` or `date` \| `location` \| `page` \| `step` \| `time` or any value or text | The current item of a set: `page`, `step`, `location`, `date`, `time` or true. |
+| `value_now` | a number or any value or text | The value of a range. |
+| `value_text` | text or any value | How a range's value is said. |
+| `busy` | `true` or `false` or any value or text | The node is updating. |
 
 ## The title bar
 

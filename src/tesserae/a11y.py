@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-__all__ = ["ACTIONS", "BINDABLE", "LIVE", "ROLES", "bind", "check", "describe", "on_action"]
+__all__ = ["ACTIONS", "BINDABLE", "CURRENT", "EXTRAS", "LIVE", "RELATIONS", "ROLES", "apply_extras", "bind", "check", "describe", "on_action"]
 
 #: The roles `tre` accepts (`none` for a node that's only structure).
 ROLES = frozenset({
@@ -33,11 +33,19 @@ LIVE = frozenset({"off", "polite", "assertive"})
 #: The requests assistive technology can make of a node.
 ACTIONS = frozenset({"increment", "decrement", "expand", "collapse", "scroll_into_view", "set_value"})
 
-_BOOLS = ("checked", "selected", "expanded", "disabled", "hidden")
+#: The states tre 0.5.4 has no property for yet (requested: mindderivative/tre#160). The language and Tesserae's widgets set them; they reach the
+#: engine when it takes them, and until then each is dropped, said once by name.
+EXTRAS = ("pressed", "invalid", "description", "current", "value_now", "value_text", "busy")
+#: `describedby` and `controls` name other nodes of the view (by their `name:`), or a list of them; the view resolves them to nodes.
+RELATIONS = ("describedby", "controls")
+CURRENT = frozenset({"page", "step", "location", "date", "time"})
+_BOOLS = ("checked", "selected", "expanded", "disabled", "hidden", "invalid", "busy")
 _NUMBERS = ("value", "value_min", "value_max", "value_step")
 #: The states and numbers tre holds as "not set" (`None`) until a node says: `expanded` is absent on a node that cannot expand, and
 #: `checked: null` is a box that is neither on nor off to a screen reader. `hidden` and `disabled` are always one or the other.
-_OPTIONAL = frozenset({"checked", "selected", "expanded", "value", "value_min", "value_max", "value_step"})
+_OPTIONAL = frozenset({"checked", "selected", "expanded", "value", "value_min", "value_max", "value_step", "invalid", "busy", "pressed",
+                       "description", "current", "value_now", "value_text"})
+_NUMBERS_EXTRA = ("value_now",)
 
 
 def check(fields: dict[str, Any], where: str = "") -> dict[str, Any]:
@@ -60,25 +68,63 @@ def check(fields: dict[str, Any], where: str = "") -> dict[str, Any]:
                 raise ValueError(f"{prefix}a11y level must be a positive whole number, got {value!r}")
         elif name in _OPTIONAL and value is None:
             pass
+        elif name == "pressed":
+            if value not in (True, False, "mixed") or (isinstance(value, int) and not isinstance(value, bool)):
+                raise ValueError(f"{prefix}a11y pressed must be true, false or mixed, got {value!r}")
+        elif name in ("description", "value_text"):
+            if not isinstance(value, str):
+                raise ValueError(f"{prefix}a11y {name} must be a string, got {value!r}")
+        elif name == "current":
+            if value is not True and value is not False and value not in CURRENT:
+                raise ValueError(f"{prefix}a11y current must be true, false or one of {', '.join(sorted(CURRENT))}, got {value!r}")
+        elif name in RELATIONS:
+            names = [value] if isinstance(value, str) else value
+            if not isinstance(names, list) or not names or not all(isinstance(n, str) and n for n in names):
+                raise ValueError(f"{prefix}a11y {name} is the name of a node, or a list of names, got {value!r}")
         elif name in _BOOLS:
             if not isinstance(value, bool):
                 raise ValueError(f"{prefix}a11y {name} must be true or false, got {value!r}")
-        elif name in _NUMBERS:
+        elif name in _NUMBERS or name in _NUMBERS_EXTRA:
             if isinstance(value, bool) or not isinstance(value, (int, float)):
                 raise ValueError(f"{prefix}a11y {name} must be a number, got {value!r}")
             value = float(value)
         else:
-            known = sorted({"role", "label", "live", "level", *_BOOLS, *_NUMBERS})
+            known = sorted({"role", "label", "live", "level", *_BOOLS, *_NUMBERS, *EXTRAS, *RELATIONS})
             raise ValueError(f"{prefix}unknown a11y field {name!r} (known: {', '.join(known)})")
         props["a11y_hidden" if name == "hidden" else name] = value
     return props
 
 
+_WARNED: set[str] = set()
+
+
+def apply_extras(node: Any, props: dict[str, Any]) -> None:
+    """Sets the accessibility states tre may not have yet (`EXTRAS`, and relations resolved to nodes) one at a time, so a property tre does not
+    know costs only that property: it is skipped, with one warning naming it."""
+    for name, value in props.items():
+        try:
+            node.set(**{name: value})
+        except ValueError as exc:
+            if "unknown node property" not in str(exc) and "unknown property" not in str(exc):
+                raise
+            if name not in _WARNED:
+                _WARNED.add(name)
+                from loguru import logger
+
+                logger.warning("a11y {}: this tre has no such property, so it is not sent to the screen reader", name)
+
+
 def describe(node: Any, **fields: Any) -> None:
     """Sets what `node` tells assistive technology, for example
     `describe(node, role="switch", label="Wi-Fi", checked=True)`. Every
-    field is checked before any is set."""
-    node.set(**check(fields))
+    field is checked before any is set. States tre does not have yet
+    (`EXTRAS`) are applied as far as it takes them."""
+    if any(name in RELATIONS for name in fields):
+        raise ValueError("a11y.describe: describedby and controls name nodes of a view; write them in the view's `a11y:`")
+    props = check(fields)
+    extras = {k: props.pop(k) for k in list(props) if k in EXTRAS or k in RELATIONS}
+    node.set(**props)
+    apply_extras(node, extras)
 
 
 def on_action(node: Any, handlers: dict[str, Callable[[Any], Any]],
@@ -107,7 +153,7 @@ def on_action(node: Any, handlers: dict[str, Callable[[Any], Any]],
 #: The fields `bind` can keep up to date (M47 Q2): values that change as
 #: the app runs. `role` and `live` say what a node is and how it's
 #: announced, so they're set once, with `describe`.
-BINDABLE = ("label", "hidden", "level", "checked", "selected", "expanded", "value", "value_min", "value_max", "value_step")
+BINDABLE = ("label", "hidden", "level", "checked", "selected", "expanded", "value", "value_min", "value_max", "value_step", *EXTRAS)
 
 
 def bind(node: Any, **fields: Any) -> Callable[[], None]:
@@ -134,7 +180,9 @@ def bind(node: Any, **fields: Any) -> Callable[[], None]:
 
         def apply() -> None:
             props = check({name: read()}, "a11y.bind")
-            if any(target.get(k) != v for k, v in props.items()):
+            if name in EXTRAS:
+                apply_extras(target, props)
+            elif any(target.get(k) != v for k, v in props.items()):
                 target.set(**props)
         effects.append(Effect(apply))
 

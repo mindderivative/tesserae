@@ -62,7 +62,7 @@ from tesserae.spec.title_bar import expand_title_bars
 from tesserae.spec.window import expand_windows
 from tesserae.spec.build import (
     A11Y_BINDABLE, Built, _CONTROL_KINDS, _WIDGET_KINDS, a11y_bindings, build_with, connect_edges, control_shape,
-    focus_ring_color,
+    focus_ring_color, is_binding,
     interaction_tint, layout_of, natural_size, patch, prepare_layers, resting_focus,
 )
 from tesserae.spec.cascade import resolve_style
@@ -200,6 +200,8 @@ class View:
         self._sync_docks()
         self._sync_embeds()
         self._wire_actions()
+        self._extras_set: dict[str, set[str]] = {}  # the accessibility states tre may lack that each node was given, to take back one that is dropped
+        self._apply_a11y_extras()
         if app is not None:
             app._followers[self] = None
 
@@ -726,6 +728,31 @@ class View:
             self._wire(self._spec)
         else:
             self._wire_actions()
+        self._apply_a11y_extras()
+
+    def _apply_a11y_extras(self) -> None:
+        """The `a11y:` fields tre may not have a property for yet (`a11y.EXTRAS`) and the relations (`describedby`, `controls`, which name other
+        nodes of the view): set one at a time on the node that carries the node's accessibility, so one tre lacks is skipped and said once. A field
+        a node no longer gives is cleared."""
+        for node_spec in _walk(self._spec):
+            node_id = node_spec["id"]
+            fields = node_spec.get("a11y") if isinstance(node_spec.get("a11y"), dict) else {}
+            props: dict[str, Any] = {k: v for k, v in fields.items() if k in a11y.EXTRAS and not is_binding(v)}
+            for name in a11y.RELATIONS:
+                if name in fields:
+                    names = [fields[name]] if isinstance(fields[name], str) else list(fields[name])
+                    missing = [n for n in names if n not in self._built.outer]
+                    if missing:
+                        raise ValueError(f'widget "{node_id}": a11y {name} names {missing[0]!r}, which is not a node of this view')
+                    props[name] = [self._built.outer[n] for n in names]
+            before = self._extras_set.get(node_id, set())
+            props.update({k: None for k in before - set(props) - set(a11y_bindings(node_spec))})
+            if not props:
+                self._extras_set.pop(node_id, None)
+                continue
+            self._extras_set[node_id] = {k for k, v in props.items() if v is not None}
+            target = self._built.outer[node_id] if node_spec.get("kind") == "Link" else self._built.nodes[node_id]
+            a11y.apply_extras(target, props)
 
     def _unwire(self) -> None:
         steps, self._wiring = self._wiring, []
@@ -975,7 +1002,9 @@ class View:
             for dependency in subscribed:
                 dependency._subscribe(run)
             value = _a11y_value(field_name, value, where)
-            if node.get(prop) != value:
+            if field_name in a11y.EXTRAS:
+                a11y.apply_extras(node, {prop: value})
+            elif node.get(prop) != value:
                 node.set(**{prop: value})
 
         run()

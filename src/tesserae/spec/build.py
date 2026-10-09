@@ -909,7 +909,8 @@ def focus_ring_color(scheme: Optional[dict[str, RGBA]]) -> RGBA:
 
 #: The `a11y:` fields a YAML node may set; widget states (`checked`, ...)
 #: belong to Tesserae's widgets (M40).
-_A11Y_YAML = ("label", "role", "hidden", "live", "level", "expanded", "selected", "checked", "value", "value_min", "value_max", "value_step")
+_A11Y_YAML = ("label", "role", "hidden", "live", "level", "expanded", "selected", "checked", "value", "value_min", "value_max", "value_step",
+              *a11y.EXTRAS, *a11y.RELATIONS)
 #: The states `a11y:` may set on a node that is not a control; a control kind sets its own (a Checkbox is checked or not by its state).
 _A11Y_STATES = frozenset({"expanded", "selected", "checked", "value", "value_min", "value_max", "value_step"})
 #: What each `a11y:` field resets to when a patch drops it.
@@ -918,7 +919,7 @@ _A11Y_RESET = {"label": None, "a11y_hidden": False, "live": None, "level": None,
 #: The `a11y:` fields a `{{ }}` binding may set (M47 Q2), and the
 #: property each is; `role` and `live` stay fixed.
 A11Y_BINDABLE = {"label": "label", "hidden": "a11y_hidden", "level": "level", "expanded": "expanded", "selected": "selected", "checked": "checked",
-                 "value": "value", "value_min": "value_min", "value_max": "value_max", "value_step": "value_step"}
+                 "value": "value", "value_min": "value_min", "value_max": "value_max", "value_step": "value_step", **{k: k for k in a11y.EXTRAS}}
 
 
 def is_binding(value: Any) -> bool:
@@ -956,9 +957,11 @@ def _a11y_fields(node: dict[str, Any]) -> dict[str, Any]:
         raise SpecBuildError(f"{where}: a11y {fixed_only[0]} can't be bound -- only "
                              f"{', '.join(A11Y_BINDABLE)} can follow a binding")
     try:
-        return a11y.check({k: v for k, v in value.items() if k not in bound}, where)
+        checked = a11y.check({k: v for k, v in value.items() if k not in bound}, where)
     except ValueError as exc:
         raise SpecBuildError(str(exc)) from None
+    # what tre may not have yet (and relations) are applied by the view, one at a time, not set with the rest
+    return {k: v for k, v in checked.items() if k not in a11y.EXTRAS and k not in a11y.RELATIONS}
 
 
 def _a11y_props(node: dict[str, Any], *, patching: bool) -> dict[str, Any]:

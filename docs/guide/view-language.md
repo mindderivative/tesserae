@@ -288,6 +288,23 @@ text: Read the docs
 handlers: {on_click: "open_url('https://example.com/docs')"}
 ```
 
+## Accessibility
+
+`a11y:` says what a node tells assistive technology: `label`, `role`, `hidden`, `live`, `level`, and the states `expanded`, `selected`, `checked`,
+`value`, `value_min`, `value_max`, `value_step`, `pressed` (true, false or `mixed`), `invalid`, `busy`, `description`, `current` (`page`, `step`,
+`location`, `date`, `time` or true), `value_now` and `value_text`. A value may be an expression. `describedby` and `controls` name another node of
+the view by its `name:`, or a list of them.
+
+```yaml
+widget: Container
+name: menu_button
+a11y: {pressed: "{{ open }}", controls: menu, description: "{{ hint }}"}
+```
+
+The engine does not have properties for `pressed`, `invalid`, `description`, `current`, `value_now`, `value_text`, `busy`, `describedby` and `controls` yet
+(they are requested of it), so they are checked, kept, and sent as far as the engine takes them: on an engine without one, that field is skipped and a
+warning names it once. The components set the ones they mean (a text field sets `invalid` and `description`).
+
 ## Moving between screens
 
 `app.transition` sets how `navigate`, `back` and `forward` change screens; the default, `none`, is a swap, and `show()` is a jump that never animates.

@@ -54,7 +54,10 @@ children:
             disabled: "{{ disabled }}"
             typography_role: body_large
             style: {flex: fill, min_height: "{{ 72 if multiline else 24 }}"}
-            a11y: {label: "{{ label + (': ' + error if error != '' else '') }}"}
+            a11y:
+              label: "{{ label + (': ' + error if error != '' else '') }}"
+              invalid: "{{ error != '' }}"
+              description: "{{ error if error != '' else supporting }}"   # sent to the screen reader when tre takes it; the label carries the error until then
           - {widget: Text, name: suffix, if: "suffix != ''", text: "{{ suffix }}", typography_role: body_large}
       - {widget: Icon, name: error_icon, if: "error != ''", icon: error, style: {width: 24, height: 24}}
       - {widget: Icon, name: trailing_icon, if: "trailing != '' and error == '' and not obscured", icon: "{{ trailing }}", style: {width: 24, height: 24}}

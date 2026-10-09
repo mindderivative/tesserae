@@ -130,6 +130,8 @@ The language is specified in `design/yaml-language.md`; the phases land one at a
 - **Splitter** ([#203](https://github.com/mindderivative/tesserae/issues/203)). `widget: Splitter` with two child panes, `orientation`, a two-way `position`, `min_first`, `min_second` and `collapsible`: a handle you drag
   (the pointer is captured), move with the arrow keys, Home and End, a screen reader can set, and double click to collapse.
 - **Image masks** ([#236](https://github.com/mindderivative/tesserae/issues/236)). A picture's rounded, circular and pill shapes are `style.corner_radius` (also from a rule); no new code was needed, and they are tested.
+- **The accessibility vocabulary** ([#237](https://github.com/mindderivative/tesserae/issues/237)). `a11y:` takes `pressed`, `invalid`, `description`, `describedby`, `controls`, `current`, `value_now`, `value_text`
+  and `busy`, checked and bindable; the engine has no property for them yet (requested: tre#160), so they are sent one at a time as far as it takes them, with one warning naming each it lacks.
 
 ### Removed
 
