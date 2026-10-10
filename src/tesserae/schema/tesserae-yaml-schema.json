@@ -2485,6 +2485,7 @@
             "NodeGraph",
             "Overlay",
             "RadioButton",
+            "RangeSlider",
             "Rect",
             "ScrollView",
             "Slider",
@@ -2640,6 +2641,28 @@
             }
           ],
           "description": "Whether a Slider shows a bubble with its value over the handle."
+        },
+        "low": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "A RangeSlider's least value."
+        },
+        "high": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "A RangeSlider's most value."
         },
         "vertical": {
           "anyOf": [
@@ -7121,6 +7144,17 @@
         "handlers": {
           "$ref": "#/definitions/handlers"
         },
+        "high": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "A RangeSlider's most value."
+        },
         "hour": {
           "anyOf": [
             {
@@ -7563,6 +7597,7 @@
             "NodeGraph",
             "Overlay",
             "RadioButton",
+            "RangeSlider",
             "Rect",
             "ScrollView",
             "Slider",
@@ -7580,6 +7615,17 @@
         "label": {
           "type": "string",
           "description": "A GraphNode's title."
+        },
+        "low": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "A RangeSlider's least value."
         },
         "max": {
           "anyOf": [

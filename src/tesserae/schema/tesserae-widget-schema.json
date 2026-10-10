@@ -23,6 +23,7 @@
         "NodeGraph",
         "Overlay",
         "RadioButton",
+        "RangeSlider",
         "Rect",
         "ScrollView",
         "Slider",
@@ -2696,6 +2697,283 @@
             "disabled",
             "error",
             "label"
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "widget": {
+            "const": "RangeSlider"
+          }
+        },
+        "required": [
+          "widget"
+        ]
+      },
+      "then": {
+        "properties": {
+          "widget": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          },
+          "if": {
+            "type": "string"
+          },
+          "for": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "slot": {
+            "type": "string"
+          },
+          "state": {
+            "type": "object"
+          },
+          "style": {
+            "type": "object"
+          },
+          "classes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "handlers": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "a11y": {
+            "type": "object"
+          },
+          "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "window_region": {
+            "enum": [
+              "drag",
+              "none"
+            ]
+          },
+          "route": {
+            "type": "string"
+          },
+          "focus_group": {
+            "enum": [
+              "horizontal",
+              "vertical",
+              "both"
+            ]
+          },
+          "tooltip": {
+            "type": [
+              "string",
+              "object"
+            ]
+          },
+          "params": {
+            "type": [
+              "array",
+              "object"
+            ]
+          },
+          "expects": {
+            "type": "object"
+          },
+          "low": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The least of the two values; a bound Signal follows the drag."
+          },
+          "high": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The most of the two values; it is never below `low`."
+          },
+          "min": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ]
+          },
+          "max": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ]
+          },
+          "step": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Snap to multiples of this from `min`; the keys move by it."
+          },
+          "ticks": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A mark at each step (needs `step`): a discrete slider."
+          },
+          "value_indicator": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A bubble with the value over a handle while it is dragged or has the keyboard."
+          },
+          "vertical": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Stood up: the bottom is `min`; `style.height` is its length and `style.width` the touch target's."
+          },
+          "size": {
+            "anyOf": [
+              {
+                "enum": [
+                  "xs",
+                  "s",
+                  "m",
+                  "l",
+                  "xl"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "MD3 Expressive's size: a thicker track in three pieces and thin 4 px handles (empty: the standard 4 px track and 20 px handles)."
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "An icon inset at the start of the track (needs a `size` of `s` or larger)."
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "What a screen reader calls it; the handles are 'minimum' and 'maximum' of it."
+          },
+          "disabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ]
+          }
+        },
+        "required": [
+          "widget"
+        ],
+        "propertyNames": {
+          "enum": [
+            "widget",
+            "name",
+            "if",
+            "for",
+            "key",
+            "slot",
+            "state",
+            "style",
+            "classes",
+            "handlers",
+            "a11y",
+            "interaction",
+            "window_region",
+            "route",
+            "focus_group",
+            "tooltip",
+            "params",
+            "expects",
+            "low",
+            "high",
+            "min",
+            "max",
+            "step",
+            "ticks",
+            "value_indicator",
+            "vertical",
+            "size",
+            "icon",
+            "label",
+            "disabled"
           ]
         }
       }

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def test_the_built_in_widgets_are_declared_with_their_properties():
     for name in ("Rect", "Container", "Text", "Link", "TextInput", "Image", "Icon", "Svg", "ScrollView", "Checkbox", "RadioButton", "Switch",
-                 "Slider", "SpinBox", "CircularProgress", "LinearProgress", "LoadingIndicator", "TimePickerDial", "NodeGraph",
+                 "Slider", "RangeSlider", "SpinBox", "CircularProgress", "LinearProgress", "LoadingIndicator", "TimePickerDial", "NodeGraph",
                  "GraphNode", "Window", "TitleBar", "Dock", "DockPanel", "Slot"):
         assert W.lookup(name) is not None, name
     assert set(W.lookup("Slider").properties) == {"value", "min", "max", "step", "ticks", "value_indicator", "vertical", "size", "icon", "label", "disabled"}

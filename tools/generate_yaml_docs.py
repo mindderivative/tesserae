@@ -43,6 +43,7 @@ KINDS = (
     ("RadioButton", "MD3's radio button; the ones with one `group:` exclude each other.", "`selected:`, `group:`, `disabled:`"),
     ("Switch", "MD3's switch.", "`selected:`, `disabled:`"),
     ("Slider", "MD3's slider.", "`value:`, `min:`, `max:`, `step:`"),
+    ("RangeSlider", "MD3's slider with two handles.", "`low:`, `high:`, `min:`, `max:`, `step:`"),
     ("SpinBox", "A number field between − and + buttons.", "`value:`, `min:`, `max:`, `step:`"),
     ("CircularProgress", "A circular progress indicator; no `value:` means indeterminate.", "`value:`"),
     ("LinearProgress", "A linear progress indicator; no `value:` means indeterminate.", "`value:`"),

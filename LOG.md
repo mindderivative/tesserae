@@ -2527,3 +2527,18 @@ User: "release tesserae 0.5.0", then "pypi is up".
   Written from memory of the spec; I could not fetch it, so they are unchecked. The two pieces of track are re-placed on every paint (the active piece ends a gap before the handle, the inactive starts a gap after).
   Rendered to a PNG with the headless snapshot and looked at: the pieces, the gap, the icon and the stood-up slider (growing from the bottom) draw as intended.
 - **Wiring:** `vertical`, `size`, `icon` are declared on the Slider widget, passed by the builder, in `_NODE_KEYS` and `view._props_equal`'s keys, and in `control_shape` (a change rebuilds the control).
+
+### 0.5.0.3, part 2: the range slider
+
+- **Shape:** `widget: RangeSlider` (a new kind, not a flag on Slider) with `low` and `high` as its two bound models; `controls.RangeSlider(Slider)` reuses the slider's geometry (`_place`, `_slide`, `_snap`,
+  `_at`, `_from_event`, `_fit_length`, ticks, icon) and a shared `_configure()` / `_follow_layout()` split out of `Slider.__init__` (the 52 slider tests stayed green through that). The group node is `role: group`
+  and not focusable; each handle has a 48 px touch-target node (`role: slider`, focusable, its own `Interaction` for the state layer and ring) and a visual handle and bubble that translate with it.
+- **Probed first:** a press on a child node fires the child's listener, then bubbles to the parent with coordinates already in the parent's frame, and the parent can `capture_pointer()`; so the group picks the
+  nearer handle from a bubbled press and holds the drag. **A bug that probe found:** a press that began on a handle's own node made a ripple there that was never let go (the release went to the group, which
+  held the pointer); `Interaction.release()` (public, over `_release_all`) is called for both handles when a drag ends. Test added.
+- **A11y:** each handle node carries `value`, `value_min`/`value_max` (its own reach: the low one up to the high one, the high one down to the low one), `value_step`, and `increment`/`decrement`/`set_value`;
+  its label is "<label>, minimum" / "<label>, maximum" (the builder passes the node's a11y label in; `relabel()` follows a patch). Nobody has tried it with a real screen reader.
+- **Two mistakes in my own tests, not the code:** `step: 25` snaps 20 and 70 to 25 and 75 (three marks lie between, not two), and a simulated key goes to the focused node whatever node the call names.
+- **Wiring list for a new control kind** (it is long, so it is written down): `builtin_widgets.declare`; `build._CONTROL_KINDS`, `_NODE_KEYS`, the construction branch and the patch branch; `view._CONTROL_STATE` and
+  `_props_equal`'s keys; the two lists in `lower.py`; `tools/generate_yaml_schema.py` node_props; the page text in `tools/component_docs.yaml`; the five generators; and the widget-name list in `tests/test_widgets.py`.
+- **Looked at:** rendered to a PNG with the headless snapshot: the track between the handles, the three expressive pieces, the stood-up ones, the focus ring and the "70" bubble on the focused handle.

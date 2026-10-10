@@ -18,7 +18,7 @@ A view is one node, with its children inside it. A node is a widget (`kind:`), a
 
 ```yaml
 id: <text>
-kind: <one of 22 names>
+kind: <one of 23 names>
 classes: <a list>
 style: <a style mapping or text>
 text: <a mapping>
@@ -33,6 +33,8 @@ step: <a number or text>
 track: <text or any value>
 ticks: <true or false or text>
 value_indicator: <true or false or text>
+low: <a number or text>
+high: <a number or text>
 vertical: <true or false or text>
 size: <xs | s | m | l | xl or any value>
 icons: <true or false or text>
@@ -93,6 +95,8 @@ children: <a list>
 | `track` | text or any value | The colour role of the track behind a progress indicator. |
 | `ticks` | `true` or `false` or text | Whether a Slider marks each step. |
 | `value_indicator` | `true` or `false` or text | Whether a Slider shows a bubble with its value over the handle. |
+| `low` | a number or text | A RangeSlider's least value. |
+| `high` | a number or text | A RangeSlider's most value. |
 | `vertical` | `true` or `false` or text | Whether a Slider is stood up (the bottom is its minimum). |
 | `size` | `xs` \| `s` \| `m` \| `l` \| `xl` or any value | A Slider's MD3 Expressive size. |
 | `icons` | `true` or `false` or text | Whether a Switch shows a check or a cross on its handle. |
@@ -156,6 +160,7 @@ children: <a list>
 | `RadioButton` | MD3's radio button; the ones with one `group:` exclude each other. | `selected:`, `group:`, `disabled:` |
 | `Switch` | MD3's switch. | `selected:`, `disabled:` |
 | `Slider` | MD3's slider. | `value:`, `min:`, `max:`, `step:` |
+| `RangeSlider` | MD3's slider with two handles. | `low:`, `high:`, `min:`, `max:`, `step:` |
 | `SpinBox` | A number field between − and + buttons. | `value:`, `min:`, `max:`, `step:` |
 | `CircularProgress` | A circular progress indicator; no `value:` means indeterminate. | `value:` |
 | `LinearProgress` | A linear progress indicator; no `value:` means indeterminate. | `value:` |

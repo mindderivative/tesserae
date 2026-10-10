@@ -25,7 +25,23 @@ A slider lets the user pick a value from a range by dragging a handle, or with t
 
 Events: `on_input` while it is dragged (every step), `on_change` once it is let go and after each key. Dragging captures the pointer; the arrow keys
 step it, Page Up and Down move by ten steps, Home and End go to the ends, and a screen reader can increment, decrement and set it. The colour is
-`style.foreground` and the length is `style.width` (`style.height` when `vertical`). Range (two handles) is not built.
+`style.foreground` and the length is `style.width` (`style.height` when `vertical`).
+
+### Range slider
+
+`widget: RangeSlider` picks two values, a least and a most, with two handles. It takes the slider's `min`, `max`, `step`, `ticks`, `value_indicator`,
+`vertical`, `size`, `icon`, `label` and `disabled`, and, in place of `value`:
+
+| Property | Type | Meaning |
+| --- | --- | --- |
+| `low` | number, two-way | the least of the two; a bound Signal follows the drag |
+| `high` | number, two-way | the most of the two; never below `low` (a `high` below it is read as `low`) |
+
+The handles never cross: a drag stops at the other handle. Each handle is its own stop for Tab, has its own state layer and focus ring and, for a
+screen reader, is a slider of its own (named from `label`: "Price, minimum" and "Price, maximum"; its reach is up to or down from the other handle).
+The arrow, Page Up and Down keys move the handle that has the focus; Home and End take it to the end of what it may reach. A press on the track moves the
+nearer handle there, and a drag keeps hold of the handle it began on. The track between the handles is `primary`; with a `size` it is three pieces, a gap
+from each handle. `on_input` and `on_change` fire as for a slider; read the values from the bound `low` and `high`.
 
 `widget: Slider` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
@@ -64,6 +80,7 @@ style: {flex_direction: vertical, gap: 16, width: 280, height: 160, padding: 16}
 children:
   - {widget: Slider, value: "{{ volume }}", min: 0, max: 100, label: Volume, value_indicator: true, style: {width: 240}}
   - {widget: Slider, value: "{{ stars }}", min: 1, max: 5, step: 1, ticks: true, style: {width: 240}}
+  - {widget: RangeSlider, low: "{{ cheapest }}", high: "{{ dearest }}", min: 0, max: 500, step: 10, label: Price, style: {width: 240}}
 ```
 
 ## Using the fragment

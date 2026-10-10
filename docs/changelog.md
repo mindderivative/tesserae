@@ -4,7 +4,13 @@
 
 ### Added
 
-- **Slider: Expressive sizes, vertical and an inset icon** ([#250](https://github.com/mindderivative/tesserae/issues/250), part 1 of 2; the range slider is part 2).
+- **RangeSlider: two handles** ([#250](https://github.com/mindderivative/tesserae/issues/250), part 2 of 2). `widget: RangeSlider` picks a least and a most value
+  with `low` and `high` (two-way, `low <= high`: the handles never cross). Each handle is its own Tab stop with its own state layer and focus ring, and a slider of
+  its own for a screen reader ("Price, minimum", "Price, maximum", reaching up to or down from the other handle); the arrow, Page and Home/End keys move the handle
+  that has the focus. A press on the track moves the nearer handle, a drag keeps the handle it began on. It takes the slider's `min`, `max`, `step`, `ticks`,
+  `value_indicator`, `vertical`, `size` and `icon`; with a `size` the track is three pieces, a gap from each handle. `controls.RangeSlider` is the Python class;
+  `on_input` and `on_change` hear `(low, high)`.
+- **Slider: Expressive sizes, vertical and an inset icon** ([#250](https://github.com/mindderivative/tesserae/issues/250), part 1 of 2).
   `size: xs | s | m | l | xl` draws MD3 Expressive's slider: a track 16, 24, 40, 56 or 96 px thick in two pieces with a 6 px gap on each side of a thin
   4 px handle (44 to 108 px across it); the touch target grows to hold the handle. `vertical: true` stands it up: the bottom is `min`, `style.height` is
   its length, the up and down arrows step it, and the ticks and the value bubble go beside the track. `icon: name` insets a glyph at the start of the

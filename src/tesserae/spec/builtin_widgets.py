@@ -121,6 +121,18 @@ declare("Slider", {"value": P("float", default=0.0, model=True, doc="From `min` 
                    "icon": P("str", doc="An icon inset at the start of the track (needs a `size` of `s` or larger)."),
                    "label": P("str", doc="What a screen reader calls it."), "disabled": P("bool")},
         extras=("foreground",), doc="Picks a value between `min` and `max` by dragging.")
+declare("RangeSlider", {"low": P("float", default=0.0, model=True, doc="The least of the two values; a bound Signal follows the drag."),
+                        "high": P("float", default=1.0, model=True, doc="The most of the two values; it is never below `low`."),
+                        "min": P("float", default=0.0), "max": P("float", default=1.0),
+                        "step": P("float", doc="Snap to multiples of this from `min`; the keys move by it."),
+                        "ticks": P("bool", doc="A mark at each step (needs `step`): a discrete slider."),
+                        "value_indicator": P("bool", doc="A bubble with the value over a handle while it is dragged or has the keyboard."),
+                        "vertical": P("bool", doc="Stood up: the bottom is `min`; `style.height` is its length and `style.width` the touch target's."),
+                        "size": P("enum", choices=("xs", "s", "m", "l", "xl"),
+                                  doc="MD3 Expressive's size: a thicker track in three pieces and thin 4 px handles (empty: the standard 4 px track and 20 px handles)."),
+                        "icon": P("str", doc="An icon inset at the start of the track (needs a `size` of `s` or larger)."),
+                        "label": P("str", doc="What a screen reader calls it; the handles are 'minimum' and 'maximum' of it."), "disabled": P("bool")},
+        extras=("foreground",), doc="Picks two values, a least and a most, between `min` and `max` by dragging two handles.")
 declare("SpinBox", {
     "value": P("float", default=0.0, model=True), "min": P("float"), "max": P("float"), "step": P("float", default=1.0),
     "disabled": P("bool"), "label": P("str", doc="What a screen reader calls it."),

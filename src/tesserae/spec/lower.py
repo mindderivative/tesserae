@@ -62,7 +62,7 @@ def lower(inst: Instance) -> dict[str, Any]:
         if "scroll_offset" in values or values.get("orientation") == "horizontal" or values.get("snap") not in (None, "none"):
             node["scroll"] = {k: v for k, v in (("offset", values.get("scroll_offset")), ("orientation", values.get("orientation")),
                                                   ("snap", values.get("snap"))) if v is not None}
-    elif widget in ("Checkbox", "RadioButton", "Switch", "Slider"):
+    elif widget in ("Checkbox", "RadioButton", "Switch", "Slider", "RangeSlider"):
         folded = {"label"}
         if widget == "Checkbox" and "checked" in values:
             node["checked"] = values["checked"]
@@ -98,7 +98,7 @@ def lower(inst: Instance) -> dict[str, Any]:
     if inst.classes:
         node["classes"] = list(inst.classes)
     a11y: dict[str, Any] = {}
-    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator", "Checkbox", "RadioButton", "Switch", "Slider", "SpinBox", "TimePickerDial") and values.get("label"):
+    if widget in ("LinearProgress", "CircularProgress", "LoadingIndicator", "Checkbox", "RadioButton", "Switch", "Slider", "RangeSlider", "SpinBox", "TimePickerDial") and values.get("label"):
         a11y = {"label": values["label"]}
     if widget == "Text" and values.get("heading"):
         a11y = {"role": "heading", "level": values["heading"]}

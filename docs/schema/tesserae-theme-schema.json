@@ -2626,6 +2626,7 @@
             "NodeGraph",
             "Overlay",
             "RadioButton",
+            "RangeSlider",
             "Rect",
             "ScrollView",
             "Slider",

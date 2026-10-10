@@ -34,7 +34,7 @@ from tesserae import motion
 
 __all__ = [
     "DISABLED_CONTAINER", "DISABLED_CONTENT", "Checkbox", "Control", "RadioButton", "RadioGroup", "STATE_LAYER_SIZE",
-    "CircularProgress", "LinearProgress", "LoadingIndicator", "Slider", "SpinBox", "Switch", "TARGET_SIZE",
+    "CircularProgress", "LinearProgress", "LoadingIndicator", "RangeSlider", "Slider", "SpinBox", "Switch", "TARGET_SIZE",
     "TimePickerDial",
 ]
 
@@ -475,7 +475,7 @@ def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
-_max = max  # a Slider has a parameter named `max`
+_max, _min = max, min  # a Slider has parameters named `min` and `max`
 
 
 class Slider(Control):
@@ -510,6 +510,24 @@ class Slider(Control):
                  step: Optional[float] = None, width: Optional[float] = None, height: Optional[float] = None,
                  color: Optional[RGBA] = None, ticks: bool = False, value_indicator: bool = False,
                  vertical: bool = False, size: Optional[str] = None, icon: Optional[str] = None, **kwargs: Any) -> None:
+        node_size = self._configure(min, max, step, width, height, color, ticks, value_indicator, vertical, size, icon)
+        self._start: float = 0.0
+        self.value = Signal(self._snap(value))
+        super().__init__(window, **node_size, **kwargs)
+        for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
+                               ("pointer_up", self._on_up), ("pointer_cancel", self._on_up),
+                               ("key_down", self._on_key)):
+            self._undo.append(self._listen(self.node, event, handler))
+        self._undo.append(a11y.on_action(self.node, {
+            "increment": lambda e: self._user_set(self.value.get() + self._key_step()),
+            "decrement": lambda e: self._user_set(self.value.get() - self._key_step()),
+            "set_value": lambda e: self._user_set(float(e.value)) if e.value is not None else None,
+        }, listen=self._listen))
+        self._follow_layout()
+
+    def _configure(self, min: float, max: float, step: Optional[float], width: Optional[float], height: Optional[float], color: Optional[RGBA],
+                   ticks: bool, value_indicator: bool, vertical: bool, size: Optional[str], icon: Optional[str]) -> dict[str, float]:
+        """What a slider and a range slider share: the range, the look and the geometry. Returns the node's `width` and `height`."""
         if not max > min:
             raise ValueError(f"a slider needs max > min, got min={min!r}, max={max!r}")
         if step is not None and not step > 0:
@@ -535,25 +553,16 @@ class Slider(Control):
         self._color = color
         self.ticks = bool(ticks and step)  # a mark at each step (a discrete slider); without a step there is nothing to mark
         self.value_indicator = bool(value_indicator)  # a bubble over the handle with the value, while it is dragged or has the keyboard
-        self._live: list[Callable[[float], None]] = []
+        self._live: list[Callable[[Any], None]] = []
         self._shown = False
         self._dragging = False
-        self._start: float = 0.0
-        self.value = Signal(self._snap(value))
-        super().__init__(window, **node_size, **kwargs)
-        for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
-                               ("pointer_up", self._on_up), ("pointer_cancel", self._on_up),
-                               ("key_down", self._on_key)):
-            self._undo.append(self._listen(self.node, event, handler))
-        self._undo.append(a11y.on_action(self.node, {
-            "increment": lambda e: self._user_set(self.value.get() + self._key_step()),
-            "decrement": lambda e: self._user_set(self.value.get() - self._key_step()),
-            "set_value": lambda e: self._user_set(float(e.value)) if e.value is not None else None,
-        }, listen=self._listen))
-        # a slider laid out longer or shorter than it was built (flex, a percentage, a resized window) takes the room it was given (#252);
-        # layout is settled when a frame has been drawn, and `_fit_length` does nothing while the length is the same
+        return node_size
+
+    def _follow_layout(self) -> None:
+        """A slider laid out longer or shorter than it was built (flex, a percentage, a resized window) takes the room it was given (#252);
+        layout is settled when a frame has been drawn, and `_fit_length` does nothing while the length is the same."""
         for event in ("frame", "resize"):
-            self._undo.append(listen_window(window, event, lambda e: untrack(lambda: self._fit_length() and self._paint(animate=False))))
+            self._undo.append(listen_window(self.window, event, lambda e: untrack(lambda: self._fit_length() and self._paint(animate=False))))
 
     @property
     def width(self) -> float:
@@ -786,6 +795,286 @@ class Slider(Control):
             self._user_set(self.min)
         elif event.key == "end":
             self._user_set(self.max)
+
+
+class RangeSlider(Slider):
+    """A slider with two handles: `low` and `high`, two `Signal`s, never crossing (`low <= high`). Each handle is its own stop for Tab, has the
+    arrow, Page and Home/End keys (Home and End go to the ends of what that handle may reach), is its own slider for a screen reader
+    (minimum and maximum) and has its own state layer and focus ring; the control itself is the group around them. A press on the track moves the
+    nearer handle there, and a drag keeps hold of the handle it began on. The track between the handles is `primary`; the rest is
+    `surface_container_highest`. `size`, `vertical`, `ticks` and `value_indicator` are the slider's.
+
+    `on_input(fn)` and `on_change(fn)` hear `(low, high)`; a bound `low` or `high` is written the same way a slider's `value` is."""
+
+    role = "group"
+    THUMB = 48.0  # a handle's touch target along the track
+
+    def __init__(self, window: Any, *, low: float = 0.0, high: float = 1.0, min: float = 0.0, max: float = 1.0,
+                 step: Optional[float] = None, width: Optional[float] = None, height: Optional[float] = None,
+                 color: Optional[RGBA] = None, ticks: bool = False, value_indicator: bool = False,
+                 vertical: bool = False, size: Optional[str] = None, icon: Optional[str] = None, label: Optional[str] = None,
+                 **kwargs: Any) -> None:
+        node_size = self._configure(min, max, step, width, height, color, ticks, value_indicator, vertical, size, icon)
+        self._label = label
+        self.low = Signal(self._snap(low))
+        self.high = Signal(_max(self._snap(high), self.low.get()))  # a `high` below `low` is raised to it
+        self._drag: Optional[int] = None  # the handle a drag holds (0: low, 1: high)
+        self._began: tuple[float, float] = (self.low.get(), self.high.get())
+        self._shown_for = [False, False]
+        Control.__init__(self, window, label=label, **node_size, **kwargs)
+        self._undo.append(self._listen(self.node, "pointer_down", self._on_down))
+        self._undo.append(self._listen(self.node, "pointer_move", self._on_move))
+        self._undo.append(self._listen(self.node, "pointer_up", self._on_up))
+        self._undo.append(self._listen(self.node, "pointer_cancel", self._on_up))
+        for i, thumb in enumerate(self.thumbs):
+            self._undo.append(self._listen(thumb.node, "key_down", lambda e, i=i: self._on_key_for(i, e)))
+            self._undo.append(a11y.on_action(thumb.node, {
+                "increment": lambda e, i=i: self._user_set(i, self._of(i) + self._key_step()),
+                "decrement": lambda e, i=i: self._user_set(i, self._of(i) - self._key_step()),
+                "set_value": lambda e, i=i: self._user_set(i, float(e.value)) if e.value is not None else None,
+            }, listen=self._listen))
+        self._follow_layout()
+
+    # -- the two values ------------------------------------------------------------------------------------------------------
+
+    def _of(self, i: int) -> float:
+        return (self.low, self.high)[i].get()
+
+    def _pair(self) -> tuple[float, float]:
+        """The two values, snapped and in order, whatever the Signals were last set to."""
+        low = self._snap(self.low.get())
+        return low, _max(self._snap(self.high.get()), low)
+
+    def _bounds(self, i: int) -> tuple[float, float]:
+        """What handle `i` may reach: the low one up to the high one, the high one down to the low one."""
+        low, high = self._pair()
+        return (self.min, high) if i == 0 else (low, self.max)
+
+    def _set_handle(self, i: int, value: float) -> None:
+        lo, hi = self._bounds(i)
+        (self.low, self.high)[i].set(_clamp(self._snap(value), lo, hi))
+
+    def _user_set(self, i: int, value: float) -> None:
+        before = self._pair()
+        self._set_handle(i, value)
+        if self._pair() != before:
+            self._input()
+            self._changed(self._pair())
+
+    def _input(self) -> None:
+        for fn in list(self._live):
+            fn(self._pair())
+
+    def _fractions(self) -> tuple[float, float]:
+        low, high = self._pair()
+        return (low - self.min) / (self.max - self.min), (high - self.min) / (self.max - self.min)
+
+    # -- building --------------------------------------------------------------------------------------------------------------
+
+    def _build(self) -> None:
+        from types import SimpleNamespace
+
+        mid = self.cross / 2
+        thick = self._thick
+        self.inactive = self.window.create("box", position="absolute", corner_radius=thick / 2, hit_testable=False, a11y_hidden=True)
+        self.inactive_high = self.window.create("box", position="absolute", corner_radius=thick / 2, hit_testable=False, a11y_hidden=True)
+        self.active = self.window.create("box", position="absolute", corner_radius=thick / 2, hit_testable=False, a11y_hidden=True)
+        self._place(self.inactive, self._edge, self._span, mid - thick / 2, thick)
+        self._place(self.active, self._edge, 0.0, mid - thick / 2, thick)
+        for piece in (self.inactive, self.inactive_high, self.active):
+            self.node.add_child(piece)
+        self.tick_marks: list[Any] = []
+        count = round((self.max - self.min) / self.step) if self.ticks else 0
+        if 0 < count <= 100:
+            for i in range(count + 1):
+                mark = self.window.create("box", position="absolute", corner_radius=1.0, hit_testable=False, a11y_hidden=True)
+                self.node.add_child(mark)
+                self.tick_marks.append(mark)
+        self._place_ticks()
+        self.icon = None
+        if self.icon_name is not None:  # at the start of the track: over the low piece of it
+            px = self._icon_px
+            self.icon = self.window.create("path", data=icon_path(self.icon_name), view_box=icon_view_box(self.icon_name), position="absolute",
+                                           hit_testable=False, a11y_hidden=True)
+            self._place(self.icon, (thick - px) / 2, px, mid - px / 2, px)
+            self.node.add_child(self.icon)
+        self.thumbs: list[Any] = []
+        names = ("minimum", "maximum")
+        for i in range(2):
+            handle = self.window.create("box", position="absolute", corner_radius=_min(self._hl, self._across) / 2, hit_testable=False, a11y_hidden=True)
+            bubble = self.window.create("box", corner_radius=14.0, align_items="center", justify_content="center", visible=False, position="absolute",
+                                        hit_testable=False, a11y_hidden=True)
+            bubble_text = self.window.create("text", text="", font_family="Roboto", font_size=12.0, font_weight=500.0, hit_testable=False, a11y_hidden=True)
+            bubble.add_child(bubble_text)
+            node = self.window.create("box", position="absolute", focusable=True, role="slider", cursor="pointer")
+            a11y.describe(node, label=self._handle_label(i))
+            surface = self.window.create("box", position="absolute", x=(self.THUMB - STATE_LAYER_SIZE) / 2 if not self.vertical else (self.cross - STATE_LAYER_SIZE) / 2,
+                                         y=(self.cross - STATE_LAYER_SIZE) / 2 if not self.vertical else (self.THUMB - STATE_LAYER_SIZE) / 2,
+                                         width=STATE_LAYER_SIZE, height=STATE_LAYER_SIZE, corner_radius=STATE_LAYER_SIZE / 2, hit_testable=False,
+                                         a11y_hidden=True)
+            node.add_child(surface)
+            for part in (handle, node, bubble):
+                self.node.add_child(part)
+            thumb = SimpleNamespace(node=node, surface=surface, handle=handle, bubble=bubble, bubble_text=bubble_text, interaction=None)
+            thumb.interaction = Interaction(self.window, node, self._tint(), self._listen, self.color("secondary"), surface=surface)
+            self.thumbs.append(thumb)
+            self._undo.append(self._listen(node, "focus", lambda e, i=i: self._show_bubble_for(i, bool(getattr(e, "focus_visible", True)))))
+            self._undo.append(self._listen(node, "unfocus", lambda e, i=i: self._show_bubble_for(i, False)))
+        self.handle, self.handle_high = self.thumbs[0].handle, self.thumbs[1].handle  # the two handles, by their old and their new names
+        self._place_start()
+
+    def _handle_label(self, i: int) -> str:
+        name = ("minimum", "maximum")[i]
+        return f"{self._label}, {name}" if self._label else name.capitalize()
+
+    def relabel(self, label: Optional[str]) -> None:
+        """Names the handles from the group's new `label`."""
+        if label != self._label:
+            self._label = label
+            for i, thumb in enumerate(self.thumbs):
+                a11y.describe(thumb.node, label=self._handle_label(i))
+
+    def _place_start(self) -> None:
+        mid = self.cross / 2
+        for thumb in self.thumbs:
+            self._place(thumb.handle, 0.0, self._hl, mid - self._across / 2, self._across)
+            self._place(thumb.bubble, self._edge - 14.0, 28.0, mid - self._across / 2 - 8.0 - 28.0, 28.0)
+            self._place(thumb.node, self._edge - self.THUMB / 2, self.THUMB, 0.0, self.cross)
+
+    def _tint(self) -> RGBA:
+        return self._on_colour()
+
+    def _render(self) -> None:
+        disabled = self.disabled.get()
+        self.node.set(focusable=False, disabled=disabled, cursor="default" if disabled else "pointer")  # the group is not a stop; its handles are
+        self.interaction.enabled = False  # the group itself shows no feedback: each handle does
+        for thumb in self.thumbs:
+            thumb.node.set(focusable=not disabled, disabled=disabled, cursor="default" if disabled else "pointer")
+            thumb.interaction.enabled = not disabled
+        self._paint(animate=self._painted)
+        for thumb in self.thumbs:
+            thumb.interaction.retint(self._tint(), self.color("secondary"))
+        self._painted = True
+
+    def set_theme(self, theme: Theme) -> None:
+        super().set_theme(theme)
+        for thumb in self.thumbs:
+            thumb.interaction.retint(self._tint(), self.color("secondary"))
+
+    def dispose(self) -> None:
+        for thumb in getattr(self, "thumbs", ()):
+            thumb.interaction.detach()
+        super().dispose()
+
+    # -- painting --------------------------------------------------------------------------------------------------------------
+
+    def _paint(self, animate: bool) -> None:
+        self._fit_length()
+        low, high = self._pair()
+        disabled = self.disabled.get()
+        on_surface = self.color("on_surface")
+        if disabled:
+            active = handle = with_alpha(on_surface, DISABLED_CONTENT)
+            inactive = with_alpha(on_surface, DISABLED_CONTAINER)
+        else:
+            active = handle = self._on_colour()
+            inactive = self.color("surface_container_highest")
+        ms = self._ms(animate, "short3")
+        for piece, colour in ((self.active, active), (self.inactive, inactive), (self.inactive_high, inactive)):
+            self._to(piece, "fill", colour, ms)
+        fractions = self._fractions()
+        offsets = [f * self._span for f in fractions]
+        mid, thick, hl = self.cross / 2, self._thick, self._hl
+        centres = [self._edge + o for o in offsets]
+        if self.size:  # three pieces of track, each a gap from a handle
+            low_end = _max(centres[0] - hl / 2 - self.GAP, 0.0)
+            active_start, active_end = centres[0] + hl / 2 + self.GAP, centres[1] - hl / 2 - self.GAP
+            high_start = centres[1] + hl / 2 + self.GAP
+            self._place(self.inactive, 0.0, low_end, mid - thick / 2, thick)
+            self._place(self.active, active_start, _max(active_end - active_start, 0.0), mid - thick / 2, thick)
+            self._place(self.inactive_high, high_start, _max(self.length - high_start, 0.0), mid - thick / 2, thick)
+        else:  # the full track lies under, and the active part is drawn between the two handle centres
+            self._place(self.active, centres[0], offsets[1] - offsets[0], mid - thick / 2, thick)
+        for i, thumb in enumerate(self.thumbs):
+            value = (low, high)[i]
+            lo, hi = self._bounds(i)
+            thumb.node.set(value=value, value_min=lo, value_max=hi, value_step=self._key_step())
+            self._to(thumb.handle, "fill", handle, ms)
+            self._slide(thumb.handle, offsets[i])
+            self._slide(thumb.node, offsets[i])
+            thumb.bubble.set(fill=self.color("inverse_surface"))
+            thumb.bubble_text.set(text=f"{value:g}", fill=self.color("inverse_on_surface"))
+            self._slide(thumb.bubble, offsets[i])
+        if self.icon is not None:
+            self.icon.set(fill=with_alpha(on_surface, DISABLED_CONTENT) if disabled else self.color("on_surface_variant"))
+        count = len(self.tick_marks) - 1
+        for i, mark in enumerate(self.tick_marks):  # a mark between the handles is the on-colour, outside them the variant
+            inside = count > 0 and fractions[0] - 1e-9 <= i / count <= fractions[1] + 1e-9
+            mark.set(fill=self.color("on_primary") if inside and not disabled else self.color("on_surface_variant"))
+
+    def _show_bubble_for(self, i: int, shown: bool) -> None:
+        self._shown_for[i] = shown
+        self.thumbs[i].bubble.set(visible=self.value_indicator and (shown or self._drag == i))
+
+    # -- the pointer -----------------------------------------------------------------------------------------------------------
+
+    def _nearer(self, along: float) -> int:
+        """The handle nearer a press `along` the track; on a tie the one on the press's side."""
+        centres = [self._edge + f * self._span for f in self._fractions()]
+        near_low, near_high = abs(along - centres[0]), abs(along - centres[1])
+        if near_low == near_high:
+            return 0 if along < centres[0] else 1
+        return 0 if near_low < near_high else 1
+
+    def _on_down(self, event: Any) -> None:
+        along = self._at(event)
+        if self.disabled.get() or along is None:
+            return
+        self._drag = self._nearer(along)
+        self._began = self._pair()
+        self.node.capture_pointer()
+        thumb = self.thumbs[self._drag]
+        thumb.interaction.set_dragged(True)
+        thumb.node.focus()
+        self._show_bubble_for(self._drag, self._shown_for[self._drag])
+        self._move_to(event)
+
+    def _on_move(self, event: Any) -> None:
+        if self._drag is not None and self._at(event) is not None:
+            self._move_to(event)
+
+    def _move_to(self, event: Any) -> None:
+        before = self._pair()
+        self._set_handle(self._drag, self._from_event(event))
+        if self._pair() != before:
+            self._input()
+
+    def _on_up(self, event: Any) -> None:
+        if self._drag is None:
+            return
+        held, self._drag = self._drag, None
+        self.node.release_pointer()
+        for thumb in self.thumbs:
+            thumb.interaction.release()  # a press that began on a handle's own node was released to the group, which held the pointer
+        self.thumbs[held].interaction.set_dragged(False)
+        self._show_bubble_for(held, self._shown_for[held])
+        if self._pair() != self._began:
+            self._changed(self._pair())
+
+    # -- the keys --------------------------------------------------------------------------------------------------------------
+
+    def _on_key_for(self, i: int, event: Any) -> None:
+        if self.disabled.get():
+            return
+        step = self._key_step()
+        moves = {"arrow_right": step, "arrow_up": step, "arrow_left": -step, "arrow_down": -step, "page_up": 10 * step, "page_down": -10 * step}
+        lo, hi = self._bounds(i)
+        if event.key in moves:
+            self._user_set(i, self._pair()[i] + moves[event.key])
+        elif event.key == "home":
+            self._user_set(i, lo)
+        elif event.key == "end":
+            self._user_set(i, hi)
 
 
 class SpinBox:

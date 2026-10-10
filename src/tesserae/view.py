@@ -101,7 +101,7 @@ _NUMBER_PROPS = {"width", "height", "padding", "gap", "opacity", "corner_radius"
 def _props_equal(a: dict[str, Any], b: dict[str, Any]) -> bool:
     """`tre`'s `node_props_equal`, plus the state fields Tesserae builds from."""
     # `handlers` and `a11y` too: they change focus, role and label (M39)
-    keys = ("kind", "classes", "style", "text", "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "value", "error", "icons", "ticks", "value_indicator", "vertical", "size", "checked", "selected", "value", "hour", "minute",
+    keys = ("kind", "classes", "style", "text", "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "value", "error", "icons", "ticks", "value_indicator", "vertical", "size", "low", "high", "checked", "selected", "value", "hour", "minute",
             "handlers", "a11y", "component_of", "min", "max", "step", "label", "x", "y",  # M57, M58, M60
             "disabled",  # M70: a control's is its own
             "spin", "dial", "graph", "tooltip",  # a SpinBox's options, a dial's mode, a generated node's tooltip
@@ -1174,7 +1174,7 @@ def _remeasure(window: Any, node: Any, style: dict[str, Any], kind: str) -> None
 
 
 #: A control's state a binding sets on the control (M40), and the type each takes.
-_CONTROL_STATE = {"checked": bool, "selected": bool, "disabled": bool, "value": float, "hour": int, "minute": int}
+_CONTROL_STATE = {"checked": bool, "selected": bool, "disabled": bool, "value": float, "low": float, "high": float, "hour": int, "minute": int}
 
 
 def _apply_to_control(control: Any, kind: Optional[str], prop: str, value: Any) -> None:

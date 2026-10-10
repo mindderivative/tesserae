@@ -326,6 +326,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "track": {"anyOf": [{"type": "string"}, {"type": "null"}], "description": "The colour role of the track behind a progress indicator."},
         "ticks": {**maybe_bool, "description": "Whether a Slider marks each step."},
         "value_indicator": {**maybe_bool, "description": "Whether a Slider shows a bubble with its value over the handle."},
+        "low": {**maybe_number, "description": "A RangeSlider's least value."},
+        "high": {**maybe_number, "description": "A RangeSlider's most value."},
         "vertical": {**maybe_bool, "description": "Whether a Slider is stood up (the bottom is its minimum)."},
         "size": {"anyOf": [{"enum": ["xs", "s", "m", "l", "xl"]}, {"type": "null"}], "description": "A Slider's MD3 Expressive size."},
         "icons": {**maybe_bool, "description": "Whether a Switch shows a check or a cross on its handle."},

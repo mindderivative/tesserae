@@ -13,7 +13,7 @@ Each kind maps onto `tre`'s building blocks:
 | `TextField` | a `box` (its `background`) holding a `text_input` |
 | `Image` | an `image`, from pixels Tesserae decoded |
 | `Icon` | a `path` from `tesserae.icons` (needs `foreground`) |
-| `Checkbox`, `RadioButton`, `Switch`, `Slider`, `CircularProgress`, `LinearProgress`, `LoadingIndicator`, `TimePickerDial` | Tesserae's own MD3 controls (`tesserae.controls`, M40), whose `.node` goes in the tree; `Built.controls` keeps them |
+| `Checkbox`, `RadioButton`, `Switch`, `Slider`, `RangeSlider`, `CircularProgress`, `LinearProgress`, `LoadingIndicator`, `TimePickerDial` | Tesserae's own MD3 controls (`tesserae.controls`, M40), whose `.node` goes in the tree; `Built.controls` keeps them |
 
 Styles resolve through `tesserae.spec.cascade`; theme roles, shape
 tokens, elevation levels and type roles through `tesserae.tokens`. Errors
@@ -48,7 +48,7 @@ _TRANSPARENT: RGBA = (0, 0, 0, 0)
 #: MD3's baseline colours, for nodes with no theme.
 _BASELINE = tokens.BASELINE
 _CONTROL_KINDS = frozenset({
-    "Checkbox", "RadioButton", "Switch", "Slider", "SpinBox", "CircularProgress", "LinearProgress",
+    "Checkbox", "RadioButton", "Switch", "Slider", "RangeSlider", "SpinBox", "CircularProgress", "LinearProgress",
     "LoadingIndicator", "TimePickerDial",
 })
 #: Kinds built with a `tesserae.widgets` widget (M60): a node graph and its nodes.
@@ -57,7 +57,7 @@ _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", 
                                            "ScrollView", "Canvas", "Overlay"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "error", "icons", "ticks", "value_indicator", "vertical", "size", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "error", "icons", "ticks", "value_indicator", "vertical", "size", "low", "high", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -1265,6 +1265,12 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
                                       max=1.0 if node.get("max") is None else float(node["max"]), step=node.get("step"),
                                       ticks=bool(node.get("ticks")), value_indicator=bool(node.get("value_indicator")),
                                       vertical=bool(node.get("vertical")), size=node.get("size"), icon=node.get("icon"), **size, **common)
+        elif kind == "RangeSlider":
+            control = controls.RangeSlider(ctx.window, low=float(node.get("low") or 0.0), high=1.0 if node.get("high") is None else float(node["high"]),
+                                           min=float(node.get("min") or 0.0), max=1.0 if node.get("max") is None else float(node["max"]),
+                                           step=node.get("step"), ticks=bool(node.get("ticks")), value_indicator=bool(node.get("value_indicator")),
+                                           vertical=bool(node.get("vertical")), size=node.get("size"), icon=node.get("icon"),
+                                           label=(node.get("a11y") or {}).get("label"), **size, **common)  # its handles are named from it
         elif kind == "SpinBox":  # M58: two buttons and a field, sized by MD3, not `width`/`height`
             common.pop("color")
             control = controls.SpinBox(ctx.window, value=_spin_number(node.get("value") or 0, node.get("step") or 1),
@@ -1387,6 +1393,10 @@ def _patch_control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], c
             control.buffer.set(node.get("buffer"))
     elif kind == "Slider":
         control.value.set(float(node.get("value") or 0.0))
+    elif kind == "RangeSlider":
+        control.low.set(float(node.get("low") or 0.0))
+        control.high.set(1.0 if node.get("high") is None else float(node["high"]))
+        control.relabel((node.get("a11y") or {}).get("label"))
     elif kind == "SpinBox":
         control.value.set(control._fit(_spin_number(node.get("value") or 0, control.step)))
     elif kind == "TimePickerDial":

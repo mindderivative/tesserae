@@ -1610,6 +1610,38 @@ MD3's loading indicator: a filled `primary` shape, 38 px in a 48 px box, morphin
 
 Also has everything `Indicator` has.
 
+### `RangeSlider`
+
+```python
+class RangeSlider(
+    window: Any,
+    *,
+    low: float = 0.0,
+    high: float = 1.0,
+    min: float = 0.0,
+    max: float = 1.0,
+    step: Optional[float] = None,
+    width: Optional[float] = None,
+    height: Optional[float] = None,
+    color: Optional[RGBA] = None,
+    ticks: bool = False,
+    value_indicator: bool = False,
+    vertical: bool = False,
+    size: Optional[str] = None,
+    icon: Optional[str] = None,
+    label: Optional[str] = None,
+    **kwargs: Any
+) -> None  # extends Slider
+```
+
+A slider with two handles: `low` and `high`, two `Signal`s, never crossing (`low <= high`). Each handle is its own stop for Tab, has the arrow, Page and Home/End keys (Home and End go to the ends of what that handle may reach), is its own slider for a screen reader (minimum and maximum) and has its own state layer and focus ring; the control itself is the group around them.
+
+Also has everything `Slider` has.
+
+- `dispose() -> None`: Stops the control (its repainting and listeners) but leaves its node, for a caller about to free the tree it sits in.
+- `relabel(label: Optional[str]) -> None`: Names the handles from the group's new `label`.
+- `set_theme(theme: Theme) -> None`: Re-tints the control for `theme`, at once.
+
 ### `Slider`
 
 ```python
@@ -1976,6 +2008,7 @@ The state layer, ripple and focus ring on one `box` node: the layer and ripple t
 - `enabled` *(property)*: Whether the node shows state feedback (hover, focus, press); set it to turn that on or off.
 - `opacity` *(property)*: The state layer's resting opacity for the current state.
 - `refresh() -> None`: Follows the node's corners (and, for the ring, its size).
+- `release() -> None`: Lets go of every press held, for a widget whose pointer was taken by another node (a captured drag), so the release never came here.
 - `retint(tint: RGBA, ring_color: RGBA, glow: tuple[RGBA, RGBA] | None = None) -> None`: New colours (a theme change), for the layer, live ripples and ring.
 - `ring_visible` *(property)*: Whether the focus ring is showing.
 - `ripples` *(property)*: The live ripples, oldest first: their circle nodes, or (drawn by the shader) the presses it holds.

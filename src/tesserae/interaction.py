@@ -150,6 +150,10 @@ class Interaction:
             return list(self._shader.presses)
         return [ripple.circle for ripple in self._ripples]
 
+    def release(self) -> None:
+        """Lets go of every press held, for a widget whose pointer was taken by another node (a captured drag), so the release never came here."""
+        self._release_all()
+
     def set_dragged(self, dragged: bool) -> None:
         """For widgets that drag: MD3's dragged state."""
         self.dragged = dragged
