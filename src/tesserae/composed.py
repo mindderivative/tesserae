@@ -92,7 +92,7 @@ def scroll_edges(offset: float, viewport: float, length: float) -> tuple[bool, b
 
 
 def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable[..., Optional[Callable[..., Any]]]:
-    """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen[, params])`, `navigate_route(path)`, `surface.dismiss` and
+    """The actions a handler may call without a ViewModel: `window.<action>`, `navigate.<screen>`, `navigate_to(screen[, params])`, `navigate_route(path)`, `open_window(view[, modal])`, `surface.dismiss` and
     `focus(name)`, `capture()`, `release()`, `cursor(name)`, `copy(text)`, `paste()`, `open_url(url)`, `after(ms, action[, name])`, `every(ms, action[, name])` and `cancel(name)`. `view_ref()` is the `ComposedView` they act for (it does not exist yet when composing starts); `window` is the one it will be on, which is how `app` is found then."""
 
     def resolve(path: str, scope: Any = None) -> Optional[Callable[..., Any]]:
@@ -116,7 +116,17 @@ def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable
             return lambda name: view.timers.cancel(view.timer_name(scope, name))
         head, _, rest = path.partition(".")
         if head == "window" and rest in WINDOW_ACTIONS:
-            return lambda: getattr(app_of(view.window), rest)() if app_of(view.window) is not None else None
+            def window_action() -> None:
+                app = app_of(view.window)
+                if app is not None:  # a second window's title bar acts on that window, not the main one
+                    getattr(app._appwindow_for(view.window) or app, rest)()
+            return window_action
+        if path == "open_window":  # a view in a window of its own (`open_window('Settings', True)`: the second argument blocks this window)
+            def open_window(name: str, modal: bool = False) -> None:
+                app = app_of(view.window)
+                if app is not None:
+                    app.open_window(name, parent=app._appwindow_for(view.window), modal=bool(modal))
+            return open_window
         if head == "navigate" and rest:
             def navigate() -> None:
                 app = app_of(view.window)

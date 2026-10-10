@@ -82,6 +82,7 @@ class App(
 - `check() -> list[str]`: Problems between the views opened with `open_view` and their ViewModels (names, actions and `expects:`), and ViewModels that serve a view none of them has.
 - `click_through` *(property)*: Whether the whole window ignores the pointer, so clicks reach what is behind it.
 - `close() -> None`: Closes the window as the user's close would: `close_requested` fires first, so an app's "save changes?" check still runs and can cancel it.
+- `close_window(name: str) -> None`: Closes the window `name` as the user's close would.
 - `current` *(property)*: The name last passed to `show()`, or `None` before the first real call -- lets a registered handler ask "which screen is this, anyway" without the app keeping its own separate bookkeeping.
 - `dark` *(property)*: Whether the app is showing its dark scheme right now.
 - `dark_mode` *(property)*: `"system"` (following the OS), or the app's fixed `True`/`False`.
@@ -105,6 +106,7 @@ class App(
 - `of(view: Any) -> 'App | None'`: The live app whose window `view` (a view, a component, or a window) is on, or `None`: for a ViewModel's constructor, before `super().__init__(view)` gives it `self.app`.
 - `on_file_drop(handler: Any) -> None`: Calls `handler(event)` when files are dropped anywhere on the window (`event.paths`); `None` stops it.
 - `open_view(view: str | Path, name: str | None = None) -> Any`: Opens a view written with `widget:` nodes against the ViewModel that serves its name, and registers it under `name` (default: its root `name:`, else its file's name) for `show(name)`.
+- `open_window(view: str | Path, name: str | None = None, *, parent: Any = None, modal: bool = False, center: bool = True) -> Any`: Opens `view` (a path or a name in the project, as `open_view` takes) in a new OS window and returns its `AppWindow`.
 - `platform` *(property)*: `"windows"`, `"macos"`, `"wayland"` or `"x11"`.
 - `present_mode` *(property)*: How frames are paced: `"vsync"` (one a display refresh, the default: an animating window uses a few percent of a core) or `"low_latency"` (the newest frame at once, and a whole core while something animates).
 - `profile_nodes` *(property)*: Whether each node's drawing time is measured, so `frame_stats()["profile"]` says where it went.
@@ -139,6 +141,8 @@ class App(
 - `watch_component(path: str | Path) -> None`: While `run(hot_reload=True)` runs, watches a component file and reloads every live instance of it on change; `tesserae.instantiate` calls it, so a component first added while the app runs is watched too.
 - `window` *(property)*: The app's one window (it exists from the start).
 - `window_border` *(property)*: Whether a borderless window gets its 1 px border (on by default): around the window, in the theme's `outline_variant`, a node of class `window_border` a theme or stylesheet can restyle.
+- `window_of(name: str) -> Any`: The `AppWindow` named `name`.
+- `windows` *(property)*: The app's other windows by name (not the main one, `app.window`).
 
 ## Reactivity
 

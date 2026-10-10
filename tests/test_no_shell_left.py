@@ -15,9 +15,10 @@ from tesserae import App, cli
 
 ROOT = Path(__file__).resolve().parent.parent
 GONE = re.compile(r"shell_file|AppShell|load_shell|use_shell|_Shell|tesserae\.shell|decorations|_removed|RemovedError")
-#: `decorations` is also `tre`'s own window option: the two lines where `borderless` is passed to it.
+#: `decorations` is also `tre`'s own window option: the lines where `borderless` is passed to it (the main window's two, and a second window's).
 TRE_LINES = re.compile(r"Window\(width=width, height=height, title=title, decorations=not borderless\)"
-                       r"|self\._window\.set\(decorations=not bool\(value\)")
+                       r"|self\._window\.set\(decorations=not bool\(value\)"
+                       r"|win\.set\(decorations=False, resize_border=")
 
 
 def test_nothing_of_the_old_shell_or_decorations_is_left_in_src():

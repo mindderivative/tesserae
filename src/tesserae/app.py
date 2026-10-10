@@ -30,7 +30,7 @@ from loguru import logger
 from tre import App as _TreApp
 from tre import Window
 
-from tesserae.follow import alive, app_of, register_app, retheme
+from tesserae.follow import alive, app_of, register_app, register_window, retheme
 from tesserae.listeners import Listeners, listen_window
 from tesserae.naming import check_naming_convention
 from tesserae.project import Project, is_name, resolve_embedded, resolve_view
@@ -387,6 +387,7 @@ class App:
         self._current: str | None = None
         #: The window view (`kind: Window`) once one is loaded: its `Frame` (0.4.4)
         self._frame: Any = None
+        self._windows: dict[str, Any] = {}
         self._guards: dict[str, list[Callable[[dict[str, Any]], Any]]] = {}
         self._frame_guards: dict[str, Callable[[dict[str, Any]], Any]] = {}
         self._redirects = 0
@@ -853,6 +854,9 @@ class App:
         """Opens a view written with `widget:` nodes against the ViewModel that serves its name, and registers it under
         `name` (default: its root `name:`, else its file's name) for `show(name)`. `view` is a path or a name found in the project;
         the views it calls are found in the project too. Returns the `ComposedView`; its `.handle` is what the ViewModel holds."""
+        return self._open_view(view, name, self._window)
+
+    def _open_view(self, view: str | Path, name: str | None, window: Any) -> Any:
         from tesserae.composed import open_composed
         from tesserae.shipped import ViewLibrary, shipped_rules
         from tesserae.spec.rules import is_rule_sheet
@@ -868,14 +872,96 @@ class App:
                 rules.append(self._rule_sheet())
             else:
                 kwargs["stylesheet_spec"] = self._stylesheet_spec
-        opened = open_composed(doc, self.bindings, library.doc, base_dir=path.parent, window=self._window, rules=rules, **kwargs)
+        opened = open_composed(doc, self.bindings, library.doc, base_dir=path.parent, window=window, rules=rules, **kwargs)
         key = name or doc.name or path.name.removesuffix("_View.yaml")
+        if window is not self._window:  # another window's view is not a screen of the main one: it is kept, themed and checked with the rest
+            self._built.append(_Built(opened))
+            self._opened[key] = opened
+            return opened
         self.register(key, opened, opened.handle.viewmodel)
         self._built.append(_Built(opened))
         self._opened[key] = opened
         if window_of(opened.spec) is not None:  # a `widget: Window` root is the app's window, as `kind: Window` is for `load`
             self._adopt_window_view(key, opened)
         return opened
+
+    def open_window(self, view: str | Path, name: str | None = None, *, parent: Any = None, modal: bool = False, center: bool = True) -> Any:
+        """Opens `view` (a path or a name in the project, as `open_view` takes) in a new OS window and returns its `AppWindow`.
+
+        The view's `widget: Window` root gives the window its title, size, minimum size, `borderless` and flags; without one it is 480 by 320. `modal=True` blocks
+        the parent (the main window, or `parent`, an `AppWindow`) until it closes. `center` puts it in the middle of the screen where the system allows. Before
+        `run()` the window opens with the main one; while it runs, on the loop's next turn. Closing it leaves the app running; closing the main window closes
+        every window."""
+        from tesserae import appwindows
+
+        win = Window(width=480, height=320, title=self._title or "")
+        register_window(self, win)
+        win.root.set(padding_top=0, padding_right=0, padding_bottom=0, padding_left=0, align_items="flex_start")
+        opened = self._open_view(view, name, win)
+        key = name or opened.handle.name or Path(str(view)).name.removesuffix("_View.yaml")
+        if key in self._windows:
+            raise ValueError(f"open_window: a window named {key!r} is already open")
+        options = window_of(opened.spec) or {}
+        self._apply_window_to(win, options)
+        if opened.root.parent() is None:
+            win.root.add_child(opened.root)
+        aw = appwindows.AppWindow(self, key, win, opened, parent=parent, modal=modal)
+        self._windows[key] = aw
+        listen_window(win, "closed", lambda event, aw=aw, key=key: (self._windows.pop(key, None), aw._closed()))
+        listen_window(win, "maximized", lambda event, aw=aw: aw._maximized.set(bool(event.maximized)))
+        if modal:
+            aw._block_parent()
+        if center:
+            win.after(50, aw.center)  # a window can be placed once it is open
+        if self._tre_app is not None:
+            self._tre_app.add_window(win)
+        return aw
+
+    def _apply_window_to(self, win: Any, options: dict[str, Any]) -> None:
+        """A second window's own options (`_apply_window` is the main window's)."""
+        if options.get("title") is not None:
+            win.set(title=options["title"])
+        if options.get("borderless"):
+            win.set(decorations=False, resize_border=self.DEFAULT_RESIZE_BORDER)
+        for key in ("min_width", "min_height"):
+            if key in options:
+                win.set(**{key: int(options[key])})
+        for name in ("transparent", "blur_behind", "click_through"):
+            if options.get(name):
+                self._set_win(win, name)
+        if options.get("size") is not None:
+            width, height = options["size"]
+            win.resize(int(width), int(height))
+        if options.get("fullscreen"):
+            win.set(fullscreen=True)
+        if options.get("maximized"):
+            win.maximize()
+
+    def _set_win(self, win: Any, name: str) -> None:
+        try:
+            win.set(**{name: True})
+        except (ValueError, TypeError) as exc:
+            raise ValueError(f"open_window: {name} isn't available here: {exc}") from None
+
+    @property
+    def windows(self) -> dict[str, Any]:
+        """The app's other windows by name (not the main one, `app.window`)."""
+        return dict(self._windows)
+
+    def window_of(self, name: str) -> Any:
+        """The `AppWindow` named `name`."""
+        try:
+            return self._windows[name]
+        except KeyError:
+            raise KeyError(f"no window named {name!r} is open (open: {', '.join(self._windows) or 'none'})") from None
+
+    def _appwindow_for(self, window: Any) -> Any:
+        """The `AppWindow` whose tre window this is, or None for the main window."""
+        return next((each for each in self._windows.values() if each.window == window), None)
+
+    def close_window(self, name: str) -> None:
+        """Closes the window `name` as the user's close would."""
+        self.window_of(name).close()
 
     def _rule_sheet(self) -> Any:
         from tesserae.spec.rules import RuleSheet
@@ -1696,6 +1782,9 @@ class App:
             self._tre_app = _TreApp()
         tre_app = self._tre_app
         tre_app.add_window(self._window)
+        for each in list(self._windows.values()):  # windows opened before the run open with the main one
+            tre_app.add_window(each.window)
+        listen_window(self._window, "closed", lambda event: [each.window.close() for each in list(self._windows.values())])
         tre_app.thread_handle().call_soon(self._adopt_os_appearance)  # on the first frame (M53 Q2)
         report = os.environ.get("TESSERAE_FRAMES_REPORT")
         drawn = [0]

@@ -22,7 +22,7 @@ from typing import Any, Optional
 
 from tesserae.theme import Theme
 
-__all__ = ["alive", "app_of", "initial_theme", "register_app", "retheme", "unfollow"]
+__all__ = ["alive", "app_of", "initial_theme", "register_app", "register_window", "retheme", "unfollow"]
 
 _APPS: dict[int, "weakref.ReferenceType[Any]"] = {}
 
@@ -32,6 +32,11 @@ def register_app(app: Any) -> None:
     for key in [key for key, ref in _APPS.items() if ref() is None]:
         del _APPS[key]  # apps that are gone
     _APPS[id(app.window)] = weakref.ref(app)
+
+
+def register_window(app: Any, window: Any) -> None:
+    """Makes `app` the owner of one more window (a second window of the app), for widgets and views made on it."""
+    _APPS[id(window)] = weakref.ref(app)
 
 
 def app_of(window: Any) -> Optional[Any]:

@@ -121,6 +121,26 @@ children:
 
 Call `app.navigate_to("")` after loading the window; nothing shows until a screen is current.
 
+## Several windows
+
+`app.window` is the main window. `app.open_window("Prefs")` builds `Prefs_View.yaml` in a new OS window and returns its `AppWindow` (also `app.windows`, `app.window_of("prefs")`,
+`app.close_window("prefs")`). The view's `widget: Window` root gives that window its title, size, minimum size, `borderless` and flags (without one it is 480 by 320). The view has the ViewModel that
+serves its name, and the app's theme, stylesheet and `app`. From a handler: `open_window('Prefs')`, and `open_window('Prefs', True)` for a modal one.
+
+```python
+prefs = app.open_window("Prefs", modal=True)   # blocks the window it was opened from until it closes
+prefs.on_close(save)
+prefs.center()                                 # where the system lets an app place a window
+```
+
+- Before `run()` the window opens with the main one; while it runs, on the loop's next turn.
+- `window.close`, `window.minimize` and the other window handlers act on the window their view is in.
+- `modal=True` puts a dimming layer over the parent (the main window, or `parent=` another `AppWindow`) that takes its clicks and keys until the child closes. The operating system is not told the child
+  belongs to the parent (tre has no owner window), so the two can still be raised and minimized separately.
+- Closing a second window leaves the app running; closing the main window closes every window.
+- A second window has no screens or routes (those belong to the main window's frame), and its title bar's maximize button reads `app.maximized`, which is the main window's.
+- Positions are the system's to give: Wayland does not let an app place or centre a window.
+
 ## Docks
 
 `kind: Dock` holds `kind: DockPanel`s around the content. Each panel says where it docks with `zone:`, a style field:
