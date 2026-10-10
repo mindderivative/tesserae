@@ -2542,3 +2542,18 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Wiring list for a new control kind** (it is long, so it is written down): `builtin_widgets.declare`; `build._CONTROL_KINDS`, `_NODE_KEYS`, the construction branch and the patch branch; `view._CONTROL_STATE` and
   `_props_equal`'s keys; the two lists in `lower.py`; `tools/generate_yaml_schema.py` node_props; the page text in `tools/component_docs.yaml`; the five generators; and the widget-name list in `tests/test_widgets.py`.
 - **Looked at:** rendered to a PNG with the headless snapshot: the track between the handles, the three expressive pieces, the stood-up ones, the focus ring and the "70" bubble on the focused handle.
+
+## 0.5.0.4: #249, progress extras (thickness, the circular gap, two-bar, contained, wavy)
+
+- **Four stages, one commit each would have been the plan; they went in as one** because they share the widget wiring (the same ten places as a new control property, listed under 0.5.0.3):
+  A `thickness` (bar height, ring stroke; a thicker ring's radius shrinks so the standard ring's outer edge stays, which keeps a larger standard ring exactly as it was) and the gap
+  (track `trim_start`/`trim_end` leave 4 px plus the two round caps either side of a determinate arc; none for a wait, a zero value or a full one); B `two_bar` (a long and a short
+  bar, the short one starting 650 ms later through `window.after`; fixed widths because only translate, scale, rotation, stroke, fill and `data`/trim animate); C `contained`; D `wavy`.
+- **Wavy, how:** a linear wave is a periodic polyline path (16 steps a wavelength, `data` set once) inside the sliding bar, which clips it; the wave flows by animating its `translate_x` by one
+  wavelength and starting over (the picture at -λ is the one at 0). The track is a separate straight bar, so the control is `thickness + 2 * amplitude` tall. A ring's wave cannot be a
+  translation or a rotation (the arc is anchored at the top and trimmed), and a `data` morph cannot move a wave (between a wave and its shifted self the middle is flat), so the ring's path
+  is rebuilt on a `window.every(33)` timer with a moving phase (cancelled in `dispose`; no timer for a plain ring or reduced motion).
+- **Not verified:** amplitude (3 px bar, 1.5 px ring), 40 px wavelength, 10 crests, flow speeds and the thicker sizes are from memory of the spec. The look was rendered to PNGs and looked at, not seen
+  on a real display. Left alone on purpose: making a track and a stop dot the default (the recorded `tre` parity trees draw the old look).
+- **Mistakes in my own tests this time:** a hidden node's layout size is 0 (the buffer bar), a node with no fill reads back `(0, 0, 0, 0)`, `get("data")` reads arcs back as cubics (so compare `circle`), and
+  the test helper does not make nested directories.

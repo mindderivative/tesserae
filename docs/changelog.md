@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0.4
+
+### Added
+
+- **Progress: thicker sizes, the circular gap, the two-bar sweep, the contained loading indicator and wavy shapes** ([#249](https://github.com/mindderivative/tesserae/issues/249)).
+  `thickness` sets a bar's height or a ring's width (4 is the standard; a thicker ring keeps the standard ring's outer edge). With a `track`, a determinate ring and its
+  track are a 4 px gap apart. `two_bar: true` sweeps a wait as a long bar and a shorter one behind it. `contained: true` puts the loading indicator's shape in a
+  `primary_container` circle. `wavy: true` draws a bar as a sine wave flowing along a straight track (the control is taller by the wave) and a ring's arc as a wave whose
+  crests flow round it. All are opt-in: the default look is unchanged. The widths of the two bars are fixed (the engine cannot animate a width), and the wave's size, its speed
+  and the thicker sizes are written from memory of the spec and have not been checked against it. Not done: making MD3's current look (a track and a stop dot) the default.
+
 ## 0.5.0.3
 
 ### Added

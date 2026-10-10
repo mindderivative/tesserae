@@ -57,7 +57,7 @@ _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", 
                                            "ScrollView", "Canvas", "Overlay"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "error", "icons", "ticks", "value_indicator", "vertical", "size", "low", "high", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "error", "icons", "ticks", "value_indicator", "vertical", "size", "low", "high", "thickness", "two_bar", "contained", "wavy", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -1209,6 +1209,16 @@ def _checked(node: dict[str, Any]) -> Optional[bool]:
     return bool(node.get("checked") or False)
 
 
+def _thickness(node: dict[str, Any], default: float) -> float:
+    """A progress indicator's `thickness:`, a number above 0 (the standard one when the node does not say)."""
+    value = node.get("thickness")
+    if value is None:
+        return default
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not value > 0:
+        raise SpecBuildError(f'widget {_q(node["id"])}: thickness is a number of pixels above 0, got {value!r}')
+    return float(value)
+
+
 def _progress_value(node: dict[str, Any]) -> Optional[float]:
     """A progress indicator's value: a number from 0 to 1, or `None` (indeterminate) when the node says `value` and it is empty. A node that does not
     mention `value` (the 0.4.x syntax) is a bar at 0."""
@@ -1240,14 +1250,16 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
         common["track"] = node.get("track")
         if kind == "LinearProgress":
             control = controls.LinearProgress(ctx.window, value=value, width=size.get("width", 240.0),
-                                              stop_indicator=bool(node.get("stop_indicator")), buffer=node.get("buffer"), **common)
+                                              stop_indicator=bool(node.get("stop_indicator")), buffer=node.get("buffer"),
+                                              thickness=_thickness(node, 4.0), two_bar=bool(node.get("two_bar")), wavy=bool(node.get("wavy")), **common)
             if "height" in size:
                 control.node.set(height=size["height"])
                 control.bar.set(height=size["height"])
         elif kind == "CircularProgress":
-            control = controls.CircularProgress(ctx.window, value=value, size=size.get("width", 48.0), **common)
+            control = controls.CircularProgress(ctx.window, value=value, size=size.get("width", 48.0), thickness=_thickness(node, 4.0),
+                                                wavy=bool(node.get("wavy")), **common)
         else:
-            control = controls.LoadingIndicator(ctx.window, size=size.get("width", 48.0), **common)
+            control = controls.LoadingIndicator(ctx.window, size=size.get("width", 48.0), contained=bool(node.get("contained")), **common)
     else:
         common["listen"] = ctx.listen
         if kind == "Checkbox":
@@ -1412,4 +1424,4 @@ def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> 
     style = resolve_style(node, layers)
     return (node.get("kind"), style.get("width"), style.get("height"), node.get("group"),
             node.get("min"), node.get("max"), node.get("step"), repr(node.get("spin")), node.get("track"), node.get("stop_indicator"), node.get("icons"), node.get("ticks"), node.get("value_indicator"),
-            node.get("vertical"), node.get("size"), node.get("icon"))  # a SpinBox's bounds are built in (M58)
+            node.get("vertical"), node.get("size"), node.get("icon"), node.get("thickness"), node.get("two_bar"), node.get("contained"), node.get("wavy"))  # a SpinBox's bounds are built in (M58)

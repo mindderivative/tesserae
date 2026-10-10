@@ -143,12 +143,18 @@ declare("SpinBox", {
 }, doc="A number with step buttons. Holding a button repeats the step; Page Up and Page Down step by ten.")
 _TRACK = P("str", doc="The colour role of the track behind the indicator.")
 declare("CircularProgress", {"value": P("float", doc="0 to 1; leave out, or give nothing, for a wait with no end."), "track": _TRACK,
+                             "wavy": P("bool", doc="The arc is a wave whose crests flow round the ring (MD3 Expressive)."),
+                             "thickness": P("float", doc="The ring's width in pixels (4 is the standard one; MD3 Expressive's are thicker). With a `track` the arc and the track are a gap apart."),
                              "label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="A progress ring.")
 declare("LinearProgress", {"value": P("float", doc="0 to 1; leave out, or give nothing, for a wait with no end."), "track": _TRACK,
+                           "thickness": P("float", doc="The bar's height in pixels (4 is the standard one; MD3 Expressive's are thicker)."),
                            "buffer": P("float", doc="0 to 1: how much has loaded, drawn as a lighter bar behind the value."),
                            "stop_indicator": P("bool", doc="A dot at the end of the track (Material 3)."),
+                           "wavy": P("bool", doc="The bar is a sine wave that flows along a straight track (MD3 Expressive); the control is taller by the wave's height."),
+                           "two_bar": P("bool", doc="A wait with no end sweeps as two bars, a long one and a short one a little behind (MD3), not one."),
                            "label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="A progress bar.")
-declare("LoadingIndicator", {"label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="An indeterminate wait indicator.")
+declare("LoadingIndicator", {"contained": P("bool", doc="The shape in a `primary_container` circle, in `on_primary_container` (MD3 Expressive)."),
+                             "label": P("str", doc="What a screen reader calls it.")}, extras=("foreground",), doc="An indeterminate wait indicator.")
 declare("TimePickerDial", {"hour": P("float", default=0.0, model=True, doc="0 to 23; a press keeps the half of the day it is in."),
                            "minute": P("float", default=0.0, model=True, doc="0 to 59, in fives on the face."),
                            "mode": P("enum", choices=("hour", "minute"), default="hour", model=True,

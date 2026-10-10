@@ -1576,12 +1576,24 @@ Radio buttons that exclude each other, as HTML's same-`name` radios. Selecting o
 ### `CircularProgress`
 
 ```python
-class CircularProgress(window: Any, *, size: float = 48.0, **kwargs: Any) -> None  # extends Indicator
+class CircularProgress(
+    window: Any,
+    *,
+    size: float = 48.0,
+    thickness: float = 4.0,
+    wavy: bool = False,
+    **kwargs: Any
+) -> None  # extends Indicator
 ```
 
 MD3's circular progress indicator: a 4 px `primary` arc in a 48 px box. Determinate, the arc runs clockwise from 12 o'clock for the value's share of the circle; indeterminate, the arc spins (one turn per 1568 ms) while it lengthens and shortens (666 ms each way).
 
 Also has everything `Indicator` has.
+
+- `circle` *(property)*: The ring: clockwise from the top (the track's, and a plain arc's).
+- `dispose() -> None`: Stops the indicator's repainting and loop but leaves its node.
+- `radius` *(property)*: The ring's radius in view-box units (the box is 48 across however large the node is; the stroke is in pixels).
+- `wave(phase: float) -> str`: The wavy arc's ring for a phase: a crest `WAVES` times round, as a closed polyline of 12 steps a crest.
 
 ### `LinearProgress`
 
@@ -1592,6 +1604,9 @@ class LinearProgress(
     width: float = 240.0,
     stop_indicator: bool = False,
     buffer: Optional[float] = None,
+    thickness: float = 4.0,
+    two_bar: bool = False,
+    wavy: bool = False,
     **kwargs: Any
 ) -> None  # extends Indicator
 ```
@@ -1600,10 +1615,18 @@ MD3's linear progress indicator: a 4 px `surface_container_highest` track and a 
 
 Also has everything `Indicator` has.
 
+- `dispose() -> None`: Stops the indicator's repainting and loop but leaves its node.
+
 ### `LoadingIndicator`
 
 ```python
-class LoadingIndicator(window: Any, *, size: float = 48.0, **kwargs: Any) -> None  # extends Indicator
+class LoadingIndicator(
+    window: Any,
+    *,
+    size: float = 48.0,
+    contained: bool = False,
+    **kwargs: Any
+) -> None  # extends Indicator
 ```
 
 MD3's loading indicator: a filled `primary` shape, 38 px in a 48 px box, morphing forever through a pentagon, a pill, a cookie and an oval, 650 ms per step, linear. These are the outlines `tre`'s MD3 handover defines (its `intended` pill and oval, not the diamonds `tre` drew).

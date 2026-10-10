@@ -20,11 +20,17 @@ eases to each new value.
 | `track` | linear, circular | the colour role of the track behind the indicator (a bar has `surface_container_highest`, a ring none) |
 | `buffer` | linear | 0 to 1: how much has loaded, a lighter bar behind the value |
 | `stop_indicator` | linear | a dot at the end of the track |
+| `thickness` | linear, circular | the bar's height or the ring's width in pixels (4 is the standard one; MD3 Expressive's are thicker) |
+| `wavy` | linear, circular | the bar (or the ring's arc) is a sine wave whose crests flow along (or round) a plain track; the bar is taller by the wave's height |
+| `two_bar` | linear | a wait with no end sweeps as two bars, a long one and a short one a little behind, as MD3 draws it, not one |
+| `contained` | loading indicator | the shape sits in a `primary_container` circle, in `on_primary_container` |
 | `label` | all | what a screen reader calls it |
 
 The colour is `style.foreground`; the bar's length is `style.width` and a ring's size is `style.width` too. A screen reader hears a progress bar
 with its value as a percentage, or as busy when there is none. An app that reduces motion gets a still bar and arc instead of the endless motion.
-Material 3's wavy shapes, the two-bar sweep and the contained loading indicator are not built.
+With a `track`, a determinate ring and its track are a gap apart (4 px between the rounded ends), as in MD3. The widths of the two bars are fixed (the engine
+cannot animate a width), so the two-bar sweep approximates MD3's, whose bars grow and shrink; the wave's size and speed and the thicker sizes are written
+from memory of the spec and have not been checked against it. The default look is still the one `tre`'s recorded trees draw: a track and a stop dot are opt-in.
 
 `widget: LinearProgress` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
 
@@ -96,6 +102,7 @@ children:
   - {widget: LinearProgress, value: "{{ sent }}", buffer: "{{ queued }}", label: Uploading, style: {width: 240}}
   - {widget: LinearProgress, style: {width: 240}}                  # no value: a wait with no end
   - {widget: CircularProgress, value: "{{ sent }}", track: secondary_container}
+  - {widget: LinearProgress, value: "{{ sent }}", wavy: true, thickness: 4, style: {width: 240}}
 ```
 
 ## Using the fragment

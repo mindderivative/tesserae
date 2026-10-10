@@ -1409,39 +1409,115 @@ class LinearProgress(Indicator):
     """MD3's linear progress indicator: a 4 px `surface_container_highest`
     track and a `primary` bar. Determinate, the bar fills to the value
     (sliding in over `medium1`); indeterminate, a bar 40% of the width
-    sweeps across again and again (MD3's two-bar sweep, simplified to one)."""
+    sweeps across again and again (MD3's two-bar sweep, simplified to one).
+
+    `two_bar` is the sweep MD3 draws: a long bar and, a little behind it, a
+    shorter one, each crossing the track again and again. The widths are
+    fixed (the engine cannot animate a width), so it is an approximation of
+    MD3's, whose bars grow and shrink as they go. `thickness` is the bar's
+    height (MD3 Expressive's thicker ones).
+
+    `wavy` draws the bar (or bars) as a sine wave that flows along the
+    track, which stays straight beneath it (MD3 Expressive's wavy
+    indicator): the control is `thickness` plus twice the wave's amplitude
+    tall. The amplitude, wavelength and speed are written from memory of
+    the spec and have not been checked against it (#249)."""
 
     HEIGHT = 4.0
     SWEEP_MS = 1500
     SWEEP = 0.4
     STOP = 4.0
+    #: the two-bar sweep: each bar's share of the width, how long it takes to cross, and how long after the first it starts
+    TWO_BARS = ((0.55, 1900, 0), (0.3, 1900, 650))
+    AMPLITUDE = 3.0     # a wavy bar's wave, from the middle to a crest
+    WAVELENGTH = 40.0
+    FLOW_MS = 1000      # a wave flows one wavelength in this long
 
-    def __init__(self, window: Any, *, width: float = 240.0, stop_indicator: bool = False, buffer: Optional[float] = None, **kwargs: Any) -> None:
+    def __init__(self, window: Any, *, width: float = 240.0, stop_indicator: bool = False, buffer: Optional[float] = None,
+                 thickness: float = HEIGHT, two_bar: bool = False, wavy: bool = False, **kwargs: Any) -> None:
+        if not thickness > 0:
+            raise ValueError(f"a progress bar's thickness is above 0, got {thickness!r}")
         self.width = float(width)
+        self.thickness = float(thickness)  # MD3 Expressive's thicker bars (4 is the standard one)
+        self.two_bar = bool(two_bar)
+        self.wavy = bool(wavy)
+        self.box = self.thickness + (2 * self.AMPLITUDE if self.wavy else 0.0)  # the control's height: a wavy bar's crests stand clear of the track
+        self.waves: list[Any] = []
+        self._flowing = False
+        self._flow_generation = 0
         self.stop_indicator = bool(stop_indicator)  # MD3's dot at the track's end
         self.buffer = Signal(buffer)  # a second, lighter bar behind the first: how much has loaded, 0..1
         super().__init__(window, **kwargs)
 
     def _build(self) -> Any:
-        node = self.window.create("box", width=self.width, height=self.HEIGHT, corner_radius=self.HEIGHT / 2,
-                                  clip_children=True)
-        # the bar is full width, slid left out of the clip by the unfilled part
-        self.bar = self.window.create("box", position="absolute", x=0.0, y=0.0, width=self.width,
-                                      height=self.HEIGHT, corner_radius=self.HEIGHT / 2, translate_x=-self.width,
-                                      hit_testable=False, a11y_hidden=True)
-        self.loaded = self.window.create("box", position="absolute", x=0.0, y=0.0, width=self.width, height=self.HEIGHT,
-                                         corner_radius=self.HEIGHT / 2, translate_x=-self.width, hit_testable=False, a11y_hidden=True)
+        box, thick, wavy = self.box, self.thickness, self.wavy
+        node = self.window.create("box", width=self.width, height=box, corner_radius=0.0 if wavy else thick / 2, clip_children=True)
+        # a wavy bar's track is a straight bar of its own, in the middle
+        self.track_line = self.window.create("box", position="absolute", x=0.0, y=(box - thick) / 2, width=self.width, height=thick,
+                                             corner_radius=thick / 2, hit_testable=False, a11y_hidden=True, visible=wavy)
+        node.add_child(self.track_line)
+        self.loaded = self.window.create("box", position="absolute", x=0.0, y=(box - thick) / 2, width=self.width, height=thick,
+                                         corner_radius=thick / 2, translate_x=-self.width, hit_testable=False, a11y_hidden=True)
         node.add_child(self.loaded)  # behind the bar
-        node.add_child(self.bar)
-        self.stop = self.window.create("box", position="absolute", x=self.width - self.STOP - 0.0, y=(self.HEIGHT - self.STOP) / 2,
-                                       width=self.STOP, height=self.STOP, corner_radius=self.STOP / 2, hit_testable=False,
+        # the bar is full width, slid left out of the clip by the unfilled part
+        self.bar = self._bar(node)
+        self.bar2 = self._bar(node, visible=False)  # the second bar of a two-bar sweep
+        dot = min(self.STOP, self.thickness)  # a thin bar's dot is no taller than it
+        self.stop = self.window.create("box", position="absolute", x=self.width - dot - 0.0, y=(box - dot) / 2,
+                                       width=dot, height=dot, corner_radius=dot / 2, hit_testable=False,
                                        a11y_hidden=True, visible=self.stop_indicator)
         node.add_child(self.stop)
         return node
 
+    def _bar(self, node: Any, visible: bool = True) -> Any:
+        """A bar: a box that slides, and (wavy) holds the wave that flows inside it, clipped to the bar."""
+        bar = self.window.create("box", position="absolute", x=0.0, y=0.0, width=self.width, height=self.box,
+                                 corner_radius=0.0 if self.wavy else self.thickness / 2, clip_children=self.wavy, translate_x=-self.width,
+                                 hit_testable=False, a11y_hidden=True, visible=visible)
+        if self.wavy:
+            wave = self.window.create("path", data=self._wave_data(self.width + self.WAVELENGTH), position="absolute", x=0.0, y=0.0,
+                                      width=self.width + self.WAVELENGTH, height=self.box, stroke_width=self.thickness, fill=_CLEAR,
+                                      hit_testable=False, a11y_hidden=True)
+            bar.add_child(wave)
+            self.waves.append(wave)
+        node.add_child(bar)
+        return bar
+
+    def _wave_data(self, length: float) -> str:
+        """A sine wave `length` long, a crest every `WAVELENGTH`, along the middle of the control, as a polyline of 16 steps a wavelength."""
+        steps = max(int(length / self.WAVELENGTH * 16), 16)
+        mid = self.box / 2
+        points = [(length * n / steps, mid - self.AMPLITUDE * math.sin(2 * math.pi * (length * n / steps) / self.WAVELENGTH)) for n in range(steps + 1)]
+        return "M" + " L".join(f"{x:.2f},{y:.2f}" for x, y in points)
+
+    def _flow(self, generation: int) -> None:
+        """The waves flow along their bars, a wavelength at a time (the wave is periodic, so the jump back is not seen)."""
+        if generation != self._flow_generation:
+            return
+        for wave in self.waves:
+            wave.stop_animation("translate_x")
+            wave.set(translate_x=0.0)
+        self.waves[0].animate("translate_x", -self.WAVELENGTH, self.FLOW_MS, easing="linear", on_complete=lambda: self._flow(generation))
+        for wave in self.waves[1:]:
+            wave.animate("translate_x", -self.WAVELENGTH, self.FLOW_MS, easing="linear")
+
+    def dispose(self) -> None:
+        self._flow_generation += 1
+        super().dispose()
+
     def _paint(self, animate: bool) -> None:
-        self.node.set(fill=self.color(self.track or "surface_container_highest"))
-        self.bar.set(fill=self._on_colour())
+        track = self.color(self.track or "surface_container_highest")
+        if self.wavy:
+            self.track_line.set(fill=track)
+            for wave in self.waves:
+                wave.set(stroke_color=self._on_colour())
+            if not self._flowing and not motion.reduced(self.window):
+                self._flowing = True
+                self._flow(self._flow_generation)
+        else:
+            self.node.set(fill=track)
+            self.bar.set(fill=self._on_colour())
+            self.bar2.set(fill=self._on_colour())
         self.stop.set(fill=self._on_colour())
         self.loaded.set(fill=self._on_colour() if self.buffer.get() is None else self._on_colour()[:3] + (96,), visible=self.buffer.get() is not None)
         if self.buffer.get() is not None:
@@ -1457,13 +1533,37 @@ class LinearProgress(Indicator):
         if motion.reduced(self.window):  # no sweep: a still bar across the middle
             self.bar.set(width=self.SWEEP * self.width, translate_x=(1.0 - self.SWEEP) * self.width / 2)
             return
+        if self.two_bar:
+            self.bar2.set(visible=True)
+            for bar, share, ms, delay in zip((self.bar, self.bar2), *zip(*self.TWO_BARS)):
+                self._cross(bar, share, ms, delay, generation)
+            return
         self.bar.set(width=self.SWEEP * self.width)
         self.bar.stop_animation("translate_x")
         self.bar.set(translate_x=-self.SWEEP * self.width)
         self.bar.animate("translate_x", self.width, self.SWEEP_MS, easing=Theme.easing("standard"),
                          on_complete=lambda: self._loop(generation))
 
+    def _cross(self, bar: Any, share: float, ms: int, delay: int, generation: int) -> None:
+        """One bar of a two-bar sweep, crossing the track again and again, starting `delay` ms from now."""
+        width = share * self.width
+        bar.stop_animation("translate_x")
+        bar.set(width=width, translate_x=-width)  # off the left end until it is its turn
+
+        def go() -> None:
+            if not self._alive(generation):
+                return
+            bar.set(translate_x=-width)
+            bar.animate("translate_x", self.width, ms, easing=Theme.easing("standard"), on_complete=go)
+
+        if delay:
+            self.window.after(delay, go)
+        else:
+            go()
+
     def _settle(self) -> None:
+        self.bar2.stop_animation("translate_x")
+        self.bar2.set(visible=False, translate_x=-self.width)
         self.bar.set(width=self.width)
         self._paint(animate=False)
 
@@ -1472,43 +1572,124 @@ class CircularProgress(Indicator):
     """MD3's circular progress indicator: a 4 px `primary` arc in a 48 px
     box. Determinate, the arc runs clockwise from 12 o'clock for the
     value's share of the circle; indeterminate, the arc spins (one turn
-    per 1568 ms) while it lengthens and shortens (666 ms each way)."""
+    per 1568 ms) while it lengthens and shortens (666 ms each way).
+
+    `thickness` is the arc's width (MD3 Expressive's thicker rings; 4 is the
+    standard one): the outer edge of the standard ring stays where it is, so
+    a thicker arc has a smaller radius. With a `track`, a determinate arc and the track
+    are a gap apart (a 4 px gap between the rounded ends), as in MD3.
+
+    `wavy` draws the arc as a wave around the ring, its crests flowing round
+    it (MD3 Expressive's wavy indicator); the track stays a plain circle on
+    the wave's middle line, and the crests reach where the plain arc would.
+    The wave's size and speed are written from memory of the spec and have
+    not been checked against it (#249)."""
 
     SIZE = 48.0
     STROKE = 4.0
-    CIRCLE = "M24,4 A20,20 0 1,1 24,44 A20,20 0 1,1 24,4"  # clockwise from the top
+    MARGIN = 2.0  # between the standard ring's outer edge and the box (in the box's own 48 units)
+    GAP = 4.0     # between the arc and the track
     TURN_MS = 1568
     ARC_MS = 666
+    WAVES = 10          # crests round a wavy ring
+    AMPLITUDE = 1.5     # a wavy ring's wave, from the middle to a crest, in pixels of a 48 px ring
+    FLOW_MS = 1200      # a wave flows one wavelength round in this long
+    TICK_MS = 33        # how often the wave moves
 
-    def __init__(self, window: Any, *, size: float = SIZE, **kwargs: Any) -> None:
+    def __init__(self, window: Any, *, size: float = SIZE, thickness: float = STROKE, wavy: bool = False, **kwargs: Any) -> None:
+        if not thickness > 0 or thickness > size / 2 - self.MARGIN:
+            raise ValueError(f"a progress ring's thickness is above 0 and fits the ring, got {thickness!r} in {size!r}")
         self.size = float(size)
+        self.thickness = float(thickness)
+        self.wavy = bool(wavy)
+        self._phase = 0.0
+        self._ticker: Any = None
         super().__init__(window, **kwargs)
+
+    @property
+    def radius(self) -> float:
+        """The ring's radius in view-box units (the box is 48 across however large the node is; the stroke is in pixels)."""
+        k = self.SIZE / self.size  # pixels to view-box units: the stroke is in pixels, the path in the box's
+        return (self.SIZE / 2 - self.MARGIN - self.STROKE / 2) + (self.STROKE - self.thickness) * k / 2  # the standard ring's outer edge, kept
+
+    @property
+    def _amplitude(self) -> float:
+        """A wavy ring's amplitude in view-box units."""
+        return self.AMPLITUDE * self.SIZE / self.size if self.wavy else 0.0
+
+    @property
+    def _middle(self) -> float:
+        """The radius of the ring's middle line: the plain radius, or (wavy) a crest's less."""
+        return self.radius - self._amplitude
+
+    @property
+    def circle(self) -> str:
+        """The ring: clockwise from the top (the track's, and a plain arc's)."""
+        c, r = self.SIZE / 2, self._middle
+        return f"M{c:g},{c - r:g} A{r:g},{r:g} 0 1,1 {c:g},{c + r:g} A{r:g},{r:g} 0 1,1 {c:g},{c - r:g}"
+
+    def wave(self, phase: float) -> str:
+        """The wavy arc's ring for a phase: a crest `WAVES` times round, as a closed polyline of 12 steps a crest."""
+        c, r, a = self.SIZE / 2, self._middle, self._amplitude
+        steps = self.WAVES * 12
+        points = []
+        for n in range(steps + 1):
+            theta = 2 * math.pi * n / steps
+            radius = r + a * math.sin(self.WAVES * theta + phase)
+            points.append(f"{c + radius * math.sin(theta):.3f},{c - radius * math.cos(theta):.3f}")
+        return "M" + " L".join(points)
+
+    def _flow(self) -> None:
+        """Moves the wave on: one crest round the ring per `FLOW_MS`."""
+        self._phase = (self._phase - 2 * math.pi * self.TICK_MS / self.FLOW_MS) % (2 * math.pi)
+        self.arc.set(data=self.wave(self._phase))
+
+    def dispose(self) -> None:
+        if self._ticker is not None:
+            self._ticker.cancel()
+            self._ticker = None
+        super().dispose()
+
+    @property
+    def _gap(self) -> float:
+        """The gap as a share of the ring's length: the 4 px between the rounded ends, plus the two caps."""
+        px = self._middle * self.size / self.SIZE  # the middle line's radius in pixels
+        return (self.GAP + self.thickness) / (2 * math.pi * px)
 
     def _build(self) -> Any:
         node = self.window.create("box", width=self.size, height=self.size)
-        self.ring = self.window.create("path", data=self.CIRCLE, view_box=(0, 0, self.SIZE, self.SIZE), width=self.size, height=self.size,
-                                       stroke_width=self.STROKE, fill=_CLEAR, trim_start=0.0, trim_end=1.0, hit_testable=False, a11y_hidden=True,
+        self.ring = self.window.create("path", data=self.circle, view_box=(0, 0, self.SIZE, self.SIZE), width=self.size, height=self.size,
+                                       stroke_width=self.thickness, fill=_CLEAR, trim_start=0.0, trim_end=1.0, hit_testable=False, a11y_hidden=True,
                                        visible=self.track is not None)  # the track, when there is one: the whole circle behind the arc
         node.add_child(self.ring)
-        self.arc = self.window.create("path", data=self.CIRCLE, view_box=(0, 0, self.SIZE, self.SIZE),
-                                      width=self.size, height=self.size, stroke_width=self.STROKE, fill=_CLEAR,
+        self.arc = self.window.create("path", data=self.wave(0.0) if self.wavy else self.circle, view_box=(0, 0, self.SIZE, self.SIZE),
+                                      width=self.size, height=self.size, stroke_width=self.thickness, fill=_CLEAR,
                                       trim_start=0.0, trim_end=0.0, hit_testable=False, a11y_hidden=True)
         node.add_child(self.arc)
         return node
 
     def _paint(self, animate: bool) -> None:
         self.arc.set(stroke_color=self._on_colour())
+        if self.wavy and self._ticker is None and not motion.reduced(self.window):
+            self._ticker = self.window.every(self.TICK_MS, self._flow)
         if self.track is not None:
             self.ring.set(stroke_color=self.color(self.track))
         value = self.value.get()
         if value is not None:
-            Control._to(self.arc, "trim_end", _clamp(float(value), 0.0, 1.0),
-                        Theme.duration("medium1") if animate else 0, Theme.easing("standard"))
+            share = _clamp(float(value), 0.0, 1.0)
+            ms, easing = Theme.duration("medium1") if animate else 0, Theme.easing("standard")
+            Control._to(self.arc, "trim_end", share, ms, easing)
+            if self.track is not None:  # the track starts a gap after the arc and stops a gap before the top again
+                gap = self._gap
+                start, end = (share + gap, 1.0 - gap) if 0.0 < share < 1.0 else (1.0, 1.0) if share >= 1.0 else (0.0, 1.0)
+                Control._to(self.ring, "trim_start", _min(start, end), ms, easing)
+                Control._to(self.ring, "trim_end", end, ms, easing)
 
     def _loop(self, generation: int) -> None:
         if motion.reduced(self.window):  # no spinning: a still arc
             self.arc.set(rotation_deg=0.0, trim_end=0.75)
             return
+        self.ring.set(trim_start=0.0, trim_end=1.0)  # a wait has no share to leave a gap after
         self._spin(generation)
         self._stretch(generation, longer=True)
 
@@ -1537,7 +1718,10 @@ class LoadingIndicator(Indicator):
     box, morphing forever through a pentagon, a pill, a cookie and an oval,
     650 ms per step, linear. These are the outlines `tre`'s MD3 handover
     defines (its `intended` pill and oval, not the diamonds `tre` drew).
-    Always indeterminate; `value` is ignored."""
+    Always indeterminate; `value` is ignored. `contained` puts the shape in
+    a `primary_container` circle the size of the box, the shape then in
+    `on_primary_container` (MD3 Expressive's contained loading indicator);
+    `color` still replaces the shape's colour."""
 
     SIZE = 48.0
     SHAPE = 38.0
@@ -1552,15 +1736,16 @@ class LoadingIndicator(Indicator):
         "24.00,12.00C37.25,12.00 48.00,17.37 48.00,24.00",
     )
 
-    def __init__(self, window: Any, *, size: float = SIZE, **kwargs: Any) -> None:
+    def __init__(self, window: Any, *, size: float = SIZE, contained: bool = False, **kwargs: Any) -> None:
         kwargs["value"] = None
         self._step = 0
         self.size = float(size)
+        self.contained = bool(contained)
         super().__init__(window, **kwargs)
 
     def _build(self) -> Any:
         node = self.window.create("box", width=self.size, height=self.size, align_items="center",
-                                  justify_content="center")
+                                  justify_content="center", corner_radius=self.size / 2)
         shape = self.size * self.SHAPE / self.SIZE  # MD3: 38 of 48
         self.shape = self.window.create("path", data=self.SHAPES[0], view_box=(0, 0, 48, 48), width=shape,
                                         height=shape, hit_testable=False, a11y_hidden=True)
@@ -1568,7 +1753,11 @@ class LoadingIndicator(Indicator):
         return node
 
     def _paint(self, animate: bool) -> None:
-        self.shape.set(fill=self._on_colour())
+        if self.contained:
+            self.node.set(fill=self.color("primary_container"))
+            self.shape.set(fill=self._color or self.color("on_primary_container"))
+        else:
+            self.shape.set(fill=self._on_colour())
 
     def _loop(self, generation: int) -> None:
         if not self._alive(generation):

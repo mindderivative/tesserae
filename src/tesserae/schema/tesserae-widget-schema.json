@@ -530,6 +530,30 @@
             ],
             "description": "The colour role of the track behind the indicator."
           },
+          "wavy": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The arc is a wave whose crests flow round the ring (MD3 Expressive)."
+          },
+          "thickness": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The ring's width in pixels (4 is the standard one; MD3 Expressive's are thicker). With a `track` the arc and the track are a gap apart."
+          },
           "label": {
             "anyOf": [
               {
@@ -568,6 +592,8 @@
             "expects",
             "value",
             "track",
+            "wavy",
+            "thickness",
             "label"
           ]
         }
@@ -1623,6 +1649,18 @@
             ],
             "description": "The colour role of the track behind the indicator."
           },
+          "thickness": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The bar's height in pixels (4 is the standard one; MD3 Expressive's are thicker)."
+          },
           "buffer": {
             "anyOf": [
               {
@@ -1646,6 +1684,30 @@
               }
             ],
             "description": "A dot at the end of the track (Material 3)."
+          },
+          "wavy": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The bar is a sine wave that flows along a straight track (MD3 Expressive); the control is taller by the wave's height."
+          },
+          "two_bar": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "A wait with no end sweeps as two bars, a long one and a short one a little behind (MD3), not one."
           },
           "label": {
             "anyOf": [
@@ -1685,8 +1747,11 @@
             "expects",
             "value",
             "track",
+            "thickness",
             "buffer",
             "stop_indicator",
+            "wavy",
+            "two_bar",
             "label"
           ]
         }
@@ -2081,6 +2146,18 @@
           "expects": {
             "type": "object"
           },
+          "contained": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The shape in a `primary_container` circle, in `on_primary_container` (MD3 Expressive)."
+          },
           "label": {
             "anyOf": [
               {
@@ -2117,6 +2194,7 @@
             "tooltip",
             "params",
             "expects",
+            "contained",
             "label"
           ]
         }

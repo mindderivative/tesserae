@@ -33,6 +33,10 @@ step: <a number or text>
 track: <text or any value>
 ticks: <true or false or text>
 value_indicator: <true or false or text>
+wavy: <true or false or text>
+contained: <true or false or text>
+two_bar: <true or false or text>
+thickness: <a number or text>
 low: <a number or text>
 high: <a number or text>
 vertical: <true or false or text>
@@ -95,6 +99,10 @@ children: <a list>
 | `track` | text or any value | The colour role of the track behind a progress indicator. |
 | `ticks` | `true` or `false` or text | Whether a Slider marks each step. |
 | `value_indicator` | `true` or `false` or text | Whether a Slider shows a bubble with its value over the handle. |
+| `wavy` | `true` or `false` or text | Whether a LinearProgress or CircularProgress is drawn as a wave. |
+| `contained` | `true` or `false` or text | Whether a LoadingIndicator sits in a circle of its container colour. |
+| `two_bar` | `true` or `false` or text | Whether a LinearProgress waits as two sweeping bars. |
+| `thickness` | a number or text | A progress indicator's width in pixels. |
 | `low` | a number or text | A RangeSlider's least value. |
 | `high` | a number or text | A RangeSlider's most value. |
 | `vertical` | `true` or `false` or text | Whether a Slider is stood up (the bottom is its minimum). |

@@ -3406,6 +3406,50 @@
           ],
           "description": "Whether a Slider shows a bubble with its value over the handle."
         },
+        "wavy": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a LinearProgress or CircularProgress is drawn as a wave."
+        },
+        "contained": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a LoadingIndicator sits in a circle of its container colour."
+        },
+        "two_bar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a LinearProgress waits as two sweeping bars."
+        },
+        "thickness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "A progress indicator's width in pixels."
+        },
         "low": {
           "anyOf": [
             {
@@ -8799,6 +8843,17 @@
           "type": "string",
           "description": "The fragment this node is the root of."
         },
+        "contained": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a LoadingIndicator sits in a circle of its container colour."
+        },
         "disabled": {
           "anyOf": [
             {
@@ -9521,6 +9576,17 @@
             }
           ]
         },
+        "thickness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "A progress indicator's width in pixels."
+        },
         "ticks": {
           "anyOf": [
             {
@@ -9785,6 +9851,17 @@
           ],
           "description": "The colour role of the track behind a progress indicator."
         },
+        "two_bar": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a LinearProgress waits as two sweeping bars."
+        },
         "two_way": {
           "type": "string",
           "description": "The one bound property whose user edits write back to the ViewModel."
@@ -9842,6 +9919,17 @@
             }
           },
           "additionalProperties": false
+        },
+        "wavy": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a LinearProgress or CircularProgress is drawn as a wave."
         },
         "when": {
           "description": "Keeps this child only when the value is true."
