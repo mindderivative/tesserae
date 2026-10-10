@@ -37,7 +37,7 @@ from tesserae.reactive import Computed, Signal
 
 __all__ = [
     "BUILTIN_FUNCTIONS", "DEFAULT_LIMITS", "Expr", "ExprError", "Limits", "MapScope", "Origin", "Statements", "Template",
-    "compile_expr", "compile_statements", "compile_template", "is_action_name",
+    "check_handler_calls", "compile_expr", "compile_statements", "compile_template", "is_action_name",
 ]
 
 MISSING = object()
@@ -302,6 +302,7 @@ class _Checker:
     def __init__(self, source: str, origin: Optional[Origin], limits: Limits, mode: str) -> None:
         self.source, self.origin, self.limits, self.mode = source, origin, limits, mode
         self.names: set[str] = set()
+        self.calls: list[ast.Call] = []  # the calls of a bare name (`clamp(x, 0, 1)`), for `check_calls` / `check_handler_calls` (#251)
         self.nodes = 0
         self._bound: list[set[str]] = []
 
@@ -363,6 +364,8 @@ class _Checker:
         for kw in node.keywords:
             if kw.arg is None:
                 raise self.error(kw.value, "'**' in a call is not allowed")
+        if isinstance(node.func, ast.Name) and not any(node.func.id in frame for frame in self._bound):
+            self.calls.append(node)
         self.check(node.func, depth + 1)
         for arg in node.args:
             self.check(arg, depth + 1)
@@ -486,7 +489,16 @@ def compile_expr(source: str, *, origin: Optional[Origin] = None, limits: Limits
     tree = _parse(text, "eval", origin, limits)
     checker = _Checker(text, origin, limits, "expr")
     checker.check(tree)
+    for call in checker.calls:  # an expression calls only the built-in functions, so a name that is not one fails here, not when it runs (#251)
+        if call.func.id not in BUILTIN_FUNCTIONS:
+            raise checker.error(call.func, f"'{call.func.id}' is not a function you can call here",
+                                _did_you_mean(call.func.id, BUILTIN_FUNCTIONS) or f"allowed: {', '.join(sorted(BUILTIN_FUNCTIONS))}")
     return Expr(text, tree, frozenset(checker.names), origin, limits)
+
+
+def _did_you_mean(name: str, known: Any) -> Optional[str]:
+    close = difflib.get_close_matches(name, [str(k) for k in known], n=3)
+    return ("did you mean " + " or ".join(f"'{c}'" for c in close)) if close else None
 
 
 # -- statements (handlers) ----------------------------------------------------------------------------------------------
@@ -508,6 +520,7 @@ class Statements:
     names: frozenset[str]
     origin: Optional[Origin] = None
     limits: Limits = field(default=DEFAULT_LIMITS, repr=False)
+    calls: tuple[ast.Call, ...] = ()  # the calls of a bare name, which only the scope can judge (`check_handler_calls`)
 
     def run(self, scope: Any, *, event: Any = None) -> None:
         """Runs the statements in order against `scope` (assignments through `scope.assign`, calls through the scope's actions
@@ -546,7 +559,21 @@ def compile_statements(source: str, *, origin: Optional[Origin] = None, limits: 
         else:
             raise checker.error(statement, f"'{_statement_name(statement)}' is not available in a handler (an assignment or a call only)",
                                 "if, for, del, return and the rest are reserved")
-    return Statements(text, tree.body, frozenset(checker.names | names), origin, limits)
+    return Statements(text, tree.body, frozenset(checker.names | names), origin, limits, tuple(checker.calls))
+
+
+def check_handler_calls(statements: Statements, scope: Any) -> None:
+    """Raises `ExprError` for a name a handler calls that is neither a built-in function nor a call its `scope` knows (a built-in action, a
+    method of the ViewModel, a handler parameter), so a mistake shows when the view loads, not when the handler is pressed (#251). A scope that
+    does not know its actions (`knows_actions` false: no app to ask) cannot judge, so nothing is raised."""
+    if not getattr(scope, "knows_actions", False):
+        return
+    for call in statements.calls:
+        name = call.func.id
+        if name in BUILTIN_FUNCTIONS or scope.is_known_call(name):
+            continue
+        near = _did_you_mean(name, [*BUILTIN_FUNCTIONS, *getattr(scope, "callable_names", lambda: [])()])
+        raise _node_error(statements.source, statements.origin, call.func, f"'{name}' is not a function or an action you can call here", near)
 
 
 #: The calls whose second argument is a handler of its own, run later: `after(ms, "statements")`, `every(ms, "statements")`.

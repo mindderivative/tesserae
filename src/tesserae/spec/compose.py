@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Iterable, Iterator, Mapping, Optional
 
-from tesserae.expr import BUILTIN_FUNCTIONS, Expr, Template
+from tesserae.expr import BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_handler_calls
 from tesserae.reactive import Computed, Effect, Signal, untrack
 from tesserae.spec.nodes import Handler, LoadError, Node, ViewDoc
 from tesserae.spec.rules import INTERACTION_STATES, Identity, Rule, RuleSheet, ordered
@@ -188,6 +188,36 @@ class Scope:
 
     def is_action(self, path: str) -> bool:
         return self._action(path) is not None
+
+    @property
+    def knows_actions(self) -> bool:
+        """Whether this scope can say what a handler may call at load: an app's built-in actions are listed in `actions.names` (the resolver itself
+        needs the view, which does not exist while it is composed, so it is never asked here)."""
+        return getattr(self.actions, "names", None) is not None
+
+    def is_known_call(self, name: str) -> bool:
+        """Whether a handler may call the bare `name` here: a handler parameter, a built-in action, or a callable of the ViewModel."""
+        held = self._frame(name)
+        if held is not None:
+            return isinstance(held.values[name], HandlerRef)
+        if name in getattr(self.actions, "names", ()):
+            return True
+        target = getattr(self.root, name, None) if self.root is not None and not name.startswith("_") else None
+        return callable(target) and not isinstance(target, (Signal, Computed))
+
+    def callable_names(self) -> list[str]:
+        """The bare names a handler may call here, for the names offered when one is mistyped: handler parameters, the built-in actions and the
+        ViewModel's methods."""
+        out: list[str] = []
+        scope: Optional[Scope] = self
+        while scope is not None:
+            out.extend(n for n, v in scope.values.items() if isinstance(v, HandlerRef))
+            scope = scope.parent
+        out.extend(getattr(self.actions, "names", ()))
+        if self.root is not None:
+            out.extend(n for n in dir(self.root) if not n.startswith("_") and callable(getattr(self.root, n, None))
+                       and not isinstance(getattr(self.root, n, None), (Signal, Computed)))
+        return out
 
     def call_action(self, path: str, args: list[Any], kwargs: dict[str, Any]) -> Any:
         action = self._action(path)
@@ -699,6 +729,15 @@ class Composer:
     def _fail(self, ctx: _Ctx, at: tuple[int, int], message: str, hint: Optional[str] = None) -> LoadError:
         return LoadError(message, file=ctx.doc.file, line=at[0], column=at[1], hint=hint, text=ctx.doc.text)
 
+    def _check_handler(self, ctx: _Ctx, handler: Handler, scope: "Scope") -> None:
+        """A name a handler calls that nothing here answers to is a load error, with the line (#251)."""
+        if handler.statements is None:
+            return
+        try:
+            check_handler_calls(handler.statements, scope)
+        except ExprError as exc:
+            raise LoadError(exc.message, file=ctx.doc.file, line=exc.line, column=exc.column, hint=exc.hint, text=ctx.doc.text) from None
+
     def _check_root(self, root: Node, ctx: _Ctx) -> None:
         for directive, label in ((root.loop, "for"), (root.when, "if"), (root.slot, "slot")):
             if directive is not None:
@@ -820,9 +859,11 @@ class Composer:
         if is_action_name(text):
             return HandlerRef(Handler(text.strip(), action=text.strip()), call_scope)
         try:
-            return HandlerRef(Handler(text, statements=compile_statements(text, origin=Origin(ctx.doc.file, *node.prop_at.get(pname, node.at)))), call_scope)
+            handler = Handler(text, statements=compile_statements(text, origin=Origin(ctx.doc.file, *node.prop_at.get(pname, node.at))))
         except ExprError as exc:
             raise self._fail(ctx, node.prop_at.get(pname, node.at), exc.message, exc.hint) from None
+        self._check_handler(ctx, handler, call_scope)
+        return HandlerRef(handler, call_scope)
 
     def _local_copy(self, bound: Any, holder: Instance) -> Signal:
         """A Signal holding `bound`'s value, following it as it changes. A write to it stays here until the expression next changes."""
@@ -877,10 +918,13 @@ class Composer:
                                  "it may be worked out from the view's params, but not from a Signal")
         for name, value in node.tooltip.items():
             if name == "actions":  # (label, handler) pairs: the label follows its Signals, the handler runs in the scope it was written in
+                for _, handler in value:
+                    self._check_handler(ctx, handler, inner)
                 inst.tooltip[name] = [(self._bind(label, inner, inst), (handler, inner)) for label, handler in value]
             else:
                 inst.tooltip[name] = self._bind(value, inner, inst)
         for event, handler in node.handlers.items():
+            self._check_handler(ctx, handler, inner)
             inst.handlers[event] = (handler, inner)
         for name, value in node.props.items():
             nodes = [value] if isinstance(value, Node) else value if isinstance(value, list) and value and all(isinstance(v, Node) for v in value) else None
@@ -1029,10 +1073,13 @@ class Composer:
             inst.a11y[name] = self._bind(value, call_scope, inst)
         for name, value in node.tooltip.items():
             if name == "actions":  # (label, handler) pairs: the label follows its Signals, the handler runs in the scope it was written in
+                for _, handler in value:
+                    self._check_handler(ctx, handler, call_scope)
                 inst.tooltip[name] = [(self._bind(label, call_scope, inst), (handler, call_scope)) for label, handler in value]
             else:
                 inst.tooltip[name] = self._bind(value, call_scope, inst)
         for event, handler in node.handlers.items():
+            self._check_handler(ctx, handler, call_scope)
             if event in inst.handlers:  # the view's own root handler runs first, then the call's
                 inst.chained.setdefault(event, []).append((handler, call_scope))
             else:

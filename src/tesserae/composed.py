@@ -151,6 +151,8 @@ def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable
 
     resolve.app = lambda: app_of(window if window is not None else getattr(view_ref(), "window", None))  # type: ignore[attr-defined]  # `app` in an expression
     resolve.wants_scope = True  # type: ignore[attr-defined]  # `focus` needs the widget the handler was written in
+    resolve.names = ("focus", "open_url", "copy", "paste", "capture", "release", "cursor", "after", "every", "cancel", "open_window",  # type: ignore[attr-defined]
+                     "navigate_to", "navigate_route")  # the bare names, offered when a handler calls one that does not exist (#251)
     return resolve
 
 

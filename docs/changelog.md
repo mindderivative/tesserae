@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0.2
+
+### Changed
+
+- **A function name that does not exist is found when the view loads** ([#251](https://github.com/mindderivative/tesserae/issues/251)).
+  `{{ nosuch(1) }}` in a template, an `if:`, a `for:` or a stylesheet rule, and `x = nosuch(1)` or `nosuch(1)` in a handler, used to load
+  without a word and fail when the expression ran (a traceback on stderr when a handler was pressed, an expression that raised at render).
+  Now the view does not load: the error names the file and line and offers the near names (`did you mean 'clamp'`). In an expression the
+  only functions are the built-in ones, so it is found as the text is compiled. In a handler a call may also be a built-in action
+  (`copy`, `focus`, `after`, `navigate_to`, ...), a method of the ViewModel or a handler parameter, so it is found as the view is composed.
+  A handler whose names cannot be judged (a scope with no app to list the built-in actions) loads as before.
+  A ViewModel method added to the object after its view loaded is now a load error: define it on the class.
+
 ## 0.5.0.1
 
 Point releases between 0.5.0 and 0.5.1: one issue each, in the order the backlog was recommended (#252, #251, #250, #249, #248).

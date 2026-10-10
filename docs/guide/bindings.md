@@ -94,6 +94,12 @@ one:
 widget "label" binding on "text" ("{{ missing.get() }}"): 'missing' is not defined (did you mean 'min')
 ```
 
+A function name that does not exist is found when the view loads, with the line, not when the expression runs. In a template, an `if:`,
+a `for:` or a stylesheet rule the only functions are the built-in ones (`clamp`, `min`, `max`, `len`, `format_number`, ...), so
+`{{ limit(x, 0, 1) }}` is a load error naming `limit` and offering the near names (`did you mean 'clamp'`). In a handler a call may also be
+a built-in action (`copy`, `focus`, `after`, `navigate_to`, ...), a method of the ViewModel or a handler parameter; a name that is none of
+these is a load error too (`bmup(2)` offers `bump`).
+
 ## Who evaluates it
 
 Tesserae does: `tesserae.binding` is a thin layer over `tesserae.expr`, in

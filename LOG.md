@@ -2502,3 +2502,16 @@ User: "release tesserae 0.5.0", then "pypi is up".
   the test sends `resize`. Two tests added (the press, and the ticks and handle); a slider with its built width is untouched.
 - **Environment, same day:** the venvs were rebuilt (`~/Projects/pyDev/venv`, and a `.venv` in this project, Python 3.14.6); `TRE_SOURCE_DIR` is set in fish so the font test
   runs, and `rpm` is installed so the rpmbuild test runs. The suite on Linux: 7718 passed, 2 skipped (the macOS-only title-bar tests).
+
+## 0.5.0.2: #251, an unknown function name is a load error
+
+- **Where the name is judged:** in an expression (a template, `if:`, `for:`, a stylesheet value) the only callable names are `BUILTIN_FUNCTIONS`, so `compile_expr` refuses any other
+  bare-name call as the text is compiled, with `did you mean` from `difflib` (else the allowed list), the line and the column. A handler's call may also be a built-in action,
+  a ViewModel method or a handler parameter, which only the scope knows: `Statements.calls` keeps the bare-name calls and `Composer._check_handler` runs
+  `expr.check_handler_calls` where a handler meets its scope (a node's handlers, a call's handlers, tooltip actions, a handler parameter given statements).
+- **A mistake on the way, caught by the full suite:** the first version asked `scope.is_action(name)`, which runs the app's resolver, and `builtin_actions` builds its closures from the
+  view, which does not exist while a view is composed (5 timer tests: `'NoneType' has no attribute 'timers'`). The resolver now publishes `resolve.names` (the bare built-in action
+  names) and the scope answers from that, a handler parameter or the ViewModel's callables (`Scope.is_known_call`); a scope whose actions have no `names` cannot judge, so it loads as before.
+- **A behaviour change, found by one test:** `test_a_click_on_a_child_is_handled_there...` attached `log_outer` to the ViewModel after the view loaded; that is now a load error, so the
+  test defines it on the class. Said in the changelog.
+- **Not covered:** the literal handler text inside `after(...)` and `every(...)`, and dotted calls (`a.b()`), which are methods on values or `window.`/`navigate.` actions.

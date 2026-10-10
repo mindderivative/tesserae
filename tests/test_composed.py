@@ -239,9 +239,13 @@ def test_a_disabled_nodes_handlers_do_not_run():
 
 
 def test_a_click_on_a_child_is_handled_there_and_does_not_also_run_the_parents_handler():
+    class Outer(DemoVM):  # a ViewModel method is there when the view loads (#251 finds a name that is not)
+        def log_outer(self):
+            self.log.append("outer")
+
     view, vm, _ = render(BASE + "  - widget: Rect\n    name: outer\n    style: {width: 80, height: 40, background: '#6750A4'}\n    handlers: {on_click: 'log_outer()'}\n"
-                         "    children:\n      - {widget: Rect, name: inner, style: {width: 30, height: 20, background: '#B3261E'}, handlers: {on_click: bump}}\n")
-    vm.log_outer = lambda: vm.log.append("outer")
+                         "    children:\n      - {widget: Rect, name: inner, style: {width: 30, height: 20, background: '#B3261E'}, handlers: {on_click: bump}}\n",
+                         vmcls=Outer)
     view.window.advance(16)
     view.window.simulate("click", node=view.node("root.outer.inner"))
     assert vm.log == ["bump"]
