@@ -40,8 +40,8 @@ tools/fullcheck.sh                                  # the whole suite, then `mkd
 .venv/bin/python -m pytest tests/test_toolbar.py -q   # one file
 ```
 
-A commit needs `fullcheck.sh` to pass. Tests run against a headless window: **it draws no shaders and no backdrop blur**, so those are tested by their
-values only and need a look in a real window (`.venv/bin/python -m tesserae ...` or an example in `examples/`). A real display is also needed for
+A commit needs `fullcheck.sh` to pass. Tests run against a headless window whose `window.snapshot()` draws shaders, gradients and backdrop blur, so
+`tests/test_pixels.py` reads those back by pixel (see its helpers); what a snapshot cannot tell you is how it *feels* (timing, scroll snap) or looks to a person. A real display is needed for
 `tools/window_perf.py` and anything that opens a second OS window while running.
 
 Some tests read tre's source: `TRE_SOURCE_DIR=<path to the tre checkout>` lets the one real-font test run.

@@ -6,7 +6,7 @@ a circle with an anti-aliased edge, and Python moves the three `vec4`s (centre x
 timing Material Web's `md-ripple` has. Nothing is drawn, and no timer runs, while no ripple is alive. The state layer stays a node: it is a flat
 colour whose opacity the engine already eases.
 
-The headless renderer does not draw shaders, so the tests read the uniforms; only a real window shows the pixels.
+tre's headless snapshot draws shaders, so `tests/test_pixels.py` reads the ripple back from the pixels as well as the uniforms.
 """
 
 from __future__ import annotations
