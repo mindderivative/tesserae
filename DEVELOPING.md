@@ -26,16 +26,9 @@ python3 -m venv .venv
 .venv/bin/pip install mkdocs mkdocs-material   # the docs build; also pillow-based tools need no extra
 ```
 
-`pip install -e ".[dev]"` pulls `tesserae-engine>=0.5.6,<0.6`. **Until tre publishes 0.5.6 to PyPI that requirement cannot be met**; PyPI has 0.5.5. Until then
-build the wheel from tre's `0.5.6` branch and install it into the venv (it must be this branch: the late windows, timers, layout animation, extra
-accessibility states, text-input props and masks 0.5.0 uses are all in it):
-
-```bash
-git clone https://github.com/mindderivative/tre.git && cd tre && git checkout 0.5.6   # if the branch is not on GitHub yet, ask tre's maintainer for the wheel
-pip install maturin
-maturin build --release -m crates/engine-py/Cargo.toml     # a wheel in target/wheels/
-cd ../tesserae && .venv/bin/pip install --force-reinstall --no-deps ../tre/target/wheels/tesserae_engine-0.5.6-*.whl
-```
+`pip install -e ".[dev]"` pulls `tesserae-engine>=0.5.6,<0.6` from PyPI (still `import tre`); nothing else is needed. The suite was run on the PyPI build of 0.5.6
+(7712 passed, 3 skipped). To work against an unreleased tre, build its wheel (`pip install maturin`, then in the tre checkout `maturin build --release -m
+crates/engine-py/Cargo.toml`) and `pip install --force-reinstall --no-deps` it into a scratch venv.
 
 Never put a scratch tre build into `.venv` by accident; to try another tre version make a throwaway venv (`python3 -m venv /tmp/v055`, install the wheel and
 `pip install -e . --no-deps` plus the dependencies).
