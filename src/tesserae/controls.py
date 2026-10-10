@@ -475,6 +475,9 @@ def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
+_max = max  # a Slider has a parameter named `max`
+
+
 class Slider(Control):
     """MD3's slider: a 4 px track, `primary` up to the value and
     `surface_container_highest` after it, and a 20 px `primary` handle.
@@ -486,21 +489,49 @@ class Slider(Control):
 
     `value` runs from `min` to `max`, snapped to `step` when one is given;
     the keys move by `step`, else a hundredth of the range. While dragged,
-    the handle's state layer shows MD3's dragged opacity."""
+    the handle's state layer shows MD3's dragged opacity.
+
+    `vertical` stands it up: the value grows upwards (the bottom is `min`),
+    `width` is then the touch target's and `height` the length. `size`
+    (`xs` to `xl`) is MD3 Expressive's: a thicker track in two pieces with a
+    gap, and a thin 4 px handle across it; `icon` is a glyph inset at the
+    start of the track (from size `s` up, where it fits)."""
 
     role = "slider"
     TRACK = 4.0
     HANDLE = 20.0
+    #: MD3 Expressive's sizes: the track's thickness, the handle's length across the track, and the inset icon's size (0: none fits).
+    #: Written from memory of the spec, not checked against it (#250).
+    SIZES = {"xs": (16.0, 44.0, 0.0), "s": (24.0, 44.0, 16.0), "m": (40.0, 52.0, 24.0), "l": (56.0, 68.0, 24.0), "xl": (96.0, 108.0, 32.0)}
+    HANDLE_WIDTH = 4.0  # an Expressive handle's length along the track
+    GAP = 6.0           # between an Expressive handle and each piece of track
 
     def __init__(self, window: Any, *, value: float = 0.0, min: float = 0.0, max: float = 1.0,
-                 step: Optional[float] = None, width: float = 200.0, height: float = TARGET_SIZE,
-                 color: Optional[RGBA] = None, ticks: bool = False, value_indicator: bool = False, **kwargs: Any) -> None:
+                 step: Optional[float] = None, width: Optional[float] = None, height: Optional[float] = None,
+                 color: Optional[RGBA] = None, ticks: bool = False, value_indicator: bool = False,
+                 vertical: bool = False, size: Optional[str] = None, icon: Optional[str] = None, **kwargs: Any) -> None:
         if not max > min:
             raise ValueError(f"a slider needs max > min, got min={min!r}, max={max!r}")
         if step is not None and not step > 0:
             raise ValueError(f"a slider's step must be positive, got {step!r}")
+        if size is not None and size not in self.SIZES:
+            raise ValueError(f"a slider's size is one of {', '.join(self.SIZES)}, got {size!r}")
+        if icon is not None and (size is None or not self.SIZES[size][2]):
+            raise ValueError("a slider's inset icon needs a size with room for it (s, m, l or xl)" + (f", not {size!r}" if size else ""))
         self.min, self.max, self.step = float(min), float(max), step
-        self.width = float(width)
+        self.vertical = bool(vertical)
+        self.size = size
+        self.icon_name = icon
+        self._thick, self._across, self._icon_px = self.SIZES[size] if size else (self.TRACK, self.HANDLE, 0.0)
+        self._hl = self.HANDLE_WIDTH if size else self.HANDLE  # the handle's length along the track
+        room = _max(TARGET_SIZE, self._across)  # the touch target across the track
+        if self.vertical:
+            across, self.length = (float(width) if width is not None else room), (float(height) if height is not None else 200.0)
+            node_size = {"width": across, "height": self.length}
+        else:
+            self.length, across = (float(width) if width is not None else 200.0), (float(height) if height is not None else room)
+            node_size = {"width": self.length, "height": across}
+        self.cross = across
         self._color = color
         self.ticks = bool(ticks and step)  # a mark at each step (a discrete slider); without a step there is nothing to mark
         self.value_indicator = bool(value_indicator)  # a bubble over the handle with the value, while it is dragged or has the keyboard
@@ -509,7 +540,7 @@ class Slider(Control):
         self._dragging = False
         self._start: float = 0.0
         self.value = Signal(self._snap(value))
-        super().__init__(window, width=self.width, height=height, **kwargs)
+        super().__init__(window, **node_size, **kwargs)
         for event, handler in (("pointer_down", self._on_down), ("pointer_move", self._on_move),
                                ("pointer_up", self._on_up), ("pointer_cancel", self._on_up),
                                ("key_down", self._on_key)):
@@ -519,27 +550,67 @@ class Slider(Control):
             "decrement": lambda e: self._user_set(self.value.get() - self._key_step()),
             "set_value": lambda e: self._user_set(float(e.value)) if e.value is not None else None,
         }, listen=self._listen))
-        # a slider laid out wider or narrower than it was built (flex, a percentage, a resized window) takes the room it was given (#252);
-        # layout is settled when a frame has been drawn, and `_fit_width` does nothing while the width is the same
+        # a slider laid out longer or shorter than it was built (flex, a percentage, a resized window) takes the room it was given (#252);
+        # layout is settled when a frame has been drawn, and `_fit_length` does nothing while the length is the same
         for event in ("frame", "resize"):
-            self._undo.append(listen_window(window, event, lambda e: untrack(lambda: self._fit_width() and self._paint(animate=False))))
+            self._undo.append(listen_window(window, event, lambda e: untrack(lambda: self._fit_length() and self._paint(animate=False))))
+
+    @property
+    def width(self) -> float:
+        """The node's width: its length, or (stood up) the touch target's."""
+        return self.cross if self.vertical else self.length
 
     @property
     def _span(self) -> float:
         """How far the handle's centre travels."""
-        return self.width - self.HANDLE
+        return self.length - self._hl
 
-    def _fit_width(self) -> bool:
-        """Takes the width the node was laid out at (the engine reads pending layout), moving the track and the tick marks with it; whether it changed."""
-        laid = float(self.node.get("layout_width") or 0.0)
-        if laid <= self.HANDLE or abs(laid - self.width) < 0.5:
+    @property
+    def _edge(self) -> float:
+        """From the start of the track to the handle's centre at `min`."""
+        return self._hl / 2
+
+    # -- the axis: the track starts at the left, or (stood up) at the bottom -------------------------------------------------
+
+    def _place(self, node: Any, start: float, extent: float, across: float, thickness: float, **more: Any) -> None:
+        """Puts a box that begins `start` from the track's start and runs `extent` along it, `across` from the target's edge and `thickness` thick."""
+        if self.vertical:
+            node.set(x=across, y=self.length - start - extent, width=thickness, height=extent, **more)
+        else:
+            node.set(x=start, y=across, width=extent, height=thickness, **more)
+
+    def _slide(self, node: Any, offset: float) -> None:
+        """Moves a node `offset` along the track from where `_place` put it, at once."""
+        self._to(node, "translate_y" if self.vertical else "translate_x", -offset if self.vertical else offset, 0)
+
+    def _fit_length(self) -> bool:
+        """Takes the length the node was laid out at (the engine reads pending layout), moving the track and the tick marks with it; whether it changed."""
+        laid = float(self.node.get("layout_height" if self.vertical else "layout_width") or 0.0)
+        if laid <= self._hl or abs(laid - self.length) < 0.5:
             return False
-        self.width = laid
-        self.inactive.set(width=self._span)
+        self.length = laid
+        mid = self.cross / 2
+        if not self.size:
+            self._place(self.inactive, self._edge, self._span, mid - self._thick / 2, self._thick)
+        self._place_ticks()
+        self._place_start()
+        return True
+
+    def _place_start(self) -> None:
+        """What sits at the start of the track and moves with its end when the length changes: the handle, the state layer, the bubble."""
+        mid = self.cross / 2
+        self._place(self.handle, 0.0, self._hl, mid - self._across / 2, self._across)
+        self._place(self.bubble, self._edge - 14.0, 28.0, mid - self._across / 2 - 8.0 - 28.0, 28.0)
+        if self.vertical:
+            self.surface.set(y=self.length - self._edge - STATE_LAYER_SIZE / 2)
+        else:
+            self.surface.set(x=self._edge - STATE_LAYER_SIZE / 2)
+
+    def _place_ticks(self) -> None:
+        mid = self.cross / 2
         count = len(self.tick_marks) - 1
         for i, mark in enumerate(self.tick_marks):
-            mark.set(x=self.HANDLE / 2 + self._span * i / count - 1.0)
-        return True
+            self._place(mark, self._edge + self._span * i / count - 1.0, 2.0, mid - 1.0, 2.0)
 
     def _snap(self, value: float) -> float:
         value = _clamp(float(value), self.min, self.max)
@@ -556,35 +627,38 @@ class Slider(Control):
         return (self._snap(self.value.get()) - self.min) / (self.max - self.min)
 
     def _build(self) -> None:
-        centre_y = self.target[1] / 2
-        radius = self.HANDLE / 2
-        self.inactive = self.window.create("box", position="absolute", x=radius, y=centre_y - self.TRACK / 2,
-                                           width=self._span, height=self.TRACK, corner_radius=self.TRACK / 2,
-                                           hit_testable=False, a11y_hidden=True)
-        self.active = self.window.create("box", position="absolute", x=radius, y=centre_y - self.TRACK / 2,
-                                         width=0.0, height=self.TRACK, corner_radius=self.TRACK / 2,
-                                         hit_testable=False, a11y_hidden=True)
-        self.handle = self.window.create("box", position="absolute", x=0.0, y=centre_y - radius, width=self.HANDLE,
-                                         height=self.HANDLE, corner_radius=radius, hit_testable=False,
+        mid = self.cross / 2
+        thick, round_ = self._thick, self._thick / 2
+        self.inactive = self.window.create("box", position="absolute", corner_radius=round_, hit_testable=False, a11y_hidden=True)
+        self.active = self.window.create("box", position="absolute", corner_radius=round_, hit_testable=False, a11y_hidden=True)
+        self.handle = self.window.create("box", position="absolute", corner_radius=min(self._hl, self._across) / 2, hit_testable=False,
                                          a11y_hidden=True)
+        self._place(self.inactive, self._edge, self._span, mid - thick / 2, thick)
+        self._place(self.active, self._edge, 0.0, mid - thick / 2, thick)
         for child in (self.inactive, self.active, self.handle):
             self.node.add_child(child)
         self.tick_marks: list[Any] = []
         count = round((self.max - self.min) / self.step) if self.ticks else 0
         if 0 < count <= 100:
             for i in range(count + 1):
-                mark = self.window.create("box", position="absolute", x=radius + self._span * i / count - 1.0, y=centre_y - 1.0, width=2.0, height=2.0,
-                                          corner_radius=1.0, hit_testable=False, a11y_hidden=True)
+                mark = self.window.create("box", position="absolute", corner_radius=1.0, hit_testable=False, a11y_hidden=True)
                 self.node.add_child(mark)
                 self.tick_marks.append(mark)
-        self.bubble = self.window.create("box", position="absolute", x=radius - 14.0, y=centre_y - radius - 8.0 - 28.0, width=28.0, height=28.0,
-                                         corner_radius=14.0, align_items="center", justify_content="center", visible=False,
-                                         hit_testable=False, a11y_hidden=True)
+        self._place_ticks()
+        self.icon = None
+        if self.icon_name is not None:  # at the start of the track, centred in its thickness
+            px = self._icon_px
+            self.icon = self.window.create("path", data=icon_path(self.icon_name), view_box=icon_view_box(self.icon_name), position="absolute",
+                                           hit_testable=False, a11y_hidden=True)
+            self._place(self.icon, (thick - px) / 2, px, mid - px / 2, px)
+            self.node.add_child(self.icon)
+        self.bubble = self.window.create("box", corner_radius=14.0, align_items="center", justify_content="center", visible=False,
+                                         position="absolute", hit_testable=False, a11y_hidden=True)
         self.bubble_text = self.window.create("text", text="", font_family="Roboto", font_size=12.0, font_weight=500.0, hit_testable=False,
                                               a11y_hidden=True)
         self.bubble.add_child(self.bubble_text)
         self.node.add_child(self.bubble)
-        self.surface.set(x=radius - STATE_LAYER_SIZE / 2)  # centred on the handle at the start
+        self._place_start()  # the handle, the bubble and the state layer, centred on the handle at the start
         for event, shown in (("focus", True), ("unfocus", False)):
             self._undo.append(self._listen(self.node, event, lambda e, shown=shown: self._show_bubble(shown and bool(getattr(e, "focus_visible", True)))))
 
@@ -595,7 +669,7 @@ class Slider(Control):
         return self._on_colour()
 
     def _paint(self, animate: bool) -> None:
-        self._fit_width()
+        self._fit_length()
         value, disabled = self._snap(self.value.get()), self.disabled.get()
         self.node.set(value=value, value_min=self.min, value_max=self.max, value_step=self._key_step())
         on_surface = self.color("on_surface")
@@ -611,16 +685,28 @@ class Slider(Control):
         self._to(self.handle, "fill", handle, ms)
         # position follows the value at once: a drag mustn't lag behind the pointer
         offset = self._fraction() * self._span
-        self.active.set(width=offset)
-        self._to(self.handle, "translate_x", offset, 0)
-        self._to(self.surface, "translate_x", offset, 0)
+        mid, thick = self.cross / 2, self._thick
+        if self.size:  # two pieces of track, each a gap from the handle
+            centre = self._edge + offset
+            active_end = _max(centre - self._hl / 2 - self.GAP, 0.0)
+            inactive_start = centre + self._hl / 2 + self.GAP
+            self._place(self.active, 0.0, active_end, mid - thick / 2, thick)
+            self._place(self.inactive, inactive_start, _max(self.length - inactive_start, 0.0), mid - thick / 2, thick)
+        else:
+            self._place(self.active, self._edge, offset, mid - thick / 2, thick)
+        self._slide(self.handle, offset)
+        self._slide(self.surface, offset)
+        if self.icon is not None:  # over the active piece it is on the colour, else on the track
+            covered = self.size and active_end >= (thick - self._icon_px) / 2 + self._icon_px
+            self.icon.set(fill=with_alpha(on_surface, DISABLED_CONTENT) if disabled
+                          else self.color("on_primary") if covered else self.color("on_surface_variant"))
         count = len(self.tick_marks) - 1
         for i, mark in enumerate(self.tick_marks):  # a mark over the active part is the on-colour, over the rest the variant
             reached = count > 0 and i / count <= self._fraction() + 1e-9
             mark.set(fill=self.color("on_primary") if reached and not disabled else self.color("on_surface_variant"))
         self.bubble.set(fill=self.color("inverse_surface"))
         self.bubble_text.set(text=f"{value:g}", fill=self.color("inverse_on_surface"))
-        self._to(self.bubble, "translate_x", offset, 0)
+        self._slide(self.bubble, offset)
 
     def _activate(self) -> None:
         pass  # a click has already set the value, at pointer_down
@@ -646,13 +732,20 @@ class Slider(Control):
             self._input()
             self._changed(self.value.get())
 
-    def _from_x(self, x: float) -> float:
-        if self._fit_width():
-            untrack(lambda: self._paint(animate=False))  # the handle and the fill go to the new span even if the value stays
-        return self.min + _clamp((x - self.HANDLE / 2) / self._span, 0.0, 1.0) * (self.max - self.min)
+    def _at(self, event: Any) -> Optional[float]:
+        """How far along the track, from its start, the pointer is (`None` for a key's click, which has no place)."""
+        point = event.y if self.vertical else event.x
+        if point is None:
+            return None
+        return self.length - point if self.vertical else point
+
+    def _from_event(self, event: Any) -> float:
+        if self._fit_length():
+            untrack(lambda: self._paint(animate=False))  # the handle and the fill go to the new length even if the value stays
+        return self.min + _clamp((self._at(event) - self._edge) / self._span, 0.0, 1.0) * (self.max - self.min)
 
     def _on_down(self, event: Any) -> None:
-        if self.disabled.get() or event.x is None:
+        if self.disabled.get() or self._at(event) is None:
             return
         self._dragging = True
         self._start = self.value.get()
@@ -660,14 +753,14 @@ class Slider(Control):
         self.interaction.set_dragged(True)
         self._show_bubble(self._shown)
         before = self.value.get()
-        self.value.set(self._snap(self._from_x(event.x)))
+        self.value.set(self._snap(self._from_event(event)))
         if self.value.get() != before:
             self._input()
 
     def _on_move(self, event: Any) -> None:
-        if self._dragging and event.x is not None:
+        if self._dragging and self._at(event) is not None:
             before = self.value.get()
-            self.value.set(self._snap(self._from_x(event.x)))
+            self.value.set(self._snap(self._from_event(event)))
             if self.value.get() != before:
                 self._input()
 

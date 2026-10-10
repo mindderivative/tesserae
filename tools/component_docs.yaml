@@ -1200,12 +1200,15 @@ components:
       | `step` | number | snap to multiples of it from `min`; the keys move by it (else by a hundredth of the range) |
       | `ticks` | true or false | a mark at each step (needs `step`): a discrete slider |
       | `value_indicator` | true or false | a bubble with the value over the handle while it is dragged or has the keyboard |
+      | `vertical` | true or false | stood up: the bottom is `min`, `style.height` is its length and `style.width` the touch target's; up and down arrows step it |
+      | `size` | `xs`, `s`, `m`, `l`, `xl` | MD3 Expressive: a track 16, 24, 40, 56 or 96 px thick, in two pieces with a 6 px gap, and a thin 4 px handle across it (empty: the standard 4 px track and 20 px handle) |
+      | `icon` | an icon name | a glyph inset at the start of the track (needs a `size` of `s` or larger); the colour of what it lies on |
       | `label` | text | what a screen reader calls it |
       | `disabled` | true or false | dimmed and does not move |
 
       Events: `on_input` while it is dragged (every step), `on_change` once it is let go and after each key. Dragging captures the pointer; the arrow keys
       step it, Page Up and Down move by ten steps, Home and End go to the ends, and a screen reader can increment, decrement and set it. The colour is
-      `style.foreground` and the length is `style.width`. Range (two handles), vertical and inset icons are not built.
+      `style.foreground` and the length is `style.width` (`style.height` when `vertical`). Range (two handles) is not built.
     usage_view: |
       name: player
       widget: Container

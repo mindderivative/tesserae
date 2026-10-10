@@ -115,6 +115,10 @@ declare("Slider", {"value": P("float", default=0.0, model=True, doc="From `min` 
                    "step": P("float", doc="Snap to multiples of this from `min`; the keys move by it."),
                    "ticks": P("bool", doc="A mark at each step (needs `step`): a discrete slider."),
                    "value_indicator": P("bool", doc="A bubble with the value over the handle while it is dragged or has the keyboard."),
+                   "vertical": P("bool", doc="Stood up: the bottom is `min`; `style.height` is its length and `style.width` the touch target's."),
+                   "size": P("enum", choices=("xs", "s", "m", "l", "xl"),
+                             doc="MD3 Expressive's size: a thicker track in two pieces and a thin 4 px handle (empty: the standard 4 px track and 20 px handle)."),
+                   "icon": P("str", doc="An icon inset at the start of the track (needs a `size` of `s` or larger)."),
                    "label": P("str", doc="What a screen reader calls it."), "disabled": P("bool")},
         extras=("foreground",), doc="Picks a value between `min` and `max` by dragging.")
 declare("SpinBox", {

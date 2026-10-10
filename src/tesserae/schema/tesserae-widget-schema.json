@@ -3209,6 +3209,48 @@
             ],
             "description": "A bubble with the value over the handle while it is dragged or has the keyboard."
           },
+          "vertical": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Stood up: the bottom is `min`; `style.height` is its length and `style.width` the touch target's."
+          },
+          "size": {
+            "anyOf": [
+              {
+                "enum": [
+                  "xs",
+                  "s",
+                  "m",
+                  "l",
+                  "xl"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "MD3 Expressive's size: a thicker track in two pieces and a thin 4 px handle (empty: the standard 4 px track and 20 px handle)."
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "An icon inset at the start of the track (needs a `size` of `s` or larger)."
+          },
           "label": {
             "anyOf": [
               {
@@ -3262,6 +3304,9 @@
             "step",
             "ticks",
             "value_indicator",
+            "vertical",
+            "size",
+            "icon",
             "label",
             "disabled"
           ]

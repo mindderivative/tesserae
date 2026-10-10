@@ -2641,6 +2641,34 @@
           ],
           "description": "Whether a Slider shows a bubble with its value over the handle."
         },
+        "vertical": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Slider is stood up (the bottom is its minimum)."
+        },
+        "size": {
+          "anyOf": [
+            {
+              "enum": [
+                "xs",
+                "s",
+                "m",
+                "l",
+                "xl"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A Slider's MD3 Expressive size."
+        },
         "icons": {
           "anyOf": [
             {
@@ -7637,6 +7665,23 @@
           ],
           "description": "A Switch's or RadioButton's state."
         },
+        "size": {
+          "anyOf": [
+            {
+              "enum": [
+                "xs",
+                "s",
+                "m",
+                "l",
+                "xl"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "A Slider's MD3 Expressive size."
+        },
         "step": {
           "anyOf": [
             {
@@ -7975,6 +8020,17 @@
             }
           ],
           "description": "Whether a Slider shows a bubble with its value over the handle."
+        },
+        "vertical": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether a Slider is stood up (the bottom is its minimum)."
         },
         "view": {
           "type": "string",

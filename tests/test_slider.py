@@ -253,3 +253,106 @@ def test_a_flex_expanded_slider_moves_its_tick_marks_and_its_handle_with_the_lai
 def test_a_slider_with_its_built_width_is_left_alone(tmp_path):
     view, _ = opened(tmp_path, SLIDER % "")
     assert control(view).width == 220.0
+
+
+# -- #250: Expressive sizes, stood up, an inset icon ---------------------------------------------------------------------------
+
+
+def sized(tmp_path, extra, style="width: 220"):
+    return opened(tmp_path, '  - {widget: Slider, name: s, min: 0, max: 100, value: "{{ volume }}", %s, style: {%s}}\n' % (extra, style))
+
+
+@pytest.mark.parametrize("size,track,handle", [("xs", 16, 44), ("s", 24, 44), ("m", 40, 52), ("l", 56, 68), ("xl", 96, 108)])
+def test_an_expressive_size_has_a_thick_track_and_a_thin_handle(tmp_path, size, track, handle):
+    view, _ = sized(tmp_path, f"size: {size}")
+    c = control(view)
+    assert c.active.get("layout_height") == track and c.inactive.get("layout_height") == track
+    assert (c.handle.get("layout_width"), c.handle.get("layout_height")) == (4.0, handle)
+    assert view.node("root.s").get("layout_height") == max(48.0, handle)  # the touch target holds the handle
+
+
+def test_an_expressive_track_is_two_pieces_a_gap_from_the_handle(tmp_path):
+    view, _ = sized(tmp_path, "size: m")
+    c = control(view)
+    centre = c._edge + 0.3 * c._span  # the value is 30
+    assert c.active.get("layout_x") == 0.0
+    assert c.active.get("layout_width") == pytest.approx(centre - 2.0 - c.GAP, abs=0.5)
+    assert c.inactive.get("layout_x") == pytest.approx(centre + 2.0 + c.GAP, abs=0.5)
+    assert c.inactive.get("layout_x") + c.inactive.get("layout_width") == pytest.approx(220.0, abs=0.5)
+
+
+def test_an_expressive_slider_still_maps_the_pointer_over_its_own_span(tmp_path):
+    view, vm = sized(tmp_path, "size: l")
+    node, c = view.node("root.s"), control(view)
+    view.window.simulate("pointer_down", node, x=c._edge + 0.8 * c._span, y=30)
+    view.window.simulate("pointer_up", x=node.get("layout_x") + c._edge + 0.8 * c._span, y=node.get("layout_y") + 30)
+    assert vm.volume.get() == pytest.approx(80.0, abs=0.5)
+
+
+def test_a_size_that_is_not_one_is_refused_and_an_icon_needs_room(tmp_path):
+    with pytest.raises(LoadError):
+        sized(tmp_path, "size: huge")
+    for extra in ("icon: volume_high", "size: xs, icon: volume_high"):
+        with pytest.raises(Exception, match="inset icon needs a size"):
+            sized(tmp_path, extra)
+
+
+def test_an_inset_icon_sits_at_the_start_of_the_track_and_takes_the_colour_of_what_is_under_it(tmp_path):
+    view, vm = sized(tmp_path, "size: l, icon: volume_high")
+    c = control(view)
+    assert (c.icon.get("layout_width"), c.icon.get("layout_height")) == (24.0, 24.0)
+    assert c.icon.get("layout_x") == pytest.approx((56 - 24) / 2) and c.icon.get("fill") == role(view, "on_primary")  # at 30 the active piece covers it
+    vm.volume.set(0.0)
+    view.window.advance(16)
+    assert c.icon.get("fill") == role(view, "on_surface_variant")  # at 0 it lies on the inactive piece
+
+
+def test_a_vertical_slider_is_tall_and_its_bottom_is_the_minimum(tmp_path):
+    view, vm = sized(tmp_path, "vertical: true", style="height: 200")
+    node, c = view.node("root.s"), control(view)
+    assert (node.get("layout_width"), node.get("layout_height")) == (48.0, 200.0)
+    assert (c.inactive.get("layout_width"), c.inactive.get("layout_height")) == (4.0, c._span)
+    assert c.handle.get("translate_y") == pytest.approx(-0.3 * c._span) and c.active.get("layout_height") == pytest.approx(0.3 * c._span)
+    # the active part grows up from the bottom edge of the track
+    assert c.active.get("layout_y") + c.active.get("layout_height") == pytest.approx(200 - c._edge)
+
+
+def test_a_vertical_slider_reads_the_pointers_height_from_the_bottom(tmp_path):
+    view, vm = sized(tmp_path, "vertical: true", style="height: 200")
+    node, c = view.node("root.s"), control(view)
+    y = 200 - (c._edge + 0.7 * c._span)  # 70% of the way up
+    view.window.simulate("pointer_down", node, x=24, y=y)
+    view.window.simulate("pointer_up", x=node.get("layout_x") + 24, y=node.get("layout_y") + y)
+    assert vm.volume.get() == pytest.approx(70.0, abs=0.5)
+    view.window.simulate("pointer_down", node, x=24, y=0)  # the top is the maximum
+    view.window.simulate("pointer_up", x=node.get("layout_x") + 24, y=node.get("layout_y"))
+    assert vm.volume.get() == 100.0
+
+
+def test_a_vertical_slider_is_stepped_by_the_up_and_down_keys(tmp_path):
+    view, vm = sized(tmp_path, "vertical: true, step: 10", style="height: 200")
+    node = view.node("root.s")
+    view.window.simulate("focus", node)
+    view.window.simulate("key_down", node, key="arrow_up")
+    assert vm.volume.get() == 40.0
+    view.window.simulate("key_down", node, key="arrow_down")
+    view.window.simulate("key_down", node, key="arrow_down")
+    assert vm.volume.get() == 20.0
+
+
+def test_a_vertical_slider_puts_its_ticks_and_bubble_beside_the_track(tmp_path):
+    view, _ = sized(tmp_path, "vertical: true, step: 25, ticks: true, value_indicator: true", style="height: 200")
+    c = control(view)
+    assert len(c.tick_marks) == 5
+    assert c.tick_marks[0].get("layout_y") + 1.0 == pytest.approx(200 - c._edge) and c.tick_marks[-1].get("layout_y") + 1.0 == pytest.approx(c._edge)
+    assert c.bubble.get("layout_x") < c.handle.get("layout_x")  # to the left of the handle, not above it
+
+
+def test_a_flex_expanded_vertical_slider_takes_its_laid_out_height(tmp_path):
+    view, vm = opened(tmp_path, '  - widget: Slider\n    name: s\n    min: 0\n    max: 100\n    vertical: true\n    value: "{{ volume }}"\n'
+                      '    style: {height: 80, flex: expand_vertical}\n')
+    c, node = control(view), view.node("root.s")
+    laid = node.get("layout_height")
+    assert laid > 150
+    view.window.simulate("resize", width=300, height=200)
+    assert c.length == pytest.approx(laid, abs=0.5)

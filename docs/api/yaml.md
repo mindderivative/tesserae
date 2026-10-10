@@ -33,6 +33,8 @@ step: <a number or text>
 track: <text or any value>
 ticks: <true or false or text>
 value_indicator: <true or false or text>
+vertical: <true or false or text>
+size: <xs | s | m | l | xl or any value>
 icons: <true or false or text>
 error: <true or false or text>
 buffer: <a number or text>
@@ -91,6 +93,8 @@ children: <a list>
 | `track` | text or any value | The colour role of the track behind a progress indicator. |
 | `ticks` | `true` or `false` or text | Whether a Slider marks each step. |
 | `value_indicator` | `true` or `false` or text | Whether a Slider shows a bubble with its value over the handle. |
+| `vertical` | `true` or `false` or text | Whether a Slider is stood up (the bottom is its minimum). |
+| `size` | `xs` \| `s` \| `m` \| `l` \| `xl` or any value | A Slider's MD3 Expressive size. |
 | `icons` | `true` or `false` or text | Whether a Switch shows a check or a cross on its handle. |
 | `error` | `true` or `false` or text | Whether a Checkbox or RadioButton is drawn in the error colours. |
 | `buffer` | a number or text | A LinearProgress's loaded share, 0 to 1. |

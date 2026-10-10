@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0.3
+
+### Added
+
+- **Slider: Expressive sizes, vertical and an inset icon** ([#250](https://github.com/mindderivative/tesserae/issues/250), part 1 of 2; the range slider is part 2).
+  `size: xs | s | m | l | xl` draws MD3 Expressive's slider: a track 16, 24, 40, 56 or 96 px thick in two pieces with a 6 px gap on each side of a thin
+  4 px handle (44 to 108 px across it); the touch target grows to hold the handle. `vertical: true` stands it up: the bottom is `min`, `style.height` is
+  its length, the up and down arrows step it, and the ticks and the value bubble go beside the track. `icon: name` insets a glyph at the start of the
+  track (from size `s` up), in the on-colour while the active piece covers it and in the track's colour when it does not. The standard slider is unchanged.
+  The sizes are written from memory of the spec and have not been checked against it.
+
 ## 0.5.0.2
 
 ### Changed

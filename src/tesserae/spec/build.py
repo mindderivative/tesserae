@@ -57,7 +57,7 @@ _KINDS = _CONTROL_KINDS | _WIDGET_KINDS | {"Rect", "Container", "Text", "Link", 
                                            "ScrollView", "Canvas", "Overlay"}
 _NODE_KEYS = frozenset({
     "id", "kind", "classes", "style", "text", "checked", "selected", "value", "hour", "minute",
-    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "error", "icons", "ticks", "value_indicator", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
+    "image", "icon", "svg", "canvas", "scroll", "overlay", "virtual", "track", "stop_indicator", "buffer", "error", "icons", "ticks", "value_indicator", "vertical", "size", "bindings", "handlers", "two_way", "interaction", "a11y", "group", "children",
     "component_of",  # the fragment a node is the root of (M57): its theme `components:` entry
     "embed",  # a `view:` node, made a container (0.4.4): the view to build into it and its `with:`
     "window",  # a root `kind: Window`, made a container (0.4.4): the OS window's title, borderless, sizes
@@ -1263,7 +1263,8 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
         elif kind == "Slider":
             control = controls.Slider(ctx.window, value=float(node.get("value") or 0.0), min=float(node.get("min") or 0.0),
                                       max=1.0 if node.get("max") is None else float(node["max"]), step=node.get("step"),
-                                      ticks=bool(node.get("ticks")), value_indicator=bool(node.get("value_indicator")), **size, **common)
+                                      ticks=bool(node.get("ticks")), value_indicator=bool(node.get("value_indicator")),
+                                      vertical=bool(node.get("vertical")), size=node.get("size"), icon=node.get("icon"), **size, **common)
         elif kind == "SpinBox":  # M58: two buttons and a field, sized by MD3, not `width`/`height`
             common.pop("color")
             control = controls.SpinBox(ctx.window, value=_spin_number(node.get("value") or 0, node.get("step") or 1),
@@ -1400,4 +1401,5 @@ def control_shape(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> 
     the reconciler rebuilds the control rather than patching it."""
     style = resolve_style(node, layers)
     return (node.get("kind"), style.get("width"), style.get("height"), node.get("group"),
-            node.get("min"), node.get("max"), node.get("step"), repr(node.get("spin")), node.get("track"), node.get("stop_indicator"), node.get("icons"), node.get("ticks"), node.get("value_indicator"))  # a SpinBox's bounds are built in (M58)
+            node.get("min"), node.get("max"), node.get("step"), repr(node.get("spin")), node.get("track"), node.get("stop_indicator"), node.get("icons"), node.get("ticks"), node.get("value_indicator"),
+            node.get("vertical"), node.get("size"), node.get("icon"))  # a SpinBox's bounds are built in (M58)

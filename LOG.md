@@ -2515,3 +2515,15 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **A behaviour change, found by one test:** `test_a_click_on_a_child_is_handled_there...` attached `log_outer` to the ViewModel after the view loaded; that is now a load error, so the
   test defines it on the class. Said in the changelog.
 - **Not covered:** the literal handler text inside `after(...)` and `every(...)`, and dotted calls (`a.b()`), which are methods on values or `window.`/`navigate.` actions.
+
+## 0.5.0.3: #250, Slider sizes, vertical and an inset icon (part 1); the range slider is part 2
+
+- **Scope:** #250 asks for four things: Expressive sizes, vertical, inset icons and a range slider (two handles, two values). Done in two commits under one version: the three that change
+  how one handle is laid out, then the range, which needs two focusable handles and a two-value model.
+- **The refactor first:** the Slider's geometry was written for a horizontal 4/20 slider, so every position went through new axis helpers (`_place(node, start, extent, across, thickness)` and
+  `_slide(node, offset)`: the track starts at the left, or at the bottom when stood up), with the existing 51 slider/control/video tests as the safety net before anything new was added.
+  `_fit_width` became `_fit_length` (a stood-up slider takes `layout_height`); the 0.5.0.1 entries above still name the old one. `Slider.width` is now a property (the node's width).
+- **Expressive:** `SIZES` = (track thickness, handle length across, inset icon size) for xs, s, m, l, xl = (16, 44, 0), (24, 44, 16), (40, 52, 24), (56, 68, 24), (96, 108, 32), a 4 px handle and a 6 px gap.
+  Written from memory of the spec; I could not fetch it, so they are unchecked. The two pieces of track are re-placed on every paint (the active piece ends a gap before the handle, the inactive starts a gap after).
+  Rendered to a PNG with the headless snapshot and looked at: the pieces, the gap, the icon and the stood-up slider (growing from the bottom) draw as intended.
+- **Wiring:** `vertical`, `size`, `icon` are declared on the Slider widget, passed by the builder, in `_NODE_KEYS` and `view._props_equal`'s keys, and in `control_shape` (a change rebuilds the control).
