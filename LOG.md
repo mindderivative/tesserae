@@ -2470,3 +2470,23 @@ User: "scope #113 as 0.4.6", "approved, move #113 to Ready and start phase 1", "
   `AttributeError`, `tesserae.shell` and `tesserae._removed` a `ModuleNotFoundError`; `new --shell` is "unrecognized arguments";
   `examples/window_dock` ran its own checks.
 - Still open: #105 (separate-OS-window modals) and #106 (dropping a panel onto a split half), both Backlog.
+
+## Tesserae 0.5.0 released
+
+User: "release tesserae 0.5.0", then "pypi is up".
+
+- The 0.5.0 build: the view language (`widget:` views against ViewModels, shipped views with stylesheets of rules), about 50 shipped views (the buttons, fields, menus,
+  navigation, dialogs, pickers, tree, carousel, toolbar, video player and more), a second window (`app.open_window`), routed screens with nested routes, guards and lazy
+  screens, window options from a view (flags, `remember`), and the optional extras: a ripple shader, morphing icon toggles, frosted surfaces and a gradient focus ring.
+  The record of what each piece needed is `design/yaml-language.md`; the user-facing list is `docs/changelog.md`.
+- The first push of the release commit failed CI on Windows and macOS (about 30 tests) and Linux (5): none of the 0.5.0 work had run on those runners before. Causes, all in
+  tests or the report text, not the product: GitHub's Windows and macOS runners ask for reduced motion, so every animation finished at once; the clipboard tests need a display;
+  one date-picker test assumed the day it was written; and the migration report printed backslashes on Windows. Fixed in `4461400`, reproduced first by making an `App` see
+  "reduced motion: on" (30 failures, as in CI), and the fix passes both that and the normal run. CI then passed on every platform.
+- Released: 7717 tests passed, `v0.5.0` target `4461400`, the Release workflow's `pypi` environment approved by the user. `tesserae-ui` 0.5.0 is on PyPI and pulled
+  `tesserae-engine` 0.5.6. From that install in a clean venv: a view with a Toolbar (fit), a SplitButton and a DatePicker built and drew at 400 by 300 with the shader ripple and
+  gradient focus ring switched on; 50 shipped views.
+- Not checked on real hardware: IME, screen-reader output, the scroll-snap feel, window placement off Wayland, X11/Windows/macOS multi-window; and nobody has looked at the
+  shader ripple, frosted blur or gradient ring in a real window (they are checked by pixels in the headless snapshot).
+- Still open (Backlog): #248 typing effects, #249 progress extras, #250 slider range/vertical/inset icons, #251 load-time unknown-function check, #252 flex-expanded slider
+  pointer mapping.
