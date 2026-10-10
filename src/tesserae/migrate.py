@@ -63,9 +63,9 @@ class Report:
     def render(self, root: Optional[Path] = None) -> str:
         def rel(path: Path) -> str:
             try:
-                return str(path.relative_to(root)) if root else str(path)
+                return (path.relative_to(root) if root else path).as_posix()
             except ValueError:
-                return str(path)
+                return path.as_posix()
 
         lines: list[str] = []
         for r in self.results:
@@ -232,5 +232,5 @@ def _python_hints(root: Path, viewmodels: dict[str, Path], translated: dict[Path
             shown = vm.relative_to(root)
         except ValueError:
             shown = vm
-        hints.append(f"{shown}: " + "; ".join(steps))
+        hints.append(f"{shown.as_posix()}: " + "; ".join(steps))
     return sorted(hints)

@@ -94,3 +94,18 @@ def os_appearance(monkeypatch):
     appearance = Appearance()
     monkeypatch.setattr(tesserae.app, "_os_dark", lambda window: appearance.dark)
     return appearance
+
+
+@pytest.fixture(autouse=True)
+def _the_os_does_not_ask_for_reduced_motion(monkeypatch):
+    """An `App` that follows the OS (the default) would read reduced motion from the machine running the tests: GitHub's Windows and macOS
+    runners ask for it, so every animation finished at once and the tests that watch one in progress failed. A test that cares passes
+    `reduced_motion=True` or `False` itself; `test_os_preferences.py` drives the OS events directly."""
+    from tesserae.app import App
+
+    wanted = App._wanted
+
+    def not_reduced(self, name, mode):
+        return False if (name == "reduced_motion" and mode == "system") else wanted(self, name, mode)
+
+    monkeypatch.setattr(App, "_wanted", not_reduced)

@@ -34,6 +34,8 @@ def opened(tmp_path, text=VIEW):
     app.bind(VM)
     view = app.open_view("Main")
     app.show("main")
+    if not view.window.write_clipboard("probe") or view.window.read_clipboard() != "probe":
+        pytest.skip("this machine has no clipboard (no display)")  # tre reads and writes the OS clipboard; CI's Linux has none
     return view, app.bindings.viewmodel_for("main")
 
 

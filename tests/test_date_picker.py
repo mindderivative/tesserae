@@ -20,6 +20,14 @@ class VM(ViewModel):
         self.log.append("ok")
 
 
+@pytest.fixture(autouse=True)
+def _today_is_some_other_day(monkeypatch):
+    """The picker marks today; these tests pick days around 2026-10-09 and must not depend on the day they run. A test that cares sets its own."""
+    from tesserae import expr
+
+    monkeypatch.setitem(expr.BUILTIN_FUNCTIONS, "current_date", lambda: "2001-01-01")
+
+
 def opened(tmp_path, props="", date="2026-10-09", show=True):
     (tmp_path / "Views").mkdir(exist_ok=True)
     lines = "\n    ".join(props.split(", ")) if props else ""
