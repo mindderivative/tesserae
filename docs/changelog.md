@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0.1
+
+Point releases between 0.5.0 and 0.5.1: one issue each, in the order the backlog was recommended (#252, #251, #250, #249, #248).
+
+### Fixed
+
+- **A flex-expanded Slider maps the pointer with the width it was laid out at** ([#252](https://github.com/mindderivative/tesserae/issues/252)).
+  The slider fixed its span at the width it was built with (200 by default), so in a row with `flex: expand_horizontal` (or a percentage)
+  its track and handle were drawn at that width and a press in the middle gave the wrong value (a 280 px slider read 62 as 90). It now takes
+  the width the engine laid it out at when it paints, when a pointer is mapped, on a drawn frame and on a window resize, and moves the
+  track, the tick marks and the handle with it. A slider with an explicit width is untouched.
+
 ## 0.5.0
 
 The YAML language redesign ([#209](https://github.com/mindderivative/tesserae/issues/209)), then the components and the windows work.

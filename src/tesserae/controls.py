@@ -27,7 +27,7 @@ from tesserae import a11y, tokens
 from tesserae.follow import initial_theme, unfollow
 from tesserae.icons import icon_path, icon_view_box
 from tesserae.interaction import Interaction
-from tesserae.listeners import Listeners, handled
+from tesserae.listeners import Listeners, handled, listen_window
 from tesserae.reactive import Effect, Signal, untrack
 from tesserae.theme import Theme
 from tesserae import motion
@@ -519,11 +519,27 @@ class Slider(Control):
             "decrement": lambda e: self._user_set(self.value.get() - self._key_step()),
             "set_value": lambda e: self._user_set(float(e.value)) if e.value is not None else None,
         }, listen=self._listen))
+        # a slider laid out wider or narrower than it was built (flex, a percentage, a resized window) takes the room it was given (#252);
+        # layout is settled when a frame has been drawn, and `_fit_width` does nothing while the width is the same
+        for event in ("frame", "resize"):
+            self._undo.append(listen_window(window, event, lambda e: untrack(lambda: self._fit_width() and self._paint(animate=False))))
 
     @property
     def _span(self) -> float:
         """How far the handle's centre travels."""
         return self.width - self.HANDLE
+
+    def _fit_width(self) -> bool:
+        """Takes the width the node was laid out at (the engine reads pending layout), moving the track and the tick marks with it; whether it changed."""
+        laid = float(self.node.get("layout_width") or 0.0)
+        if laid <= self.HANDLE or abs(laid - self.width) < 0.5:
+            return False
+        self.width = laid
+        self.inactive.set(width=self._span)
+        count = len(self.tick_marks) - 1
+        for i, mark in enumerate(self.tick_marks):
+            mark.set(x=self.HANDLE / 2 + self._span * i / count - 1.0)
+        return True
 
     def _snap(self, value: float) -> float:
         value = _clamp(float(value), self.min, self.max)
@@ -579,6 +595,7 @@ class Slider(Control):
         return self._on_colour()
 
     def _paint(self, animate: bool) -> None:
+        self._fit_width()
         value, disabled = self._snap(self.value.get()), self.disabled.get()
         self.node.set(value=value, value_min=self.min, value_max=self.max, value_step=self._key_step())
         on_surface = self.color("on_surface")
@@ -630,6 +647,8 @@ class Slider(Control):
             self._changed(self.value.get())
 
     def _from_x(self, x: float) -> float:
+        if self._fit_width():
+            untrack(lambda: self._paint(animate=False))  # the handle and the fill go to the new span even if the value stays
         return self.min + _clamp((x - self.HANDLE / 2) / self._span, 0.0, 1.0) * (self.max - self.min)
 
     def _on_down(self, event: Any) -> None:

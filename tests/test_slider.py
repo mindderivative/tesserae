@@ -219,3 +219,37 @@ def test_moving_within_one_step_is_not_a_new_input(tmp_path):
     view, vm = opened(tmp_path, SLIDER % ", step: 10, handlers: {on_input: moving}")
     drag(view, [0.5, 0.51, 0.52, 0.49])
     assert vm.live == [50.0]  # the press set it to 50; the small moves stayed on the same step
+
+
+def test_a_flex_expanded_slider_maps_the_pointer_with_its_laid_out_width(tmp_path):
+    """#252: the span was the width at build (220), so a press in the middle of a slider laid out at 300 read the wrong value."""
+    view, vm = opened(tmp_path, '  - widget: Container\n    name: row\n    style: {flex_direction: horizontal, width: 300, height: 48}\n    children:\n'
+                      '      - {widget: Slider, name: s, min: 0, max: 100, value: "{{ volume }}", style: {width: 120, flex: expand_horizontal}}\n')
+    node = view.node("root.row.s")
+    laid = node.get("layout_width")
+    assert laid > 250  # it did expand past the built 120
+    c = view._built.controls["root.row.s"]
+    handle = c.HANDLE
+    view.window.simulate("pointer_down", node, x=handle / 2 + (laid - handle) / 2, y=24)
+    view.window.simulate("pointer_up", x=node.get("layout_x") + laid / 2, y=node.get("layout_y") + 24)
+    assert vm.volume.get() == pytest.approx(50.0, abs=1.0)
+    # and the track and the handle follow the laid-out width, not the built one
+    assert c.inactive.get("width") == pytest.approx(laid - handle, abs=0.5)
+
+
+def test_a_flex_expanded_slider_moves_its_tick_marks_and_its_handle_with_the_laid_out_width(tmp_path):
+    view, vm = opened(tmp_path, '  - widget: Container\n    name: row\n    style: {flex_direction: horizontal, width: 300, height: 48}\n    children:\n'
+                      '      - {widget: Slider, name: s, min: 0, max: 100, step: 25, ticks: true, value: "{{ volume }}", style: {width: 120, flex: expand_horizontal}}\n')
+    c = view._built.controls["root.row.s"]
+    laid = view.node("root.row.s").get("layout_width")
+    view.window.simulate("resize", width=300, height=200)  # headless `advance` lays out but draws no frame; the slider looks on a frame or a resize
+    assert c.width == pytest.approx(laid, abs=0.5) and laid > 250
+    assert c.tick_marks[-1].get("x") == pytest.approx(c.HANDLE / 2 + c._span - 1.0)
+    vm.volume.set(100.0)
+    view.window.advance(16)
+    assert c.handle.get("translate_x") == pytest.approx(c._span)
+
+
+def test_a_slider_with_its_built_width_is_left_alone(tmp_path):
+    view, _ = opened(tmp_path, SLIDER % "")
+    assert control(view).width == 220.0

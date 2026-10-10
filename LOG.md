@@ -2490,3 +2490,15 @@ User: "release tesserae 0.5.0", then "pypi is up".
   shader ripple, frosted blur or gradient ring in a real window (they are checked by pixels in the headless snapshot).
 - Still open (Backlog): #248 typing effects, #249 progress extras, #250 slider range/vertical/inset icons, #251 load-time unknown-function check, #252 flex-expanded slider
   pointer mapping.
+
+## 0.5.0.1: #252, a flex-expanded Slider maps the pointer with its laid-out width
+
+- **The plan:** slow the versioning. Each issue of the 0.5.0 backlog is one point release (0.5.0.1, 0.5.0.2, ...), in this order: #252 (a bug), #251 (an enabler), #250, #249, #248;
+  then 0.5.1. #105 and #106 (separate OS windows, drops onto split halves) wait until after 0.5.1.
+- **The bug, reproduced first:** a Slider with `flex: expand_horizontal` in a 300 px row laid out at 300, and a press at its middle read 100, not 50: `_span` was the built width
+  minus the handle. (The same slider in a column does not expand at all with an explicit width; the bug is the row case VideoPlayer is in.)
+- **The fix:** `controls.Slider._fit_width()` takes `layout_width` (reading it runs pending layout) and moves the track, the tick marks and the handle to it. It runs when the slider
+  paints, when a pointer is mapped (`_from_x`), on a drawn `frame` and on a window `resize`. Headless `advance()` lays out but draws no frame and `simulate()` cannot send one, so
+  the test sends `resize`. Two tests added (the press, and the ticks and handle); a slider with its built width is untouched.
+- **Environment, same day:** the venvs were rebuilt (`~/Projects/pyDev/venv`, and a `.venv` in this project, Python 3.14.6); `TRE_SOURCE_DIR` is set in fish so the font test
+  runs, and `rpm` is installed so the rpmbuild test runs. The suite on Linux: 7718 passed, 2 skipped (the macOS-only title-bar tests).
