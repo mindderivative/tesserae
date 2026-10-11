@@ -2623,3 +2623,18 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Still not checked:** X11, Windows, macOS; a drag that leaves the window; a screen reader on the tab strips.
 - **`--interactive`** was added to the example for this (the first instruction to "drag in the example" could not work: the script exits after 20 frames).
 
+## 0.5.0.5: #247, the build order brought up to date
+
+- **What #247 was:** the dependency order of all the 0.5.0 components (84 steps), with a checklist in the issue. Nobody had ticked it while the work went; only #184 was marked done. "Start on #247" turned out to
+  mean reconciling it with what exists, since the commit history (`git log fdf1bf9..HEAD`) shows every step built: the 15 language and renderer foundations, the components, the adoptions from tre, and then #105/#106.
+- **Done:** all 84 steps marked `done: true` in `tools/component_order.yaml`; `design/component-order.md` regenerated ("84 of the 84 steps are done", and the generator no longer says the first component is the only one done);
+  the issue's boxes ticked, with a status paragraph. A step is ticked from the commits, and checked against the code where that was cheap: a shipped view or widget behind every component (Tooltip is the `tooltip:` property and
+  the rich form, with `tests/test_tooltip.py`).
+- **The six tre steps** are ticked because tre 0.5.6 is the version Tesserae now requires and credits with them (`pyproject.toml`, the changelog). Probed on 2026-10-11 against the installed engine: window `after`/`every`;
+  the accessibility states `pressed`, `invalid`, `description`, `current`, `busy`, `value_text`; the `mask` property; `animate` exists. **Not probed:** the text-input properties, layout animation, `describedby`/`controls`/`value_now`.
+  Probing shows a property is accepted, not that it behaves.
+- **Scroll snap is only partly there:** tre 0.5.6 takes `scroll_snap` and `snap_align` on a scroll view (the Carousel uses them) and rejects `snap_points`; a virtual list was not checked. `design/tre-requests/scroll-snap.md` says
+  none of it exists (so does its "re-checked on 0.5.6" line): that file is out of date and was left alone.
+- **The board disagrees with the code in five places, left for the maintainer:** #241 (ripple shader), #242 (morphing icon toggles), #243 (frosted surfaces), #245 (gradient focus ring) and #246 (the full-screen Dialog) are in
+  Backlog, but their steps are built (commits `082ebc4`, `58e7684`, `adfb116`, `910c754`, and the `fullscreen` parameter of `Dialog_View.yaml`; #246's commit is titled #151). #116 and #117 (reference documents) were not looked at.
+

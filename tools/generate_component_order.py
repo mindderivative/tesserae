@@ -134,6 +134,10 @@ def render() -> str:
     counts = {k: sum(1 for n in nodes.values() if n["kind"] == k) for k in KIND_LABEL}
     out += [f"{len(nodes)} steps in {max(level.values()) + 1} levels: {counts['component']} components, "
             f"{counts['tesserae'] + counts['mixed']} pieces of Tesserae, {counts['tre']} requests to tre, {counts['adopt']} optional adoptions.", ""]
+    finished = sum(1 for n in nodes.values() if n.get("done"))
+    out += [f"**{finished} of the {len(nodes)} steps are done** (the table says which). A tre step is done when the engine ships it; the note under "
+            "\"What each step is\" says how that was checked. Those notes otherwise say what each step was for when the order was written, "
+            "not what is missing now.", ""]
 
     out += ["## The order", "", "| Step | Level | What | Kind | Needs first | Unblocks |", "| ---: | ---: | --- | --- | --- | ---: |"]
     for name in sequence:
@@ -165,8 +169,8 @@ def render() -> str:
     finish = nodes.get("textfield-finish")
     if finish:
         out += ["## Where the text field's loose ends went", "",
-                "The first component, [#184](https://github.com/mindderivative/tesserae/issues/184), is done except for what depends on other work. "
-                f"Those loose ends are the step *{finish['title']}* ({step['textfield-finish']}), which comes after:", ""]
+                "The first component, [#184](https://github.com/mindderivative/tesserae/issues/184), was built first, with what depended on other work "
+                f"left for the step *{finish['title']}* ({step['textfield-finish']}), which came after:", ""]
         out += [f"- {ref(need)}" for need in sorted(finish["needs"], key=lambda n: step[n])]
         out += ["", finish.get("note", ""), ""]
 
@@ -182,7 +186,7 @@ def render() -> str:
     out += ["## Cycles in the issues, and where they were cut", "",
             "The issues name each other in places; a build order needs one direction, so these were decided here:", "",
             "- **Tooltip and IconButton**: IconButton wants a tooltip and a rich tooltip wants a button. The tooltip needs only `Button`, so it comes first.",
-            "- **Menu and TextField**: a menu's exposed dropdown is a text field, and a text field's autocomplete is a menu. The field's base is done; the "
+            "- **Menu and TextField**: a menu's exposed dropdown is a text field, and a text field's autocomplete is a menu. The field's base came first; the "
             "autocomplete is part of *TextField: what is left*, after the menu.",
             "- **Carousel and Pagination**: pagination's dots serve the carousel. Pagination includes the dots and the carousel uses them.",
             "- **TimePickerDial and Time input**: each names the other as its second mode, so they are one unit with the period selector.",

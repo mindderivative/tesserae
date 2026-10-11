@@ -6,181 +6,183 @@ A **step** is a component (or a group built together), a piece of the language o
 
 84 steps in 12 levels: 50 components, 24 pieces of Tesserae, 6 requests to tre, 4 optional adoptions.
 
+**84 of the 84 steps are done** (the table says which). A tre step is done when the engine ships it; the note under "What each step is" says how that was checked. Those notes otherwise say what each step was for when the order was written, not what is missing now.
+
 ## The order
 
 | Step | Level | What | Kind | Needs first | Unblocks |
 | ---: | ---: | --- | --- | --- | ---: |
-| 1 | 0 | **The accessibility states tre already has** | Tesserae | nothing | 47 |
-| 2 | 0 | **`max_lines`, `letter_spacing` and `selectable` on text** | Tesserae | nothing | 47 |
-| 3 | 0 | **Colour roles with alpha, and the `full` shape token** | Tesserae | nothing | 43 |
-| 4 | 0 | **Focus control and keyboard navigation** | Tesserae | nothing | 43 |
-| 5 | 0 | **`transition:` for what tre can animate** | Tesserae | nothing | 43 |
-| 6 | 0 | **Drawing with tre's canvas and painter** | Tesserae | nothing | 40 |
-| 7 | 0 | **A full icon set** | Tesserae | nothing | 40 |
-| 8 | 0 | **Timers in handlers** | Tesserae | nothing | 36 |
-| 9 | 0 | **Scroll state as a readable source** | Tesserae | nothing | 28 |
-| 10 | 0 | **Pointer capture, cursor and drag helpers in handlers** | Tesserae | nothing | 10 |
-| 11 | 0 | **Per-corner `corner_radius`** | Tesserae | nothing | 8 |
-| 12 | 0 | **Windows, title bars and docks in composed views** | Tesserae | nothing | 7 |
-| 13 | 0 | **Input masks on `TextInput`** | Tesserae | nothing | 3 |
-| 14 | 0 | **Clipboard actions** | Tesserae | nothing | 1 |
-| 15 | 0 | **An `open_url` action** | Tesserae | nothing | 1 |
-| 16 | 0 | **tre: rounded and circular masks** | tre (engine) | nothing | 1 |
-| 17 | 0 | **Divider** (#152) | component | nothing | 27 |
-| 18 | 0 | **Image** (#196) | component | nothing | 23 |
+| 1 | 0 | **The accessibility states tre already has** | Tesserae, done | nothing | 47 |
+| 2 | 0 | **`max_lines`, `letter_spacing` and `selectable` on text** | Tesserae, done | nothing | 47 |
+| 3 | 0 | **Colour roles with alpha, and the `full` shape token** | Tesserae, done | nothing | 43 |
+| 4 | 0 | **Focus control and keyboard navigation** | Tesserae, done | nothing | 43 |
+| 5 | 0 | **`transition:` for what tre can animate** | Tesserae, done | nothing | 43 |
+| 6 | 0 | **Drawing with tre's canvas and painter** | Tesserae, done | nothing | 40 |
+| 7 | 0 | **A full icon set** | Tesserae, done | nothing | 40 |
+| 8 | 0 | **Timers in handlers** | Tesserae, done | nothing | 36 |
+| 9 | 0 | **Scroll state as a readable source** | Tesserae, done | nothing | 28 |
+| 10 | 0 | **Pointer capture, cursor and drag helpers in handlers** | Tesserae, done | nothing | 10 |
+| 11 | 0 | **Per-corner `corner_radius`** | Tesserae, done | nothing | 8 |
+| 12 | 0 | **Windows, title bars and docks in composed views** | Tesserae, done | nothing | 7 |
+| 13 | 0 | **Input masks on `TextInput`** | Tesserae, done | nothing | 3 |
+| 14 | 0 | **Clipboard actions** | Tesserae, done | nothing | 1 |
+| 15 | 0 | **An `open_url` action** | Tesserae, done | nothing | 1 |
+| 16 | 0 | **tre: rounded and circular masks** | tre (engine), done | nothing | 1 |
+| 17 | 0 | **Divider** (#152) | component, done | nothing | 27 |
+| 18 | 0 | **Image** (#196) | component, done | nothing | 23 |
 | 19 | 0 | **TextField: the base** (#184) | component, done | nothing | 10 |
-| 20 | 0 | **Svg** (#197) | component | nothing | 0 |
-| 21 | 1 | **Elevation that animates on hover, press and drag** | Tesserae | `transition:` for what tre can animate (5) | 38 |
-| 22 | 1 | **The overlay widget** | Tesserae | Focus control and keyboard navigation (4) | 37 |
-| 23 | 1 | **`for:` backed by tre's `virtual_list`** | Tesserae | Scroll state as a readable source (9) | 21 |
-| 24 | 1 | **More than one window** | Tesserae + tre | Windows, title bars and docks in composed views (12) | 2 |
-| 25 | 1 | **Window size classes as a binding source** | Tesserae | Windows, title bars and docks in composed views (12) | 2 |
-| 26 | 1 | **Screen transitions: fade through, shared axis, container transform** | Tesserae | `transition:` for what tre can animate (5), Windows, title bars and docks in composed views (12) | 1 |
-| 27 | 1 | **tre: more accessibility states** | tre (engine), gated on tre | The accessibility states tre already has (1) | 46 |
-| 28 | 1 | **tre: animatable layout properties** | tre (engine), gated on tre | `transition:` for what tre can animate (5) | 17 |
-| 29 | 1 | **tre: more on the text input** | tre (engine), gated on tre | Input masks on `TextInput` (13) | 2 |
-| 30 | 1 | **tre: timers** | tre (engine) | Timers in handlers (8) | 0 |
-| 31 | 1 | **Text** (#195) | component | `max_lines`, `letter_spacing` and `selectable` on text (2) | 46 |
-| 32 | 1 | **Splitter** (#203) | component | Focus control and keyboard navigation (4), Pointer capture, cursor and drag helpers in handlers (10), Divider (17) | 3 |
-| 33 | 1 | **Image: rounded and circular masks** | component | tre: rounded and circular masks (16), Image (18) | 0 |
-| 34 | 2 | **The full accessibility vocabulary** | Tesserae | The accessibility states tre already has (1), tre: more accessibility states (27) | 45 |
-| 35 | 2 | **A `tooltip:` property on every node** | Tesserae | Timers in handlers (8), The overlay widget (22) | 34 |
-| 36 | 2 | **`transition:` for layout properties** | Tesserae | `transition:` for what tre can animate (5), tre: animatable layout properties (28) | 16 |
-| 37 | 2 | **tre: scroll snap points** | tre (engine) | `for:` backed by tre's `virtual_list` (23) | 0 |
-| 38 | 2 | **Badge (dot, labeled)** (#141, #142) | component | Text (31) | 32 |
-| 39 | 2 | **Link** (#174) | component | An `open_url` action (15), Text (31) | 0 |
-| 40 | 3 | **Progress (linear, circular, loading indicator)** (#143, #144, #145) | component | Drawing with tre's canvas and painter (6), The full accessibility vocabulary (34) | 38 |
-| 41 | 3 | **Checkbox** (#175) | component | Colour roles with alpha, and the `full` shape token (3), Text (31), The full accessibility vocabulary (34) | 19 |
-| 42 | 3 | **RadioButton** (#176) | component | Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), Text (31), The full accessibility vocabulary (34) | 19 |
-| 43 | 3 | **Switch** (#177) | component | Colour roles with alpha, and the `full` shape token (3), Text (31), The full accessibility vocabulary (34) | 19 |
-| 44 | 3 | **Slider** (#178) | component | Colour roles with alpha, and the `full` shape token (3), Drawing with tre's canvas and painter (6), Pointer capture, cursor and drag helpers in handlers (10), The overlay widget (22), Text (31), The full accessibility vocabulary (34) | 4 |
-| 45 | 3 | **Segmented buttons** (#193) | component | Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), A full icon set (7), Per-corner `corner_radius` (11), Text (31), The full accessibility vocabulary (34) | 3 |
-| 46 | 3 | **Tabs and TabsItem** (#166, #167) | component | Focus control and keyboard navigation (4), A full icon set (7), Scroll state as a readable source (9), Divider (17), Text (31), The full accessibility vocabulary (34), `transition:` for layout properties (36), Badge (38) | 3 |
-| 47 | 4 | **Button (filled, tonal, elevated, outlined, text)** (#118, #119, #120, #121, #122) | component | Colour roles with alpha, and the `full` shape token (3), A full icon set (7), Elevation that animates on hover, press and drag (21), Text (31), The full accessibility vocabulary (34), Progress (40) | 37 |
-| 48 | 5 | **Ripple and state layer as a shader (T2, T3)** | adopt from tre, optional | Colour roles with alpha, and the `full` shape token (3), `transition:` for what tre can animate (5), Button (47) | 0 |
-| 49 | 5 | **Tooltip** (#147) | component | The overlay widget (22), Text (31), A `tooltip:` property on every node (35), Button (47) | 33 |
-| 50 | 5 | **Dialog** (#151) | component | Focus control and keyboard navigation (4), `transition:` for what tre can animate (5), Scroll state as a readable source (9), Divider (17), The overlay widget (22), Text (31), Button (47) | 3 |
-| 51 | 5 | **ButtonGroup** (#123) | component | Focus control and keyboard navigation (4), `transition:` for what tre can animate (5), Per-corner `corner_radius` (11), Segmented buttons (45), Button (47) | 1 |
-| 52 | 6 | **IconButton (standard, filled, tonal, outlined)** (#129, #130, #131, #132) | component | Colour roles with alpha, and the `full` shape token (3), A full icon set (7), The full accessibility vocabulary (34), Badge (38), Tooltip (49) | 30 |
-| 53 | 6 | **FAB and extended FAB** (#133, #134, #135, #136, #137, #138, #139, #140) | component | Colour roles with alpha, and the `full` shape token (3), A full icon set (7), Scroll state as a readable source (9), Elevation that animates on hover, press and drag (21), Text (31), `transition:` for layout properties (36), Tooltip (49) | 6 |
-| 54 | 6 | **StatusBar** (#201) | component | A full icon set (7), Divider (17), Text (31), Progress (40), Tooltip (49) | 0 |
-| 55 | 7 | **Icon toggles that morph (T14)** | adopt from tre, optional | `transition:` for what tre can animate (5), A full icon set (7), IconButton (52) | 0 |
-| 56 | 7 | **ListItem** (#153) | component | `max_lines`, `letter_spacing` and `selectable` on text (2), Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), A full icon set (7), Divider (17), Image (18), `for:` backed by tre's `virtual_list` (23), Text (31), Badge (38), Checkbox (41), RadioButton (42), Switch (43), IconButton (52) | 18 |
-| 57 | 7 | **NavigationRail (rail, item, screens, screen)** (#159, #160, #161, #162) | component | Focus control and keyboard navigation (4), A full icon set (7), Text (31), The full accessibility vocabulary (34), `transition:` for layout properties (36), Badge (38), Tooltip (49), IconButton (52), FAB and extended FAB (53) | 3 |
-| 58 | 7 | **Card (elevated, filled, outlined)** (#148, #149, #150) | component | Colour roles with alpha, and the `full` shape token (3), Divider (17), Image (18), Elevation that animates on hover, press and drag (21), Text (31), Button (47), IconButton (52) | 2 |
-| 59 | 7 | **Title bar** (#205) | component | A full icon set (7), Windows, title bars and docks in composed views (12), Text (31), Tooltip (49), IconButton (52) | 2 |
-| 60 | 7 | **Pagination** (#200) | component | TextField: the base (19), Text (31), Button (47), IconButton (52) | 1 |
-| 61 | 7 | **Chips (assist, filter, input, suggestion)** (#179, #180, #181, #182, #183) | component | Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), `transition:` for what tre can animate (5), A full icon set (7), Clipboard actions (14), Image (18), TextField: the base (19), Text (31), IconButton (52) | 0 |
-| 62 | 7 | **SideSheet (standard, modal)** (#154, #155) | component | Scroll state as a readable source (9), Per-corner `corner_radius` (11), Divider (17), The overlay widget (22), `transition:` for layout properties (36), Button (47), IconButton (52) | 0 |
-| 63 | 7 | **Snackbar** (#146) | component | `transition:` for what tre can animate (5), Timers in handlers (8), The overlay widget (22), Text (31), Button (47), IconButton (52) | 0 |
-| 64 | 7 | **SpinBox** (#185) | component | Timers in handlers (8), TextField: the base (19), The full accessibility vocabulary (34), Slider (44), IconButton (52) | 0 |
-| 65 | 7 | **TimePicker: dial, period selector, time input** (#190, #191, #192, #194) | component | Focus control and keyboard navigation (4), Drawing with tre's canvas and painter (6), TextField: the base (19), Text (31), Slider (44), Segmented buttons (45), Button (47), Dialog (50), IconButton (52) | 0 |
-| 66 | 8 | **Menu and MenuItem** (#168, #169) | component | Focus control and keyboard navigation (4), Divider (17), The overlay widget (22), The full accessibility vocabulary (34), Checkbox (41), RadioButton (42), IconButton (52), ListItem (56) | 13 |
-| 67 | 8 | **NavigationDrawer and item** (#163, #164) | component | Divider (17), The overlay widget (22), `transition:` for layout properties (36), ListItem (56), NavigationRail (57) | 1 |
-| 68 | 8 | **SearchBar and SearchView** (#170, #171) | component | Focus control and keyboard navigation (4), Divider (17), TextField: the base (19), The overlay widget (22), `for:` backed by tre's `virtual_list` (23), IconButton (52), ListItem (56) | 1 |
-| 69 | 8 | **AccordionHeader** (#156) | component | Focus control and keyboard navigation (4), Divider (17), The full accessibility vocabulary (34), `transition:` for layout properties (36), ListItem (56) | 0 |
-| 70 | 8 | **Carousel** (#199) | component | `transition:` for what tre can animate (5), Scroll state as a readable source (9), Pointer capture, cursor and drag helpers in handlers (10), Image (18), `for:` backed by tre's `virtual_list` (23), Text (31), Card (58), Pagination (60) | 0 |
-| 71 | 8 | **Tree (branch, leaf)** (#157, #158) | component | Focus control and keyboard navigation (4), `for:` backed by tre's `virtual_list` (23), The full accessibility vocabulary (34), `transition:` for layout properties (36), Checkbox (41), ListItem (56) | 0 |
-| 72 | 9 | **Frosted navigation, search and menus (T16, T5)** | adopt from tre, optional | Colour roles with alpha, and the `full` shape token (3), Tooltip (49), NavigationRail (57), Menu and MenuItem (66), SearchBar and SearchView (68) | 0 |
-| 73 | 9 | **Dock and DockPanel** (#206, #207) | component | Pointer capture, cursor and drag helpers in handlers (10), Windows, title bars and docks in composed views (12), Splitter (32), Tabs and TabsItem (46), Menu and MenuItem (66) | 2 |
-| 74 | 9 | **TextField: what is left** | component | Focus control and keyboard navigation (4), Per-corner `corner_radius` (11), Input masks on `TextInput` (13), TextField: the base (19), tre: more on the text input (29), The full accessibility vocabulary (34), `transition:` for layout properties (36), Menu and MenuItem (66) | 1 |
-| 75 | 9 | **TopAppBar** (#165) | component | Colour roles with alpha, and the `full` shape token (3), Scroll state as a readable source (9), Text (31), `transition:` for layout properties (36), Tooltip (49), IconButton (52), Menu and MenuItem (66) | 1 |
-| 76 | 9 | **DatePicker (day cells and the picker)** (#186, #187, #188, #189) | component | Focus control and keyboard navigation (4), TextField: the base (19), The overlay widget (22), `for:` backed by tre's `virtual_list` (23), The full accessibility vocabulary (34), Segmented buttons (45), Button (47), Dialog (50), ButtonGroup (51), IconButton (52), Menu and MenuItem (66) | 0 |
-| 77 | 9 | **NodeGraph** (#202) | component | Drawing with tre's canvas and painter (6), Pointer capture, cursor and drag helpers in handlers (10), Slider (44), Card (58), Menu and MenuItem (66) | 0 |
-| 78 | 9 | **SplitButton (five variants)** (#124, #125, #126, #127, #128) | component | Per-corner `corner_radius` (11), The overlay widget (22), The full accessibility vocabulary (34), Button (47), Menu and MenuItem (66) | 0 |
-| 79 | 9 | **Toolbar (docked, floating)** (#172, #173) | component | Focus control and keyboard navigation (4), Scroll state as a readable source (9), Divider (17), Tooltip (49), IconButton (52), FAB and extended FAB (53), Menu and MenuItem (66) | 0 |
-| 80 | 9 | **Video** (#198) | component | Timers in handlers (8), Text (31), Progress (40), Slider (44), IconButton (52), Menu and MenuItem (66) | 0 |
-| 81 | 10 | **Animated gradient focus borders (T12)** | adopt from tre, optional | `transition:` for what tre can animate (5), FAB and extended FAB (53), TextField: what is left (74) | 0 |
-| 82 | 10 | **Window** (#204) | component | Windows, title bars and docks in composed views (12), More than one window (24), Window size classes as a binding source (25), Title bar (59), Dock and DockPanel (73) | 1 |
-| 83 | 10 | **Dialog: the full-screen form** | component | Dialog (50), TopAppBar (75) | 0 |
-| 84 | 11 | **Routed views** (#208) | component | Screen transitions: fade through, shared axis, container transform (26), Tabs and TabsItem (46), NavigationRail (57), NavigationDrawer and item (67), Window (82) | 0 |
+| 20 | 0 | **Svg** (#197) | component, done | nothing | 0 |
+| 21 | 1 | **Elevation that animates on hover, press and drag** | Tesserae, done | `transition:` for what tre can animate (5) | 38 |
+| 22 | 1 | **The overlay widget** | Tesserae, done | Focus control and keyboard navigation (4) | 37 |
+| 23 | 1 | **`for:` backed by tre's `virtual_list`** | Tesserae, done | Scroll state as a readable source (9) | 21 |
+| 24 | 1 | **More than one window** | Tesserae + tre, done | Windows, title bars and docks in composed views (12) | 2 |
+| 25 | 1 | **Window size classes as a binding source** | Tesserae, done | Windows, title bars and docks in composed views (12) | 2 |
+| 26 | 1 | **Screen transitions: fade through, shared axis, container transform** | Tesserae, done | `transition:` for what tre can animate (5), Windows, title bars and docks in composed views (12) | 1 |
+| 27 | 1 | **tre: more accessibility states** | tre (engine), done, gated on tre | The accessibility states tre already has (1) | 46 |
+| 28 | 1 | **tre: animatable layout properties** | tre (engine), done, gated on tre | `transition:` for what tre can animate (5) | 17 |
+| 29 | 1 | **tre: more on the text input** | tre (engine), done, gated on tre | Input masks on `TextInput` (13) | 2 |
+| 30 | 1 | **tre: timers** | tre (engine), done | Timers in handlers (8) | 0 |
+| 31 | 1 | **Text** (#195) | component, done | `max_lines`, `letter_spacing` and `selectable` on text (2) | 46 |
+| 32 | 1 | **Splitter** (#203) | component, done | Focus control and keyboard navigation (4), Pointer capture, cursor and drag helpers in handlers (10), Divider (17) | 3 |
+| 33 | 1 | **Image: rounded and circular masks** | component, done | tre: rounded and circular masks (16), Image (18) | 0 |
+| 34 | 2 | **The full accessibility vocabulary** | Tesserae, done | The accessibility states tre already has (1), tre: more accessibility states (27) | 45 |
+| 35 | 2 | **A `tooltip:` property on every node** | Tesserae, done | Timers in handlers (8), The overlay widget (22) | 34 |
+| 36 | 2 | **`transition:` for layout properties** | Tesserae, done | `transition:` for what tre can animate (5), tre: animatable layout properties (28) | 16 |
+| 37 | 2 | **tre: scroll snap points** | tre (engine), done | `for:` backed by tre's `virtual_list` (23) | 0 |
+| 38 | 2 | **Badge (dot, labeled)** (#141, #142) | component, done | Text (31) | 32 |
+| 39 | 2 | **Link** (#174) | component, done | An `open_url` action (15), Text (31) | 0 |
+| 40 | 3 | **Progress (linear, circular, loading indicator)** (#143, #144, #145) | component, done | Drawing with tre's canvas and painter (6), The full accessibility vocabulary (34) | 38 |
+| 41 | 3 | **Checkbox** (#175) | component, done | Colour roles with alpha, and the `full` shape token (3), Text (31), The full accessibility vocabulary (34) | 19 |
+| 42 | 3 | **RadioButton** (#176) | component, done | Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), Text (31), The full accessibility vocabulary (34) | 19 |
+| 43 | 3 | **Switch** (#177) | component, done | Colour roles with alpha, and the `full` shape token (3), Text (31), The full accessibility vocabulary (34) | 19 |
+| 44 | 3 | **Slider** (#178) | component, done | Colour roles with alpha, and the `full` shape token (3), Drawing with tre's canvas and painter (6), Pointer capture, cursor and drag helpers in handlers (10), The overlay widget (22), Text (31), The full accessibility vocabulary (34) | 4 |
+| 45 | 3 | **Segmented buttons** (#193) | component, done | Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), A full icon set (7), Per-corner `corner_radius` (11), Text (31), The full accessibility vocabulary (34) | 3 |
+| 46 | 3 | **Tabs and TabsItem** (#166, #167) | component, done | Focus control and keyboard navigation (4), A full icon set (7), Scroll state as a readable source (9), Divider (17), Text (31), The full accessibility vocabulary (34), `transition:` for layout properties (36), Badge (38) | 3 |
+| 47 | 4 | **Button (filled, tonal, elevated, outlined, text)** (#118, #119, #120, #121, #122) | component, done | Colour roles with alpha, and the `full` shape token (3), A full icon set (7), Elevation that animates on hover, press and drag (21), Text (31), The full accessibility vocabulary (34), Progress (40) | 37 |
+| 48 | 5 | **Ripple and state layer as a shader (T2, T3)** | adopt from tre, done, optional | Colour roles with alpha, and the `full` shape token (3), `transition:` for what tre can animate (5), Button (47) | 0 |
+| 49 | 5 | **Tooltip** (#147) | component, done | The overlay widget (22), Text (31), A `tooltip:` property on every node (35), Button (47) | 33 |
+| 50 | 5 | **Dialog** (#151) | component, done | Focus control and keyboard navigation (4), `transition:` for what tre can animate (5), Scroll state as a readable source (9), Divider (17), The overlay widget (22), Text (31), Button (47) | 3 |
+| 51 | 5 | **ButtonGroup** (#123) | component, done | Focus control and keyboard navigation (4), `transition:` for what tre can animate (5), Per-corner `corner_radius` (11), Segmented buttons (45), Button (47) | 1 |
+| 52 | 6 | **IconButton (standard, filled, tonal, outlined)** (#129, #130, #131, #132) | component, done | Colour roles with alpha, and the `full` shape token (3), A full icon set (7), The full accessibility vocabulary (34), Badge (38), Tooltip (49) | 30 |
+| 53 | 6 | **FAB and extended FAB** (#133, #134, #135, #136, #137, #138, #139, #140) | component, done | Colour roles with alpha, and the `full` shape token (3), A full icon set (7), Scroll state as a readable source (9), Elevation that animates on hover, press and drag (21), Text (31), `transition:` for layout properties (36), Tooltip (49) | 6 |
+| 54 | 6 | **StatusBar** (#201) | component, done | A full icon set (7), Divider (17), Text (31), Progress (40), Tooltip (49) | 0 |
+| 55 | 7 | **Icon toggles that morph (T14)** | adopt from tre, done, optional | `transition:` for what tre can animate (5), A full icon set (7), IconButton (52) | 0 |
+| 56 | 7 | **ListItem** (#153) | component, done | `max_lines`, `letter_spacing` and `selectable` on text (2), Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), A full icon set (7), Divider (17), Image (18), `for:` backed by tre's `virtual_list` (23), Text (31), Badge (38), Checkbox (41), RadioButton (42), Switch (43), IconButton (52) | 18 |
+| 57 | 7 | **NavigationRail (rail, item, screens, screen)** (#159, #160, #161, #162) | component, done | Focus control and keyboard navigation (4), A full icon set (7), Text (31), The full accessibility vocabulary (34), `transition:` for layout properties (36), Badge (38), Tooltip (49), IconButton (52), FAB and extended FAB (53) | 3 |
+| 58 | 7 | **Card (elevated, filled, outlined)** (#148, #149, #150) | component, done | Colour roles with alpha, and the `full` shape token (3), Divider (17), Image (18), Elevation that animates on hover, press and drag (21), Text (31), Button (47), IconButton (52) | 2 |
+| 59 | 7 | **Title bar** (#205) | component, done | A full icon set (7), Windows, title bars and docks in composed views (12), Text (31), Tooltip (49), IconButton (52) | 2 |
+| 60 | 7 | **Pagination** (#200) | component, done | TextField: the base (19), Text (31), Button (47), IconButton (52) | 1 |
+| 61 | 7 | **Chips (assist, filter, input, suggestion)** (#179, #180, #181, #182, #183) | component, done | Colour roles with alpha, and the `full` shape token (3), Focus control and keyboard navigation (4), `transition:` for what tre can animate (5), A full icon set (7), Clipboard actions (14), Image (18), TextField: the base (19), Text (31), IconButton (52) | 0 |
+| 62 | 7 | **SideSheet (standard, modal)** (#154, #155) | component, done | Scroll state as a readable source (9), Per-corner `corner_radius` (11), Divider (17), The overlay widget (22), `transition:` for layout properties (36), Button (47), IconButton (52) | 0 |
+| 63 | 7 | **Snackbar** (#146) | component, done | `transition:` for what tre can animate (5), Timers in handlers (8), The overlay widget (22), Text (31), Button (47), IconButton (52) | 0 |
+| 64 | 7 | **SpinBox** (#185) | component, done | Timers in handlers (8), TextField: the base (19), The full accessibility vocabulary (34), Slider (44), IconButton (52) | 0 |
+| 65 | 7 | **TimePicker: dial, period selector, time input** (#190, #191, #192, #194) | component, done | Focus control and keyboard navigation (4), Drawing with tre's canvas and painter (6), TextField: the base (19), Text (31), Slider (44), Segmented buttons (45), Button (47), Dialog (50), IconButton (52) | 0 |
+| 66 | 8 | **Menu and MenuItem** (#168, #169) | component, done | Focus control and keyboard navigation (4), Divider (17), The overlay widget (22), The full accessibility vocabulary (34), Checkbox (41), RadioButton (42), IconButton (52), ListItem (56) | 13 |
+| 67 | 8 | **NavigationDrawer and item** (#163, #164) | component, done | Divider (17), The overlay widget (22), `transition:` for layout properties (36), ListItem (56), NavigationRail (57) | 1 |
+| 68 | 8 | **SearchBar and SearchView** (#170, #171) | component, done | Focus control and keyboard navigation (4), Divider (17), TextField: the base (19), The overlay widget (22), `for:` backed by tre's `virtual_list` (23), IconButton (52), ListItem (56) | 1 |
+| 69 | 8 | **AccordionHeader** (#156) | component, done | Focus control and keyboard navigation (4), Divider (17), The full accessibility vocabulary (34), `transition:` for layout properties (36), ListItem (56) | 0 |
+| 70 | 8 | **Carousel** (#199) | component, done | `transition:` for what tre can animate (5), Scroll state as a readable source (9), Pointer capture, cursor and drag helpers in handlers (10), Image (18), `for:` backed by tre's `virtual_list` (23), Text (31), Card (58), Pagination (60) | 0 |
+| 71 | 8 | **Tree (branch, leaf)** (#157, #158) | component, done | Focus control and keyboard navigation (4), `for:` backed by tre's `virtual_list` (23), The full accessibility vocabulary (34), `transition:` for layout properties (36), Checkbox (41), ListItem (56) | 0 |
+| 72 | 9 | **Frosted navigation, search and menus (T16, T5)** | adopt from tre, done, optional | Colour roles with alpha, and the `full` shape token (3), Tooltip (49), NavigationRail (57), Menu and MenuItem (66), SearchBar and SearchView (68) | 0 |
+| 73 | 9 | **Dock and DockPanel** (#206, #207) | component, done | Pointer capture, cursor and drag helpers in handlers (10), Windows, title bars and docks in composed views (12), Splitter (32), Tabs and TabsItem (46), Menu and MenuItem (66) | 2 |
+| 74 | 9 | **TextField: what is left** | component, done | Focus control and keyboard navigation (4), Per-corner `corner_radius` (11), Input masks on `TextInput` (13), TextField: the base (19), tre: more on the text input (29), The full accessibility vocabulary (34), `transition:` for layout properties (36), Menu and MenuItem (66) | 1 |
+| 75 | 9 | **TopAppBar** (#165) | component, done | Colour roles with alpha, and the `full` shape token (3), Scroll state as a readable source (9), Text (31), `transition:` for layout properties (36), Tooltip (49), IconButton (52), Menu and MenuItem (66) | 1 |
+| 76 | 9 | **DatePicker (day cells and the picker)** (#186, #187, #188, #189) | component, done | Focus control and keyboard navigation (4), TextField: the base (19), The overlay widget (22), `for:` backed by tre's `virtual_list` (23), The full accessibility vocabulary (34), Segmented buttons (45), Button (47), Dialog (50), ButtonGroup (51), IconButton (52), Menu and MenuItem (66) | 0 |
+| 77 | 9 | **NodeGraph** (#202) | component, done | Drawing with tre's canvas and painter (6), Pointer capture, cursor and drag helpers in handlers (10), Slider (44), Card (58), Menu and MenuItem (66) | 0 |
+| 78 | 9 | **SplitButton (five variants)** (#124, #125, #126, #127, #128) | component, done | Per-corner `corner_radius` (11), The overlay widget (22), The full accessibility vocabulary (34), Button (47), Menu and MenuItem (66) | 0 |
+| 79 | 9 | **Toolbar (docked, floating)** (#172, #173) | component, done | Focus control and keyboard navigation (4), Scroll state as a readable source (9), Divider (17), Tooltip (49), IconButton (52), FAB and extended FAB (53), Menu and MenuItem (66) | 0 |
+| 80 | 9 | **Video** (#198) | component, done | Timers in handlers (8), Text (31), Progress (40), Slider (44), IconButton (52), Menu and MenuItem (66) | 0 |
+| 81 | 10 | **Animated gradient focus borders (T12)** | adopt from tre, done, optional | `transition:` for what tre can animate (5), FAB and extended FAB (53), TextField: what is left (74) | 0 |
+| 82 | 10 | **Window** (#204) | component, done | Windows, title bars and docks in composed views (12), More than one window (24), Window size classes as a binding source (25), Title bar (59), Dock and DockPanel (73) | 1 |
+| 83 | 10 | **Dialog: the full-screen form** | component, done | Dialog (50), TopAppBar (75) | 0 |
+| 84 | 11 | **Routed views** (#208) | component, done | Screen transitions: fade through, shared axis, container transform (26), Tabs and TabsItem (46), NavigationRail (57), NavigationDrawer and item (67), Window (82) | 0 |
 
 ## What each step is
 
-1. **The accessibility states tre already has** — Tesserae. `expanded`, `selected`, `checked`, `value_min`/`value_max`, `live`, `level`, `role`, `label`, `hidden`: make them properties/fields in the view language and set by the built-in widgets.
-2. **`max_lines`, `letter_spacing` and `selectable` on text** — Tesserae. tre has them on text nodes; expose them as properties of Text and Link.
-3. **Colour roles with alpha, and the `full` shape token** — Tesserae. `primary@12%` for state layers, 38% disabled content and outlines; `corner_radius: full`. Tokens and the builder.
-4. **Focus control and keyboard navigation** — Tesserae. `focus(name)` action (a click on a field's padding focuses its input), roving `tab_index` groups, arrow-key and type-ahead helpers. `on_key` exists.
-5. **`transition:` for what tre can animate** — Tesserae. opacity, fill, corner radius, shadows, scale and translate go through `node.animate` instead of `set`, with durations, easing and springs. Reserved in the language today.
-6. **Drawing with tre's canvas and painter** — Tesserae. A way for a widget to draw paths (wavy progress, slider ticks, dial ticks, graph edges).
-7. **A full icon set** — Tesserae. `Icon` knows 18 names; MD3 components use dozens. Bundle a Material Symbols subset (and an `Icon` from a path). Data and `icons.py`.
-8. **Timers in handlers** — Tesserae. `after(ms, action)`, `every`, cancel; on the frame loop until the engine has timers. Auto-dismiss, hover delay, hold-to-repeat, autoplay.
-9. **Scroll state as a readable source** — Tesserae. ScrollView `scroll_offset` drawn (not yet) and scroll direction / at-top / at-end readable in expressions. Collapse-on-scroll, hide-on-scroll.
-10. **Pointer capture, cursor and drag helpers in handlers** — Tesserae. `capture`/`release` and `cursor` from a handler, with `on_pan` values (they are in `event` already).
-11. **Per-corner `corner_radius`** — Tesserae. tre already takes a 4-tuple. Needed for filled text fields, connected button groups, split buttons, segmented buttons, sheets.
-12. **Windows, title bars and docks in composed views** — Tesserae. `ComposedView` does not wire the bindings and handlers the Window/TitleBar/Dock expansion produces (found in phase 7). The windows track: #114, #106.
-13. **Input masks on `TextInput`** — Tesserae. A `mask` (digits, groups, patterns) applied as the user types, in the renderer; tre's input has none.
-14. **Clipboard actions** — Tesserae. `copy(text)` and `paste()`; tre has `write_clipboard`/`read_clipboard`. Low priority.
-15. **An `open_url` action** — Tesserae. For `Link`; the OS opener.
-16. **tre: rounded and circular masks** — tre (engine). Clip any node, images included, to a shape. Images use the container's corner radius until then.
-17. **Divider** — component.
-18. **Image** — component. Rounded masks follow the engine: see image-masks.
+1. **The accessibility states tre already has** — Tesserae, done. `expanded`, `selected`, `checked`, `value_min`/`value_max`, `live`, `level`, `role`, `label`, `hidden`: make them properties/fields in the view language and set by the built-in widgets.
+2. **`max_lines`, `letter_spacing` and `selectable` on text** — Tesserae, done. tre has them on text nodes; expose them as properties of Text and Link.
+3. **Colour roles with alpha, and the `full` shape token** — Tesserae, done. `primary@12%` for state layers, 38% disabled content and outlines; `corner_radius: full`. Tokens and the builder.
+4. **Focus control and keyboard navigation** — Tesserae, done. `focus(name)` action (a click on a field's padding focuses its input), roving `tab_index` groups, arrow-key and type-ahead helpers. `on_key` exists.
+5. **`transition:` for what tre can animate** — Tesserae, done. opacity, fill, corner radius, shadows, scale and translate go through `node.animate` instead of `set`, with durations, easing and springs. Reserved in the language today.
+6. **Drawing with tre's canvas and painter** — Tesserae, done. A way for a widget to draw paths (wavy progress, slider ticks, dial ticks, graph edges).
+7. **A full icon set** — Tesserae, done. `Icon` knows 18 names; MD3 components use dozens. Bundle a Material Symbols subset (and an `Icon` from a path). Data and `icons.py`.
+8. **Timers in handlers** — Tesserae, done. `after(ms, action)`, `every`, cancel; on the frame loop until the engine has timers. Auto-dismiss, hover delay, hold-to-repeat, autoplay.
+9. **Scroll state as a readable source** — Tesserae, done. ScrollView `scroll_offset` drawn (not yet) and scroll direction / at-top / at-end readable in expressions. Collapse-on-scroll, hide-on-scroll.
+10. **Pointer capture, cursor and drag helpers in handlers** — Tesserae, done. `capture`/`release` and `cursor` from a handler, with `on_pan` values (they are in `event` already).
+11. **Per-corner `corner_radius`** — Tesserae, done. tre already takes a 4-tuple. Needed for filled text fields, connected button groups, split buttons, segmented buttons, sheets.
+12. **Windows, title bars and docks in composed views** — Tesserae, done. `ComposedView` does not wire the bindings and handlers the Window/TitleBar/Dock expansion produces (found in phase 7). The windows track: #114, #106.
+13. **Input masks on `TextInput`** — Tesserae, done. A `mask` (digits, groups, patterns) applied as the user types, in the renderer; tre's input has none.
+14. **Clipboard actions** — Tesserae, done. `copy(text)` and `paste()`; tre has `write_clipboard`/`read_clipboard`. Low priority.
+15. **An `open_url` action** — Tesserae, done. For `Link`; the OS opener.
+16. **tre: rounded and circular masks** — tre (engine), done. Clip any node, images included, to a shape. Images use the container's corner radius until then. Done: tre 0.5.6 takes `mask` on a node (checked 2026-10-11 that it is accepted); Image masks needed no new code (#236).
+17. **Divider** — component, done.
+18. **Image** — component, done. Rounded masks follow the engine: see image-masks.
 19. **TextField: the base** — component, done. Built on the TextInput primitive; the rest of it is textfield-finish.
-20. **Svg** — component.
-21. **Elevation that animates on hover, press and drag** — Tesserae. tre animates `shadows`.
-22. **The overlay widget** — Tesserae. A layer anchored to a node (placement, flip), modal scrim, focus trap, Escape, outside press, focus return, an `open` model property that closing writes back. tre layers exist.
-23. **`for:` backed by tre's `virtual_list`** — Tesserae. Long lists (10 000 rows) without building every row.
-24. **More than one window** — Tesserae + tre. #105; a real-window spike (tools/spikes/second_window.py) needs the user at the machine.
-25. **Window size classes as a binding source** — Tesserae.
-26. **Screen transitions: fade through, shared axis, container transform** — Tesserae.
-27. **tre: more accessibility states** — tre (engine), gated on tre. `pressed`, `invalid`, `description` and `describedby`, `controls`, `current`, `value_now`/`value_text`, `busy`. tre has expanded, selected, checked, value_min/max already; ask once Tesserae has fixed the vocabulary.
-28. **tre: animatable layout properties** — tre (engine), gated on tre. width, height, x, y, padding, gap and font size are not animatable today (opacity, fill, corner radius, scale, translate are), plus an animation-finished event. Without it a collapse is done with a transform or frame by frame.
-29. **tre: more on the text input** — tre (engine), gated on tre. `max_length`, `read_only`, an input mode, a `submit` event and the IME composition event (the renderer works round the first three; composition has no workaround).
-30. **tre: timers** — tre (engine). `window.after`/`every`, cancellable. Tesserae's frame-loop timers work until then.
-31. **Text** — component. Every component uses it.
-32. **Splitter** — component.
-33. **Image: rounded and circular masks** — component.
-34. **The full accessibility vocabulary** — Tesserae. `pressed`, `invalid`, `description`, `controls`/`describedby`, `current`, `value_text`, `busy` as `a11y:` fields (spec section 12), set by the widgets.
-35. **A `tooltip:` property on every node** — Tesserae. Hover and focus delay, plain and rich.
-36. **`transition:` for layout properties** — Tesserae. Width, height, position, padding: drawer and rail collapse, accordion, FAB collapse, tab indicator, sheet slide, the text field's label.
-37. **tre: scroll snap points** — tre (engine). Snap on a ScrollView or virtual list. Carousels and tab strips snap in Tesserae with an animated `scroll_offset` until then.
-38. **Badge (dot, labeled)** — component. Placed over a host with a wrapper and absolute position.
-39. **Link** — component.
-40. **Progress (linear, circular, loading indicator)** — component.
-41. **Checkbox** — component.
-42. **RadioButton** — component.
-43. **Switch** — component.
-44. **Slider** — component. The value indicator is an overlay.
-45. **Segmented buttons** — component. The shared selection pattern (a state, items that set it) is written here first.
-46. **Tabs and TabsItem** — component.
-47. **Button (filled, tonal, elevated, outlined, text)** — component. Five fragments become one view with `variant:`.
-48. **Ripple and state layer as a shader (T2, T3)** — adopt from tre, optional. One pass instead of boxes.
-49. **Tooltip** — component.
-50. **Dialog** — component. The full-screen form waits for the top app bar: dialog-fullscreen.
-51. **ButtonGroup** — component. Takes its button as a property, not a widget name from a parameter (the gap the translator found).
-52. **IconButton (standard, filled, tonal, outlined)** — component.
-53. **FAB and extended FAB** — component.
-54. **StatusBar** — component.
-55. **Icon toggles that morph (T14)** — adopt from tre, optional.
-56. **ListItem** — component. The one row component: MenuItem, drawer items, tree nodes, accordion headers and search results are built from it.
-57. **NavigationRail (rail, item, screens, screen)** — component.
-58. **Card (elevated, filled, outlined)** — component.
-59. **Title bar** — component.
-60. **Pagination** — component. Includes the page dots, so the carousel uses them and not the other way round.
-61. **Chips (assist, filter, input, suggestion)** — component.
-62. **SideSheet (standard, modal)** — component.
-63. **Snackbar** — component.
-64. **SpinBox** — component. Hold-to-repeat is a timer.
-65. **TimePicker: dial, period selector, time input** — component. The dial and the time input each name the other, so they are one unit.
-66. **Menu and MenuItem** — component.
-67. **NavigationDrawer and item** — component.
-68. **SearchBar and SearchView** — component. The search app bar for TopAppBar is built here.
-69. **AccordionHeader** — component.
-70. **Carousel** — component.
-71. **Tree (branch, leaf)** — component.
-72. **Frosted navigation, search and menus (T16, T5)** — adopt from tre, optional. `backdrop_blur` with a translucent fill.
-73. **Dock and DockPanel** — component. Each names the other, so they are one unit.
-74. **TextField: what is left** — component. The label glides (transition), filled's 4dp-top corner, aria-invalid and describedby, a click on the padding focuses the input (focus), input masks, autocomplete as an exposed dropdown (menu), IME composition visuals (engine-input).
-75. **TopAppBar** — component. The search app bar variant follows search.
-76. **DatePicker (day cells and the picker)** — component. The four day fragments become one cell in four states.
-77. **NodeGraph** — component.
-78. **SplitButton (five variants)** — component.
-79. **Toolbar (docked, floating)** — component.
-80. **Video** — component.
-81. **Animated gradient focus borders (T12)** — adopt from tre, optional.
-82. **Window** — component.
-83. **Dialog: the full-screen form** — component.
-84. **Routed views** — component.
+20. **Svg** — component, done.
+21. **Elevation that animates on hover, press and drag** — Tesserae, done. tre animates `shadows`.
+22. **The overlay widget** — Tesserae, done. A layer anchored to a node (placement, flip), modal scrim, focus trap, Escape, outside press, focus return, an `open` model property that closing writes back. tre layers exist.
+23. **`for:` backed by tre's `virtual_list`** — Tesserae, done. Long lists (10 000 rows) without building every row.
+24. **More than one window** — Tesserae + tre, done. #105; a real-window spike (tools/spikes/second_window.py) needs the user at the machine.
+25. **Window size classes as a binding source** — Tesserae, done.
+26. **Screen transitions: fade through, shared axis, container transform** — Tesserae, done.
+27. **tre: more accessibility states** — tre (engine), done, gated on tre. `pressed`, `invalid`, `description` and `describedby`, `controls`, `current`, `value_now`/`value_text`, `busy`. tre has expanded, selected, checked, value_min/max already; ask once Tesserae has fixed the vocabulary. Done: tre 0.5.6 takes `pressed`, `invalid`, `description`, `current`, `busy` and `value_text` on a node (checked 2026-10-11 by setting them; `describedby`, `controls` and `value_now` were not probed).
+28. **tre: animatable layout properties** — tre (engine), done, gated on tre. width, height, x, y, padding, gap and font size are not animatable today (opacity, fill, corner radius, scale, translate are), plus an animation-finished event. Without it a collapse is done with a transform or frame by frame. Done: tre 0.5.6 per `pyproject.toml` and the 0.5.0 changelog (a layout `transition:` is the engine's own animation); not probed on 2026-10-11.
+29. **tre: more on the text input** — tre (engine), done, gated on tre. `max_length`, `read_only`, an input mode, a `submit` event and the IME composition event (the renderer works round the first three; composition has no workaround). Done: tre 0.5.6 per `pyproject.toml` and the 0.5.0 changelog; not probed on 2026-10-11.
+30. **tre: timers** — tre (engine), done. `window.after`/`every`, cancellable. Tesserae's frame-loop timers work until then. Done: tre 0.5.6 has `window.after` and `window.every` (checked 2026-10-11).
+31. **Text** — component, done. Every component uses it.
+32. **Splitter** — component, done.
+33. **Image: rounded and circular masks** — component, done.
+34. **The full accessibility vocabulary** — Tesserae, done. `pressed`, `invalid`, `description`, `controls`/`describedby`, `current`, `value_text`, `busy` as `a11y:` fields (spec section 12), set by the widgets.
+35. **A `tooltip:` property on every node** — Tesserae, done. Hover and focus delay, plain and rich.
+36. **`transition:` for layout properties** — Tesserae, done. Width, height, position, padding: drawer and rail collapse, accordion, FAB collapse, tab indicator, sheet slide, the text field's label.
+37. **tre: scroll snap points** — tre (engine), done. Snap on a ScrollView or virtual list. Carousels and tab strips snap in Tesserae with an animated `scroll_offset` until then. Done in part: tre 0.5.6 takes `scroll_snap` and `snap_align` on a scroll view (checked 2026-10-11 that they are accepted; that it settles on a point was not probed) and the Carousel uses them; `snap_points` is rejected, and a virtual list was not checked. `design/tre-requests/scroll-snap.md` still says none of it exists, which is out of date.
+38. **Badge (dot, labeled)** — component, done. Placed over a host with a wrapper and absolute position.
+39. **Link** — component, done.
+40. **Progress (linear, circular, loading indicator)** — component, done.
+41. **Checkbox** — component, done.
+42. **RadioButton** — component, done.
+43. **Switch** — component, done.
+44. **Slider** — component, done. The value indicator is an overlay.
+45. **Segmented buttons** — component, done. The shared selection pattern (a state, items that set it) is written here first.
+46. **Tabs and TabsItem** — component, done.
+47. **Button (filled, tonal, elevated, outlined, text)** — component, done. Five fragments become one view with `variant:`.
+48. **Ripple and state layer as a shader (T2, T3)** — adopt from tre, done, optional. One pass instead of boxes.
+49. **Tooltip** — component, done.
+50. **Dialog** — component, done. The full-screen form waits for the top app bar: dialog-fullscreen.
+51. **ButtonGroup** — component, done. Takes its button as a property, not a widget name from a parameter (the gap the translator found).
+52. **IconButton (standard, filled, tonal, outlined)** — component, done.
+53. **FAB and extended FAB** — component, done.
+54. **StatusBar** — component, done.
+55. **Icon toggles that morph (T14)** — adopt from tre, done, optional.
+56. **ListItem** — component, done. The one row component: MenuItem, drawer items, tree nodes, accordion headers and search results are built from it.
+57. **NavigationRail (rail, item, screens, screen)** — component, done.
+58. **Card (elevated, filled, outlined)** — component, done.
+59. **Title bar** — component, done.
+60. **Pagination** — component, done. Includes the page dots, so the carousel uses them and not the other way round.
+61. **Chips (assist, filter, input, suggestion)** — component, done.
+62. **SideSheet (standard, modal)** — component, done.
+63. **Snackbar** — component, done.
+64. **SpinBox** — component, done. Hold-to-repeat is a timer.
+65. **TimePicker: dial, period selector, time input** — component, done. The dial and the time input each name the other, so they are one unit.
+66. **Menu and MenuItem** — component, done.
+67. **NavigationDrawer and item** — component, done.
+68. **SearchBar and SearchView** — component, done. The search app bar for TopAppBar is built here.
+69. **AccordionHeader** — component, done.
+70. **Carousel** — component, done.
+71. **Tree (branch, leaf)** — component, done.
+72. **Frosted navigation, search and menus (T16, T5)** — adopt from tre, done, optional. `backdrop_blur` with a translucent fill.
+73. **Dock and DockPanel** — component, done. Each names the other, so they are one unit.
+74. **TextField: what is left** — component, done. The label glides (transition), filled's 4dp-top corner, aria-invalid and describedby, a click on the padding focuses the input (focus), input masks, autocomplete as an exposed dropdown (menu), IME composition visuals (engine-input).
+75. **TopAppBar** — component, done. The search app bar variant follows search.
+76. **DatePicker (day cells and the picker)** — component, done. The four day fragments become one cell in four states.
+77. **NodeGraph** — component, done.
+78. **SplitButton (five variants)** — component, done.
+79. **Toolbar (docked, floating)** — component, done.
+80. **Video** — component, done.
+81. **Animated gradient focus borders (T12)** — adopt from tre, done, optional.
+82. **Window** — component, done.
+83. **Dialog: the full-screen form** — component, done.
+84. **Routed views** — component, done.
 
 ## What waits on tre
 
@@ -197,7 +199,7 @@ Each request to tre, what has to be built before it is worth asking, and the com
 
 ## Where the text field's loose ends went
 
-The first component, [#184](https://github.com/mindderivative/tesserae/issues/184), is done except for what depends on other work. Those loose ends are the step *TextField: what is left* (74), which comes after:
+The first component, [#184](https://github.com/mindderivative/tesserae/issues/184), was built first, with what depended on other work left for the step *TextField: what is left* (74), which came after:
 
 - Focus control and keyboard navigation (4)
 - Per-corner `corner_radius` (11)
@@ -219,7 +221,7 @@ Several things the component issues were written to ask for exist now and are no
 The issues name each other in places; a build order needs one direction, so these were decided here:
 
 - **Tooltip and IconButton**: IconButton wants a tooltip and a rich tooltip wants a button. The tooltip needs only `Button`, so it comes first.
-- **Menu and TextField**: a menu's exposed dropdown is a text field, and a text field's autocomplete is a menu. The field's base is done; the autocomplete is part of *TextField: what is left*, after the menu.
+- **Menu and TextField**: a menu's exposed dropdown is a text field, and a text field's autocomplete is a menu. The field's base came first; the autocomplete is part of *TextField: what is left*, after the menu.
 - **Carousel and Pagination**: pagination's dots serve the carousel. Pagination includes the dots and the carousel uses them.
 - **TimePickerDial and Time input**: each names the other as its second mode, so they are one unit with the period selector.
 - **Dock and DockPanel**, and **Window and Routed views**: the dock and its panels are one unit; the window comes before routed views, whose screens it already hosts.
