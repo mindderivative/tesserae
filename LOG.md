@@ -2706,3 +2706,12 @@ User: "release tesserae 0.5.0", then "pypi is up".
   `absolute-insets.md` and `anchored-layout.md`. The first #257 estimate, "small each" for pointer_events and visible, held; the two "large"/"medium" ones were bounded by the engine, as the issue said they might be.
 - **No version bump** (no code changed).
 
+## #115 brought up to date (components that function)
+
+- **What it was:** the umbrella for the 91 component issues (#118 to #208), a checklist never ticked while they were built, as #247 was. "Start on #115" meant checking whether its complaint still holds and ticking what is done.
+- **Checked:** all 91 are Done on the board and each number is named in at least one commit (a script over the board and `git log`). All 91 boxes ticked; a status paragraph added to the issue.
+- **The complaint run again (a NavigationDrawer in a view, `scratchpad/drawer_probe.py`, not kept):** hover changes the row's pixel; a press chooses it and writes back to the ViewModel; `current: page` follows; a disabled row ignores a press and is not focusable; arrow up moves focus, Enter chooses;
+  `slot: header` takes children; `open: false` takes the column from 360 to 0; each row is a `link`. `NavigationDrawerScreens` was not probed (only its test). 18 existing tests cover these, so no test was added.
+- **Not re-run:** the other list-style components one by one. The probe hit one error of mine (`mail` is not an icon; `email` is), which the loader reported with a suggestion.
+- **No code changed, no version bump.**
+
