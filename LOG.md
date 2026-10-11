@@ -2672,3 +2672,14 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Mutations:** 12 scripted breaks, all caught by `tests/test_visible.py` (16 tests) and `tests/test_pointer_events.py` after one test was added (the coercion of what an expression works out).
 - **Not checked:** a real window; focus and the accessibility tree of a hidden node (the engine's behaviour, not probed or changed here).
 
+## 0.5.0.8: #260, `overflow` (third of the five in #257)
+
+- **A second spelling, on purpose.** #209 aimed at one way to say each thing, and this is a second way to say `clip_children`. The maintainer approved the scope all the same (2026-10-11); it is built as a plain alias in
+  `layout.engine_style` (`hidden` is `clip_children: true`, `visible` is `false`), and a node that gives both with different meanings is an error naming both. Only `hidden` and `visible`: `scroll`, `auto` and `clip` are refused, since
+  nothing here scrolls.
+- **One catch:** a stylesheet rule and a node's own style are merged before the engine sees them, so a rule's `overflow: hidden` and a node's own `clip_children: false` count as one node saying both, and it is an error rather than the
+  node's value winning. Said in the changelog. If that turns out to be wrong in practice, the fix is to resolve the two before merging.
+- **Not the Text property:** `Text` has its own `overflow` (`clip` or `ellipsis`); the style field of the same name is separate, and a test has both on one Text.
+- **Mutations:** 6 scripted breaks, all caught by `tests/test_overflow.py` (15 tests; one pixel test that the child is cut, and not cut with `visible`).
+- **Not checked:** a control with `overflow` (controls place only some keys, `clip_children` is not among them, so it is ignored there as `clip_children` is); a real window.
+

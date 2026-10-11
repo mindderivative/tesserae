@@ -306,6 +306,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `filter.sepia` | a number | 0 is unchanged, 1 fully sepia. |
 | `foreground` | a color or a gradient | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `opacity` | a number | From 0 (clear) to 1 (opaque). |
+| `overflow` | `hidden` \| `visible` | `hidden` cuts what is inside to the node's own box, `visible` lets it spill out: the same as `clip_children: true` and `false`, which it is another way to write (a node that says both must agree). It does not scroll: use a ScrollView for that. |
 | `pointer_events` | `auto` \| `none` | `none` lets the pointer through the node itself: a click on it goes to whatever is under it, and it is not hovered or pressed. What is inside it keeps its own (a child with `auto` is still hit). `auto`, the default, is the usual. |
 
 ## Colors

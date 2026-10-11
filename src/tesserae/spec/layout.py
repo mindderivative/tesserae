@@ -36,6 +36,8 @@ FLEXES = ("none", "expand_horizontal", "expand_vertical", "fill")
 ALIGN_TRACKS = ("start", "center", "end", "stretch", "between", "around", "evenly")
 #: What `pointer_events` takes: `none` lets the pointer through the node itself (its children are not affected).
 POINTER_EVENTS = ("auto", "none")
+#: What `overflow` takes: `hidden` cuts the children to the node (`clip_children: true`), `visible` lets them spill out (`false`).
+OVERFLOWS = ("hidden", "visible")
 
 #: The fields this module owns.
 LAYOUT_FIELDS = frozenset({"align_content", "spread", "flex", "align_self", "align_wrapped", "align_tracks", "align_cells"})
@@ -84,7 +86,13 @@ def engine_style(node_id: str, style: dict[str, Any], parent: Optional[tuple[str
     for old, new in REPLACED.items():
         if old in style:
             raise LayoutError(f'widget "{node_id}": style.{old} is now {new}')
-    out = {k: v for k, v in style.items() if k not in LAYOUT_FIELDS and k != "pointer_events"}
+    out = {k: v for k, v in style.items() if k not in LAYOUT_FIELDS and k not in ("pointer_events", "overflow")}
+    if "overflow" in style:  # another way to say `clip_children`
+        clip = _choose(node_id, "overflow", style["overflow"], OVERFLOWS) == "hidden"
+        if style.get("clip_children") is not None and bool(style["clip_children"]) != clip:
+            raise LayoutError(f'widget "{node_id}": style.overflow: {style["overflow"]} and style.clip_children: '
+                              f'{str(bool(style["clip_children"])).lower()} disagree; say one of them')
+        out["clip_children"] = clip
     if "pointer_events" in style:  # the engine's name for it is `hit_testable`
         out["hit_testable"] = _choose(node_id, "pointer_events", style["pointer_events"], POINTER_EVENTS) == "auto"
     direction = style.get("flex_direction", "horizontal")

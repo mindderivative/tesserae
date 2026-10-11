@@ -243,7 +243,9 @@ own parent.
 `position: absolute` takes a node out of the flow, and `x`/`y` place it
 in its parent, in pixels or percentages. `z_index` (an integer)
 draws it above or below its siblings, and a container with
-`clip_children: true` cuts its children to its own box.
+`clip_children: true` cuts its children to its own box. `overflow: hidden`
+is another way to write that (and `overflow: visible` is `clip_children: false`); a node that gives both must
+agree. It does not scroll: a `ScrollView` does.
 
 ```yaml
 id: root

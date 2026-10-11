@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0.8
+
+### Added
+
+- **`overflow: hidden | visible`** ([#260](https://github.com/mindderivative/tesserae/issues/260), part of [#257](https://github.com/mindderivative/tesserae/issues/257)). A style field that is another way to write `clip_children` (`hidden` is `true`, `visible` is `false`),
+  added because it is what people reach for. It does not scroll: a `ScrollView` does. A node that gives both with different meanings is an error naming both (a stylesheet rule's `overflow` and a node's own `clip_children` are
+  merged first, so they count as the same node); anything but `hidden` or `visible` is an error naming the node. It is not the `overflow` property of a `Text` (`clip` or `ellipsis`), which is unchanged.
+
 ## 0.5.0.7
 
 ### Added

@@ -1249,6 +1249,24 @@
           "description": "From 0 (clear) to 1 (opaque). (Paint and effects.)",
           "x-group": "Paint and effects"
         },
+        "overflow": {
+          "anyOf": [
+            {
+              "enum": [
+                "hidden",
+                "visible"
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "`hidden` cuts what is inside to the node's own box, `visible` lets it spill out: the same as `clip_children: true` and `false`, which it is another way to write (a node that says both must agree). It does not scroll: use a ScrollView for that. (Paint and effects.)",
+          "x-group": "Paint and effects"
+        },
         "padding": {
           "anyOf": [
             {
