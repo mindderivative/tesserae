@@ -2638,3 +2638,13 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **The board disagrees with the code in five places, left for the maintainer:** #241 (ripple shader), #242 (morphing icon toggles), #243 (frosted surfaces), #245 (gradient focus ring) and #246 (the full-screen Dialog) are in
   Backlog, but their steps are built (commits `082ebc4`, `58e7684`, `adfb116`, `910c754`, and the `fullscreen` parameter of `Dialog_View.yaml`; #246's commit is titled #151). #116 and #117 (reference documents) were not looked at.
 
+## 0.5.0.5: #116 and #117 checked
+
+- **Both are reference snapshots of 2026-10-07, not trackers:** #116 (the YAML language, L1 to L14, written before the #209 redesign) and #117 (tre capabilities, T1 to T33, written against tre 0.5.5). Status comments added; both moved to In review.
+- **#116 is mostly obsolete.** Probed on the current build, each in a one-node view: a ternary, `%`, unary minus and `None` in expressions work; `corner_radius` takes a dict and `full`; still rejected: `style: anchor`, `calc()` widths, `pointer_events`,
+  a static `visible`, `overflow`. The rest of L1 to L14 was not re-probed; the evidence is the guide, shipped use and the changelog. The five gaps are #257 (Backlog).
+- **#117 is partly stale.** Its list of "gaps tre cannot fill" (layout animation, masks, scroll snap) is out of date for tre 0.5.6: `mask` and `animate` are accepted; `scroll_snap` and `snap_align` are accepted on a scroll view, `snap_points` is not.
+  The adopted ideas were taken from the commit history. The other T-numbers were not checked one by one: a code search for "used now" was unreliable (zero counts that look like pattern misses), so the "NOT USED" column was left alone.
+- **A mistake of mine on the way:** I first wrote into #247 that the component issues' Done status meant "audit only"; the commits show those issues were built. Removed before it stood.
+- **Probe harness, for next time:** a one-off new-style view needs `Views/Main_View.yaml` under an `App(root=...)` and `app.open_view("Main")` (as `tests/test_badge.py` does); `View(...)` takes the old `id:` shape and `app.load` wants a real `*_ViewModel.py`.
+
