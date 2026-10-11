@@ -5,6 +5,7 @@ The frame -- the title bar, the rail, the docked panels, the screens and the sta
 with `app.load()`. There are no widgets made in Python:
 
 - The panels (`Files`, `Outline`, `Properties`, `Console`) are `view:` nodes; `Console` has a `Console_ViewModel.py` too.
+- `Compare` is a panel of two halves (a split): drag a tab onto a half to add it as a tab, or onto its edge to split it.
 - The screens (`Home`, `Notes`) are `view:` nodes with a `route:`; the rail's items name them, and `app.navigate`
   moves the rail's selection.
 - Everything follows the app's theme: no `theme=` anywhere.
@@ -37,7 +38,7 @@ assert app.borderless is True and app.current_screen.get() == "Home"
 assert view.node("root").get("visible") is not False
 layout = dock.layout()["zones"]
 assert layout["left"]["panels"] == ["Files", "Outline"] and layout["right"]["panels"] == ["Properties"]
-assert layout["bottom"]["panels"] == ["Console"] and layout["center"]["panels"] == ["Screens"]
+assert layout["bottom"]["panels"] == ["Console"] and layout["center"]["panels"] == ["Screens", "Compare"]
 assert console.last.get() == "tesserae: window started"
 
 window.simulate("click", node=view.node("nav.item.1"))  # the rail opens Notes
@@ -52,6 +53,21 @@ window.advance(16)
 assert dock.size("left") == 300
 saved = dock.layout()
 dock.restore(saved)  # ...and putting a saved layout back
+
+# The Compare panel has two halves, each a small zone with a tab strip. Dragging a tab onto a half adds it as a tab, onto an edge
+# splits the half; from code, `move` does the first. The layout keeps the halves and the splits the user made.
+dock.dock.show(view.node("compare"))
+window.advance(16)
+assert list(dock.halves()) == ["before", "after"] and dock.halves()["after"] == {"panels": [], "shown": None}
+dock.move("outline", "after")
+window.advance(16)
+assert dock.half_of("outline") == "after" and dock.halves()["after"] == {"panels": ["outline"], "shown": "outline"}
+saved = dock.layout()  # plain data: it could be written to a file
+assert saved["halves"]["after"] == {"panels": ["Outline"], "shown": "Outline"}
+dock.move("outline", "left")  # back in its zone...
+dock.restore(saved)  # ...and into the half again
+window.advance(16)
+assert dock.half_of("outline") == "after"
 
 app.set_dark(True)  # the frame follows the app's theme
 app.set_dark(False)

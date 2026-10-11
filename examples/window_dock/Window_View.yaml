@@ -55,6 +55,21 @@ children:
             children:
               - {id: home, view: Home_View.yaml, route: "", style: {flex: fill}}
               - {id: notes, view: Notes_View.yaml, route: notes, style: {flex: fill}}
+          - id: compare                  # a panel of two halves: drag a tab onto a half to add it, or onto an edge to split it
+            kind: DockPanel
+            title: Compare
+            style: {zone: center}
+            children:
+              - id: before
+                kind: DockPanel
+                title: Before
+                children:
+                  - {id: before_text, kind: Text, text: {content: "Drop a panel here", typography_role: body_large}, style: {foreground: on_surface, padding: 16}}
+              - id: after
+                kind: DockPanel
+                title: After
+                children:
+                  - {id: after_text, kind: Text, text: {content: "or on an edge to split this half", typography_role: body_large}, style: {foreground: on_surface, padding: 16}}
   - id: status
     component: StatusBar
     with: {text: Ready, width: "100%"}

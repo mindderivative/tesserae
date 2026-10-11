@@ -183,7 +183,7 @@ prefs.center()                                 # where the system lets an app pl
 ```python
 dock = view.dock_host("dock")
 dock.set_size("left", 280)
-saved = dock.layout()      # plain data: where every panel is, which one shows, the sizes
+saved = dock.layout()      # plain data: where every panel is, which one shows, the sizes, the halves
 dock.restore(saved)        # ...put back later, e.g. when the app starts
 ```
 
@@ -200,8 +200,24 @@ a panel on the halves inside it.
 dock.halves()                       # {"source": {"panels": ["outline"], "shown": "outline"}, ...}: the panels in each half
 dock.show_in_half("source", None)   # show the half's own content; or pass a panel id
 dock.half_of("outline")             # the half a panel is in, or None if it is in a zone
-dock.move("outline", "left")        # back to a zone
+dock.move("outline", "source")      # into a half, from code; or "left" for a zone
 ```
 
-Not yet: `layout()` and `restore()` do not record the halves (the panels in them, or a split a drop made), so after a restart the
-YAML's layout is what comes back.
+`layout()` records the halves too, so the arrangement the user made survives a restart: `halves` has, for each half, the titles of the
+panels in it and the tab it shows (`None`: its own content), and `made` has, for each half of the YAML that the user split, the tree
+of the splits, as plain data you can write to a file:
+
+```python
+{"halves": {"source": {"panels": ["Outline"], "shown": "Outline"}, "source.split1": {"panels": ["Files"], "shown": "Files"}, ...},
+ "made": {"source": {"axis": "x", "size": 240.0, "first": {"half": "source"}, "second": {"half": "source.split1"}}}}
+```
+
+`restore()` takes the user's splits apart (the panels in them go back to their zones), makes the ones in the layout and puts the panels
+in their halves. A split's `size` is its first part's width (`x`) or height (`y`). Halves and titles this dock does not have are
+skipped, and a split none of whose panels come back is not made. A layout saved before halves were recorded has neither key, and
+leaves the halves as they are. A half of the YAML is found by its `id`, so renaming one in the file means a saved layout no
+longer finds it.
+
+Editing the YAML while the app runs keeps all of this: the strips, the panels the user dropped on a half and the splits they made
+stay where they are, and a half the file removes sends the panels dropped in it back to their zones. Not supported: dragging
+a half's own content (what the YAML put in it) to another place, and tabs of a zone or a half cannot be put in a different order.

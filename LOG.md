@@ -2597,3 +2597,21 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Not seen:** the strips, the highlight, the drag out of a half and the collapse have been driven with `simulate` and read back as numbers, not looked at in a window or dragged by a person. Real-window drags
   from a half's tab (the pointer capture on KDE Wayland) are unchecked.
 
+## 0.5.0.5: #106, phase 4 of 4: the halves in the layout, the example and the guide
+
+- **`layout()` / `restore()`:** `halves` (each half's panel titles and the tab it shows, `None` for its own content) and `made` (a tree per half of the YAML that the user split: `{"half": name}` or `{"axis", "size", "first", "second"}`,
+  `size` being the first part's). The tree is read off the live nodes (`_tree`, `_describe`), not kept as a list of what was done, so a collapse can never leave it describing a split that is gone. `restore()` first takes the current
+  made splits apart (`_dissolve`: their panels go home, the halves collapse), moves panels into zones, grows the saved trees (`_grow`: split the half that exists, on the side that puts the new half where the tree has it, naming the new
+  half as the tree does, recursing into both parts), docks the panels into their halves, collapses a made half none of whose panels came back, then shows the saved tabs. A layout without `halves`/`made` (saved before) leaves
+  the halves alone. A malformed tree, an unknown axis, a name this dock already has, or a tree that does not contain its own half is skipped.
+- **A bug that the restore tests found, from phases 2 and 3:** a handle between a split's two parts held the node that stood in the first place when it was made; splitting that part again moved the node inside a new container, so
+  dragging the handle (or the YAML's own split handle, once the user split a half) resized the wrong node, and the recorded size was the inner one (92, with 126 on screen). The handles ask for `before()` each time now (`_top`,
+  and `both.children()[0]` for a made one). Two tests; the nested near-band restore tests are what found it.
+- **A change I made and then took out:** a handle bound for a container with no layout yet (I thought restoring needed it; the cause was the bug above and tre lays out lazily on read). The mutant that removed it survived, so it went.
+- **`DockHost.move(panel_id, where)`** takes a half's id as well as a zone, for code that puts a panel in a half; the example does.
+- **Example:** `examples/window_dock` has a `Compare` panel of two halves (`Before`, `After`); its self-checks put the Outline in one, save the layout, take it out and restore. It also runs in a real window (20 frames).
+- **Guide:** `windows-and-docks.md` (dropping on a half, the saved layout and its format, what a reload keeps), `docking.md`; changelog.
+- **Mutations:** 13 more scripted breaks of this phase's code, all caught after three tests were added (own tab shown after a restore, an axis that is not x or y, a panel's way home); the phase 3 set of 19 still all caught.
+- **Not built:** reordering tabs (a restored layout puts a panel in the right zone or half, not at its old place in the strip); dragging a half's own content elsewhere.
+- **Not seen:** as before, the strips, the highlight and the drags have been driven with `simulate` and read back as numbers; nobody has dragged a tab of a half in a window. That is the one thing to do at the machine before this goes to Done.
+

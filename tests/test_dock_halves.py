@@ -675,3 +675,232 @@ def test_a_reload_that_removes_a_half_sends_the_panels_dropped_in_it_back_to_the
     assert "right_half" not in host.halves() and not host._made_halves and not host._made_splits
     assert set(host.layout()["zones"]["left"]["panels"]) == {"Files", "Outline"}
     assert view.node("outline").get("layout_width") > 0 and host.half_of("outline") is None
+
+
+# -- saving and restoring the halves (phase 4) --------------------------------------------------------------
+
+def _shape(host):
+    """Where every half is and how big, as whole numbers: what a restored layout has to bring back."""
+    out = {}
+    for name in host.halves():
+        slot = _slot(host, name)
+        out[name] = tuple(round(slot.get(k)) for k in ("layout_x", "layout_y", "layout_width", "layout_height"))
+    return out
+
+
+def _arranged():
+    """A dock with a panel joined to the left half and the right half split twice (Files to the right, Console beneath that)."""
+    app, view = _view()
+    host = view.dock_host("dock")
+    _join(app, host, "left_half", "Outline")
+    _split(app, host, "right_half", "right", "Files")
+    inner = _new_half(host)
+    _drag_to(app, _tab(host, "bottom", "Console"), _point(_slot(host, inner), "bottom"))
+    app.window.advance(32)
+    host._made_splits[0].set(100)
+    app.window.advance(32)
+    return app, view, host
+
+
+def test_the_layout_records_the_halves_and_the_splits_a_drop_made_as_plain_data():
+    import json
+    app, view, host = _arranged()
+    layout = host.layout()
+    first, inner = [n for n in host.halves() if n not in ("left_half", "right_half")]
+    assert layout["halves"]["left_half"] == {"panels": ["Outline"], "shown": "Outline"}
+    assert layout["halves"]["right_half"] == {"panels": [], "shown": None}
+    assert layout["halves"][first] == {"panels": ["Files"], "shown": "Files"}
+    assert layout["halves"][inner] == {"panels": ["Console"], "shown": "Console"}
+    tree = layout["made"]["right_half"]
+    assert tree["axis"] == "x" and tree["first"] == {"half": "right_half"} and tree["size"] == pytest.approx(100, abs=1)
+    assert tree["second"]["axis"] == "y" and tree["second"]["first"] == {"half": first} and tree["second"]["second"] == {"half": inner}
+    assert "left_half" not in layout["made"] and layout["splits"] == {}  # a drop's splits are in `made`, not `splits`
+    assert json.loads(json.dumps(layout)) == layout  # it is plain data, to keep in a file
+
+
+def test_a_layout_with_no_splits_made_has_an_empty_made():
+    app, view = _view()
+    host = view.dock_host("dock")
+    assert host.layout()["made"] == {} and host.layout()["halves"]["left_half"] == {"panels": [], "shown": None}
+
+
+def test_restoring_a_layout_into_a_new_dock_brings_back_the_halves_and_the_splits():
+    import json
+    app, view, host = _arranged()
+    saved = json.loads(json.dumps(host.layout()))
+    shape = _shape(host)
+    app2, view2 = _view()  # the next run of the app
+    host2 = view2.dock_host("dock")
+    assert _shape(host2) != shape
+    host2.restore(saved)
+    app2.window.advance(64)
+    assert _shape(host2) == shape
+    assert host2.halves() == host.halves() and host2.layout()["zones"] == host.layout()["zones"]
+    assert view2.node("outline").parent() == view2.node("left_half") and view2.node("outline").get("visible")
+    assert not view2.node("left_text").get("visible")  # Outline shows, as it did
+    assert host2.layout()["made"] == saved["made"]
+
+
+def test_restoring_takes_apart_the_splits_that_are_not_in_the_layout():
+    app, view = _view()
+    host = view.dock_host("dock")
+    plain = host.layout()
+    shape = _shape(host)
+    _split(app, host, "right_half", "left", "Outline")
+    _split(app, host, "left_half", "top", "Files")
+    assert len(host._made_splits) == 2
+    host.restore(plain)
+    app.window.advance(64)
+    assert not host._made_splits and not host._made_halves and _shape(host) == shape
+    assert set(host.layout()["zones"]["left"]["panels"]) == {"Files", "Outline"}  # back in their zone
+
+
+def test_restoring_a_layout_moves_a_panel_between_halves_and_zones():
+    app, view, host = _arranged()
+    saved = host.layout()
+    host.move("outline", "bottom")  # out of the left half
+    host.move("files", "right_half")  # into another
+    app.window.advance(32)
+    host.restore(saved)
+    app.window.advance(64)
+    assert host.half_of("outline") == "left_half" and host.half_of("files") == [n for n in host.halves() if host.halves()[n]["panels"] == ["files"]][0]
+    assert host.layout()["halves"] == saved["halves"] and host.layout()["zones"]["bottom"] == saved["zones"]["bottom"]
+
+
+@pytest.mark.parametrize("axis, near, far", [("x", "left", "right"), ("y", "top", "bottom")])
+def test_the_splits_come_back_on_the_side_they_were_made(axis, near, far):
+    app, view = _view()
+    host = view.dock_host("dock")
+    _split(app, host, "right_half", far, "Outline")
+    _split(app, host, "right_half", near, "Files")
+    saved = host.layout()
+    shape = _shape(host)
+    app2, view2 = _view()
+    host2 = view2.dock_host("dock")
+    host2.restore(saved)
+    app2.window.advance(64)
+    assert _shape(host2) == shape and host2.halves() == host.halves()
+
+
+def test_a_layout_with_titles_and_halves_this_dock_has_not_is_restored_around_them():
+    app, view, host = _arranged()
+    saved = host.layout()
+    first = [n for n in saved["halves"] if n not in ("left_half", "right_half")][0]
+    saved["halves"]["not_a_half"] = {"panels": ["Outline"], "shown": "Outline"}
+    saved["halves"]["left_half"]["panels"].append("No such panel")
+    saved["made"]["not_a_half"] = {"half": "not_a_half"}
+    app2, view2 = _view()
+    host2 = view2.dock_host("dock")
+    host2.restore(saved)
+    app2.window.advance(64)
+    assert host2.halves() == host.halves() and host2.half_of("outline") == "left_half"
+    assert first in host2.halves()
+
+
+def test_a_split_whose_panels_are_all_unknown_does_not_stay_empty():
+    app, view, host = _arranged()
+    saved = host.layout()
+    for name in saved["halves"]:
+        if name not in ("left_half", "right_half"):
+            saved["halves"][name] = {"panels": ["Nobody"], "shown": "Nobody"}
+    app2, view2 = _view()
+    host2 = view2.dock_host("dock")
+    host2.restore(saved)
+    app2.window.advance(64)
+    assert list(host2.halves()) == ["left_half", "right_half"] and not host2._made_splits
+    assert view2.node("editor.split.0").parent() == view2.node("editor")
+
+
+@pytest.mark.parametrize("tree", [
+    {"half": "right_half"}, {"axis": "z", "size": 100, "first": {"half": "right_half"}, "second": {"half": "x"}},
+    {"axis": "x", "first": {"half": "right_half"}}, {"axis": "x", "size": 100, "first": {"half": "a"}, "second": {"half": "b"}},
+    {"axis": "x", "size": 100, "first": {"half": "right_half"}, "second": {"half": "right_half"}},
+    {"axis": "x", "size": 100, "first": {"half": "right_half"}, "second": {"half": "left_half"}}, "nonsense", None])
+def test_a_tree_that_is_not_one_is_skipped(tree):
+    app, view = _view()
+    host = view.dock_host("dock")
+    shape = _shape(host)
+    host.restore({"made": {"right_half": tree}, "halves": {}})
+    app.window.advance(32)
+    assert _shape(host) == shape and not host._made_splits and list(host.halves()) == ["left_half", "right_half"]
+
+
+def test_a_layout_from_before_halves_were_recorded_leaves_the_halves_alone():
+    app, view, host = _arranged()
+    old = host.layout()
+    del old["halves"], old["made"]
+    shape, halves = _shape(host), host.halves()
+    host.restore(old)
+    app.window.advance(32)
+    assert _shape(host) == shape and host.halves() == halves
+
+
+def test_a_panel_can_be_moved_into_a_half_by_name_from_code():
+    app, view = _view()
+    host = view.dock_host("dock")
+    host.move("outline", "right_half")
+    app.window.advance(16)
+    assert host.half_of("outline") == "right_half" and host.halves()["right_half"]["shown"] == "outline"
+    host.move("outline", "left_half")  # from one half to another
+    assert host.half_of("outline") == "left_half"
+    host.move("outline", "bottom")  # and back to a zone
+    assert host.half_of("outline") is None and host.layout()["zones"]["bottom"]["panels"] == ["Console", "Outline"]
+
+
+def test_a_handle_still_resizes_its_first_part_after_that_part_is_split_again():
+    app, view = _view()
+    host = view.dock_host("dock")
+    _split(app, host, "right_half", "right", "Outline")
+    outer = host._made_splits[0]
+    _split(app, host, "right_half", "left", "Files")  # the part in front of the outer handle is now a container of two
+    first = outer.node.parent().children()[0]
+    assert first.get("layout_width") == outer.get() and len(first.children()) == 3
+    outer.set(150)
+    app.window.advance(32)
+    assert first.get("layout_width") == 150.0 and outer.get() == 150.0
+    assert host.layout()["made"]["right_half"]["size"] == 150.0
+
+
+def test_the_views_split_handle_still_resizes_a_half_after_the_user_splits_it():
+    app, view = _view()
+    host = view.dock_host("dock")
+    _split(app, host, "left_half", "bottom", "Outline")
+    handle = host._splits["editor.split.0"]
+    handle.set(250)
+    app.window.advance(32)
+    assert _slot(host, "right_half").get("layout_x") == 216 + 250 + 16
+    assert _slot(host, "left_half").parent().get("layout_width") == 250.0  # the container the split made, not the half inside it
+
+
+def test_a_half_that_was_showing_its_own_content_shows_it_again_after_a_restore():
+    app, view = _view()
+    host = view.dock_host("dock")
+    _join(app, host, "left_half")
+    host.show_in_half("left_half", None)
+    saved = host.layout()
+    assert saved["halves"]["left_half"] == {"panels": ["Outline"], "shown": None}
+    app2, view2 = _view()
+    host2 = view2.dock_host("dock")
+    host2.restore(saved)
+    app2.window.advance(32)
+    assert host2.half_of("outline") == "left_half" and host2.halves()["left_half"]["shown"] is None
+    assert view2.node("left_text").get("visible") and not view2.node("outline").get("visible")
+
+
+def test_a_split_with_an_axis_that_is_not_x_or_y_is_not_made_even_if_a_panel_would_go_in_it():
+    app, view = _view()
+    host = view.dock_host("dock")
+    shape = _shape(host)
+    host.restore({"made": {"right_half": {"axis": "z", "size": 100, "first": {"half": "right_half"}, "second": {"half": "nowhere"}}},
+                  "halves": {"nowhere": {"panels": ["Outline"], "shown": "Outline"}}})
+    app.window.advance(32)
+    assert _shape(host) == shape and host.half_of("outline") is None and list(host.halves()) == ["left_half", "right_half"]
+
+
+def test_a_panels_home_is_the_zone_it_came_from_when_its_half_is_taken_apart():
+    app, view = _view()
+    host = view.dock_host("dock")
+    _split(app, host, "right_half", "right", "Outline")
+    host.restore({"halves": {}, "made": {}})  # a layout with no splits: the split goes
+    app.window.advance(32)
+    assert host.half_of("outline") is None and "Outline" in host.layout()["zones"]["left"]["panels"] and not host._made_splits
