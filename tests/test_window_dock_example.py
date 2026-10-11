@@ -22,6 +22,18 @@ def test_the_example_runs_and_its_own_checks_pass(monkeypatch):
     runpy.run_path(str(EXAMPLE / "app.py"), run_name="__main__")
 
 
+def test_interactive_runs_until_the_window_is_closed_and_the_default_for_20_frames(monkeypatch):
+    monkeypatch.syspath_prepend(str(EXAMPLE))
+    for name in [n for n in sys.modules if n in ("Console_ViewModel", "Notes_ViewModel")]:
+        sys.modules.pop(name)
+    calls = []
+    monkeypatch.setattr(App, "run", lambda self, *args, **kwargs: calls.append(kwargs))
+    runpy.run_path(str(EXAMPLE / "app.py"), run_name="__main__")
+    monkeypatch.setattr(sys, "argv", ["app.py", "--interactive"])
+    runpy.run_path(str(EXAMPLE / "app.py"), run_name="__main__")
+    assert calls == [{"max_frames": 20, "hot_reload": True}, {"hot_reload": True}]  # no frame limit when asked for
+
+
 @pytest.fixture
 def app(monkeypatch):
     monkeypatch.syspath_prepend(str(EXAMPLE))

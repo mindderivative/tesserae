@@ -13,7 +13,7 @@
   during a tre drag (checked in a real window on KDE Wayland), so tre needs no change. In Python: `DockHost.halves()`, `show_in_half()`, `half_of()`, `move()`; `Dock.add_half()`,
   `on_half_drop()`, `on_half_empty()`. A hot reload leaves the strips, the dropped panels and the splits the user made where they are, and a half the file removes sends its panels back to their zones.
   `layout()` records the halves (`halves`: the titles of the panels in each and the tab it shows) and the splits the user made (`made`: a tree per half of the YAML), and `restore()` takes the current splits apart and
-  makes the saved ones, so the arrangement survives a restart; `DockHost.move(panel_id, half)` puts a panel in a half from code. `examples/window_dock` has a `Compare` panel of two halves that its self-checks drop a panel on, save and restore.
+  makes the saved ones, so the arrangement survives a restart; `DockHost.move(panel_id, half)` puts a panel in a half from code. `examples/window_dock` has a `Compare` panel of two halves that its self-checks drop a panel on, save and restore, and a `--interactive` flag that keeps its window open to try by hand.
   **Fixed on the way:** a handle between two parts of a split stopped resizing the right node once its first part had been split again (it kept the half's old column, now inside a container); it asks each time now, and
   the YAML's own split handle does the same.
   A half's own content cannot be dragged to another place, and tabs are not reordered (a restored layout puts a panel in the right zone or half, not at the right place in its tab strip).

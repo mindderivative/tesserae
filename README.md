@@ -123,7 +123,8 @@ one live window.
 `window_dock/`: a studio written as one `Window_View.yaml`: a title bar, a
 navigation rail, tool panels docked left, right and bottom, routed screens
 in the middle, and a status bar -- all `kind: Window`, `kind: Dock` and
-`view:` nodes, with no widgets made in Python.
+`view:` nodes, with no widgets made in Python. `python examples/window_dock/app.py --interactive`
+keeps the window open to try by hand (drag a tab onto a half of `Compare`).
 
 ## Components
 

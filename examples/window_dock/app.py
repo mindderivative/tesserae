@@ -10,9 +10,11 @@ with `app.load()`. There are no widgets made in Python:
   moves the rail's selection.
 - Everything follows the app's theme: no `theme=` anywhere.
 
-It checks itself, then renders 20 frames with hot reload on (omit `max_frames` for a real, interactive run).
+It checks itself, then renders 20 frames with hot reload on and exits. Run it with `--interactive` to keep the window open
+(close it to quit) and try it by hand: drag a tab onto a half of `Compare`, onto its edge, and back out.
 """
 
+import sys
 from pathlib import Path
 
 from loguru import logger
@@ -68,10 +70,17 @@ dock.move("outline", "left")  # back in its zone...
 dock.restore(saved)  # ...and into the half again
 window.advance(16)
 assert dock.half_of("outline") == "after"
+dock.move("outline", "left")  # put it back, so a hand-run starts with the Outline tab in the left zone and Compare showing
+window.advance(16)
+assert dock.half_of("outline") is None
 
 app.set_dark(True)  # the frame follows the app's theme
 app.set_dark(False)
 
 logger.info("layout: {}", saved)
-app.run(max_frames=20, hot_reload=True)  # the window view and the views in it are watched while it runs
-logger.info("examples/window_dock/app.py: exited cleanly after a real 20-frame render loop")
+if "--interactive" in sys.argv[1:]:
+    logger.info("interactive: close the window to quit")
+    app.run(hot_reload=True)  # until the window is closed
+else:
+    app.run(max_frames=20, hot_reload=True)  # the window view and the views in it are watched while it runs
+    logger.info("examples/window_dock/app.py: exited cleanly after a real 20-frame render loop")
