@@ -2694,3 +2694,15 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **So #261 is not what its title says.** No `calc()` syntax exists. I moved it to In review with that said first; the maintainer decides whether the recipes and the request are enough, or whether a frame-following version with its limits is wanted anyway.
 - **No version bump:** no code changed (docs, a request draft and tests).
 
+## 0.5.0.8: #262, anchor (last of the five in #257) -- no new syntax, on purpose
+
+- **The feasibility step:** tre's `show_layer(node, anchor=..., placement=...)` places a layer against a node at every layout, and follows it with no lag (an anchor moved 100 to 250 in one `advance`, the layer with it). Tesserae's `widget: Overlay` is that, with
+  `anchor:` and `placement:`, so a floating thing beside a distant node is already writable in a view (this answers #116's "a popup beside a distant node cannot be placed"; the audit missed it or it came after).
+- **What a layer is not, probed:** four placements only (`below`, `above`, `start`, `end`; `top_end`, `above_end`, `bottom_start`, `center`, `over` are rejected), each aligned with the anchor's start edge; flipped to fit (`above` an anchor 4 px from the top lands
+  below); drawn above the window, so not cut by a clipping ancestor (a pixel test); its own Tab scope. And an in-tree anchor does not exist: tre has no `right`/`bottom`/anchor for an ordinary node and no node-level layout event.
+- **The maintainer chose** (a question put to them, as the issue promised) "document Overlay and ask tre", over an in-tree frame-following `anchor:` style and over leaving it open. So: a guide section, `tests/test_anchored_overlay.py` (12 tests pinning the
+  engine's behaviour, including the pixel one), `design/tre-requests/anchored-layout.md` (corners and an offset for layers, or an anchored node in the tree), **not sent**.
+- **So the five in #257 end:** #258 pointer_events (built), #259 visible (built), #260 overflow (built, an alias), #261 calc() (not built: recipes and a request), #262 anchor (not built: documented Overlay and a request). Two requests to tre are drafted and unsent:
+  `absolute-insets.md` and `anchored-layout.md`. The first #257 estimate, "small each" for pointer_events and visible, held; the two "large"/"medium" ones were bounded by the engine, as the issue said they might be.
+- **No version bump** (no code changed).
+

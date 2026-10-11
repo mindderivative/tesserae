@@ -265,6 +265,26 @@ What cannot be said is an **absolutely positioned** node stretched between two e
 width ignores margins, and the engine has no `right` or `bottom`. Give it a number, or put it in the flow. This is asked of the engine in
 `design/tre-requests/absolute-insets.md`.
 
+## Placing a node against another node
+
+`style: {anchor: ...}` does not exist. A node that floats beside a node that is not its parent, and follows it, is an `Overlay`:
+
+```yaml
+- {widget: Rect, name: target, style: {width: 60, height: 40, background: primary}}
+- widget: Overlay
+  anchor: target
+  placement: above       # below, above, start or end; aligned with the target's start edge
+  open: true
+  dismissible: false
+  children:
+    - {widget: Rect, style: {width: 12, height: 12, background: error}}
+```
+
+The engine keeps it against the target at every layout, so it follows with no lag. Because it is a layer it is drawn above the whole window, is not cut by
+a parent's `clip_children`, is its own Tab scope, and flips to the other side when it does not fit. It can sit on the four sides only, not on a corner
+or the middle. For a badge on a corner, make it a child of its host and place it with `position: absolute` (the shipped `Badge` does); for the rest, the
+engine would have to place it (`design/tre-requests/anchored-layout.md`, not sent).
+
 ## Placing a node exactly
 
 `position: absolute` takes a node out of the flow, and `x`/`y` place it
