@@ -1,6 +1,6 @@
 # Request to tre: place a node against another node, in the tree (and at its corners)
 
-*Drafted for Tesserae 0.5.0.8 (#262, part of #257). **Not sent yet**: it goes to tre's session when the maintainer says so. Probed on tre 0.5.6.*
+*Drafted for Tesserae 0.5.0.8 (#262, part of #257). Sent 2026-10-11 as mindderivative/tre#179. Probed on tre 0.5.6.*
 
 ## What Tesserae needs
 

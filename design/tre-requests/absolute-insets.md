@@ -1,6 +1,6 @@
 # Request to tre: insets on an absolute node (or mixed-unit sizes)
 
-*Drafted for Tesserae 0.5.0.8 (#261, part of #257). **Not sent yet**: it goes to tre's session when the maintainer says so. Probed on tre 0.5.6.*
+*Drafted for Tesserae 0.5.0.8 (#261, part of #257). Sent 2026-10-11 as mindderivative/tre#178. Probed on tre 0.5.6.*
 
 ## What Tesserae needs
 

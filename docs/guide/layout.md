@@ -263,7 +263,7 @@ and follows the parent when it changes:
 
 What cannot be said is an **absolutely positioned** node stretched between two edges of its parent (`x: 8` and 8 pixels from the right): its percentage
 width ignores margins, and the engine has no `right` or `bottom`. Give it a number, or put it in the flow. This is asked of the engine in
-`design/tre-requests/absolute-insets.md`.
+`design/tre-requests/absolute-insets.md` (sent to tre as tre#178).
 
 ## Placing a node against another node
 
@@ -283,7 +283,7 @@ width ignores margins, and the engine has no `right` or `bottom`. Give it a numb
 The engine keeps it against the target at every layout, so it follows with no lag. Because it is a layer it is drawn above the whole window, is not cut by
 a parent's `clip_children`, is its own Tab scope, and flips to the other side when it does not fit. It can sit on the four sides only, not on a corner
 or the middle. For a badge on a corner, make it a child of its host and place it with `position: absolute` (the shipped `Badge` does); for the rest, the
-engine would have to place it (`design/tre-requests/anchored-layout.md`, not sent).
+engine would have to place it (`design/tre-requests/anchored-layout.md`, sent to tre as tre#179).
 
 ## Placing a node exactly
 

@@ -12,9 +12,9 @@
 
 - **A size that is the parent minus something** ([#261](https://github.com/mindderivative/tesserae/issues/261), part of [#257](https://github.com/mindderivative/tesserae/issues/257)). There is no `calc()`: the engine takes only a number, `auto` or a percentage for a size, and has no
   node-level event for a change of size, so Tesserae cannot follow a parent's size itself without trailing it by a frame and shrinking inside an `auto`-sized parent. In the flow `flex: fill` with margins or a `gap` is exact, and the layout guide
-  shows it (tested). An absolute node stretched between two edges cannot be said; it is asked of tre in `design/tre-requests/absolute-insets.md` (not sent yet).
+  shows it (tested). An absolute node stretched between two edges cannot be said; it is asked of tre in `design/tre-requests/absolute-insets.md` (sent as tre#178).
 - **Placing a node against another node** ([#262](https://github.com/mindderivative/tesserae/issues/262), part of [#257](https://github.com/mindderivative/tesserae/issues/257)). There is no `anchor:` style: an `Overlay` already sits against a named node on one of four sides and follows it with no lag, and the layout
-  guide says so, with what a layer is (above the window, not clipped by a parent, its own Tab scope, flipped to fit) and is not (a corner, or in the tree). That is asked of tre in `design/tre-requests/anchored-layout.md` (not sent yet).
+  guide says so, with what a layer is (above the window, not clipped by a parent, its own Tab scope, flipped to fit) and is not (a corner, or in the tree). That is asked of tre in `design/tre-requests/anchored-layout.md` (sent as tre#179).
 
 ## 0.5.0.7
 

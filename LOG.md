@@ -2715,3 +2715,12 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Not re-run:** the other list-style components one by one. The probe hit one error of mine (`mail` is not an icon; `email` is), which the loader reported with a suggestion.
 - **No code changed, no version bump.**
 
+## The two requests to tre sent (2026-10-11, at the maintainer's word)
+
+- **mindderivative/tre#178:** insets (`right`, `bottom`) on an absolute node, or mixed-unit sizes (the #261 request, `design/tre-requests/absolute-insets.md`).
+- **mindderivative/tre#179:** place a node against another node in the tree, and at its corners (the #262 request, `design/tre-requests/anchored-layout.md`).
+- **How:** `gh issue create --repo mindderivative/tre`, plain titles and no labels as tre#163 and tre#166 were; the body is the draft with its italic header replaced by a provenance line. Before sending, the 18 tests that pin the facts both rest on were run (tre 0.5.6, still
+  installed) and passed. tre#166 (scroll snap) is closed, in step with tre 0.5.6 taking `scroll_snap` and `snap_align`, so tre's side acts on these.
+- **Updated:** the two request files, the layout guide and the changelog now say "sent as tre#178 / tre#179" where they said "not sent". Older LOG entries still say "not sent" because they were true when written.
+- **Nothing is waiting on tre in the code.** If tre adds insets, corners or a layout event, `tests/test_size_recipes.py` and `tests/test_anchored_overlay.py` fail on purpose and say which fact changed.
+
