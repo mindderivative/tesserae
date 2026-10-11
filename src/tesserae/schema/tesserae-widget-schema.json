@@ -83,6 +83,12 @@
         "string"
       ]
     },
+    "visible": {
+      "type": [
+        "boolean",
+        "string"
+      ]
+    },
     "window_region": {
       "enum": [
         "drag",
@@ -175,6 +181,12 @@
               "string"
             ]
           },
+          "visible": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
           "window_region": {
             "enum": [
               "drag",
@@ -236,6 +248,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -301,6 +314,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -402,6 +421,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -470,6 +490,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -584,6 +610,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -653,6 +680,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -749,6 +782,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -822,6 +856,12 @@
               "string"
             ]
           },
+          "visible": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
           "window_region": {
             "enum": [
               "drag",
@@ -889,6 +929,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -955,6 +996,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -1039,6 +1086,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -1106,6 +1154,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -1199,6 +1253,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -1267,6 +1322,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -1357,6 +1418,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -1424,6 +1486,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -1521,6 +1589,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -1589,6 +1658,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -1739,6 +1814,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -1811,6 +1887,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -2032,6 +2114,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -2115,6 +2198,12 @@
               "string"
             ]
           },
+          "visible": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
           "window_region": {
             "enum": [
               "drag",
@@ -2188,6 +2277,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -2254,6 +2344,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -2362,6 +2458,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -2431,6 +2528,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -2580,6 +2683,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -2652,6 +2756,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -2764,6 +2874,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -2833,6 +2944,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -3034,6 +3151,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -3115,6 +3233,12 @@
               "string"
             ]
           },
+          "visible": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
           "window_region": {
             "enum": [
               "drag",
@@ -3182,6 +3306,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -3248,6 +3373,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -3388,6 +3519,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -3459,6 +3591,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -3648,6 +3786,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -3728,6 +3867,12 @@
               "string"
             ]
           },
+          "visible": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
           "window_region": {
             "enum": [
               "drag",
@@ -3777,6 +3922,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -3841,6 +3987,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -4010,6 +4162,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -4084,6 +4237,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -4219,6 +4378,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -4290,6 +4450,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -4380,6 +4546,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -4447,6 +4614,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -4547,6 +4720,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -4615,6 +4789,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -4808,6 +4988,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -4884,6 +5065,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -5067,6 +5254,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -5143,6 +5331,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -5260,6 +5454,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -5329,6 +5524,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -5422,6 +5623,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -5490,6 +5692,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -5623,6 +5831,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",
@@ -5694,6 +5903,12 @@
             "type": "object"
           },
           "interaction": {
+            "type": [
+              "boolean",
+              "string"
+            ]
+          },
+          "visible": {
             "type": [
               "boolean",
               "string"
@@ -5875,6 +6090,7 @@
             "handlers",
             "a11y",
             "interaction",
+            "visible",
             "window_region",
             "route",
             "focus_group",

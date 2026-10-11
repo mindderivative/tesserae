@@ -73,6 +73,7 @@ a11y: <a mapping>
 group: <text>
 component_of: <text>
 disabled: <true or false or text>
+visible: <true or false or text>
 window_region: <drag | none>
 label: <text>
 x: <a number or text>
@@ -139,6 +140,7 @@ children: <a list>
 | `group` | text | A RadioButton's group: the ones with one name exclude each other. |
 | `component_of` | text | The fragment this node is the root of. |
 | `disabled` | `true` or `false` or text | Whether the node ignores input and fades. |
+| `visible` | `true` or `false` or text | Whether the node is shown. False hides it and takes it out of layout; it stays in the tree. Only a node that says it is touched. |
 | `window_region` | `drag` \| `none` | `drag`: a press here moves the window (a title bar); `none`: it does not. |
 | `label` | text | A GraphNode's title. |
 | `x` | a number or text | A GraphNode's place. |

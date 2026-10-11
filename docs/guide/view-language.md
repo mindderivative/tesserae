@@ -37,6 +37,7 @@ its name, with the params as plain keys. There is no other difference.
 | `handlers` | events to actions |
 | `a11y` | accessibility: `label`, `role`, `hidden`, `live`, `level`, `expanded`, `selected`, `checked`, `value`, `value_min`, `value_max`, `value_step` |
 | `interaction` | the hover, focus and press feedback: `true`, `false` or a colour role |
+| `visible` | `false` hides the node and takes it out of layout, `true` shows it; an expression is allowed. A widget or view that declares a `visible` property of its own keeps it |
 | `window_region` | `drag` or `none`, for a custom title bar |
 | `route` | on a view call inside a window: makes it a screen |
 | `focus_group` | `horizontal`, `vertical` or `both`: the focusable nodes under it share one tab stop and the arrow keys move among them |
@@ -153,6 +154,10 @@ children:
   stays are kept, new keys are built, removed keys are gone, and the order follows the list. A list changed in place is not noticed; replace it.
 - `if:` builds the node only while its expression is true, and a node under a false `if:` runs nothing. With both on one node, the `if:` is
   tested for each element.
+- `visible:` hides a node that is built: it takes no room and no pointer, but it stays in the tree with its `state:`, its running timers and its
+  listeners, and showing it again is instant. Use `visible:` for something that comes and goes (a panel, a hint) and `if:` for something that is not
+  worth keeping while it is away. On a view call it hides the whole view; on the root of a view file it is an error (write it where the view is called).
+  Focus and the accessibility tree follow the engine's hidden nodes; nothing here changes them.
 - `state:` makes a Signal for each name, for this node and everything under it. A starting value may be an expression over the view's own params, which seed it once when the state is made (`state: {draft: "{{ hour }}"}`); it may not read a ViewModel's names. It belongs to the node (to each row under a `for:`), is written
   by handlers, and survives a hot reload for a node that keeps its name or key. Use it for presentation (open, on); what the app cares about belongs
   in the ViewModel.

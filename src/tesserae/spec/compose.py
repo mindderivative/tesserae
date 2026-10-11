@@ -28,7 +28,7 @@ from typing import Any, Callable, Iterable, Iterator, Mapping, Optional
 
 from tesserae.expr import BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_handler_calls
 from tesserae.reactive import Computed, Effect, Signal, untrack
-from tesserae.spec.nodes import Handler, LoadError, Node, ViewDoc
+from tesserae.spec.nodes import VISIBLE, Handler, LoadError, Node, ViewDoc
 from tesserae.spec.rules import INTERACTION_STATES, Identity, Rule, RuleSheet, ordered
 from tesserae.spec.widgets import PropertyError, WidgetDecl
 
@@ -742,6 +742,9 @@ class Composer:
         for directive, label in ((root.loop, "for"), (root.when, "if"), (root.slot, "slot")):
             if directive is not None:
                 raise self._fail(ctx, root.at, f"the root of a view takes no '{label}:'")
+        if "visible" in root.props and "visible" not in (root.decl.properties if root.decl else ()):
+            raise self._fail(ctx, root.prop_at.get("visible", root.at), "the root of a view takes no 'visible:'",
+                             "write it where the view is called, or set the handle's `visible`")
 
     def _view(self, name: str) -> Optional[ViewDoc]:
         return self._views(name) if callable(self._views) else self._views.get(name)
@@ -876,6 +879,8 @@ class Composer:
 
     def _coercer(self, ctx: _Ctx, node: Node, decl: Optional[WidgetDecl], name: str) -> Optional[Callable[[Any], Any]]:
         prop = decl.properties.get(name) if decl else None
+        if prop is None and name == "visible":  # the key every node has, when the widget declares no property of the name
+            prop = VISIBLE
         if prop is None or prop.type in ("node", "nodes"):
             return None
 
@@ -1014,7 +1019,7 @@ class Composer:
         call_scope = self._with_state(node, caller_scope, iid, "call", ctx, holder)
 
         decl = doc.decl or WidgetDecl(node.widget, view=True, container=True)
-        unknown = [k for k in node.props if k not in decl.properties]
+        unknown = [k for k in node.props if k not in decl.properties and k != "visible"]  # `visible:` lies over the callee's root, as `style:` does
         if unknown:
             raise self._fail(ctx, node.prop_at.get(unknown[0], node.at), f"{node.widget}: no parameter '{unknown[0]}'",
                              f"parameters: {', '.join(decl.properties) or 'none'}")
@@ -1085,6 +1090,8 @@ class Composer:
             else:
                 inst.handlers[event] = (handler, call_scope)
         inst.classes = [*inst.classes, *node.classes]
+        if "visible" in node.props and "visible" not in decl.properties:
+            inst.props["visible"] = self._bind(node.props["visible"], call_scope, inst, self._coercer(ctx, node, None, "visible"))
         if node.interaction is not None:
             if hasattr(node.interaction, "evaluate"):
                 if node.interaction.is_reactive(call_scope):

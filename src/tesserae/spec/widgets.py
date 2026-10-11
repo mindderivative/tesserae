@@ -349,7 +349,7 @@ _UNIVERSAL: dict[str, dict[str, Any]] = {
     "if": {"type": "string"}, "for": {"type": "string"}, "key": {"type": "string"}, "slot": {"type": "string"},
     "state": {"type": "object"}, "style": {"type": "object"}, "classes": {"type": "array", "items": {"type": "string"}},
     "handlers": {"type": "object", "additionalProperties": {"type": "string"}}, "a11y": {"type": "object"},
-    "interaction": {"type": ["boolean", "string"]}, "window_region": {"enum": ["drag", "none"]},
+    "interaction": {"type": ["boolean", "string"]}, "visible": {"type": ["boolean", "string"]}, "window_region": {"enum": ["drag", "none"]},
     "route": {"type": "string"}, "focus_group": {"enum": ["horizontal", "vertical", "both"]},
     "tooltip": {"type": ["string", "object"]},
     # the header of a view file, valid on its root

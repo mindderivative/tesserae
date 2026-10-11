@@ -381,6 +381,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "group": {"type": "string", "description": "A RadioButton's group: the ones with one name exclude each other."},
         "component_of": {"type": "string", "description": "The fragment this node is the root of."},
         "disabled": {**maybe_bool, "description": "Whether the node ignores input and fades."},
+        "visible": {**maybe_bool, "description": "Whether the node is shown. False hides it and takes it out of layout; it stays in the tree. "
+                                                 "Only a node that says it is touched."},
         "window_region": {"enum": ["drag", "none"],
                           "description": "`drag`: a press here moves the window (a title bar); `none`: it does not."},
         "label": {"type": "string", "description": "A GraphNode's title."},

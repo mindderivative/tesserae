@@ -2659,3 +2659,16 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Not checked:** a real window (the engine behaviour was probed headless with `simulate`); keyboard focus of a click-through node (unchanged by this, documented as such, not tested).
 - **A harness note:** `app.bind(VM)` returns nothing; the instance is `app.bindings.viewmodel_for("main")`; a nested node is `root.over.kid`.
 
+## 0.5.0.7: #259, a static `visible` (second of the five in #257)
+
+- **How:** `visible` is a node key valid on any node, parsed as a bool (or expression) property (`nodes.VISIBLE`), so it flows the way `disabled` does: re-lowered when its Signal changes, `node["visible"]` in the lowered spec, then fed into the
+  engine style by `build._with_visible` at both the build and the patch, and so through the existing "optional layout keys" bookkeeping: set only when a node says it, put back to True when it stops. That matters because other code hides nodes
+  (an overlay, a view's root through `ViewHandle.visible`, a binding), and a re-patch must not show them. `view._props_equal` had to learn the key, or a changed `visible` was never patched (the first probe showed it: the Signal changed and nothing moved).
+- **Decisions, mine, open to change:** (1) a widget or view that declares a property called `visible` keeps it (the key is a fallback, not a reserved name), so no existing view breaks; (2) on a view call it lies over the called view's
+  root as `style:` does; (3) on a view's own root it is an error with a hint (the handle's `visible` already owns the root, and a silent ignore is worse); (4) a literal that is not true or false is a parse error, an expression's result is checked
+  when it is worked out.
+- **A gap found in #258, fixed here:** controls place only keys listed in `_PLACEMENT`, and a Link splits outer box and text by `_PLACED`; neither had `hit_testable`, so `pointer_events: none` did nothing on a Slider, Checkbox, ... or Link
+  (the first tests only used a Container). Both lists have `visible` and `hit_testable` now, with a test on a Slider and a Link. 0.5.0.6 shipped that gap in its commit; the changelog says so.
+- **Mutations:** 12 scripted breaks, all caught by `tests/test_visible.py` (16 tests) and `tests/test_pointer_events.py` after one test was added (the coercion of what an expression works out).
+- **Not checked:** a real window; focus and the accessibility tree of a hidden node (the engine's behaviour, not probed or changed here).
+

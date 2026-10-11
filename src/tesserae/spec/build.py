@@ -67,6 +67,7 @@ _NODE_KEYS = frozenset({
     "dial",  # a TimePickerDial's mode and auto_advance
     "graph",  # a NodeGraph's snap, arrows and fit
     "disabled",  # any node's (M70): the View applies it, or a control's own
+    "visible",  # any node's (#259): hidden, and out of layout, while false; only a node that says it is touched (`_OPTIONAL_LAYOUT`)
     "window_region",  # any node's (0.3.0 M3): part of the window's title bar, or not
     "tooltip",  # any node's text on a rest of the pointer (a title bar's buttons): the view that has it shows it
 
@@ -236,6 +237,13 @@ def _engine(node_id: str, style: dict[str, Any], parent: tuple[str, str]) -> dic
         raise SpecBuildError(str(exc)) from None
 
 
+def _with_visible(node: dict[str, Any], engine: dict[str, Any]) -> dict[str, Any]:
+    """`engine` (a node's style in the engine's terms) with the node's own `visible:`, if it gave one."""
+    if node.get("visible") is None:
+        return engine
+    return {**engine, "visible": bool(node["visible"])}
+
+
 def layout_of(node: dict[str, Any], layers: tuple[Optional[Sheet], ...]) -> tuple[str, str]:
     """The `(flex_direction, display)` a node's style gives its children."""
     style = resolve_style(node, layers)
@@ -262,7 +270,7 @@ def _build(ctx: _Context, node: dict[str, Any], built: Built, parent_id: Optiona
         transition.plan(node_id, kind, style)
     except ValueError as exc:
         raise SpecBuildError(str(exc)) from None
-    engine = _engine(node_id, style, ctx.parent)  # first: it says what replaces an engine name
+    engine = _with_visible(node, _engine(node_id, style, ctx.parent))  # first: it says what replaces an engine name
     unknown_style = set(style) - STYLE_FIELDS - (set(REPLACED) | {"align_content", "align_self"} if layout.LEGACY_ENGINE_NAMES else set())
     if unknown_style:
         raise SpecBuildError(f"widget {_q(node_id)}: unknown style field(s) {sorted(unknown_style)}"
@@ -329,6 +337,8 @@ _OPTIONAL_LAYOUT: dict[str, Any] = {
     "clip_children": False,
     # `style.pointer_events`, as `layout.engine_style` turns it: the node's own pointer hits (its children keep theirs)
     "hit_testable": True,
+    # a node's `visible:` (#259), put in by `_with_visible`; other code hides nodes too (an overlay, a view's root), so only a node that says it is set
+    "visible": True,
     # M74: CSS Grid. `justify_items`/`align_content` can't be set back to unset;
     # "stretch" lays out the same. A dropped `row_gap`/`column_gap` goes back
     # to the style's `gap` (`_resets`), which `_layout` sets before them.
@@ -751,7 +761,7 @@ def _text_props(ctx, node, style):
 
 _PLACED = ("scale", "translate_x", "translate_y", "rotation_deg", "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
            "align_self", "position", "x", "y", "z_index", "min_width", "max_width", "min_height", "max_height",
-           "aspect_ratio", "grid_column", "grid_row", "justify_self")
+           "aspect_ratio", "grid_column", "grid_row", "justify_self", "visible", "hit_testable")
 
 
 def _link_props(ctx, node, style):
@@ -1105,7 +1115,7 @@ def patch(
     built or patched (`Built.layout_keys`): one it no longer gives is reset.
     Returns the keys it gives now."""
     ctx = _Context(window, layers, scheme, frames or {})
-    style = _engine(node["id"], resolve_style(node, layers), parent)
+    style = _with_visible(node, _engine(node["id"], resolve_style(node, layers), parent))
     kind = node["kind"]
     given = layout_keys(style)
     resets = _resets(style, before - given)
@@ -1181,7 +1191,7 @@ def _role(ctx, name):
 #: size (a control is built at its size) or its own content alignment.
 _PLACEMENT = frozenset({
     "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
-    "align_self", "position", "x", "y", "z_index", "grid_column", "grid_row", "justify_self",
+    "align_self", "position", "x", "y", "z_index", "grid_column", "grid_row", "justify_self", "visible", "hit_testable",
 })
 _PLACEMENT_RESET = {"margin_top": 0.0, "margin_right": 0.0, "margin_bottom": 0.0, "margin_left": 0.0,
                     "flex_grow": 0.0, "flex_shrink": 1.0}

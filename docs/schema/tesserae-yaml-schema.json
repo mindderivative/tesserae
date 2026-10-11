@@ -3111,6 +3111,17 @@
           ],
           "description": "Whether the node ignores input and fades."
         },
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether the node is shown. False hides it and takes it out of layout; it stays in the tree. Only a node that says it is touched."
+        },
         "window_region": {
           "enum": [
             "drag",
@@ -8183,6 +8194,17 @@
             }
           },
           "additionalProperties": false
+        },
+        "visible": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ],
+          "description": "Whether the node is shown. False hides it and takes it out of layout; it stays in the tree. Only a node that says it is touched."
         },
         "wavy": {
           "anyOf": [

@@ -25,6 +25,9 @@ from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from
 
 __all__ = ["EVENTS", "ForSpec", "Handler", "LoadError", "Node", "ViewDoc", "load_marked", "parse_view"]
 
+#: What `visible:` is when a widget does not declare a property of that name: a bool (or an expression), like any property.
+VISIBLE = Property("bool", name="visible", doc="Shown while true; while false it is hidden and takes no room.")
+
 #: Keys every node may have, besides its widget's properties (section 2).
 #: What a `tooltip:` mapping may hold, and where it may sit against its node.
 TOOLTIP_FIELDS = ("text", "title", "delay", "placement", "actions")
@@ -327,9 +330,11 @@ class _Parser:
                 self.universal(node, key, value, vat, where, depth)
             elif key in decl.properties:
                 self.property(node, decl.properties[key], key, value, vat, depth)
+            elif key == "visible":  # on any node, unless the widget declares a property of its own by the name (which keeps its meaning)
+                self.property(node, VISIBLE, key, value, vat, depth)
             else:
                 unknown = decl.check_properties([key])[0]
-                raise self.fail(where, unknown[0], unknown[1] or _near(key, [*decl.properties, *UNIVERSAL_KEYS]))
+                raise self.fail(where, unknown[0], unknown[1] or _near(key, [*decl.properties, *UNIVERSAL_KEYS, "visible"]))
         for message, hint in decl.check_properties([k for k in m if k in decl.properties]):
             raise self.fail(at, message, hint)
         if node.key is not None and node.loop is None:

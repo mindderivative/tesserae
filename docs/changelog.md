@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0.7
+
+### Added
+
+- **`visible:` on any node** ([#259](https://github.com/mindderivative/tesserae/issues/259), part of [#257](https://github.com/mindderivative/tesserae/issues/257)). `visible: false` hides a node and takes it out of layout; `true` shows it; an expression
+  is allowed, so a Signal can show and hide it. Unlike `if:` the node stays in the tree with its `state:`, timers and listeners. On a view call it hides the whole view; on the root of a view file it is an error. A widget
+  or view that declares a property called `visible` keeps it. Only a node that says `visible:` is touched, because overlays, a view's handle and bindings hide nodes too; a node that stops saying it is shown again.
+
+### Fixed
+
+- **`pointer_events` (0.5.0.6) did nothing on a control or a Link**, which place only some keys: a `Slider`, `Checkbox`, `RadioButton`, `Switch`, `SpinBox`, `RangeSlider` or `Link` with `pointer_events: none` was still hit. It reaches them now,
+  and `visible` the same way.
+
 ## 0.5.0.6
 
 ### Added

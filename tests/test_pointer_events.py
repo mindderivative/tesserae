@@ -115,3 +115,12 @@ def test_only_a_style_that_gives_it_touches_the_property(tmp_path):
     """The builder sets `hit_testable=False` on its own decoration nodes; a node that does not say `pointer_events` keeps what it was built with."""
     app, view, vm = opened(tmp_path)
     assert view.node("root.under").get("hit_testable") is True and view.node("root.over.kid").get("hit_testable") is True
+
+
+def test_a_control_and_a_link_take_pointer_events_too(tmp_path):
+    """Controls place only some keys, and a Link has an outer box and its text: the key must reach the outer one."""
+    body = ("  - {widget: Slider, name: s, value: 3, min: 0, max: 10, style: {pointer_events: none}}\n"
+            "  - {widget: Link, name: l, text: Docs, href: 'https://example.com', style: {foreground: primary, pointer_events: none}}\n")
+    app, view, vm = opened(tmp_path, STACK.split("children:\n")[0] + "children:\n" + body)
+    assert view.node("root.s").get("hit_testable") is False
+    assert view.node("root.l").get("hit_testable") is False
