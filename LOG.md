@@ -2615,3 +2615,11 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Not built:** reordering tabs (a restored layout puts a panel in the right zone or half, not at its old place in the strip); dragging a half's own content elsewhere.
 - **Not seen:** as before, the strips, the highlight and the drags have been driven with `simulate` and read back as numbers; nobody has dragged a tab of a half in a window. That is the one thing to do at the machine before this goes to Done.
 
+## 0.5.0.5: #106 checked by hand
+
+- **Tried by the maintainer on KDE Wayland (2026-10-11), `python examples/window_dock/app.py --interactive`:** a tab dropped on the middle of a half joined it, one dropped on an edge split it, and a tab dragged back out of a half
+  (the pointer capture, the one thing the headless tests could not show) worked. The maintainer reported that everything worked; no other detail was recorded (no timings, no screenshots, nothing about how the highlight or the
+  collapse looked or felt).
+- **Still not checked:** X11, Windows, macOS; a drag that leaves the window; a screen reader on the tab strips.
+- **`--interactive`** was added to the example for this (the first instruction to "drag in the example" could not work: the script exits after 20 frames).
+
