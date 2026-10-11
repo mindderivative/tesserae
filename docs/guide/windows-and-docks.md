@@ -174,7 +174,8 @@ prefs.center()                                 # where the system lets an app pl
   between zones to resize them.
 - A `DockPanel` inside a `DockPanel` is a split of it: side by side (the parent's `flex_direction: horizontal`, the default)
   or top and bottom (`vertical`), with a handle between the halves. A half with a `width` (or `height`) of its own keeps it, and
-  the others share what is left. A panel has either splits or content, not both.
+  the others share what is left. A panel has either splits or content, not both. Each half is a small zone of its own: a tab
+  strip over it, with a tab for the half's own content (titled by the `DockPanel`'s `title:`, else its `id:`).
 - `zone:` is an error on anything but a `DockPanel` in a `Dock`; a window has one `Dock`.
 - Editing the YAML while the app runs keeps the layout the user made: which zone each panel is in, which tab shows, the
   sizes.
@@ -186,4 +187,21 @@ saved = dock.layout()      # plain data: where every panel is, which one shows, 
 dock.restore(saved)        # ...put back later, e.g. when the app starts
 ```
 
-Dragging a panel onto one half of a split isn't supported: a dragged panel docks in the five zones.
+### Dropping a panel on a half of a split
+
+Drag a tab over a half and the highlight shows what a drop will do. The outer quarter of each side of a half is an **edge**: dropping
+there splits the half, the panel taking a new half on that side with a handle between the two. The rest, strip included, is the
+**middle**: dropping there adds the panel to the half as another tab, and the half shows it. A tab in a half is dragged like any
+other, to a zone, to another half or to the edge of one; a half made by a drop that loses its last panel disappears and its neighbour
+takes the room back. In the tab menu (right click, the Menu key or Shift+F10), "Move to ..." lists the halves too. You cannot drop
+a panel on the halves inside it.
+
+```python
+dock.halves()                       # {"source": {"panels": ["outline"], "shown": "outline"}, ...}: the panels in each half
+dock.show_in_half("source", None)   # show the half's own content; or pass a panel id
+dock.half_of("outline")             # the half a panel is in, or None if it is in a zone
+dock.move("outline", "left")        # back to a zone
+```
+
+Not yet: `layout()` and `restore()` do not record the halves (the panels in them, or a split a drop made), so after a restart the
+YAML's layout is what comes back.

@@ -1982,16 +1982,21 @@ class Dock(window: Any, *, theme: Optional[Theme] = None) -> None
 
 The docking of one window (see the module doc). `add_zone(side, size)` returns the zone's node to place in the layout (the caller places them); `add_panel(side, node, title)` docks a panel; `show`, `move`, `side_of`, `panels`, `shown`, `titles`, `shown_title`, `panel(title)`; `on_move(fn)` hears a panel moving, `fn(node, side)`; `set_theme(theme)` re-colours it.
 
-- `accept_halves(halves: Optional[Callable[[], list[tuple[str, Any]]]], drop: Optional[Callable[[Any, str, str], Any]] = None) -> None`: Lets a dragged panel be dropped onto the halves `halves()` lists, as `(name, node)` pairs: the nodes whose laid-out rectangles the pointer is tested against, each a leaf (no half inside it).
-- `add_panel(side: str, panel: Any, title: str, closable: bool = False) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone, titled `title` on its tab, and shows it.
+- `add_half(name: str, body: Any, title: Optional[str] = None) -> Any`: Makes `body`, a half of a split, a zone of the dock (key `HALF + name`): a column of a tab strip over `body`, put in `body`'s place in its parent with `body`'s size (`body` then fills the column).
+- `add_panel(side: str, panel: Any, title: str, closable: bool = False) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone (or a half: `HALF + name`), titled `title` on its tab, and shows it.
 - `add_zone(side: str, size: float) -> Any`: Creates `side`'s zone -- a tab strip over the area that shows its selected panel -- `size` px wide (left, right) or tall (top, bottom), or filling what's left (center).
 - `close(panel: Any) -> Any`: Closes `panel` as its tab's close button does: it is undocked (see `remove_panel`) and `on_close` is told.
 - `dispose() -> None`: Stops the dock: its window events, its tabs' listeners.
+- `half_slot(name: str) -> Any`: The column `add_half` made for the half `name`: what stands in the half's place in its parent.
+- `half_state(name: str) -> tuple[list[Any], Optional[Any]]`: `(panels, shown)` of the half `name`: the panels docked in it, in tab order, and the one showing (`None`: its own content).
 - `move(panel: Any, side: str) -> None`: Moves `panel` to `side`'s zone and shows it there, as a drag would, moving it between zones.
 - `on_close(fn: Callable[[Any], Any]) -> Callable[[], None]`: Calls `fn(node)` when a panel's close button closes it.
+- `on_half_drop(fn: Optional[Callable[[Any, str, str], Any]]) -> None`: Lets a dragged panel be dropped onto a half: `fn(panel_node, name, band)` is called with the panel already out of its zone or half, `band` being `left`, `right`, `top`, `bottom` (an edge: split the half there) or `middle` (the host docks it in the half, as a tab).
+- `on_half_empty(fn: Optional[Callable[[str], Any]]) -> None`: Calls `fn(name)` when a half with no content of its own has lost its last panel: the host collapses it.
 - `on_move(fn: Callable[[Any, str], Any]) -> Callable[[], None]`: Calls `fn(node, side)` when a panel moves zone.
 - `panel(title: str) -> Optional[Any]`: The docked panel titled `title`, or `None` (for putting a saved layout back).
-- `panels(side: str) -> list[Any]`: `side`'s panels, in their tabs' order.
+- `panels(side: str) -> list[Any]`: `side`'s panels, in their tabs' order (not a half's own content).
+- `remove_half(name: str) -> None`: Stops the half being a zone: its tabs and strip go (the column and the body are the caller's; a panel docked in it is not moved).
 - `remove_panel(panel: Any) -> Any`: Undocks `panel`: its tab goes, and if it was shown the zone shows the next panel, else the previous.
 - `rename(panel: Any, title: str) -> None`: Gives `panel` a new title, on its tab.
 - `set_theme(theme: Theme) -> None`: Re-colours the zones, tabs and highlight for `theme`, at once.
@@ -2004,6 +2009,7 @@ The docking of one window (see the module doc). `add_zone(side, size)` returns t
 **Constants**
 
 - `DRAG_THRESHOLD` = `4.0`
+- `HALF` = `'half:'`
 - `HALF_EDGE` = `0.25`
 - `SIDES` = `('left', 'right', 'top', 'bottom', 'center')`
 - `TAB_HEIGHT` = `48.0`

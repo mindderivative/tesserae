@@ -43,4 +43,6 @@ A panel is any node (or widget) with a title. Each zone shows its panels as MD3 
 ## Not yet covered
 
 - Panels are found by title, so two panels with the same title can't be told apart.
-- Dragging a panel onto one half of a split isn't supported: a dragged panel docks in the five zones.
+- The halves of a split (`add_half`, `on_half_drop`, `on_half_empty`) are for a host that lays out its own split, as `DockHost` does for a
+  `kind: Dock` (see [Windows, Docks and Embedded Views](windows-and-docks.md#dropping-a-panel-on-a-half-of-a-split)); a plain
+  `Dock` has none, so a dragged panel docks in the five zones.

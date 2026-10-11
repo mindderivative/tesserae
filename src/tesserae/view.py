@@ -590,20 +590,38 @@ class View:
             else:
                 if previous is not None:
                     kept.add(child["id"])
+                    self._destroy_child(child["id"], outer)
                     self._forget(previous)
-                    self._built.outer.get(child["id"]) and self._built.outer[child["id"]].destroy()
                 child_node = build_with(self.window, child, scheme=self._scheme, layers=self._layers,
                                         frames=self._frames, into=self._built, listen=self._events.listen,
                                         parent=node_id)
+            child_node = self._placed(child["id"], child_node, outer)
             # a tre Node is a fresh handle on each call, so compare with ==, not `is`
             if child_node.parent() != outer or _child_index(outer, child_node) != index:
                 outer.insert_child(index, child_node)
         for child_id, child in old_children.items():
             if child_id not in kept:
-                node = self._built.outer.get(child_id)
+                self._destroy_child(child_id, outer)
                 self._forget(child)
-                if node is not None:
-                    node.destroy()
+
+    def _placed(self, node_id: str, node: Any, outer: Any) -> Any:
+        """The node to keep in `outer`'s child list for the child `node_id`: `node`, unless a dock has put it in a column of its own
+        (a half of a split) or a split container, in which case that, the thing `outer` holds in its place."""
+        if not any(host.relocated(node_id) for host in self._docks.values()):
+            return node
+        while node is not None and node.parent() != outer:
+            node = node.parent()
+        return node if node is not None else self._built.outer[node_id]
+
+    def _destroy_child(self, node_id: str, outer: Any) -> None:
+        """Destroys the built node `node_id` and what a dock put around it, after the panels docked in halves inside it have gone
+        back to their zones."""
+        node = self._built.outer.get(node_id)
+        if node is None:
+            return
+        for host in self._docks.values():
+            host.release(node_id, self._placed(node_id, node, outer))  # panels dropped in its halves go home (a made half may collapse)
+        self._placed(node_id, node, outer).destroy()  # again: releasing can have collapsed the split it was in
 
     def _reconcile_dock(self, old: dict[str, Any], new: dict[str, Any]) -> None:
         """A `Dock`'s panels, matched by id: a kept one is patched where the user left it (a panel moved to another zone
@@ -646,7 +664,7 @@ class View:
         for zone, size in new["dock"].get("sizes", {}).items():
             if zone in host.sizes and size != old["dock"].get("sizes", {}).get(zone):
                 host.set_size(zone, size)  # the file changed it
-        host.sync_splits()
+        # the splits and halves are synced by `_sync_docks`, once `self._spec` is the new spec
 
     def _reconcile_graph(self, old: dict[str, Any], new: dict[str, Any]) -> None:
         """A NodeGraph's GraphNodes, matched by id: a kept one is

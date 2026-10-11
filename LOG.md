@@ -2576,3 +2576,24 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Not built, by design:** the half's tab strip and dragging a panel out of a half (phase 3), collapse of an emptied half (phase 3), `layout()`/`restore()` of halves (phase 4), the guide and the example (phase 4).
 - **Not seen:** the new highlight and the splits were driven with `simulate` and read back as numbers, not looked at in a window.
 
+## 0.5.0.5: #106, phase 3 of 4: halves as mini zones
+
+- **The shape:** each leaf half of a split is wrapped, by `Dock.add_half`, in a column (tab strip, divider, the half's own container) that takes the half's place in its parent and its size; the half's children
+  never move. The Dock keeps it as a zone of its own (key `half:<name>`, `_Zone.half`), so the tab code (`_tab`, `_paint_tabs`, arrow keys, close buttons, the menu) is the zones' code. The half's own content is a
+  first `_Panel` with `own=[its children]` that cannot be moved, closed or opened a menu on; showing a tab hides the others' nodes (`visible`), as tre does not do it for a half. Phase 2's `accept_halves` is gone
+  (it was never released): `on_half_drop` and `on_half_empty`.
+- **A tab of a half is not tre's to drag** (tre knows only panels it docked), so a press past the threshold captures the pointer on the tab (as the resize handles do) and the Dock finds the half or the zone under
+  it with the phase 2 hit-test plus a zone rectangle test (strip included, which is more forgiving than tre's: a release on a zone's strip docks there). Over a half that takes nothing (its own, with only itself
+  in it) is over nothing, not the zone round it: that was a bug the tests found. `simulate` cannot deliver `pointer_cancel`, so the cancel path is tested by calling the listener's function.
+- **Collapse:** a half a drop made with no panel left unwraps its split: the neighbour goes into the pair's place with the pair's size (`_collapse`); a split inside a split collapses from the inside out.
+- **The reload problem came first, not in phase 4:** wrapping every half means `_reconcile_node` would put each half back out of its column on every reload. It now keeps what the dock stands in the half's place
+  (`View._placed`: the node, or its ancestor that the parent holds), and a half the file removes first sends the panels dropped in it home (`DockHost.release`), then the dock's column or split container is
+  destroyed (`View._destroy_child`). Found on the way: `_reconcile_dock` called `sync_splits` while `view.spec` was still the old spec; `_sync_docks` does it once the new one is set, so that call went. A file that turns a
+  leaf half into a split gets the nested halves their strips, and the old half's strip is taken away (a test, from a mutant that survived).
+- **Mutations:** 19 scripted breaks of the phase 3 code, all caught by `tests/test_dock_halves.py` (51 tests) and the dock suites after two tests were added for the first two survivors (the spec handle resizing the
+  column rather than the body; a leaf half that becomes a split).
+- **A change anyone will see:** every half now has a 48 px strip and a divider, so a split is 49 px shorter than in 0.5.0.4. That is the design (#106 decision 2: "a title on a lone panel too").
+- **Not built, by design:** dragging a half's own content elsewhere (it is the file's, not a panel); phase 4: `layout()`/`restore()` of halves, the example and a pass over the guide.
+- **Not seen:** the strips, the highlight, the drag out of a half and the collapse have been driven with `simulate` and read back as numbers, not looked at in a window or dragged by a person. Real-window drags
+  from a half's tab (the pointer capture on KDE Wayland) are unchecked.
+

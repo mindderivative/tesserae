@@ -4,13 +4,15 @@
 
 ### Added
 
-- **Dropping a dragged panel onto a split half, phase 2 of 4** ([#106](https://github.com/mindderivative/tesserae/issues/106), part of [#114](https://github.com/mindderivative/tesserae/issues/114)).
-  While a tab is dragged over a `DockPanel` split half, the outer quarter of each side is an edge and the rest is the middle, and the highlight shows which. Dropping on the
-  **middle** adds the panel to the half (the half's own content is hidden while the panel shows; `DockHost.halves()`, `show_in_half()`, `half_of()`); dropping on an **edge** splits the half
-  there, the panel taking the new half beside it with a resize handle of its own, and a new half takes drops and splits too. `DockHost.move(panel_id, zone)` puts a panel in a half back in a zone.
-  Tesserae finds the half itself from the window's pointer events, which keep arriving during a drag (checked in a real window on KDE Wayland); tre needs no change.
-  **Not finished (phases 3 and 4):** a half has no tab strip yet, so a panel dropped into one is switched with `show_in_half` and dragged out only by `move`; an emptied half does not
-  collapse; `layout()`/`restore()` do not record halves; and a hot reload undoes a split (a drop on the middle survives one).
+- **Halves of a split are mini zones, and a panel can be dropped on one (phases 2 and 3 of 4)** ([#106](https://github.com/mindderivative/tesserae/issues/106), part of [#114](https://github.com/mindderivative/tesserae/issues/114)).
+  Every `DockPanel` half of a split now has a tab strip over it, with a tab for its own content (titled by the `DockPanel`; a half with no `title:` shows its `id`), so a split looks different
+  from 0.5.0.4: each half is 49 px shorter. While a tab is dragged over a half, the outer quarter of each side is an **edge** and the rest is the **middle**, and the highlight shows which. Dropping on the
+  middle (or the strip) adds the panel to the half as a tab; dropping on an edge splits the half there, the panel taking the new half beside it with a resize handle of its own. A tab in a half is
+  dragged to a zone, another half or an edge (Tesserae holds the pointer itself, since tre does not know that panel), switches by click or arrow keys, closes with its close button, and is in the
+  "Move to ..." menu, which lists the halves. A half a drop made that loses its last panel collapses into its neighbour. Tesserae finds the half from the window's pointer events, which keep arriving
+  during a tre drag (checked in a real window on KDE Wayland), so tre needs no change. In Python: `DockHost.halves()`, `show_in_half()`, `half_of()`, `move()`; `Dock.add_half()`,
+  `on_half_drop()`, `on_half_empty()`. A hot reload leaves the strips, the dropped panels and the splits the user made where they are, and a half the file removes sends its panels back to their zones.
+  **Not finished (phase 4):** `layout()` and `restore()` do not record the halves; the example and a pass over the guide; a half's own content cannot be dragged elsewhere.
 
 ## 0.5.0.4
 
