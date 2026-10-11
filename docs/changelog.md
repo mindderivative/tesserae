@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0.5
+
+### Added
+
+- **Dropping a dragged panel onto a split half, phase 2 of 4** ([#106](https://github.com/mindderivative/tesserae/issues/106), part of [#114](https://github.com/mindderivative/tesserae/issues/114)).
+  While a tab is dragged over a `DockPanel` split half, the outer quarter of each side is an edge and the rest is the middle, and the highlight shows which. Dropping on the
+  **middle** adds the panel to the half (the half's own content is hidden while the panel shows; `DockHost.halves()`, `show_in_half()`, `half_of()`); dropping on an **edge** splits the half
+  there, the panel taking the new half beside it with a resize handle of its own, and a new half takes drops and splits too. `DockHost.move(panel_id, zone)` puts a panel in a half back in a zone.
+  Tesserae finds the half itself from the window's pointer events, which keep arriving during a drag (checked in a real window on KDE Wayland); tre needs no change.
+  **Not finished (phases 3 and 4):** a half has no tab strip yet, so a panel dropped into one is switched with `show_in_half` and dragged out only by `move`; an emptied half does not
+  collapse; `layout()`/`restore()` do not record halves; and a hot reload undoes a split (a drop on the middle survives one).
+
 ## 0.5.0.4
 
 ### Added

@@ -1982,6 +1982,7 @@ class Dock(window: Any, *, theme: Optional[Theme] = None) -> None
 
 The docking of one window (see the module doc). `add_zone(side, size)` returns the zone's node to place in the layout (the caller places them); `add_panel(side, node, title)` docks a panel; `show`, `move`, `side_of`, `panels`, `shown`, `titles`, `shown_title`, `panel(title)`; `on_move(fn)` hears a panel moving, `fn(node, side)`; `set_theme(theme)` re-colours it.
 
+- `accept_halves(halves: Optional[Callable[[], list[tuple[str, Any]]]], drop: Optional[Callable[[Any, str, str], Any]] = None) -> None`: Lets a dragged panel be dropped onto the halves `halves()` lists, as `(name, node)` pairs: the nodes whose laid-out rectangles the pointer is tested against, each a leaf (no half inside it).
 - `add_panel(side: str, panel: Any, title: str, closable: bool = False) -> Any`: Docks `panel` (a node, or a widget's `.node`) in `side`'s zone, titled `title` on its tab, and shows it.
 - `add_zone(side: str, size: float) -> Any`: Creates `side`'s zone -- a tab strip over the area that shows its selected panel -- `size` px wide (left, right) or tall (top, bottom), or filling what's left (center).
 - `close(panel: Any) -> Any`: Closes `panel` as its tab's close button does: it is undocked (see `remove_panel`) and `on_close` is told.
@@ -2003,6 +2004,7 @@ The docking of one window (see the module doc). `add_zone(side, size)` returns t
 **Constants**
 
 - `DRAG_THRESHOLD` = `4.0`
+- `HALF_EDGE` = `0.25`
 - `SIDES` = `('left', 'right', 'top', 'bottom', 'center')`
 - `TAB_HEIGHT` = `48.0`
 

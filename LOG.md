@@ -2557,3 +2557,22 @@ User: "release tesserae 0.5.0", then "pypi is up".
   on a real display. Left alone on purpose: making a track and a stop dot the default (the recorded `tre` parity trees draw the old look).
 - **Mistakes in my own tests this time:** a hidden node's layout size is 0 (the buffer bar), a node with no fill reads back `(0, 0, 0, 0)`, `get("data")` reads arcs back as cubics (so compare `circle`), and
   the test helper does not make nested directories.
+
+## 0.5.0.5: #106 (part of #114), phase 2 of 4: targets, highlight and the drop
+
+- **#114 is #106 now:** #105 (separate OS windows) was built and closed in 0.5.0; what is left of #114 is the drop onto a split half.
+- **Phase 1, the real-window spike (KDE Wayland, the maintainer dragging):** the first run was inconclusive (the presses were on panel content, not on tabs, so no tre drag began; the script now says
+  INCONCLUSIVE instead of NO then). The second: 5016 root `pointer_move`s with window coordinates over 11 drags; `pointer_up` carries the last position and fires within a millisecond of `dock_drop`;
+  `dock_target` is the zone (or `None` between zones) with no position. So the hit-test is Tesserae's and tre needs no change. Not checked: X11, Windows, macOS, a drag that leaves the window.
+- **How:** `Dock` (docking.py) listens to the root's `pointer_move`/`pointer_up`/`pointer_cancel` only while a tab is dragged (a root listener is one per event, so not for longer), finds the half under the
+  pointer (`accept_halves(halves, drop)`; the halves are leaves, so they do not overlap; the dragged panel's own halves are skipped), names the band (the nearest side if within a quarter of it, else the middle),
+  and draws the highlight over that band instead of the zone. On a drop it takes the panel out of whichever zone tre put it in (`remove_panel`) and hands it to `DockHost._drop_on_half`: a middle `_join`s it
+  (the half's own content nodes are hidden, not moved, so a reload that reconciles the half's children still finds them), an edge `_split_half`s: a new container takes the half's place and size, holding the half,
+  a handle and a new half for the panel. `sync_splits` now builds its handles through `_split_handle`, which the new splits share.
+- **A bug the tests found in my code:** an edge drop recorded the panel as being in the half it hit instead of the new half. Fixed; the test names it.
+- **Mutations:** 10 scripted breaks of the new code, each caught by `tests/test_dock_halves.py` (23 tests). Two survived the first time: the "smallest half wins" rule (dead, halves never overlap; deleted) and showing a
+  hidden panel when it leaves a half (a test added). `test_pointer_cancel` made me listen for `pointer_cancel` as well.
+- **Checked on a hot reload, not fixed:** a drop on the middle survives a reload; a split does not (the view puts the half back in its old parent, the host still lists the split). That is phase 4.
+- **Not built, by design:** the half's tab strip and dragging a panel out of a half (phase 3), collapse of an emptied half (phase 3), `layout()`/`restore()` of halves (phase 4), the guide and the example (phase 4).
+- **Not seen:** the new highlight and the splits were driven with `simulate` and read back as numbers, not looked at in a window.
+

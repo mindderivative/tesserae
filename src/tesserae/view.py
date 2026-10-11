@@ -624,8 +624,7 @@ class View:
                 if info["title"] != old_info[panel_id]["title"] and not shut:
                     host.retitle(panel_id, info["title"])
                 if info["zone"] != old_info[panel_id]["zone"] and not shut:  # the file moved it
-                    host.dock.move(self.node(panel_id), info["zone"])
-                    host.panels[panel_id]["zone"] = info["zone"]
+                    host.move(panel_id, info["zone"])
                 continue
             if previous is not None:
                 kept.add(panel_id)

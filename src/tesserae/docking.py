@@ -20,6 +20,14 @@ and the drop (`dock_drop`). What a drag looks like is the framework's
 
 A `Dock` owns its window's `dock_target`/`dock_drop` events (`window.on`
 keeps one listener per event), so a window has one `Dock`.
+
+Split halves (0.5.0, #106): `tre` knows only the five zones, so a host that has
+halves (`accept_halves`) lets the user drop onto one. While a tab is dragged the
+window root's `pointer_move`s keep arriving with window coordinates (a real window
+checked, KDE Wayland), so the `Dock` finds the half under the pointer itself: the
+outer quarter of a side is that edge (the drop splits the half there), the rest is
+the middle (the drop adds the panel to the half). The highlight shows which; the
+drop takes the panel back out of `tre`'s zone and hands it to the host.
 """
 
 from __future__ import annotations
@@ -35,7 +43,7 @@ from tesserae.interaction import Interaction
 from tesserae.listeners import Listeners, handled
 from tesserae.theme import Theme
 
-__all__ = ["DRAG_THRESHOLD", "SIDES", "TAB_HEIGHT", "Dock"]
+__all__ = ["DRAG_THRESHOLD", "HALF_EDGE", "SIDES", "TAB_HEIGHT", "Dock"]
 
 SIDES = ("left", "right", "top", "bottom", "center")
 #: MD3's secondary tabs: 48 px, 16 px either side of a `title_small`
@@ -51,6 +59,8 @@ DRAG_THRESHOLD = 4.0
 #: The drop highlight: `primary` at 12% (MD3's pressed/dragged overlay) with a 2 px outline.
 HIGHLIGHT_ALPHA = 0x1F
 HIGHLIGHT_OUTLINE = 2.0
+#: The share of a half, from each side, that is that edge (a drop there splits the half); the rest is its middle.
+HALF_EDGE = 0.25
 
 
 @dataclass
@@ -99,6 +109,12 @@ class Dock:
         self._press: Optional[dict[str, Any]] = None
         self._dragging: Optional[_Panel] = None
         self._menu: Any = None
+        self._halves: Optional[Callable[[], list[tuple[str, Any]]]] = None  # the drop targets inside zones (`accept_halves`)
+        self._half_drop: Optional[Callable[[Any, str, str], Any]] = None
+        self._tracking: list[Callable[[], None]] = []  # the root's pointer listeners, while a tab is dragged
+        self._pointer: Optional[tuple[float, float]] = None
+        self._zone_target: Optional[str] = None
+        self._half_target: Optional[tuple[str, str]] = None  # (half, band) under the pointer, or None
         self.highlight = window.create("box", position="absolute", x=0.0, y=0.0, width="100%", height="100%",
                                        stroke_width=HIGHLIGHT_OUTLINE, hit_testable=False, a11y_hidden=True)
         window.on("dock_target", self._on_target)
@@ -203,8 +219,7 @@ class Dock:
         zone = self._zones[entry.side]
         self.window.undock_panel(entry.node)
         if (self._dragging is entry) or (self._press is not None and self._press["entry"] is entry):
-            if self.highlight.parent() is not None:
-                self.highlight.remove()
+            self._end_drag()
             self._press, self._dragging = None, None
         zone.panels.remove(entry)
         self._rebuild(zone)
@@ -238,14 +253,20 @@ class Dock:
                 for undo in tab.undo:
                     undo()
                 tab.interaction.detach()
-        if self.highlight.parent() is not None:
-            self.highlight.remove()
+        self._end_drag()
         self._press, self._dragging = None, None
 
     def on_move(self, fn: Callable[[Any, str], Any]) -> Callable[[], None]:
         """Calls `fn(node, side)` when a panel moves zone. Returns the stopper."""
         self._moves.append(fn)
         return lambda: self._moves.remove(fn) if fn in self._moves else None
+
+    def accept_halves(self, halves: Optional[Callable[[], list[tuple[str, Any]]]], drop: Optional[Callable[[Any, str, str], Any]] = None) -> None:
+        """Lets a dragged panel be dropped onto the halves `halves()` lists, as `(name, node)` pairs: the nodes whose laid-out
+        rectangles the pointer is tested against, each a leaf (no half inside it). A drop on one calls `drop(panel_node, name,
+        band)` with `band` one of `left`, `right`, `top`, `bottom` (an edge: split the half there) or `middle` (add the panel to
+        it), after the panel has been taken out of `tre`'s zone (`remove_panel`). `accept_halves(None)` stops it."""
+        self._halves, self._half_drop = halves, drop
 
     def set_theme(self, theme: Theme) -> None:
         """Re-colours the zones, tabs and highlight for `theme`, at once."""
@@ -347,6 +368,10 @@ class Dock:
             return
         self._dragging = press["entry"]
         press["tab"].interaction.set_dragged(True)
+        self._pointer, self._zone_target, self._half_target = (event.window_x, event.window_y), None, None
+        if self._halves is not None and not self._tracking:
+            root = self.window.root
+            self._tracking = [self._events.listen(root, event, self._track) for event in ("pointer_move", "pointer_up", "pointer_cancel")]
         self.window.start_panel_drag(press["entry"].node)
 
     def _up(self) -> None:
@@ -354,22 +379,75 @@ class Dock:
             self._press = None
 
     def _on_target(self, event: Any) -> None:
-        if self.highlight.parent() is not None:
-            self.highlight.remove()
-        zone = self._zones.get(event.side) if event.side is not None else None
-        if zone is not None:
-            zone.body.add_child(self.highlight)
+        self._zone_target = event.side
+        self._show_highlight()
 
     def _on_drop(self, event: Any) -> None:
-        if self.highlight.parent() is not None:
-            self.highlight.remove()
+        half = self._half_target
+        self._end_drag()
         press, self._press, self._dragging = self._press, None, None
         if press is not None:
             press["tab"].interaction.set_dragged(False)
         entry = self._find(event.panel) if event.panel is not None else None
+        if half is not None and entry is not None and self._half_drop is not None:
+            # `tre` may have moved the panel to the zone it reported; take it out of whichever zone it is in
+            self._half_drop(self.remove_panel(entry.node), *half)
+            return
         if entry is None or event.side is None or event.side == entry.side or event.side not in self._zones:
             return
         self._moved(entry, event.side)
+
+    # -- the halves under the pointer ----------------------------------------
+
+    def _track(self, event: Any) -> None:
+        """A root `pointer_move`/`pointer_up` during a drag: the half under the pointer, and the highlight that says so."""
+        if self._dragging is None or event.window_x is None:
+            return
+        self._pointer = (event.window_x, event.window_y)
+        hit = self._half_hit(*self._pointer)
+        if hit != self._half_target:
+            self._half_target = hit
+            self._show_highlight()
+
+    def _half_hit(self, x: float, y: float) -> Optional[tuple[str, str]]:
+        """`(half, band)` for the half the point is in (not one inside the dragged panel), or `None`. The halves are leaves, so
+        they do not overlap."""
+        if self._halves is None or self._dragging is None:
+            return None
+        for name, node in self._halves():
+            rect = _rect(node)
+            if rect is None or not node.get("visible") or _inside(node, self._dragging.node):
+                continue
+            rx, ry, rw, rh = rect
+            if rx <= x < rx + rw and ry <= y < ry + rh:
+                return name, _band(rect, x, y)
+        return None
+
+    def _show_highlight(self) -> None:
+        """The highlight over the half band under the pointer, else over the zone `tre` reports, else nowhere."""
+        if self.highlight.parent() is not None:
+            self.highlight.remove()
+        if self._half_target is not None and self._halves is not None:
+            name, band = self._half_target
+            node = next((n for h, n in self._halves() if h == name), None)
+            rect = _rect(node) if node is not None else None
+            if rect is not None:
+                self.highlight.set(**_band_box(rect[2], rect[3], band))
+                node.add_child(self.highlight)
+                return
+        zone = self._zones.get(self._zone_target) if self._zone_target is not None else None
+        if zone is not None:
+            self.highlight.set(x=0.0, y=0.0, width="100%", height="100%")
+            zone.body.add_child(self.highlight)
+
+    def _end_drag(self) -> None:
+        """The drag is over (a drop, or the panel gone): no highlight, no pointer listeners, no target."""
+        for undo in self._tracking:
+            undo()
+        self._tracking = []
+        self._zone_target, self._half_target, self._pointer = None, None, None
+        if self.highlight.parent() is not None:
+            self.highlight.remove()
 
     def _moved(self, entry: _Panel, side: str) -> None:
         """`tre` has moved `entry` to `side` (a drop, or `move`): follow it."""
@@ -438,3 +516,41 @@ class Dock:
         if entry is None:
             raise ValueError("that panel isn't docked here")
         return entry
+
+
+def _rect(node: Any) -> Optional[tuple[float, float, float, float]]:
+    """`node`'s laid-out rectangle in window coordinates (`layout_x`/`layout_y` are window coordinates), or `None` before layout or when it is empty."""
+    x, y, w, h = (node.get(k) for k in ("layout_x", "layout_y", "layout_width", "layout_height"))
+    if None in (x, y, w, h) or not w or not h:
+        return None
+    return float(x), float(y), float(w), float(h)
+
+
+def _inside(node: Any, ancestor: Any) -> bool:
+    """Whether `node` is `ancestor` or below it."""
+    while node is not None:
+        if node == ancestor:
+            return True
+        node = node.parent()
+    return False
+
+
+def _band(rect: tuple[float, float, float, float], x: float, y: float) -> str:
+    """Which part of `rect` the point is in: the nearest side if it is within `HALF_EDGE` of it, else `middle`."""
+    rx, ry, rw, rh = rect
+    fx, fy = (x - rx) / rw, (y - ry) / rh
+    near = {"left": fx, "right": 1.0 - fx, "top": fy, "bottom": 1.0 - fy}
+    side = min(near, key=near.__getitem__)
+    return side if near[side] < HALF_EDGE else "middle"
+
+
+def _band_box(width: float, height: float, band: str) -> dict[str, float]:
+    """The highlight's box inside a half `width` x `height`: the edge's outer `HALF_EDGE` strip, or the whole half."""
+    box = {"x": 0.0, "y": 0.0, "width": width, "height": height}
+    if band in ("left", "right"):
+        box["width"] = width * HALF_EDGE
+        box["x"] = 0.0 if band == "left" else width - box["width"]
+    elif band in ("top", "bottom"):
+        box["height"] = height * HALF_EDGE
+        box["y"] = 0.0 if band == "top" else height - box["height"]
+    return box
