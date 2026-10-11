@@ -238,6 +238,33 @@ A `ScrollView` can be a grid too: its `display` and track keys lay out
 its children, and a `grid_column` on it places the scroll view in its
 own parent.
 
+## A size that is the parent minus something
+
+A size is a number, `auto` or a percentage; there is no `calc(100% - 16)`. In the flow you do not need one, because the layout does the sum
+and follows the parent when it changes:
+
+```yaml
+# the full width less a 8 pixel gutter each side (100% - 16)
+- {widget: Rect, name: bar, style: {height: 20, flex: expand_horizontal, margin: {left: 8, right: 8}}}
+
+# two columns with a 16 pixel gutter (50% - 8 each)
+- widget: Container
+  style: {gap: 16}
+  children:
+    - {widget: Container, name: left, style: {flex: fill}}
+    - {widget: Container, name: right, style: {flex: fill}}
+
+# what is left of a row after a fixed part (100% - 80)
+- widget: Container
+  children:
+    - {widget: Rect, name: icon, style: {width: 80, height: 20}}
+    - {widget: Container, name: rest, style: {flex: fill}}
+```
+
+What cannot be said is an **absolutely positioned** node stretched between two edges of its parent (`x: 8` and 8 pixels from the right): its percentage
+width ignores margins, and the engine has no `right` or `bottom`. Give it a number, or put it in the flow. This is asked of the engine in
+`design/tre-requests/absolute-insets.md`.
+
 ## Placing a node exactly
 
 `position: absolute` takes a node out of the flow, and `x`/`y` place it

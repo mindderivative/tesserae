@@ -2683,3 +2683,14 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Mutations:** 6 scripted breaks, all caught by `tests/test_overflow.py` (15 tests; one pixel test that the child is cut, and not cut with `visible`).
 - **Not checked:** a control with `overflow` (controls place only some keys, `clip_children` is not among them, so it is ignored there as `clip_children` is); a real window.
 
+## 0.5.0.8: #261, calc() (fourth of the five in #257) -- not built, on purpose
+
+- **The feasibility step (as the issue said to do first):** (1) tre 0.5.6 takes a number, `auto` or a percentage for a size; `calc(100% - 16)`, `100% - 16`, `40px`, `10vw`, `fit-content` and `stretch` are each rejected; (2) an absolute node has no
+  `right`, `bottom` or `inset`, and a margin does not shrink its percentage width (`x=8, width=100%, margin_right=16` is 300 wide, 8 past a 300 parent); (3) there is no node-level layout or size event, only the window's `resize`; `window.on("frame")` is accepted.
+- **Why Tesserae does not build its own:** it could set a number on the node when the parent's size changes, but it can only learn that on window resizes and its own changes, or on every frame. The frame version trails by a frame and falls into a loop in an
+  `auto`-sized parent (`child = parent - 16`, `parent = child`: 16 pixels less each frame), which cannot be told apart reliably. `measured_width` already has the first limit (it refreshes on window resizes, not when a splitter moves its parent).
+- **What is delivered instead:** the layout guide shows the in-flow cases, which are exact without calc (`flex: fill` with margins is `100% - 16`; two fills and a gap are `50% - 8`; a fill after a fixed part is `100% - 80`), each tested including that it follows the
+  parent; `design/tre-requests/absolute-insets.md` asks tre for insets on an absolute node (and, second, mixed-unit sizes), **not sent**; `tests/test_size_recipes.py` pins what tre does today (6 tests), so the request's first section fails loudly when tre changes.
+- **So #261 is not what its title says.** No `calc()` syntax exists. I moved it to In review with that said first; the maintainer decides whether the recipes and the request are enough, or whether a frame-following version with its limits is wanted anyway.
+- **No version bump:** no code changed (docs, a request draft and tests).
+

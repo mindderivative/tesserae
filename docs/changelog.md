@@ -8,6 +8,12 @@
   added because it is what people reach for. It does not scroll: a `ScrollView` does. A node that gives both with different meanings is an error naming both (a stylesheet rule's `overflow` and a node's own `clip_children` are
   merged first, so they count as the same node); anything but `hidden` or `visible` is an error naming the node. It is not the `overflow` property of a `Text` (`clip` or `ellipsis`), which is unchanged.
 
+### Documented
+
+- **A size that is the parent minus something** ([#261](https://github.com/mindderivative/tesserae/issues/261), part of [#257](https://github.com/mindderivative/tesserae/issues/257)). There is no `calc()`: the engine takes only a number, `auto` or a percentage for a size, and has no
+  node-level event for a change of size, so Tesserae cannot follow a parent's size itself without trailing it by a frame and shrinking inside an `auto`-sized parent. In the flow `flex: fill` with margins or a `gap` is exact, and the layout guide
+  shows it (tested). An absolute node stretched between two edges cannot be said; it is asked of tre in `design/tre-requests/absolute-insets.md` (not sent yet).
+
 ## 0.5.0.7
 
 ### Added
