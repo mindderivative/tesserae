@@ -132,7 +132,9 @@ def main(argv=None) -> int:
     drops = [e for e in events if e["kind"] == "dock_drop"]
     moves_in_drag = [e for e in events if e["kind"] == "pointer_move" and e.get("dragging")]
     lines = [f"drag spike: {len(events)} events, {len(drops)} drops, {len(moves_in_drag)} pointer_moves during a drag",
-             "root pointer_move kept arriving during a drag: " + ("YES" if moves_in_drag else "NO (Tesserae cannot hit-test; ask tre)")]
+             "root pointer_move kept arriving during a drag: " + (
+                 "YES" if moves_in_drag else "NO (Tesserae cannot hit-test; ask tre)" if drops else
+                 "INCONCLUSIVE: no tab drag started (press on a tab label in the strip and move it; a press elsewhere is not a drag)")]
     for drop in drops:
         lines.append(f"  drop {drop['panel']!r}: tre said {drop['side']!r}; last pointer ({drop['last_x']}, {drop['last_y']}); "
                      f"half {drop['half']!r}, band {drop['band']!r}")

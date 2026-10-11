@@ -1,0 +1,13 @@
+drag spike: 13958 events, 11 drops, 5016 pointer_moves during a drag
+root pointer_move kept arriving during a drag: YES
+  drop None: tre said 'center'; last pointer (474.97265625, 322.5859375); half None, band None
+  drop None: tre said None; last pointer (748.23046875, 259.0859375); half None, band None
+  drop None: tre said 'center'; last pointer (642.640625, 392.71484375); half None, band None
+  drop None: tre said 'bottom'; last pointer (403.10546875, 556.921875); half None, band None
+  drop None: tre said 'right'; last pointer (839.8515625, 137.82421875); half None, band None
+  drop None: tre said 'center'; last pointer (454.28125, 427.60546875); half None, band None
+  drop None: tre said 'center'; last pointer (403.05859375, 310.65234375); half None, band None
+  drop None: tre said 'right'; last pointer (841.609375, 161.1640625); half 'preview', band 'left'
+  drop None: tre said 'center'; last pointer (443.79296875, 95.37109375); half 'preview', band 'top'
+  drop None: tre said 'right'; last pointer (767.3984375, 150.65625); half None, band None
+  drop None: tre said 'left'; last pointer (106.26171875, 101.4453125); half None, band None
