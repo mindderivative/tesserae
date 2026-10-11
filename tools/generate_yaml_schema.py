@@ -161,6 +161,8 @@ def _definitions(fragment: bool) -> dict[str, Any]:
                    "(`hue_rotate` is in degrees)."),
         "sticky": ({"type": "number"}, "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past."),
         "snap_align": ({"enum": ["none", "start", "center", "end"]}, "In a scroll view that has `snap`, this node is a place it settles on, with this edge of the node at the same edge of the view."),
+        "pointer_events": ({"enum": ["auto", "none"]}, "`none` lets the pointer through the node itself: a click on it goes to whatever is under it, and it "
+                            "is not hovered or pressed. What is inside it keeps its own (a child with `auto` is still hit). `auto`, the default, is the usual."),
         "scale": ({"type": "number", "minimum": 0}, "Draws the node and what is in it at this multiple of its size (1 is unchanged), about its centre."),
         "translate_x": ({"type": "number"}, "Draws the node this many pixels to the right of where it is laid out."),
         "translate_y": ({"type": "number"}, "Draws the node this many pixels lower than where it is laid out."),

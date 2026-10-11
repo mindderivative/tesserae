@@ -57,7 +57,7 @@ STYLE_FIELDS = frozenset({
     "flex_wrap", "min_width", "max_width", "min_height", "max_height", "aspect_ratio",
     "position", "x", "y", "z_index", "clip_children",
     # effects: `tesserae.spec.effects`
-    "blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor", "snap_align",
+    "blur", "backdrop_blur", "blend_mode", "filter", "sticky", "cursor", "snap_align", "pointer_events",
     # motion: a transform, and which changes ease (`tesserae.spec.transition`)
     "scale", "translate_x", "translate_y", "rotation_deg", "transition",
     # where a DockPanel docks in its Dock (0.4.4)
@@ -78,7 +78,7 @@ STYLE_GROUPS: dict[str, tuple[str, ...]] = {
     "Docking": ("zone",),
     "Motion": ("scale", "translate_x", "translate_y", "rotation_deg", "transition"),
     "Paint and effects": ("background", "foreground", "border_width", "border_color", "corner_radius", "opacity",
-                          "elevation", "clip_children", "blur", "backdrop_blur", "blend_mode", "filter", "cursor"),
+                          "elevation", "clip_children", "blur", "backdrop_blur", "blend_mode", "filter", "cursor", "pointer_events"),
 }
 #: A style field's section.
 STYLE_GROUP_OF: dict[str, str] = {name: group for group, names in STYLE_GROUPS.items() for name in names}

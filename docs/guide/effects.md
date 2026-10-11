@@ -196,3 +196,14 @@ The picture is read with the view, like an `Image`'s: relative to the view's fol
 side, and `hotspot` is the pixel that is the pointer's place. It is in device pixels, so give a larger one for a
 high-density screen. A picture is only given in a node's own `style:`, not in a stylesheet. A `Link` keeps
 `pointer` unless it says another.
+
+`pointer_events: none` lets the pointer through the node itself, so a decorative layer laid over a button does not swallow the click: it goes to
+whatever is under the layer, and the layer is not hovered or pressed. `auto` is the usual. It is about the node alone: what is inside a
+`pointer_events: none` node still takes the pointer (as in CSS), and so does its focus and its place in the accessibility tree, which this
+does not change.
+
+```yaml
+- widget: Rect              # a shimmer over a card; the card underneath still gets the click
+  name: shimmer
+  style: {position: absolute, x: 0, y: 0, width: 100%, height: 100%, background: "primary@8%", pointer_events: none}
+```

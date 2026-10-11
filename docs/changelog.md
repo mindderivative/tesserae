@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0.6
+
+### Added
+
+- **`pointer_events: none`** ([#258](https://github.com/mindderivative/tesserae/issues/258), part of [#257](https://github.com/mindderivative/tesserae/issues/257)). A style field that lets the pointer through the node itself: a click goes to whatever
+  is under it, and it is not hovered or pressed. `auto` is the usual. It is about the node alone (as in CSS): what is inside a `pointer_events: none` node still takes the pointer, and its focus and its place in the
+  accessibility tree are unchanged. Value may be an expression; anything but `auto` or `none` is an error naming the node. It sets the engine's `hit_testable`, and only when a style gives it: a node that does not say it
+  keeps what it was built with, and a node whose style drops it is hit-testable again. Before, a decorative layer laid over a button in YAML swallowed the click.
+
 ## 0.5.0.5
 
 ### Added

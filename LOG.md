@@ -2648,3 +2648,14 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **A mistake of mine on the way:** I first wrote into #247 that the component issues' Done status meant "audit only"; the commits show those issues were built. Removed before it stood.
 - **Probe harness, for next time:** a one-off new-style view needs `Views/Main_View.yaml` under an `App(root=...)` and `app.open_view("Main")` (as `tests/test_badge.py` does); `View(...)` takes the old `id:` shape and `app.load` wants a real `*_ViewModel.py`.
 
+## 0.5.0.6: #258, pointer_events (first of the five in #257)
+
+- **Scope (the maintainer, 2026-10-11):** all five gaps of #257 as separate issues, done back to back, smallest first: #258 `pointer_events`, #259 static `visible`, #260 `overflow`, #261 `calc()`, #262 anchor.
+- **What the engine does, probed first:** `hit_testable=False` makes the node itself click-through, and its children stay clickable (a click on a child reaches the child; it also bubbles to the parent's listeners in tre, though Tesserae's
+  clickables stop it at the innermost one). So `pointer_events: none` is the CSS meaning: it is about the node alone. This is documented as such.
+- **How:** a style field in `STYLE_FIELDS` and the "Paint and effects" group; `layout.engine_style` turns it into the engine's `hit_testable` (an error naming the node for any value but `auto` and `none`); `hit_testable` is in
+  `_OPTIONAL_LAYOUT`, so it is set only when a style gives it (the builder sets `hit_testable=False` on its own decoration nodes and must keep that) and put back to True when a patch no longer gives it.
+- **Mutations:** 4 scripted breaks (the sense of `auto`, the value check, the resting value, the stray Tesserae name left in the engine style), all caught by `tests/test_pointer_events.py` (10 tests) after one assertion was added for the last.
+- **Not checked:** a real window (the engine behaviour was probed headless with `simulate`); keyboard focus of a click-through node (unchanged by this, documented as such, not tested).
+- **A harness note:** `app.bind(VM)` returns nothing; the instance is `app.bindings.viewmodel_for("main")`; a nested node is `root.over.kid`.
+

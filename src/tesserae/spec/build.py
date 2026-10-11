@@ -327,6 +327,8 @@ _OPTIONAL_LAYOUT: dict[str, Any] = {
     "flex_wrap": "no_wrap", "align_self": None, "min_width": "auto", "max_width": "auto", "min_height": "auto",
     "max_height": "auto", "aspect_ratio": None, "position": "relative", "x": "auto", "y": "auto", "z_index": 0,
     "clip_children": False,
+    # `style.pointer_events`, as `layout.engine_style` turns it: the node's own pointer hits (its children keep theirs)
+    "hit_testable": True,
     # M74: CSS Grid. `justify_items`/`align_content` can't be set back to unset;
     # "stretch" lays out the same. A dropped `row_gap`/`column_gap` goes back
     # to the style's `gap` (`_resets`), which `_layout` sets before them.

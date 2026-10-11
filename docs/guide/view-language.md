@@ -448,7 +448,7 @@ selected: "{{ dark }}"                 # toggling writes `dark`
 
 `style:` holds layout and paint: size and spacing (`width height min_width max_width min_height max_height aspect_ratio padding margin`),
 flex and grid, alignment, position, `background border_width border_color corner_radius opacity elevation`, effects (`blur backdrop_blur
-blend_mode filter cursor clip_children`), and the widget's extras. Values may be expressions.
+blend_mode filter cursor pointer_events clip_children`), and the widget's extras. Values may be expressions.
 
 A **stylesheet** (`<Name>_Stylesheet.yaml`) holds rules, so a look is written once and not on every node:
 
