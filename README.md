@@ -93,6 +93,7 @@ python examples/counter/app.py
 python examples/multi_screen/app.py
 python examples/todo_list/app.py
 python examples/window_dock/app.py
+python examples/typing_effects/app.py --interactive
 ```
 
 `counter/`: a real `Signal`-bound counter -- a `Counter_View.yaml` +

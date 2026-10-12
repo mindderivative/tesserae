@@ -2724,3 +2724,17 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Updated:** the two request files, the layout guide and the changelog now say "sent as tre#178 / tre#179" where they said "not sent". Older LOG entries still say "not sent" because they were true when written.
 - **Nothing is waiting on tre in the code.** If tre adds insets, corners or a layout event, `tests/test_size_recipes.py` and `tests/test_anchored_overlay.py` fail on purpose and say which fact changed.
 
+## 0.5.0.9: #248, typing effects
+
+- **What changed under the issue:** it was written (2026-10-08) when tre had no caret or glyph geometry, so its "now" plan was a pulse or glow on the whole input and the per-character effects waited for tre. tre#165 shipped in 0.5.6, which Tesserae requires: `caret_move` (with the caret
+  rectangle and the byte range an edit inserted), `Node.caret_rect()`, `Node.text_rects(start, end)`, and caret styling. So the whole-input pulse and glow were dropped as superseded, and the "later" half was built. Said in the changelog.
+- **What it is:** `typing_effect: none | flash | fade_in` and `caret_effect: none | glide`, properties of `TextInput` and `TextField`, in `tesserae/typing_effects.py` (`TypingEffects`), wired per input in `composed._wire_typing` like `max_length`/`mask` are. A flash or fade is a rectangle, a child of the input, laid
+  exactly over each piece of `text_rects(inserted)` and animated out; the glide hides the engine's caret and draws a bar that is placed at the new rectangle and eased in from the old one with a transform (no relayout), solid while typing, blinking on `Timers` after 500 ms.
+- **Probed first, all under `simulate`:** `caret_move` fires with the right rectangle and range; a text input accepts children; overlay coordinates are the same space as `text_rects` (a pixel in the flash is tinted); `text_rects` is in the node's own space, with the scroll offset in it.
+- **Decisions, mine, open to change:** names (`flash`, `fade_in`, `glide`); flash is the primary colour at 24% over 260 ms, fade-in is the background over 180 ms, glide is 120 ms; `fade_in` takes the first opaque fill going up from the input, else `surface`; with reduced motion there is no flash or fade, the caret jumps and does not blink; durations,
+  colours and easing are not configurable (not asked).
+- **Mutations:** 17 scripted breaks of the module, the wiring and the TextField pass-through, all caught by `tests/test_typing_effects.py` (21 tests) after four tests were added for survivors (an arrow key with no insertion, a keystroke mid-blink, detaching a running blink, a move while unfocused).
+- **Looked at:** the example rendered to PNG at 46 ms after typing: a soft violet band behind only the new word for the flash; the new word at partial strength next to the settled one for the fade; our caret after the text for the glide. Not a person at a window, and the glide's motion is only judged by numbers (16.2 px away at 16 ms, 2.1 px at 76 ms, 0 after).
+- **Not checked:** a real window with real timing and a real keyboard; input-method composition; right-to-left or mixed-direction text (tre says it did not verify `text_rects` for those); dragging a selection with the glide on; a very long single-line field scrolled sideways while a flash runs.
+- **An example:** `examples/typing_effects` (four fields, self-checks, `--interactive`), with a test that runs it.
+

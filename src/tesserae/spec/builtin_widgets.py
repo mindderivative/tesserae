@@ -51,6 +51,10 @@ declare("TextInput", {
     "max_length": P("int", default=0, doc="The most characters it takes; 0 is no limit."),
     "read_only": P("bool", doc="The text can be selected and copied but not changed."),
     "mask": P("mask", doc="A pattern the typed text is put in: # a digit, A a letter, * either, \\ a literal; other characters come by themselves."),
+    "typing_effect": P("enum", choices=("none", "flash", "fade_in"), default="none",
+                       doc="What happens to the characters just typed: `flash` tints them with the primary colour for a moment; `fade_in` fades them in out of the background."),
+    "caret_effect": P("enum", choices=("none", "glide"), default="none",
+                      doc="`glide` draws the caret itself and eases it to each new place; it blinks, solid while typing. The engine's caret is hidden meanwhile."),
     "typography_role": P("str"), "font_family": P("str"), "font_size": P("float"), "font_weight": P("any"), "disabled": P("bool"),
 }, extras=("foreground",), doc="A bare text input (the part of a TextField that takes the typing).")
 declare("Image", {

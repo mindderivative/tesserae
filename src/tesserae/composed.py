@@ -26,6 +26,7 @@ from tesserae.reactive import Effect, Signal, untrack
 from tesserae.expr import compile_statements, is_action_name
 from tesserae.spec.compose import Instance
 from tesserae.timers import Timers
+from tesserae.typing_effects import TypingEffects
 from tesserae.spec.images import extract_images
 from tesserae.spec.lower import SPLIT_HANDLE, lower
 from tesserae.spec.mask import Mask
@@ -320,6 +321,7 @@ class ComposedView(View):
             node = self._built.outer[inst.id] if inst.widget == "Link" else self._built.nodes[inst.id]
             control = self._built.controls.get(inst.id)
             self._enforce_input(inst, node)
+            self._wire_typing(inst, node)
             # the bound Signal is written before a handler runs, so a handler reads what the user just did
             for prop, (name, scope) in inst.models.items():
                 if inst.widget in ("ScrollView", "VirtualList") and prop in _SCROLL_OUTPUTS:
@@ -1050,6 +1052,21 @@ class ComposedView(View):
             self._handler_undos.append(self._listen(node, "change", enforce))
         if mask is not None:  # after the others: a read-only field is put back whole, a masked one fitted
             self._handler_undos.append(self._listen(node, "change", fit))
+
+    def _wire_typing(self, inst: Instance, node: Any) -> None:
+        """A `TextInput`'s `typing_effect` and `caret_effect` (#248): drawn over the characters just typed, and a caret that glides."""
+        if inst.widget != "TextInput":
+            return
+        typing, caret = inst.value("typing_effect") or "none", inst.value("caret_effect") or "none"
+        if typing == "none" and caret == "none":
+            return
+
+        def reduced() -> bool:
+            app = app_of(self.window)
+            return bool(app is not None and app.reduced_motion)
+
+        effects = TypingEffects(self.window, node, typing=typing, caret=caret, scheme=self._scheme or tokens.BASELINE, reduced=reduced, listen=self._listen)
+        self._handler_undos.append(effects.detach)
 
     def close(self) -> None:
         """Stops following the composition and releases it."""

@@ -31,10 +31,19 @@ the `TextInput` widget, the bare input, and the nodes around it, so every part h
 | `disabled`, `read_only` | true or false | dimmed and takes no typing; the text can be selected and copied but not changed |
 | `suggestions` | a list of texts | those that contain what is typed show in a menu under the field (up to six); pressing one fills the field in; Escape closes the menu |
 | `mask` | a pattern | what is typed is fitted to it (`###-####`) |
+| `typing_effect` | `none`, `flash` or `fade_in` | what happens to the characters just typed (below); `none` by default |
+| `caret_effect` | `none` or `glide` | `glide` draws the caret itself and eases it to each new place (below); `none` by default |
 | `on_edit` | a handler | called after each edit, once `text` has been written |
 
 Events: `on_key` for each key pressed in the field, `on_edit` after each edit, and `on_submit` for Enter in a field that is not
 multiline. A handler written on the field is called as the user types.
+
+**Typing effects.** `typing_effect: flash` tints the characters just typed with the primary colour and lets the tint fade (about a quarter of a second);
+`fade_in` covers them in the background colour and lets that fade, so they seem to appear. Each is drawn exactly over what was inserted (a paste over
+several lines gets a piece on each line), from the geometry the engine reports for the edit. The background `fade_in` uses is the first opaque fill going up from the
+input, else the theme's `surface`. `caret_effect: glide` hides the engine's caret and draws one of Tesserae's own, which eases to each new place in about an eighth
+of a second, stays solid while you type and blinks after a moment, and shows only while the field has the focus. When the app asks for reduced motion there is no
+flash and no fade, and the caret jumps and does not blink. Neither takes the pointer or appears to a screen reader.
 
 The parts a stylesheet can address are `box`, `label`, `input`, `prefix`, `suffix`, `leading_icon`, `trailing_icon`, `error_icon`,
 `reveal_button`, `reveal_icon`, `indicator` (the line under a filled field), `supporting` and `counter`. The state of a rule is the state of
@@ -77,7 +86,7 @@ children:
 ```
 
 `TextInput` is the bare input, for when the field around it is your own: `text`, `placeholder`, `multiline`, `obscured`, `max_length`,
-`read_only` and `disabled`, drawn as one line that scrolls.
+`read_only`, `disabled`, `mask`, `typing_effect` and `caret_effect`, drawn as one line that scrolls.
 
 ## Changing its look
 

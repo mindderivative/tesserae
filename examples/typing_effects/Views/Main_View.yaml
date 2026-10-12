@@ -1,0 +1,11 @@
+# Four text fields, each with a different typing effect, to type in and watch. See app.py.
+name: main
+widget: Container
+style: {width: 520, height: 460, flex_direction: vertical, gap: 20, padding: 24, background: surface}
+children:
+  - {widget: Text, name: title, text: Typing effects, typography_role: headline_small, style: {foreground: on_surface}}
+  - {widget: Text, name: hint, text: "Type, paste and move the caret with the arrow keys in each field.", typography_role: body_medium, style: {foreground: on_surface_variant}}
+  - {widget: TextField, name: flash, label: "typing_effect: flash", text: "{{ a }}", typing_effect: flash}
+  - {widget: TextField, name: fade, label: "typing_effect: fade_in", text: "{{ b }}", typing_effect: fade_in}
+  - {widget: TextField, name: glide, label: "caret_effect: glide", text: "{{ c }}", caret_effect: glide}
+  - {widget: TextField, name: both, variant: outlined, label: "flash and glide, outlined", text: "{{ d }}", typing_effect: flash, caret_effect: glide}
