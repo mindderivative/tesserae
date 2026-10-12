@@ -2738,3 +2738,8 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Not checked:** a real window with real timing and a real keyboard; input-method composition; right-to-left or mixed-direction text (tre says it did not verify `text_rects` for those); dragging a selection with the glide on; a very long single-line field scrolled sideways while a flash runs.
 - **An example:** `examples/typing_effects` (four fields, self-checks, `--interactive`), with a test that runs it.
 
+## #248 tried by hand
+
+- **The maintainer ran `python examples/typing_effects/app.py --interactive` (2026-10-11) and said it "looks pretty awesome".** That is all that was reported: nothing about timing, the caret's motion, a paste, the arrow keys, or any platform other than their own
+  (KDE Wayland). So the "not checked" list above stands, apart from the first item (a person at a real window), which is now done in the one sense that they looked at it.
+
