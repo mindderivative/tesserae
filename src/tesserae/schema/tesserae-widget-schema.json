@@ -5207,6 +5207,45 @@
             ],
             "description": "What happens to the characters just typed: `flash` tints them with the primary colour for a moment; `fade_in` fades them in out of the background."
           },
+          "typing_duration": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "How long a flash or a fade-in lasts, in milliseconds: 260 for a flash and 180 for a fade-in when left out; 0 leaves the effect out."
+          },
+          "flash_color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "What a flash is tinted with: a theme role or a colour (`primary@50%` works); the primary colour when left out."
+          },
+          "flash_opacity": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "How strong a flash starts, from 0 to 1: 0.24 when left out."
+          },
           "caret_effect": {
             "anyOf": [
               {
@@ -5221,6 +5260,32 @@
               }
             ],
             "description": "`glide` draws the caret itself and eases it to each new place; it blinks, solid while typing. The engine's caret is hidden meanwhile."
+          },
+          "glide_duration": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "How long the caret takes to reach its new place, in milliseconds: 120 when left out; 0 makes it jump."
+          },
+          "caret_blink": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "The time the gliding caret is on and then off, in milliseconds: 530 when left out; 0 keeps it solid."
           },
           "typography_role": {
             "anyOf": [
@@ -5300,7 +5365,12 @@
             "read_only",
             "mask",
             "typing_effect",
+            "typing_duration",
+            "flash_color",
+            "flash_opacity",
             "caret_effect",
+            "glide_duration",
+            "caret_blink",
             "typography_role",
             "font_family",
             "font_size",

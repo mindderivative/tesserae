@@ -17,6 +17,11 @@ params:
   suffix: {type: str, default: "", doc: "Text after the typing, such as a unit."}
   max_length: {type: int, default: 0, doc: "The most characters it takes; 0 is no limit."}
   typing_effect: {type: enum, choices: [none, flash, fade_in], default: none, doc: "What happens to the characters just typed: flash tints them for a moment; fade_in fades them in. Left out when the app asks for reduced motion."}
+  typing_duration: {type: float, default: null, min: 0, doc: "How long a flash or a fade-in lasts, in milliseconds: 260 for a flash and 180 for a fade-in when left out; 0 leaves the effect out."}
+  flash_color: {type: color, default: null, doc: "What a flash is tinted with: a theme role or a colour; the primary colour when left out."}
+  flash_opacity: {type: float, default: null, min: 0, max: 1, doc: "How strong a flash starts, from 0 to 1: 0.24 when left out."}
+  glide_duration: {type: float, default: null, min: 0, doc: "How long the gliding caret takes to reach its new place, in milliseconds: 120 when left out; 0 makes it jump."}
+  caret_blink: {type: float, default: null, min: 0, doc: "The time the gliding caret is on and then off, in milliseconds: 530 when left out; 0 keeps it solid."}
   caret_effect: {type: enum, choices: [none, glide], default: none, doc: "glide draws the caret itself and eases it to each new place. It jumps, and does not blink, when the app asks for reduced motion."}
   mask: {type: mask, default: "", doc: "A pattern the typing is put in: # a digit, A a letter, * either, \\ a literal; other characters come by themselves, as in (###) ###-####."}
   counter: {type: bool, default: false, doc: "Shows how many characters are typed (of max_length, when there is one)."}
@@ -65,6 +70,11 @@ children:
             mask: "{{ mask }}"
             typing_effect: "{{ typing_effect }}"
             caret_effect: "{{ caret_effect }}"
+            typing_duration: "{{ typing_duration }}"
+            flash_color: "{{ flash_color }}"
+            flash_opacity: "{{ flash_opacity }}"
+            glide_duration: "{{ glide_duration }}"
+            caret_blink: "{{ caret_blink }}"
             read_only: "{{ read_only }}"
             disabled: "{{ disabled }}"
             typography_role: body_large

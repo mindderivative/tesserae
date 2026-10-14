@@ -26,7 +26,7 @@ from tesserae.reactive import Effect, Signal, untrack
 from tesserae.expr import compile_statements, is_action_name
 from tesserae.spec.compose import Instance
 from tesserae.timers import Timers
-from tesserae.typing_effects import TypingEffects
+from tesserae.typing_effects import OPTIONS, TypingEffects
 from tesserae.spec.images import extract_images
 from tesserae.spec.lower import SPLIT_HANDLE, lower
 from tesserae.spec.mask import Mask
@@ -183,6 +183,8 @@ class ComposedView(View):
         self.handle = handle
         self._base_dir = Path(base_dir) if base_dir is not None else Path.cwd()
         self._handler_undos: list[Callable[[], None]] = []
+        self._typing: dict[str, tuple[tuple, Any, TypingEffects]] = {}  # an input's id -> its effects: they outlive a re-wire (the caret has to remember where it was)
+        self._typing_wired: set[str] = set()
         self._state_undos: list[Callable[[], None]] = []
         self._group_undos: list[Callable[[], None]] = []
         self._active: dict[str, str] = {}  # a focus group's id -> the id of the item that holds its tab stop
@@ -315,6 +317,7 @@ class ComposedView(View):
         for undo in self._handler_undos:
             undo()
         self._handler_undos = []
+        self._typing_wired = set()
         for inst in self.handle.composition.walk():
             if inst.id not in self._built.nodes:
                 continue
@@ -375,6 +378,7 @@ class ComposedView(View):
                     self._handler_undos.append(self._listen(node, tre_event, handled(call)))
                 else:
                     self._handler_undos.append(self._listen(node, tre_event, call))
+        self._prune_typing()
 
     def _fit_scroll(self, inst: Instance) -> None:
         """A ScrollView with a `max_height` (a `max_width` when horizontal) and no size of its own is as long as its content, up to that limit: the
@@ -1054,19 +1058,36 @@ class ComposedView(View):
             self._handler_undos.append(self._listen(node, "change", fit))
 
     def _wire_typing(self, inst: Instance, node: Any) -> None:
-        """A `TextInput`'s `typing_effect` and `caret_effect` (#248): drawn over the characters just typed, and a caret that glides."""
+        """A `TextInput`'s `typing_effect` and `caret_effect` (#248): drawn over the characters just typed, and a caret that glides.
+
+        Wiring runs again whenever the composition changes (each keystroke writes the text back), so the effects are kept between runs: one per input,
+        made again only when its settings or its node change. Made afresh each time, the caret would start every move where it ended."""
         if inst.widget != "TextInput":
             return
         typing, caret = inst.value("typing_effect") or "none", inst.value("caret_effect") or "none"
+        options = {name: inst.value(name) for name in OPTIONS}
+        key = (typing, caret, tuple(options.items()))
+        held = self._typing.get(inst.id)
         if typing == "none" and caret == "none":
             return
+        self._typing_wired.add(inst.id)
+        if held is not None and held[0] == key and held[1] == node:
+            return
+        if held is not None:
+            held[2].detach()
 
         def reduced() -> bool:
             app = app_of(self.window)
             return bool(app is not None and app.reduced_motion)
 
-        effects = TypingEffects(self.window, node, typing=typing, caret=caret, scheme=self._scheme or tokens.BASELINE, reduced=reduced, listen=self._listen)
-        self._handler_undos.append(effects.detach)
+        effects = TypingEffects(self.window, node, typing=typing, caret=caret, scheme=lambda: self._scheme or tokens.baseline_scheme(),
+                                reduced=reduced, listen=self._listen, options=options)
+        self._typing[inst.id] = (key, node, effects)
+
+    def _prune_typing(self) -> None:
+        """Takes the effects of an input that is no longer there, or no longer asks for any."""
+        for inst_id in [i for i in self._typing if i not in self._typing_wired]:
+            self._typing.pop(inst_id)[2].detach()
 
     def close(self) -> None:
         """Stops following the composition and releases it."""
@@ -1087,6 +1108,8 @@ class ComposedView(View):
         for undo in (*self._handler_undos, *self._state_undos, *self._group_undos):
             undo()
         self._handler_undos, self._state_undos, self._group_undos = [], [], []
+        self._typing_wired = set()
+        self._prune_typing()
         self.handle.close()
 
 

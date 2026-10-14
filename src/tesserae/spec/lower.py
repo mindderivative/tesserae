@@ -21,7 +21,7 @@ _FIELD_KEYS = ("typography_role", "font_family", "font_size", "font_weight", "pl
 #: The widget names that are not the builder's kind names.
 _KIND = {"TextInput": "TextField", "VirtualList": "ScrollView"}
 #: Properties the renderer acts on (it has no builder equivalent), so they are not part of the lowered spec.
-_RENDERER_ONLY = {"TextInput": {"max_length", "read_only", "mask", "typing_effect", "caret_effect"}}
+_RENDERER_ONLY = {"TextInput": {"max_length", "read_only", "mask", "typing_effect", "caret_effect", "typing_duration", "flash_color", "flash_opacity", "glide_duration", "caret_blink"}}
 _PLACEHOLDER = "composed"
 
 

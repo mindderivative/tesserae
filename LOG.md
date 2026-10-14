@@ -2743,3 +2743,18 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **The maintainer ran `python examples/typing_effects/app.py --interactive` (2026-10-11) and said it "looks pretty awesome".** That is all that was reported: nothing about timing, the caret's motion, a paste, the arrow keys, or any platform other than their own
   (KDE Wayland). So the "not checked" list above stands, apart from the first item (a person at a real window), which is now done in the one sense that they looked at it.
 
+## #248, the looks settable per field, and three bugs found on the way
+
+- **Settable per field (YAML):** `typing_duration` (ms; 0 leaves the effect out), `flash_color` (a theme role or colour), `flash_opacity` (0 to 1), `glide_duration` (ms; 0 jumps), `caret_blink` (ms; 0 solid), on `TextInput` and passed through `TextField`; each `None` when left out and then
+  the old constants. The easing stays fixed. To check a range with a file and line, `Property` gained optional `minimum` and `maximum` (view params say `min`/`max`; the widget schema carries them), a small language addition, not specific to this feature.
+- **Three bugs, all found by testing the settings through a real `TextField`, none by the engine-level tests that came first:**
+  1. **The effects were rebuilt on every focus change and every keystroke** (the view wires its inputs again whenever the composition changes, which a keystroke does by writing the text back). A rebuilt caret starts where the caret already is, so **in a field the caret never glided**,
+     and a running flash was destroyed by the next keystroke. They are kept now, one per input, made again only when their settings or their node change, and taken away when the input stops asking or the view closes (`composed._typing`, `_prune_typing`).
+     **This means the build the maintainer tried and called "pretty awesome" (0.5.0.9 as first committed) had a flash and a fade that worked and a caret that did not glide.** They should look at the glide again.
+  2. **A duration from a view is a float and the engine's `animate` wants whole milliseconds**; it raised inside a callback, which the engine logs and does not raise, so no test failed. With a `typing_duration` set in YAML a flash stayed at full strength for good. Durations are rounded to integers now.
+     (An earlier version of my own test only passed because of it: it read the opacity of a cover that never animated.)
+  3. **The colour fallback was `tokens.BASELINE`, which has only some of the roles**, and the scheme was captured once at wiring, so a role such as `tertiary` was unknown without a theme and a dark-mode switch left the old colour. The scheme is asked for each time now and falls back to the full baseline.
+- **Mutations:** 33 scripted breaks over the module, the wiring, the language change and the pass-through; all caught but one that is equivalent (the `glide_duration > 0` guard: a zero-length animation snaps on the next tick, so it looks the same as a jump; the guard is kept to say what 0 means).
+  One guard I had put in `detach` was dead (removing listeners from a destroyed input does not raise) and was taken out; the other three guards do raise and have a test.
+- **Tests:** `tests/test_typing_effects.py` has 42. The first version had 21 and all passed; they exercised the module, not the view. The lesson for this repository: a feature that lives in the view's wiring needs at least one test through a real view that watches it work over several keystrokes.
+

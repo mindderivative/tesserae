@@ -7,8 +7,10 @@
 - **Typing effects on a text field** ([#248](https://github.com/mindderivative/tesserae/issues/248)). `typing_effect: flash` tints the characters just typed with the primary colour and lets the tint fade; `typing_effect: fade_in` covers them in the
   background colour and lets that fade, so they seem to appear. `caret_effect: glide` hides the engine's caret and draws one of Tesserae's own that eases to each new place, stays solid while typing and blinks after a moment. Each is drawn from the geometry
   tre 0.5.6 reports for an edit (`caret_move`, `text_rects`; tre#165), so it sits exactly on what was inserted, line by line for a paste. They are properties of `TextField` and of the bare `TextInput`, `none` by default; with reduced motion asked for there is no flash and no
-  fade, and the caret jumps and does not blink. The issue's first plan, a pulse or glow on the whole input, is dropped: the geometry makes it unnecessary. Not built: a shader on the typed characters (tre did not add per-character shader inputs), and a choice of colours, durations or easing.
-  `examples/typing_effects` has the four on one page (`--interactive` to type in them).
+  fade, and the caret jumps and does not blink. The issue's first plan, a pulse or glow on the whole input, is dropped: the geometry makes it unnecessary. Each look is the field's own to set: `typing_duration` (milliseconds; `0` leaves the effect out),
+  `flash_color` (a theme role or colour), `flash_opacity` (0 to 1), `glide_duration` and `caret_blink` (milliseconds; `0` makes the caret jump, or stay solid). Not built: a shader on the typed characters (tre did not add per-character shader inputs), and the easing, which is fixed.
+  `examples/typing_effects` has them on one page (`--interactive` to type in them).
+- **A number can have a range** (#248). A widget property or a view parameter may say `min` and `max`; a value outside is an error that names the property and the range, with the file and line, and the schema tells an editor.
 
 ## 0.5.0.8
 

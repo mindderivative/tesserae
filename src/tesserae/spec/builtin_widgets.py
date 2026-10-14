@@ -53,8 +53,13 @@ declare("TextInput", {
     "mask": P("mask", doc="A pattern the typed text is put in: # a digit, A a letter, * either, \\ a literal; other characters come by themselves."),
     "typing_effect": P("enum", choices=("none", "flash", "fade_in"), default="none",
                        doc="What happens to the characters just typed: `flash` tints them with the primary colour for a moment; `fade_in` fades them in out of the background."),
+    "typing_duration": P("float", minimum=0, doc="How long a flash or a fade-in lasts, in milliseconds: 260 for a flash and 180 for a fade-in when left out; 0 leaves the effect out."),
+    "flash_color": P("color", doc="What a flash is tinted with: a theme role or a colour (`primary@50%` works); the primary colour when left out."),
+    "flash_opacity": P("float", minimum=0, maximum=1, doc="How strong a flash starts, from 0 to 1: 0.24 when left out."),
     "caret_effect": P("enum", choices=("none", "glide"), default="none",
                       doc="`glide` draws the caret itself and eases it to each new place; it blinks, solid while typing. The engine's caret is hidden meanwhile."),
+    "glide_duration": P("float", minimum=0, doc="How long the caret takes to reach its new place, in milliseconds: 120 when left out; 0 makes it jump."),
+    "caret_blink": P("float", minimum=0, doc="The time the gliding caret is on and then off, in milliseconds: 530 when left out; 0 keeps it solid."),
     "typography_role": P("str"), "font_family": P("str"), "font_size": P("float"), "font_weight": P("any"), "disabled": P("bool"),
 }, extras=("foreground",), doc="A bare text input (the part of a TextField that takes the typing).")
 declare("Image", {

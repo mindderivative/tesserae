@@ -2,7 +2,8 @@
 """Typing effects on a text field: a flash and a fade-in on the characters just typed, and a caret that glides.
 
 `typing_effect: flash | fade_in` is drawn over exactly the characters an edit inserted, and `caret_effect: glide` replaces the engine's caret with one
-that eases to each new place and blinks after a moment. Both leave themselves out when the app asks for reduced motion. See the Text fields page.
+that eases to each new place and blinks after a moment. Both leave themselves out when the app asks for reduced motion. The last field sets the
+looks itself (`flash_color`, `flash_opacity`, `typing_duration`, `glide_duration`, `caret_blink`). See the Text fields page.
 
 It checks itself, then renders 20 frames and exits. Run it with `--interactive` to keep the window open and type in the fields by hand.
 """
@@ -22,7 +23,7 @@ class MainViewModel(ViewModel):
 
     def __init__(self):
         super().__init__()
-        self.a, self.b, self.c, self.d = Signal(""), Signal(""), Signal(""), Signal("")
+        self.a, self.b, self.c, self.d, self.e = Signal(""), Signal(""), Signal(""), Signal(""), Signal("")
 
 
 app = App(root=Path(__file__).parent, title="Typing effects", theme_seed=(0x67, 0x50, 0xA4, 0xFF), dark=False)
@@ -51,6 +52,8 @@ flash = type_into("flash", "Hello")
 assert flash.children(), "the flash is drawn over what was typed"
 fade = type_into("fade", "Hello")
 assert fade.children(), "the fade-in covers what was typed"
+custom = type_into("custom", "Hello")
+assert custom.children(), "the settings are the field's own: a tertiary flash that lasts 700 ms"
 glide = type_into("glide", "Hello")
 assert glide.get("caret_visible") is False and glide.children(), "the engine's caret is hidden and ours is drawn"
 window.advance(600)

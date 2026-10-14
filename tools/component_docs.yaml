@@ -1326,7 +1326,12 @@ components:
       | `suggestions` | a list of texts | those that contain what is typed show in a menu under the field (up to six); pressing one fills the field in; Escape closes the menu |
       | `mask` | a pattern | what is typed is fitted to it (`###-####`) |
       | `typing_effect` | `none`, `flash` or `fade_in` | what happens to the characters just typed (below); `none` by default |
+      | `typing_duration` | milliseconds | how long a flash or a fade-in lasts: 260 for a flash and 180 for a fade-in when left out; `0` leaves the effect out |
+      | `flash_color` | a theme role or colour | what a flash is tinted with (`tertiary`, `#FF8800`, `primary@50%`); the primary colour when left out |
+      | `flash_opacity` | 0 to 1 | how strong a flash starts: `0.24` when left out |
       | `caret_effect` | `none` or `glide` | `glide` draws the caret itself and eases it to each new place (below); `none` by default |
+      | `glide_duration` | milliseconds | how long the gliding caret takes to reach its new place: `120` when left out; `0` makes it jump |
+      | `caret_blink` | milliseconds | how long the gliding caret is on, then off: `530` when left out; `0` keeps it solid |
       | `on_edit` | a handler | called after each edit, once `text` has been written |
 
       Events: `on_key` for each key pressed in the field, `on_edit` after each edit, and `on_submit` for Enter in a field that is not
@@ -1337,7 +1342,8 @@ components:
       several lines gets a piece on each line), from the geometry the engine reports for the edit. The background `fade_in` uses is the first opaque fill going up from the
       input, else the theme's `surface`. `caret_effect: glide` hides the engine's caret and draws one of Tesserae's own, which eases to each new place in about an eighth
       of a second, stays solid while you type and blinks after a moment, and shows only while the field has the focus. When the app asks for reduced motion there is no
-      flash and no fade, and the caret jumps and does not blink. Neither takes the pointer or appears to a screen reader.
+      flash and no fade, and the caret jumps and does not blink. Neither takes the pointer or appears to a screen reader. The looks above are each the field's own to set (a number below `0`, or a strength outside `0` to `1`, is an
+      error that names the property and the line); the easing is not settable.
 
       The parts a stylesheet can address are `box`, `label`, `input`, `prefix`, `suffix`, `leading_icon`, `trailing_icon`, `error_icon`,
       `reveal_button`, `reveal_icon`, `indicator` (the line under a filled field), `supporting` and `counter`. The state of a rule is the state of

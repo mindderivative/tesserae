@@ -17,9 +17,10 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional
 
+from tesserae import tokens
 from tesserae.timers import Timers
 
-__all__ = ["CARET_EFFECTS", "TYPING_EFFECTS", "TypingEffects"]
+__all__ = ["CARET_EFFECTS", "OPTIONS", "TYPING_EFFECTS", "TypingEffects"]
 
 TYPING_EFFECTS = ("none", "flash", "fade_in")
 CARET_EFFECTS = ("none", "glide")
@@ -34,16 +35,32 @@ HOLD_MS = 500
 BLINK_MS = 530
 EASE_OUT = (0.0, 0.0, 0.2, 1.0)  # emphasized decelerate, near enough
 CARET_WIDTH = 1.5
+#: The properties that set the looks; each is `None` when left out, and then the constants above are what is used.
+OPTIONS = ("typing_duration", "flash_color", "flash_opacity", "glide_duration", "caret_blink")
 
 
 class TypingEffects:
-    """The effects of one text input `node`. `typing` and `caret` are the property values; `scheme` gives the colours; `reduced` says whether motion
-    is to be left out (read each time); `listen` is the shared `Listeners.listen`. `detach()` takes it all away and puts the engine's caret back."""
+    """The effects of one text input `node`. `typing` and `caret` are the property values; `scheme` gives the colours (a dict of roles, or a function that
+    gives it, asked each time so a theme change is followed); `reduced` says whether motion is to be left out (read each time); `listen` is the shared
+    `Listeners.listen`; `options` are the looks (`OPTIONS`). `detach()` takes it all away and puts the engine's caret back."""
 
     def __init__(self, window: Any, node: Any, *, typing: str, caret: str, scheme: dict[str, Any], reduced: Callable[[], bool],
-                 listen: Callable[[Any, str, Callable[[Any], None]], Callable[[], None]]) -> None:
-        self.window, self.node, self.scheme, self.reduced = window, node, scheme, reduced
+                 listen: Callable[[Any, str, Callable[[Any], None]], Callable[[], None]], options: Optional[dict[str, Any]] = None) -> None:
+        self.window, self.node, self.reduced = window, node, reduced
+        self._scheme_of: Callable[[], dict[str, Any]] = scheme if callable(scheme) else (lambda: scheme)
         self.typing, self.caret = typing, caret
+        given = {name: value for name, value in (options or {}).items() if value is not None}
+        unknown = sorted(set(given) - set(OPTIONS))
+        if unknown:
+            raise ValueError(f"unknown typing effect option(s) {unknown}; they are {', '.join(OPTIONS)}")
+        # the engine's `animate` takes whole milliseconds, and a number from a view is a float
+        self._duration: Optional[int] = round(given["typing_duration"]) if "typing_duration" in given else None
+        self._flash_opacity: float = float(given.get("flash_opacity", FLASH_ALPHA))
+        self._flash_color_raw = given.get("flash_color")
+        if self._flash_color_raw is not None:
+            self._resolve(self._flash_color_raw)  # a mistake is found now, not at the first keystroke
+        self._glide_ms: int = round(given.get("glide_duration", GLIDE_MS))
+        self._blink_ms: float = float(given.get("caret_blink", BLINK_MS))
         self._timers = Timers(window)
         self._undos: list[Callable[[], None]] = []
         self._covers: list[Any] = []
@@ -69,6 +86,19 @@ class TypingEffects:
 
     # -- flash and fade-in -----------------------------------------------------
 
+    @property
+    def scheme(self) -> dict[str, Any]:
+        return self._scheme_of()
+
+    def _resolve(self, raw: Any) -> tuple[int, int, int, int]:
+        """`flash_color`: a theme role or a colour (`tokens.resolve_color`), else an error that names the property."""
+        if isinstance(raw, str) and raw in self.scheme:
+            return tuple(self.scheme[raw])  # type: ignore[return-value]
+        try:
+            return tuple(tokens.resolve_color(str(raw), self.scheme))  # type: ignore[return-value]
+        except ValueError as exc:
+            raise ValueError(f"flash_color {raw!r} is not a theme role or a colour: {exc}") from None
+
     def _background(self) -> tuple[int, int, int, int]:
         """The first opaque fill going up from the input, else the theme's surface."""
         parent = self.node.parent()
@@ -82,10 +112,13 @@ class TypingEffects:
     def _cover(self, start: int, end: int) -> None:
         """A rectangle over each piece of the characters in bytes `start` to `end`, from `flash`'s tint or `fade_in`'s cover to nothing."""
         if self.typing == "flash":
-            r, g, b, _ = self.scheme["primary"]
-            fill, opacity, ms = (r, g, b, 255), FLASH_ALPHA, FLASH_MS
+            r, g, b, a = self._resolve(self._flash_color_raw) if self._flash_color_raw is not None else self.scheme["primary"]
+            fill, opacity, ms = (r, g, b, a), self._flash_opacity, FLASH_MS
         else:
             fill, opacity, ms = self._background(), 1.0, FADE_MS
+        ms = self._duration if self._duration is not None else ms
+        if ms <= 0:  # no time to show it in: left out
+            return
         for x, y, width, height in self.node.text_rects(start, end):
             cover = self.window.create("box", position="absolute", x=float(x), y=float(y), width=float(width), height=float(height), fill=fill,
                                        opacity=opacity, hit_testable=False, a11y_hidden=True)
@@ -119,10 +152,10 @@ class TypingEffects:
         x, y, _, height = rect
         old_x, old_y = bar.get("x"), bar.get("y")
         bar.set(x=float(x), y=float(y), height=float(height), fill=self._color())
-        if not self.reduced() and isinstance(old_x, float) and isinstance(old_y, float) and (old_x, old_y) != (float(x), float(y)):
+        if not self.reduced() and self._glide_ms > 0 and isinstance(old_x, float) and isinstance(old_y, float) and (old_x, old_y) != (float(x), float(y)):
             bar.set(translate_x=old_x - float(x), translate_y=old_y - float(y))  # drawn where it was, then eased home: a transform, so no relayout
-            bar.animate("translate_x", 0.0, GLIDE_MS, EASE_OUT)
-            bar.animate("translate_y", 0.0, GLIDE_MS, EASE_OUT)
+            bar.animate("translate_x", 0.0, self._glide_ms, EASE_OUT)
+            bar.animate("translate_y", 0.0, self._glide_ms, EASE_OUT)
         self._solid()
 
     def _solid(self) -> None:
@@ -132,11 +165,11 @@ class TypingEffects:
         self._blink_on = True
         if self._bar is not None:
             self._bar.set(visible=self._focused)
-        if self._focused and not self.reduced():
+        if self._focused and not self.reduced() and self._blink_ms > 0:
             self._timers.after(HOLD_MS, self._start_blink, name="hold")
 
     def _start_blink(self) -> None:
-        self._timers.every(BLINK_MS, self._toggle, name="blink")
+        self._timers.every(self._blink_ms, self._toggle, name="blink")
 
     def _toggle(self) -> None:
         self._blink_on = not self._blink_on

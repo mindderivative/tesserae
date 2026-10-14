@@ -69,6 +69,8 @@ class Property:
     required: bool = False
     model: bool = False
     doc: str = ""
+    minimum: Optional[float] = None  # for an `int` or `float`: the least and the most it takes (a value outside is an error that names them)
+    maximum: Optional[float] = None
     name: str = field(default="", compare=False)
 
     def __post_init__(self) -> None:
@@ -86,6 +88,11 @@ class Property:
     def __set_name__(self, owner: type, name: str) -> None:
         self.name = name
 
+    def _range(self) -> str:
+        if self.minimum is not None and self.maximum is not None:
+            return f"from {self.minimum:g} to {self.maximum:g}"
+        return f"of {self.minimum:g} or more" if self.minimum is not None else f"of {self.maximum:g} or less"
+
     def coerce(self, value: Any) -> Any:
         """The value to keep for `value`, or a `PropertyError`. An expression, `None` for an optional property and the structural
         types (`node`, `nodes`, checked by the loader) pass."""
@@ -96,6 +103,8 @@ class Property:
                 raise PropertyError(f"'{self.name}' needs a value")
             return None
         result = _COERCE[self.type](self, value)
+        if self.type in ("int", "float") and ((self.minimum is not None and result < self.minimum) or (self.maximum is not None and result > self.maximum)):
+            raise PropertyError(f"'{self.name}' takes a number {self._range()}, got {value!r}")
         if self.choices is not None and result not in self.choices:
             raise PropertyError(f"'{self.name}' is {value!r}, which is not one of: {', '.join(map(str, self.choices))}",
                                 _near(str(result), [str(c) for c in self.choices]))
@@ -308,7 +317,7 @@ def style_fields_of(decl: Optional[WidgetDecl]) -> frozenset[str]:
 
 def decl_from_params(name: str, params: Any) -> WidgetDecl:
     """A view's declaration from its `params:` (spec section 3): a list of names (all `any`, required unless written `{name: default}`)
-    or a mapping of name to a type, or to `{type, default, choices, required, model, doc}`."""
+    or a mapping of name to a type, or to `{type, default, choices, required, model, doc, min, max}` (`min` and `max` bound an `int` or `float`)."""
     props: dict[str, Property] = {}
     if params is None:
         pass
@@ -322,7 +331,7 @@ def decl_from_params(name: str, params: Any) -> WidgetDecl:
             else:
                 raise ValueError(f"{name}: a params entry is a name or {{name: default}}, got {item!r}")
     elif isinstance(params, dict):
-        allowed = {"type", "default", "choices", "required", "model", "doc"}
+        allowed = {"type", "default", "choices", "required", "model", "doc", "min", "max"}
         for key, spec in params.items():
             if isinstance(spec, str):
                 props[key] = Property(spec)
@@ -330,7 +339,9 @@ def decl_from_params(name: str, params: Any) -> WidgetDecl:
                 extra = set(spec) - allowed
                 if extra:
                     raise ValueError(f"{name}: param '{key}' has unknown field(s) {sorted(extra)} (allowed: {', '.join(sorted(allowed))})")
-                props[key] = Property(**{**spec, "type": spec.get("type", "any")})
+                bounds = {"minimum": spec["min"]} if "min" in spec else {}
+                bounds.update({"maximum": spec["max"]} if "max" in spec else {})
+                props[key] = Property(**{**{k: v for k, v in spec.items() if k not in ("min", "max")}, **bounds, "type": spec.get("type", "any")})
             else:
                 raise ValueError(f"{name}: param '{key}' is a type or a mapping, got {spec!r}")
     else:
@@ -373,7 +384,9 @@ def _schema_of(prop: Property) -> dict[str, Any]:
     elif prop.type == "any":
         out = {}
     else:
-        out = {"anyOf": [_JSON_TYPE[prop.type], _EXPRESSION]}
+        number = {**_JSON_TYPE[prop.type], **({"minimum": prop.minimum} if prop.minimum is not None else {}),
+                  **({"maximum": prop.maximum} if prop.maximum is not None else {})}
+        out = {"anyOf": [number, _EXPRESSION]}
     return {**out, "description": prop.doc} if prop.doc else out
 
 
