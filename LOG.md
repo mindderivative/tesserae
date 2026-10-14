@@ -2758,3 +2758,9 @@ User: "release tesserae 0.5.0", then "pypi is up".
   One guard I had put in `detach` was dead (removing listeners from a destroyed input does not raise) and was taken out; the other three guards do raise and have a test.
 - **Tests:** `tests/test_typing_effects.py` has 42. The first version had 21 and all passed; they exercised the module, not the view. The lesson for this repository: a feature that lives in the view's wiring needs at least one test through a real view that watches it work over several keystrokes.
 
+## #248, the glide tried again after the fix
+
+- **The maintainer ran `python examples/typing_effects/app.py --interactive` again (2026-10-14), after the effects were made to survive a re-wire, and said the glide "looks good and what you expected".** What was expected (said to them beforehand): a short slide on a letter, a longer fast slide on a paste, a glide
+  back and forth on the arrow keys with no flash, solid while typing and blinking after about half a second, gone when unfocused. They did not report any of those individually, so this confirms the general look on KDE Wayland and nothing finer.
+- **Still not checked:** input-method composition, right-to-left text, dragging a selection with the glide on, a long field scrolled sideways during a flash, other platforms.
+
