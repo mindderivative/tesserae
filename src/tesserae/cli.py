@@ -254,8 +254,13 @@ def project_schema(folder: Path) -> Path:
 
     data = project_schema_data(folder)
     path = folder / PROJECT_SCHEMA
+    for link in (path.parent, path):  # a link there would send the write somewhere else (a project that is someone else's)
+        if link.is_symlink():
+            raise CliError(f"{link} is a symbolic link; remove it, and `tesserae schema --project` will write there")
     path.parent.mkdir(exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    temporary = path.with_name(path.name + ".tmp")
+    temporary.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    os.replace(temporary, path)  # the whole file or none of it, and never through a link at `path`
     return path
 
 

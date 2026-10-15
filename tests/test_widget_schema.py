@@ -138,3 +138,30 @@ def test_a_new_project_validates_against_its_own_schema(tmp_path, flags):
     validator = _validator_for(tmp_path / "fresh")
     for path in (tmp_path / "fresh" / "Views").glob("*_View.yaml"):
         assert not _problems(validator, yaml.safe_load(path.read_text())), path.name
+
+
+def test_a_link_where_the_project_schema_goes_is_refused_not_followed(tmp_path):
+    """The schema is written under the project's `.tesserae/`; a symbolic link there would write elsewhere."""
+    outside = tmp_path / "elsewhere"
+    outside.mkdir()
+    project = tmp_path / "project"
+    (project / "Views").mkdir(parents=True)
+    (project / ".tesserae").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(cli.CliError, match="symbolic link"):
+        cli.project_schema(project)
+    assert not list(outside.iterdir())
+    (project / ".tesserae").unlink()
+    (project / ".tesserae").mkdir()
+    victim = tmp_path / "victim.json"
+    victim.write_text("mine")
+    (project / ".tesserae" / "tesserae-widget-schema.json").symlink_to(victim)
+    with pytest.raises(cli.CliError, match="symbolic link"):
+        cli.project_schema(project)
+    assert victim.read_text() == "mine"
+
+
+def test_the_project_schema_is_written_whole_and_leaves_no_temporary_file(tmp_path):
+    (tmp_path / "Views").mkdir()
+    path = cli.project_schema(tmp_path)
+    assert json.loads(path.read_text())["title"] and not list(path.parent.glob("*.tmp"))
+    assert cli.project_schema(tmp_path) == path  # again: it replaces its own file
