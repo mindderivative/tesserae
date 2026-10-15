@@ -258,9 +258,17 @@ def project_schema(folder: Path) -> Path:
         if link.is_symlink():
             raise CliError(f"{link} is a symbolic link; remove it, and `tesserae schema --project` will write there")
     path.parent.mkdir(exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    os.replace(temporary, path)  # the whole file or none of it, and never through a link at `path`
+    import tempfile
+
+    handle, name = tempfile.mkstemp(dir=path.parent, prefix=path.name + ".", suffix=".tmp")  # a new file nobody named beforehand (O_CREAT | O_EXCL)
+    try:
+        with os.fdopen(handle, "w", encoding="utf-8") as out:
+            out.write(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+        os.chmod(name, 0o644)  # mkstemp makes it private; the schema is for any editor to read
+        os.replace(name, path)  # the whole file or none of it, and never through a link at `path`
+    except BaseException:
+        Path(name).unlink(missing_ok=True)
+        raise
     return path
 
 

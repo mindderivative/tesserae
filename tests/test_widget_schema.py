@@ -165,3 +165,23 @@ def test_the_project_schema_is_written_whole_and_leaves_no_temporary_file(tmp_pa
     path = cli.project_schema(tmp_path)
     assert json.loads(path.read_text())["title"] and not list(path.parent.glob("*.tmp"))
     assert cli.project_schema(tmp_path) == path  # again: it replaces its own file
+
+
+def test_a_link_planted_at_the_old_temporary_name_is_not_written_through(tmp_path):
+    """The temporary file is a new one with a name nobody could plant, not `<schema>.tmp`."""
+    (tmp_path / "Views").mkdir()
+    (tmp_path / ".tesserae").mkdir()
+    victim = tmp_path / "victim.json"
+    victim.write_text("mine")
+    (tmp_path / ".tesserae" / "tesserae-widget-schema.json.tmp").symlink_to(victim)
+    path = cli.project_schema(tmp_path)
+    assert victim.read_text() == "mine" and json.loads(path.read_text())["title"]
+    assert not path.is_symlink() and path.stat().st_mode & 0o777 == 0o644
+
+
+def test_a_failed_write_leaves_no_temporary_file(tmp_path, monkeypatch):
+    (tmp_path / "Views").mkdir()
+    monkeypatch.setattr(cli.os, "replace", lambda *a: (_ for _ in ()).throw(OSError("disk full")))
+    with pytest.raises(OSError):
+        cli.project_schema(tmp_path)
+    assert not [p for p in (tmp_path / ".tesserae").iterdir() if p.name != ".gitkeep"]
