@@ -192,7 +192,6 @@ bar, and the two screens as calls with a `route:`:
 ```
 
 - The rail replaces the Settings button, so the screens lose their Back and Settings buttons.
-- `window_border=False` leaves out the 1 px line the app draws around a borderless window, so the title bar is the window's edge.
 - `app.open_view("Window")` opens `Views/Window_View.yaml`. Its `widget: Main` and `widget: Settings` calls, with a
   `route:`, are the screens: each is registered under its view's name (`Main`, `Settings`), so `app.py` no longer opens
   or routes them.

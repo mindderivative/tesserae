@@ -211,7 +211,6 @@ brings the two screens in.
   of its own: it reads the names of the ViewModel that serves the window. That is why `Tasks_ViewModel.py` and
   `Settings_ViewModel.py` are now one, `Window_ViewModel.py`, serving `Window`.
 - The rail replaces the Settings and Back buttons, so they are gone from the screens.
-- `window_border=False` leaves out the 1 px line the app draws around a borderless window, so the title bar is the window's edge.
 - The window is still resizable (from its edges), and the title bar still drags it.
 
 See [Windows, Docks & Embedded Views](guide/windows-and-docks.md) and [Custom Title Bars](guide/custom-title-bars.md).

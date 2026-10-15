@@ -14,7 +14,7 @@ class AppState:
 
 
 state = AppState()
-app = App(title="Tasks", root=HERE, custom_theme="Brand", stylesheet="Tasks", state=state, window_border=False)
+app = App(title="Tasks", root=HERE, custom_theme="Brand", stylesheet="Tasks", state=state)
 app.bind(app.project.viewmodel("Window")(state))
 app.open_view("Window")  # Views/Window_View.yaml: the window, its rail and its screens
 

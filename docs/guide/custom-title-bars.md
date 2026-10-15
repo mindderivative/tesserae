@@ -200,7 +200,8 @@ macOS, where the OS keeps the frame. It follows the app's theme, light
 and dark.
 
 `App(window_border=False)`, or `app.window_border = False`, turns it
-off. Its class is `window_border`, so a stylesheet or theme restyles it:
+off. Its class is `window_border`, so a stylesheet in the older rule shape (rules by `classes`) restyles it. A stylesheet of
+`widget:` rules does not reach it, because the border is not a widget; use `window_border=False` and draw your own edge:
 
 ```yaml
 styles:

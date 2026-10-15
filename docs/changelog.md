@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.11
+
+### Fixed
+
+- **A borderless window no longer crashes when the app's stylesheet is a sheet of `widget:` rules** ([#271](https://github.com/mindderivative/tesserae/issues/271)). The window's 1 px border is a plain `Rect` in a small view of its own, and the app's stylesheet was handed to it even when it was in the rule shape that view cannot read, so `App(borderless=True, stylesheet=...)` raised `unknown field(s) ['widget']` (and `tesserae build --check` with it). A rule sheet is no longer passed to the border, which no `widget:` rule could reach anyway; a sheet in the older shape still restyles it by class. The Tasks tutorial's last step no longer needs `window_border=False`.
+
 ## 0.5.0.10
 
 ### Changed

@@ -1486,6 +1486,8 @@ class App:
             self._border.root.set(visible=shown)
 
     def _build_border(self) -> Any:
+        from tesserae.spec.rules import is_rule_sheet
+
         style: dict[str, Any] = {"position": "absolute", "x": 0, "y": 0, "width": "100%", "height": "100%",
                                  "z_index": 1000}
         theme = self._view_theme()
@@ -1494,8 +1496,8 @@ class App:
             style.update(background="transparent", border_width=1,
                          border_color="#{:02X}{:02X}{:02X}{:02X}".format(*tokens.BASELINE["outline_variant"]))
         spec = {"id": "window_border", "kind": "Rect", "classes": ["window_border"], "style": style}
-        if self._stylesheet_spec is not None:
-            theme["stylesheet_spec"] = self._stylesheet_spec
+        if self._stylesheet_spec is not None and not is_rule_sheet(self._stylesheet_spec):
+            theme["stylesheet_spec"] = self._stylesheet_spec  # the border is a plain Rect, which no `widget:` rule reaches, and the old reader refuses one
         view = TesseraeView(spec, window=self._window, **theme)
         view.root.set(hit_testable=False, a11y_hidden=True)  # drawn over the app, never in its way
         self._built.append(_Built(view))  # re-themed with the app's views

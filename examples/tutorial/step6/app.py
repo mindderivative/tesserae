@@ -23,7 +23,6 @@ app = App(
     custom_theme=HERE / "Brand_Theme.yaml",
     stylesheet=HERE / "Tasks_Stylesheet.yaml",
     state=state,
-    window_border=False,  # no 1 px line around the frame; the title bar is the window's edge
 )
 app.bind(WindowViewModel(state))
 app.open_view("Window")  # the window: its title bar, its rail, and the screens in it

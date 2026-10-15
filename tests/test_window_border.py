@@ -112,3 +112,26 @@ def test_an_unthemed_app_gets_the_baseline_colour():
     app = App(borderless=True)
     assert _border(app).get("stroke_color") == tokens.BASELINE["outline_variant"]
     assert _border(app).get("stroke_width") == 1.0
+
+
+RULES = {"styles": [{"widget": "Button", "style": {"corner_radius": 4}}]}  # a stylesheet of `widget:` rules
+OLD_RULES = {"styles": [{"kind": "Rect", "classes": ["window_border"], "style": {"border_width": 3}}]}  # the 0.4 shape
+
+
+def test_a_rule_stylesheet_does_not_stop_the_border_being_built():
+    """#271: the app's stylesheet went to the border's own small view, which only reads the old shape, and a `widget:` rule raised."""
+    app = _app(borderless=True, stylesheet_spec=RULES)
+    border = _border(app)
+    assert border.get("visible") is True and border.get("stroke_width") == 1.0
+
+
+def test_the_border_follows_a_theme_switch_with_a_rule_stylesheet():
+    app = _app(borderless=True, stylesheet_spec=RULES)
+    app.set_dark(not app.dark)
+    app.window.advance(16)
+    assert _border(app).get("stroke_color") == Theme.resolve(theme_seed=SEED, dark=app.dark).role("outline_variant")
+
+
+def test_an_old_shape_stylesheet_still_restyles_the_border():
+    app = _app(borderless=True, stylesheet_spec=OLD_RULES)
+    assert _border(app).get("stroke_width") == 3.0
