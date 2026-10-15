@@ -1,0 +1,2545 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://mindderivative.github.io/tesserae/schema/tesserae-stylesheet-schema.json",
+  "title": "Tesserae stylesheet of rules",
+  "description": "A stylesheet of rules: `<Name>_Stylesheet.yaml`, or the file `App(stylesheet=)` names. Each rule says which widgets it is for and the style it sets.",
+  "definitions": {
+    "color": {
+      "anyOf": [
+        {
+          "enum": [
+            "background",
+            "error",
+            "error_container",
+            "inverse_on_surface",
+            "inverse_primary",
+            "inverse_surface",
+            "on_background",
+            "on_error",
+            "on_error_container",
+            "on_primary",
+            "on_primary_container",
+            "on_primary_fixed",
+            "on_primary_fixed_variant",
+            "on_secondary",
+            "on_secondary_container",
+            "on_secondary_fixed",
+            "on_secondary_fixed_variant",
+            "on_surface",
+            "on_surface_variant",
+            "on_tertiary",
+            "on_tertiary_container",
+            "on_tertiary_fixed",
+            "on_tertiary_fixed_variant",
+            "outline",
+            "outline_variant",
+            "primary",
+            "primary_container",
+            "primary_fixed",
+            "primary_fixed_dim",
+            "scrim",
+            "secondary",
+            "secondary_container",
+            "secondary_fixed",
+            "secondary_fixed_dim",
+            "shadow",
+            "surface",
+            "surface_bright",
+            "surface_container",
+            "surface_container_high",
+            "surface_container_highest",
+            "surface_container_low",
+            "surface_container_lowest",
+            "surface_dim",
+            "surface_tint",
+            "surface_variant",
+            "tertiary",
+            "tertiary_container",
+            "tertiary_fixed",
+            "tertiary_fixed_dim"
+          ]
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "description": "A theme role (such as `surface` or `on_primary`), `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `transparent`, a CSS colour name, or a CSS function such as `rgb(...)` or `oklch(...)`. End any of them with `@N%` to scale its alpha: `primary@12%`."
+    },
+    "fill": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/color"
+        },
+        {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*(linear|radial|conic)-gradient\\("
+            },
+            {
+              "type": "object",
+              "required": [
+                "gradient",
+                "stops"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "gradient": {
+                  "enum": [
+                    "linear",
+                    "radial",
+                    "sweep"
+                  ]
+                },
+                "stops": {
+                  "type": "array",
+                  "minItems": 2,
+                  "description": "Colours, or `[place, colour]` pairs with places from 0 to 1."
+                },
+                "angle": {
+                  "type": "number",
+                  "description": "Degrees: 0 up, 90 right, 180 down."
+                },
+                "center": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "`[x, y]`, as fractions of the box."
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "start": {
+                  "type": "number"
+                }
+              }
+            }
+          ],
+          "description": "A CSS-like `linear-gradient(...)`, `radial-gradient(...)` or `conic-gradient(...)` whose stops are theme roles or colours, or a mapping with `gradient: linear|radial|sweep` and `stops`."
+        }
+      ],
+      "description": "A colour (a theme role, a hex or a CSS colour) or a gradient."
+    },
+    "style": {
+      "type": "object",
+      "description": "How a node looks and lays out its children.",
+      "properties": {
+        "align_cells": {
+          "description": "In a grid: where each item sits in its cell. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "enum": [
+                "top_left",
+                "top",
+                "top_right",
+                "left",
+                "center",
+                "right",
+                "bottom_left",
+                "bottom",
+                "bottom_right"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "align_content": {
+          "description": "Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. (Alignment.)",
+          "x-group": "Alignment",
+          "anyOf": [
+            {
+              "enum": [
+                "top_left",
+                "top",
+                "top_right",
+                "left",
+                "center",
+                "right",
+                "bottom_left",
+                "bottom",
+                "bottom_right"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "align_self": {
+          "description": "Its own place in its parent, over the parent's `align_content`. (Alignment.)",
+          "x-group": "Alignment",
+          "anyOf": [
+            {
+              "enum": [
+                "top_left",
+                "top",
+                "top_right",
+                "left",
+                "center",
+                "right",
+                "bottom_left",
+                "bottom",
+                "bottom_right"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "align_tracks": {
+          "description": "In a grid: how the tracks share the room left over. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch",
+                "between",
+                "around",
+                "evenly"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "align_wrapped": {
+          "description": "With `flex_wrap: wrap`: how the lines share the room left over. (Alignment.)",
+          "x-group": "Alignment",
+          "anyOf": [
+            {
+              "enum": [
+                "start",
+                "center",
+                "end",
+                "stretch",
+                "between",
+                "around",
+                "evenly"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "aspect_ratio": {
+          "description": "Width over height: gives the missing side from the one set. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "backdrop_blur": {
+          "description": "Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "background": {
+          "description": "Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/fill"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "blend_mode": {
+          "description": "How it is drawn over what is behind it, as CSS `mix-blend-mode`. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "enum": [
+                "normal",
+                "multiply",
+                "screen",
+                "overlay",
+                "darken",
+                "lighten",
+                "color_dodge",
+                "color_burn",
+                "hard_light",
+                "soft_light",
+                "difference",
+                "exclusion",
+                "hue",
+                "saturation",
+                "color",
+                "luminosity"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "blur": {
+          "description": "Blurs the node and what it draws, by this many pixels. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "border_color": {
+          "description": "The colour of its border: a colour or a gradient. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/fill"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "border_width": {
+          "description": "The width of its border, in pixels. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "clip_children": {
+          "description": "Whether children are cut off at its edge. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "column_gap": {
+          "description": "Space between columns (defaults to `gap`). (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "corner_radius": {
+          "description": "Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "enum": [
+                        "extra_large",
+                        "extra_small",
+                        "large",
+                        "medium",
+                        "none",
+                        "small",
+                        "full"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "enum": [
+                          "extra_large",
+                          "extra_small",
+                          "large",
+                          "medium",
+                          "none",
+                          "small",
+                          "full"
+                        ]
+                      }
+                    ]
+                  },
+                  "minItems": 4,
+                  "maxItems": 4
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "top_left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the top left corner."
+                    },
+                    "top_right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the top right corner."
+                    },
+                    "bottom_right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the bottom right corner."
+                    },
+                    "bottom_left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of the bottom left corner."
+                    },
+                    "top": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both top corners."
+                    },
+                    "right": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both right corners."
+                    },
+                    "bottom": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both bottom corners."
+                    },
+                    "left": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "enum": [
+                            "extra_large",
+                            "extra_small",
+                            "large",
+                            "medium",
+                            "none",
+                            "small",
+                            "full"
+                          ]
+                        }
+                      ],
+                      "description": "The radius of both left corners."
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "cursor": {
+          "description": "The pointer over it: a name, or `{src: cursor.png, hotspot: [x, y]}` (a picture next to the view, at most 256 pixels a side; only in a node's own `style:`). (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "enum": [
+                    "default",
+                    "pointer",
+                    "text",
+                    "grab",
+                    "grabbing",
+                    "move",
+                    "not_allowed",
+                    "wait",
+                    "progress",
+                    "crosshair",
+                    "help",
+                    "col_resize",
+                    "row_resize",
+                    "ew_resize",
+                    "ns_resize",
+                    "nesw_resize",
+                    "nwse_resize",
+                    "copy",
+                    "cell",
+                    "context_menu",
+                    "zoom_in",
+                    "zoom_out",
+                    "all_scroll"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "src"
+                  ],
+                  "properties": {
+                    "src": {
+                      "type": "string",
+                      "description": "A PNG (or any picture Pillow reads) next to the view."
+                    },
+                    "hotspot": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      },
+                      "description": "`[x, y]`: the pixel that is the pointer's place."
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "display": {
+          "description": "`flex` (the default) or `grid`. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "enum": [
+                "flex",
+                "grid"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "elevation": {
+          "description": "A shadow level, 0 to 5. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "level_0",
+                    "level_1",
+                    "level_2",
+                    "level_3",
+                    "level_4",
+                    "level_5"
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "filter": {
+          "description": "Colour filters over it and its children, as in CSS: `{grayscale: 1}`, `{saturate: 0.4, brightness: 0.9}` (`hue_rotate` is in degrees). (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "saturate": {
+                  "type": "number",
+                  "description": "1 is unchanged, 0 grey, above 1 more vivid."
+                },
+                "brightness": {
+                  "type": "number",
+                  "description": "1 is unchanged, 0 black, above 1 brighter."
+                },
+                "contrast": {
+                  "type": "number",
+                  "description": "1 is unchanged, 0 flat grey, above 1 harder."
+                },
+                "grayscale": {
+                  "type": "number",
+                  "description": "0 is unchanged, 1 fully grey."
+                },
+                "hue_rotate": {
+                  "type": "number",
+                  "description": "Turns the hues, in degrees."
+                },
+                "invert": {
+                  "type": "number",
+                  "description": "0 is unchanged, 1 inverted."
+                },
+                "sepia": {
+                  "type": "number",
+                  "description": "0 is unchanged, 1 fully sepia."
+                }
+              }
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "flex": {
+          "description": "How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. (Flex.)",
+          "x-group": "Flex",
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "expand_horizontal",
+                "expand_vertical",
+                "fill"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "flex_direction": {
+          "description": "How its children are laid out: `horizontal` (the default) or `vertical`. (Flex.)",
+          "x-group": "Flex",
+          "anyOf": [
+            {
+              "enum": [
+                "horizontal",
+                "vertical"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "flex_wrap": {
+          "description": "`wrap` lets children flow onto more lines; `no_wrap` keeps one. (Flex.)",
+          "x-group": "Flex",
+          "anyOf": [
+            {
+              "enum": [
+                "no_wrap",
+                "wrap"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "foreground": {
+          "description": "Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/fill"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "gap": {
+          "description": "Space between its children. (Flex.)",
+          "x-group": "Flex",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "grid_auto_columns": {
+          "description": "The size of columns the template doesn't name. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "grid_auto_flow": {
+          "description": "How grid children fill the cells. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "enum": [
+                "row",
+                "column",
+                "row dense",
+                "column dense",
+                "dense"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "grid_auto_rows": {
+          "description": "The size of rows the template doesn't name. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "grid_column": {
+          "description": "Which grid column it takes: `2`, or `1 / 3`. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "grid_row": {
+          "description": "Which grid row it takes: `2`, or `1 / 3`. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "grid_template_columns": {
+          "description": "The grid's columns, as in CSS: `1fr 2fr 100px`. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "grid_template_rows": {
+          "description": "The grid's rows, as in CSS. (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "height": {
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "margin": {
+          "description": "Space outside it: one number, or `{left, right, top, bottom}`. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "top": {
+                      "type": "number"
+                    },
+                    "right": {
+                      "type": "number"
+                    },
+                    "bottom": {
+                      "type": "number"
+                    },
+                    "left": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "max_height": {
+          "description": "The most height it can take. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "max_width": {
+          "description": "The most width it can take. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "min_height": {
+          "description": "The least height it can take. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "min_width": {
+          "description": "The least width it can take. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "opacity": {
+          "description": "From 0 (clear) to 1 (opaque). (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "overflow": {
+          "description": "`hidden` cuts what is inside to the node's own box, `visible` lets it spill out: the same as `clip_children: true` and `false`, which it is another way to write (a node that says both must agree). It does not scroll: use a ScrollView for that. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "enum": [
+                "hidden",
+                "visible"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "padding": {
+          "description": "Space inside it: one number, or `{left, right, top, bottom}`. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "top": {
+                      "type": "number"
+                    },
+                    "right": {
+                      "type": "number"
+                    },
+                    "bottom": {
+                      "type": "number"
+                    },
+                    "left": {
+                      "type": "number"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "pointer_events": {
+          "description": "`none` lets the pointer through the node itself: a click on it goes to whatever is under it, and it is not hovered or pressed. What is inside it keeps its own (a child with `auto` is still hit). `auto`, the default, is the usual. (Paint and effects.)",
+          "x-group": "Paint and effects",
+          "anyOf": [
+            {
+              "enum": [
+                "auto",
+                "none"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "position": {
+          "description": "`absolute` takes it out of the flow and places it at `x` and `y`. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "enum": [
+                "relative",
+                "absolute"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "rotation_deg": {
+          "description": "Turns the node by this many degrees, clockwise, about its centre. (Motion.)",
+          "x-group": "Motion",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "row_gap": {
+          "description": "Space between rows (defaults to `gap`). (Grid.)",
+          "x-group": "Grid",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "scale": {
+          "description": "Draws the node and what is in it at this multiple of its size (1 is unchanged), about its centre. (Motion.)",
+          "x-group": "Motion",
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "snap_align": {
+          "description": "In a scroll view that has `snap`, this node is a place it settles on, with this edge of the node at the same edge of the view. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "start",
+                "center",
+                "end"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "spread": {
+          "description": "Spreads its children along the layout: `between` (the space goes between them), `around` or `evenly`. (Alignment.)",
+          "x-group": "Alignment",
+          "anyOf": [
+            {
+              "enum": [
+                "none",
+                "between",
+                "around",
+                "evenly"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "sticky": {
+          "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "transition": {
+          "description": "Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. `all` covers every one that can. A node is where it says when first drawn; only a change eases. (Motion.)",
+          "x-group": "Motion",
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "all": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "background": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "foreground": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "border_color": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "border_width": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "corner_radius": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "elevation": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "opacity": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "blur": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "backdrop_blur": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "scale": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "translate_x": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "translate_y": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "rotation_deg": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "icon": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "width": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "height": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "x": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "y": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "gap": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "padding": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                },
+                "margin": {
+                  "anyOf": [
+                    {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "duration": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "easing": {
+                          "anyOf": [
+                            {
+                              "enum": [
+                                "linear",
+                                "standard",
+                                "standard_accelerate",
+                                "standard_decelerate",
+                                "emphasized",
+                                "emphasized_accelerate",
+                                "emphasized_decelerate",
+                                "spring"
+                              ]
+                            },
+                            {
+                              "type": "array",
+                              "items": {
+                                "type": "number"
+                              },
+                              "minItems": 4,
+                              "maxItems": 4
+                            }
+                          ]
+                        },
+                        "bounce": {
+                          "type": "number",
+                          "exclusiveMinimum": -1,
+                          "exclusiveMaximum": 1
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "translate_x": {
+          "description": "Draws the node this many pixels to the right of where it is laid out. (Motion.)",
+          "x-group": "Motion",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "translate_y": {
+          "description": "Draws the node this many pixels lower than where it is laid out. (Motion.)",
+          "x-group": "Motion",
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "width": {
+          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "x": {
+          "description": "Where an `absolute` node sits from the left. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "y": {
+          "description": "Where an `absolute` node sits from the top. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "z_index": {
+          "description": "Stacking order: higher is in front. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "zone": {
+          "description": "A DockPanel's zone in its Dock: where it docks. Only a DockPanel directly in a Dock has one; anywhere else it is an error. (Docking.)",
+          "x-group": "Docking",
+          "anyOf": [
+            {
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom",
+                "center"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "description": "Styles for the nodes it matches: a widget (a built-in, or a view called by its name), narrowed by variant, size, shape, classes, name, part and state.",
+      "required": [
+        "style"
+      ],
+      "properties": {
+        "widget": {
+          "type": "string",
+          "description": "The widget the rule is for: a built-in, or a view (`Button`)."
+        },
+        "variant": {
+          "type": "string",
+          "description": "Only widgets with this variant."
+        },
+        "size": {
+          "type": "string",
+          "description": "Only widgets of this size."
+        },
+        "shape": {
+          "type": "string",
+          "description": "Only widgets of this shape."
+        },
+        "classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Only nodes with all of these classes."
+        },
+        "name": {
+          "type": "string",
+          "description": "Only the node with this name."
+        },
+        "part": {
+          "type": "string",
+          "description": "A named node inside the widget's view (the widget's root when left out)."
+        },
+        "state": {
+          "enum": [
+            "hovered",
+            "focused",
+            "focus_visible",
+            "pressed",
+            "disabled",
+            "selected",
+            "checked",
+            "expanded",
+            "error",
+            "read_only",
+            "visited"
+          ],
+          "description": "Only while the widget is in this state."
+        },
+        "style": {
+          "$ref": "#/definitions/style",
+          "description": "The style fields the rule sets."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "styles"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "styles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/rule"
+      },
+      "description": "The rules, in order: a later rule wins a tie."
+    }
+  }
+}

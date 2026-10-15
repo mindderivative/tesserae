@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.18
+
+### Fixed
+
+- **Editor support for the current language** ([#275](https://github.com/mindderivative/tesserae/issues/275)). `tesserae schema --settings` mapped every `*_View.yaml` to the schema of the older syntax, which flagged every view of the current one, and the widget schema knew only the 30 built-in widgets, so a `Button` or a view of your own was an error too, and a node's `style:` was just "an object". The widget schema now has a branch for each view Tesserae ships (with its params, types, choices and bounds) and describes `style:` field by field (expressions accepted); there is a new `tesserae-stylesheet-schema.json` for a stylesheet of rules (the theme schema knew only the older keys). `--settings` maps views, stylesheets and themes to those. `tesserae schema --project [DIR]` writes `DIR/.tesserae/tesserae-widget-schema.json`, the widget schema with every view the project has of its own, and maps the views to it, so an editor completes a call of your view and flags a misspelt or missing param. The schemas are written by `tools/generate_yaml_schema.py` (`generate_widget_schema.py` runs it) and the site copies are in `docs/schema/`.
+
 ## 0.5.0.17
 
 ### Fixed

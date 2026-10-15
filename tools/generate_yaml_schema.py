@@ -639,8 +639,74 @@ def _style_file() -> dict[str, Any]:
                      "style": {"$ref": "#/definitions/style", "description": "The style fields, as in a node's `style:`."}}})
 
 
+def _style_definitions() -> dict[str, Any]:
+    """The style fields of a 0.5.0 node, as the editor should offer them: each with its type or choices, and anything that is an expression
+    (`"{{ height / 2 }}"`) accepted where a value is."""
+    defs = _only(_definitions(fragment=False), "style", "color", "fill")
+    expression = {"type": "string", "pattern": r"\{\{"}
+    style = defs["style"]
+    wrapped = {}
+    for key, spec in style["properties"].items():
+        meta = {k: spec[k] for k in ("description", "x-group") if k in spec}
+        body = {k: v for k, v in spec.items() if k not in meta}
+        wrapped[key] = {**meta, "anyOf": [body, expression]}
+    percent = {"type": "string", "pattern": r"^-?\d+(\.\d+)?%$"}
+    for key in ("x", "y"):  # a position may be a percentage of the parent
+        wrapped[key]["anyOf"][0] = {"anyOf": [*wrapped[key]["anyOf"][0]["anyOf"], percent]}
+    from tesserae.spec.transition import LAYOUT_TRANSITIONABLE, TRANSITIONABLE
+
+    for option in wrapped["transition"]["anyOf"]:  # the fields that can ease are the ones the engine's planner takes
+        if option.get("type") == "object" and "all" in option.get("properties", {}):
+            one = option["properties"]["all"]
+            option["properties"] = {name: one for name in ["all", *TRANSITIONABLE, *LAYOUT_TRANSITIONABLE]}
+    defs["style"] = {**style, "properties": wrapped}
+    return defs
+
+
+def _widget() -> dict[str, Any]:
+    """A node of the current language: a branch for each built-in widget and each view Tesserae ships. A project's own views are added by
+    `tesserae schema --project`."""
+    from tesserae.shipped import ViewLibrary, shipped_views
+    from tesserae.spec.widgets import json_schema
+
+    library = ViewLibrary()
+    views = {name: library.decl(name) for name in shipped_views()}
+    out = json_schema(views, _style_definitions())
+    return {"$schema": DRAFT, "$id": SITE + "tesserae-widget-schema.json",
+            "description": "A view of the current language: `*_View.yaml`. A tree of `widget:` nodes, with a branch for each built-in widget and each view "
+                           "Tesserae ships; `tesserae schema --project` adds the project's own.",
+            **{k: v for k, v in out.items() if k != "$schema"}}
+
+
+def _stylesheet() -> dict[str, Any]:
+    """A stylesheet of rules (`*_Stylesheet.yaml`): `widget:`, `variant:`, `part:`, `state:` and a `style:` of fields."""
+    from tesserae.spec.rules import STATES
+
+    defs = _style_definitions()
+    rule = {
+        "type": "object",
+        "description": "Styles for the nodes it matches: a widget (a built-in, or a view called by its name), narrowed by variant, size, shape, classes, name, part and state.",
+        "required": ["style"],
+        "properties": {
+            "widget": {"type": "string", "description": "The widget the rule is for: a built-in, or a view (`Button`)."},
+            "variant": {"type": "string", "description": "Only widgets with this variant."},
+            "size": {"type": "string", "description": "Only widgets of this size."},
+            "shape": {"type": "string", "description": "Only widgets of this shape."},
+            "classes": {"type": "array", "items": {"type": "string"}, "description": "Only nodes with all of these classes."},
+            "name": {"type": "string", "description": "Only the node with this name."},
+            "part": {"type": "string", "description": "A named node inside the widget's view (the widget's root when left out)."},
+            "state": {"enum": list(STATES), "description": "Only while the widget is in this state."},
+            "style": {"$ref": "#/definitions/style", "description": "The style fields the rule sets."}},
+        "additionalProperties": False}
+    defs["rule"] = rule
+    return _root("tesserae-stylesheet-schema.json", "Tesserae stylesheet of rules",
+                 "A stylesheet of rules: `<Name>_Stylesheet.yaml`, or the file `App(stylesheet=)` names. Each rule says which widgets it is for and the style it sets.",
+                 defs, {"type": "object", "required": ["styles"], "additionalProperties": False, "properties": {
+                     "styles": {"type": "array", "items": {"$ref": "#/definitions/rule"}, "description": "The rules, in order: a later rule wins a tie."}}})
+
+
 def schemas() -> dict[str, dict[str, Any]]:
-    return {"tesserae-yaml-schema.json": _view(),
+    return {"tesserae-yaml-schema.json": _view(), "tesserae-widget-schema.json": _widget(), "tesserae-stylesheet-schema.json": _stylesheet(),
             "tesserae-theme-schema.json": _theme(), "tesserae-component-schema.json": _component(),
             "tesserae-style-schema.json": _style_file()}
 

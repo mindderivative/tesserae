@@ -3,7 +3,7 @@
     tesserae new <name> [--window [--custom-title-bar]] [--dir PARENT]
     tesserae add screen <Name> [--dir DIR]
     tesserae build [app.py] [--name N] [--icon F] [--console] [--include G] [--exclude G] [--check]
-    tesserae schema [--settings]
+    tesserae schema [--settings] [--project [DIR]]
     tesserae migrate-yaml [PATH] [--write] [--force]
 
 `new` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair
@@ -13,7 +13,8 @@ marker comments `new` leaves in `app.py`, its bind, `open_view()` and route.
 Neither overwrites a file. The templates are in `tesserae/templates/`.
 `build` makes the app one executable: see `tesserae.build`.
 `schema` (0.3.2) says where the YAML schemas for Red Hat's YAML language
-server are, and with `--settings` prints the `yaml.schemas` setting for them.
+server are, and with `--settings` prints the `yaml.schemas` setting for them. `--project` writes a schema of the views too that the project
+DIR (here by default) has of its own, in `DIR/.tesserae/`, and maps the views to it.
 """
 
 from __future__ import annotations
@@ -34,13 +35,19 @@ LOAD_MARKER = "# (tesserae add screen adds each new screen's lines above this li
 SCHEMAS = Path(__file__).parent / "schema"
 #: Each YAML schema and the files it is for, as `yaml.schemas` globs (a `!` leaves files out).
 SCHEMA_FILES = {
-    "tesserae-yaml-schema.json": ["**/*_View.yaml"],
+    "tesserae-widget-schema.json": ["**/*_View.yaml"],
+    "tesserae-stylesheet-schema.json": ["**/*_Stylesheet.yaml", "**/*stylesheet*.yaml"],
+    # A theme file: the suffix, and a guess at other names (not a view or a stylesheet).
+    "tesserae-theme-schema.json": ["**/*_Theme.yaml", "**/*theme*.yaml", "!**/*_View.yaml", "!**/*_Component.yaml", "!**/*_Stylesheet.yaml",
+                                   "!**/*stylesheet*.yaml"],
+    # The older syntax, for the files of a project that has not moved yet.
     "tesserae-component-schema.json": ["**/*_Component.yaml"],
     "tesserae-style-schema.json": ["**/*_Style.yaml"],
-    # Themes and stylesheets (and a component's stylesheet): the suffixes, and a guess at other names.
-    "tesserae-theme-schema.json": ["**/*_Theme.yaml", "**/*_Stylesheet.yaml", "**/*theme*.yaml", "**/*stylesheet*.yaml",
-                                   "!**/*_View.yaml", "!**/*_Component.yaml"],
 }
+#: The view schema of the older syntax (`kind:`, `id:`): shipped, and for a file that names it in a comment.
+OLDER_VIEW_SCHEMA = "tesserae-yaml-schema.json"
+#: Where `--project` writes the schema of the project's own views, under the project.
+PROJECT_SCHEMA = Path(".tesserae") / "tesserae-widget-schema.json"
 
 
 class CliError(Exception):
@@ -190,6 +197,8 @@ def _parser() -> argparse.ArgumentParser:
     schema_cmd = commands.add_parser("schema", help="where the YAML schemas for editors are")
     schema_cmd.add_argument("--settings", action="store_true",
                             help="print the `yaml.schemas` setting for Red Hat's YAML language server")
+    schema_cmd.add_argument("--project", nargs="?", const=Path("."), type=Path, metavar="DIR",
+                            help="also know the views DIR (here by default) has of its own: writes DIR/.tesserae/tesserae-widget-schema.json")
     build_cmd = commands.add_parser("build", help="build the app into one executable (needs tesserae-ui[build])")
     build_cmd.add_argument("app", nargs="?", type=Path, default=Path("app.py"),
                            help="the app's entry point (default: app.py)")
@@ -210,20 +219,64 @@ def _parser() -> argparse.ArgumentParser:
     return parser
 
 
+def project_schema_data(folder: Path) -> dict:
+    """The widget schema with the views `folder` has of its own: every view of the project (found anywhere under it) is a widget in it, with its
+    params. An editor then checks a call of one, and a misspelt name, as it does a built-in."""
+    import json
+
+    from tesserae.project import Project, ProjectError
+    from tesserae.shipped import ViewLibrary
+    from tesserae.spec.widgets import json_schema
+
+    if not folder.is_dir():
+        raise CliError(f"{folder} isn't a folder")
+    try:
+        names = Project(folder, recursive=True).index("view")
+    except ProjectError as exc:
+        raise CliError(str(exc)) from None
+    library = ViewLibrary(names)
+    views = {}
+    for name in library.paths:
+        try:
+            decl = library.decl(name)
+        except (ValueError, OSError, AttributeError):  # a view with a mistake in its params, or in the older syntax: the loader says what is wrong
+            continue
+        if decl is not None:
+            views[name] = decl
+    packaged = json.loads((SCHEMAS / "tesserae-widget-schema.json").read_text(encoding="utf-8"))
+    out = json_schema(views, packaged["definitions"])
+    return {**{k: v for k, v in packaged.items() if k not in out}, **out}
+
+
+def project_schema(folder: Path) -> Path:
+    """Writes `project_schema_data(folder)` to `folder/.tesserae/` and returns its path."""
+    import json
+
+    data = project_schema_data(folder)
+    path = folder / PROJECT_SCHEMA
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return path
+
+
 def _schema(args: argparse.Namespace) -> int:
     """Prints the schemas' places, or the setting that maps them to their files."""
     import json
 
-    missing = [name for name in SCHEMA_FILES if not (SCHEMAS / name).is_file()]
+    missing = [name for name in [*SCHEMA_FILES, OLDER_VIEW_SCHEMA] if not (SCHEMAS / name).is_file()]
     if missing:
         raise CliError(f"this install has no {', '.join(missing)}")
+    places = {name: SCHEMAS / name for name in SCHEMA_FILES}
+    if args.project is not None:
+        places["tesserae-widget-schema.json"] = project_schema(args.project.resolve())
     if args.settings:
-        print(json.dumps({"yaml.schemas": {str(SCHEMAS / name): globs for name, globs in SCHEMA_FILES.items()}}, indent=2))
+        print(json.dumps({"yaml.schemas": {str(path): SCHEMA_FILES[name] for name, path in places.items()}}, indent=2))
         return 0
     for name, globs in SCHEMA_FILES.items():
-        print(f"{SCHEMAS / name}\n    for {', '.join(g for g in globs if not g.startswith('!'))}")
-    print("\nFor Red Hat's YAML language server, `tesserae schema --settings` prints the setting. See "
-          "https://mindderivative.github.io/tesserae/guide/editor-support/")
+        print(f"{places[name]}\n    for {', '.join(g for g in globs if not g.startswith('!'))}")
+    print(f"{SCHEMAS / OLDER_VIEW_SCHEMA}\n    for a view in the older syntax (`kind:`), by a comment at the top of the file")
+    print("\nFor Red Hat's YAML language server, `tesserae schema --settings` prints the setting. `--project` adds the views of your own project. "
+          "See https://mindderivative.github.io/tesserae/guide/editor-support/")
     return 0
 
 

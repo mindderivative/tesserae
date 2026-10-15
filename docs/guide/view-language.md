@@ -509,4 +509,5 @@ data in a view's header: `expects: {count: int, rows: list, add: handler}`.
 ## Tools
 
 - `tesserae migrate-yaml [PATH] [--write] [--force]` moves a project written in the older syntax to this one: [Migrating](../migration.md#to-050).
-- A JSON schema of every widget's node, with its properties, ships in the package as `schema/tesserae-widget-schema.json`.
+- A JSON schema of every widget's node, with its properties and style fields, ships in the package as `schema/tesserae-widget-schema.json` (and one for a
+  stylesheet of rules, `tesserae-stylesheet-schema.json`). `tesserae schema --project` adds your own views to it: [Editor Support](editor-support.md).

@@ -81,6 +81,7 @@ briefly to see it start. Options: `--name`, `--icon`, `--console`, `--include GL
 ```bash
 tesserae schema            # where the YAML schemas are
 tesserae schema --settings # the `yaml.schemas` setting for Red Hat's YAML language server
+tesserae schema --settings --project   # the same, with the schema of this project's own views (see Editor Support)
 ```
 
 See [Editor Support](editor-support.md).

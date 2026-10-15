@@ -156,10 +156,12 @@ def test_the_schema_has_a_branch_per_widget_and_is_what_the_tool_writes():
     schema = W.json_schema()
     assert schema["properties"]["widget"]["enum"] == W.names()
     assert len(schema["allOf"]) == len(W.names())
-    spec = importlib.util.spec_from_file_location("generate_widget_schema", ROOT / "tools" / "generate_widget_schema.py")
+    spec = importlib.util.spec_from_file_location("generate_yaml_schema", ROOT / "tools" / "generate_yaml_schema.py")
     tool = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(tool)
-    assert tool.PATH.read_text(encoding="utf-8") == tool.render(), "run `python tools/generate_widget_schema.py`"
+    written = tool.render(tool.schemas()["tesserae-widget-schema.json"])  # built-ins and the shipped views, with the style fields
+    assert (ROOT / "src" / "tesserae" / "schema" / "tesserae-widget-schema.json").read_text(encoding="utf-8") == written, \
+        "run `python tools/generate_yaml_schema.py`"
     slider = next(b for b in schema["allOf"] if b["if"]["properties"]["widget"]["const"] == "Slider")["then"]
     assert "value" in slider["properties"] and "value" in slider["propertyNames"]["enum"] and "valu" not in slider["propertyNames"]["enum"]
     json.dumps(schema)

@@ -167,7 +167,7 @@ def test_schema_says_where_the_yaml_schemas_are_and_prints_the_setting(capsys):
 
     assert cli.main(["schema", "--settings"]) == 0
     setting = json.loads(capsys.readouterr().out)["yaml.schemas"]
-    assert setting[str(cli.SCHEMAS / "tesserae-yaml-schema.json")] == ["**/*_View.yaml"]
+    assert setting[str(cli.SCHEMAS / "tesserae-widget-schema.json")] == ["**/*_View.yaml"]
     assert set(setting) == {str(cli.SCHEMAS / name) for name in cli.SCHEMA_FILES}
 
 

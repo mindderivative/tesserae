@@ -390,27 +390,35 @@ def _schema_of(prop: Property) -> dict[str, Any]:
     return {**out, "description": prop.doc} if prop.doc else out
 
 
-def json_schema() -> dict[str, Any]:
-    """A JSON schema of every registered widget's node (an `if`/`then` per `widget:` value), for editors."""
+def json_schema(views: Optional[dict[str, WidgetDecl]] = None, definitions: Optional[dict[str, Any]] = None) -> dict[str, Any]:
+    """A JSON schema of every registered widget's node (an `if`/`then` per `widget:` value), for editors. `views` are more widgets to include (views, by
+    name: the ones Tesserae ships, and a project's own); `definitions`, when given, are the schema's `definitions` and a node's `style` refers to
+    `#/definitions/style` in them, so an editor completes the style fields."""
     _load_builtins()
+    declared = {**(views or {}), **_REGISTRY}  # a view called `Window` (the window's own file) is the built-in `Window`, as in a node
+    style = {"$ref": "#/definitions/style"} if definitions and "style" in definitions else _UNIVERSAL["style"]
+    universal = {**_UNIVERSAL, "style": style}
     branches = []
-    for name in sorted(_REGISTRY):
-        decl = _REGISTRY[name]
+    for name in sorted(declared):
+        decl = declared[name]
         props = {k: _schema_of(p) for k, p in decl.properties.items()}
         extra = {"children": {"type": "array", "items": {"$ref": "#"}}} if decl.container else {}
         branches.append({
             "if": {"properties": {"widget": {"const": name}}, "required": ["widget"]},
             "then": {
-                "properties": {**_UNIVERSAL, **extra, **props},
+                "properties": {**universal, **extra, **props},
                 "required": ["widget"] + [k for k, p in decl.properties.items() if p.required],
-                "propertyNames": {"enum": [*_UNIVERSAL, *extra, *props]},
+                "propertyNames": {"enum": [*universal, *extra, *props]},
             },
         })
-    return {
+    out: dict[str, Any] = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "Tesserae view node (0.5.0)",
         "type": "object",
         "required": ["widget"],
-        "properties": {**_UNIVERSAL, "widget": {"enum": sorted(_REGISTRY)}},
+        "properties": {**universal, "widget": {"enum": sorted(declared)}},
         "allOf": branches,
     }
+    if definitions:
+        out["definitions"] = definitions
+    return out

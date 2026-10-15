@@ -1,20 +1,8 @@
-"""Writes `src/tesserae/schema/tesserae-widget-schema.json`: the JSON schema of a 0.5.0 view node, one branch per registered widget.
+"""Writes the widget schema (`tesserae-widget-schema.json`), with the others: see `tools/generate_yaml_schema.py`, which this runs."""
 
-Run it after changing a widget declaration (`src/tesserae/spec/builtin_widgets.py`); `tests/test_widgets.py` fails while the file is stale.
-"""
+import sys
 
-import json
-from pathlib import Path
-
-from tesserae.spec.widgets import json_schema
-
-PATH = Path(__file__).resolve().parent.parent / "src" / "tesserae" / "schema" / "tesserae-widget-schema.json"
-
-
-def render() -> str:
-    return json.dumps(json_schema(), indent=2, sort_keys=False) + "\n"
-
+import generate_yaml_schema
 
 if __name__ == "__main__":
-    PATH.write_text(render(), encoding="utf-8")
-    print(f"wrote {PATH}")
+    sys.exit(generate_yaml_schema.main(sys.argv[1:]))
