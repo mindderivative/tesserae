@@ -131,6 +131,9 @@ def _os_dark(window: Any) -> bool | None:
     return None if value is None else bool(value)
 
 
+_SAME: Any = object()  # `spec` not given: the app's current one
+
+
 def _apply_all(views: list[Any], apply: Any, undo: Any) -> None:
     """`apply(view)` for each view; if one raises, `undo(view)` the ones
     already done, then re-raise -- so a rejected theme or stylesheet
@@ -793,11 +796,28 @@ class App:
         `run(hot_reload=True)` does, when the default stylesheet file
         changes.
         """
+        from tesserae.composed import ComposedView
+        from tesserae.spec.rules import is_rule_sheet
+
         previous = self._stylesheet_spec
+        rules_now = is_rule_sheet(stylesheet_spec)
+        rules_before = is_rule_sheet(previous)
+        library = self._composed_docs_library()
+        new_rules = self._composed_rules(library, stylesheet_spec)[0]
+        old_rules = self._composed_rules(library, previous)[0]
+
+        def restyle(view: Any, spec: Any, rules: Any, is_rules: bool, was_rules: bool) -> None:
+            if isinstance(view, ComposedView):  # a view of `widget:` nodes: its rules are part of its composition, and an older-shape sheet is the view's own
+                view.set_stylesheet(stylesheet_spec=None if is_rules else spec)
+                if is_rules or was_rules:
+                    view.restyle(rules)
+            elif not is_rules:  # an older view cannot take a sheet of rules
+                view.set_stylesheet(stylesheet_spec=spec)
+
         _apply_all(
-            [b.view for b in self._built if not b.own_stylesheet],
-            lambda view: view.set_stylesheet(stylesheet_spec=stylesheet_spec),
-            lambda view: view.set_stylesheet(stylesheet_spec=previous),
+            [b.view for b in self._built if not b.own_stylesheet or isinstance(b.view, ComposedView)],
+            lambda view: restyle(view, stylesheet_spec, new_rules, rules_now, rules_before),
+            lambda view: restyle(view, previous, old_rules, rules_before, rules_now),
         )
         self._stylesheet_spec = stylesheet_spec
 
@@ -864,19 +884,27 @@ class App:
         library = ViewLibrary(self.project.index("view"))
         return library.parse(path), library
 
-    def _composed_rules(self, library: Any) -> tuple[list[Any], dict[str, Any]]:
-        """The rules under a composed view (what the shipped components look like, then the app's stylesheet) and the theme arguments."""
-        from tesserae.shipped import shipped_rules
-        from tesserae.spec.rules import is_rule_sheet
+    def _composed_docs_library(self) -> Any:
+        """A library of the project's views and Tesserae's, for what needs only its names."""
+        from tesserae.shipped import ViewLibrary
 
+        return ViewLibrary(self.project.index("view"))
+
+    def _composed_rules(self, library: Any, spec: Any = _SAME) -> tuple[list[Any], dict[str, Any]]:
+        """The rules under a composed view (what the shipped components look like, then the app's stylesheet `spec`, by default the current one) and
+        the theme arguments."""
+        from tesserae.shipped import shipped_rules
+        from tesserae.spec.rules import RuleSheet, is_rule_sheet
+
+        spec = self._stylesheet_spec if spec is _SAME else spec
         kwargs = self._view_theme()
         rules = [sheet.without(library.replaced) for sheet in shipped_rules()]
-        if self._stylesheet_spec is not None:
-            if is_rule_sheet(self._stylesheet_spec):  # the app's rules by widget, variant, part and state
+        if spec is not None:
+            if is_rule_sheet(spec):  # the app's rules by widget, variant, part and state
                 kwargs.pop("stylesheet_spec", None)
-                rules.append(self._rule_sheet())
+                rules.append(RuleSheet.of(spec, "<stylesheet>"))
             else:
-                kwargs["stylesheet_spec"] = self._stylesheet_spec
+                kwargs["stylesheet_spec"] = spec
         return rules, kwargs
 
     def _open_view(self, view: str | Path, name: str | None, window: Any) -> Any:

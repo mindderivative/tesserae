@@ -280,6 +280,10 @@ class ComposedView(View):
         self.image_files = images
         return spec, {node_id: (rgba, w, h) for node_id, rgba, w, h in frames}
 
+    def restyle(self, rules: Any) -> None:
+        """Composes the same view again under other `rules` (the app's stylesheet changed); the state, the ViewModel and the nodes stay."""
+        self.recompose(self.handle.doc, self.handle.composition._composer._views, rules)
+
     def recompose(self, doc: ViewDoc, views: Any, rules: Any = ()) -> None:
         """Hot reload: composes `doc` again, with the state of the nodes whose id is the same carried over, and shows it in place of the old
         composition. The ViewModel, the handle and the window's nodes (matched by id) stay. If the new one cannot be composed or built, the view is

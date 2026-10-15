@@ -8,7 +8,7 @@ opened:
 | a theme: `App(custom_theme=)`, `App(default_theme=)` | every view is re-themed in place ([below](#theme-and-stylesheet-files)) |
 | a view the app opened with `app.load` (the older syntax), and the fragments and images it was built from | the screen is rebuilt in place, its ViewModel and bindings kept |
 | a view the app opened with `app.open_view` or `app.open_window`, any view it calls, and the pictures it draws | the view is composed again in place: its ViewModel, the nodes that keep their name or position, and their `state:` stay ([below](#a-view-written-with-widget-nodes)) |
-| the app's stylesheet of rules (`App(stylesheet=)`, `widget:` rules) | not applied while the app runs: run it again |
+| the app's stylesheet of rules (`App(stylesheet=)`, `widget:` rules) | every view opened with `open_view` is composed again under the new rules, its state kept; a sheet with a mistake leaves them as they were |
 
 The log says what is watched when it starts, and names a screen it does not watch:
 `hot reload: screen 'Tasks' isn't watched -- it was built from a spec, not a file`.
@@ -32,7 +32,7 @@ so is every window `open_window` opens.
 A mistake leaves the window as it was and is logged as an `ERROR` naming the file: invalid YAML, a call with a wrong parameter, a name that is
 not defined, or a widget the engine rejects. Fix the file and save.
 
-Not reloaded: the app's own stylesheet of rules (`App(stylesheet=)`), the Python files (a ViewModel's code is not reloaded), and a `widget: Window`
+Not reloaded: the Python files (a ViewModel's code is not reloaded), and a `widget: Window`
 view's window options (its size, title and flags are read when it opens).
 
 ## In an app (the older syntax)

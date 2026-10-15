@@ -1,10 +1,16 @@
 # Changelog
 
+## 0.5.0.14
+
+### Fixed
+
+- **The app's stylesheet of `widget:` rules is applied again when it changes while the app runs** ([#272](https://github.com/mindderivative/tesserae/issues/272)). `set_stylesheet_spec` (which `run(hot_reload=True)` calls when the stylesheet file is saved) handed the sheet to each view's older stylesheet check, which refused a `widget:` rule with `unknown field(s) ['widget', 'variant']` and kept the old rules, so editing the stylesheet never reached a running window. Every view opened with `open_view` is now composed again under the new rules (`ComposedView.restyle`), with its ViewModel and `state:` kept; a sheet the engine rejects leaves every view as it was. An older-shape sheet works as before, and a view opened later uses the new rules.
+
 ## 0.5.0.13
 
 ### Added
 
-- **Hot reload for views written with `widget:` nodes** ([#269](https://github.com/mindderivative/tesserae/issues/269)). `app.run(hot_reload=True)` watches a view opened with `open_view` or `open_window`, every view it calls (and the views those call) and the pictures it draws, and composes the view again when one changes: the ViewModel and its Signals are the same ones, a node that keeps its place keeps its `state:`, and handlers are wired again. A mistake (invalid YAML, a call with a wrong parameter, a name nothing defines, a widget the engine rejects) leaves the window as it was and is logged as one `ERROR` naming the file. A view opened while the app runs is watched too, and a view the file starts to call is watched from then on. The views Tesserae ships are not. Not reloaded: the app's stylesheet of rules ([#272](https://github.com/mindderivative/tesserae/issues/272)), Python code, and a `widget: Window` view's window options. Until now the log said such a screen "isn't watched" and a saved edit did nothing.
+- **Hot reload for views written with `widget:` nodes** ([#269](https://github.com/mindderivative/tesserae/issues/269)). `app.run(hot_reload=True)` watches a view opened with `open_view` or `open_window`, every view it calls (and the views those call) and the pictures it draws, and composes the view again when one changes: the ViewModel and its Signals are the same ones, a node that keeps its place keeps its `state:`, and handlers are wired again. A mistake (invalid YAML, a call with a wrong parameter, a name nothing defines, a widget the engine rejects) leaves the window as it was and is logged as one `ERROR` naming the file. A view opened while the app runs is watched too, and a view the file starts to call is watched from then on. The views Tesserae ships are not. Not reloaded: Python code, and a `widget: Window` view's window options (the app's stylesheet of rules is reloaded from 0.5.0.14). Until now the log said such a screen "isn't watched" and a saved edit did nothing.
 
 ## 0.5.0.12
 

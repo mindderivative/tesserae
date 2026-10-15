@@ -257,7 +257,8 @@ An app has one stylesheet, and every view it opens uses it.
 `app.set_theme_specs(default, custom)` re-themes every view the app opened, and the window, in one
 call. Both dicts are the complete new selection (`None` for none); the seed and the light or dark
 appearance stay as they are. With `run(hot_reload=True)`, saving a theme file does this for you.
-A stylesheet of rules is read when the app is made: change it and run the app again.
+`app.set_stylesheet_spec(rules)` does the same for the app's stylesheet of rules: every open view is composed again under the new rules, its state kept,
+and a sheet that is wrong leaves every view as it was. With `run(hot_reload=True)`, saving the stylesheet file does this for you.
 
 ```python
 from tesserae.spec import load_theme
