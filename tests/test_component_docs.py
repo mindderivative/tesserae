@@ -37,20 +37,16 @@ def test_the_pages_are_what_the_generator_writes():
         f"out of date: {stale or sorted(existing - set(pages))}: run `python tools/generate_component_docs.py`"
 
 
-def test_every_component_fragment_is_on_exactly_one_page():
-    listed = sorted(name for entry in DATA["components"] for name in entry["fragments"])
-    built_in = sorted(p.name.removesuffix("_Component.yaml") for p in GENERATOR.FRAGMENTS.glob("*_Component.yaml"))
-    assert listed == built_in
+def test_every_shipped_view_is_on_exactly_one_page():
+    listed = sorted(name for entry in DATA["components"] for name in entry.get("views", []))
+    shipped = sorted(p.name.removesuffix("_View.yaml") for p in GENERATOR.VIEWS.glob("*_View.yaml"))
+    assert listed == shipped
 
 
-@pytest.mark.parametrize("entry", [p for p in ENTRIES if p.values[0].get("usage")])
-def test_a_usage_example_builds_in_a_real_view(entry):
-    spec = yaml.safe_load("id: root\nkind: Container\nstyle: {width: 800, height: 600}\nchildren:\n"
-                          + "\n".join("  " + line for line in entry["usage"].splitlines()))
-    from tesserae.spec import expand_components_to_spec
-
-    view = View(expand_components_to_spec(yaml.safe_dump(spec)), theme_seed=SEED)
-    assert view.root is not None
+def test_a_view_left_off_every_page_is_refused():
+    shipped = sorted(p.name.removesuffix("_View.yaml") for p in GENERATOR.VIEWS.glob("*_View.yaml"))
+    with pytest.raises(SystemExit, match="not listed"):
+        GENERATOR.check_coverage(DATA, shipped + ["NoSuchView"])
 
 
 class _Anything:

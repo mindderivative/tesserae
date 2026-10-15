@@ -1,8 +1,9 @@
-id: root
-kind: Container
+widget: Container
 style: {flex_direction: vertical, width: 360, height: 160, gap: 12, padding: 16, background: "#1C1B1F"}
 children:
-  - id: label
-    kind: Text
-    text: {content: "Count: 0", font_family: Roboto, font_size: 20}
+  - widget: Text
+    name: label
+    text: "Count: 0"
+    font_family: Roboto
+    font_size: 20
     style: {width: 160, height: 28, foreground: "#FFFFFF"}

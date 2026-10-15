@@ -1,54 +1,60 @@
 # SearchView_Stylesheet.yaml
 
-A search view: the full-size surface search results appear on.
+The look of SearchView (Material 3): a surface_container_high panel with 28 pixel corners, 8 pixels above and below the rows.
 
 The look of [`SearchView`](../../components/search.md) (in [Search](../../components/search.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# SearchView: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of SearchView (Material 3): a surface_container_high panel with 28 pixel corners, 8 pixels above and below the rows.
 styles:
-  - id: root
+  - widget: SearchView
+    part: panel
     style:
-      width: "{{ width }}"
-      height: "{{ height }}"
-      background: surface_container_high
-      corner_radius: extra_large
-      elevation: level_3
+      background: "{{ 'surface_container_high@72%' if frosted else 'surface_container_high' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
+      corner_radius: 28
+      padding: {left: 0, right: 0, top: 8, bottom: 8}
+  - {widget: SearchView, part: none, style: {foreground: on_surface_variant, padding: {left: 16, right: 16, top: 12, bottom: 12}}}
+  - {widget: SearchView, part: count, style: {foreground: on_surface_variant}}
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`SearchView_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: SearchView`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: SearchView` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Rect)
+### `panel` (Container)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | the `height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `surface_container_high` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `corner_radius` | `extra_large` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `elevation` | `level_3` | A shadow level, 0 to 5. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `background` | `{{ 'surface_container_high@72%' if frosted else 'surface_container_high' }}` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `backdrop_blur` | `{{ 20 if frosted else 0 }}` | Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. |
+| always | `corner_radius` | `28` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
+| always | `padding` | `{bottom: 8, left: 0, right: 0, top: 8}` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
-## What it makes
+### `none` (Text)
 
-With `width: 120, height: 40`, each part's style is:
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| always | `padding` | `{bottom: 12, left: 16, right: 16, top: 12}` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
-```yaml
-root: {width: 120, height: 40, background: surface_container_high, corner_radius: extra_large, elevation: level_3}
-```
+### `count` (Text)
+
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## Changing it
 
-Put a `SearchView_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: root
+  - widget: SearchView
+    part: panel
     style: {background: tertiary}
 ```

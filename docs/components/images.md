@@ -9,48 +9,27 @@ container: a corner from the shape scale, a circle for an avatar.
 
 ## In Tesserae
 
-`widget: Image` is the engine's picture node: Tesserae reads and decodes the file (Pillow), and `fit` says how it fills the box.
-
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `src` | file | the picture, relative to the view; an expression, so it follows a Signal |
-| `fit` | `cover`, `contain` or `fill` | how it fills its box; `cover` by default |
-| `alt` | text | what the picture shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks |
+`widget: Image` is the engine's picture node: Tesserae reads and decodes the file (Pillow), and `fit` says how it fills the box (`cover` by default, or `contain` or `fill`).
+`src` is relative to the view, and can be an expression, so it follows a Signal. `alt` says what the picture shows, for a screen reader; without it the picture is decorative
+and hidden from one, unless it handles clicks. The path must be relative and stay inside the view's directory; an absolute one, or one that leaves it, is refused.
 
 Its shape is `style.corner_radius`: a number, a shape token, `full` for a circle on a square picture, or a different radius on each
 corner (`{top_left: 24}`). The engine clips the picture to it: `full` on a square picture is a circle (an avatar), and on any other a pill. Put it in a rule
-(`classes: [avatar]`) and every picture with the class takes the shape. A shape that is not a rounded rectangle needs a mask the engine does not have.
+(`classes: [avatar]`) and every picture with the class takes the shape. Not built: a picture clipped to any other shape (the engine can mask a node with a circle, a rounded rectangle or a path, but no style passes one on).
 A missing or unreadable file stops the view opening, with the widget's name and the file in the message.
-
-`widget: Image` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: Image` | A picture from a file, fitted to its box. | [`Image_Stylesheet.yaml`](../stylesheets/images/image.md) |
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
-
 ### `Image`
 
-A picture from a file, fitted to its box. Its look: [`Image_Stylesheet.yaml`](../stylesheets/images/image.md).
+A picture.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `src` | required |  |
-| `width` | required |  |
-| `height` | required |  |
-| `fit` | required |  |
-
-```yaml
-params: [src, width, height, fit]
-id: root
-kind: Image
-image:
-  src: "{{ src }}"
-  fit: "{{ fit }}"
-```
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `src` | `str` |  | A path relative to the file. |
+| `fit` | `cover` or `contain` or `fill` | `cover` | How the picture fills its box. |
+| `alt` | `str` |  | What the picture shows, for a screen reader. Without it the picture is decorative and hidden from one. |
+| `frame` | `any` |  | A video frame, (rgba, width, height), pushed from a ViewModel. |
 
 ## Using it
 
@@ -70,40 +49,13 @@ children:
     style: {width: 64, height: 64, corner_radius: full}
 ```
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: photo
-    component: Image
-    with: {src: cat.png, width: 200, height: 150, fit: cover}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import image
 
 photo = image(app.window, "cat.png", 200, 150, fit="cover")
 ```
-
-## Changing its look
-
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
-
-```yaml
-# Image_Stylesheet.yaml, next to your views
-styles:
-  - id: root
-    style: {width: tertiary}
-```
-
-See [Component stylesheets](../stylesheets/index.md).
 
 ## See also
 

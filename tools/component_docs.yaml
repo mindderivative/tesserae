@@ -21,30 +21,22 @@ components:
   - slug: buttons
     title: Buttons
     group: Actions
-    fragments: [ButtonFilled, ButtonFilledTonal, ButtonElevated, ButtonOutlined, ButtonText]
+    views: [Button]
     md3: |
       Buttons let people take an action with one tap. Material Design 3 has five, in order of emphasis: **filled**
       for a screen's one main action, **filled tonal** and **elevated** for important but secondary ones,
       **outlined** for medium emphasis, and **text** for the lowest: dialogs, cards and toolbars. A button is 40dp
       high and fully rounded, and its label is in the *label large* type style.
-    shipped_view: Button
     built: |
       `widget: Button` is a view Tesserae ships (`Button_View.yaml` and `Button_Stylesheet.yaml`). One widget has all five types, in five sizes. It is as wide
-      as its label and icons, and `handlers: {on_click: ...}` on the call is what a press does.
+      as its label and icons, and `handlers: {on_click: ...}` on the call is what a press does; Enter or Space on a focused button does the same.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `label` | text | the text |
-      | `variant` | `filled`, `tonal`, `elevated`, `outlined`, `text` | the type (default `filled`) |
-      | `size` | `xs`, `s`, `m`, `l`, `xl` | 32, 40, 56, 96 or 136 pixels tall (default `s`) |
-      | `shape` | `round`, `square` | a pill, or a rounded square |
-      | `icon`, `trailing_icon` | an icon name | before and after the label |
-      | `disabled` | true or false | dimmed, not focusable, handlers do not run |
-      | `loading` | true or false | a spinner in the icon's place; does not respond |
-      | `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the colours and the shape swap while it is on |
-      | `flip` | true or false | for a toggle: off, a press does not flip `selected` and the caller decides (a button group's buttons) |
+      A toggle (`toggle: true`) flips `selected` on each press, and its colours and shape swap while it is on; with `flip: false` the caller decides when it flips
+      (a button group's buttons are made so). While `loading` a spinner takes the icon's place and the button does not respond. A disabled button fades as a whole.
 
-      Padding is 24 pixels each side (16 on the side with an icon; a text button 12). The container is a pill and, while pressed, squares off; a toggle that is
+      The label is `label_large` at `xs` and `s`, `title_medium` at `m`, `headline_small` at `l` and `headline_large` at `xl`; the gap between the parts is 4, 8, 8, 12 and 16 pixels. Padding
+      at the default size is 24 pixels each side (16 on the side with an icon, or the spinner; a text button 12); `xs` has 12, `m` 24, `l` 48 and `xl` 64 whatever is in the button.
+      The container is a pill and, while pressed, squares off; a toggle that is
       on takes the other shape. A filled or tonal button lifts to level 1 when hovered, an elevated one rests at level 1 and lifts to 2. The state layer, ripple and
       focus ring are the node's interaction. The look is in the stylesheet: write a `Button_Stylesheet.yaml` in your project to change it. Not built: the
       container colour at 12% for a disabled filled button (a disabled button fades as a whole).
@@ -66,23 +58,16 @@ components:
   - slug: button-groups
     title: Button groups
     group: Actions
-    shipped_view: ButtonGroup
-    fragments: [ButtonGroup]
+    views: [ButtonGroup]
     md3: |
       A button group lays related buttons side by side, with an even gap, so they read as one set of choices.
     built: |
       `widget: ButtonGroup` is a view Tesserae ships (`ButtonGroup_View.yaml`): `Button`s side by side, one for each of `items`.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `items` | a list | the buttons, each `{value, label}` and optionally `{icon, disabled}` |
-      | `mode` | `none`, `single`, `multiple` | actions; a choice of one; any number chosen |
-      | `selected` | a value, or a list with `multiple`; two-way | what is chosen |
-      | `chosen` | a value; two-way | for `none`: the value of the button last pressed (nothing needs to be bound) |
-      | `variant`, `size` | as on `Button` | passed to every button |
-      | `connected` | true or false | a 2 pixel gap and square inner corners, instead of 8 pixels apart |
-      | `orientation` | `horizontal`, `vertical` | a row or a column |
-      | `disabled` | true or false | no button responds |
+      The `mode` says what the buttons are: `none` (the default) is a row of actions, and the value of the one last pressed goes to `chosen` (nothing needs to be bound);
+      `single` is a choice of one, with `selected` its value; `multiple` is a set, with `selected` the list of chosen values. Each item is `{value, label}` and optionally
+      `{icon, disabled}`. `variant` and `size` are `Button`'s and go to every button. By default the buttons stand 8 pixels apart; `connected: true` makes the gap 2
+      pixels with 4 pixel inner corners, and `orientation: vertical` makes a column.
 
       In `single` mode a chosen button is a toggle that is on, and the arrow keys move the choice; `multiple` toggles each button and the arrows only move the
       focus. There is one Tab stop. Not built: the pressed button widening and its neighbours giving way, and an overflow button.
@@ -108,22 +93,15 @@ components:
   - slug: split-buttons
     title: Split buttons
     group: Actions
-    shipped_view: SplitButton
-    fragments: [SplitButtonFilled, SplitButtonFilledTonal, SplitButtonElevated, SplitButtonOutlined, SplitButtonText]
+    views: [SplitButton]
     md3: |
       A split button joins a main action to a menu of related ones: the leading part does the usual thing, and the
       trailing chevron opens the others.
     built: |
       `widget: SplitButton` is a view Tesserae ships (`SplitButton_View.yaml`): two `Button`s 2 pixels apart and a `Menu` for the trailing one. One widget covers all five types.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `label`, `icon` | text, an icon | the main part's text and leading icon |
-      | `variant`, `size` | as on `Button` | `filled`, `tonal`, `elevated`, `outlined`, `text`; `xs` to `xl`; both parts take them |
-      | `items` | a list | the menu's rows, as `Menu` takes them |
-      | `chosen` | a value; two-way | the value of the menu row pressed |
-      | `on_click` | a handler | what the main part does |
-      | `disabled` | true or false | both parts are dimmed and do not respond |
+      The main part has the `label` and an optional `icon` and runs `on_click`; the trailing part opens a `Menu` of `items` (rows as `Menu` takes them), and the `value`
+      of the row pressed goes to `chosen`. `variant` and `size` are `Button`'s and both parts take them.
 
       The inner corners are small (4 pixels) and the outer ones round; while the menu is open the trailing part is round on every corner and its chevron is turned over. Each part is its
       own Tab stop; the trailing part says it is expanded while its menu shows. Arrow-down on either part opens the menu and moves the focus to its first row (a press opens it
@@ -149,8 +127,7 @@ components:
   - slug: icon-buttons
     title: Icon buttons
     group: Actions
-    shipped_view: IconButton
-    fragments: [IconButtonStandard, IconButtonFilled, IconButtonFilledTonal, IconButtonOutlined]
+    views: [IconButton]
     md3: |
       An icon button is an action shown as a glyph alone. Like buttons it has four emphases: standard (no
       container), filled, filled tonal and outlined. It is 40dp, with a 48dp touch target.
@@ -158,16 +135,10 @@ components:
       `widget: IconButton` is a view Tesserae ships (`IconButton_View.yaml`): one widget for the four types, in five sizes and three widths. The `label`
       names it for a screen reader and is its tooltip. `handlers: {on_click: ...}` on the call is what a press does.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `icon`, `selected_icon` | an icon name | the glyph; the one shown while a toggle is on |
-      | `label` | text | what it does: its name and its tooltip |
-      | `variant` | `standard`, `filled`, `tonal`, `outlined` | the type (default `standard`) |
-      | `size` | `xs`, `s`, `m`, `l`, `xl` | 32, 40, 56, 96 or 136 pixels tall; the glyph is 20, 24, 24, 32 or 40 |
-      | `width_kind` | `narrow`, `default`, `wide` | as tall as it is, or narrower or wider |
-      | `shape` | `round`, `square` | a circle, or a rounded square |
-      | `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the glyph, the colours and the shape change while it is on; the glyph morphs into the other over 200 ms when the two are shapes of the same kind (add and remove do; play and pause have different numbers of parts, so they switch halfway) |
-      | `disabled` | true or false | dimmed, not focusable, handlers do not run |
+      The glyph is 20, 24, 24, 32 or 40 pixels for the five sizes. `width_kind` makes it as wide as it is tall (`default`), or narrower or wider (a 40 pixel button is 32
+      pixels wide when `narrow` and 52 when `wide`). A toggle (`toggle: true`) flips `selected` on a press, and the `selected_icon`, the colours and the shape show while it is on. The
+      glyph morphs into the other over 200 ms when the two are both closed shapes or both open lines (`add` and `remove` do); other pairs, such as `play` and `pause`, switch partway through
+      instead. `tint` sets a standard button's icon colour to a colour role. A button with a `label` shows it as a tooltip, and without one there is no tooltip.
 
       The state layer, ripple and focus ring are the node's interaction; a pressed circle squares off. Not built: the 12% container of a disabled filled
       button, and the 48 pixel touch target around a 40 pixel button.
@@ -186,8 +157,7 @@ components:
   - slug: fabs
     title: Floating action buttons
     group: Actions
-    shipped_view: Fab
-    fragments: [FabPrimary, FabSecondary, FabTertiary, FabSurface]
+    views: [Fab]
     md3: |
       A floating action button (FAB) is the screen's most important action, as an icon in a prominent container.
       There are four colours (primary, secondary, tertiary and surface) and three sizes: small (40dp), the
@@ -196,18 +166,12 @@ components:
       `widget: Fab` is a view Tesserae ships (`Fab_View.yaml`): one widget for the four colours and three sizes, and for the extended form too (give it a
       `label`).
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `icon` | an icon name | the glyph (24 pixels, 36 on a large FAB) |
-      | `label` | text | the text beside the icon, which makes it extended; also the accessible name |
-      | `variant` | `primary`, `secondary`, `tertiary`, `surface` | the container colour |
-      | `size` | `small`, `medium`, `large` | 40, 56 or 96 pixels, with 12, 16 and 28 pixel corners |
-      | `collapsed` | true or false | an extended FAB shows only its icon (and its label becomes its tooltip) |
-      | `disabled` | true or false | dimmed, not focusable, handlers do not run |
+      The glyph is 24 pixels, 36 on a large FAB, and the corners are 12, 16 and 28 pixels for the three sizes. A collapsed extended FAB shows only its icon, and its
+      label becomes its tooltip; the label is also the accessible name.
 
       It rests at elevation level 3, lifts to 4 when hovered and settles to 3 when pressed. To collapse as a list scrolls down and extend as it scrolls up, bind
-      `collapsed: "{{ way == 'down' }}"` to the `scroll_direction` of the list. Not built: extending animates only as far as the engine lets a width go to `auto`
-      (the collapse eases, the extend is at once), and the FAB menu.
+      `collapsed: "{{ way == 'down' }}"` to the `scroll_direction` of the list. Not built: easing the collapse and the extend (the width goes between a number and `auto`,
+      which the engine does not animate, so the FAB changes shape at once), and the FAB menu.
     usage_view: |
       name: inbox
       widget: Container
@@ -216,7 +180,7 @@ components:
         - widget: ScrollView
           scroll_direction: "{{ way }}"
           style: {height: 400}
-          children: [{widget: Text, text: Messages}]
+          children: [{widget: Text, text: Messages, typography_role: body_medium, style: {foreground: on_surface}}]
         - widget: Fab
           icon: add
           label: Compose
@@ -230,8 +194,7 @@ components:
   - slug: extended-fabs
     title: Extended FABs
     group: Actions
-    shipped_view: Fab
-    fragments: [ExtendedFabPrimary, ExtendedFabSecondary, ExtendedFabTertiary, ExtendedFabSurface]
+    shares: fabs
     md3: |
       An extended FAB is a FAB with a text label, for a main action that an icon alone wouldn't explain.
     built: |
@@ -252,8 +215,7 @@ components:
   - slug: badges
     title: Badges
     group: Communication
-    shipped_view: Badge
-    fragments: [BadgeDot, BadgeLabeled]
+    views: [Badge]
     md3: |
       A badge shows that something has news. The small one is a dot, and the large one carries a short count or
       text. It sits on the corner of what it describes.
@@ -261,12 +223,8 @@ components:
       `widget: Badge` is a view Tesserae ships (`Badge_View.yaml`) with its look as rules (`Badge_Stylesheet.yaml`): a 6 pixel `error` dot, or with a
       `value` a 16 pixel pill in `label_small` on `on_error`, at least 16 wide and growing with its text.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `value` | a number or a few characters | what it shows; empty is a dot |
-      | `limit` | whole number | a number over it shows as the limit and a plus (`999+`); `999` by default |
-      | `show` | true or false | whether it shows; `show: "{{ unread > 0 }}"` hides a zero count |
-      | `anchored` | true or false | its children are the host, and the badge sits over the host's top right corner |
+      A `value` that is a number over `limit` shows as the limit and a plus (`999+` by default), and `show: "{{ unread > 0 }}"` hides a zero count. With
+      `anchored: true` the children are the host, and the badge sits over the host's top right corner.
 
       Anchored, a dot overlaps the corner by 4 and a pill starts 12 in from the corner and 4 above it. The badge is hidden from a screen reader: put the
       count in the host's label ("Inbox, 3 unread"). The parts a stylesheet can address are `mark` and `label`.
@@ -285,10 +243,6 @@ components:
           anchored: true
           children:
             - {widget: Icon, icon: home, style: {width: 24, height: 24, foreground: on_surface}}
-    usage: |
-      - id: unread
-        component: BadgeLabeled
-        with: {label: "3", width: 20}
     python: |
       from tesserae.widgets import badge
 
@@ -297,8 +251,7 @@ components:
   - slug: progress-indicators
     title: Progress indicators
     group: Communication
-    widget: LinearProgress
-    fragments: [LinearProgress, CircularProgress, LoadingIndicator]
+    widgets: [LinearProgress, CircularProgress, LoadingIndicator]
     md3: |
       Progress indicators show that something is happening. **Determinate** ones fill as a value from 0 to 1
       grows; **indeterminate** ones keep moving when there's no value to show. The loading indicator is MD3's
@@ -308,23 +261,13 @@ components:
       `widget: LoadingIndicator`. Leave `value` out, or let an expression give nothing, for a wait with no end; a number from 0 to 1 is determinate and
       eases to each new value.
 
-      | Property | Widget | Meaning |
-      | --- | --- | --- |
-      | `value` | linear, circular | 0 to 1, or nothing for a wait with no end; an expression follows its Signals |
-      | `track` | linear, circular | the colour role of the track behind the indicator (a bar has `surface_container_highest`, a ring none) |
-      | `buffer` | linear | 0 to 1: how much has loaded, a lighter bar behind the value |
-      | `stop_indicator` | linear | a dot at the end of the track |
-      | `thickness` | linear, circular | the bar's height or the ring's width in pixels (4 is the standard one; MD3 Expressive's are thicker) |
-      | `wavy` | linear, circular | the bar (or the ring's arc) is a sine wave whose crests flow along (or round) a plain track; the bar is taller by the wave's height |
-      | `two_bar` | linear | a wait with no end sweeps as two bars, a long one and a short one a little behind, as MD3 draws it, not one |
-      | `contained` | loading indicator | the shape sits in a `primary_container` circle, in `on_primary_container` |
-      | `label` | all | what a screen reader calls it |
-
-      The colour is `style.foreground`; the bar's length is `style.width` and a ring's size is `style.width` too. A screen reader hears a progress bar
-      with its value as a percentage, or as busy when there is none. An app that reduces motion gets a still bar and arc instead of the endless motion.
-      With a `track`, a determinate ring and its track are a gap apart (4 px between the rounded ends), as in MD3. The widths of the two bars are fixed (the engine
-      cannot animate a width), so the two-bar sweep approximates MD3's, whose bars grow and shrink; the wave's size and speed and the thicker sizes are written
-      from memory of the spec and have not been checked against it. The default look is still the one `tre`'s recorded trees draw: a track and a stop dot are opt-in.
+      A bar is 240 pixels long and 4 thick, and a ring is 48 across, unless the call's `style:` gives a `width`; the colour is `style.foreground`, `primary` by default. A bar
+      has a `surface_container_highest` track behind it and a ring has none, until `track` names a colour role; a stop dot at the end of the bar's track is opt-in
+      (`stop_indicator`), as is a `buffer` (how much has loaded, 0 to 1, a lighter bar behind the value). With a `track`, a determinate ring and its track are a gap apart
+      (4 pixels between the rounded ends), as in MD3. A `wavy` bar is taller than its `thickness` by the wave's height (6 pixels), and a wavy ring's arc is a wave round
+      a plain track. A screen reader hears a progress bar with its value as a percentage, or as busy when there is none. An app that reduces motion gets a still bar and arc
+      instead of the endless motion. The two bars of `two_bar` keep their widths as they cross, so the sweep approximates MD3's, whose bars grow and shrink; the wave's size
+      and speed and the thicker sizes are written from memory of the spec and have not been checked against it.
     usage_view: |
       name: upload
       widget: Container
@@ -334,10 +277,6 @@ components:
         - {widget: LinearProgress, style: {width: 240}}                  # no value: a wait with no end
         - {widget: CircularProgress, value: "{{ sent }}", track: secondary_container}
         - {widget: LinearProgress, value: "{{ sent }}", wavy: true, thickness: 4, style: {width: 240}}
-    usage: |
-      - id: upload
-        component: LinearProgress
-        with: {width: 240, height: 4, value: 0.4}
     python: |
       from tesserae.widgets import linear_progress
 
@@ -348,25 +287,20 @@ components:
   - slug: snackbars
     title: Snackbars
     group: Communication
-    shipped_view: Snackbar
-    fragments: [Snackbar]
+    views: [Snackbar, SnackbarHost]
     md3: |
       A snackbar briefly tells the user about a process that has happened or will happen, at the bottom of the
       window, and may offer one action. It goes away by itself.
     built: |
       Two views Tesserae ships: `Snackbar` (one message) and `SnackbarHost` (several, one after another).
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `open` | true or false; two-way | whether it is showing; it writes `false` when it closes |
-      | `message`, `action`, `closable` | text, text, true or false | the message, a text button after it, a close button |
-      | `on_action`, `on_close` | handlers | the action button's handler; called when it closes however it closes |
-      | `duration` | milliseconds | how long it stays (default 4000; 0 keeps it until it is closed); the pointer over it holds the time off |
-      | `width`, `margin`, `centered` | numbers, true or false | 344 to 560 wide, 16 from the window's edge, at the start or centred |
+      A `Snackbar` shows while `open` is true and writes `false` back when it closes. It closes itself after `duration` milliseconds (4000 by default; 0 keeps it until it is closed),
+      and the pointer over it holds the time off. The `action` is a text button after the message: pressing it runs `on_action` and closes the snackbar. `closable` adds a close
+      button, and `on_close` is called when it closes however it closes. It is 344 to 560 pixels wide (`width`), 16 from the window's edge (`margin`), at the start or `centered`.
 
       It is `inverse_surface` at level 3 with 4 pixel corners, 48 pixels tall (68 for two lines), over the content, not modal, and takes no focus; a screen reader hears it
       as a polite alert. A `SnackbarHost` takes `messages` (`{message}` and optionally `{action, value, id, duration}`), shows the first, drops it when it closes
-      and shows the next; add to the list from anywhere that can write it; `chosen` is the `value` of the action pressed. An `Overlay` now has a `timeout`
+      and shows the next; add to the list from anywhere that can write it; `chosen` is the `value` of the action pressed. An `Overlay` has a `timeout`
       and an `on_dismiss` handler, which is how this is made. Not built: swipe to dismiss, and lifting above a FAB or a bottom bar.
     usage_view: |
       name: notes
@@ -391,14 +325,13 @@ components:
   - slug: tooltips
     title: Tooltips
     group: Communication
-    fragments: [Tooltip]
     md3: |
       A tooltip names or explains a control when the pointer rests on it, or it has keyboard focus.
     built: |
       Any node takes a `tooltip:`. A plain one is text on the inverse surface; a rich one has a `title`, up to two `actions` and a `placement`
       (`below`, `above`, `start`, `end`), is a raised surface the pointer can move onto, and closes when an action is pressed. It shows after the
-      pointer rests for `delay` (500 ms), at once on keyboard focus, or after a long press; Escape, a press, or leaving closes it. The text also names
-      the node for a screen reader. Not built: reaching the actions by keyboard.
+      pointer rests for `delay` (500 ms by default), at once on keyboard focus (focus that a click gave does not count), or after a touch held in place; Escape, a press, or leaving
+      closes it. The text also names the node for a screen reader, unless the node has a description of its own. Not built: reaching the actions by keyboard.
     usage_view: |
       name: file
       widget: Container
@@ -421,22 +354,17 @@ components:
   - slug: cards
     title: Cards
     group: Containment
-    shipped_view: Card
-    fragments: [CardElevated, CardFilled, CardOutlined]
+    views: [Card]
     md3: |
       A card holds content and actions about one subject. It comes **elevated** (a shadow), **filled** (a
       higher surface) or **outlined** (a border). All have a medium (12dp) corner radius.
     built: |
       `widget: Card` is a view Tesserae ships (`Card_View.yaml`): a surface with 12 pixel corners that is as tall as what is in it.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `variant` | `elevated`, `filled`, `outlined` | a shadow, a higher surface, or a 1 pixel border |
-      | `headline`, `subhead`, `text` | text | a `title_large` title, a `title_small` line, `body_medium` supporting text, with 16 pixels around them |
-      | `media`, `media_height` | a picture, a number | a picture across the top, clipped to the corners (default 160 tall) |
-      | `actionable` | true or false | the whole card is one pressable surface: a state layer, a ripple, Enter, and a lift for the elevated one |
-      | `selected` | true or false | a chosen card: `secondary_container` (an outlined one gets an `outline` border); the caller decides when |
-      | `disabled` | true or false | dimmed |
+      The `variant` is a shadow (`elevated`, level 1), a higher surface (`filled`) or a 1 pixel `outline_variant` border (`outlined`). The `headline` is `title_large`, the `subhead`
+      `title_small` and the `text` `body_medium`, with 16 pixels around them. A `media` picture runs across the top, clipped to the corners (160 pixels tall unless `media_height` says
+      otherwise). An `actionable` card is one pressable surface: a state layer, a ripple, Enter, and a lift to level 2 for the elevated one when hovered. A `selected` card is
+      `secondary_container` (an outlined one gets an `outline` border instead); the caller decides when, as in `on_click: "picked = not picked"`. A `disabled` card is dimmed.
 
       Your own content goes in the default slot, after the text, and buttons in the `actions` slot (a row at the end). `handlers: {on_click: ...}` on the call is
       what a press of an actionable card does. A plain card is a group and takes no focus. Not built: dragging and swiping a card, and the dragged state.
@@ -462,8 +390,7 @@ components:
   - slug: dialogs
     title: Dialogs
     group: Containment
-    shipped_view: Dialog
-    fragments: [Dialog]
+    views: [Dialog]
     md3: |
       A dialog interrupts to ask for a decision or give needed information. It has a headline, supporting text and
       up to two actions, on a raised surface over a scrim, and blocks what is behind it.
@@ -471,15 +398,10 @@ components:
       `widget: Dialog` is a view Tesserae ships (`Dialog_View.yaml`): a modal [`Overlay`](../guide/view-language.md#overlays) holding a raised panel (28 pixel
       corners, 24 of padding) with an optional icon, a headline, supporting text, your own content and text-button actions.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `open` | true or false; two-way | whether it is showing; Escape and a press on the scrim write `false` back |
-      | `headline`, `text`, `icon` | text | the title, the supporting text, an icon above the headline |
-      | `actions` | a list | text buttons, each `{label, value}` and optionally `{variant}` |
-      | `result` | a value; two-way | the `value` of the action pressed; pressing one also closes the dialog |
-      | `dismissible` | true or false | off, only an action closes it |
-      | `width`, `max_height` | numbers | the panel's width, held between 280 and 560 (default 312); the content scrolls beyond `max_height` |
-      | `fullscreen` | true or false | the full-screen form: the panel fills the window on `surface`, with a close button, the headline and the actions in a 56 pixel bar along the top, and the content scrolling under it |
+      `open` is two-way: Escape and a press on the scrim write `false` back, unless `dismissible` is off, when only an action closes it. Each of the `actions` is `{label, value}`
+      and optionally `{variant}` (a text button unless it says otherwise); pressing one closes the dialog and writes its `value` to `result`, which stays empty when the dialog was
+      dismissed. The panel is `width` wide, held between 280 and 560 pixels (312 by default), and the content scrolls beyond `max_height` (480). `fullscreen` is the full-screen
+      form: the panel fills the window on `surface`, with a close button, the headline and the actions in a 56 pixel bar along the top, and the content scrolling under it.
 
       Children are the content, after the supporting text. When the content scrolls, a line shows above the actions. Actions stack when they do not fit
       one row. A screen reader hears a `dialog` named by the headline (tre has no `alertdialog` role). In the full-screen form the close button writes
@@ -511,8 +433,7 @@ components:
   - slug: dividers
     title: Dividers
     group: Containment
-    shipped_view: Divider
-    fragments: [Divider]
+    views: [Divider]
     md3: |
       A divider is a thin line that groups and separates content in lists and containers. It spans the whole length (**full-width**), starts
       16 dp in from the start (**inset**), or is 16 dp in from both ends (**middle inset**), and is horizontal or vertical.
@@ -520,11 +441,8 @@ components:
       `widget: Divider` is a view Tesserae ships (`Divider_View.yaml`) with its look as rules (`Divider_Stylesheet.yaml`): a line in the
       `outline_variant` colour that fills the length it is in, and is a `separator` to a screen reader.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `variant` | `full`, `inset` or `middle` | how much of the ends it keeps clear; `full` by default |
-      | `orientation` | `horizontal` or `vertical` | horizontal fills the width it is in, vertical the height; `horizontal` by default |
-      | `thickness` | number | how thick the line is; `1` by default |
+      The `variant` says how much of the ends it keeps clear (`full` by default; `inset` leaves 16 pixels at the start, `middle` 16 at both ends). A `horizontal` divider fills the
+      width it is in and a `vertical` one the height; it is 1 pixel thick unless `thickness` says.
     usage_view: |
       name: settings
       widget: Container
@@ -547,10 +465,6 @@ components:
       ```
 
       A view named `Divider_View.yaml` in your project replaces the shipped divider, and its shipped look with it.
-    usage: |
-      - id: rule
-        component: Divider
-        with: {width: 240, height: 1}
     python: |
       from tesserae.widgets import divider
 
@@ -559,26 +473,20 @@ components:
   - slug: lists
     title: Lists
     group: Containment
-    shipped_view: ListItem
-    fragments: [ListItem]
+    views: [ListItem]
     md3: |
       A list is a column of rows, each a headline with optional leading and trailing content and supporting text.
     built: |
       `widget: ListItem` is a view Tesserae ships (`ListItem_View.yaml`): a row as wide as its place, 56, 72 or 88 pixels tall by its lines. A list is a
       container of them (or a `for:`, or a `VirtualList`, over your data).
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `headline`, `supporting`, `overline` | text | the first line, the line under it, a small line above it |
-      | `leading_icon`, `leading_text`, `leading_image` | an icon, letters, a picture | before the text: a 24 pixel icon, a 40 pixel circle holding letters, a 56 pixel picture |
-      | `trailing_text`, `trailing_icon` | text, an icon | after it |
-      | `lines` | 1, 2 or 3 | the height; 0 works it out from the text |
-      | `selectable`, `selected` | true or false; `selected` is two-way | a press flips `selected`; a selected row is `secondary_container` |
-      | `disabled` | true or false | dimmed, not focusable, handlers do not run |
-      | `divider` | true or false | a line along the bottom edge |
+      The `headline` is the first line, `supporting` the line under it and `overline` a small line above it; they set the height (56 for one line, 72 for two, 88 for three) unless
+      `lines` says. Before the text goes a 24 pixel `leading_icon`, a 40 pixel circle holding the letters of `leading_text`, or a 56 pixel `leading_image`; after it a `trailing_text` or a
+      `trailing_icon`. With `selectable` a press flips `selected`, and a selected row is `secondary_container`. `divider` draws a line along the bottom edge.
 
       Your own content goes in the `leading` and `trailing` slots (`slot: trailing` on a child): a switch, a checkbox, a button. `handlers: {on_click: ...}` on
-      the call is what a press does. Not built: swipe actions, drag to reorder, sticky headers, and the dragged state.
+      the call is what a press does. A section's header can hold the top of a `ScrollView` while its rows scroll past: give it `style: {sticky: 0}`. Not built: swipe actions, drag to
+      reorder, and the dragged state.
     usage_view: |
       name: mail
       widget: Container
@@ -594,25 +502,21 @@ components:
       from tesserae.widgets import list_, list_item
 
       rows = list_(app.window, [list_item(app.window, name) for name in ("Inbox", "Sent", "Drafts")], width=320)
-    see: [guide/repeater.md]
+    see: [guide/repeater.md, guide/effects.md]
 
   - slug: side-sheets
     title: Side sheets
     group: Containment
-    shipped_view: SideSheet
-    fragments: [SideSheetStandard, SideSheetModal]
+    views: [SideSheet, SideSheetModal, SideSheetPanel]
     md3: |
       A side sheet holds secondary content beside the main content. A **standard** one shares the window with it;
       a **modal** one covers it over a scrim and must be dismissed.
     built: |
       Three views Tesserae ships: `SideSheet` (standard, inline), `SideSheetModal` (over a scrim) and `SideSheetPanel` (the inside they share).
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `open` | true or false; two-way | whether it is showing; the close button, and for a modal one Escape and a press on the scrim, write `false` |
-      | `title`, `back`, `on_back`, `closable` | text, true or false, a handler, true or false | the header: a `title_large` title, a back button that runs `on_back`, a close button |
-      | `width` | a number | held between 256 and 400 pixels (default 360) |
-      | `side`, `dismissible` | `start` or `end`; true or false | modal only: the edge it comes from, and whether Escape and the scrim close it |
+      `open` is two-way: the close button writes `false`, and so do Escape and a press on the scrim of a modal sheet. The header has a `title_large` `title`, a back button (`back: true`)
+      that runs `on_back`, and a close button (`closable`, on by default). The sheet is `width` wide, held between 256 and 400 pixels (360 by default). A modal sheet also takes `side`
+      (`end`, the default, or `start`: the edge it comes from) and `dismissible` (off, Escape and the scrim do not close it).
 
       Children are the content, which scrolls (a line shows over the actions once it has); children with `slot: actions` are the buttons, in a row at the bottom right.
       A standard sheet is inline: it takes room from the content while `open` and its width eases open and shut; put it first in its row for the start side and last for
@@ -640,8 +544,7 @@ components:
   - slug: accordions
     title: Accordions
     group: Containment
-    shipped_view: Accordion
-    fragments: [AccordionHeader]
+    views: [Accordion, AccordionGroup]
     md3: |
       Material Design 3 has no accordion of its own. Tesserae's is built in MD3's terms: a list row with a chevron
       that turns when the section opens.
@@ -649,11 +552,9 @@ components:
       Two views Tesserae ships. `widget: Accordion` is one section: a 56 pixel header button (the `title` and a chevron that turns over in 200 milliseconds) and, while `expanded`
       (two-way), its content (the children). `widget: AccordionGroup` makes several behave as one set with dividers between them.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `title`, `expanded`, `disabled` | text, true or false (two-way), true or false | the header, whether the content shows, dimmed and not toggling |
-      | `on_toggle` | a handler | called after the header has been pressed |
-      | `items`, `mode`, `open` (`AccordionGroup`) | a list of `{value, title, text}`, `single` or `multiple`, a value or a list; two-way | the sections, whether one or several can be open, and which are |
+      A press, Enter or Space on the header toggles `expanded`, and `on_toggle` is called after it. A `disabled` section is dimmed and does not toggle. An `AccordionGroup` takes
+      `items`, each `{value, title, text}` (the text is the section's content; for more than text, write the `Accordion` sections yourself); `mode` is `single` (the default: opening one
+      closes the rest) or `multiple`, and `open` is the value that is open (empty for none), or with `multiple` the list of values that are.
 
       A screen reader hears a button that says whether it is expanded and what it controls; the content is hidden from it while closed and its parts are not built, so they
       take no Tab stop. The up and down arrows move between the headers, and Home and End go to the first and last. Not built: the content's height easing open
@@ -681,8 +582,7 @@ components:
   - slug: trees
     title: Trees
     group: Containment
-    shipped_view: Tree
-    fragments: [TreeNodeBranch, TreeNodeLeaf]
+    views: [Tree, TreeNode, TreeLevel]
     md3: |
       Material Design 3 has no tree view; this is MD3's list row, indented by depth, with a chevron on the rows
       that open.
@@ -690,12 +590,8 @@ components:
       Views Tesserae ships: `Tree` (the whole tree from data), `TreeNode` (one row, a branch with a chevron or a leaf) and `TreeLevel` (the rows of one level, which calls itself for
       the children of an open branch).
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `nodes` | a list | rows: `{value, label}` and optionally `{icon, children, disabled}`; `children` is the same shape |
-      | `expanded` | a list; two-way | the values of the open branches |
-      | `selected` | a value; two-way | the chosen row |
-      | `compact` | true or false | 40 pixel rows instead of 56 |
+      The `nodes` are rows, `{value, label}` and optionally `{icon, children, disabled}`, where `children` is a list of the same shape. `expanded` (the values of the open branches)
+      and `selected` (the value of the chosen row) are two-way. Rows are 56 pixels tall, or 40 with `compact`.
 
       A row is indented 16 pixels plus 24 for each level, has a 24 pixel chevron that turns a quarter when its branch opens (a leaf keeps the room), an optional icon and a `body_large`
       label; the chosen row is `secondary_container`. A press chooses a row and opens or closes a branch. One Tab stop; the up and down arrows move through the rows that show, Right
@@ -728,8 +624,7 @@ components:
   - slug: navigation-rail
     title: Navigation rail
     group: Navigation
-    shipped_view: NavigationRail
-    fragments: [NavigationRail, NavigationRailItem, NavigationRailScreens, NavigationRailScreen]
+    views: [NavigationRail, NavigationRailItem, NavigationRailScreens, NavigationRailScreen]
     md3: |
       A navigation rail puts three to seven destinations in a narrow column beside the content, on medium and
       large windows. Each is an icon in a pill with a label; the selected one's pill is filled.
@@ -737,19 +632,16 @@ components:
       Four views Tesserae ships: `NavigationRail` (the column), `NavigationRailItem` (one destination), `NavigationRailScreens` (a rail whose destinations are the
       app's screens) and `NavigationRailScreen` (one such destination).
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `items` | a list | the destinations of a `NavigationRail`, each `{value, label, icon}` and optionally `{badge, disabled}` |
-      | `selected` | a value; two-way | the value of the chosen destination; a press (or an arrow key) writes it back |
-      | `expanded` | true or false | 220 pixels wide with the labels beside the icons, instead of 80 with them under |
-      | `alignment` | `top`, `center`, `bottom` | where the destinations sit in the column |
-      | `items` | a list | the destinations of a `NavigationRailScreens` (and of a `NavigationRail`, above), each `{screen, label, icon}` and optionally `{badge}` |
+      The `items` of a `NavigationRail` are `{value, label, icon}` and optionally `{badge, disabled}` (`badge: true` is a dot), and `selected` is the value of the chosen one: a press, or an
+      arrow key, writes it back. Those of a `NavigationRailScreens` are `{screen, label, icon}` and optionally `{badge}`. The rail is 80 pixels wide with the labels under the icons, or 220
+      with `expanded: true` and the labels beside them; `alignment` puts the destinations at the `top` (the default), `center` or `bottom` of the column, and `frosted: true` makes the
+      surface translucent and blurred.
 
       A destination is a 24 pixel icon in a 56 by 32 pill (`secondary_container` when it is the chosen one) over a `label_medium` label, 12 pixels from the
       next, starting 44 pixels down. Children with `slot: header` (a menu button, a FAB) go above the destinations and `slot: footer` below. There is one Tab stop;
       the up and down arrows move the focus and choose the destination. A screen reader hears a link named by the label, the current one marked as the page.
       The screens rail follows `app.current_screen` and a press is `navigate_to(screen)`; it belongs in each screen (or in a window's shell). Not built: the
-      modal expanded rail, sections with headings, the pill's fade and scale as it is selected, and the destinations' `tab` role (tre has no `navigation` role).
+      modal expanded rail, sections with headings, the pill growing as it is selected (it fades in), and a `navigation` role for the rail (tre has none, so it is a `group` named Navigation).
     usage_view: |
       name: shell
       widget: Container
@@ -768,13 +660,12 @@ components:
       from tesserae.widgets import navigation_rail
 
       rail = navigation_rail(app.window, ["Home", "Search"], ["home", "search"], selected=0)
-    see: [guide/windows-and-docks.md]
+    see: [guide/windows-and-docks.md, guide/effects.md]
 
   - slug: navigation-drawer
     title: Navigation drawer
     group: Navigation
-    shipped_view: NavigationDrawer
-    fragments: [NavigationDrawer, NavigationDrawerItem]
+    views: [NavigationDrawer, NavigationDrawerItem, NavigationDrawerModal, NavigationDrawerPanel, NavigationDrawerScreens]
     md3: |
       A navigation drawer holds more destinations than a rail, as a vertical list of icon-and-label items. It can
       be permanent (standard) or slide over the content (modal).
@@ -782,12 +673,10 @@ components:
       Views Tesserae ships: `NavigationDrawer` (standard, beside the content), `NavigationDrawerModal` (over a scrim), `NavigationDrawerScreens` (the app's screens), and
       `NavigationDrawerItem` (one destination) and `NavigationDrawerPanel` (the inside the first two share).
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `items` | a list | rows: `{value, label, icon}` and optionally `{badge, disabled}`; `{heading: Text}`; `{divider: true}`. For `NavigationDrawerScreens`, `{screen, label, icon}` |
-      | `selected` | a value; two-way | the chosen destination; a press (or an arrow key) writes it back |
-      | `open` | true or false; two-way | standard: whether it takes its room (the width eases, which is how it collapses); modal: whether it is showing |
-      | `width` | a number | held between 256 and 360 pixels (default 360) |
+      The `items` are rows: `{value, label, icon}` and optionally `{badge, disabled}`, `{heading: Text}` for a section's title, and `{divider: true}` for a line (for
+      `NavigationDrawerScreens`, `{screen, label, icon}` in place of `value`). `selected` is the chosen destination, and a press or an arrow key writes it back. `open` is two-way: on a
+      standard drawer it says whether the drawer takes its room (the width eases, which is how it collapses), on a modal one whether it is showing. The drawer is `width` wide, held between
+      256 and 360 pixels (360 by default). `frosted: true` makes the surface translucent and blurred.
 
       A destination is a 56 pixel pill with 28 pixel corners, a 24 pixel icon, a `label_large` label and a badge at the end; the chosen one is `secondary_container`.
       Children with `slot: header` and `slot: footer` go above and below the destinations, which scroll when there are too many. A modal drawer is
@@ -813,28 +702,22 @@ components:
       from tesserae.widgets import navigation_drawer
 
       drawer = navigation_drawer(app.window, ["Inbox", "Search"], ["home", "search"], selected=0)
-    see: [guide/overlays.md]
+    see: [guide/overlays.md, guide/effects.md]
 
   - slug: top-app-bar
     title: Top app bar
     group: Navigation
-    shipped_view: TopAppBar
-    fragments: [TopAppBar]
+    views: [TopAppBar]
     md3: |
       A top app bar sits along the top of a screen with its title and the actions for it: a navigation icon at the
       start and up to a few action icons at the end.
     built: |
       `widget: TopAppBar` is a view Tesserae ships (`TopAppBar_View.yaml`): a bar as wide as its place, built from `IconButton`s and a title.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `title` | text | the title |
-      | `variant` | `small`, `center`, `medium`, `large` | 64 tall with the title beside the icon; 64 with the title in the middle; 112 or 152 with the title under the icons |
-      | `leading_icon`, `leading_label`, `on_leading` | an icon, text, a handler | the navigation icon (`menu`, `arrow_back`), its name and tooltip, and what it does |
-      | `actions` | a list | up to three icons at the end, each `{value, icon, label}`; pressing one sets `chosen` to its `value` |
-      | `chosen` | a value; two-way | the action last pressed |
-      | `collapsed` | true or false | a medium or large bar shows as a small one (the height eases) |
-      | `scrolled` | true or false | content is under the bar: its colour goes from `surface` to `surface_container` |
+      The `variant` is `small` (64 tall, the title beside the icon, the default), `center` (64, the title in the middle), `medium` (112) or `large` (152), the last two with the title under
+      the icons. `leading_icon` is the navigation icon (`menu` or `arrow_back`), `leading_label` its name and tooltip, and `on_leading` what it does. `actions` are up to three icons at the
+      end, each `{value, icon, label}`; pressing one sets `chosen` to its `value`. `collapsed` makes a medium or large bar show as a small one (the height eases), and `scrolled` says content
+      is under the bar: its colour goes from `surface` to `surface_container`. `frosted: true` makes the surface translucent and blurred.
 
       Bind `collapsed` and `scrolled` to how a list under the bar has scrolled (the `at_top` of a `ScrollView`). Every icon is a button with a label, which is its name and its
       tooltip. With `App(borderless=True)` a bar can sit in a window's title area; the title bar of a window is `TitleBar`. Not built: the contextual action mode (a selection bar
@@ -858,13 +741,12 @@ components:
       from tesserae.widgets import top_app_bar
 
       bar = top_app_bar(app.window, "Notes", leading_icon="menu", trailing_icons=["settings"])
-    see: [guide/custom-title-bars.md, guide/windows-and-docks.md]
+    see: [guide/custom-title-bars.md, guide/windows-and-docks.md, guide/effects.md]
 
   - slug: tabs
     title: Tabs
     group: Navigation
-    shipped_view: Tabs
-    fragments: [Tabs, TabsItem]
+    views: [Tabs]
     md3: |
       Tabs organise content at one level of hierarchy, with the selected tab marked by an indicator. Primary tabs
       may carry an icon above the label.
@@ -872,16 +754,13 @@ components:
       `widget: Tabs` is a view Tesserae ships (`Tabs_View.yaml`): a row of equal tabs over a divider, with an indicator under the chosen tab that
       slides to the next one.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `tabs` | a list | the tabs, each `{value, label}` and optionally `{icon, badge}`; an expression follows its Signals |
-      | `selected` | a value; two-way | the chosen tab; a press, or an arrow key, writes it back |
-      | `variant` | `primary` or `secondary` | primary: a 3 pixel rounded indicator as wide as the label's share of the tab; secondary: 2 pixels across the whole tab |
-      | `tab_width` | a number | how wide each tab is (default 120) |
+      The `tabs` are `{value, label}` and optionally `{icon, badge}`; an expression follows its Signals. `selected` is the value of the chosen tab, and a press or an arrow key writes it
+      back. With `variant: primary` (the default) the indicator is 3 pixels tall, rounded on top, and 12 pixels in from each side of the tab; with `secondary` it is 2 pixels tall across
+      the whole tab. Every tab is `tab_width` wide (120 by default).
 
       The bar is 48 pixels tall, or 64 when a primary bar has an icon. The chosen tab's label and icon are `primary`, the others `on_surface_variant`. The bar
       is a `tablist` with one Tab stop; the arrow keys, Home and End move the focus and choose the tab. The panel each tab shows is yours: put an
-      `if: "selected == 'trips'"` on it. Not built yet: a bar that scrolls when the tabs do not fit.
+      `if: "selected == 'trips'"` on it. Not built: a bar that scrolls when the tabs do not fit.
     usage_view: |
       name: trips
       widget: Container
@@ -901,26 +780,23 @@ components:
   - slug: menus
     title: Menus
     group: Navigation
-    shipped_view: Menu
-    fragments: [Menu, MenuItem]
+    views: [Menu, MenuItem]
     md3: |
       A menu shows a list of choices on a temporary surface, opened by a button, a right click or a keyboard
       shortcut.
     built: |
       Two views Tesserae ships: `Menu`, an anchored `Overlay` holding the rows, and `MenuItem`, one 48 pixel row.
 
-      | Property of `Menu` | Type | Meaning |
-      | --- | --- | --- |
-      | `open` | true or false; two-way | whether it is showing; Escape and a press outside write `false` |
-      | `anchor`, `placement` | a node's name, `below`/`above`/`start`/`end` | the node in the calling view it sits against, and which side (it flips to fit) |
-      | `items` | a list | rows: `{value, label}` and optionally `{icon, shortcut, checked, disabled, submenu}`; `{divider: true}`; `{heading: Text}` |
-      | `chosen` | a value; two-way | the `value` of the item pressed; pressing one closes the menu |
-      | `mode`, `checks`, `selected` | `plain`, `check`, `radio`; a list; a value | `check`: pressing flips an item's check (the checked values are `checks`); `radio`: one is checked (`selected`) |
-      | `width`, `on_pick` | a number, a handler | 112 to 280 pixels; called after an item is chosen |
+      A `Menu` is shown while `open` is true; Escape and a press outside write `false` back. `anchor` is the name of the node in the calling view it sits against, and `placement`
+      (`below` by default, `above`, `start` or `end`) the side, which it flips or shifts to fit. The `items` are rows `{value, label}` and optionally `{icon, shortcut, checked, disabled,
+      submenu}`, `{divider: true}` for a line and `{heading: Text}` for a small heading. Pressing an item writes its `value` to `chosen`, closes the menu and calls `on_pick`. With `mode:
+      check` pressing an item flips its check (the checked values are `checks`); with `mode: radio` one item is checked (`selected`). The menu is `width` wide, 112 to 280 pixels (200 by
+      default), and `frosted: true` makes the surface translucent and blurred.
 
       A `MenuItem` has a `label`, an `icon`, `trailing_text` (a shortcut), `checked` (true shows a check, false keeps the room, empty is not checkable), `submenu` (a chevron) and
       `disabled`. An item with a `submenu` list opens another `Menu` beside it, on a press or the Right arrow, and choosing in it closes both. The arrows move between rows,
-      Enter chooses, typing the start of a label jumps to it. A right-click or long-press opener, and the exposed dropdown under a text field, are not built.
+      Enter chooses, typing the start of a label jumps to it. A long press can open it (`handlers: {on_long_press: ...}` on the node, writing `open`), and in Python `attach_context(node)`
+      on a `menu(...)` opens it at the pointer on a right-click. Not built: a right-click opener in a view, and the exposed dropdown under a text field.
     usage_view: |
       name: editor
       widget: Container
@@ -941,13 +817,12 @@ components:
 
       actions = menu(app.window, [("Cut", viewmodel.cut), ("Copy", viewmodel.copy)], width=200)
       actions.open(save.node)
-    see: [guide/overlays.md]
+    see: [guide/overlays.md, guide/effects.md]
 
   - slug: search
     title: Search
     group: Navigation
-    shipped_view: SearchBar
-    fragments: [SearchBar, SearchView]
+    views: [SearchBar, SearchView]
     md3: |
       A search bar is a rounded field that starts a search; the search view is the full-size surface that shows
       suggestions and results once it is focused.
@@ -955,13 +830,11 @@ components:
       Two views Tesserae ships. `widget: SearchBar` is a 56 pixel `surface_container_high` pill at level 3 with a leading icon, the text, and trailing parts. `widget: SearchView`
       is the docked panel that opens under it with the suggestions, history and results.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `query` | text; two-way | what has been typed |
-      | `active` | true or false; two-way | the search is under way; pressing the bar or typing in it sets it, the back arrow clears it |
-      | `placeholder`, `leading_icon`, `trailing_icon`, `avatar_text` | text, icon names, letters | the hint, the icon at the start (`menu` for a menu button), a microphone at the end, an avatar |
-      | `on_leading`, `on_trailing`, `on_search` | handlers | the menu button, the trailing icon, Enter |
-      | `results`, `chosen`, `open`, `anchor` (`SearchView`) | a list; a value, two-way; true or false, two-way; a node's name | `{value, label}` rows (optionally `supporting` and `icon`), the one pressed, whether it shows, the bar it sits under |
+      `query` is what has been typed. `active` says the search is under way: pressing the bar or typing in it sets it, and the back arrow clears it. The bar has a `placeholder`, a
+      `leading_icon` (a search glass; `menu` makes it a menu button that runs `on_leading`), an optional `trailing_icon` (a microphone, say, that runs `on_trailing` and shows
+      while the field is empty) and an optional avatar (`avatar_text`); Enter calls `on_search`. The `results` of a `SearchView` are `{value, label}` rows, optionally with `supporting` and
+      `icon`; the row pressed goes to `chosen`, `open` says whether the view shows, and `anchor` names the bar it sits under. `frosted: true` makes the bar and the view translucent
+      and blurred.
 
       A clear button shows once there is text. While active the leading icon is a back arrow. Bind the bar's `active` and the view's `open` to the same name, and the view's `results` to
       something that follows `query`. The view says how many results there are, politely, and `empty` text when a query finds none. Escape and a press outside close it. Not built:
@@ -982,30 +855,23 @@ components:
       from tesserae.widgets import search_bar
 
       search = search_bar(app.window, "Search notes", 360)
+    see: [guide/effects.md]
 
   - slug: toolbars
     title: Toolbars
     group: Navigation
-    shipped_view: Toolbar
-    fragments: [ToolbarDocked, ToolbarFloating]
+    views: [Toolbar]
     md3: |
       A toolbar groups the actions for the content around it. A **docked** one is fixed to an edge; a **floating**
       one is a rounded bar over the content.
     built: |
       `widget: Toolbar` is a view Tesserae ships (`Toolbar_View.yaml`): one widget for the docked and the floating toolbar, built from `IconButton`s, an optional `Fab` and a `Menu`.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `variant` | `docked` or `floating` | docked spans its width, 64 tall, on `surface_container`; floating is a pill with a shadow as long as its buttons |
-      | `orientation` | `horizontal` or `vertical` | a floating toolbar can be a column, 64 wide |
-      | `vibrant` | true or false | `primary_container`, with `on_primary_container` icons |
-      | `items` | a list | the icon buttons, each `{value, icon, label}` and optionally `disabled` |
-      | `chosen` | a value; two-way | the `value` of the item or overflow row pressed |
-      | `overflow` | a list | `Menu` rows under a more button at the end |
-      | `fab_icon`, `fab_label`, `on_fab` | | an action button at the end, and what it does |
-      | `fit`, `max_length` | true or false; pixels | items that do not fit move, in order, into the overflow menu under the more button; a docked toolbar measures itself, a floating one uses `max_length` |
-      | `hidden` | true or false | fades it out and takes its buttons out of the tab order (bind it to the way a list scrolls) |
-      | `label`, `width`, `disabled` | | its accessible name; a docked toolbar's width; no button responds |
+      A `docked` toolbar spans its width (or `width`), 64 tall, on `surface_container`; a `floating` one is a pill with a shadow as long as its buttons, and with `orientation: vertical` a
+      column 64 wide. `vibrant: true` puts it on `primary_container`, with `on_primary_container` icons. The `items` are icon buttons, each `{value, icon, label}` and optionally `disabled`;
+      the `value` of the item or overflow row pressed goes to `chosen`. `overflow` is `Menu` rows under a more button at the end. `fab_icon` (with `fab_label` and `on_fab`) adds a small
+      action button at the end. With `fit`, items that do not fit move, in order, into the overflow menu; a docked toolbar measures itself, a floating one uses `max_length` pixels.
+      `hidden` fades it out and takes its buttons out of the tab order (bind it to the way a list scrolls). `label` is its accessible name, and `disabled` stops every button.
 
       Your own content goes in the default slot after the items. The arrow keys move between the buttons (one Tab stop). The role is `group`: the engine has no toolbar role.
       With `fit`, the items that spill and the rows of `overflow` share one menu, a divider between. Not built: sliding out of the way (it fades).
@@ -1041,23 +907,18 @@ components:
   - slug: links
     title: Links
     group: Navigation
-    widget: Link
-    fragments: [Link]
+    widgets: [Link]
     md3: |
       A link takes the user somewhere else, or opens a related page. It is text, in the primary colour.
     built: |
       `widget: Link` is text that takes focus, and that Enter or a click activates. It is `primary`, in `body_medium` unless you name another type role.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `text` | text | what it says; it also names the link for a screen reader |
-      | `href` | a link | opened in the OS's browser or mail program when it is activated: `http`, `https`, `mailto` and `tel` only, anything else is refused |
-      | `visited` | true or false, two-way | whether it has been followed; opening its `href` sets a bound one, and `state: visited` in a rule colours it (`secondary` by default) |
-      | `disabled` | true or false | dimmed, out of the Tab order, and does nothing |
-      | `underline` | `hover`, `always` or `never` | underlined while the pointer is over it or keyboard focus is on it (the default), always, or never |
-      | `handlers` | | `on_click` runs as well as the `href` opens |
+      The `text` also names the link for a screen reader. Its `href` is opened in the OS's browser or mail program when the link is activated: `http`, `https`, `mailto` and `tel` only,
+      anything else is refused. Opening it sets a bound `visited`, and `state: visited` in a rule colours it (`secondary` by default). A disabled link is dimmed, out of the Tab order,
+      and does nothing. It is underlined while the pointer is over it or keyboard focus is on it (`underline: hover`, the default), always, or never. `handlers: {on_click: ...}` runs
+      as well as the `href` opens; a link with no `href` just runs its handler.
 
-      The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. Inside a longer text, use `text.runs` with a `link`.
+      The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. Inside a longer text, put the `Link` in a row with the `Text` pieces around it.
     usage_view: |
       name: help
       widget: Container
@@ -1066,36 +927,28 @@ components:
         - {widget: Link, text: Read the docs, href: "https://example.com/docs", visited: "{{ docs_seen }}"}
         - {widget: Link, text: Not now, disabled: true}
         - {widget: Link, text: Sign in, handlers: {on_click: sign_in}}
-    usage: |
-      - id: help
-        component: Link
-        with: {text: Read the docs, width: 160, height: 24}
-        handlers: {on_click: open_docs}
     python: |
       from tesserae.widgets import link
 
       help_link = link(app.window, "Read the docs", 160, on_click=viewmodel.open_docs)
+    see: [guide/rich-text.md]
 
   # -- Selection and input -----------------------------------------------------------------------
   - slug: checkboxes
     title: Checkbox
     group: Selection and input
-    widget: Checkbox
-    fragments: [Checkbox]
+    widgets: [Checkbox]
     md3: |
       A checkbox lets the user select one or more items from a set, or turn an option on or off. It has a 40dp
       state layer around an 18dp box.
     built: |
-      `widget: Checkbox` is one of Tesserae's controls (`tesserae.controls.Checkbox`). Give `checked` a bare reference and a press writes it back.
+      `widget: Checkbox` is one of Tesserae's controls (`tesserae.controls.Checkbox`). Give `checked` a bare reference and a press writes it back. It has three
+      states: on, off, and empty (`null`), which is neither: a dash in a filled box, for a parent of some checked children. A press turns an empty one on.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `checked` | true, false or empty, two-way | empty (`null`) is neither on nor off: a dash in a filled box, for a parent of some checked children; a press turns it on |
-      | `label` | text | beside the box, part of what you press, and what a screen reader calls it |
-      | `error` | true or false | drawn in the error colours |
-      | `disabled` | true or false | dimmed and does nothing |
+      The `label` sits beside the box and is part of what you press: pressing the text toggles the box and gives it the focus. `error` draws it in the error colours, and a
+      disabled one is dimmed and does nothing. `handlers: {on_change: ...}` runs after the user changes it (not when the bound value changes).
 
-      The colour is `style.foreground`. The 18 pixel box sits in a 48 pixel target with a 40 pixel state layer; Space toggles it from the keyboard.
+      The colour is `style.foreground`. The 18 pixel box sits in a 48 pixel target with a 40 pixel state layer; Tab reaches it, and Space or Enter toggles it.
     usage_view: |
       name: terms
       widget: Container
@@ -1103,11 +956,6 @@ components:
       children:
         - {widget: Checkbox, checked: "{{ all_read }}", label: I have read the terms, error: "{{ show_error }}"}
         - {widget: Checkbox, checked: "{{ some_read }}", label: Select all}      # empty while only some are on
-    usage: |
-      - id: agree
-        component: Checkbox
-        with: {background: surface, width: 48, height: 48, checked: false}
-        handlers: {on_change: toggled}
     python: |
       from tesserae.widgets import checkbox
 
@@ -1118,22 +966,14 @@ components:
   - slug: radio-buttons
     title: Radio button
     group: Selection and input
-    widget: RadioButton
-    fragments: [RadioButton]
+    widgets: [RadioButton]
     md3: |
       A radio button lets the user choose one option from a set. Radio buttons in one group exclude each other,
       and the arrow keys move between them.
     built: |
-      `widget: RadioButton`, a Tesserae control. Radio buttons with one `group:` name share a group: choosing one unchooses the others, the group is one
-      Tab stop (the chosen one, else the first), and the arrow keys move the choice.
-
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `selected` | true or false, two-way | whether it is the chosen one |
-      | `group` | a name | buttons with the same name exclude each other |
-      | `label` | text | beside the ring, part of what you press, and what a screen reader calls it |
-      | `error` | true or false | drawn in the error colours |
-      | `disabled` | true or false | dimmed and does nothing |
+      `widget: RadioButton`, a Tesserae control: a 20 pixel ring with a dot that grows in when it is chosen. Radio buttons with one `group:` name share a group: choosing
+      one unchooses the others, the group is one Tab stop (the chosen one, else the first that is not disabled), and the arrow keys move the choice (and the focus) to the next or
+      previous button that is not disabled, wrapping round. A press on a chosen one does not unchoose it. The `label` sits beside the ring and is part of what you press.
 
       To keep the choice in one value, test it in `selected` and set it in `on_change`: `selected: "{{ size == 'm' }}"`, `on_change: "size = 'm'"`.
     usage_view: |
@@ -1144,10 +984,6 @@ components:
         - {widget: RadioButton, group: size, label: Small, selected: "{{ size == 's' }}", handlers: {on_change: "size = 's'"}}
         - {widget: RadioButton, group: size, label: Medium, selected: "{{ size == 'm' }}", handlers: {on_change: "size = 'm'"}}
         - {widget: RadioButton, group: size, label: Large, selected: "{{ size == 'l' }}", handlers: {on_change: "size = 'l'"}}
-    usage: |
-      - id: small
-        component: RadioButton
-        with: {size: 48, selected: true}
     python: |
       from tesserae.controls import RadioGroup
       from tesserae.widgets import radio_button
@@ -1159,20 +995,14 @@ components:
   - slug: switches
     title: Switch
     group: Selection and input
-    widget: Switch
-    fragments: [Switch]
+    widgets: [Switch]
     md3: |
       A switch toggles one setting on or off, and takes effect at once. It has a track and a thumb that grows when
       it is on.
     built: |
-      `widget: Switch`, a Tesserae control: a 52 by 32 pixel track and a handle that slides across it and grows when pressed.
-
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `selected` | true or false, two-way | whether it is on |
-      | `label` | text | beside the track, part of what you press, and what a screen reader calls it |
-      | `icons` | true or false | a check on the handle when on and a cross when off (the off handle is then as big as the on one) |
-      | `disabled` | true or false | dimmed and does nothing |
+      `widget: Switch`, a Tesserae control: a 52 by 32 pixel track and a handle that slides across it and grows when pressed (16 pixels off, 24 on, 28 pressed). The `label` sits beside
+      the track and is part of what you press. With `icons: true` the handle carries a check when on and a cross when off, and the off handle is then as big as the on one. Space or
+      Enter toggles it from the keyboard, and `handlers: {on_change: ...}` runs after the user toggles it.
     usage_view: |
       name: settings
       widget: Container
@@ -1180,10 +1010,6 @@ components:
       children:
         - {widget: Switch, selected: "{{ wifi }}", label: Wi-Fi}
         - {widget: Switch, selected: "{{ dark }}", label: Dark mode, icons: true}
-    usage: |
-      - id: dark
-        component: Switch
-        with: {width: 52, height: 32, selected: false}
     python: |
       from tesserae.widgets import switch
 
@@ -1193,39 +1019,29 @@ components:
   - slug: sliders
     title: Slider
     group: Selection and input
-    widget: Slider
-    fragments: [Slider]
+    widgets: [Slider, RangeSlider]
     md3: |
       A slider lets the user pick a value from a range by dragging a handle, or with the keyboard.
     built: |
-      `widget: Slider`, a Tesserae control: a 4 pixel track, a 20 pixel handle and a 40 pixel state layer in a 48 pixel target.
+      `widget: Slider`, a Tesserae control: a 4 pixel track, a 20 pixel handle and a 40 pixel state layer in a 48 pixel target. A bound `value` follows the drag, not only its end.
+      With a `step` the value snaps to multiples of it from `min`, the keys move by it (else by a hundredth of the range), and `ticks: true` puts a mark at each step: a discrete
+      slider (without a `step` there is nothing to mark). `value_indicator: true` shows a bubble with the value over the handle while it is dragged or has the keyboard focus.
+      A `max` that is not above `min`, or a `step` that is not positive, is an error.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `value` | number, two-way | from `min` to `max`; a bound Signal follows the drag, not only its end |
-      | `min`, `max` | numbers | the range; 0 to 1 by default |
-      | `step` | number | snap to multiples of it from `min`; the keys move by it (else by a hundredth of the range) |
-      | `ticks` | true or false | a mark at each step (needs `step`): a discrete slider |
-      | `value_indicator` | true or false | a bubble with the value over the handle while it is dragged or has the keyboard |
-      | `vertical` | true or false | stood up: the bottom is `min`, `style.height` is its length and `style.width` the touch target's; up and down arrows step it |
-      | `size` | `xs`, `s`, `m`, `l`, `xl` | MD3 Expressive: a track 16, 24, 40, 56 or 96 px thick, in two pieces with a 6 px gap, and a thin 4 px handle across it (empty: the standard 4 px track and 20 px handle) |
-      | `icon` | an icon name | a glyph inset at the start of the track (needs a `size` of `s` or larger); the colour of what it lies on |
-      | `label` | text | what a screen reader calls it |
-      | `disabled` | true or false | dimmed and does not move |
+      Three looks go beyond the standard one. `vertical: true` stands it up: the bottom is `min`, `style.height` is its length and `style.width` the touch target's. `size`
+      (`xs`, `s`, `m`, `l` or `xl`) is the Expressive form: a track 16, 24, 40, 56 or 96 pixels thick, in two pieces with a 6 pixel gap either side of a thin 4 pixel handle that
+      stands across it. `icon` insets a glyph at the start of the track (it needs a `size` of `s` or larger) in the colour of what it lies on.
 
-      Events: `on_input` while it is dragged (every step), `on_change` once it is let go and after each key. Dragging captures the pointer; the arrow keys
-      step it, Page Up and Down move by ten steps, Home and End go to the ends, and a screen reader can increment, decrement and set it. The colour is
-      `style.foreground` and the length is `style.width` (`style.height` when `vertical`).
+      Events: `on_input` while it is dragged (every step), `on_change` once it is let go, and after each key. Dragging captures the pointer, and a press anywhere on the track
+      sets the value there. The arrow keys step it (all four, whichever way it lies), Page Up and Down move by ten steps, Home and End go to the ends, and a screen reader can
+      increment, decrement and set it. The colour is `style.foreground` and the length is `style.width` (`style.height` when `vertical`); a slider laid out longer or shorter than
+      it was built, in a flexible row, takes the room it was given.
 
       ### Range slider
 
       `widget: RangeSlider` picks two values, a least and a most, with two handles. It takes the slider's `min`, `max`, `step`, `ticks`, `value_indicator`,
-      `vertical`, `size`, `icon`, `label` and `disabled`, and, in place of `value`:
-
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `low` | number, two-way | the least of the two; a bound Signal follows the drag |
-      | `high` | number, two-way | the most of the two; never below `low` (a `high` below it is read as `low`) |
+      `vertical`, `size`, `icon`, `label` and `disabled`, and, in place of `value`, two two-way numbers: `low`, the least of the two, and `high`, the most. A `high` below
+      `low` is read as `low`.
 
       The handles never cross: a drag stops at the other handle. Each handle is its own stop for Tab, has its own state layer and focus ring and, for a
       screen reader, is a slider of its own (named from `label`: "Price, minimum" and "Price, maximum"; its reach is up to or down from the other handle).
@@ -1240,10 +1056,6 @@ components:
         - {widget: Slider, value: "{{ volume }}", min: 0, max: 100, label: Volume, value_indicator: true, style: {width: 240}}
         - {widget: Slider, value: "{{ stars }}", min: 1, max: 5, step: 1, ticks: true, style: {width: 240}}
         - {widget: RangeSlider, low: "{{ cheapest }}", high: "{{ dearest }}", min: 0, max: 500, step: 10, label: Price, style: {width: 240}}
-    usage: |
-      - id: volume
-        component: Slider
-        with: {background: surface, width: 240, height: 44, value: 0.5}
     python: |
       from tesserae.widgets import slider
 
@@ -1254,8 +1066,7 @@ components:
   - slug: chips
     title: Chips
     group: Selection and input
-    shipped_view: Chip
-    fragments: [ChipAssist, ChipFilter, ChipFilterSelected, ChipInput, ChipSuggestion]
+    views: [Chip, ChipGroup]
     md3: |
       Chips are compact elements for an action, a filter, a piece of input, or a suggestion. **Assist** chips
       start an action, **filter** chips narrow results (and show a check when selected), **input** chips are
@@ -1264,20 +1075,16 @@ components:
       `widget: Chip` is a view Tesserae ships (`Chip_View.yaml`): 32 pixels tall with 8 pixel corners, as wide as its label. `widget: ChipGroup` is a wrapping row of
       them.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `label` | text | the text |
-      | `variant` | `assist`, `filter`, `input`, `suggestion` | what it is for (default `assist`) |
-      | `icon`, `avatar_text` | an icon, letters | a leading 18 pixel icon, or letters in a 24 pixel circle |
-      | `selected` | true or false; two-way | a filter or input chip that is on: `secondary_container`, no outline, a check in place of the icon |
-      | `elevated` | true or false | a raised surface instead of an outline |
-      | `removable`, `removed`, `on_remove` | true or false; true or false, two-way; a handler | a close button; pressing it sets `removed` and runs `on_remove` |
-      | `disabled` | true or false | dimmed, not focusable, handlers do not respond |
+      A chip has a leading 18 pixel `icon`, or `avatar_text`: letters in a 24 pixel circle. A filter or input chip that is `selected` is `secondary_container` with no outline, and
+      a filter chip also shows a check in place of its icon. `elevated` swaps the outline for a raised surface. A `removable` chip (an input chip) has a close button: pressing it
+      sets `removed` to true and runs `on_remove`. A filter chip is a checkbox to a screen reader and the others are buttons; a disabled chip is dimmed and not focusable.
 
       A filter chip flips `selected` itself (`flip: false` leaves that to you); `handlers: {on_click: ...}` on the call is what a press does. A `ChipGroup` takes
       `chips` (`{value, label}` and optionally `{icon, avatar_text, disabled}`) and a `mode`: `none` (assist or suggestion chips; the last pressed goes to
       `chosen`), `single` or `multiple` (filter chips; `selected` is the value or the list of values), or `input` (chips with a close, and a field: Enter adds a
-      chip, the close removes one, and `chips` is two-way). Not built: dragging chips to reorder, and a chip group that scrolls sideways.
+      chip, the close removes one, and `chips` is two-way; `entry` is what is typed and `placeholder` its hint). In `none` mode `variant` is `assist` or `suggestion`, and
+      `elevated` raises every chip. The group is one Tab stop and the arrow keys move the focus along the chips (in `single` mode the focus carries the choice with it). Not built:
+      dragging chips to reorder, and a chip group that scrolls sideways.
     usage_view: |
       name: filters
       widget: Container
@@ -1297,8 +1104,8 @@ components:
   - slug: text-fields
     title: Text fields
     group: Selection and input
-    shipped_view: TextField
-    fragments: []
+    views: [TextField]
+    widgets: [TextInput]
     md3: |
       A text field lets people enter and edit text. Material Design 3 has two kinds: a **filled** field, a tinted container with a line under
       it, and an **outlined** one, a field with a border. The label is the field's name: it sits in the middle as a hint and moves up, smaller,
@@ -1308,42 +1115,28 @@ components:
       `widget: TextField` is a view Tesserae ships (`TextField_View.yaml`) with its look as rules (`TextField_Stylesheet.yaml`). It is built from
       the `TextInput` widget, the bare input, and the nodes around it, so every part has a name a stylesheet can address.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `variant` | `filled` or `outlined` | the look; `filled` by default |
-      | `label` | text | the field's name; it also names the input for a screen reader |
-      | `text` | text, two-way | what is typed: give it a bare reference and typing writes it |
-      | `placeholder` | text | shown while the field is empty and has focus (or has no label) |
-      | `supporting` | text | help under the field |
-      | `error` | text | an error message: the field takes the error look and the message replaces the supporting text |
-      | `leading`, `trailing` | icon name | an icon before and after the text; an error replaces the trailing icon |
-      | `prefix`, `suffix` | text | text around the typing, such as `$` and `USD` |
-      | `max_length` | whole number | the most characters it takes; `0` is no limit |
-      | `counter` | true or false | shows how many characters are typed, of `max_length` when there is one |
-      | `multiline` | true or false | several lines; Enter makes a new one |
-      | `obscured` | true or false | a password: dots, with a button that shows the text |
-      | `disabled`, `read_only` | true or false | dimmed and takes no typing; the text can be selected and copied but not changed |
-      | `suggestions` | a list of texts | those that contain what is typed show in a menu under the field (up to six); pressing one fills the field in; Escape closes the menu |
-      | `mask` | a pattern | what is typed is fitted to it (`###-####`) |
-      | `typing_effect` | `none`, `flash` or `fade_in` | what happens to the characters just typed (below); `none` by default |
-      | `typing_duration` | milliseconds | how long a flash or a fade-in lasts: 260 for a flash and 180 for a fade-in when left out; `0` leaves the effect out |
-      | `flash_color` | a theme role or colour | what a flash is tinted with (`tertiary`, `#FF8800`, `primary@50%`); the primary colour when left out |
-      | `flash_opacity` | 0 to 1 | how strong a flash starts: `0.24` when left out |
-      | `caret_effect` | `none` or `glide` | `glide` draws the caret itself and eases it to each new place (below); `none` by default |
-      | `glide_duration` | milliseconds | how long the gliding caret takes to reach its new place: `120` when left out; `0` makes it jump |
-      | `caret_blink` | milliseconds | how long the gliding caret is on, then off: `530` when left out; `0` keeps it solid |
-      | `on_edit` | a handler | called after each edit, once `text` has been written |
+      `text` is two-way: give it a bare reference and typing writes it. `placeholder` shows while the field is empty and has focus (or has no label). `supporting` is help under the
+      field, and `error` is a message that gives the field the error look and replaces the supporting text. `leading` and `trailing` are icons (an error replaces the trailing one),
+      `prefix` and `suffix` are text around the typing, such as `$` and `USD`, and `counter` shows how many characters are typed, of `max_length` when there is one (`0` is no limit).
+      `multiline` makes Enter start a new line; `obscured` makes a password (dots, with a button that shows the text); `read_only` lets the text be selected and copied but not
+      changed. `mask` fits what is typed to a pattern (`###-####`: `#` a digit, `A` a letter, `*` either, `\` a literal). `suggestions` is a list of texts: those that contain
+      what is typed show in a menu under the field (up to six), pressing one fills the field in, and Escape closes the menu.
 
-      Events: `on_key` for each key pressed in the field, `on_edit` after each edit, and `on_submit` for Enter in a field that is not
-      multiline. A handler written on the field is called as the user types.
+      Events: `on_key` for each key pressed in the field, `on_edit` after each edit (once `text` has been written), and `on_submit` for Enter in a field that is not
+      multiline.
 
       **Typing effects.** `typing_effect: flash` tints the characters just typed with the primary colour and lets the tint fade (about a quarter of a second);
       `fade_in` covers them in the background colour and lets that fade, so they seem to appear. Each is drawn exactly over what was inserted (a paste over
       several lines gets a piece on each line), from the geometry the engine reports for the edit. The background `fade_in` uses is the first opaque fill going up from the
       input, else the theme's `surface`. `caret_effect: glide` hides the engine's caret and draws one of Tesserae's own, which eases to each new place in about an eighth
       of a second, stays solid while you type and blinks after a moment, and shows only while the field has the focus. When the app asks for reduced motion there is no
-      flash and no fade, and the caret jumps and does not blink. Neither takes the pointer or appears to a screen reader. The looks above are each the field's own to set (a number below `0`, or a strength outside `0` to `1`, is an
-      error that names the property and the line); the easing is not settable.
+      flash and no fade, and the caret jumps and does not blink. Neither takes the pointer or appears to a screen reader.
+
+      Five more properties tune them, each the field's own to set. `typing_duration` is how long a flash or a fade-in lasts, in milliseconds (260 for a flash and 180 for a fade-in
+      when left out; `0` leaves the effect out). `flash_color` is what a flash is tinted with: a theme role or a colour (`tertiary`, `#FF8800`, `primary@50%`), the primary colour
+      when left out. `flash_opacity` is how strong a flash starts, `0` to `1` (`0.24` when left out). `glide_duration` is how long the gliding caret takes to reach its new place
+      (`120` when left out; `0` makes it jump), and `caret_blink` is how long it is on, then off (`530` when left out; `0` keeps it solid). A number below `0`, or a strength outside
+      `0` to `1`, is an error that names the property and the line. The easing is not settable.
 
       The parts a stylesheet can address are `box`, `label`, `input`, `prefix`, `suffix`, `leading_icon`, `trailing_icon`, `error_icon`,
       `reveal_button`, `reveal_icon`, `indicator` (the line under a filled field), `supporting` and `counter`. The state of a rule is the state of
@@ -1380,7 +1173,8 @@ components:
           text: "{{ bio }}"
     after: |
       `TextInput` is the bare input, for when the field around it is your own: `text`, `placeholder`, `multiline`, `obscured`, `max_length`,
-      `read_only`, `disabled`, `mask`, `typing_effect` and `caret_effect`, drawn as one line that scrolls.
+      `read_only`, `disabled`, `mask`, the typing and caret effects above (`typing_effect`, `caret_effect` and the five that tune them) and the font (`typography_role`,
+      `font_family`, `font_size`, `font_weight`); its colour is `style.foreground`.
 
       ## Changing its look
 
@@ -1399,28 +1193,23 @@ components:
           style: {background: tertiary}
       ```
 
-      A view named `TextField_View.yaml` in your project replaces the shipped field, and its shipped look with it. In a view written with `kind:`,
-      `kind: TextField` is the bare input (the `TextInput` widget), with `text: {placeholder, multiline, obscured}` for those three;
-      `tesserae migrate-yaml` turns it into `widget: TextInput`.
+      A view named `TextField_View.yaml` in your project replaces the shipped field, and its shipped look with it.
     see: [guide/view-language.md, guide/bindings.md]
 
   - slug: spin-boxes
     title: Spin box
     group: Selection and input
-    fragments: [SpinBox]
+    views: [SpinBoxField]
+    widgets: [SpinBox]
     md3: |
       Material Design 3 has no spin box. Tesserae's is built from MD3's parts: a number field between two 40dp
       icon buttons.
     built: |
-      The `SpinBox` kind (`widget: SpinBox` in a view), a Tesserae control. Typing, the arrow keys and the buttons change `value`; `min`, `max` and `step` bound it.
-
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `value`, `min`, `max`, `step` | numbers; `value` is two-way | the number and what bounds and moves it |
-      | `decimals` | a whole number | how many decimal places show |
-      | `prefix`, `suffix` | text | shown with the number (a currency sign, a unit); typing may include them or not |
-      | `wrap` | true or false | a step past one bound lands on the other, so the buttons never disable (needs `min` and `max`) |
-      | `label`, `disabled` | text, true or false | the name for a screen reader; dimmed |
+      The `SpinBox` kind (`widget: SpinBox` in a view), a Tesserae control: a 64 by 40 pixel number field between two 40 pixel buttons. The buttons, the up and down arrow keys in the
+      field and a screen reader's increment and decrement change `value` by `step`; typing a number sets it once it parses and fits `min` to `max`, and leaving the field puts the
+      value's text back if what was typed did not. A button whose step would pass a bound is disabled, unless `wrap` is on (it needs `min` and `max`): then a step past one bound
+      lands on the other and the buttons never disable. `decimals` fixes how many places show (without it, only as many as the number needs). `prefix` and `suffix` (a currency sign,
+      a unit) are shown with the number, and typing may include them or not. `label` is the name for a screen reader.
 
       Holding a button steps again after 400 milliseconds and then every 80, until it is let go or reaches a bound; Page Up and Page Down step ten at a time.
       `widget: SpinBoxField` is a view Tesserae ships that adds a visible `label` above and a line of `supporting` or `error` text under it (`least` and `most` are its
@@ -1441,23 +1230,17 @@ components:
   - slug: date-pickers
     title: Date picker
     group: Selection and input
-    shipped_view: DatePicker
-    fragments: [DatePickerDay, DatePickerDayToday, DatePickerDaySelected, DatePickerDayOutsideMonth]
+    views: [DatePicker, DatePickerDay]
     md3: |
       A date picker lets the user pick a date from a month grid. Today is outlined, the chosen day is a filled
       circle, and days of the neighbouring months are dimmed.
     built: |
       Two views Tesserae ships: `DatePickerDay` (one day, in all its states) and `DatePicker` (the modal dialog).
 
-      | Property of `DatePicker` | Type | Meaning |
-      | --- | --- | --- |
-      | `open` | true or false; two-way | whether it is showing; Escape and a press on the scrim close it |
-      | `date` | text `year-month-day`; two-way | the date ("2026-10-09", or empty for none); changed only when OK is pressed |
-      | `earliest`, `latest` | text `year-month-day` | the days outside them are disabled |
-      | `week_starts` | `sunday`, `monday` | which day the weeks start on |
-      | `title`, `on_ok` | text, a handler | the small heading; called after OK |
+      `DatePicker`'s `open` is two-way (Escape and a press on the scrim close it). `date` is text, `year-month-day` ("2026-10-09", or empty for none), also two-way, and it changes only
+      when OK is pressed. The days before `earliest` and after `latest` are disabled, `week_starts` is `sunday` (the default) or `monday`, and `on_ok` is called after OK.
 
-      The dialog shows the chosen date in `headline_large` and a keyboard button that swaps the grid for a typed field (`####-##-##`), the month with arrows between months, the
+      The dialog shows the chosen date in `headline_large` and a keyboard button that swaps the grid for a typed field (`####-##-##`; text that is not a real day is left out), the month with arrows between months, the
       weekday initials, six weeks of days, and Cancel and OK. Today is outlined, the chosen day is a `primary` circle, and the days of the months either side are faint and move
       the view to their month when pressed. The arrow keys move around the grid. A `DatePickerDay` has `day`, `selected`, `today`, `outside` and `disabled`. The dates are worked out with
       the expression language's `date_add_days`, `date_weekday`, `days_in_month`, `format_date` and `current_date`, which are there for any view. Not built: a range picker,
@@ -1480,23 +1263,20 @@ components:
   - slug: time-pickers
     title: Time picker
     group: Selection and input
-    shipped_view: TimePicker
-    fragments: [TimePickerDial, PeriodSelectorAM, PeriodSelectorPM]
+    views: [TimePicker, PeriodSelector]
+    widgets: [TimePickerDial]
     md3: |
       A time picker lets the user choose an hour and a minute on a dial, with an AM/PM selector in a 12-hour
       format.
     built: |
       Four pieces. `TimePickerDial` is a Tesserae control (`widget: TimePickerDial`): `hour`, `minute` and `mode` (`hour` or `minute`; letting go on an hour moves on to the
-      minutes unless `auto_advance` is off). `PeriodSelector` is a view: two halves, `period` `AM` or `PM` (two-way), with an `on_change` handler for after a choice.
+      minutes unless `auto_advance` is off; the arrow keys step the hour by one or the minute by five, and a screen reader can increment and decrement it). `PeriodSelector` is a view: two 40 pixel halves, `period` `AM` or `PM` (two-way), with an `on_change` handler for after a choice; it is one Tab stop and the up and down arrows move and choose.
       `TimeInput` is a view: an hour field, a colon, a minute field and, in 12-hour time, a period selector, where `hour` and `minute` are two-way and a number that does
       not fit is left out (the fields are filled from the time when they appear). `TimePicker` is the dialog of Material 3.
 
-      | Property of `TimePicker` | Type | Meaning |
-      | --- | --- | --- |
-      | `open` | true or false; two-way | whether it is showing; Escape and a press on the scrim close it |
-      | `hour`, `minute` | whole numbers; two-way | the time, 0 to 23; changed only when OK is pressed |
-      | `twelve` | true or false | 12-hour time with a dial and a period selector; off, only the typed fields |
-      | `title`, `on_ok` | text, a handler | the small heading; called after OK |
+      `TimePicker`'s `open` is two-way (Escape and a press on the scrim close it). `hour` (0 to 23) and `minute` are two-way and change only when OK is pressed; Cancel, Escape and the
+      scrim leave them. `twelve` (the default) is 12-hour time with a dial and a period selector; `twelve: false` opens straight on the typed fields, with no dial and no keyboard
+      button. `on_ok` is called after OK.
 
       The picker shows the time as an hour and a minute you press to choose which the dial sets, the period selector, the 256 pixel dial, a keyboard button that
       swaps the dial for the typed fields (and back), and Cancel and OK. Reopening it starts from the time as it then is. Not built: a 24-hour dial with an inner ring,
@@ -1524,24 +1304,17 @@ components:
   - slug: segmented-buttons
     title: Segmented buttons
     group: Selection and input
-    shipped_view: SegmentedButton
-    fragments: []
+    views: [SegmentedButton]
     md3: |
       A segmented button is a row of two to five connected options, for one choice or several.
     built: |
       `widget: SegmentedButton` is a view Tesserae ships (`SegmentedButton_View.yaml`): one outlined pill (40 pixels tall, a 1 pixel `outline`, fully
       rounded) of segments with a line between them.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `options` | a list | the segments, each `{value, label}` and optionally `{icon, disabled}`; an expression follows its Signals |
-      | `selected` | a value, or a list with `multiple`; two-way | the chosen one(s); a press writes it back |
-      | `multiple` | true or false | several can be chosen; each segment toggles |
-      | `disabled` | true or false | dimmed, and no segment can be pressed |
-
-      A chosen segment is `secondary_container` with a check that takes the place of its icon. Single choice is a radio group: one Tab stop (the
-      chosen segment), and the arrow keys move the choice; multiple choice is a group of toggles, each its own Tab stop with the arrows moving focus
-      only. The look is in the view, because each segment's state is its own: write a `SegmentedButton_View.yaml` in your project to change it.
+      Each segment is `{value, label}` and optionally `{icon, disabled}`; `options` can be an expression, and follows its Signals. `selected` is the chosen value (with `multiple`, the
+      list of chosen values) and a press writes it back. A chosen segment is `secondary_container` with a check that takes the place of its icon, and a segment of its own `disabled`,
+      or all of them with the button's `disabled`, is dimmed and cannot be pressed. Single choice is a radio group: one Tab stop (the chosen segment), and the arrow keys
+      move the choice, skipping a disabled segment; multiple choice is a group of toggles, each its own Tab stop with the arrows moving focus only. The look is in the view, because each segment's state is its own: write a `SegmentedButton_View.yaml` in your project to change it.
     usage_view: |
       name: calendar
       widget: Container
@@ -1566,11 +1339,23 @@ components:
   - slug: time-input
     title: Time input
     group: Selection and input
-    fragments: []
+    views: [TimeInput]
     md3: |
       A time input field is a numeric field for the hour or the minute, used in the time picker's keyboard mode.
     built: |
-      Python only.
+      `widget: TimeInput` is a view Tesserae ships (`TimeInput_View.yaml`): two outlined `TextField`s, 96 pixels wide, for the hour and the minute, a colon between them and, in
+      12-hour time, a `PeriodSelector`. `hour` (0 to 23) and `minute` are two-way. The fields take two digits (`mask: "##"`); a number that does not fit (1 to 12 in 12-hour
+      time, 0 to 23 otherwise, and 0 to 59 for the minute) is left out until it does. The fields are filled from the time when the input appears and follow what is typed after
+      that. The time picker shows it in its keyboard mode.
+
+      In Python, `time_input_field` is one numeric field of Material 3's: 96 by 72 pixels, a centred two-digit numeral, `unit` `hour` or `minute`. Its `value` is a `Signal`;
+      typing a number in range sets it, and the up and down arrows (and a screen reader's increment and decrement) step it, wrapping.
+    usage_view: |
+      name: alarm_time
+      widget: Container
+      style: {width: 360, height: 120, padding: 16}
+      children:
+        - {widget: TimeInput, hour: "{{ alarm_hour }}", minute: "{{ alarm_minute }}", twelve: false}
     python: |
       from tesserae.widgets import time_input_field
 
@@ -1580,8 +1365,7 @@ components:
   - slug: text
     title: Text
     group: Content
-    widget: Text
-    fragments: [Text]
+    widgets: [Text]
     md3: |
       Text is set in Material Design 3's type scale: 15 styles in five groups (display, headline, title, body and
       label), each large, medium or small, with a font, size, weight, line height and tracking.
@@ -1589,16 +1373,9 @@ components:
       `widget: Text`. Name a `typography_role` and Tesserae fills in the rest; a theme's `typography:` can change
       what a role means.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `text` | text | what is shown; an expression follows the Signals it reads |
-      | `typography_role` | a role such as `body_large` | the font, size, weight and line height |
-      | `font_family`, `font_size`, `font_weight` | | replace what the role gives |
-      | `wrap`, `overflow`, `text_align` | | `word` or `none`; `clip` or `ellipsis`; `start`, `center`, `end` |
-      | `max_lines` | whole number | the most lines shown; with `overflow: ellipsis` the last one ends in an ellipsis |
-      | `letter_spacing` | number | extra space between letters, in pixels |
-      | `selectable` | true or false | the text can be selected and copied |
-      | `heading` | 1 to 6 | makes it a heading of that level for a screen reader |
+      `text` can be an expression, and follows the Signals it reads. `font_family`, `font_size` and `font_weight` replace what the role gives. `wrap` is `word` or `none`,
+      `overflow` is `clip` or `ellipsis`, `text_align` is `start`, `center` or `end`, and `max_lines` cuts a longer text to that many lines (with `overflow: ellipsis` the last
+      one ends in an ellipsis). `letter_spacing` adds space between letters, in pixels. `selectable: true` lets the text be selected and copied, and `heading: 1` to `6` makes it a heading of that level for a screen reader.
 
       The colour is `style.foreground`. Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are
       `tokens.MD3_TRACKING`, and a theme turns them on with `typography: tokens.MD3_TRACKING_TYPOGRAPHY` (or one role at a time:
@@ -1616,10 +1393,6 @@ components:
           overflow: ellipsis
           selectable: true
           style: {foreground: on_surface_variant}
-    usage: |
-      - id: heading
-        component: Text
-        with: {text: Notes, typography_role: headline_medium, color: on_surface}
     python: |
       from tesserae.widgets import text
 
@@ -1629,23 +1402,18 @@ components:
   - slug: images
     title: Images
     group: Content
-    widget: Image
-    fragments: [Image]
+    widgets: [Image]
     md3: |
       An image shows a picture, fitted to its box. Material Design 3 describes how to crop and round it in a
       container: a corner from the shape scale, a circle for an avatar.
     built: |
-      `widget: Image` is the engine's picture node: Tesserae reads and decodes the file (Pillow), and `fit` says how it fills the box.
-
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `src` | file | the picture, relative to the view; an expression, so it follows a Signal |
-      | `fit` | `cover`, `contain` or `fill` | how it fills its box; `cover` by default |
-      | `alt` | text | what the picture shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks |
+      `widget: Image` is the engine's picture node: Tesserae reads and decodes the file (Pillow), and `fit` says how it fills the box (`cover` by default, or `contain` or `fill`).
+      `src` is relative to the view, and can be an expression, so it follows a Signal. `alt` says what the picture shows, for a screen reader; without it the picture is decorative
+      and hidden from one, unless it handles clicks. The path must be relative and stay inside the view's directory; an absolute one, or one that leaves it, is refused.
 
       Its shape is `style.corner_radius`: a number, a shape token, `full` for a circle on a square picture, or a different radius on each
       corner (`{top_left: 24}`). The engine clips the picture to it: `full` on a square picture is a circle (an avatar), and on any other a pill. Put it in a rule
-      (`classes: [avatar]`) and every picture with the class takes the shape. A shape that is not a rounded rectangle needs a mask the engine does not have.
+      (`classes: [avatar]`) and every picture with the class takes the shape. Not built: a picture clipped to any other shape (the engine can mask a node with a circle, a rounded rectangle or a path, but no style passes one on).
       A missing or unreadable file stops the view opening, with the widget's name and the file in the message.
     usage_view: |
       name: profile
@@ -1661,10 +1429,6 @@ components:
           src: avatar.png
           alt: Your photo
           style: {width: 64, height: 64, corner_radius: full}
-    usage: |
-      - id: photo
-        component: Image
-        with: {src: cat.png, width: 200, height: 150, fit: cover}
     python: |
       from tesserae.widgets import image
 
@@ -1673,9 +1437,7 @@ components:
   - slug: svg
     title: SVG
     group: Content
-    node_kind: Svg
-    widget: Svg
-    fragments: []
+    widgets: [Svg]
     md3: |
       Material Design 3 uses SVG for its icons and illustrations. An SVG document is vector art: shapes, gradients,
       patterns, clips, masks and text, which scale to any size without blurring.
@@ -1684,13 +1446,11 @@ components:
       centred in it. Tesserae reads the file, and decodes the raster pictures in it (`<image href="...">`: PNG, JPEG, GIF
       or WebP, found next to the SVG file, or a `data:` URL) for the engine, which decodes no image format. `style.foreground` is what
       `currentColor` means in the document, so a monochrome icon follows the theme, light and dark. Give a `width` or a
-      `height`, or both. Hot reload watches the file and the pictures in it.
+      `height`, or both.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `src` | file | a `.svg` or `.svgz` file next to the view; an expression, so it follows a Signal |
-      | `content` | text | the document itself, instead of a file (give one of `src` and `content`) |
-      | `alt` | text | what the picture shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks |
+      Give one of `src`, a `.svg` or `.svgz` file next to the view (an expression, so it follows a Signal), and `content`, the document itself as text. `alt` says what the picture
+      shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks. A missing file, or a document that is not SVG, stops the view
+      opening with the widget's name in the message.
     usage_view: |
       name: brand
       widget: Container
@@ -1703,12 +1463,6 @@ components:
         - widget: Svg
           content: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg>'
           style: {width: 24, height: 24, foreground: on_surface}
-    usage: |
-      - id: logo
-        kind: Svg
-        svg:
-          content: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg>'
-        style: {width: 48, height: 48, foreground: primary}
     python: |
       from tesserae.widgets import svg
 
@@ -1718,8 +1472,7 @@ components:
   - slug: video
     title: Video
     group: Content
-    shipped_view: VideoPlayer
-    fragments: [Video]
+    views: [VideoPlayer]
     md3: |
       Video is content, not a component, in Material Design 3; Tesserae shows frames you supply.
     built: |
@@ -1727,17 +1480,10 @@ components:
 
       `widget: VideoPlayer` is a view Tesserae ships (`VideoPlayer_View.yaml`) that puts transport controls under such a picture: a play/pause button, the time, a seek slider, the length and a mute button.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `frame` | `(rgba, width, height)` | the picture, pushed by the app as the video plays |
-      | `width`, `height`, `fit` | | the picture's size (the controls are as wide) and how it fills its box |
-      | `playing` | true or false; two-way | the play button flips it; the app's player follows |
-      | `position` | seconds; two-way | the seek slider shows and writes it; the app moves it on as it plays |
-      | `duration` | seconds | the length (the slider is off without one) |
-      | `muted` | true or false; two-way | the volume button flips it |
-      | `buffering` | true or false | a wait ring over the picture |
-      | `caption` | text | a subtitle on a darkened band at the foot of the picture |
-      | `step`, `label` | | how far the arrow keys move the slider; the player's accessible name |
+      The app pushes each `frame` as the video plays; `width` and `height` are the picture's size (the controls are as wide) and `fit` how it fills its box (`contain` here). The three
+      two-way values are `playing` (the play button flips it; the app's player follows), `position` (seconds; the seek slider shows and writes it, and the app moves it on as it plays)
+      and `muted` (the volume button flips it). `duration` is the length in seconds, and the slider is off without one. `buffering` lays a wait ring over the picture, `caption` puts a
+      subtitle on a darkened band at its foot, `step` is how far the arrow keys move the slider, and `label` is the player's name for a screen reader.
 
       On the seek slider: Space plays or pauses, the arrows step the position, M mutes. Not built: a decoder (decode with the library you choose, and set `frame`), full-screen, speeds, a volume level, a poster.
     usage_view: |
@@ -1752,10 +1498,6 @@ components:
           duration: 125
           muted: "{{ muted }}"
           caption: "{{ words }}"
-    usage: |
-      - id: clip
-        component: Video
-        with: {width: 320, height: 180, fit: contain}
     python: |
       from tesserae.widgets import video
 
@@ -1764,21 +1506,17 @@ components:
   - slug: carousel
     title: Carousel
     group: Content
-    shipped_view: Carousel
-    fragments: []
+    views: [Carousel]
     md3: |
       A carousel shows a row of items that scroll, with the focused one largest. MD3 has multi-browse, uncontained,
       hero and full-screen layouts.
     built: |
       `widget: Carousel` is a view Tesserae ships (`Carousel_View.yaml`): a `ScrollView` that scrolls sideways (`orientation: horizontal`) and settles on an item
-      (`snap`, with each item's `snap_align`), of rounded items 8 pixels apart with a title on a darkened band.
+      (`snap`, with each item's `snap_align`), of items with 28 pixel corners, 8 pixels apart, with a title on a darkened band.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `items` | a list | `{value, title}` and optionally `{image, supporting}` |
-      | `variant` | `uncontained`, `multi_browse`, `hero`, `center_hero` | every item `item_width` wide; a large, a medium and then small items; large items with a peek of the next; the middle item large with a peek of each neighbour |
-      | `width`, `height`, `item_width` | numbers | the carousel's size (default 360 by 200) and an uncontained item's width |
-      | `chosen` | a value; two-way | the item pressed |
+      Each of `items` is `{value, title}` and optionally `{image, supporting}`. `variant` sets how big the items are: `uncontained` (the default; every item `item_width` wide),
+      `multi_browse` (a large item, a medium one, then small ones), `hero` (large items with a peek of the next) or `center_hero` (the middle item large, with a peek of each
+      neighbour). `width` and `height` are the carousel's own size (360 by 200 by default). Pressing an item sets `chosen` (two-way) to its `value`.
 
       The wheel and a drag scroll it; when it stops it settles with an item at the start (the middle for `center_hero`). The items are focusable and the arrow keys move along
       them. A `ScrollView` takes `snap` (`none`, `start`, `center`, `end`) and any node a `snap_align` style, so other strips can do the same. Not built: the sizes changing as
@@ -1803,23 +1541,18 @@ components:
   - slug: pagination
     title: Pagination
     group: Content
-    shipped_view: Pagination
-    fragments: []
+    views: [Pagination]
     md3: |
       Pagination shows where the user is among pages: a row of dots or numbers.
     built: |
       `widget: Pagination` is a view Tesserae ships (`Pagination_View.yaml`): previous and next arrows with the page numbers between them.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `page` | a whole number from 1; two-way | the page showing; choosing another writes it back |
-      | `pages` | a whole number | how many pages there are |
-      | `compact` | true or false | "3 of 12" between the arrows instead of the numbers |
-      | `dots` | true or false | a dot for each page, the current one `primary`, for a carousel |
+      `page` (from 1) is two-way: choosing another writes it back. `pages` is how many there are. `compact` shows "3 of 12" between the arrows instead of the numbers, and `dots`
+      shows a dot for each page, the current one `primary`, for a carousel (best under ten pages).
 
       The first and last pages and the ones beside the current page always show, with an ellipsis for the stretch left out (up to seven pages show whole). The
       current page is a filled button, and each number is named "Page n" and marks the current one as the page. Previous is disabled on the first page and next on the
-      last. Not built: an items-per-page control, a total, and a jump-to field.
+      last. Tab visits each control, and Enter or Space chooses. Not built: an items-per-page control, a count of all the items, and a jump-to field.
     usage_view: |
       name: results
       widget: Container
@@ -1837,8 +1570,7 @@ components:
   - slug: status-bar
     title: Status bar
     group: Beyond MD3
-    shipped_view: StatusBar
-    fragments: [StatusBar]
+    views: [StatusBar]
     md3: |
       Material Design 3 has no status bar. A desktop app often wants one, so this is a thin strip in MD3's
       surface and *label* style.
@@ -1846,12 +1578,9 @@ components:
       `widget: StatusBar` is a view Tesserae ships (`StatusBar_View.yaml`): a 24 pixel `surface_container` strip as wide as the place it is put in, with
       `label_small` text in `on_surface_variant`.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `items` | a list | each `{text}` and optionally `{icon, side, value, tooltip}`; `side` is `start` (the default), `center` or `end` |
-      | `progress` | 0 to 1 | a 4 pixel determinate indicator along the top edge |
-      | `busy` | true or false | an indicator with no end along the top edge |
-      | `clicked` | a value; two-way | the `value` of the item last pressed |
+      Each of `items` is `{text}` and optionally `{icon, side, value, tooltip}`; `side` is `start` (the default), `center` or `end`. `text` (a string) is a shorthand for one message
+      at the start, and `width` sets the bar's width instead of the place it is put in. `progress` (0 to 1) shows a 4 pixel determinate indicator along the top edge, and `busy`
+      one with no end. `clicked` is two-way: the `value` of the item last pressed.
 
       An item with a `value` is a button: it has a state layer, a tooltip if it has one, and pressing it sets `clicked`. The centre section is centred on the
       bar whatever the sides hold. The bar is announced politely when its items change. Not built: items that can be dragged or hidden when the window is
@@ -1878,27 +1607,37 @@ components:
   - slug: node-graph
     title: Node graph
     group: Beyond MD3
-    fragments: [NodeGraph]
+    widgets: [NodeGraph, GraphNode]
     md3: |
       Material Design 3 has no node graph. This is a pannable canvas of titled boxes joined by edges, for tools.
     built: |
       The `NodeGraph` kind (`widget: NodeGraph` in a view), with `GraphNode` children at an `x` and a `y`. Drag the background to pan, the wheel zooms about the pointer, drag a node (or
       press the arrow keys on a focused one) to move it, and its edges follow.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `edges` | a list | the links, each `{from: id, to: id}`, the ids of the `GraphNode`s |
-      | `snap` | pixels | a node the user moves lands on a multiple of this; a key then steps one square; `0` is no grid |
-      | `arrows` | true or false | each edge ends in an arrowhead |
-      | `fit` | true or false | when it opens, pan and zoom so every node shows (never past actual size) |
+      `edges` are the links, each `{from: id, to: id}`, the ids of the `GraphNode`s: their path from the view's root, as `root.graph.load` for the node `load` in the graph `graph`; an edge runs from the right side of one node to the left of the other, as a curve. `snap`
+      makes a node the user moves land on a multiple of that many pixels (an arrow key steps one square, or 8 pixels with no grid; `0` is no grid), `arrows` ends each edge in an arrowhead, and `fit`
+      pans and zooms when it opens so every node shows (never past actual size). A `GraphNode` has a `label` (its title), an `x` and a `y` in the graph's own coordinates, and its
+      size from `style`; what it holds goes in its body.
 
       Pressing a node chooses it (a `primary` border, and it is selected to a screen reader); pressing the background chooses none. From Python the widget has `fit_to_view(padding)`,
       `zoom`, `offset`, `snap`, `arrows` and `selected` (a `Signal` of the node chosen). Not built: ports and dragging to connect, labels on edges, selecting several, a minimap, undo, and
       building only the nodes in view.
-    usage: |
-      - id: graph
-        component: NodeGraph
-        with: {width: 480, height: 320}
+    usage_view: |
+      name: pipeline
+      widget: Container
+      style: {width: 640, height: 360}
+      children:
+        - widget: NodeGraph
+          name: graph
+          arrows: true
+          fit: true
+          snap: 20
+          edges: [{from: root.graph.load, to: root.graph.clean}, {from: root.graph.clean, to: root.graph.save}]
+          style: {width: 640, height: 360}
+          children:
+            - {widget: GraphNode, name: load, label: Load, x: 20, y: 40, style: {width: 140, height: 80}}
+            - {widget: GraphNode, name: clean, label: Clean, x: 240, y: 100, style: {width: 140, height: 80}}
+            - {widget: GraphNode, name: save, label: Save, x: 460, y: 40, style: {width: 140, height: 80}}
     python: |
       from tesserae.widgets import graph_node, node_graph
 
@@ -1908,21 +1647,16 @@ components:
   - slug: splitter
     title: Splitter
     group: Beyond MD3
-    widget: Splitter
-    fragments: []
+    widgets: [Splitter]
     md3: |
       Material Design 3 has no splitter. It divides the window into two panes with a bar the user drags.
     built: |
       `widget: Splitter` has exactly two children, the panes, and a handle between them: a 16 pixel bar holding MD3's 4 by 48 drag handle, with a
       resize cursor, a Tab stop, and the role of a slider for a screen reader.
 
-      | Property | Type | Meaning |
-      | --- | --- | --- |
-      | `orientation` | `horizontal` or `vertical` | side by side, or one above the other |
-      | `position` | 0 to 1, two-way | how much of the room the first pane has; bind a Signal and the handle writes it |
-      | `min_first`, `min_second` | pixels | the least each pane can be |
-      | `collapsible` | true or false | a double click on the handle closes the first pane, and opens it again where it was |
-      | `label` | text | what a screen reader calls the handle |
+      `orientation` puts the panes side by side (`horizontal`, the default) or one above the other (`vertical`). `position`, from 0 to 1, is how much of the room the first
+      pane has, two-way: bind a Signal and the handle writes it. `min_first` and `min_second` are the least each pane can be, in pixels. With `collapsible: true` a double click
+      on the handle closes the first pane, and opens it again where it was. `label` is what a screen reader calls the handle.
 
       The pointer drags it (the pointer is captured, so it keeps following outside the handle); the arrow keys along its axis move it by 5%, Home
       and End go to the ends; a screen reader can increment, decrement and set it. The parts a stylesheet can address are `first`, `handle`
@@ -1951,91 +1685,120 @@ components:
   - slug: window
     title: Window
     group: Windows and docking
-    fragments: []
+    widgets: [Window]
     md3: |
-      Material Design 3 describes how an app's content adapts to a window, not the window itself. `kind: Window` is the OS
+      Material Design 3 describes how an app's content adapts to a window, not the window itself. `widget: Window` is the OS
       window as a view: the root of `Window_View.yaml`, with its title, size and title bar.
     built: |
       Before the view is built, the `Window` becomes a vertical container holding the `TitleBar` and a content container;
-      `App` reads its title, size, `borderless` and minimum size when it loads the view. There is one per app, and it
-      can't be nested or embedded.
+      `App` reads its title, size, `borderless` and minimum size when it loads the view. A `Window` is the root of its view: it can't be nested or embedded. There is
+      one `Window` per window view. The app's own window is the window view it opens with `app.open_view("Window")` (an app has one), and a second OS window is another view whose
+      root is a `Window`, opened with `app.open_window`.
 
       | Property | Meaning |
       | --- | --- |
-      | `title`, `borderless`, `min_width`, `min_height`, `title_bar`, `style` | as above; `style`'s `width` and `height` are the window's size |
-      | `remember` | true, or a name | the size, the place (where the platform lets an app say: not Wayland) and the maximized state are kept in a small file in the user's config directory (named for the title, or the name) and put back next run; a maximized window keeps the size it had before |
-      | `fullscreen`, `maximized` | set when the view loads, only when written |
+      | `title`, `borderless`, `min_width`, `min_height` | the OS window's title, whether it has no OS title bar or borders, and the least the user can resize it to |
+      | `title_bar` | a `{title, icon, buttons}` mapping for the window's title bar; in a window that is not `borderless` it is a plain header, with no buttons of its own (the OS draws them) |
+      | `style` | `width` and `height` are the window's size (a second window whose view has no `Window` root is 480 by 320), and `background` its fill; the rest lays out the content |
+      | `remember` | true, or a name: the size, the place (where the platform lets an app say: not Wayland) and the maximized state are kept in a small file in the user's config directory (named for the title, or the name) and put back next run; a maximized window keeps the size it had before. The app's own window only |
+      | `fullscreen`, `maximized` | set when the view loads, only when written (in a second window too) |
       | `transparent`, `blur_behind`, `click_through` | set before the window opens, only when written; the platform may refuse one, and says so |
 
-      A view branches on the window's size with `app.width_class` and `app.height_class` (Material 3's size classes). Several windows: `app.open_window("Prefs")` (or the handler `open_window('Prefs')`, and `open_window('Prefs', True)` for a modal one) opens a view in a window of its own; see the windows guide. Not built: a native menu bar.
+      A view branches on the window's size with `app.width_class` and `app.height_class` (Material 3's size classes).
+
+      **Several windows.** `app.open_window("Prefs")` builds `Prefs_View.yaml` in a new OS window and returns its `AppWindow`; `app.windows` holds the others by name,
+      `app.window_of("prefs")` finds one and `app.close_window("prefs")` closes it. The view's `Window` root gives that window its title, size, minimum size, `borderless` and flags.
+      `modal=True` puts a dimming layer over the parent (the app's window, or `parent=` another `AppWindow`) that takes its input until the child closes. From a view,
+      the handler `open_window('Prefs')` does the same, and `open_window('Prefs', True)` opens a modal one. A second window has no screens or routes, and closing it leaves the
+      app running; closing the app's own window closes them all. Not built: a native menu bar.
 
       ```yaml
-      id: root
-      kind: Window
+      name: window
+      widget: Window
       title: Notes
       borderless: true
-      style: {width: 960, height: 600}
+      style: {width: 960, height: 600, flex_direction: vertical}
       title_bar: {title: Notes, buttons: [minimize, maximize, close]}
       children:
-        - id: body
-          view: Main_View.yaml
-          route: ""
+        - {widget: Main, name: main, route: "", style: {flex: fill}}
       ```
 
       ```python
       app = App(title="Notes", root=HERE)
-      app.load("Window")
+      app.open_view("Window")     # Views/Window_View.yaml: the app's window
+      ```
+
+      ```python
+      prefs = app.open_window("Prefs", modal=True)   # Prefs_View.yaml, in a window of its own
+      prefs.on_close(save)
+      prefs.center()                                 # where the system lets an app place a window
       ```
     see: [guide/windows-and-docks.md, guide/custom-title-bars.md]
 
   - slug: title-bar
     title: Title bar
     group: Windows and docking
-    fragments: []
+    widgets: [TitleBar]
     md3: |
       Material Design 3's top app bar sits inside the window; a title bar is the window's own strip. A desktop app that
       draws its own keeps the OS's behaviour: drag to move, double-click to maximize.
     built: |
-      The `TitleBar` kind (`widget: TitleBar` in a view), or `title_bar:` on a `Window`. Its buttons are the handlers `window.minimize`,
-      `window.maximize`, `window.close` and the like, which need no ViewModel; in a dialog or a sheet `dismiss` closes it. Each button says what it does
-      when the pointer rests on it (Minimize, Maximize, Close). The bar's children sit between the title and the buttons, so tabs, a search field or
-      icon buttons can live there; the window's `flex_direction: vertical` puts the bar above the content. Not built: the Windows 11 snap layouts on the
-      maximize button, the system menu, and a different glyph set for the buttons.
-    usage: |
-      - id: bar
-        kind: TitleBar
-        title: Notes
-        icon: home
-        buttons: [minimize, maximize, close]
+      `widget: TitleBar` in a view, or `title_bar:` on a `Window`. It has a `title`, an `icon` and `buttons` (any of `minimize`, `maximize` and `close`, all three by default). It
+      is 40 pixels high unless its `style` gives another height, and each button is 46 pixels wide. A press on the bar (or its title or icon) moves the window and a double click
+      maximizes it. Its buttons are the handlers `window.minimize`, `window.toggle_maximized`, `window.close` and the like, which need no ViewModel; in a dialog or a sheet
+      `buttons: [dismiss]` closes it. The maximize button shows the restore glyph while the window is maximized, and each button says what it does when the pointer rests on it
+      (Minimize, Maximize, Close). While the window is not the focused one, the title, icon and buttons fade. The bar's children sit between the title and the buttons, so tabs, a
+      search field or icon buttons can live there; the window's `flex_direction: vertical` puts the bar above the content. On macOS the bar leaves room at its start for the
+      traffic lights and hides its own buttons. A right click on the bar opens the OS's window menu only if the app was made with `system_menu=True`. Not built: the Windows 11 snap
+      layouts on the maximize button, and a different glyph set for the buttons.
+    usage_view: |
+      name: notes_bar
+      widget: Container
+      style: {flex_direction: vertical, width: 640, height: 200}
+      children:
+        - widget: TitleBar
+          name: bar
+          title: Notes
+          icon: home
+          buttons: [minimize, maximize, close]
+          children:
+            - {widget: IconButton, name: find, icon: search, label: Find, handlers: {on_click: find}}
     see: [guide/custom-title-bars.md, guide/windows-and-docks.md]
 
   - slug: dock
     title: Dock
     group: Windows and docking
-    fragments: []
+    widgets: [Dock]
     md3: |
       Material Design 3 has no dock. A desktop tool often wants panels around its content that the user can move and
       resize: files on the left, output below.
     built: |
-      The `Dock` kind holds `DockPanel`s; each says its zone with the style field `zone`. Panels in one zone are tabs, and
-      the user drags a tab to another zone or the handles between zones. `view.dock_host(id)` reads and sets the zone
-      sizes and saves and restores the layout: `dock = view.dock_host("dock")`, then `dock.set_size("left", 280)`,
-      `saved = dock.layout()` and `dock.restore(saved)`.
+      `widget: Dock` holds `DockPanel`s; each says its zone with the style field `zone`: `left`, `right`, `top`, `bottom` or `center`. A left or right zone's size is its panel's
+      `width`, and a top or bottom one's its `height` (240 and 180 pixels when the panel gives none). Each zone is a column: a strip of tabs, one for each panel, over the panel
+      that is showing. The tab is the panel's `title` (else its name). A click or Enter on a tab shows its panel, and the left and right arrow keys move along the strip. The user
+      drags a tab to another zone, or to a half of a split (see the dock panel), and drags the handles between zones to resize them. Dragging is pointer only, so a tab's context menu
+      (a right click, the Menu key or Shift+F10) offers "Move to ..." for each zone and each half. A window has one `Dock`, and `zone:` is an error on anything but a `DockPanel` in a `Dock`.
+
+      `view.dock_host(id)` reads and sets the layout from Python. A node's id is its path from the view's root, so the dock named `dock` is `view.dock_host("root.dock")`, and
+      its panel `files` is `"root.dock.files"`:
+
+      | Call | What it does |
+      | --- | --- |
+      | `set_size(zone, px)`, `size(zone)` | a zone's size, kept between 120 pixels and 70% of the room |
+      | `layout()` | where every panel is, which tab shows in each zone, the zone sizes, the sizes of the splits, and the halves (see the dock panel), as plain data |
+      | `restore(saved)` | puts a `layout()` back; titles, zones and halves the dock does not have are skipped |
+      | `move(panel, where)` | a panel (its id) to the tabs of a zone (`"left"`) or a half (its id), from code |
+      | `closed()`, `close(panel)`, `reopen(panel)`, `on_closed(fn)` | the closable panels that are shut |
+
+      Editing the YAML while the app runs keeps the layout the user made: which zone each panel is in, which tab shows, and the sizes.
 
       A panel with `closable: true` has a close button on its tab. A Dock's `closed` (a list, two-way) holds the names of the closable panels that are shut: a close
-      button adds its panel's name, and taking a name out opens the panel again, as the last tab of its zone. Putting names in shuts them without the button. `dock.closed()`,
-      `dock.close(id)` and `dock.reopen(id)` do the same from Python. Not built: floating panels, tearing a panel off into a window, maximising a panel, reordering tabs,
-      and layouts saved by name.
-    usage: |
-      - id: dock
-        kind: Dock
-        style: {flex: fill}
-        children:
-          - {id: files, kind: DockPanel, title: Files, style: {zone: left, width: 220}, children: []}
-          - {id: editor, kind: DockPanel, title: Editor, style: {zone: center}, children: []}
+      button adds its panel's name, and taking a name out opens the panel again, as the last tab of its zone. Putting names in shuts them without the button. Not built: floating
+      panels, tearing a panel off into a window, maximising a panel, reordering tabs, and layouts saved by name.
     usage_view: |
       name: studio
       widget: Window
+      title: Studio
       style: {width: 900, height: 600, flex_direction: vertical}
       children:
         - widget: Dock
@@ -2048,53 +1811,80 @@ components:
   - slug: dock-panel
     title: Dock panel
     group: Windows and docking
-    fragments: []
+    widgets: [DockPanel]
     md3: |
       Material Design 3 has no dock panel. It is one panel of a dock: a titled tab in a zone.
     built: |
-      The `DockPanel` kind, with `zone` in its `style`. A `DockPanel` inside another is a split of it, side by side
-      (`flex_direction: horizontal`) or top and bottom (`vertical`), with a handle to resize. `closable: true` puts a close button on its tab (see the Dock's `closed`).
-    usage: |
-      - id: dock
-        kind: Dock
-        style: {flex: fill}
-        children:
-          - id: editor
-            kind: DockPanel
-            title: Editor
-            style: {zone: center}
-            children:
-              - id: source
-                kind: DockPanel
-                title: Source
-                children: []
-              - id: preview
-                kind: DockPanel
-                title: Preview
-                children: []
+      `widget: DockPanel`, with `zone` in its `style` and a `title` for its tab (else its name). `closable: true` puts a close button on its tab (see the Dock's `closed`).
+
+      A `DockPanel` inside another is a split of it, side by side (`flex_direction: horizontal`, the default) or top and bottom (`vertical`), with a handle between the halves
+      to resize them. A half with a `width` (or `height`) of its own keeps it, and the others share what is left. A panel has either splits or content, not both, and a half has no
+      `zone`. Each half is a small zone of its own: a tab strip over it, with a tab for the half's own content (titled by its `title:`, else its name) and one for each panel dropped
+      on it.
+
+      Drag a tab over a half and the highlight shows what a drop will do. The outer quarter of each side of a half is an **edge**: dropping there splits the half, the panel
+      taking a new half on that side with a handle between the two. The rest, the tab strip included, is the **middle**: dropping there adds the panel to the half as another tab,
+      and the half shows it. A tab in a half is dragged like any other, to a zone, to another half or to the edge of one. A half that a drop made collapses when its last panel
+      leaves, and its neighbour takes the room back. You cannot drop a panel on the halves inside it. In the tab menu (right click, the Menu key or Shift+F10) "Move to ..."
+      lists the halves too.
+
+      From Python, with `dock = view.dock_host("root.dock")`. The half and the panel are named by their ids, their paths from the view's root (`root.dock.editor.source`):
+
+      | Call | What it does |
+      | --- | --- |
+      | `dock.halves()` | each half's panels (their ids) and the one it shows (`None`: the half's own content) |
+      | `dock.show_in_half(half, panel)` | shows a panel in a half; `panel` of `None` shows the half's own content |
+      | `dock.half_of(panel)` | the id of the half a panel is in, or `None` if it is in a zone |
+      | `dock.move(panel, where)` | a panel into a half or a zone (`"left"`) |
+
+      `dock.layout()` records the halves, so the arrangement the user made survives a restart: `halves` has, for each half, the titles of the panels in it and the tab it shows,
+      and `made` has, for each half of the YAML that the user split, the tree of the splits (an `axis` of `x` or `y`, the first part's `size` in pixels, and its `first` and
+      `second` parts), as plain data you can write to a file. `dock.restore(saved)` takes the user's splits apart, makes the ones in the layout and puts the panels in their
+      halves; halves and titles the dock does not have are skipped, and a split none of whose panels come back is not made. A half is found by its id, so renaming one in the
+      file means a saved layout no longer finds it. Editing the YAML while the app runs keeps the strips, the panels dropped on a half and the splits the user made; a half the
+      file removes sends the panels dropped in it back to their zones. Not built: dragging or closing a half's own content (what the YAML put in it), and reordering tabs.
+    usage_view: |
+      name: studio
+      widget: Window
+      title: Studio
+      style: {width: 900, height: 600, flex_direction: vertical}
+      children:
+        - widget: Dock
+          children:
+            - {widget: DockPanel, name: outline, title: Outline, style: {zone: left, width: 220}}
+            - widget: DockPanel
+              name: editor
+              title: Editor
+              style: {zone: center}
+              children:
+                - {widget: DockPanel, name: source, title: Source, style: {width: 400}}
+                - {widget: DockPanel, name: preview, title: Preview}
     see: [guide/windows-and-docks.md]
 
   - slug: routed-views
     title: Routed views
     group: Windows and docking
-    fragments: []
     md3: |
       Material Design 3's navigation rail and bar move between an app's destinations. A routed view is a destination whose
       content is a view of its own.
     built: |
-      A `view:` node with a `route:` in the window view. It is registered as a screen of the app under its file's name, and
+      A call of a view with a `route:` in the window view. It is registered as a screen of the app under the view's name, and
       shown while it is current; the others are hidden, with their state. `NavigationRailScreens` is a rail whose
       destinations navigate.
 
       ```yaml
-      - id: nav
-        component: NavigationRailScreens
-        with:
+      name: window
+      widget: Window
+      title: Notes
+      style: {width: 960, height: 600, flex_direction: horizontal}
+      children:
+        - widget: NavigationRailScreens
+          name: nav
           items:
             - {label: Notes, icon: home, screen: Main}
             - {label: Settings, icon: settings, screen: Settings}
-      - {id: main, view: Main_View.yaml, route: ""}
-      - {id: settings, view: Settings_View.yaml, route: settings}
+        - {widget: Main, name: main, route: "", style: {flex: fill}}
+        - {widget: Settings, name: settings, route: settings, style: {flex: fill}}
       ```
 
       ```python
@@ -2102,7 +1892,7 @@ components:
       app.navigate_to("settings")
       ```
 
-      In a view written in the current language, a call with a `route:` is the screen, named for the view it calls (`- {widget: Settings, name: settings, route: settings}`
+      A call with a `route:` is the screen, named for the view it calls (`- {widget: Settings, name: settings, route: settings}`
       is the screen `Settings`). A route can read params from the path (`notes/{id:int}`), and the screen showing reads the ones it was reached with as
       `app.params` (`{{ app.params.get('id') }}`); going back or forward restores each step's params, and `show()` clears them. Handlers: `navigate.Settings`,
       `navigate.back`, `navigate.forward`, `navigate_to('Note', {'id': 3})` (a screen by name, with params) and `navigate_route('notes/' + str(id))` (a route by its

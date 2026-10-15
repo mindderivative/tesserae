@@ -47,11 +47,30 @@ batch(apply_discount)  # total recomputes once, not twice
   making the enclosing `Computed`/`Effect` depend on it.
 
 `Computed`/`Effect` duck-type against `Signal`'s own subscribe shape,
-so a `{{ }}` binding in a `*_View.yaml` can point straight at a
-`Computed.get()` value with no special handling:
+so a `{{ }}` expression in a `*_View.yaml` can point straight at a
+`Computed` with no special handling. A Signal or Computed reads as its value in a view, so `{{ total }}` and `{{ total.get() }}` are the same:
 
 ```yaml
-bindings: {text: "{{ total.get() }}"}
+text: "{{ total }}"
+```
+
+A ViewModel is a class whose attributes are the names a view reads. It serves the views that name it, and
+is made once, with no arguments, by `app.bind`:
+
+```python
+from tesserae import Computed, Signal, ViewModel
+
+class CartViewModel(ViewModel):
+    views = "Cart"
+
+    def __init__(self):
+        super().__init__()
+        self.price = Signal(10.0)
+        self.quantity = Signal(2)
+        self.total = Computed(lambda: self.price.get() * self.quantity.get())
+
+    def add_one(self):                      # a handler: `handlers: {on_click: add_one}`
+        self.quantity.update(lambda q: q + 1)
 ```
 
 See [Binding Expressions](bindings.md) for what a `{{ }}` expression can contain.
@@ -74,3 +93,5 @@ See [Binding Expressions](bindings.md) for what a `{{ }}` expression can contain
 - **Bindings use them.** A bound node updates when a `Signal` or
   `Computed` its `{{ }}` expression reads changes. See
   [Binding Expressions](bindings.md).
+- **A list in a Signal is replaced, not changed in place.** A `for:` and a binding notice `tasks.set([...])` or
+  `tasks.update(lambda ts: [*ts, new])`; `tasks.get().append(new)` changes the list without a notification, and nothing updates.

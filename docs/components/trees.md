@@ -12,12 +12,8 @@ that open.
 Views Tesserae ships: `Tree` (the whole tree from data), `TreeNode` (one row, a branch with a chevron or a leaf) and `TreeLevel` (the rows of one level, which calls itself for
 the children of an open branch).
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `nodes` | a list | rows: `{value, label}` and optionally `{icon, children, disabled}`; `children` is the same shape |
-| `expanded` | a list; two-way | the values of the open branches |
-| `selected` | a value; two-way | the chosen row |
-| `compact` | true or false | 40 pixel rows instead of 56 |
+The `nodes` are rows, `{value, label}` and optionally `{icon, children, disabled}`, where `children` is a list of the same shape. `expanded` (the values of the open branches)
+and `selected` (the value of the chosen row) are two-way. Rows are 56 pixels tall, or 40 with `compact`.
 
 A row is indented 16 pixels plus 24 for each level, has a 24 pixel chevron that turns a quarter when its branch opens (a leaf keeps the room), an optional icon and a `body_large`
 label; the chosen row is `secondary_container`. A press chooses a row and opens or closes a branch. One Tab stop; the up and down arrows move through the rows that show, Right
@@ -25,67 +21,55 @@ opens a branch and Left closes it, and typing the start of a label jumps to a ro
 expanded. `TreeNode` can be used alone for a custom tree. Not built: loading children when a branch first opens, selecting several, dragging to reorder, a context menu, and
 building only the rows in view for a very large tree.
 
-`widget: Tree` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: TreeNodeBranch` | A tree row that can be expanded: a title and a chevron, indented by its depth. | [`TreeNodeBranch_Stylesheet.yaml`](../stylesheets/trees/tree-node-branch.md) |
-| `component: TreeNodeLeaf` | A tree row with nothing under it: a title, indented by its depth. | [`TreeNodeLeaf_Stylesheet.yaml`](../stylesheets/trees/tree-node-leaf.md) |
-
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: Tree`. A file of the same name in your project replaces it.
 
-### `TreeNodeBranch`
+### `Tree`
 
-A tree row that can be expanded: a title and a chevron, indented by its depth. Its look: [`TreeNodeBranch_Stylesheet.yaml`](../stylesheets/trees/tree-node-branch.md).
+A tree (the WAI-ARIA tree pattern in Material 3's list terms): rows that open to show their children, one level inside the next. `nodes` is a list of {value, label} and optionally {icon, children, disabled}, the children being the same shape. `expanded` is the list of values of the open branches and `selected` the value of the chosen row; both are two-way. A press on a row chooses it, and on a branch opens or closes it too. One Tab stop; the up and down arrows move through the rows that show, Right opens a branch and Left closes one, and typing the start of a label jumps to a row.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `title` | required |  |
-| `width` | required |  |
-| `left_padding` | required |  |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `nodes` | `list` | `[]` | The rows: {value, label} and optionally {icon, children, disabled}; children are the same shape. |
+| `expanded` | `list` | `[]` | The values of the branches that are open. Two-way: give it a bare reference and the view writes it back. |
+| `selected` | `any` |  | The value of the chosen row. Two-way: give it a bare reference and the view writes it back. |
+| `compact` | `bool` | `false` | 40 pixel rows instead of 56. |
 
-```yaml
-params: [title, width, left_padding]
-id: root
-kind: Container
-children:
-  - id: title
-    kind: Text
-    text:
-      content: "{{ title }}"
-      typography_role: label_large
-      wrap: none
-      overflow: ellipsis
-  - id: chevron
-    kind: Icon
-    icon: {name: expand_more}
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `top` (TreeLevel).
 
-### `TreeNodeLeaf`
+### `TreeNode`
 
-A tree row with nothing under it: a title, indented by its depth. Its look: [`TreeNodeLeaf_Stylesheet.yaml`](../stylesheets/trees/tree-node-leaf.md).
+One row of a tree: a leaf or a branch with a chevron that turns a quarter when it opens. 56 pixels tall (40 when `compact`), indented 16 pixels plus 24 for each `level`, with an optional 24 pixel icon and a `body_large` label; a selected row is `secondary_container`. A screen reader hears a tree item at level `level + 1`, a branch saying whether it is expanded. It is pressable; `handlers: {on_click: ...}` on the call is what a press does. `Tree` puts the rows together.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `title` | required |  |
-| `width` | required |  |
-| `left_padding` | required |  |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `label` | `str` |  | The row's text. |
+| `icon` | `str` |  | A leading icon. |
+| `level` | `int` | `0` | How deep it is: 0 for the top. |
+| `branch` | `bool` | `false` | It has children: a chevron shows. |
+| `expanded` | `bool` | `false` | For a branch: whether its children show. |
+| `selected` | `bool` | `false` | Whether this is the chosen row. |
+| `compact` | `bool` | `false` | A 40 pixel row instead of 56. |
+| `disabled` | `bool` | `false` | Dimmed and not pressable. |
 
-```yaml
-params: [title, width, left_padding]
-id: root
-kind: Container
-children:
-  - id: title
-    kind: Text
-    text:
-      content: "{{ title }}"
-      typography_role: label_large
-      wrap: none
-      overflow: ellipsis
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `chevron` (Icon), `chevron_space` (Container), `icon` (Icon), `label` (Text).
+
+Its look is in [`TreeNode_Stylesheet.yaml`](../stylesheets/trees/tree-node.md).
+
+### `TreeLevel`
+
+The rows of one level of a tree, each followed by its children's level while it is open (this view calls itself). `Tree` is the one to use; this is its part.
+
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `nodes` | `list` | `[]` | The rows: {value, label} and optionally {icon, children, disabled}. |
+| `level` | `int` | `0` | How deep this level is. |
+| `expanded` | `list` | `[]` | The values of the branches that are open. Two-way: give it a bare reference and the view writes it back. |
+| `selected` | `any` |  | The value of the chosen row. Two-way: give it a bare reference and the view writes it back. |
+| `compact` | `bool` | `false` | 40 pixel rows. |
+
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `entry` (Container), `row` (TreeNode), `children` (TreeLevel).
 
 ## Using it
 
@@ -107,9 +91,7 @@ children:
       - {value: readme, label: Readme, icon: file}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import tree_node
@@ -120,12 +102,13 @@ file = tree_node(app.window, "app.py", depth=1, leaf=True)
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# TreeNodeBranch_Stylesheet.yaml, next to your views
+# TreeNode_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: title
+  - widget: TreeNode
+    part: chevron
     style: {foreground: tertiary}
 ```
 

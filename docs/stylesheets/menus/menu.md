@@ -1,78 +1,55 @@
 # Menu_Stylesheet.yaml
 
-A menu: a surface listing choices, each a menu item.
+The look of Menu (Material 3): a surface_container surface with 4 pixel corners at level 2, 8 pixels above and below its items; headings in on_surface_variant.
 
 The look of [`Menu`](../../components/menus.md) (in [Menus](../../components/menus.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# Menu: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of Menu (Material 3): a surface_container surface with 4 pixel corners at level 2, 8 pixels above and below its items; headings in on_surface_variant.
 styles:
-  - id: root
+  - widget: Menu
+    part: surface
     style:
-      width: "{{ width }}"
-      flex_direction: vertical
-      background: surface_container
-      corner_radius: extra_small
-      elevation: level_2
-      padding:
-        left: 0
-        right: 0
-        top: 8
-        bottom: 8
+      background: "{{ 'surface_container@72%' if frosted else 'surface_container' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
+      corner_radius: 4
+      elevation: 2
+      padding: {left: 0, right: 0, top: 8, bottom: 8}
+  - {widget: Menu, part: heading, style: {foreground: on_surface_variant, padding: {left: 12, right: 12, top: 8, bottom: 8}}}
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`Menu_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: Menu`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: Menu` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Container)
+### `surface` (Container)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `background` | `surface_container` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `corner_radius` | `extra_small` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `elevation` | `level_2` | A shadow level, 0 to 5. |
-| `padding` | left `0`, right `0`, top `8`, bottom `8` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `background` | `{{ 'surface_container@72%' if frosted else 'surface_container' }}` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `backdrop_blur` | `{{ 20 if frosted else 0 }}` | Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. |
+| always | `corner_radius` | `4` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
+| always | `elevation` | `2` | A shadow level, 0 to 5. |
+| always | `padding` | `{bottom: 8, left: 0, right: 0, top: 8}` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
-## What it makes
+### `heading` (Text)
 
-With `width: 120`, and a list of items, each part's style is:
-
-```yaml
-root:
-  width: 120
-  flex_direction: vertical
-  background: surface_container
-  corner_radius: extra_small
-  elevation: level_2
-  padding: {left: 0, right: 0, top: 8, bottom: 8}
-item.0:
-  width: 120
-  height: 48
-  align_content: left
-  padding: {left: 12, right: 12, top: 0, bottom: 0}
-item.0.label: {foreground: on_surface, flex: expand_horizontal, min_width: 0}
-item.1:
-  width: 120
-  height: 48
-  align_content: left
-  padding: {left: 12, right: 12, top: 0, bottom: 0}
-item.1.label: {foreground: on_surface, flex: expand_horizontal, min_width: 0}
-```
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| always | `padding` | `{bottom: 8, left: 12, right: 12, top: 8}` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ## Changing it
 
-Put a `Menu_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: root
+  - widget: Menu
+    part: surface
     style: {background: tertiary}
 ```

@@ -1,6 +1,6 @@
 # Window Options & the OS
 
-`App(...)` takes these options, which are the window's.
+`App(...)` takes these options, which are the window's. `dpi_scaling`, `present_mode`, `glyph_cache`, `blur_behind` and `click_through` are also properties that can change while the app runs (`app.present_mode = "low_latency"`). The window's size, title, borders, minimum size, fullscreen and icon are in [Apps & Screens](apps-and-screens.md#the-window).
 
 | Option | Default | What it does |
 | --- | --- | --- |
@@ -14,7 +14,21 @@
 | `glyph_cache` | `False` | Keeps the shapes of letters between frames: less work for a lot of text. |
 | `system_fonts` | `False` | Lets a font family that isn't registered be found among the system's. |
 
-`app.scale_factor` is the current density. A platform that can't do an option says so, naming it.
+`app.scale_factor` is the current density (1.0 until the window opens). A platform that can't do an option says so, naming it. A `ripple` or `focus_ring` that is not one of its two values is an error.
+
+## In a window view
+
+A view whose root is a `widget: Window` sets `transparent`, `blur_behind`, `click_through`, `fullscreen`, `maximized`, `borderless`, `min_width`, `min_height` and `remember` itself, as properties of the window; see [Windows, Docks & Embedded Views](windows-and-docks.md).
+
+```yaml
+widget: Window
+title: Notes
+transparent: true
+blur_behind: true
+children:
+  - widget: Container
+    style: {width: 320, height: 200, background: "surface@72%", corner_radius: 24}
+```
 
 ## Less motion, more contrast
 
@@ -42,8 +56,8 @@ node.animate("scale", 1.0, 300, easing=Theme.spring(0.3))
 
 ## What a frame costs
 
-`app.frame_stats()` says what the frames cost (`frames`, `last`, and `recent`: the frame rate and the mean, 95th
-percentile and maximum of the frame time). `app.profile_nodes = True` measures each node's drawing too, and
+`app.frame_stats()` says what the frames cost: `frames` and `skipped`, `last` (the last frame's stage times in milliseconds) and `recent` (the last 240 frames: `fps`, and the mean, 95th
+percentile and maximum of the total and the CPU time). `app.frame_stats(reset=True)` clears the history after reading it. `app.profile_nodes = True` measures each node's drawing too, and
 `app.start_trace("trace.json")` / `app.stop_trace()` record every frame for [Perfetto](https://ui.perfetto.dev).
 `app.stats_handle()` is an object another thread can read the stats from.
 

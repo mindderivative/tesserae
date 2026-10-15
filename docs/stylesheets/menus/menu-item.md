@@ -1,66 +1,72 @@
 # MenuItem_Stylesheet.yaml
 
-One choice in a menu.
+The look of MenuItem (Material 3): 12 pixels each side and between the parts, the label in on_surface, the icon and the trailing text in on_surface_variant.
 
 The look of [`MenuItem`](../../components/menus.md) (in [Menus](../../components/menus.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# MenuItem: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of MenuItem (Material 3): 12 pixels each side and between the parts, the label in on_surface, the icon and the trailing text in on_surface_variant.
 styles:
-  - id: root
+  - widget: MenuItem
     style:
-      width: "{{ width }}"
-      height: "{{ height }}"
-      align_content: left
-      padding: "{{ padding }}"
-  - id: label
-    style:
-      foreground: on_surface
-      flex: expand_horizontal
-      min_width: 0
+      padding: {left: 12, right: 12, top: 0, bottom: 0}
+      gap: 12
+  - {widget: MenuItem, part: label, style: {foreground: on_surface}}
+  - {widget: MenuItem, part: lead, style: {width: 24, height: 24, foreground: on_surface_variant}}
+  - {widget: MenuItem, part: trailing, style: {foreground: on_surface_variant}}
+  - {widget: MenuItem, part: chevron, style: {width: 24, height: 24, foreground: on_surface_variant}}
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`MenuItem_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: MenuItem`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: MenuItem` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Container)
+### `MenuItem` itself
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | the `height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
-| `padding` | the `padding` parameter | Space inside it: one number, or `{left, right, top, bottom}`. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `padding` | `{bottom: 0, left: 12, right: 12, top: 0}` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| always | `gap` | `12` | Space between its children. |
 
 ### `label` (Text)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
-| `min_width` | `0` | The least width it can take. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
-## What it makes
+### `lead` (Icon)
 
-With `label: Go, width: 120, height: 40`, each part's style is:
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
-```yaml
-root: {width: 120, height: 40, align_content: left, padding: 16}
-label: {foreground: on_surface, flex: expand_horizontal, min_width: 0}
-```
+### `trailing` (Text)
+
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+
+### `chevron` (Icon)
+
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## Changing it
 
-Put a `MenuItem_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: label
+  - widget: MenuItem
+    part: label
     style: {foreground: tertiary}
 ```

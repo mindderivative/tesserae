@@ -21,7 +21,7 @@ python -c "import tesserae; print('Tesserae is ready')"
 
 ## Requirements
 
-- **Python 3.12 or newer.** On macOS, the `python3` that comes with Xcode's
+- **Python 3.12 or newer.** Tesserae is tested on 3.12 and 3.14. On macOS, the `python3` that comes with Xcode's
   command-line tools is older: install Python from python.org or Homebrew.
 - **Linux x86-64, macOS on Apple silicon, or Windows x64.** On these every
   dependency, the engine included, installs as a prebuilt wheel. Elsewhere
@@ -47,7 +47,8 @@ sudo apt install libxkbcommon-x11-0       # Debian, Ubuntu
 sudo dnf install libxkbcommon-x11         # Fedora
 ```
 
-On Debian and Ubuntu, `python3 -m venv` needs `sudo apt install python3-venv`.
+On Debian and Ubuntu, `python3 -m venv` needs `sudo apt install python3-venv`. On Arch and CachyOS `venv` comes with
+the `python` package.
 
 ## Working on Tesserae
 
@@ -77,5 +78,8 @@ The last command opens a window with a `Count: 0` label and a button that counts
   YAML references and the component and stylesheet pages are written from the code
   (`tools/generate_api_docs.py`, `tools/generate_yaml_docs.py`,
   `tools/generate_component_docs.py`) and tests fail if they are out of date.
-- **Editor support.** `tools/generate_yaml_schema.py` writes the YAML schemas; see
-  [Editor Support](guide/editor-support.md).
+- **Editor support.** `tools/generate_yaml_schema.py` and `tools/generate_widget_schema.py` write the YAML
+  schemas; see [Editor Support](guide/editor-support.md).
+- **Everything else.** [`DEVELOPING.md`](https://github.com/mindderivative/tesserae/blob/main/DEVELOPING.md) takes a
+  clean machine to a working checkout (Fedora, Debian and Ubuntu, Arch and CachyOS), and says how to run
+  the whole check, `tools/fullcheck.sh`.

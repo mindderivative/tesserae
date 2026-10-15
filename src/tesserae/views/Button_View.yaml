@@ -1,7 +1,7 @@
 # The Material 3 button: filled, tonal, elevated, outlined or text, in five sizes, with a leading and a trailing icon, a toggle form, a loading form and a
 # disabled form. It is as wide as its label and icons, unless the call gives it a width. `handlers: {on_click: save}` on the call is what it does when pressed.
 # With `toggle: true` a press flips `selected` (two-way) and the button swaps its colours and its shape; `loading` shows a spinner in the icon's place and
-# stops it taking presses. Colours, sizes, shapes and how it lifts are in Button_Stylesheet.yaml: write a project Button_View.yaml and Button_Stylesheet.yaml to change them.
+# stops it taking presses. Colours, sizes, shapes and how it lifts are in Button_Stylesheet.yaml: to change them, give the app rules with `App(stylesheet=...)`.
 params:
   label: {type: str, default: "", doc: "The text."}
   variant: {type: enum, choices: [filled, tonal, elevated, outlined, text], default: filled, doc: "filled is the screen's main action; tonal and elevated are important but secondary; outlined is medium; text is the lowest emphasis."}

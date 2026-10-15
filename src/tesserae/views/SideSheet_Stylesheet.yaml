@@ -1,4 +1,4 @@
-# The look of the standard side sheet: a `surface` column with a 1 pixel outline_variant line on the edge facing the content.
+# The look of the standard side sheet: a `surface` column.
 styles:
   - widget: SideSheet
     style:

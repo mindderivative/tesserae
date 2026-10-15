@@ -1,25 +1,27 @@
-from tesserae import App, Computed, Repeater, Signal, ViewModel
+from tesserae import Computed, Signal, ViewModel
 
 
 class MainViewModel(ViewModel):
-    def __init__(self, view):
-        state = App.of(view).state  # `self.state` isn't there until super().__init__
-        self.heading = Computed(lambda: f"{state.user.get()}'s tasks")
-        self.tasks = Signal([])
-        self._next_id = 1
-        self.rows = Repeater(view, self.tasks, "TaskItem", into=view.node("list"),
-                             args=lambda task_id: (task_id, self.tasks))
-        self.done_text = Computed(lambda: str(self._done()))
-        self.open_text = Computed(lambda: str(len(self.tasks.get()) - self._done()))
-        super().__init__(view)
+    views = "Main"
 
-    def _done(self):
-        self.tasks.get()
-        return sum(1 for _key, _component, row in self.rows if row.done.get())
+    def __init__(self):
+        super().__init__()
+        self.tasks = Signal([])  # a list of {"id", "text", "done"}: the one source of truth
+        self._next_id = 1
+        # a text property wants a string, so the counts are strings
+        self.open_text = Computed(lambda: str(sum(1 for t in self.tasks.get() if not t["done"])))
+        self.done_text = Computed(lambda: str(sum(1 for t in self.tasks.get() if t["done"])))
 
     def add_task(self):
-        self.tasks.update(lambda ids: [*ids, self._next_id])
+        task = {"id": self._next_id, "text": f"Task {self._next_id}", "done": False}
         self._next_id += 1
+        self.tasks.update(lambda tasks: [*tasks, task])
+
+    def toggle(self, task_id):
+        self.tasks.update(lambda tasks: [{**t, "done": not t["done"]} if t["id"] == task_id else t for t in tasks])
+
+    def remove(self, task_id):
+        self.tasks.update(lambda tasks: [t for t in tasks if t["id"] != task_id])
 
     def open_settings(self):
         self.app.navigate("Settings")  # a step the user can go back from

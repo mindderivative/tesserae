@@ -6,13 +6,13 @@ auto-width label could be a fraction of a pixel too narrow for its own text and 
 parent has a width an over-long one ends in an ellipsis. The few texts that are meant to wrap are named here.
 """
 
-import importlib.util
 from pathlib import Path
 
 import pytest
 import yaml
 
 from tesserae import App, View
+from fragment_reader import FRAGMENTS as FRAGMENT_DIR, Fragment
 from tesserae.spec import expand_components_to_spec
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -25,11 +25,7 @@ WORDS = ("label", "title", "text", "headline")
 
 
 def _fragments():
-    spec = importlib.util.spec_from_file_location("generate_component_docs", ROOT / "tools" / "generate_component_docs.py")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return {name: module.Fragment(name) for name in sorted(p.name.removesuffix("_Component.yaml")
-                                                           for p in module.FRAGMENTS.glob("*_Component.yaml"))}
+    return {name: Fragment(name) for name in sorted(p.name.removesuffix("_Component.yaml") for p in FRAGMENT_DIR.glob("*_Component.yaml"))}
 
 
 FRAGMENTS = _fragments()

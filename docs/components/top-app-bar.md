@@ -11,52 +11,39 @@ start and up to a few action icons at the end.
 
 `widget: TopAppBar` is a view Tesserae ships (`TopAppBar_View.yaml`): a bar as wide as its place, built from `IconButton`s and a title.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `title` | text | the title |
-| `variant` | `small`, `center`, `medium`, `large` | 64 tall with the title beside the icon; 64 with the title in the middle; 112 or 152 with the title under the icons |
-| `leading_icon`, `leading_label`, `on_leading` | an icon, text, a handler | the navigation icon (`menu`, `arrow_back`), its name and tooltip, and what it does |
-| `actions` | a list | up to three icons at the end, each `{value, icon, label}`; pressing one sets `chosen` to its `value` |
-| `chosen` | a value; two-way | the action last pressed |
-| `collapsed` | true or false | a medium or large bar shows as a small one (the height eases) |
-| `scrolled` | true or false | content is under the bar: its colour goes from `surface` to `surface_container` |
+The `variant` is `small` (64 tall, the title beside the icon, the default), `center` (64, the title in the middle), `medium` (112) or `large` (152), the last two with the title under
+the icons. `leading_icon` is the navigation icon (`menu` or `arrow_back`), `leading_label` its name and tooltip, and `on_leading` what it does. `actions` are up to three icons at the
+end, each `{value, icon, label}`; pressing one sets `chosen` to its `value`. `collapsed` makes a medium or large bar show as a small one (the height eases), and `scrolled` says content
+is under the bar: its colour goes from `surface` to `surface_container`. `frosted: true` makes the surface translucent and blurred.
 
 Bind `collapsed` and `scrolled` to how a list under the bar has scrolled (the `at_top` of a `ScrollView`). Every icon is a button with a label, which is its name and its
 tooltip. With `App(borderless=True)` a bar can sit in a window's title area; the title bar of a window is `TitleBar`. Not built: the contextual action mode (a selection bar
 that replaces it), and a search bar inside it (`SearchBar` is its own view).
 
-`widget: TopAppBar` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: TopAppBar` | A top app bar: the window's title and actions, along the top. | [`TopAppBar_Stylesheet.yaml`](../stylesheets/top-app-bar/top-app-bar.md) |
-
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: TopAppBar`. A file of the same name in your project replaces it.
 
 ### `TopAppBar`
 
-A top app bar: the window's title and actions, along the top. Its look: [`TopAppBar_Stylesheet.yaml`](../stylesheets/top-app-bar/top-app-bar.md).
+The Material 3 top app bar: a navigation icon, a title and up to three action icons across the top of a screen. `variant`: `small` (64 tall, the title beside the icon), `center` (64, the title in the middle), `medium` (112, the title under the row of icons) and `large` (152, a bigger title under them). The medium and large collapse to the small form while `collapsed` is true (bind it to the way a list under it has scrolled), and `scrolled` (true once content is under the bar) turns its colour from `surface` to `surface_container`. `leading_icon` is the navigation icon (`menu` or `arrow_back`) and its `on_leading` handler; `actions` is a list of {value, icon, label}, pressing one sets `chosen` to its `value`. Every icon has a label (its name and its tooltip). Role: a group.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `title` | required |  |
-| `width` | required |  |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `frosted` | `bool` | `false` | A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur). |
+| `title` | `str` |  | The title. |
+| `variant` | `small` or `center` or `medium` or `large` | `small` | How tall it is and where the title sits. |
+| `leading_icon` | `str` |  | The navigation icon (menu, arrow_back). |
+| `leading_label` | `str` | `Navigation` | The navigation icon's name and tooltip. |
+| `on_leading` | `handler` |  | What the navigation icon does. |
+| `actions` | `list` | `[]` | Up to three icons at the end, each {value, icon, label}. |
+| `chosen` | `any` |  | The value of the action last pressed. Two-way: give it a bare reference and the view writes it back. |
+| `collapsed` | `bool` | `false` | A medium or large bar shows as a small one. |
+| `scrolled` | `bool` | `false` | Content is under the bar: its colour changes. |
 
-```yaml
-params: [title, width]
-id: root
-kind: Container
-children:
-  - id: title
-    kind: Text
-    text:
-      content: "{{ title }}"
-      typography_role: title_large
-      wrap: none
-      overflow: ellipsis
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `row` (Container), `leading` (IconButton), `lead_space` (Container), `lead_filler` (Container), `title` (Text), `filler` (Container), `action` (IconButton), `big_title` (Text).
+
+Its look is in [`TopAppBar_Stylesheet.yaml`](../stylesheets/top-app-bar/top-app-bar.md).
 
 ## Using it
 
@@ -77,9 +64,7 @@ children:
   - {widget: ScrollView, at_top: "{{ at_top }}", style: {flex: fill}}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import top_app_bar
@@ -89,13 +74,14 @@ bar = top_app_bar(app.window, "Notes", leading_icon="menu", trailing_icons=["set
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# TopAppBar_Stylesheet.yaml, next to your views
+# TopAppBar_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: root
-    style: {background: tertiary}
+  - widget: TopAppBar
+    part: title
+    style: {foreground: tertiary}
 ```
 
 See [Component stylesheets](../stylesheets/index.md).
@@ -104,5 +90,6 @@ See [Component stylesheets](../stylesheets/index.md).
 
 - [Custom Title Bars](../guide/custom-title-bars.md)
 - [Windows And Docks](../guide/windows-and-docks.md)
+- [Effects](../guide/effects.md)
 - [Python API reference](../api/python.md)
 - [YAML reference](../api/yaml.md)

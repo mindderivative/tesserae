@@ -1,87 +1,59 @@
 # TopAppBar_Stylesheet.yaml
 
-A top app bar: the window's title and actions, along the top.
+The look of TopAppBar (Material 3): a `surface` bar that becomes `surface_container` once content has scrolled under it; 4 pixels in from the edge for the icons, the title in on_surface (16 pixels from the left of a medium or large bar's title), 16 pixels of room at each end.
 
 The look of [`TopAppBar`](../../components/top-app-bar.md) (in [Top app bar](../../components/top-app-bar.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# TopAppBar: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of TopAppBar (Material 3): a `surface` bar that becomes `surface_container` once content has scrolled under it; 4 pixels in from the edge for the icons, the
+# title in on_surface (16 pixels from the left of a medium or large bar's title), 16 pixels of room at each end.
 styles:
-  - id: root
+  - widget: TopAppBar
     style:
-      width: "{{ width }}"
-      height: 64
-      background: surface
-      align_content: left
-      padding:
-        left: 4
-        right: 4
-        top: 0
-        bottom: 0
-  - id: title
-    style:
-      foreground: on_surface
-      flex: expand_horizontal
-      margin:
-        left: 16
-        right: 0
-        top: 0
-        bottom: 0
-      min_width: 0
+      background: "{{ ('surface_container' if scrolled else 'surface') + ('@72%' if frosted else '') }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
+      padding: {left: 4, right: 4, top: 0, bottom: 0}
+      clip_children: true
+  - {widget: TopAppBar, part: title, style: {foreground: on_surface}}
+  - {widget: TopAppBar, part: big_title, style: {foreground: on_surface, padding: {left: 12, right: 12, top: 0, bottom: 0}}}
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`TopAppBar_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: TopAppBar`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: TopAppBar` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Container)
+### `TopAppBar` itself
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | `64` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `align_content` | `left` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
-| `padding` | left `4`, right `4`, top `0`, bottom `0` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `background` | `{{ ('surface_container' if scrolled else 'surface') + ('@72%' if frosted else '') }}` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `backdrop_blur` | `{{ 20 if frosted else 0 }}` | Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. |
+| always | `padding` | `{bottom: 0, left: 4, right: 4, top: 0}` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| always | `clip_children` | `true` | Whether children are cut off at its edge. |
 
 ### `title` (Text)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| `flex` | `expand_horizontal` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
-| `margin` | left `16`, right `0`, top `0`, bottom `0` | Space outside it: one number, or `{left, right, top, bottom}`. |
-| `min_width` | `0` | The least width it can take. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
-## What it makes
+### `big_title` (Text)
 
-With `title: Title, width: 120`, each part's style is:
-
-```yaml
-root:
-  width: 120
-  height: 64
-  background: surface
-  align_content: left
-  padding: {left: 4, right: 4, top: 0, bottom: 0}
-title:
-  foreground: on_surface
-  flex: expand_horizontal
-  margin: {left: 16, right: 0, top: 0, bottom: 0}
-  min_width: 0
-```
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| always | `padding` | `{bottom: 0, left: 12, right: 12, top: 0}` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ## Changing it
 
-Put a `TopAppBar_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: root
+  - widget: TopAppBar
     style: {background: tertiary}
 ```

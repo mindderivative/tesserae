@@ -8,9 +8,9 @@ that Tesserae's tests run.
 
 ## Install
 
-You need Python 3.12 or newer and a desktop session with a Vulkan graphics
-driver (any current Linux, macOS or Windows install has one; see
-[Installation](installation.md) if a window won't open).
+You need Python 3.12 or newer and a desktop session with a graphics driver the
+engine can use (on Linux, Vulkan; see [Installation](installation.md) if a
+window won't open).
 
 ```bash
 mkdir counter && cd counter
@@ -43,10 +43,12 @@ white text we add next reads on any desktop theme) and open it.
     --8<-- "examples/getting_started/imperative/step1/app.py"
     ```
 
-Declaratively the window shows a **screen**: `app.build_view` reads
-`Counter_View.yaml` and `app.register` names it (`None` is its ViewModel, which
-it doesn't need yet). Imperatively there is no file: `window.root` is the box
-every node goes in, and one call sets its layout and background.
+Declaratively the window shows a **screen**: `app.open_view` reads
+`Counter_View.yaml` and registers it, and `app.show("Counter")` puts it in the
+window. The screen's name is its file's name without `_View.yaml`. It has no
+ViewModel yet, because it has nothing to react to. Imperatively there is no
+file: `window.root` is the box every node goes in, and one call sets its layout
+and background.
 
 ```bash
 python app.py
@@ -74,18 +76,20 @@ A **node** is one thing on screen. Add a label that says `Count: 0`.
     --8<-- "examples/getting_started/imperative/step2/app.py"
     ```
 
-In YAML a node is an entry in `children:`: `kind: Text` makes a label and
-`text:` holds what it says. In code, `window.create("text", ...)` makes the node
+In YAML a node is an entry in `children:`: `widget: Text` makes a label and
+`text:` holds what it says. Every node says which `widget:` it is, and the rest
+of its keys are that widget's properties (`font_size`), its `style:` and a
+`name:` to find it by. In code, `window.create("text", ...)` makes the node
 and `window.root.add_child(...)` puts it in the window. The text's colour is
 `foreground` in YAML and `fill=` in code.
 
 !!! tip "If Python prints an error"
     A mistake in a view file ends in a traceback; read the **last line**. It
-    names the file, the widget and the problem, and for a misspelt word says what
-    you probably meant:
+    names the file, the line and column, the widget and the problem, and for a
+    misspelt word says what you probably meant:
 
     ```text
-    ValueError: .../Counter_View.yaml: widget "label": unknown style field(s) ['foregorund'] -- did you mean 'foreground'?
+    tesserae.spec.nodes.LoadError: .../Counter_View.yaml:6:37: error: Text: style 'foregorund' is not valid here (did you mean 'foreground')
     ```
 
 ## 3. A second node
@@ -113,10 +117,10 @@ things a little differently:
 
 | YAML view | Python |
 | --- | --- |
-| `kind: Text` / `kind: Rect` | `window.create("text", ...)` / `window.create("box", ...)` |
+| `widget: Text` / `widget: Rect` | `window.create("text", ...)` / `window.create("box", ...)` |
 | `style: {width: 96, ...}` | `width=96` |
 | `foreground`, `background` (`"#RRGGBB"`) | `fill=(r, g, b, a)` |
-| `text: {content: "...", font_size: 20}` | `text="..."`, `font_size=20` |
+| `text: "..."`, `font_size: 20` | `text="..."`, `font_size=20` |
 | `children:` | `node.add_child(other)` |
 
 ## 4. Make it count
@@ -141,21 +145,18 @@ things a little differently:
     --8<-- "examples/getting_started/imperative/step4/app.py"
     ```
 
-**Declaratively** the state lives in a ViewModel, paired with the view by name
-(`Counter_View.yaml` and `Counter_ViewModel.py`). Its `Signal` holds the label's
-text; the view's `bindings:` keeps the label showing it, and `handlers:` calls
-`increment` on a click. `app.load` pairs the two files.
+**Declaratively** the state lives in a ViewModel. The view says which one by its
+`name: Counter`, and the ViewModel says which views it serves with `views =
+"Counter"`; `app.bind(CounterViewModel)` joins them. Its `Signal` holds the
+count; the label's `text: "Count: {{ count }}"` keeps showing it, and
+`handlers:` calls `increment` on a click. A Signal reads as its value in a view,
+so `{{ count }}` follows it.
 
 **Imperatively** the state is a variable and you are the view: `button.on("click",
 count)` runs `count`, which sets the label with `label.set(text=...)`.
 
 Run it. Click the button, or press Tab and then Enter or Space, and the count
 goes up. The two versions are the same app.
-
-!!! tip "Hot reload"
-    Change `app.run()` to `app.run(hot_reload=True)` and edit
-    `Counter_View.yaml` while the app is open: the window updates at once and the
-    count stays. See [Hot Reload](guide/hot-reload.md).
 
 ## Which to use
 
@@ -164,7 +165,9 @@ bindings live in the view file, and the ViewModel holds only your logic. Use
 **imperative** for what is made while the app runs; the
 [Widgets in Python](guide/widget-catalog.md) guide covers it. The two mix freely,
 because a declarative screen is made of the same nodes you create in code:
-`view.node("button")` returns any node the YAML declared.
+`app.screen("Counter")` gives the view and its ViewModel, and
+`view.node("root.button")` returns any node the YAML declared (a node's id is its
+path from the root, using each `name:`).
 
 ## Next
 

@@ -12,6 +12,7 @@ app = App(
     custom_theme="Brand",  # Themes/Brand_Theme.yaml: the colours, made from one seed
     stylesheet="Tasks",    # Styles/Tasks_Stylesheet.yaml: the look of every screen
 )
-app.load("Main")
+app.bind(app.project.viewmodel("Main"))
+app.open_view("Main")
 app.show("Main")
 app.run()

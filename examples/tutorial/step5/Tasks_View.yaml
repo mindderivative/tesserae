@@ -1,34 +1,32 @@
-id: root
-kind: Container
+name: Tasks
+widget: Container
 classes: [page]
 children:
-  - id: title
-    kind: Text
+  - widget: Text
+    name: title
     classes: [heading]
-    text: {content: Tasks, typography_role: headline_medium}
-    bindings: {text: "{{ heading.get() }}"}
-  - id: stats
-    kind: Container
+    text: "{{ app.state.user }}'s tasks"
+    typography_role: headline_medium
+  - widget: Container
+    name: stats
     classes: [row]
     children:
-      - id: open
-        component: Stat
-        with: {label: Open, value: "{{ open_text.get() }}"}
-      - id: finished
-        component: Stat
-        with: {label: Done, value: "{{ done_text.get() }}"}
-  - id: buttons
-    kind: Container
+      - {widget: Stat, name: open, label: Open, value: "{{ open_text }}"}
+      - {widget: Stat, name: finished, label: Done, value: "{{ done_text }}"}
+  - widget: Container
+    name: buttons
     classes: [row]
     children:
-      - id: add
-        component: ButtonFilled
-        with: {label: Add a task, width: 140, height: 40, corner_radius: 20}
-        handlers: {on_click: add_task}
-      - id: settings
-        component: ButtonText
-        with: {label: Settings, width: 100, height: 40, corner_radius: 20}
-        handlers: {on_click: open_settings}
-  - id: list
-    kind: Container
+      - {widget: Button, name: add, label: Add a task, variant: filled, handlers: {on_click: add_task}}
+      - {widget: Button, name: settings, label: Settings, variant: text, handlers: {on_click: open_settings}}
+  - widget: Container
+    name: list
     classes: [rows]
+    children:
+      - for: task in tasks
+        key: task.id
+        widget: TaskItem
+        name: row
+        task: "{{ task }}"
+        on_toggle: "toggle(task.id)"
+        on_remove: "remove(task.id)"

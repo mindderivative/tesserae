@@ -2598,7 +2598,7 @@
                 "pattern": "\\{\\{"
               }
             ],
-            "description": "The name of a node in this view to sit against, or `parent` for the node it is written inside; without one it is centred in the window."
+            "description": "The name of a node in this view to sit against, or `parent` for the node it is written inside; without one it sits at its own `x` and `y`."
           },
           "placement": {
             "anyOf": [

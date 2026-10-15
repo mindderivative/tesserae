@@ -54,7 +54,7 @@ Main_View.yaml:11:5: error: Slider: no property 'valu' (did you mean 'value'; pr
 
 Nodes have **ids**, assigned by the loader and never written: the path from the root, using a node's `name` where it has one
 (`root.add`) and its place where it does not (`root.children[0]`), with `[key]` added under a `for:`. Give a node a `name` when something has to
-find it again: a ViewModel, a stylesheet rule, a test, or a hot reload that should keep its state.
+find it again: a ViewModel, a stylesheet rule, a test.
 
 ## Widgets and properties
 
@@ -114,7 +114,9 @@ children:
 ```
 
 `params:` is a list of names (`[title, icon]`, each required unless written `{icon: null}`) or a mapping of names to a type or to
-`{type, default, choices, required, model, doc}`. The types are `str int float bool color length icon enum list dict node nodes handler any`.
+`{type, default, choices, required, model, doc, min, max}`. The types are `str int float bool color length icon enum list dict node nodes handler any`.
+`min` and `max` bound an `int` or a `float`: a value outside them, written at a call or worked out by an expression, is an error that names the
+parameter and the range (`flash_opacity: {type: float, min: 0, max: 1}`).
 
 A call gives the params as keys, and its `children:` are the slot content. An expression written at the call is read **where it is written**,
 in the caller's names, and it stays reactive inside the view. The view cannot see the caller's names. Children go in the default `Slot`, or in
@@ -125,7 +127,7 @@ the caller's names. A view may call itself (a tree), to a depth of 64.
 
 A param of type `handler` takes the caller's action name or statements (`on_remove: "items = [x for x in items if x != row]"`), read in the caller's names. The view runs it by calling the param like an action, `on_remove()`; a param the caller left out does nothing when called.
 
-A param that is `model: true` and is given a bare Signal (`on: "{{ dark }}"`) passes the Signal itself, so the view's own `Switch` edits the
+A param that is `model: true` and is given a bare Signal (`dark_on: "{{ dark }}"`) passes the Signal itself, so the view's own `Switch` edits the
 caller's value.
 
 ## Repeating, choosing and remembering
@@ -158,8 +160,8 @@ children:
   listeners, and showing it again is instant. Use `visible:` for something that comes and goes (a panel, a hint) and `if:` for something that is not
   worth keeping while it is away. On a view call it hides the whole view; on the root of a view file it is an error (write it where the view is called).
   Focus and the accessibility tree follow the engine's hidden nodes; nothing here changes them.
-- `state:` makes a Signal for each name, for this node and everything under it. A starting value may be an expression over the view's own params, which seed it once when the state is made (`state: {draft: "{{ hour }}"}`); it may not read a ViewModel's names. It belongs to the node (to each row under a `for:`), is written
-  by handlers, and survives a hot reload for a node that keeps its name or key. Use it for presentation (open, on); what the app cares about belongs
+- `state:` makes a Signal for each name, for this node and everything under it. A starting value may be an expression over the view's own params, which seed it once when the state is made (`state: {draft: "{{ hour }}"}`); it may not read a ViewModel's names. It belongs to the node (to each row under a `for:`), and is written
+  by handlers. Use it for presentation (open, on); what the app cares about belongs
   in the ViewModel.
 - `for:`, `if:` and `slot:` are not allowed on the root of a view.
 

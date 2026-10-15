@@ -1,25 +1,32 @@
-id: root
-kind: Container
+name: Tasks
+widget: Container
 classes: [page]
 children:
-  - id: title
-    kind: Text
+  - widget: Text
+    name: title
     classes: [heading]
-    text: {content: Tasks, typography_role: headline_medium}
-  - id: stats
-    kind: Container
+    text: Tasks
+    typography_role: headline_medium
+  - widget: Container
+    name: stats
     classes: [row]
     children:
-      - id: open
-        component: Stat
-        with: {label: Open, value: "{{ open_text.get() }}"}
-      - id: finished
-        component: Stat
-        with: {label: Done, value: "{{ done_text.get() }}"}
-  - id: add
-    component: ButtonFilled
-    with: {label: Add a task, width: 140, height: 40, corner_radius: 20}
+      - {widget: Stat, name: open, label: Open, value: "{{ open_text }}"}
+      - {widget: Stat, name: finished, label: Done, value: "{{ done_text }}"}
+  - widget: Button
+    name: add
+    label: Add a task
+    variant: filled
+    style: {width: 140}
     handlers: {on_click: add_task}
-  - id: list
-    kind: Container
+  - widget: Container
+    name: list
     classes: [rows]
+    children:
+      - for: task in tasks
+        key: task.id
+        widget: TaskItem
+        name: row
+        task: "{{ task }}"
+        on_toggle: "toggle(task.id)"
+        on_remove: "remove(task.id)"

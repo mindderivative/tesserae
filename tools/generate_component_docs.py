@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Writes the component pages and the stylesheet pages (0.3.4, #83).
+"""Writes the component pages and the stylesheet pages.
 
-- `docs/components/<slug>.md`: one page for each MD3 component, from `tools/component_docs.yaml`
-  (the MD3 text, the usage examples) and the fragments themselves (their YAML, parameters and parts).
-- `docs/stylesheets/<slug>/<fragment>.md`: one page for each component stylesheet: the file, how it is tied to
-  its component, what each part's rules do, and what they expand to for example parameters.
+- `docs/components/<slug>.md`: one page for each MD3 component, from `tools/component_docs.yaml` (the MD3 text, the usage examples) and from the
+  code itself: each shipped view (`src/tesserae/views/<Name>_View.yaml`: its parameters, slots and parts) and each built-in widget it names
+  (`tesserae.spec.widgets`: its properties).
+- `docs/stylesheets/<slug>/<view>.md`: one page for each shipped stylesheet (`<Name>_Stylesheet.yaml`): the file, how rules reach the view, and what
+  each part's rules do.
 - the two overview pages, and the `nav:` entries for both, between markers in `mkdocs.yml`.
+
+Nothing here is written by hand except `tools/component_docs.yaml`. Every shipped view must be listed under exactly one component and every
+built-in widget under one or in `NOT_COMPONENTS`, so a new one cannot go undocumented.
 
     python tools/generate_component_docs.py          # write them
     python tools/generate_component_docs.py --check  # exit 1 if they are out of date
@@ -17,31 +21,23 @@ import argparse
 import importlib.util
 import re
 import sys
-import textwrap
 from pathlib import Path
 from typing import Any
 
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "src"))
 DATA = ROOT / "tools" / "component_docs.yaml"
-FRAGMENTS = ROOT / "src" / "tesserae" / "spec" / "components"
+VIEWS = ROOT / "src" / "tesserae" / "views"
 DOCS = ROOT / "docs"
 MKDOCS = ROOT / "mkdocs.yml"
 NAV_MARKS = ("# >>> components (written by tools/generate_component_docs.py)", "# <<< components")
 
-#: Example values for a fragment's parameters, to show what its stylesheet expands to.
-SAMPLE = {"label": "Go", "title": "Title", "text": "Hello", "headline": "Headline", "width": 120, "height": 40,
-          "corner_radius": 20, "size": 40, "icon": "home", "value": 0.5, "src": "photo.png", "fit": "cover",
-          "placeholder": "Search", "day": 7, "hour": 3, "minute": 15, "background": "primary", "left_padding": 16,
-          "item_width": 100, "scrim_width": 400, "scrim_height": 300, "frame": "frame", "min": 0, "max": 10, "step": 1,
-          "typography_role": "body_large", "color": "primary", "fab_size": "default", "button": "ButtonFilled",
-          "selected": False, "checked": False, "screen": "Main"}
-ITEMS = {"ButtonGroup": [{"label": "A"}, {"label": "B"}], "Menu": [{"label": "A"}, {"label": "B"}],
-         "Tabs": [{"label": "A", "selected": True}, {"label": "B"}],
-         "NavigationRail": [{"label": "A", "icon": "home", "selected": True}, {"label": "B", "icon": "search"}],
-         "NavigationRailScreens": [{"label": "A", "icon": "home", "screen": "A"}, {"label": "B", "icon": "search", "screen": "B"}],
-         "NavigationDrawer": [{"label": "A", "icon": "home", "selected": True}, {"label": "B", "icon": "search"}]}
+#: Built-in widgets that are building blocks, not components: they are in the view language guide and the YAML reference.
+NOT_COMPONENTS = frozenset({"Container", "Rect", "Icon", "Canvas", "ScrollView", "VirtualList", "Overlay", "Slot"})
+#: A value longer than this is cut in a table (the whole stylesheet is on the page).
+CUT = 110
 
 
 def _kebab(name: str) -> str:
@@ -58,251 +54,271 @@ def _style_field_help() -> dict[str, str]:
             else " ".join(prop.get("description", "").split()) for name, prop in style.items()}
 
 
-# -- reading the fragments ---------------------------------------------------------------------
+# -- reading the code ----------------------------------------------------------------------------
 
-class Fragment:
+class View:
+    """A shipped view: its header comment, parameters, slots and parts, and its stylesheet's rules."""
+
     def __init__(self, name: str) -> None:
         self.name = name
-        self.path = FRAGMENTS / f"{name}_Component.yaml"
+        self.path = VIEWS / f"{name}_View.yaml"
         self.text = self.path.read_text(encoding="utf-8")
         self.data = yaml.safe_load(self.text)
-        self.summary = self.text.splitlines()[0].lstrip("# ").strip()
-        self.sheet_path = FRAGMENTS / f"{name}_Stylesheet.yaml"
+        self.summary = _header(self.text)
+        self.params: dict[str, Any] = self.data.get("params") or {}
+        self.sheet_path = VIEWS / f"{name}_Stylesheet.yaml"
         self.sheet_text = self.sheet_path.read_text(encoding="utf-8") if self.sheet_path.exists() else None
-        self.rules = yaml.safe_load(self.sheet_text)["styles"] if self.sheet_text else []
-        self.params: list[tuple[str, bool, Any]] = []  # (name, required, default)
-        for entry in self.data.get("params") or []:
-            if isinstance(entry, str):
-                self.params.append((entry, True, None))
-            else:
-                key, default = next(iter(entry.items()))
-                self.params.append((key, False, default))
+        self.rules: list[dict[str, Any]] = (yaml.safe_load(self.sheet_text) or {}).get("styles", []) if self.sheet_text else []
+        self.sheet_summary = _header(self.sheet_text) if self.sheet_text else ""
+        self.slots: list[str] = []
+        self.parts: list[tuple[str, str]] = []
+        self._walk(self.data, root=True)
 
-    @property
-    def body(self) -> str:
-        """The fragment's YAML without its header comment."""
-        return "\n".join(line for line in self.text.splitlines() if not line.startswith("#")).strip() + "\n"
-
-    def parts(self) -> list[tuple[str, str]]:
-        out: list[tuple[str, str]] = []
-
-        def walk(node: dict[str, Any]) -> None:
-            if isinstance(node.get("id"), str):
-                kind = node.get("kind") or ("component " + str(node["component"]) if "component" in node else "?")
-                out.append((node["id"], kind))
-            for child in node.get("children") or []:
-                walk(child)
-
-        walk(self.data)
-        return out
-
-    def sample(self) -> dict[str, Any]:
-        params = {name: SAMPLE[name] for name, required, _ in self.params if name in SAMPLE}
-        if "items" in {name for name, _, _ in self.params}:
-            params["items"] = ITEMS[self.name]
-        return params
-
-    def expanded_styles(self) -> dict[str, Any]:
-        """Each part's style once the stylesheet is applied, for the example parameters."""
-        from tesserae.spec.expand import expand_components_to_spec
-
-        spec = expand_components_to_spec(yaml.safe_dump({"id": "x", "component": self.name, "with": self.sample()}))
-        out: dict[str, Any] = {}
-
-        def walk(node: dict[str, Any]) -> None:
-            if node.get("style"):
-                out[node["id"].removeprefix("x.") if node["id"] != "x" else "root"] = node["style"]
-            for child in node.get("children") or []:
-                walk(child)
-
-        walk(spec)
-        return out
+    def _walk(self, node: Any, root: bool = False) -> None:
+        if isinstance(node, dict):
+            if "widget" in node:
+                if node["widget"] == "Slot":
+                    self.slots.append(str(node.get("name", "default")))
+                elif isinstance(node.get("name"), str) and not root:
+                    self.parts.append((node["name"], str(node["widget"])))
+            for value in node.values():
+                self._walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                self._walk(item)
 
 
-def _value(raw: Any) -> str:
-    """A rule's value in words: a parameter, a conditional, or the value itself."""
-    if isinstance(raw, str):
-        found = re.fullmatch(r"\{\{\s*(\w+)\s*\}\}", raw)
-        if found:
-            return f"the `{found.group(1)}` parameter"
-    if isinstance(raw, dict) and "if" in raw:
-        cond = re.sub(r"[{}\s]", "", str(raw["if"]))
-        text = f"{_value(raw['then'])} if `{cond}`"
-        return text + (f", else {_value(raw['else'])}" if "else" in raw else "")
-    if isinstance(raw, dict):
-        return ", ".join(f"{k} {_value(v)}" for k, v in raw.items())
-    return f"`{raw}`"
+def _header(text: str) -> str:
+    """The comment at the top of a file, as one paragraph."""
+    lines = []
+    for line in text.splitlines():
+        if not line.startswith("#"):
+            break
+        lines.append(line.lstrip("#").strip())
+    return " ".join(part for part in lines if part)
 
 
-# -- the pages ---------------------------------------------------------------------------------
+def _cell(value: Any) -> str:
+    """A value in a table cell: code, cut if it is long, with `|` kept from ending the cell."""
+    if value is None or value == "":
+        return ""
+    text = value if isinstance(value, str) else yaml.safe_dump(value, default_flow_style=True, width=10_000).strip().removesuffix("...").strip()
+    if len(text) > CUT:
+        text = text[:CUT - 1] + "…"
+    return "`" + text.replace("|", "\\|").replace("`", "'") + "`"
+
+
+def _doc(text: Any) -> str:
+    return " ".join(str(text or "").split()).replace("|", "\\|")
+
+
+def _type(spec: Any) -> str:
+    kind = spec.get("type", "any") if isinstance(spec, dict) else str(spec)
+    choices = spec.get("choices") if isinstance(spec, dict) else None
+    out = " or ".join(f"`{c}`" for c in choices) if choices else f"`{kind}`"
+    low, high = (spec.get("min"), spec.get("max")) if isinstance(spec, dict) else (None, None)
+    if low is not None and high is not None:
+        out += f", {low:g} to {high:g}"
+    elif low is not None:
+        out += f", {low:g} or more"
+    elif high is not None:
+        out += f", {high:g} or less"
+    return out
+
+
+def _widget(name: str) -> Any:
+    from tesserae.spec.widgets import lookup
+
+    decl = lookup(name)
+    if decl is None:
+        raise SystemExit(f"tools/component_docs.yaml names the widget {name!r}, which is not registered")
+    return decl
+
+
+def _registered_widgets() -> set[str]:
+    from tesserae.spec.widgets import names
+
+    return set(names())
+
+
+# -- the pages -------------------------------------------------------------------------------------
 
 def _fence(code: str, lang: str) -> list[str]:
     return [f"```{lang}", code.rstrip("\n"), "```", ""]
 
 
-def _indent(text: str, by: int) -> str:
-    return textwrap.indent(text.rstrip("\n"), " " * by)
+def _view_section(view: View, entry: dict[str, Any]) -> list[str]:
+    out = [f"### `{view.name}`", "", view.summary or "A view Tesserae ships.", ""]
+    if view.params:
+        out += ["| Parameter | Type | Default | Meaning |", "| --- | --- | --- | --- |"]
+        for name, spec in view.params.items():
+            spec = spec if isinstance(spec, dict) else {"type": spec}
+            default = "required" if spec.get("required") else _cell(spec.get("default"))
+            model = " Two-way: give it a bare reference and the view writes it back." if spec.get("model") else ""
+            out.append(f"| `{name}` | {_type(spec)} | {default} | {_doc(spec.get('doc'))}{model} |")
+        out.append("")
+    else:
+        out += ["It takes no parameters.", ""]
+    if view.slots:
+        out += ["Children go in " + (", ".join(f"the `{s}` slot" if s != "default" else "the default slot" for s in view.slots)) + ".", ""]
+    if view.parts:
+        out += ["Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): " + ", ".join(f"`{n}` ({w})" for n, w in view.parts) + ".", ""]
+    if view.sheet_text:
+        out += [f"Its look is in [`{view.name}_Stylesheet.yaml`](../stylesheets/{entry['slug']}/{_kebab(view.name)}.md).", ""]
+    return out
 
 
-def component_page(entry: dict[str, Any], fragments: dict[str, Fragment], rel_sheet) -> str:
+def _widget_section(name: str) -> list[str]:
+    decl = _widget(name)
+    out = [f"### `{name}`", "", decl.doc or "A built-in widget.", ""]
+    if decl.properties:
+        out += ["| Property | Type | Default | Meaning |", "| --- | --- | --- | --- |"]
+        for pname, prop in decl.properties.items():
+            if prop.required:
+                default = "required"
+            else:
+                default = _cell(prop.default) if prop.default not in (None, "", False) else ""
+            spec = {"type": prop.type, "choices": prop.choices, "min": prop.minimum, "max": prop.maximum}
+            model = " Two-way." if prop.model else ""
+            out.append(f"| `{pname}` | {_type(spec)} | {default} | {_doc(prop.doc)}{model} |")
+        out.append("")
+    else:
+        out += ["It takes no properties of its own (see [The View Language](../guide/view-language.md) for what every node takes).", ""]
+    if decl.extras:
+        out += ["Its `style:` also takes " + ", ".join(f"`{e}`" for e in decl.extras) + ".", ""]
+    return out
+
+
+def component_page(entry: dict[str, Any], views: dict[str, View]) -> str:
     out = [f"# {entry['title']}", "", f"*{entry['group']}*", "", "## In Material Design 3", "", entry["md3"].strip(), ""]
     out += ["## In Tesserae", "", entry["built"].strip(), ""]
-    frags = [fragments[name] for name in entry["fragments"]]
-    if frags and (entry.get("shipped_view") or entry.get("widget")):  # both forms: the view first, and the older fragment it replaces
-        out += [f"`widget: {entry.get('shipped_view') or entry['widget']}` is the view-language form (see [The View Language](../guide/view-language.md)); "
-                "the fragment below is the older `component:` form, which keeps working.", ""]
-    if frags:
-        out += ["| Fragment | What it is | Stylesheet |", "| --- | --- | --- |"]
-        for frag in frags:
-            sheet = f"[`{frag.name}_Stylesheet.yaml`]({rel_sheet(entry, frag)})" if frag.sheet_text else "none: the control draws itself"
-            out.append(f"| `component: {frag.name}` | {frag.summary} | {sheet} |")
-        out.append("")
-        out += ["## How it is built", "",
-                "Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. "
-                "Its look is in its stylesheet, linked under each one.", ""]
-        groups: list[list[Fragment]] = []  # fragments with one structure and parameters are shown once
-        for frag in frags:
-            for group in groups:
-                if group[0].body == frag.body and group[0].params == frag.params:
-                    group.append(frag)
-                    break
-            else:
-                groups.append([frag])
-        for group in groups:
-            out += ["### " + ", ".join(f"`{f.name}`" for f in group), ""]
-            if len(group) == 1:
-                frag = group[0]
-                link = f" Its look: [`{frag.name}_Stylesheet.yaml`]({rel_sheet(entry, frag)})." if frag.sheet_text else ""
-                out += [f"{frag.summary}{link}", ""]
-            first = group[0]
-            if first.params:
-                out += ["| Parameter | | Default |", "| --- | --- | --- |"]
-                for name, required, default in first.params:
-                    out.append(f"| `{name}` | {'required' if required else 'optional'} | {'' if required else f'`{default}`'} |")
-                out.append("")
-            else:
-                out += ["It takes no parameters.", ""]
-            if len(group) > 1:
-                out += [f"These {len(group)} have one structure; only their stylesheets, above, differ.", ""]
-            out += _fence(first.body, "yaml")
-    elif entry.get("shipped_view"):
-        out += [f"This component is a view Tesserae ships: use `widget: {entry['shipped_view']}` in a view "
-                "(see [The View Language](../guide/view-language.md)).", ""]
-    elif entry.get("node_kind") and entry.get("widget"):
-        out += [f"This component is a widget, not a fragment: use `widget: {entry['widget']}` in a view "
-                f"(see [The View Language](../guide/view-language.md)), or `kind: {entry['node_kind']}` in the older syntax.", ""]
-    elif entry.get("node_kind"):
-        out += [f"This component is the `{entry['node_kind']}` node kind, not a fragment: use `kind: {entry['node_kind']}` in a view "
-                "(the [YAML reference](../api/yaml.md#the-kinds))" + (", or build it in Python." if entry.get("python") else "."), ""]
-    else:
-        out += ["This component has no `component:` fragment: build it in Python.", ""]
+    shown_views = [views[name] for name in entry.get("views") or []]
+    widgets = entry.get("widgets") or []
+    if shown_views or widgets:
+        out += ["## How it is built", ""]
+        if shown_views:
+            out += ["A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). "
+                    "Use it by name: `widget: " + shown_views[0].name + "`. A file of the same name in your project replaces it.", ""]
+        for view in shown_views:
+            out += _view_section(view, entry)
+        for name in widgets:
+            out += _widget_section(name)
+    elif entry.get("shares"):
+        out += ["## How it is built", "", f"It is the same view as the [{entry['shares'].replace('-', ' ')}](../components/{entry['shares']}.md): see there for what it takes and how it looks.", ""]
     if entry.get("usage_view"):
         out += ["## Using it", ""] + _fence(entry["usage_view"].rstrip("\n"), "yaml")
     if entry.get("after"):
         out += entry["after"].rstrip("\n").split("\n") + [""]
-    if entry.get("usage"):
-        out += ["## Using the fragment" if entry.get("usage_view") else "## Using it", "", "In a view:", ""]
-        out += _fence("# Home_View.yaml\nid: root\nkind: Container\nchildren:\n" + _indent(entry["usage"], 2), "yaml")
     if entry.get("python"):
-        out += ["In Python:" if entry.get("usage") else "## Using it", ""] if entry.get("usage") else ["## Using it", "", "In Python:", ""]
+        out += ["## Using it in Python", ""] if entry.get("usage_view") else ["## Using it", "", "In Python:", ""]
         out += _fence(entry["python"], "python")
-    sheeted = [f for f in frags if f.sheet_text]
+    sheeted = [v for v in shown_views if v.sheet_text]
     if sheeted:
-        frag = sheeted[0]
-        rule = next((r for r in frag.rules if {"background", "foreground"} & set(r["style"])), frag.rules[0])
+        view = sheeted[0]
+        rule = next((r for r in view.rules if {"background", "foreground"} & set(r["style"]) and r.get("part")), None) \
+            or next((r for r in view.rules if {"background", "foreground"} & set(r["style"])), view.rules[0])
         field = "background" if "background" in rule["style"] else "foreground" if "foreground" in rule["style"] else next(iter(rule["style"]))
+        selectors = {k: v for k, v in rule.items() if k not in ("style",)}
+        selectors.setdefault("widget", view.name)
         out += ["## Changing its look", "",
-                "To restyle a component in your whole app, put a stylesheet of the same name next to your views. "
-                "Its rules go over the built-in ones, field by field, and the rest is kept:", ""]
-        out += _fence(f"# {frag.name}_Stylesheet.yaml, next to your views\nstyles:\n  - id: {rule['id']}\n    style: {{{field}: tertiary}}", "yaml")
+                "To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. "
+                "A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, "
+                "and a node's own `style:` beats every rule:", ""]
+        out += _fence(f"# {view.name}_Stylesheet.yaml, or any stylesheet your app loads\nstyles:\n  - " + yaml.safe_dump(
+            {**selectors, "style": {field: "tertiary"}}, default_flow_style=None, sort_keys=False, width=200).strip().replace("\n", "\n    "), "yaml")
         out += ["See [Component stylesheets](../stylesheets/index.md).", ""]
     see = [f"[{Path(p).stem.replace('-', ' ').title()}](../{p})" for p in entry.get("see", [])]
     out += ["## See also", "", "- " + "\n- ".join(see + ["[Python API reference](../api/python.md)", "[YAML reference](../api/yaml.md)"]), ""]
     return "\n".join(out)
 
 
-def stylesheet_page(entry: dict[str, Any], frag: Fragment, help_: dict[str, str]) -> str:
-    out = [f"# {frag.name}_Stylesheet.yaml", "", frag.summary, "",
-           f"The look of [`{frag.name}`](../../components/{entry['slug']}.md) (in [{entry['title']}](../../components/{entry['slug']}.md)). "
-           "[How component stylesheets work](../index.md).", "",
-           "## The stylesheet", ""]
-    out += _fence(frag.sheet_text.rstrip("\n"), "yaml")
-    out += ["## How it is tied to the component", "",
-            f"`{frag.name}_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: "
-            "each rule's `id` names a part, and its `style` is what that part looks like. When a view uses "
-            f"`component: {frag.name}`, Tesserae fills in the parameters (a value like `\"{{{{ width }}}}\"` becomes the "
-            "`width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part "
-            "already has, so a part's own `style:` always wins.", ""]
-    parts = dict(frag.parts())
-    out += ["## The parts", ""]
-    for rule in frag.rules:
-        out += [f"### `{rule['id']}` ({parts.get(rule['id'], '?')})", "", "| Field | Value | What it does |", "| --- | --- | --- |"]
-        for field, raw in rule["style"].items():
-            out.append(f"| `{field}` | {_value(raw)} | {help_.get(field, '')} |")
+def _when(rule: dict[str, Any]) -> str:
+    """When a rule applies, in words: its selectors, state, classes and name."""
+    parts = [f"`{k}: {v}`" for k, v in rule.items() if k not in ("widget", "part", "style", "state", "classes", "name")]
+    if rule.get("state"):
+        parts.append(f"state `{rule['state']}`")
+    if rule.get("classes"):
+        parts.append("classes " + ", ".join(f"`{c}`" for c in rule["classes"]))
+    if rule.get("name"):
+        parts.append(f"the node named `{rule['name']}`")
+    return ", ".join(parts) or "always"
+
+
+def stylesheet_page(entry: dict[str, Any], view: View, help_: dict[str, str]) -> str:
+    out = [f"# {view.name}_Stylesheet.yaml", "", view.sheet_summary or f"The look of `{view.name}`.", "",
+           f"The look of [`{view.name}`](../../components/{entry['slug']}.md) (in [{entry['title']}](../../components/{entry['slug']}.md)). "
+           "[How component stylesheets work](../index.md).", "", "## The stylesheet", ""]
+    out += _fence(view.sheet_text.rstrip("\n"), "yaml")
+    out += ["## How it reaches the view", "",
+            f"Each rule names `widget: {view.name}` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, "
+            "a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be "
+            "expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, "
+            "then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` "
+            "beats every rule for the fields it sets.", ""]
+    by_part: dict[str, list[dict[str, Any]]] = {}
+    for rule in view.rules:
+        by_part.setdefault(rule.get("part") or "", []).append(rule)
+    out += ["## The rules", ""]
+    for part, rules in by_part.items():
+        widget = dict(view.parts).get(part)
+        out += [f"### `{part}`" + (f" ({widget})" if widget else "") if part else f"### `{view.name}` itself", "",
+                "| When | Field | Value | What it does |", "| --- | --- | --- | --- |"]
+        for rule in rules:
+            when = _when(rule)
+            for field, raw in rule["style"].items():
+                out.append(f"| {when} | `{field}` | {_cell(raw)} | {_doc(help_.get(field, ''))} |")
         out.append("")
-    expanded = frag.expanded_styles()
-    if expanded:
-        shown = {part: expanded[part] for part in expanded}
-        out += ["## What it makes", "",
-                f"With `{', '.join(f'{k}: {v}' for k, v in frag.sample().items() if not isinstance(v, list))}"
-                + ("`, and a list of items" if "items" in frag.sample() else "`") + ", each part's style is:", ""]
-        out += _fence(yaml.safe_dump(shown, sort_keys=False, default_flow_style=None, width=100), "yaml")
-    rule = next((r for r in frag.rules if {"background", "foreground"} & set(r["style"])), frag.rules[0])
-    field = "background" if "background" in rule["style"] else "foreground" if "foreground" in rule["style"] else next(iter(rule["style"]))
-    out += ["## Changing it", "",
-            f"Put a `{frag.name}_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:", ""]
-    out += _fence(f"styles:\n  - id: {rule['id']}\n    style: {{{field}: tertiary}}", "yaml")
+    first = next((r for r in view.rules if {"background", "foreground"} & set(r["style"])), view.rules[0])
+    field = "background" if "background" in first["style"] else "foreground" if "foreground" in first["style"] else next(iter(first["style"]))
+    selectors = {k: v for k, v in first.items() if k != "style"}
+    out += ["## Changing it", "", "Write a rule of your own; it goes over this file's, field by field:", ""]
+    out += _fence("styles:\n  - " + yaml.safe_dump({**selectors, "style": {field: "tertiary"}}, default_flow_style=None, sort_keys=False, width=200).strip().replace("\n", "\n    "), "yaml")
     return "\n".join(out)
 
 
 def overview_components(data: dict[str, Any]) -> str:
     out = ["# MD3 Components", "",
-           "Material Design 3's components, as Tesserae builds them. Each page says what the component is in MD3, how "
-           "Tesserae builds it (the YAML), how to use it, and links to its stylesheet. The tree on the left opens "
-           "and closes by group.", ""]
+           "Material Design 3's components, as Tesserae builds them. Each page says what the component is in MD3, how Tesserae builds it (the view or "
+           "widget, with everything it takes), how to use it, and links to its stylesheet. The tree on the left opens and closes by group.", ""]
     for group in data["groups"]:
-        out += [f"## {group}", "", "| Component | Fragments |", "| --- | --- |"]
+        out += [f"## {group}", "", "| Component | Made of |", "| --- | --- |"]
         for entry in data["components"]:
             if entry["group"] == group:
-                frags = ", ".join(f"`{f}`" for f in entry["fragments"]) or (
-                    f"`widget: {entry['shipped_view']}`" if entry.get("shipped_view") else
-                    f"`kind: {entry['node_kind']}`" if entry.get("node_kind") else "Python only")
-                out.append(f"| [{entry['title']}]({entry['slug']}.md) | {frags} |")
+                made = [f"`{v}`" for v in entry.get("views") or []] + [f"`{w}`" for w in entry.get("widgets") or []]
+                text = ", ".join(made) or (f"the {entry['shares'].replace('-', ' ')} view" if entry.get("shares") else "see the page")
+                out.append(f"| [{entry['title']}]({entry['slug']}.md) | {text} |")
         out.append("")
     return "\n".join(out)
 
 
-def overview_stylesheets(data: dict[str, Any], fragments: dict[str, Fragment]) -> str:
+def overview_stylesheets(data: dict[str, Any], views: dict[str, View]) -> str:
     out = ["# Component Stylesheets", "",
-           "Every built-in component keeps its look in a stylesheet, `<Name>_Stylesheet.yaml`, beside its structure, "
-           "`<Name>_Component.yaml`. Each page here shows one stylesheet, how it is tied to its component, "
-           "and what it makes.", "",
+           "Every shipped view keeps its look in a stylesheet, `<Name>_Stylesheet.yaml`, beside the view itself, `<Name>_View.yaml`. Each page here shows one "
+           "stylesheet, how its rules reach the view, and what each part's rules do.", "",
            "## How they work", "",
-           "A stylesheet is a list of rules. Each names a part of the component by its `id` and gives that part's `style`:", ""]
-    out += _fence('styles:\n  - id: root\n    style: {background: primary, width: "{{ width }}"}\n  - id: label\n    style: {foreground: on_primary}', "yaml")
-    out += ["- A value in `{{ }}` is one of the component's parameters, filled in where the component is used.",
-            "- A value can be `{if: \"{{ selected }}\", then: primary, else: on_surface}`, chosen by a parameter.",
-            "- A part's own `style:` in the fragment is kept, and wins over its stylesheet.",
-            "- Your own `<Name>_Stylesheet.yaml` next to your views goes over the built-in one, field by field. "
-            "A fragment of your own with the same name as a built-in one replaces it, and the built-in stylesheet "
-            "with it.",
+           "A stylesheet is a list of rules. A rule names a widget (the view), may narrow it, and gives a `style`:", ""]
+    out += _fence("styles:\n  - widget: Button\n    variant: filled\n    style: {background: primary, foreground: on_primary}\n"
+                  "  - widget: Button\n    variant: filled\n    state: disabled\n    style: {background: \"on_surface@12%\"}\n"
+                  "  - widget: Card\n    part: heading\n    style: {foreground: on_surface}", "yaml")
+    out += ["- A rule narrows by the properties the view declares (`variant`, `size`, `shape`), `classes`, a node `name`, a `part` (a named node inside the view) and a `state`.",
+            "- A value in `{{ }}` is an expression over the view's parameters, worked out where the view is used.",
+            "- The most specific rule wins; a node's own `style:` beats every rule for the fields it sets.",
+            "- The shipped rules are the lowest layer. Your app's stylesheet goes over them, and a `<Name>_Stylesheet.yaml` of the same name next to your views replaces the shipped one.",
             "- Hot reload watches the stylesheets a view uses.", "",
-            "This is a different thing from a view's stylesheet (`App(stylesheet=)`), whose rules match many nodes "
-            "by `kind`, `classes` or `id`: see [Themes](../themes/index.md). A component's stylesheet styles one "
-            "component's parts.", ""]
+            "See [The View Language](../guide/view-language.md#style) for the rule syntax and [Themes](../themes/index.md) for colours, type and shape.", ""]
     for group in data["groups"]:
-        entries = [e for e in data["components"] if e["group"] == group and any(fragments[f].sheet_text for f in e["fragments"])]
+        entries = [e for e in data["components"] if e["group"] == group and any(views[v].sheet_text for v in e.get("views") or [])]
         if not entries:
             continue
         out += [f"## {group}", ""]
         for entry in entries:
-            links = ", ".join(f"[`{f}`]({entry['slug']}/{_kebab(f)}.md)" for f in entry["fragments"] if fragments[f].sheet_text)
+            links = ", ".join(f"[`{v}`]({entry['slug']}/{_kebab(v)}.md)" for v in entry["views"] if views[v].sheet_text)
             out.append(f"- **{entry['title']}**: {links}")
         out.append("")
     return "\n".join(out)
 
 
-def nav_block(data: dict[str, Any], fragments: dict[str, Fragment]) -> str:
+def nav_block(data: dict[str, Any], views: dict[str, View]) -> str:
     lines = ["  - Components:", "      - Overview: components/index.md"]
     for group in data["groups"]:
         lines.append(f"      - {group}:")
@@ -311,40 +327,56 @@ def nav_block(data: dict[str, Any], fragments: dict[str, Fragment]) -> str:
                 lines.append(f"          - {entry['title']}: components/{entry['slug']}.md")
     lines += ["  - Stylesheets:", "      - Overview: stylesheets/index.md"]
     for group in data["groups"]:
-        entries = [e for e in data["components"] if e["group"] == group and any(fragments[f].sheet_text for f in e["fragments"])]
+        entries = [e for e in data["components"] if e["group"] == group and any(views[v].sheet_text for v in e.get("views") or [])]
         if not entries:
             continue
         lines.append(f"      - {group}:")
         for entry in entries:
             lines.append(f"          - {entry['title']}:")
-            for name in entry["fragments"]:
-                if fragments[name].sheet_text:
+            for name in entry["views"]:
+                if views[name].sheet_text:
                     lines.append(f"              - {name}: stylesheets/{entry['slug']}/{_kebab(name)}.md")
     return "\n".join(lines)
 
 
+def check_coverage(data: dict[str, Any], shipped: list[str]) -> None:
+    """Every shipped view under exactly one component, every built-in widget under one or in `NOT_COMPONENTS`, every name real."""
+    listed = [v for entry in data["components"] for v in entry.get("views") or []]
+    problems = []
+    if sorted(listed) != sorted(shipped):
+        problems.append(f"shipped views not listed: {sorted(set(shipped) - set(listed))}; "
+                        f"named but not shipped, or listed twice: {sorted(set(listed) - set(shipped)) or sorted({v for v in listed if listed.count(v) > 1})}")
+    placed = {w for entry in data["components"] for w in entry.get("widgets") or []}
+    registered = _registered_widgets()
+    missing = sorted(registered - placed - NOT_COMPONENTS - set(shipped))
+    if missing:
+        problems.append(f"built-in widgets under no component (list them, or add to NOT_COMPONENTS): {missing}")
+    unknown = sorted(placed - registered)
+    if unknown:
+        problems.append(f"widgets named that are not registered: {unknown}")
+    slugs = {entry["slug"] for entry in data["components"]}
+    bad_shares = sorted(e["slug"] for e in data["components"] if e.get("shares") and e["shares"] not in slugs)
+    if bad_shares:
+        problems.append(f"`shares` names no component: {bad_shares}")
+    if problems:
+        raise SystemExit("tools/component_docs.yaml: " + "; ".join(problems))
+
+
 def build() -> dict[Path, str]:
     data = yaml.safe_load(DATA.read_text(encoding="utf-8"))
-    names = sorted(p.name.removesuffix("_Component.yaml") for p in FRAGMENTS.glob("*_Component.yaml"))
-    fragments = {name: Fragment(name) for name in names}
-    listed = [name for entry in data["components"] for name in entry["fragments"]]
-    if sorted(listed) != names:
-        raise SystemExit(f"tools/component_docs.yaml must list every fragment once: missing {sorted(set(names) - set(listed))}, "
-                         f"extra or repeated {sorted(set(listed) - set(names)) or sorted({n for n in listed if listed.count(n) > 1})}")
+    shipped = sorted(p.name.removesuffix("_View.yaml") for p in VIEWS.glob("*_View.yaml"))
+    check_coverage(data, shipped)
+    views = {name: View(name) for name in shipped}
     help_ = _style_field_help()
-
-    def rel_sheet(entry: dict[str, Any], frag: Fragment) -> str:
-        return f"../stylesheets/{entry['slug']}/{_kebab(frag.name)}.md"
-
     pages: dict[Path, str] = {DOCS / "components" / "index.md": overview_components(data),
-                              DOCS / "stylesheets" / "index.md": overview_stylesheets(data, fragments)}
+                              DOCS / "stylesheets" / "index.md": overview_stylesheets(data, views)}
     for entry in data["components"]:
-        pages[DOCS / "components" / f"{entry['slug']}.md"] = component_page(entry, fragments, rel_sheet)
-        for name in entry["fragments"]:
-            if fragments[name].sheet_text:
-                pages[DOCS / "stylesheets" / entry["slug"] / f"{_kebab(name)}.md"] = stylesheet_page(entry, fragments[name], help_)
+        pages[DOCS / "components" / f"{entry['slug']}.md"] = component_page(entry, views)
+        for name in entry.get("views") or []:
+            if views[name].sheet_text:
+                pages[DOCS / "stylesheets" / entry["slug"] / f"{_kebab(name)}.md"] = stylesheet_page(entry, views[name], help_)
     pages = {path: text.rstrip("\n") + "\n" for path, text in pages.items()}
-    pages[MKDOCS] = _with_nav(MKDOCS.read_text(encoding="utf-8"), nav_block(data, fragments))
+    pages[MKDOCS] = _with_nav(MKDOCS.read_text(encoding="utf-8"), nav_block(data, views))
     return pages
 
 
@@ -373,10 +405,14 @@ def main() -> int:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8")
     for path in orphans:
-        print(f"leftover (delete it): {path.relative_to(ROOT)}")
+        path.unlink()
+        print(f"removed: {path.relative_to(ROOT)}")
+    for folder in sorted((DOCS / "stylesheets").glob("*/")):
+        if folder.is_dir() and not any(folder.iterdir()):
+            folder.rmdir()
     print(f"wrote {len(pages)} files")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

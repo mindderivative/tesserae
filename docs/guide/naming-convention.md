@@ -1,82 +1,82 @@
 # Naming Convention
 
-Every view is a `*_View.yaml` + `*_ViewModel.py` pair. The naming is
-enforced at **runtime** by both `App.load` and `instantiate`:
+A screen is a `<Name>_View.yaml` and a `<Name>_ViewModel.py`. The names are how Tesserae joins them, and how it
+finds them in a [project](projects.md):
 
-```python
-from tesserae import App
-from Counter_ViewModel import CounterViewModel
+| File | What it is | Its name is |
+|---|---|---|
+| `Counter_View.yaml` | a view | `Counter`: what `app.open_view("Counter")` and `widget: Counter` say |
+| `Counter_ViewModel.py` | its ViewModel, the class `CounterViewModel` | `Counter`: what `app.project.viewmodel("Counter")` finds |
+| `Brand_Theme.yaml` | a theme | `Brand`: `App(custom_theme="Brand")` |
+| `Tasks_Stylesheet.yaml` | a stylesheet of rules | `Tasks`: `App(stylesheet="Tasks")` |
 
-app = App(width=240, height=120, title="My App")
-view, viewmodel = app.load("Counter_View.yaml", CounterViewModel)
+The part before the suffix is the **name**, and it is CamelCase. Which ViewModel serves which view is not decided by the file
+names but by a second name, the view's **bind key**:
+
+```yaml
+# Counter_View.yaml
+name: Counter            # the bind key
+widget: Container
 ```
 
-Raises `ValueError` immediately if:
+```python
+# Counter_ViewModel.py
+class CounterViewModel(ViewModel):
+    views = "Counter"    # the bind keys it serves: a string, or a list for several
+```
 
-- the view file doesn't end in `_View.yaml`,
-- the `ViewModel`'s own defining file doesn't end in `_ViewModel.py`
-  (checked via `inspect.getfile` against the class itself, not a
-  string you pass separately), or
-- the two prefixes don't match (`Counter_View.yaml` paired with
-  `Settings_ViewModel.py`, say).
+```python
+app.bind(CounterViewModel)
+app.open_view("Counter")
+```
 
-## Style, stylesheet and theme files
+Keep the bind key equal to the file's name, so one name finds the view, the ViewModel and the screen
+(`app.show("Counter")`, `app.navigate("Counter")`). A view with no `name:` is not bound to any ViewModel, and is
+registered under its file's name.
 
-Three more names say what a YAML file is:
+## What is checked
+
+- **A ViewModel that is not found.** `app.project.viewmodel("Counter")` imports `Counter_ViewModel.py` and takes the class
+  `CounterViewModel`. A file with no such class is an error that lists the `*ViewModel` classes it has.
+- **A name no ViewModel has.** Every name a view reads and every action a handler calls is looked up when the view
+  opens, and a miss is an error that names the file, line and column and the nearest name:
+  `Counter_View.yaml:5:43: 'cont' is not defined (did you mean 'count')`.
+- **A mismatched pair.** A ViewModel whose `views` names a view that does not exist, because the keys differ in case or
+  spelling, is reported by `app.check()`:
+  `CounterViewModel serves the view 'counter', but no view has that name`. The view itself then has no ViewModel, and
+  fails on the first name it needs. `assert app.check() == []` in a test is the cheap way to keep the two in step.
+- **Two ViewModels for one view.** `app.bind` refuses the second.
+
+## Stylesheet and theme files
+
+Two more names say what a YAML file is:
 
 | Suffix | What it holds | Used by |
 |---|---|---|
-| `*_Style.yaml` | one node's style: `style:` over a mapping of style fields, and an optional `id:` | a node's `style:`, a stylesheet or theme rule's `style:` |
-| `*_Stylesheet.yaml` | a stylesheet: a `styles:` list of rules | `App(stylesheet=)`, `app.load(..., stylesheet=)`, `load_stylesheet` |
-| `*_Theme.yaml` | a theme: `seed:`, `colors:`, `styles:`, ... | `App(default_theme=, custom_theme=)`, `load_theme` |
+| `*_Stylesheet.yaml` | a stylesheet: a `styles:` list of rules that name a `widget` | `App(stylesheet=)`, `load_stylesheet` |
+| `*_Theme.yaml` | a theme: `seed:`, `colors:`, `typography:`, `components:` | `App(default_theme=, custom_theme=)`, `load_theme` |
 
-A node's `style:` given as a file must be a `*_Style.yaml` one. A file
-named for one kind and loaded as another is refused, naming what its
-name says it is -- `load_theme("card_Style.yaml")`, say. A theme or
-stylesheet file with none of these suffixes (`themes/Brand.yaml`) still
-loads; the suffixes are recommended, not required.
+A file named for one kind and loaded as another is refused, naming what its name says it is: `load_theme("card_Stylesheet.yaml")`,
+say. A theme or stylesheet file with neither suffix (`themes/Brand.yaml`) still loads; the suffixes are recommended, not required.
 
-## A component's stylesheet
+## The views Tesserae ships
 
-A file named `<Name>_Stylesheet.yaml` next to a view, where `<Name>` is a
-component, is that component's stylesheet. The component is a built-in one
-(`ButtonFilled_Stylesheet.yaml`) or your own (`<Name>_Component.yaml`).
-
-```yaml
-# ButtonFilled_Stylesheet.yaml
-styles:
-  - id: root
-    style: {background: tertiary, corner_radius: "{{ corner_radius }}"}
-```
-
-It is a `styles:` list of `{id: <part>, style: {...}}` rules, and each
-`id` must be a part of the component. Its values may use the component's
-`{{ parameters }}`. It goes over the built-in stylesheet field by field,
-so you restyle only the fields you name. If you write your own
-`<Name>_Component.yaml` for a built-in name, your fragment replaces the
-built-in one whole, and only the sheets from your own folders apply. See
+Tesserae's own components are views of the same kind: `Button_View.yaml` with its rules in `Button_Stylesheet.yaml`, in the
+package. A view of yours named `Button` (a file `Views/Button_View.yaml`) is found first and replaces it, and the shipped rules
+for `Button` are not used for it: its look is then your own `style:` and the rules in your app's stylesheet. See
 [Stylesheets](../stylesheets/index.md).
 
-## Why enforce this at all?
+## Why a convention at all?
 
-A `ViewModel` is scoped one-per-view-file by convention, so a
-self-contained, independently-loadable pair is what lets `App`
-register several and switch which one is shown without re-bootstrapping
-each one from scratch. Catching a mismatched pair immediately, at load
-time, is worth more than a cryptic failure much later when a handler
-name doesn't resolve against the wrong `ViewModel`.
+A name that is the same everywhere is a name nobody has to look up: the view, its ViewModel, its route and its tests all say
+`Counter`. A project that follows it can open and join screens with the names alone, and a mismatch is caught when the view
+opens, not later when a handler does nothing.
 
-## Where it's checked
+## Views in the older syntax
 
-Both call sites use the same shared check
-(`tesserae.naming.check_naming_convention`):
-
-- **`App.load`** -- for top-level screens.
-- **`instantiate`** -- for embedded components (see
-  [Components & Embedding](components.md)), so a mismatched component
-  pair fails immediately at instantiation time too.
-
-`App.register` and manually constructed `Component`s bypass this: they
-take an already-constructed `View` and `ViewModel`. The convention is
-enforced at the two *construction* entry points, not on whatever you hand
-`register`.
+A view written with `kind:` and `id:` is paired by file name alone: `app.load("Counter")` checks that `Counter_View.yaml` and the
+`Counter_ViewModel.py` that defines the ViewModel class (found with `inspect.getfile`, not a string you pass) have the same
+prefix, and raises `ValueError` immediately if the view does not end in `_View.yaml`, the ViewModel's file does not end in
+`_ViewModel.py`, or the prefixes differ. `instantiate` does the same check for an embedded component
+(`tesserae.naming.check_naming_convention` is the shared code); `App.register` and a `Component` built by hand take what you
+give them. `tesserae migrate-yaml` moves such a project to the names above ([Migrating](../migration.md)).

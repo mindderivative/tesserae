@@ -1,6 +1,6 @@
 # The frame around the screens. With no OS title bar, the window's own title bar is the one at the top.
-id: root
-kind: Window
+name: Window
+widget: Window
 title: Tasks
 borderless: true  # no OS title bar: the title bar below is the window's
 min_width: 480
@@ -8,22 +8,19 @@ min_height: 360
 style: {width: 640, height: 480, background: surface, flex_direction: vertical}
 title_bar: {title: Tasks, style: {background: primary_container}, buttons: [minimize, maximize, close]}
 children:
-  - id: body
-    kind: Container
+  - widget: Container
+    name: body
     style: {flex: fill, flex_direction: horizontal}
     children:
-      - id: nav
-        component: NavigationRailScreens
-        with:
-          items:
-            - {label: Tasks, icon: home, screen: Main}
-            - {label: Settings, icon: settings, screen: Settings}
-      - id: screens
-        kind: Container
+      - widget: NavigationRailScreens
+        name: nav
+        items:
+          - {label: Tasks, icon: home, screen: Main}
+          - {label: Settings, icon: settings, screen: Settings}
+      - widget: Container
+        name: screens
         style: {flex: fill}
         children:
-          - {id: main, view: Main_View.yaml, route: "", style: {flex: fill}}
-          - {id: settings, view: Settings_View.yaml, route: settings, style: {flex: fill}}
-  - id: status
-    component: StatusBar
-    with: {text: Ready, width: "100%"}
+          - {widget: Main, name: main, route: "", style: {flex: fill}}
+          - {widget: Settings, name: settings, route: settings, style: {flex: fill}}
+  - {widget: StatusBar, name: status, text: Ready, style: {width: 100%}}

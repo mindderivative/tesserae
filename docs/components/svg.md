@@ -13,15 +13,25 @@ patterns, clips, masks and text, which scale to any size without blurring.
 centred in it. Tesserae reads the file, and decodes the raster pictures in it (`<image href="...">`: PNG, JPEG, GIF
 or WebP, found next to the SVG file, or a `data:` URL) for the engine, which decodes no image format. `style.foreground` is what
 `currentColor` means in the document, so a monochrome icon follows the theme, light and dark. Give a `width` or a
-`height`, or both. Hot reload watches the file and the pictures in it.
+`height`, or both.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `src` | file | a `.svg` or `.svgz` file next to the view; an expression, so it follows a Signal |
-| `content` | text | the document itself, instead of a file (give one of `src` and `content`) |
-| `alt` | text | what the picture shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks |
+Give one of `src`, a `.svg` or `.svgz` file next to the view (an expression, so it follows a Signal), and `content`, the document itself as text. `alt` says what the picture
+shows, for a screen reader; without it the picture is decorative and hidden from one, unless it handles clicks. A missing file, or a document that is not SVG, stops the view
+opening with the widget's name in the message.
 
-This component is a widget, not a fragment: use `widget: Svg` in a view (see [The View Language](../guide/view-language.md)), or `kind: Svg` in the older syntax.
+## How it is built
+
+### `Svg`
+
+A vector picture.
+
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `src` | `str` |  | A .svg or .svgz file, relative to the view. |
+| `content` | `str` |  | The SVG text, instead of a file. |
+| `alt` | `str` |  | What the picture shows, for a screen reader. Without it the picture is decorative and hidden from one. |
+
+Its `style:` also takes `foreground`.
 
 ## Using it
 
@@ -39,23 +49,7 @@ children:
     style: {width: 24, height: 24, foreground: on_surface}
 ```
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: logo
-    kind: Svg
-    svg:
-      content: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><circle cx="12" cy="12" r="10" fill="currentColor"/></svg>'
-    style: {width: 48, height: 48, foreground: primary}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import svg

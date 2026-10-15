@@ -1,64 +1,53 @@
 # DatePickerDay_Stylesheet.yaml
 
-One day in a date picker's month grid.
+The look of DatePickerDay: the selected day is a primary circle with on_primary text; today a 1 pixel primary outline with primary text; a day outside the month is on_surface_variant; the rest on_surface.
 
 The look of [`DatePickerDay`](../../components/date-pickers.md) (in [Date picker](../../components/date-pickers.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# DatePickerDay: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of DatePickerDay: the selected day is a primary circle with on_primary text; today a 1 pixel primary outline with primary text; a day outside the month is
+# on_surface_variant; the rest on_surface.
 styles:
-  - id: root
+  - widget: DatePickerDay
+    part: circle
     style:
-      width: 48
-      height: 48
-      background: transparent
-      corner_radius: 24
-      align_content: center
-  - id: label
-    style:
-      foreground: on_surface
+      background: "{{ 'primary' if selected else 'transparent' }}"
+      border_width: "{{ 1 if (today and not selected) else 0 }}"
+      border_color: primary
+  - widget: DatePickerDay
+    part: number
+    style: {foreground: "{{ 'on_primary' if selected else ('primary' if today else ('on_surface_variant' if outside else 'on_surface')) }}"}
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`DatePickerDay_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: DatePickerDay`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: DatePickerDay` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Container)
+### `circle` (Container)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | `48` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | `48` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `corner_radius` | `24` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `background` | `{{ 'primary' if selected else 'transparent' }}` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `border_width` | `{{ 1 if (today and not selected) else 0 }}` | The width of its border, in pixels. |
+| always | `border_color` | `primary` | The colour of its border: a colour or a gradient. |
 
-### `label` (Text)
+### `number` (Text)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-
-## What it makes
-
-With `day: 7`, each part's style is:
-
-```yaml
-root: {width: 48, height: 48, background: transparent, corner_radius: 24, align_content: center}
-label: {foreground: on_surface}
-```
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `{{ 'on_primary' if selected else ('primary' if today else ('on_surface_variant' if outside else 'on_surface')…` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## Changing it
 
-Put a `DatePickerDay_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: root
+  - widget: DatePickerDay
+    part: circle
     style: {background: tertiary}
 ```

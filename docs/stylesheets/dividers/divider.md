@@ -1,50 +1,53 @@
 # Divider_Stylesheet.yaml
 
-A thin line that separates content.
+The look of Divider (Material 3): a line in outline_variant that fills the length it is in. The insets are margins at the ends it keeps clear.
 
 The look of [`Divider`](../../components/dividers.md) (in [Dividers](../../components/dividers.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# Divider: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of Divider (Material 3): a line in outline_variant that fills the length it is in. The insets are margins at the ends it keeps clear.
 styles:
-  - id: root
+  - widget: Divider
     style:
-      width: "{{ width }}"
-      height: "{{ height }}"
       background: outline_variant
+      width: "{{ thickness if orientation == 'vertical' else 'auto' }}"
+      height: "{{ thickness if orientation == 'horizontal' else 'auto' }}"
+
+  - widget: Divider
+    variant: inset
+    style:
+      margin: "{{ {'left': 16} if orientation == 'horizontal' else {'top': 16} }}"
+
+  - widget: Divider
+    variant: middle
+    style:
+      margin: "{{ {'left': 16, 'right': 16} if orientation == 'horizontal' else {'top': 16, 'bottom': 16} }}"
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`Divider_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: Divider`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: Divider` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Rect)
+### `Divider` itself
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | the `height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `outline_variant` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-
-## What it makes
-
-With `width: 120, height: 40`, each part's style is:
-
-```yaml
-root: {width: 120, height: 40, background: outline_variant}
-```
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `background` | `outline_variant` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `width` | `{{ thickness if orientation == 'vertical' else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `{{ thickness if orientation == 'horizontal' else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `variant: inset` | `margin` | `{{ {'left': 16} if orientation == 'horizontal' else {'top': 16} }}` | Space outside it: one number, or `{left, right, top, bottom}`. |
+| `variant: middle` | `margin` | `{{ {'left': 16, 'right': 16} if orientation == 'horizontal' else {'top': 16, 'bottom': 16} }}` | Space outside it: one number, or `{left, right, top, bottom}`. |
 
 ## Changing it
 
-Put a `Divider_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: root
+  - widget: Divider
     style: {background: tertiary}
 ```

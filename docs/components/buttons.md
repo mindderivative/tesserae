@@ -12,62 +12,43 @@ high and fully rounded, and its label is in the *label large* type style.
 ## In Tesserae
 
 `widget: Button` is a view Tesserae ships (`Button_View.yaml` and `Button_Stylesheet.yaml`). One widget has all five types, in five sizes. It is as wide
-as its label and icons, and `handlers: {on_click: ...}` on the call is what a press does.
+as its label and icons, and `handlers: {on_click: ...}` on the call is what a press does; Enter or Space on a focused button does the same.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `label` | text | the text |
-| `variant` | `filled`, `tonal`, `elevated`, `outlined`, `text` | the type (default `filled`) |
-| `size` | `xs`, `s`, `m`, `l`, `xl` | 32, 40, 56, 96 or 136 pixels tall (default `s`) |
-| `shape` | `round`, `square` | a pill, or a rounded square |
-| `icon`, `trailing_icon` | an icon name | before and after the label |
-| `disabled` | true or false | dimmed, not focusable, handlers do not run |
-| `loading` | true or false | a spinner in the icon's place; does not respond |
-| `toggle`, `selected` | true or false; `selected` is two-way | a press flips `selected`; the colours and the shape swap while it is on |
-| `flip` | true or false | for a toggle: off, a press does not flip `selected` and the caller decides (a button group's buttons) |
+A toggle (`toggle: true`) flips `selected` on each press, and its colours and shape swap while it is on; with `flip: false` the caller decides when it flips
+(a button group's buttons are made so). While `loading` a spinner takes the icon's place and the button does not respond. A disabled button fades as a whole.
 
-Padding is 24 pixels each side (16 on the side with an icon; a text button 12). The container is a pill and, while pressed, squares off; a toggle that is
+The label is `label_large` at `xs` and `s`, `title_medium` at `m`, `headline_small` at `l` and `headline_large` at `xl`; the gap between the parts is 4, 8, 8, 12 and 16 pixels. Padding
+at the default size is 24 pixels each side (16 on the side with an icon, or the spinner; a text button 12); `xs` has 12, `m` 24, `l` 48 and `xl` 64 whatever is in the button.
+The container is a pill and, while pressed, squares off; a toggle that is
 on takes the other shape. A filled or tonal button lifts to level 1 when hovered, an elevated one rests at level 1 and lifts to 2. The state layer, ripple and
 focus ring are the node's interaction. The look is in the stylesheet: write a `Button_Stylesheet.yaml` in your project to change it. Not built: the
 container colour at 12% for a disabled filled button (a disabled button fades as a whole).
 
-`widget: Button` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: ButtonFilled` | A filled button: the highest-emphasis button, for a screen's main action. | [`ButtonFilled_Stylesheet.yaml`](../stylesheets/buttons/button-filled.md) |
-| `component: ButtonFilledTonal` | A filled tonal button: a medium-emphasis button in the secondary container colour. | [`ButtonFilledTonal_Stylesheet.yaml`](../stylesheets/buttons/button-filled-tonal.md) |
-| `component: ButtonElevated` | An elevated button: a tinted surface with a shadow, for emphasis on a busy background. | [`ButtonElevated_Stylesheet.yaml`](../stylesheets/buttons/button-elevated.md) |
-| `component: ButtonOutlined` | An outlined button: a medium-emphasis button with a border and no fill. | [`ButtonOutlined_Stylesheet.yaml`](../stylesheets/buttons/button-outlined.md) |
-| `component: ButtonText` | A text button: the lowest-emphasis button, for dialogs and cards. | [`ButtonText_Stylesheet.yaml`](../stylesheets/buttons/button-text.md) |
-
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: Button`. A file of the same name in your project replaces it.
 
-### `ButtonFilled`, `ButtonFilledTonal`, `ButtonElevated`, `ButtonOutlined`, `ButtonText`
+### `Button`
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `label` | required |  |
-| `width` | required |  |
-| `height` | required |  |
-| `corner_radius` | required |  |
+The Material 3 button: filled, tonal, elevated, outlined or text, in five sizes, with a leading and a trailing icon, a toggle form, a loading form and a disabled form. It is as wide as its label and icons, unless the call gives it a width. `handlers: {on_click: save}` on the call is what it does when pressed. With `toggle: true` a press flips `selected` (two-way) and the button swaps its colours and its shape; `loading` shows a spinner in the icon's place and stops it taking presses. Colours, sizes, shapes and how it lifts are in Button_Stylesheet.yaml: to change them, give the app rules with `App(stylesheet=...)`.
 
-These 5 have one structure; only their stylesheets, above, differ.
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `label` | `str` |  | The text. |
+| `variant` | `filled` or `tonal` or `elevated` or `outlined` or `text` | `filled` | filled is the screen's main action; tonal and elevated are important but secondary; outlined is medium; text is the lowest emphasis. |
+| `size` | `xs` or `s` or `m` or `l` or `xl` | `s` | 32, 40, 56, 96 or 136 pixels tall. |
+| `shape` | `round` or `square` | `round` | A pill, or a rounded square. A toggle button swaps to the other shape while selected. |
+| `icon` | `str` |  | A leading icon. |
+| `trailing_icon` | `str` |  | An icon after the label. |
+| `disabled` | `bool` | `false` | Dimmed, not focusable, and it does not respond. |
+| `loading` | `bool` | `false` | A spinner in the icon's place; it does not respond while it shows. |
+| `toggle` | `bool` | `false` | A toggle button: it has an on and an off look, and a press flips `selected`. |
+| `flip` | `bool` | `true` | For a toggle: whether a press flips `selected` itself. Off, the caller decides (a group of buttons does). |
+| `selected` | `bool` | `false` | For a toggle button: whether it is on. Two-way: give it a bare reference and the view writes it back. |
 
-```yaml
-params: [label, width, height, corner_radius]
-id: root
-kind: Rect
-children:
-  - id: label
-    kind: Text
-    text:
-      content: "{{ label }}"
-      typography_role: label_large
-      text_align: center
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `spinner` (CircularProgress), `icon` (Icon), `label` (Text), `trailing` (Icon).
+
+Its look is in [`Button_Stylesheet.yaml`](../stylesheets/buttons/button.md).
 
 ## Using it
 
@@ -82,9 +63,7 @@ children:
   - {widget: Button, label: Sync, variant: text, loading: "{{ syncing }}"}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import button
@@ -94,13 +73,15 @@ save = button(app.window, "Save", 120, 40, variant="filled", on_click=viewmodel.
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# ButtonFilled_Stylesheet.yaml, next to your views
+# Button_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: root
-    style: {background: tertiary}
+  - widget: Button
+    variant: filled
+    part: label
+    style: {foreground: tertiary}
 ```
 
 See [Component stylesheets](../stylesheets/index.md).

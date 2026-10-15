@@ -10,22 +10,27 @@ HERE = Path(__file__).parent
 
 
 class AppState:
-    """What every screen shares: `self.state` in a ViewModel, `state` in a binding."""
+    """What every screen shares: `self.state` in a ViewModel, `state` in a view."""
 
     def __init__(self):
         self.user = Signal("Ada")
 
 
+state = AppState()
 app = App(
     width=420,
     height=520,
     title="Tasks",
+    root=HERE,
+    search=["."],
     custom_theme=HERE / "Brand_Theme.yaml",
     stylesheet=HERE / "Tasks_Stylesheet.yaml",
-    state=AppState(),
+    state=state,
 )
-app.load(HERE / "Tasks_View.yaml", TasksViewModel)
-app.load(HERE / "Settings_View.yaml", SettingsViewModel)
+app.bind(TasksViewModel)
+app.bind(SettingsViewModel(state))  # a ViewModel you made yourself
+app.open_view("Tasks")
+app.open_view("Settings")
 app.route("", "Tasks")
 app.route("settings", "Settings")
 

@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0.10
+
+### Changed
+
+- **Every docs page brought up to date and checked against the code** ([#263](https://github.com/mindderivative/tesserae/issues/263)). The component and stylesheet pages (about ninety) described the fragment system that 0.5.0 replaced, and nothing tested that they still matched. `tools/generate_component_docs.py` now reads the shipped views, their parameters, slots, named parts and stylesheet rules, and the built-in widgets, so the "How it is built" tables and the stylesheet pages cannot drift; it refuses to run when a shipped view or built-in widget sits under no component. The hand-written prose of each component was checked against the code and tests, and the claims that had become false were corrected (for example that an engine cannot ease a width, that a window is one per app, that a panel alone has a tab strip, and which looks are "Not built"). The guides, the tutorials, Getting Started, the install, architecture, theme, editor, CLI, release and reactivity pages were rewritten to the `widget:` language, with the examples run. The Getting Started and Tasks tutorial programs under `examples/` are now in the 0.5.0 language, with `tests/test_tutorials_current.py` running every step.
+- `docs/migration.md` lists what each merged fragment became (Button variants, Fab, Badge, Card, Chip, Tabs, Tooltip and the rest) and no longer says the shipped components cannot be migrated.
+- A view parameter's `min` and `max` are documented.
+
+### Added
+
+- `tests/test_docs_examples.py` loads every view and stylesheet example on every docs page against the shipped views. An example that shows the old form on purpose is marked `<!-- old-syntax -->`, and the test fails if a marked one has become valid.
+- `tests/test_component_docs.py` fails when a generated page is out of date, when a shipped view is on no page, or on two.
+
+### Fixed
+
+- `tesserae migrate-yaml` ([#264](https://github.com/mindderivative/tesserae/issues/264)) checks a view that calls a view Tesserae ships (`NavigationRailScreens`, `StatusBar`, ...) against the shipped one, and no longer fails with "no widget named" for it.
+- Comments in the shipped views that said what the code does not (a modal drawer that slides, a top bar with the role banner, a side sheet with an edge line, a text-field label that jumps, a project stylesheet that is picked up beside its view) were corrected, as was the `anchor` description of `Overlay`.
+
 ## 0.5.0.9
 
 ### Added
@@ -423,7 +441,7 @@ A window, a dock and embedded views in the same YAML as every other view ([#95](
 - **`view:`** shows another `*_View.yaml` where it is: `- {id: left, view: Left_View.yaml, with: {size: 3}, style: {width: 220}}`
   (or by name in a project). It is a view of its own, with its own ids and its own ViewModel when there is one
   (`Left_ViewModel.py`), and it needs none: a view with no ViewModel is static. `view.embedded(id)` and `view.viewmodel` read
-  them from Python; `tesserae.component.embed` is the function. See [Components & Embedding](guide/components.md#in-yaml-view).
+  them from Python; `tesserae.component.embed` is the function. See [Components & Embedding](guide/components.md).
 
 ## 0.4.3.3
 

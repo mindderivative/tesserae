@@ -68,7 +68,7 @@ Everything under the app's folder (the folder `app.py` is in), at the
 same place relative to it: view and style files, images, fonts, the
 ViewModels. The app's folder is scanned, rather than only what the app
 opens at start-up, because an app opens files later too: a screen the
-user navigates to, a `view:` in a window view, an image picked at run time.
+user navigates to, a view a window view calls, an image picked at run time.
 
 Left out, wherever they are:
 
@@ -94,11 +94,13 @@ in some unusual way (by a string name, say) may need PyInstaller's own
 
 ## Finding files in a built app
 
-A `tesserae new` app finds its files next to `app.py`:
+An app finds its files next to `app.py`, by giving the app its folder (as the [tutorials](../tutorial-project.md) do) and
+building any path from it:
 
 ```python
 HERE = Path(__file__).parent
-app.load(HERE / "Home_View.yaml", HomeViewModel)
+app = App(root=HERE)                       # views, themes and stylesheets are found by name from here
+app.open_view(HERE / "Home_View.yaml")     # or by path
 ```
 
 Keep doing that. In a built app, `__file__` is inside the folder the
@@ -144,8 +146,7 @@ tesserae build --installer --check --app-version 1.2.0 --identifier com.yourcomp
 ```
 
 It builds the app as one folder rather than one file, so the installed
-app doesn't unpack itself each time it starts (0.27 s against 0.55 s, on
-Linux, for a `tesserae new` app).
+app doesn't unpack itself each time it starts.
 
 - **macOS:** `dist/notes.app` and `dist/notes-1.2.0.dmg`. The `.dmg` opens
   to the app beside a link to Applications, to drag it onto. The version,
@@ -236,8 +237,8 @@ containers), and removes the Windows and Linux ones again.
 ## How it behaves
 
 - **Start-up** takes a little longer than `python app.py`: the executable
-  unpacks itself first (on Linux, about 0.55 s against 0.23 s for a
-  `tesserae new` app).
+  unpacks itself first (on Linux, about twice as long for a small app: 0.6 s
+  against 0.3 s to draw 30 frames and exit).
 - **Size:** a `tesserae new --window` app is about 41 MB on Linux, 25 MB on
   macOS and 30 MB on Windows, most of it Python itself and `tre`'s engine.
 - **Hot reload is off.** There are no source files to edit, so

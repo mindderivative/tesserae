@@ -1,28 +1,31 @@
 # Hot Reload
 
-Tesserae reloads a screen when you edit any file it was built from: the
-`*_View.yaml` itself, any file it `include:`s, any `*_Component.yaml`
-fragment it uses, and any image it shows. Inside an `App`, it also
-re-styles the running app when a theme or stylesheet file changes (see
-[below](#theme-and-stylesheet-files)). The live view is updated in
-place -- widgets that didn't change keep their identity, focus and any
-running animation.
+`App.run(hot_reload=True)` applies an edit to a running app, and keeps its state. What it watches depends on how a file was
+opened:
+
+| File | When you save it |
+| --- | --- |
+| a theme: `App(custom_theme=)`, `App(default_theme=)` | every view is re-themed in place ([below](#theme-and-stylesheet-files)) |
+| a view the app opened with `app.load` (the older syntax), and the fragments and images it was built from | the screen is rebuilt in place, its ViewModel and bindings kept |
+| a view the app opened with `app.open_view` | not watched: stop the app and run it again |
+| the app's stylesheet of rules (`App(stylesheet=)`, `widget:` rules) | not applied while the app runs: run it again |
+
+The log says what is watched when it starts, and names a screen it does not watch:
+`hot reload: screen 'Tasks' isn't watched -- it was built from a spec, not a file`.
 
 ## In an app
 
 ```python
 app = App()
-app.load("Home_View.yaml", HomeViewModel)
+app.load("Home_View.yaml", HomeViewModel)    # a view in the older syntax
 app.show("Home")
 app.run(hot_reload=True)
 ```
 
-Every screen built from a file is watched while the app runs: one
-`App.load()` made, and one built with `app.build_view(...)` and given to
-`App.register()` (the view keeps the file it came from). Save a
+Every screen built from a file by `App.load()` is watched while the app runs, and so is one built with `app.build_view(...)` and
+given to `App.register()` (the view keeps the file it came from). Save a
 change and it appears in the window straight away, the screen's
-ViewModel and bindings kept. A screen built from a spec dict has no file,
-so it isn't watched; the log says so when hot reload starts.
+ViewModel and bindings kept. A screen with no file isn't watched, and the log says so when hot reload starts.
 
 An edit reaches a window left alone: the watcher runs on its own thread,
 and other Python threads run while a window sits idle. See the
@@ -45,7 +48,7 @@ reload that works is logged at `INFO`. See [Logging](logging.md).
 
 ## Using `ViewWatcher` directly
 
-For a view you load yourself:
+For a view in the older syntax that you load yourself:
 
 ```python
 from tesserae.spec import ViewWatcher, load_view
@@ -81,7 +84,7 @@ reload, so a newly added include, fragment or image is picked up.
 
 ## Components added at run time
 
-A component built with `tesserae.instantiate` (a `Repeater`'s rows, say)
+In the older syntax, a component built with `tesserae.instantiate` (a `Repeater`'s rows, say)
 comes from its own `*_View.yaml`, and that file is watched too.
 Editing it reloads every live instance in place. Each keeps its nodes,
 its own ViewModel and its bound values, and a list of rows keeps its
@@ -103,7 +106,8 @@ reloaded /path/to/TodoItem_View.yaml (3 instance(s))
 
 ## The window view
 
-A `kind: Window` view is watched like any view, and so is each view it embeds (`view:`). An edit is applied in place:
+A `kind: Window` view loaded with `app.load("Window")` is watched like any view, and so is each view it embeds (`view:`). An edit is
+applied in place. (A `widget: Window` view opened with `app.open_view` is not watched.)
 
 | Edit | What happens |
 | --- | --- |
@@ -119,22 +123,24 @@ A change that can't be applied is logged as an error and the app keeps running.
 ## Theme and stylesheet files
 
 `App.run(hot_reload=True)` also watches the theme files given to
-`App(default_theme=..., custom_theme=...)`. When you save one, Tesserae
-re-reads both on the watcher thread, then re-themes every screen built
-by `app.load()` or `app.build_view()` through
-`app.set_theme_specs(...)`. Bound values stay live. A theme given as a
+`App(default_theme=..., custom_theme=)`. When you save one, Tesserae
+re-reads both on the watcher thread, then re-themes every view the app opened
+through `app.set_theme_specs(...)`: a different `seed:`, `colors:` or
+`typography:` shows at once, and bound values stay live. A theme given as a
 `*_spec=` dict has no file, so it isn't watched. A broken edit is logged
 at `ERROR` like a failed view reload, and the app keeps its previous theme.
 
-Stylesheet files are watched the same way:
+Stylesheet files are watched for screens of the older syntax:
 
-- **The default stylesheet** from `App(stylesheet=...)`: saving it
+- **The default stylesheet** from `App(stylesheet=)`: saving it
   re-styles every screen that uses the default, through
   `app.set_stylesheet_spec(...)`. Screens loaded with their own
   stylesheet are left alone.
-- **A screen's own stylesheet** from `app.load(..., stylesheet=...)`:
+- **A screen's own stylesheet** from `app.load(..., stylesheet=)`:
   saving it re-styles only the screens loaded with that file.
 
+A stylesheet of `widget:` rules, which views opened with `app.open_view` use, is not applied by a reload: the edit is logged as
+an error naming the file, the views keep their old rules, and the new ones are read when the app starts again.
 A stylesheet `tre` rejects is reported naming the file, and every
 screen keeps its old stylesheet.
 

@@ -11,19 +11,28 @@ Material Design 3 has no splitter. It divides the window into two panes with a b
 `widget: Splitter` has exactly two children, the panes, and a handle between them: a 16 pixel bar holding MD3's 4 by 48 drag handle, with a
 resize cursor, a Tab stop, and the role of a slider for a screen reader.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `orientation` | `horizontal` or `vertical` | side by side, or one above the other |
-| `position` | 0 to 1, two-way | how much of the room the first pane has; bind a Signal and the handle writes it |
-| `min_first`, `min_second` | pixels | the least each pane can be |
-| `collapsible` | true or false | a double click on the handle closes the first pane, and opens it again where it was |
-| `label` | text | what a screen reader calls the handle |
+`orientation` puts the panes side by side (`horizontal`, the default) or one above the other (`vertical`). `position`, from 0 to 1, is how much of the room the first
+pane has, two-way: bind a Signal and the handle writes it. `min_first` and `min_second` are the least each pane can be, in pixels. With `collapsible: true` a double click
+on the handle closes the first pane, and opens it again where it was. `label` is what a screen reader calls the handle.
 
 The pointer drags it (the pointer is captured, so it keeps following outside the handle); the arrow keys along its axis move it by 5%, Home
 and End go to the ends; a screen reader can increment, decrement and set it. The parts a stylesheet can address are `first`, `handle`
 and `second`. For more than two panes, nest splitters.
 
-This component has no `component:` fragment: build it in Python.
+## How it is built
+
+### `Splitter`
+
+Two panes with a draggable, keyboard-operable handle between them.
+
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `orientation` | `horizontal` or `vertical` | `horizontal` | horizontal puts the panes side by side, vertical one above the other. |
+| `position` | `float` | `0.5` | How much of the room the first pane has, from 0 to 1. Dragging the handle writes it back to a Signal it is bound to. Two-way. |
+| `min_first` | `float` |  | The least the first pane can be, in pixels. |
+| `min_second` | `float` |  | The least the second pane can be, in pixels. |
+| `collapsible` | `bool` |  | A double click on the handle closes the first pane, and opens it again. |
+| `label` | `str` | `Resize panes` | What a screen reader calls the handle. |
 
 ## Using it
 
@@ -44,9 +53,7 @@ children:
       - {widget: Container, name: content_pane, style: {background: surface, flex: fill}}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import splitter

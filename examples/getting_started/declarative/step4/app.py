@@ -4,7 +4,10 @@ from tesserae import App
 
 from Counter_ViewModel import CounterViewModel
 
+HERE = Path(__file__).parent
+
 app = App(width=360, height=160, title="Counter")
-app.load(Path(__file__).parent / "Counter_View.yaml", CounterViewModel)
+app.bind(CounterViewModel)
+app.open_view(HERE / "Counter_View.yaml")
 app.show("Counter")
 app.run()

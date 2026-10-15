@@ -14,83 +14,57 @@ Each is a Tesserae control (`tesserae.controls`), not a drawing of `tre`'s: `wid
 `widget: LoadingIndicator`. Leave `value` out, or let an expression give nothing, for a wait with no end; a number from 0 to 1 is determinate and
 eases to each new value.
 
-| Property | Widget | Meaning |
-| --- | --- | --- |
-| `value` | linear, circular | 0 to 1, or nothing for a wait with no end; an expression follows its Signals |
-| `track` | linear, circular | the colour role of the track behind the indicator (a bar has `surface_container_highest`, a ring none) |
-| `buffer` | linear | 0 to 1: how much has loaded, a lighter bar behind the value |
-| `stop_indicator` | linear | a dot at the end of the track |
-| `thickness` | linear, circular | the bar's height or the ring's width in pixels (4 is the standard one; MD3 Expressive's are thicker) |
-| `wavy` | linear, circular | the bar (or the ring's arc) is a sine wave whose crests flow along (or round) a plain track; the bar is taller by the wave's height |
-| `two_bar` | linear | a wait with no end sweeps as two bars, a long one and a short one a little behind, as MD3 draws it, not one |
-| `contained` | loading indicator | the shape sits in a `primary_container` circle, in `on_primary_container` |
-| `label` | all | what a screen reader calls it |
-
-The colour is `style.foreground`; the bar's length is `style.width` and a ring's size is `style.width` too. A screen reader hears a progress bar
-with its value as a percentage, or as busy when there is none. An app that reduces motion gets a still bar and arc instead of the endless motion.
-With a `track`, a determinate ring and its track are a gap apart (4 px between the rounded ends), as in MD3. The widths of the two bars are fixed (the engine
-cannot animate a width), so the two-bar sweep approximates MD3's, whose bars grow and shrink; the wave's size and speed and the thicker sizes are written
-from memory of the spec and have not been checked against it. The default look is still the one `tre`'s recorded trees draw: a track and a stop dot are opt-in.
-
-`widget: LinearProgress` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: LinearProgress` | A linear progress indicator: determinate with a value, indeterminate without. | [`LinearProgress_Stylesheet.yaml`](../stylesheets/progress-indicators/linear-progress.md) |
-| `component: CircularProgress` | A circular progress indicator: determinate with a value, indeterminate without. | [`CircularProgress_Stylesheet.yaml`](../stylesheets/progress-indicators/circular-progress.md) |
-| `component: LoadingIndicator` | A loading indicator: a shape that morphs while something loads. | [`LoadingIndicator_Stylesheet.yaml`](../stylesheets/progress-indicators/loading-indicator.md) |
+A bar is 240 pixels long and 4 thick, and a ring is 48 across, unless the call's `style:` gives a `width`; the colour is `style.foreground`, `primary` by default. A bar
+has a `surface_container_highest` track behind it and a ring has none, until `track` names a colour role; a stop dot at the end of the bar's track is opt-in
+(`stop_indicator`), as is a `buffer` (how much has loaded, 0 to 1, a lighter bar behind the value). With a `track`, a determinate ring and its track are a gap apart
+(4 pixels between the rounded ends), as in MD3. A `wavy` bar is taller than its `thickness` by the wave's height (6 pixels), and a wavy ring's arc is a wave round
+a plain track. A screen reader hears a progress bar with its value as a percentage, or as busy when there is none. An app that reduces motion gets a still bar and arc
+instead of the endless motion. The two bars of `two_bar` keep their widths as they cross, so the sweep approximates MD3's, whose bars grow and shrink; the wave's size
+and speed and the thicker sizes are written from memory of the spec and have not been checked against it.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
-
 ### `LinearProgress`
 
-A linear progress indicator: determinate with a value, indeterminate without. Its look: [`LinearProgress_Stylesheet.yaml`](../stylesheets/progress-indicators/linear-progress.md).
+A progress bar.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `width` | required |  |
-| `height` | required |  |
-| `value` | required |  |
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `value` | `float` |  | 0 to 1; leave out, or give nothing, for a wait with no end. |
+| `track` | `str` |  | The colour role of the track behind the indicator. |
+| `thickness` | `float` |  | The bar's height in pixels (4 is the standard one; MD3 Expressive's are thicker). |
+| `buffer` | `float` |  | 0 to 1: how much has loaded, drawn as a lighter bar behind the value. |
+| `stop_indicator` | `bool` |  | A dot at the end of the track (Material 3). |
+| `wavy` | `bool` |  | The bar is a sine wave that flows along a straight track (MD3 Expressive); the control is taller by the wave's height. |
+| `two_bar` | `bool` |  | A wait with no end sweeps as two bars, a long one and a short one a little behind (MD3), not one. |
+| `label` | `str` |  | What a screen reader calls it. |
 
-```yaml
-params: [width, height, value]
-id: root
-kind: LinearProgress
-value: "{{ value }}"
-```
+Its `style:` also takes `foreground`.
 
 ### `CircularProgress`
 
-A circular progress indicator: determinate with a value, indeterminate without. Its look: [`CircularProgress_Stylesheet.yaml`](../stylesheets/progress-indicators/circular-progress.md).
+A progress ring.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `size` | required |  |
-| `value` | required |  |
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `value` | `float` |  | 0 to 1; leave out, or give nothing, for a wait with no end. |
+| `track` | `str` |  | The colour role of the track behind the indicator. |
+| `wavy` | `bool` |  | The arc is a wave whose crests flow round the ring (MD3 Expressive). |
+| `thickness` | `float` |  | The ring's width in pixels (4 is the standard one; MD3 Expressive's are thicker). With a `track` the arc and the track are a gap apart. |
+| `label` | `str` |  | What a screen reader calls it. |
 
-```yaml
-params: [size, value]
-id: root
-kind: CircularProgress
-value: "{{ value }}"
-```
+Its `style:` also takes `foreground`.
 
 ### `LoadingIndicator`
 
-A loading indicator: a shape that morphs while something loads. Its look: [`LoadingIndicator_Stylesheet.yaml`](../stylesheets/progress-indicators/loading-indicator.md).
+An indeterminate wait indicator.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `size` | required |  |
-| `background` | required |  |
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `contained` | `bool` |  | The shape in a `primary_container` circle, in `on_primary_container` (MD3 Expressive). |
+| `label` | `str` |  | What a screen reader calls it. |
 
-```yaml
-params: [size, background]
-id: root
-kind: LoadingIndicator
-```
+Its `style:` also takes `foreground`.
 
 ## Using it
 
@@ -105,21 +79,7 @@ children:
   - {widget: LinearProgress, value: "{{ sent }}", wavy: true, thickness: 4, style: {width: 240}}
 ```
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: upload
-    component: LinearProgress
-    with: {width: 240, height: 4, value: 0.4}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import linear_progress
@@ -127,19 +87,6 @@ from tesserae.widgets import linear_progress
 upload = linear_progress(app.window, 240, value=0.4)
 upload.value.set(0.8)
 ```
-
-## Changing its look
-
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
-
-```yaml
-# LinearProgress_Stylesheet.yaml, next to your views
-styles:
-  - id: root
-    style: {width: tertiary}
-```
-
-See [Component stylesheets](../stylesheets/index.md).
 
 ## See also
 

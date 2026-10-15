@@ -2,7 +2,7 @@
 # `center` (64, the title in the middle), `medium` (112, the title under the row of icons) and `large` (152, a bigger title under them). The medium and large collapse to the
 # small form while `collapsed` is true (bind it to the way a list under it has scrolled), and `scrolled` (true once content is under the bar) turns its colour from `surface` to
 # `surface_container`. `leading_icon` is the navigation icon (`menu` or `arrow_back`) and its `on_leading` handler; `actions` is a list of {value, icon, label}, pressing one sets
-# `chosen` to its `value`. Every icon has a label (its name and its tooltip). Role: a banner.
+# `chosen` to its `value`. Every icon has a label (its name and its tooltip). Role: a group.
 params:
   frosted: {type: bool, default: false, doc: "A translucent surface that blurs what is behind it (72% of its colour, a 20 pixel backdrop blur)."}
   title: {type: str, default: "", doc: "The title."}

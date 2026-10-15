@@ -10,19 +10,19 @@ listed in the [YAML reference](../api/yaml.md).
 string:
 
 ```yaml
-id: root
-kind: Container
+widget: Container
 style: {flex_direction: vertical, gap: 12, padding: 16, width: 360, background: surface}
 children:
-  - id: banner
-    kind: Rect
+  - widget: Rect
+    name: banner
     style: {height: 64, corner_radius: 16, background: "linear-gradient(90deg, primary, tertiary)"}
-  - id: glow
-    kind: Rect
+  - widget: Rect
+    name: glow
     style: {height: 64, corner_radius: 16, background: "radial-gradient(at 30% 30%, primary_container, surface)"}
-  - id: title
-    kind: Text
-    text: {content: "Gradient text", typography_role: headline_medium}
+  - widget: Text
+    name: title
+    text: Gradient text
+    typography_role: headline_medium
     style: {foreground: "linear-gradient(to right, primary, error)"}
 ```
 
@@ -36,7 +36,10 @@ children:
 The mapping form says the same with keys, and is what to write when a string is awkward:
 
 ```yaml
+widget: Rect
 style:
+  width: 200
+  height: 80
   background: {gradient: linear, angle: 45, stops: [primary, [0.6, secondary], tertiary]}
   border_width: 3
   border_color: {gradient: sweep, stops: [primary, secondary, primary]}
@@ -47,12 +50,6 @@ and `start` go with the kind. A gradient follows its box as the layout resizes i
 `Switch`, a `Slider`) takes a plain colour only.
 
 ## Elevation that moves
-
-`frosted: true` does this for the navigation surfaces: `NavigationRail`, `NavigationDrawer`, `NavigationDrawerModal`, `Menu`, `SearchBar`, `SearchView` and `TopAppBar` become 72% of their
-colour with a 20 pixel backdrop blur. It is off by default.
-
-An `Icon` whose glyph changes can morph into the next with `transition: {icon: 200}`: two closed shapes, or two open lines, in the same set of glyphs (Material Symbols or MDI) blend smoothly;
-shapes with different numbers of parts switch halfway, and glyphs of the other set switch at once. `IconButton` does this for its toggle icons.
 
 A raised surface lifts when the pointer is over it and again when it is pressed. Give the levels in rules by state, and `transition: {elevation: 200}`
 eases the shadows between them. The base level belongs in a rule too: an `elevation` written on the node itself beats every rule.
@@ -73,6 +70,12 @@ A press during a hover carries on from where the shadow is. A level a view works
 `style: {elevation: "{{ 4 if dragging else 1 }}", transition: {elevation: 200}}`. An app that reduces motion gets the level at once. Levels are 0 to 5, or
 `level_0` to `level_5`.
 
+## Frosted surfaces
+
+`frosted: true` on the navigation surfaces (`NavigationRail`, `NavigationDrawer`, `NavigationDrawerModal`, `Menu`, `SearchBar`, `SearchView` and
+`TopAppBar`) makes them 72% of their colour with a 20 pixel backdrop blur. It is off by default. For any other node, write the same with
+`backdrop_blur` (below).
+
 ## Corner radius
 
 `corner_radius` is one radius for every corner (pixels, or a shape token `none` ... `extra_large`, `full`). Give four to round the corners
@@ -84,6 +87,8 @@ widget: Container
 style: {width: 120, height: 48, background: primary, corner_radius: {left: full, top_right: 4}}   # a pill end on the left
 ```
 
+The tokens are `none` (0), `extra_small` (4), `small` (8), `medium` (12), `large` (16), `extra_large` (28) and `full` (a pill or a circle).
+
 It is a style field like the others, so a rule can give it, a `transition:` eases it, and the state layer and focus ring follow the shape.
 
 ## Blur, and a frosted surface
@@ -92,10 +97,11 @@ It is a style field like the others, so a rule can give it, a `transition:` ease
 with a translucent `background` and a `backdrop_blur` is a frosted pane:
 
 ```yaml
-- id: pane
-  kind: Container
-  style: {width: 240, height: 120, background: "#FFFFFF55", backdrop_blur: 16, corner_radius: 20}
+widget: Container
+style: {width: 240, height: 120, background: "#FFFFFF55", backdrop_blur: 16, corner_radius: 20}
 ```
+
+A colour takes an alpha two ways: `"#FFFFFF55"`, or a theme role with a percentage, `"surface@72%"`.
 
 Both can animate. A pane only has something to blur when other nodes are drawn behind it.
 
@@ -117,9 +123,8 @@ written:
 A disabled-looking card is `filter: {grayscale: 1, brightness: 1.2}`.
 
 ```yaml
-- id: card
-  kind: Container
-  style: {width: 200, height: 80, background: primary_container, filter: {saturate: 0.2}}
+widget: Container
+style: {width: 200, height: 80, background: primary_container, filter: {saturate: 0.2}}
 ```
 
 ## Sticky headers
@@ -129,20 +134,22 @@ down, as CSS's `position: sticky` does: it scrolls with its content until it rea
 while the container it is in scrolls past, and the end of that container pushes it out. Put a header in each section:
 
 ```yaml
-- id: list
-  kind: ScrollView
-  style: {height: 240, flex_direction: vertical}
-  children:
-    - id: fruit
-      kind: Container
-      style: {flex_direction: vertical}
-      children:
-        - id: fruit_header
-          kind: Rect
-          style: {height: 40, background: surface_container_high, sticky: 0, z_index: 1}
-        - id: apple
-          kind: Rect
-          style: {height: 56, background: surface}
+widget: ScrollView
+style: {height: 240, flex_direction: vertical}
+children:
+  - widget: Container
+    name: fruit
+    style: {flex_direction: vertical}
+    children:
+      - widget: Rect
+        name: fruit_header
+        style: {height: 40, background: surface_container_high, sticky: 0, z_index: 1}
+      - widget: Rect
+        name: apple
+        style: {height: 56, background: surface}
+      - widget: Rect
+        name: pear
+        style: {height: 56, background: surface}
 ```
 
 The node is only moved when it is drawn: layout, hit testing and its siblings don't change. Content later in the
@@ -154,42 +161,50 @@ section paints over a stuck header unless the header has a `z_index`.
 next time the style gives a property a new value, it travels there:
 
 ```yaml
-- id: card
-  kind: Rect
-  style:
-    width: 200
-    height: 80
-    background: surface_container
-    corner_radius: 12
-    transition:
-      background: 150                                   # milliseconds, with the standard easing
-      corner_radius: {duration: 200, easing: emphasized_decelerate}
-      scale: {duration: 300, easing: spring, bounce: 0.3}
-      opacity: {duration: 100, easing: [0.2, 0, 0, 1]}  # or four numbers: a cubic bezier
+widget: Rect
+state: {on: false}
+handlers: {on_click: "on = not on"}
+style:
+  width: 200
+  height: 80
+  background: "{{ 'primary_container' if on else 'surface_container' }}"
+  corner_radius: "{{ 24 if on else 12 }}"
+  scale: "{{ 1.05 if on else 1 }}"
+  opacity: "{{ 1 if on else 0.8 }}"
+  transition:
+    background: 150                                   # milliseconds, with the standard easing
+    corner_radius: {duration: 200, easing: emphasized_decelerate}
+    scale: {duration: 300, easing: spring, bounce: 0.3}
+    opacity: {duration: 100, easing: [0.2, 0, 0, 1]}  # or four numbers: a cubic bezier
 ```
 
 - The keys are style fields: `background`, `foreground` (a Text's or Icon's colour), `border_color`, `border_width`, `corner_radius`, `elevation`,
   `opacity`, `blur`, `backdrop_blur`, `scale`, `translate_x`, `translate_y` and `rotation_deg`. `all: 150` covers every one of them; a named key wins over `all`.
+  An `Icon` also has `icon`, below.
 - A value is a number of milliseconds, or `{duration, easing, bounce}`. The easings are `linear`, Material's `standard`, `standard_accelerate`,
   `standard_decelerate`, `emphasized`, `emphasized_accelerate` and `emphasized_decelerate`, four numbers (a cubic bezier, as CSS writes
-  `cubic-bezier`), and `spring`, whose `duration` is its period and whose `bounce` runs from -1 to 1.
+  `cubic-bezier`), and `spring`, whose `duration` is its period and whose `bounce` is a number above -1 and below 1 (above 0 overshoots).
 - Layout eases too: `width`, `height`, `x`, `y`, `gap`, `padding` and `margin` (`all` leaves these out, since a layout that changes is not always meant
-  to glide). The engine cannot animate layout yet, so Tesserae sets the value each frame along the same curve (a spring is drawn as a settling curve); a
-  value that is not a number, such as `auto` or `50%`, changes at once, and a change begun in the middle of another goes on from where the first had got to.
+  to glide). The engine eases them in pixels. A value that is not a number, such as `auto` or `50%`, changes at once, and a change begun in the middle of another goes on from where the first had got to.
 - When the app has asked for reduced motion, a change happens at once.
 - A transition is part of a style, so a stylesheet rule can carry it: a rule for `state: hovered` that changes `background` eases if the rule for the widget gives a `transition`.
+
+An `Icon` whose glyph changes can morph into the next with `transition: {icon: 200}`: two closed shapes, or two open lines, in the same set of glyphs (Material Symbols or MDI) blend smoothly;
+shapes with different numbers of parts switch halfway, and glyphs of the other set switch at once. `all` does not include `icon`. `IconButton` does this for its toggle icons.
 
 `scale` (1 is unchanged), `translate_x`, `translate_y` (pixels) and `rotation_deg` (clockwise, about the node's centre) draw a node transformed, and
 can be eased too. They change how it is drawn, not how much room it takes.
 
 ## The pointer
 
-`cursor` is the name of a pointer shape (`pointer`, `text`, `grab`, `grabbing`, `move`, `not_allowed`, `wait`,
-`progress`, `crosshair`, `help`, `copy`, the resize pointers and the rest, listed in the
-[YAML reference](../api/yaml.md)), or a picture next to the view:
+`cursor` is the name of a pointer shape, or a picture next to the view. The names are `default`, `pointer`, `text`, `grab`, `grabbing`, `move`,
+`not_allowed`, `wait`, `progress`, `crosshair`, `help`, `col_resize`, `row_resize`, `ew_resize`, `ns_resize`, `nesw_resize`, `nwse_resize`, `copy`, `cell`,
+`context_menu`, `zoom_in`, `zoom_out` and `all_scroll` (also in the [YAML reference](../api/yaml.md)). A handler can change a node's pointer while it runs
+with `cursor('grabbing')` (see [Dragging](view-language.md#dragging)).
 
 ```yaml
-style: {cursor: {src: pointers/pen.png, hotspot: [2, 30]}}
+widget: Container
+style: {width: 120, height: 80, cursor: {src: pointers/pen.png, hotspot: [2, 30]}}
 ```
 
 The picture is read with the view, like an `Image`'s: relative to the view's folder, inside it, 1 to 256 pixels a
@@ -203,7 +218,14 @@ whatever is under the layer, and the layer is not hovered or pressed. `auto` is 
 does not change.
 
 ```yaml
-- widget: Rect              # a shimmer over a card; the card underneath still gets the click
-  name: shimmer
-  style: {position: absolute, x: 0, y: 0, width: 100%, height: 100%, background: "primary@8%", pointer_events: none}
+widget: Container
+style: {width: 200, height: 80}
+children:
+  - widget: Rect              # the card
+    name: card
+    style: {width: 200, height: 80, background: surface_container}
+    handlers: {on_click: open_card}
+  - widget: Rect              # a shimmer over it; the card underneath still gets the click
+    name: shimmer
+    style: {position: absolute, x: 0, y: 0, width: "100%", height: "100%", background: "primary@8%", pointer_events: none}
 ```

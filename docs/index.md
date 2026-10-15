@@ -7,30 +7,28 @@ and accessibility in Rust underneath, which you never have to touch.
 
 ```yaml
 # Counter_View.yaml
-id: root
-kind: Container
+name: Counter
+widget: Container
 style: {flex_direction: vertical, gap: 12, padding: 24, background: surface}
 children:
-  - id: label
-    kind: Text
-    text: {content: "Count: 0", typography_role: headline_medium}
+  - widget: Text
+    name: label
+    text: "Count: {{ count }}"
+    typography_role: headline_medium
     style: {foreground: on_surface}
-    bindings: {text: "{{ label_text.get() }}"}
-  - id: button
-    component: ButtonFilled
-    with: {label: Count, width: 120, height: 40, corner_radius: 20}
-    handlers: {on_click: increment}
+  - {widget: Button, name: button, label: Count, style: {width: 120}, handlers: {on_click: increment}}
 ```
 
 ```python
 # Counter_ViewModel.py
-from tesserae import Computed, Signal, ViewModel
+from tesserae import Signal, ViewModel
 
 class CounterViewModel(ViewModel):
-    def __init__(self, view):
+    views = "Counter"             # the view it serves
+
+    def __init__(self):
+        super().__init__()
         self.count = Signal(0)
-        self.label_text = Computed(lambda: f"Count: {self.count.get()}")
-        super().__init__(view)
 
     def increment(self):
         self.count.update(lambda n: n + 1)
@@ -41,10 +39,11 @@ class CounterViewModel(ViewModel):
 from tesserae import App
 from Counter_ViewModel import CounterViewModel
 
-app = App(width=240, height=160, title="Counter")
-app.load("Counter_View.yaml", CounterViewModel)
+app = App(width=240, height=160, title="Counter", search=["."])
+app.bind(CounterViewModel)
+app.open_view("Counter")      # Counter_View.yaml
 app.show("Counter")
-app.run(hot_reload=True)   # edit the view while the app runs
+app.run()
 ```
 
 Tesserae is on PyPI as [`tesserae-ui`](https://pypi.org/project/tesserae-ui/), pre-alpha, and runs on
@@ -52,19 +51,20 @@ Linux, macOS and Windows.
 
 ## What you get
 
-- **Screens and components.** An `App` owns the window and a registry of screens; a screen is a view and
-  ViewModel pair, checked by [naming convention](guide/naming-convention.md). Embed other pairs as
-  [components](guide/components.md), or reuse structure as [fragments](guide/component-fragments.md).
+- **Views and ViewModels.** A view is YAML: a tree of nodes, each a `widget:`. A ViewModel is Python, and serves the
+  views that name it. A view with `params:` is a component, called by its name; `for:` and `if:` build lists and choices
+  from data. See [The View Language](guide/view-language.md), [Apps & Screens](guide/apps-and-screens.md) and
+  [Components & Embedding](guide/components.md).
 - **Reactive state.** `Signal`, `Computed`, `Effect` and `ViewModel`: [bindings](guide/bindings.md) keep
-  the screen in step with them. See [Reactivity](guide/reactivity.md) and [Repeater](guide/repeater.md).
+  the screen in step with them. See [Reactivity](guide/reactivity.md).
 - **Material Design 3.** Every MD3 [component](components/index.md) with its YAML, a
   [stylesheet](stylesheets/index.md) for each, and [themes](themes/index.md): a seed colour makes the
-  palette, and light and dark follow the OS.
+  palette, and light and dark follow the OS. High contrast and reduced motion follow it too.
 - **Real desktop behaviour.** [Keyboard, state layers and screen-reader support](guide/interaction.md),
-  [overlays](guide/overlays.md), a [window, docks and embedded views](guide/windows-and-docks.md), and
-  [custom title bars](guide/custom-title-bars.md).
-- **Fast iteration.** [Hot reload](guide/hot-reload.md) updates a running app when a view, a stylesheet or
-  a theme changes, and [editor support](guide/editor-support.md) completes and checks your YAML.
+  [overlays](guide/overlays.md), [a window, docks, routed screens and several windows](guide/windows-and-docks.md),
+  and [custom title bars](guide/custom-title-bars.md). A layout can follow the window's size class.
+- **Fast iteration.** [Hot reload](guide/hot-reload.md) re-themes a running app when a theme file changes,
+  and [editor support](guide/editor-support.md) completes and checks your YAML.
 - **Shipping.** `tesserae build` makes one executable, or an installer: [Releasing](guide/releasing.md).
 
 ## Where to go
@@ -83,6 +83,6 @@ Linux, macOS and Windows.
 
 ## Files: Tesserae reads them, `tre` gets data
 
-You always give Tesserae file paths: views, fragments, `include:`d files, images, themes, stylesheets and
-fonts. Tesserae reads, parses, decodes and watches them itself and hands `tre` only data. Every error
-names the file you wrote, and a view and everything it is built from can be hot-reloaded.
+You always give Tesserae file paths or names: views, images, themes, stylesheets and fonts. Tesserae reads, parses and
+decodes them itself and hands `tre` only data. Every error names the file, line and column you wrote, and the nearest
+name when you misspelt one.

@@ -13,58 +13,33 @@ default (56dp) and large (96dp).
 `widget: Fab` is a view Tesserae ships (`Fab_View.yaml`): one widget for the four colours and three sizes, and for the extended form too (give it a
 `label`).
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `icon` | an icon name | the glyph (24 pixels, 36 on a large FAB) |
-| `label` | text | the text beside the icon, which makes it extended; also the accessible name |
-| `variant` | `primary`, `secondary`, `tertiary`, `surface` | the container colour |
-| `size` | `small`, `medium`, `large` | 40, 56 or 96 pixels, with 12, 16 and 28 pixel corners |
-| `collapsed` | true or false | an extended FAB shows only its icon (and its label becomes its tooltip) |
-| `disabled` | true or false | dimmed, not focusable, handlers do not run |
+The glyph is 24 pixels, 36 on a large FAB, and the corners are 12, 16 and 28 pixels for the three sizes. A collapsed extended FAB shows only its icon, and its
+label becomes its tooltip; the label is also the accessible name.
 
 It rests at elevation level 3, lifts to 4 when hovered and settles to 3 when pressed. To collapse as a list scrolls down and extend as it scrolls up, bind
-`collapsed: "{{ way == 'down' }}"` to the `scroll_direction` of the list. Not built: extending animates only as far as the engine lets a width go to `auto`
-(the collapse eases, the extend is at once), and the FAB menu.
-
-`widget: Fab` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: FabPrimary` | A floating action button in the primary colour: the screen's main action. | [`FabPrimary_Stylesheet.yaml`](../stylesheets/fabs/fab-primary.md) |
-| `component: FabSecondary` | A floating action button in the secondary colour. | [`FabSecondary_Stylesheet.yaml`](../stylesheets/fabs/fab-secondary.md) |
-| `component: FabTertiary` | A floating action button in the tertiary colour. | [`FabTertiary_Stylesheet.yaml`](../stylesheets/fabs/fab-tertiary.md) |
-| `component: FabSurface` | A floating action button on the surface colour. | [`FabSurface_Stylesheet.yaml`](../stylesheets/fabs/fab-surface.md) |
+`collapsed: "{{ way == 'down' }}"` to the `scroll_direction` of the list. Not built: easing the collapse and the extend (the width goes between a number and `auto`,
+which the engine does not animate, so the FAB changes shape at once), and the FAB menu.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: Fab`. A file of the same name in your project replaces it.
 
-### `FabPrimary`, `FabSecondary`, `FabTertiary`, `FabSurface`
+### `Fab`
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `icon` | required |  |
-| `size` | required |  |
-| `corner_radius` | required |  |
-| `fab_size` | optional | `default` |
+The Material 3 floating action button, and its extended form: an icon in a prominent container, with a label beside it when `label` is given. In four colours (`variant`: primary, secondary, tertiary, surface) and three sizes (`size`: small 40, medium 56, large 96). An extended FAB collapses to just its icon when `collapsed` is true; bind that to the way a list scrolls (`collapsed: "{{ way == 'down' }}"`) for the usual behaviour. `label` names it for a screen reader and, when it is only an icon, is its tooltip. `handlers: {on_click: add}` on the call is what a press does. Colours, sizes and how it lifts are in Fab_Stylesheet.yaml.
 
-These 4 have one structure; only their stylesheets, above, differ.
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `icon` | `str` |  | The icon. |
+| `label` | `str` |  | The text beside the icon (an extended FAB); also its accessible name. |
+| `variant` | `primary` or `secondary` or `tertiary` or `surface` | `primary` | The container colour. |
+| `size` | `small` or `medium` or `large` | `medium` | 40, 56 or 96 pixels. An extended FAB is 56 tall. |
+| `collapsed` | `bool` | `false` | An extended FAB shows only its icon. |
+| `disabled` | `bool` | `false` | Dimmed, not focusable, and it does not respond. |
 
-```yaml
-params:
-  - icon
-  - size
-  - corner_radius
-  - {fab_size: default}
-id: root
-component_of: "fab.{{ fab_size }}"
-kind: Rect
-children:
-  - id: icon
-    kind: Icon
-    icon:
-      name: "{{ icon }}"
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `icon` (Icon), `label` (Text).
+
+Its look is in [`Fab_Stylesheet.yaml`](../stylesheets/fabs/fab.md).
 
 ## Using it
 
@@ -76,7 +51,7 @@ children:
   - widget: ScrollView
     scroll_direction: "{{ way }}"
     style: {height: 400}
-    children: [{widget: Text, text: Messages}]
+    children: [{widget: Text, text: Messages, typography_role: body_medium, style: {foreground: on_surface}}]
   - widget: Fab
     icon: add
     label: Compose
@@ -84,9 +59,7 @@ children:
     handlers: {on_click: compose}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import fab
@@ -96,13 +69,15 @@ add = fab(app.window, "add", size="default", variant="primary")
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# FabPrimary_Stylesheet.yaml, next to your views
+# Fab_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: root
-    style: {background: tertiary}
+  - widget: Fab
+    variant: primary
+    part: icon
+    style: {foreground: tertiary}
 ```
 
 See [Component stylesheets](../stylesheets/index.md).

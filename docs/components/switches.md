@@ -9,41 +9,24 @@ it is on.
 
 ## In Tesserae
 
-`widget: Switch`, a Tesserae control: a 52 by 32 pixel track and a handle that slides across it and grows when pressed.
-
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `selected` | true or false, two-way | whether it is on |
-| `label` | text | beside the track, part of what you press, and what a screen reader calls it |
-| `icons` | true or false | a check on the handle when on and a cross when off (the off handle is then as big as the on one) |
-| `disabled` | true or false | dimmed and does nothing |
-
-`widget: Switch` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: Switch` | A switch: a setting that is on or off, and takes effect at once. | [`Switch_Stylesheet.yaml`](../stylesheets/switches/switch.md) |
+`widget: Switch`, a Tesserae control: a 52 by 32 pixel track and a handle that slides across it and grows when pressed (16 pixels off, 24 on, 28 pressed). The `label` sits beside
+the track and is part of what you press. With `icons: true` the handle carries a check when on and a cross when off, and the off handle is then as big as the on one. Space or
+Enter toggles it from the keyboard, and `handlers: {on_change: ...}` runs after the user toggles it.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
-
 ### `Switch`
 
-A switch: a setting that is on or off, and takes effect at once. Its look: [`Switch_Stylesheet.yaml`](../stylesheets/switches/switch.md).
+A toggle.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `width` | required |  |
-| `height` | required |  |
-| `selected` | required |  |
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `selected` | `bool` |  |  Two-way. |
+| `disabled` | `bool` |  |  |
+| `label` | `str` |  | Text beside it that is part of what you press, and what a screen reader calls it. |
+| `icons` | `bool` |  | A check on the handle when on and a cross when off. |
 
-```yaml
-params: [width, height, selected]
-id: root
-kind: Switch
-selected: "{{ selected }}"
-```
+Its `style:` also takes `foreground`.
 
 ## Using it
 
@@ -56,40 +39,13 @@ children:
   - {widget: Switch, selected: "{{ dark }}", label: Dark mode, icons: true}
 ```
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: dark
-    component: Switch
-    with: {width: 52, height: 32, selected: false}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import switch
 
 dark = switch(app.window, selected=False)
 ```
-
-## Changing its look
-
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
-
-```yaml
-# Switch_Stylesheet.yaml, next to your views
-styles:
-  - id: root
-    style: {width: tertiary}
-```
-
-See [Component stylesheets](../stylesheets/index.md).
 
 ## See also
 

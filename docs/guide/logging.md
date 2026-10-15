@@ -36,16 +36,17 @@ any handler you added yourself. It takes `level`, `sink` (anything
 | Level | Message |
 |---|---|
 | `DEBUG` | a screen loaded (`app.load`), a screen shown (`app.show`), the traceback of a failed hot reload |
-| `INFO` | hot reload started, and what it watches; each view reloaded; each theme or stylesheet file applied |
-| `WARNING` | Python warnings such as `FontFallbackWarning`, when `configure_logging` captures them (below) |
+| `INFO` | hot reload started, and what it watches; a screen it does not watch; each view reloaded; each theme or stylesheet file applied; the app switching between light and dark or between standard and high contrast |
+| `WARNING` | a view file in the older syntax, once per file (it still loads: `tesserae migrate-yaml` moves it); a `Link` whose `href` is refused (only `http`, `https`, `mailto` and `tel` are opened); Python warnings such as `FontFallbackWarning`, when `configure_logging` captures them (below) |
 | `ERROR` | a hot reload that failed, naming the file and the error |
 
 Each message carries the Tesserae module it came from (`tesserae.app`,
-`tesserae.spec.watch`), which loguru shows as `{name}`.
+`tesserae.spec.watch`), which loguru shows as `{name}`. A mistake in a view, such as an unknown property or a name
+no ViewModel has, is not logged: it is an exception that names the file, line and column.
 
 ## Failed hot reloads
 
-When a background reload fails, from a YAML error, an unknown component,
+When a background reload fails, from a YAML error, an unknown widget,
 or a spec or stylesheet `tre` rejects, Tesserae logs one `ERROR` line
 naming the file. The traceback is logged at `DEBUG`, so a typo doesn't
 print a stack trace unless you ask for one. The screen stays as it was,

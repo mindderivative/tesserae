@@ -1,99 +1,93 @@
 # Dialog_Stylesheet.yaml
 
-A dialog: a headline and text on a raised panel, over a scrim.
+The look of Dialog (Material 3): a raised panel with 28 pixel corners, 24 pixels of padding, an icon in `secondary`, the supporting text in `on_surface_variant`. The scrim is the modal Overlay's.
 
 The look of [`Dialog`](../../components/dialogs.md) (in [Dialogs](../../components/dialogs.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# Dialog: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of Dialog (Material 3): a raised panel with 28 pixel corners, 24 pixels of padding, an icon in `secondary`, the supporting text in
+# `on_surface_variant`. The scrim is the modal Overlay's.
 styles:
-  - id: root
+  - widget: Dialog
+    part: panel
     style:
-      width: "{{ scrim_width }}"
-      height: "{{ scrim_height }}"
-      background: '#00000052'
-      align_content: center
-  - id: panel
-    style:
-      flex_direction: vertical
-      width: "{{ width }}"
-      height: "{{ height }}"
-      background: surface_container_high
-      corner_radius: extra_large
-      elevation: level_3
-      padding: 24
-      gap: 16
-  - id: headline
-    style:
-      foreground: on_surface
-  - id: body
-    style:
-      foreground: on_surface_variant
-      flex: expand_vertical
+      background: "{{ 'surface' if fullscreen else 'surface_container_high' }}"
+      corner_radius: "{{ 0 if fullscreen else 28 }}"
+      padding: "{{ 0 if fullscreen else 24 }}"
+      gap: "{{ 0 if fullscreen else 16 }}"
+      elevation: "{{ 0 if fullscreen else 3 }}"
+  - {widget: Dialog, part: icon, style: {foreground: secondary, width: 24, height: 24}}
+  - {widget: Dialog, part: headline, style: {foreground: on_surface}}
+  - {widget: Dialog, part: body, style: {foreground: on_surface_variant}}
+  - {widget: Dialog, part: bar, style: {padding: {left: 4, right: 16, top: 0, bottom: 0}, gap: 8}}
+  - {widget: Dialog, part: bar_title, style: {foreground: on_surface}}
+  - {widget: Dialog, part: content, style: {padding: "{{ {'left': 24, 'right': 24, 'top': 16, 'bottom': 16} if fullscreen else 0 }}"}}
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`Dialog_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: Dialog`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: Dialog` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
-
-### `root` (Container)
-
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | the `scrim_width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | the `scrim_height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `#00000052` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
+## The rules
 
 ### `panel` (Container)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `width` | the `width` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | the `height` parameter | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `background` | `surface_container_high` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `corner_radius` | `extra_large` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `elevation` | `level_3` | A shadow level, 0 to 5. |
-| `padding` | `24` | Space inside it: one number, or `{left, right, top, bottom}`. |
-| `gap` | `16` | Space between its children. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `background` | `{{ 'surface' if fullscreen else 'surface_container_high' }}` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `corner_radius` | `{{ 0 if fullscreen else 28 }}` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
+| always | `padding` | `{{ 0 if fullscreen else 24 }}` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| always | `gap` | `{{ 0 if fullscreen else 16 }}` | Space between its children. |
+| always | `elevation` | `{{ 0 if fullscreen else 3 }}` | A shadow level, 0 to 5. |
+
+### `icon` (Icon)
+
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `secondary` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| always | `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
 
 ### `headline` (Text)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ### `body` (Text)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| `flex` | `expand_vertical` | How it takes room in its parent: `none` (the default) is as big as its content and never squeezed, `expand_horizontal` and `expand_vertical` take the room left over in that direction, `fill` both. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
-## What it makes
+### `bar` (Container)
 
-With `headline: Headline, text: Hello, width: 120, height: 40, scrim_width: 400, scrim_height: 300`, each part's style is:
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `padding` | `{bottom: 0, left: 4, right: 16, top: 0}` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| always | `gap` | `8` | Space between its children. |
 
-```yaml
-root: {width: 400, height: 300, background: '#00000052', align_content: center}
-panel: {flex_direction: vertical, width: 120, height: 40, background: surface_container_high, corner_radius: extra_large,
-  elevation: level_3, padding: 24, gap: 16}
-headline: {foreground: on_surface}
-body: {foreground: on_surface_variant, flex: expand_vertical}
-```
+### `bar_title` (Text)
+
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `on_surface` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+
+### `content` (ScrollView)
+
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `padding` | `{{ {'left': 24, 'right': 24, 'top': 16, 'bottom': 16} if fullscreen else 0 }}` | Space inside it: one number, or `{left, right, top, bottom}`. |
 
 ## Changing it
 
-Put a `Dialog_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: root
+  - widget: Dialog
+    part: panel
     style: {background: tertiary}
 ```

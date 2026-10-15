@@ -10,60 +10,35 @@ A button group lays related buttons side by side, with an even gap, so they read
 
 `widget: ButtonGroup` is a view Tesserae ships (`ButtonGroup_View.yaml`): `Button`s side by side, one for each of `items`.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `items` | a list | the buttons, each `{value, label}` and optionally `{icon, disabled}` |
-| `mode` | `none`, `single`, `multiple` | actions; a choice of one; any number chosen |
-| `selected` | a value, or a list with `multiple`; two-way | what is chosen |
-| `chosen` | a value; two-way | for `none`: the value of the button last pressed (nothing needs to be bound) |
-| `variant`, `size` | as on `Button` | passed to every button |
-| `connected` | true or false | a 2 pixel gap and square inner corners, instead of 8 pixels apart |
-| `orientation` | `horizontal`, `vertical` | a row or a column |
-| `disabled` | true or false | no button responds |
+The `mode` says what the buttons are: `none` (the default) is a row of actions, and the value of the one last pressed goes to `chosen` (nothing needs to be bound);
+`single` is a choice of one, with `selected` its value; `multiple` is a set, with `selected` the list of chosen values. Each item is `{value, label}` and optionally
+`{icon, disabled}`. `variant` and `size` are `Button`'s and go to every button. By default the buttons stand 8 pixels apart; `connected: true` makes the gap 2
+pixels with 4 pixel inner corners, and `orientation: vertical` makes a column.
 
 In `single` mode a chosen button is a toggle that is on, and the arrow keys move the choice; `multiple` toggles each button and the arrows only move the
 focus. There is one Tab stop. Not built: the pressed button widening and its neighbours giving way, and an overflow button.
 
-`widget: ButtonGroup` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: ButtonGroup` | A row of buttons, each made from the same button fragment. | [`ButtonGroup_Stylesheet.yaml`](../stylesheets/button-groups/button-group.md) |
-
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: ButtonGroup`. A file of the same name in your project replaces it.
 
 ### `ButtonGroup`
 
-A row of buttons, each made from the same button fragment. Its look: [`ButtonGroup_Stylesheet.yaml`](../stylesheets/button-groups/button-group.md).
+The Material 3 button group: buttons that behave as a set. `mode: none` is a row of actions (the last one pressed goes to `chosen`), `single` is a choice of one (`selected` is the chosen value) and `multiple` a set (`selected` is the list of chosen values). `connected: true` joins the buttons with a 2 pixel gap and square inner corners; otherwise they stand 8 pixels apart. One Tab stop; the arrow keys move the focus (and, for `single`, the choice). The look of each button is Button's: `variant` and `size` pass to every one.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `items` | required |  |
-| `width` | required |  |
-| `height` | required |  |
-| `corner_radius` | required |  |
-| `button` | optional | `ButtonFilled` |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `items` | `list` | `[]` | The buttons, each {value, label} and optionally {icon, disabled}. |
+| `mode` | `none` or `single` or `multiple` | `none` | none: actions; single: one chosen; multiple: any number chosen. |
+| `selected` | `any` |  | single: the chosen value; multiple: the list of chosen values. Two-way: give it a bare reference and the view writes it back. |
+| `chosen` | `any` |  | none: the value of the button last pressed. Two-way: give it a bare reference and the view writes it back. |
+| `variant` | `filled` or `tonal` or `elevated` or `outlined` or `text` | `filled` | Passed to every button. |
+| `size` | `xs` or `s` or `m` or `l` or `xl` | `s` | Passed to every button. |
+| `connected` | `bool` | `false` | Joined, with square inner corners. |
+| `orientation` | `horizontal` or `vertical` | `horizontal` | A row, or a column. |
+| `disabled` | `bool` | `false` | No button can be pressed. |
 
-```yaml
-params:
-  - items
-  - width
-  - height
-  - corner_radius
-  - {button: ButtonFilled}
-id: root
-kind: Container
-children:
-  - id: b
-    component: "{{ button }}"
-    with:
-      width: "{{ width }}"
-      height: "{{ height }}"
-      corner_radius: "{{ corner_radius }}"
-    repeat: "{{ items }}"
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `item` (Button).
 
 ## Using it
 
@@ -83,28 +58,13 @@ children:
     items: [{value: copy, label: Copy, icon: home}, {value: paste, label: Paste}]
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import button_group
 
 group = button_group(app.window, ["Day", "Week", "Month"], 90, 40, on_click=viewmodel.pick)
 ```
-
-## Changing its look
-
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
-
-```yaml
-# ButtonGroup_Stylesheet.yaml, next to your views
-styles:
-  - id: root
-    style: {flex_direction: tertiary}
-```
-
-See [Component stylesheets](../stylesheets/index.md).
 
 ## See also
 

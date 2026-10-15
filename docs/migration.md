@@ -63,12 +63,63 @@ view's ViewModel and its line in `app.py`.
 
 - A widget name that is a parameter (`component: "{{ button }}"`) has no equivalent: a `variant` property on one widget replaces it.
 - A call that sets a property its fragment does not declare (`disabled` on a `ButtonText`) is reported; the fragment needs to declare it.
-- The shipped fragments (`ButtonFilled`, `NavigationRail`, ...) are not views in the new language yet, so a view that calls one cannot be
-  opened with `app.open_view` yet; keep it on `app.load`.
-- `Window`, `TitleBar` and `Dock` views, an Image `frame` binding, a ScrollView's `scroll_offset` and `on_key` are not drawn by `app.open_view` yet.
-  The ones it cannot draw are errors that name the property, never silently dropped.
+- The shipped fragments that were merged into one view with a property are not renamed by the tool. A call of `component: ButtonFilled` becomes
+  `widget: ButtonFilled`, which does not exist, and fails the check with `no widget named 'ButtonFilled'`. [What each one became](#the-shipped-fragments-that-became-one-view)
+  is below. The shipped fragments that kept their name (`NavigationRail`, `NavigationRailScreens`, `StatusBar`, `Menu`, `Toolbar`, ...) are views of the same name and migrate as they are.
 - A view written with `kind: TextField` was the bare input. It becomes `widget: TextInput`, and `widget: TextField` is the Material text field, so a migrated view keeps what it had; move to `TextField` when you want the label, supporting text and the rest.
 - `foreground` is valid only on the widgets that draw text or glyphs; on a `Container` it is now an error that names them.
+
+### The shipped fragments that became one view
+
+Several shipped fragments were one fragment per look. They are now one view with a property that picks the look, so write the new form by hand. Each line of the
+view below is the new form of one or more old names:
+
+| Old `component:` | New |
+| --- | --- |
+| `ButtonFilled`, `ButtonFilledTonal`, `ButtonElevated`, `ButtonOutlined`, `ButtonText` | `widget: Button` with `variant: filled`, `tonal`, `elevated`, `outlined`, `text` |
+| `SplitButtonFilled`, `SplitButtonFilledTonal`, `SplitButtonElevated`, `SplitButtonOutlined`, `SplitButtonText` | `widget: SplitButton` with the same `variant` values |
+| `IconButtonStandard`, `IconButtonFilled`, `IconButtonFilledTonal`, `IconButtonOutlined` | `widget: IconButton` with `variant: standard`, `filled`, `tonal`, `outlined` |
+| `FabPrimary`, `FabSecondary`, `FabTertiary`, `FabSurface` | `widget: Fab` with `variant: primary`, `secondary`, `tertiary`, `surface` |
+| `ExtendedFabPrimary`, `ExtendedFabSecondary`, `ExtendedFabTertiary`, `ExtendedFabSurface` | `widget: Fab` with the same `variant` and a `label` |
+| `BadgeDot`, `BadgeLabeled` | `widget: Badge`; with a `value` it is the labelled one, without it the dot |
+| `CardElevated`, `CardFilled`, `CardOutlined` | `widget: Card` with `variant: elevated`, `filled`, `outlined` |
+| `ChipAssist`, `ChipFilter`, `ChipFilterSelected`, `ChipInput`, `ChipSuggestion` | `widget: Chip` with `variant: assist`, `filter`, `input`, `suggestion`; the selected filter chip is `variant: filter` with `selected: true` |
+| `ToolbarDocked`, `ToolbarFloating` | `widget: Toolbar` with `variant: docked` or `floating` |
+| `SideSheetStandard` | `widget: SideSheet` (`SideSheetModal` for a modal one) |
+| `AccordionHeader` | `widget: Accordion` (`AccordionGroup` to hold several) |
+| `TreeNodeBranch`, `TreeNodeLeaf` | `widget: TreeNode`, a branch with `branch: true` |
+| `TabsItem` | the `tabs:` list of `widget: Tabs` |
+| `DatePickerDayToday`, `DatePickerDaySelected`, `DatePickerDayOutsideMonth` | `widget: DatePickerDay` with `today: true`, `selected: true`, `outside: true` |
+| `PeriodSelectorAM`, `PeriodSelectorPM` | `widget: PeriodSelector` with `period: AM` or `PM` |
+| `Video` | `widget: VideoPlayer` |
+| `Tooltip` | the `tooltip:` key on any node |
+
+```yaml
+name: examples
+widget: Container
+style: {flex_direction: vertical, gap: 8}
+children:
+  - {widget: Button, label: Save, variant: filled}
+  - {widget: SplitButton, label: Save, variant: tonal}
+  - {widget: IconButton, icon: home, variant: outlined}
+  - {widget: Fab, icon: add, variant: tertiary}
+  - {widget: Fab, icon: add, label: New, variant: primary}
+  - {widget: Badge, value: 3}
+  - {widget: Card, variant: outlined}
+  - {widget: Chip, label: Rock, variant: filter, selected: true}
+  - {widget: Toolbar, variant: floating}
+  - {widget: SideSheet, title: Filters, open: true}
+  - {widget: Accordion, title: Details}
+  - {widget: TreeNode, label: src, branch: true}
+  - {widget: Tabs, tabs: [{label: One}, {label: Two}], selected: 0}
+  - {widget: DatePickerDay, day: 7, today: true}
+  - {widget: PeriodSelector, period: PM}
+  - widget: Text
+    text: Hover me
+    typography_role: body_medium
+    tooltip: Help
+    style: {foreground: on_surface}
+```
 
 ## To 0.4.6
 
@@ -125,6 +176,7 @@ app.load("Window")                            # Views/Window_View.yaml
 app.navigate_to("")
 ```
 
+<!-- old-syntax: the form this release took; the 0.5.0 form is in the next section -->
 ```yaml
 # Window_View.yaml
 id: root

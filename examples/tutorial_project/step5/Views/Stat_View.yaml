@@ -1,0 +1,14 @@
+# A number with a label under it, called as `widget: Stat`. Its look is its rules in Tasks_Stylesheet.yaml.
+params:
+  label: {type: str, required: true}
+  value: {type: str, required: true}
+widget: Container
+children:
+  - widget: Text
+    name: value
+    text: "{{ value }}"
+    typography_role: title_large
+  - widget: Text
+    name: label
+    text: "{{ label }}"
+    typography_role: label_medium

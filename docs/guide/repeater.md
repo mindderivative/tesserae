@@ -1,9 +1,56 @@
 # Repeater (Lists)
 
-`Repeater` keeps one `Component` and `ViewModel` alive for each item of a
-list `Signal`, matched by a key. It does the add and remove bookkeeping
-that [`instantiate` and `Component.remove()`](components.md) otherwise
-need by hand. Its signature is in the [Python API](../api/python.md).
+A list on screen is a `for:` in a view. For a list that changes, the node repeats for each element and a `key:` says which
+element each built node belongs to:
+
+```yaml
+widget: Container
+style: {flex_direction: vertical, width: 300, gap: 4}
+children:
+  - widget: Rect
+    name: add
+    style: {width: 80, height: 30, background: primary}
+    handlers: {on_click: add}
+  - widget: Container
+    for: item in items
+    key: item.id
+    name: row
+    state: {done: false}
+    style: {height: 30, gap: 8}
+    children:
+      - {widget: Checkbox, name: box, checked: "{{ done }}"}
+      - {widget: Text, name: title, text: "{{ item.title }}", typography_role: body_large, style: {foreground: on_surface}}
+      - {widget: Rect, name: remove, style: {width: 24, height: 24, background: error}, handlers: {on_click: "remove(item.id)"}}
+```
+
+```python
+class MainViewModel(ViewModel):
+    views = "main"
+
+    def __init__(self):
+        super().__init__()
+        self.items = Signal([{"id": 1, "title": "Milk"}, {"id": 2, "title": "Eggs"}])   # the single source of truth
+
+    def add(self):
+        self.items.update(lambda items: [*items, {"id": len(items) + 11, "title": "New"}])
+
+    def remove(self, id):
+        self.items.update(lambda items: [i for i in items if i["id"] != id])
+```
+
+When the list is replaced, nodes whose key stays are kept (with their `state:`), new keys are built, removed keys are gone, and the order
+follows the list. A list changed in place is not noticed: replace it, as `update` does. Each row has its own
+`state:` and its own handlers, in which the loop variable (`item`) is in scope. Every row is built; for thousands of equal rows use a
+`VirtualList` instead ([Long lists](view-language.md#long-lists)). The rest of `for:` is in
+[Repeating, choosing and remembering](view-language.md#repeating-choosing-and-remembering).
+
+## Repeater, from Python
+
+`Repeater` is the Python form of the same thing for a view written in the older syntax (`kind:` and `id:`, loaded by the
+compatibility loader): it keeps one `Component` and `ViewModel` alive for each item of a list `Signal`, matched by a key, and does the add and
+remove bookkeeping that [`instantiate` and `Component.remove()`](components.md#views-in-the-older-syntax) otherwise need by hand. It
+refuses a view written with `widget:`; `tesserae migrate-yaml` moves a project over, after which a `for:` replaces it
+([Migrating](../migration.md)). Its signature is in the [Python API](../api/python.md).
 
 ```python
 from tesserae import Repeater, Signal
@@ -26,7 +73,7 @@ items.update(lambda lst: [i for i in lst if i != id])  # removes one
 | `args` | `lambda item: (item,)` | what is forwarded to `viewmodel_cls(component, *args)`: override it for a ViewModel that needs more than the item |
 
 `examples/todo_list/` in the repository forwards the shared `items`
-`Signal` too, so an item can remove itself.
+`Signal` too, so an item can remove itself. It is written in the older syntax.
 
 ## What it does and doesn't do
 
@@ -52,5 +99,5 @@ repeater[key]               # (component, viewmodel) for one key
 
 ## In a scrolling list
 
-Put the container the `Repeater` fills inside a `ScrollView`: see
+Put the container the `Repeater` fills, or a node with a `for:`, inside a `ScrollView`: see
 [Layout](layout.md#scrolling).

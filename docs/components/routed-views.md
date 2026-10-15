@@ -9,19 +9,23 @@ content is a view of its own.
 
 ## In Tesserae
 
-A `view:` node with a `route:` in the window view. It is registered as a screen of the app under its file's name, and
+A call of a view with a `route:` in the window view. It is registered as a screen of the app under the view's name, and
 shown while it is current; the others are hidden, with their state. `NavigationRailScreens` is a rail whose
 destinations navigate.
 
 ```yaml
-- id: nav
-  component: NavigationRailScreens
-  with:
+name: window
+widget: Window
+title: Notes
+style: {width: 960, height: 600, flex_direction: horizontal}
+children:
+  - widget: NavigationRailScreens
+    name: nav
     items:
       - {label: Notes, icon: home, screen: Main}
       - {label: Settings, icon: settings, screen: Settings}
-- {id: main, view: Main_View.yaml, route: ""}
-- {id: settings, view: Settings_View.yaml, route: settings}
+  - {widget: Main, name: main, route: "", style: {flex: fill}}
+  - {widget: Settings, name: settings, route: settings, style: {flex: fill}}
 ```
 
 ```python
@@ -29,7 +33,7 @@ app.navigate("Settings")
 app.navigate_to("settings")
 ```
 
-In a view written in the current language, a call with a `route:` is the screen, named for the view it calls (`- {widget: Settings, name: settings, route: settings}`
+A call with a `route:` is the screen, named for the view it calls (`- {widget: Settings, name: settings, route: settings}`
 is the screen `Settings`). A route can read params from the path (`notes/{id:int}`), and the screen showing reads the ones it was reached with as
 `app.params` (`{{ app.params.get('id') }}`); going back or forward restores each step's params, and `show()` clears them. Handlers: `navigate.Settings`,
 `navigate.back`, `navigate.forward`, `navigate_to('Note', {'id': 3})` (a screen by name, with params) and `navigate_route('notes/' + str(id))` (a route by its
@@ -47,8 +51,6 @@ A route can be written as a mapping, `route: {path: admin, guard: signed_in, red
 A routed call inside a routed view is a nested screen: its path is under its parent's (`settings` holding `profile` is `settings/profile`; a path that starts with `/` is from the root),
 the parent shows while a child is current, a parent's guard covers its children, and the app's `transition` plays between screens of one parent. In Python, `app.guard(screen, check)`
 adds a check, `check(params)` giving `True`, `False` or a route to go to instead; guards that send the app round in a circle are an error after 8 steps.
-
-This component has no `component:` fragment: build it in Python.
 
 ## See also
 

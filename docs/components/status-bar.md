@@ -12,49 +12,34 @@ surface and *label* style.
 `widget: StatusBar` is a view Tesserae ships (`StatusBar_View.yaml`): a 24 pixel `surface_container` strip as wide as the place it is put in, with
 `label_small` text in `on_surface_variant`.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `items` | a list | each `{text}` and optionally `{icon, side, value, tooltip}`; `side` is `start` (the default), `center` or `end` |
-| `progress` | 0 to 1 | a 4 pixel determinate indicator along the top edge |
-| `busy` | true or false | an indicator with no end along the top edge |
-| `clicked` | a value; two-way | the `value` of the item last pressed |
+Each of `items` is `{text}` and optionally `{icon, side, value, tooltip}`; `side` is `start` (the default), `center` or `end`. `text` (a string) is a shorthand for one message
+at the start, and `width` sets the bar's width instead of the place it is put in. `progress` (0 to 1) shows a 4 pixel determinate indicator along the top edge, and `busy`
+one with no end. `clicked` is two-way: the `value` of the item last pressed.
 
 An item with a `value` is a button: it has a state layer, a tooltip if it has one, and pressing it sets `clicked`. The centre section is centred on the
 bar whatever the sides hold. The bar is announced politely when its items change. Not built: items that can be dragged or hidden when the window is
 narrow.
 
-`widget: StatusBar` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: StatusBar` | A status bar: a thin strip of text along the bottom of the window. | [`StatusBar_Stylesheet.yaml`](../stylesheets/status-bar/status-bar.md) |
-
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: StatusBar`. A file of the same name in your project replaces it.
 
 ### `StatusBar`
 
-A status bar: a thin strip of text along the bottom of the window. Its look: [`StatusBar_Stylesheet.yaml`](../stylesheets/status-bar/status-bar.md).
+A status bar (a desktop convention, not Material 3): a thin strip at the bottom of a window with short items on its left, centre and right. `items` is a list of {text} and optionally {icon, side, value, tooltip}: `side` is start (the default), center or end; an item with a `value` can be pressed, and pressing it sets `clicked` to the value; `tooltip` explains it. `progress` (0 to 1) or `busy` shows a 4 pixel indicator along the top edge. The bar is announced politely when its text changes.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `text` | required |  |
-| `width` | required |  |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `text` | `str` |  | One message at the start, for a bar that only says one thing; the same as a first item {text}. |
+| `width` | `any` |  | The bar's width; the width of its place when not given. |
+| `items` | `list` | `[]` | The items, each {text} and optionally {icon, side, value, tooltip}. |
+| `progress` | `any` |  | 0 to 1: a determinate indicator along the top edge. Empty shows none. |
+| `busy` | `bool` | `false` | An indicator with no end along the top edge. |
+| `clicked` | `any` |  | The value of the item last pressed. Two-way: give it a bare reference and the view writes it back. |
 
-```yaml
-params: [text, width]
-id: root
-kind: Container
-children:
-  - id: text
-    kind: Text
-    text:
-      content: "{{ text }}"
-      typography_role: label_small
-      wrap: none
-      overflow: ellipsis
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `section` (Container), `note` (Container), `note_icon` (Icon), `note_text` (Text), `item` (Container), `icon` (Icon), `text` (Text), `edge` (Container), `bar` (LinearProgress).
+
+Its look is in [`StatusBar_Stylesheet.yaml`](../stylesheets/status-bar/status-bar.md).
 
 ## Using it
 
@@ -73,9 +58,7 @@ children:
       - {text: UTF-8, side: end, icon: home, value: encoding}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import status_bar
@@ -85,13 +68,14 @@ status = status_bar(app.window, "Ready", style={"height": 32})
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# StatusBar_Stylesheet.yaml, next to your views
+# StatusBar_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: root
-    style: {background: tertiary}
+  - widget: StatusBar
+    part: text
+    style: {foreground: tertiary}
 ```
 
 See [Component stylesheets](../stylesheets/index.md).

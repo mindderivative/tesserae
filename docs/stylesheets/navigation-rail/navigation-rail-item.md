@@ -1,105 +1,94 @@
 # NavigationRailItem_Stylesheet.yaml
 
-One destination in a navigation rail: an icon in a pill, with a label under it.
+The look of NavigationRailItem (Material 3): a 56 by 32 pill that is secondary_container when selected, with a 24 pixel icon in on_secondary_container (on_surface_variant otherwise) and the label in on_surface (on_surface_variant otherwise). In an expanded rail the pill is 56 high and as wide as the item, with the label inside it.
 
 The look of [`NavigationRailItem`](../../components/navigation-rail.md) (in [Navigation rail](../../components/navigation-rail.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# NavigationRailItem: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of NavigationRailItem (Material 3): a 56 by 32 pill that is secondary_container when selected, with a 24 pixel icon in on_secondary_container
+# (on_surface_variant otherwise) and the label in on_surface (on_surface_variant otherwise). In an expanded rail the pill is 56 high and as wide as the
+# item, with the label inside it.
 styles:
-  - id: root
+  - widget: NavigationRailItem
     style:
-      width: 80
-      height: 56
-      flex_direction: vertical
-      align_content: top
-      gap: 4
-  - id: pill
-    style:
-      width: 56
-      height: 32
       corner_radius: 16
-      background:
-        if: "{{ selected }}"
-        then: secondary_container
-        else: transparent
-      align_content: center
-  - id: icon
+      transition: {background: 150}
+  - widget: NavigationRailItem
+    part: pill
     style:
-      width: 24
-      height: 24
-      foreground:
-        if: "{{ selected }}"
-        then: on_secondary_container
-        else: on_surface_variant
-  - id: label
-    style:
-      foreground:
-        if: "{{ selected }}"
-        then: on_surface
-        else: on_surface_variant
+      width: "{{ 'auto' if expanded else 56 }}"
+      height: "{{ 56 if expanded else 32 }}"
+      corner_radius: "{{ 28 if expanded else 16 }}"
+      padding: "{{ {'left': 16, 'right': 24, 'top': 0, 'bottom': 0} if expanded else 0 }}"
+      background: "{{ 'secondary_container' if selected else 'transparent' }}"
+      transition: {background: 150}
+  - {widget: NavigationRailItem, part: icon, style: {width: 24, height: 24, foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationRailItem, part: badged_icon, style: {width: 24, height: 24, foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationRailItem, part: label, style: {foreground: "{{ 'on_surface' if selected else 'on_surface_variant' }}"}}
+  - {widget: NavigationRailItem, part: inline_label, style: {foreground: "{{ 'on_secondary_container' if selected else 'on_surface_variant' }}"}}
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`NavigationRailItem_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: NavigationRailItem`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: NavigationRailItem` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Container)
+### `NavigationRailItem` itself
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | `80` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | `56` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_content` | `top` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
-| `gap` | `4` | Space between its children. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `corner_radius` | `16` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
+| always | `transition` | `{background: 150}` | Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. `all` covers every one that can. A node is where it says when first drawn; only a change eases. |
 
-### `pill` (Rect)
+### `pill` (Container)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | `56` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | `32` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `corner_radius` | `16` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `background` | `secondary_container` if `selected`, else `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `width` | `{{ 'auto' if expanded else 56 }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `{{ 56 if expanded else 32 }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `corner_radius` | `{{ 28 if expanded else 16 }}` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
+| always | `padding` | `{{ {'left': 16, 'right': 24, 'top': 0, 'bottom': 0} if expanded else 0 }}` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| always | `background` | `{{ 'secondary_container' if selected else 'transparent' }}` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `transition` | `{background: 150}` | Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. `all` covers every one that can. A node is where it says when first drawn; only a change eases. |
 
 ### `icon` (Icon)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `foreground` | `on_secondary_container` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `foreground` | `{{ 'on_secondary_container' if selected else 'on_surface_variant' }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+
+### `badged_icon` (Icon)
+
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `width` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `24` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `foreground` | `{{ 'on_secondary_container' if selected else 'on_surface_variant' }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ### `label` (Text)
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `foreground` | `on_surface` if `selected`, else `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `{{ 'on_surface' if selected else 'on_surface_variant' }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
-## What it makes
+### `inline_label` (Text)
 
-With `label: Go, icon: home, selected: False`, each part's style is:
-
-```yaml
-root: {width: 80, height: 56, flex_direction: vertical, align_content: top, gap: 4}
-pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_content: center}
-icon: {width: 24, height: 24, foreground: on_surface_variant}
-label: {foreground: on_surface_variant}
-```
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `foreground` | `{{ 'on_secondary_container' if selected else 'on_surface_variant' }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 
 ## Changing it
 
-Put a `NavigationRailItem_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: pill
+  - widget: NavigationRailItem
+    part: pill
     style: {background: tertiary}
 ```

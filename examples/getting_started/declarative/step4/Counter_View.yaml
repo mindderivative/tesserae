@@ -1,18 +1,22 @@
-id: root
-kind: Container
+name: Counter  # the name the ViewModel serves
+widget: Container
 style: {flex_direction: vertical, width: 360, height: 160, gap: 12, padding: 16, background: "#1C1B1F"}
 children:
-  - id: label
-    kind: Text
-    text: {content: "Count: 0", font_family: Roboto, font_size: 20}
-    bindings: {text: "{{ label_text.get() }}"}
+  - widget: Text
+    name: label
+    text: "Count: {{ count }}"
+    font_family: Roboto
+    font_size: 20
     style: {width: 160, height: 28, foreground: "#FFFFFF"}
-  - id: button
-    kind: Rect
+  - widget: Rect
+    name: button
     handlers: {on_click: increment}
     style: {width: 96, height: 40, background: "#6750A4", corner_radius: 20, align_content: left}
     children:
-      - id: button_label
-        kind: Text
-        text: {content: Count, font_family: Roboto, font_size: 16, text_align: center}
+      - widget: Text
+        name: button_label
+        text: Count
+        font_family: Roboto
+        font_size: 16
+        text_align: center
         style: {width: 96, height: 20, foreground: "#FFFFFF"}

@@ -9,44 +9,28 @@ state layer around an 18dp box.
 
 ## In Tesserae
 
-`widget: Checkbox` is one of Tesserae's controls (`tesserae.controls.Checkbox`). Give `checked` a bare reference and a press writes it back.
+`widget: Checkbox` is one of Tesserae's controls (`tesserae.controls.Checkbox`). Give `checked` a bare reference and a press writes it back. It has three
+states: on, off, and empty (`null`), which is neither: a dash in a filled box, for a parent of some checked children. A press turns an empty one on.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `checked` | true, false or empty, two-way | empty (`null`) is neither on nor off: a dash in a filled box, for a parent of some checked children; a press turns it on |
-| `label` | text | beside the box, part of what you press, and what a screen reader calls it |
-| `error` | true or false | drawn in the error colours |
-| `disabled` | true or false | dimmed and does nothing |
+The `label` sits beside the box and is part of what you press: pressing the text toggles the box and gives it the focus. `error` draws it in the error colours, and a
+disabled one is dimmed and does nothing. `handlers: {on_change: ...}` runs after the user changes it (not when the bound value changes).
 
-The colour is `style.foreground`. The 18 pixel box sits in a 48 pixel target with a 40 pixel state layer; Space toggles it from the keyboard.
-
-`widget: Checkbox` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: Checkbox` | A checkbox: one choice, on or off. | [`Checkbox_Stylesheet.yaml`](../stylesheets/checkboxes/checkbox.md) |
+The colour is `style.foreground`. The 18 pixel box sits in a 48 pixel target with a 40 pixel state layer; Tab reaches it, and Space or Enter toggles it.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
-
 ### `Checkbox`
 
-A checkbox: one choice, on or off. Its look: [`Checkbox_Stylesheet.yaml`](../stylesheets/checkboxes/checkbox.md).
+A box that is on or off.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `background` | required |  |
-| `width` | required |  |
-| `height` | required |  |
-| `checked` | required |  |
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `checked` | `bool` |  | true, false, or empty (null) for a box that is neither: a parent of some checked children. Two-way. |
+| `disabled` | `bool` |  |  |
+| `error` | `bool` |  | Drawn in the error colours. |
+| `label` | `str` |  | Text beside it that is part of what you press, and what a screen reader calls it. |
 
-```yaml
-params: [background, width, height, checked]
-id: root
-kind: Checkbox
-checked: "{{ checked }}"
-```
+Its `style:` also takes `foreground`.
 
 ## Using it
 
@@ -59,22 +43,7 @@ children:
   - {widget: Checkbox, checked: "{{ some_read }}", label: Select all}      # empty while only some are on
 ```
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: agree
-    component: Checkbox
-    with: {background: surface, width: 48, height: 48, checked: false}
-    handlers: {on_change: toggled}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import checkbox
@@ -82,19 +51,6 @@ from tesserae.widgets import checkbox
 agree = checkbox(app.window, (0xFF, 0xFF, 0xFF, 0xFF), 48, 48, checked=False)
 agree.checked.get()
 ```
-
-## Changing its look
-
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
-
-```yaml
-# Checkbox_Stylesheet.yaml, next to your views
-styles:
-  - id: root
-    style: {background: tertiary}
-```
-
-See [Component stylesheets](../stylesheets/index.md).
 
 ## See also
 

@@ -149,7 +149,6 @@ def resolver_for(params):
 #: What the translator reports and the loader rejects, for the component pass to settle: file -> a word in the note that says why.
 KNOWN_GAPS = {
     "ButtonGroup_Component.yaml": "no dynamic widget names",
-    "Settings_View.yaml": "declares no parameter 'disabled'",
 }
 
 

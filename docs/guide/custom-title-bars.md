@@ -30,42 +30,57 @@ window's actions and the `app.maximized` and `app.active` values a binding can f
 [The window](apps-and-screens.md#the-window), and the [Python API](../api/python.md).
 
 `tesserae new notes --window --custom-title-bar` makes an app like this
-([The `tesserae` command](cli.md)); the window is a [`kind: Window`](windows-and-docks.md) with `borderless: true` and a `title_bar:`.
+([The `tesserae` command](cli.md)); the window is a [`widget: Window`](windows-and-docks.md) with `borderless: true` and a `title_bar:`
+(the generated files are in the older syntax, which `tesserae migrate-yaml` moves over: [Migrating](../migration.md)).
 
-## `kind: TitleBar`
+## `widget: TitleBar`
 
 The simplest title bar is one node in a view:
 
 ```yaml
+name: window
+widget: Window
+title: Notes
+borderless: true
+style: {width: 960, height: 640, flex_direction: vertical}
 children:
-  - id: bar
-    kind: TitleBar
+  - widget: TitleBar
+    name: bar
     title: Notes
     icon: home                              # optional: an icon name
     buttons: [minimize, maximize, close]    # the default; any of them, each once
-    children:                               # the app's own, between the
-      - {id: search, kind: TextField, ...}  # title and the buttons
-  - id: body
-    ...
+    children:                               # the app's own, between the title and the buttons
+      - widget: TextInput
+        name: search
+        placeholder: Search
+        typography_role: body_medium
+        style: {width: 200, height: 28, background: surface_container_high}
+  - {widget: Container, name: body, style: {flex: fill}}
 ```
+
+A window's own `title_bar: {title: Notes, icon: home}` makes the same bar for you; write the node when the bar has children of its own, or sits
+somewhere other than the top of the window.
 
 It's a bar that moves the window when it's dragged (from anywhere but
 its buttons and the app's own controls) and maximizes on a double-click.
 It holds the icon and title at its start, the app's children in the
 middle, and minimize, maximize and close at the right. Maximize shows
 the restore glyph while the window is maximized, and its buttons call
-the app's actions with no ViewModel method needed. Its parts' ids are
-after the bar's: `bar.title`, `bar.close` and so on.
+the app's actions with no ViewModel method needed, and say what they do
+when the pointer rests on them. Its parts' ids are
+after the bar's: `bar.title`, `bar.close` and so on, and the app's own
+children keep the names they were given (`bar.search`).
 
 ### In a dialog or a sheet
 
 A `TitleBar` is a header for any surface, not only a window. With `buttons: [dismiss]` it has no window buttons, no room for the
 OS's controls and no drag region (a press on it doesn't move the window), and its one button closes the dialog or sheet the bar is
-in (`surface.dismiss`). Use it in a [`ViewDialog`](overlays.md#a-dialog-with-a-view-of-its-own). `dismiss` is on its own: a bar is
-for a window or for a surface.
+in (`surface.dismiss`), which closes the overlay the bar is in, the nearest one up the tree (see [Overlays](overlays.md)). A bar in no overlay does
+nothing when it is pressed: a `Dialog` written in a view is closed by its own `open` and `actions`. `dismiss` is on its own: a bar is for a
+window or for a surface.
 
 ```yaml
-- {id: bar, kind: TitleBar, title: Settings, icon: settings, buttons: [dismiss]}
+- {widget: TitleBar, name: bar, title: Settings, icon: settings, buttons: [dismiss]}
 ```
 
 ### Height and look
@@ -81,6 +96,7 @@ while the window isn't the focused one, and close's hover is red
 | Class | Part |
 |---|---|
 | `title_bar` | The bar |
+| `title_bar_inset` | The room at the start for macOS's traffic lights |
 | `title_bar_icon`, `title_bar_title` | The icon and title |
 | `title_bar_content` | The app's children |
 | `title_bar_buttons`, `title_bar_button`, `title_bar_close` | The buttons |
@@ -96,7 +112,7 @@ styles:
 
 The bar's own look is the cascade's first layer, under every theme and
 stylesheet, so any of them can change it, and an app's own default theme
-doesn't take it away.
+doesn't take it away. A `style:` on the bar itself (`style: {height: 48}`) sets its height, and every part follows.
 
 ### macOS
 
@@ -108,10 +124,9 @@ they take, `(0, 0)` elsewhere and in fullscreen) and
 bar of your own:
 
 ```yaml
-- id: inset
-  kind: Rect
-  bindings: {width: "{{ app.titlebar_inset.get()[1] }}"}
-  style: {height: 36}
+- widget: Rect
+  name: inset
+  style: {height: 36, width: "{{ app.titlebar_inset[1] }}", background: transparent}
 ```
 
 ## A bar of your own
@@ -120,16 +135,30 @@ A bar of your own is any node marked as the window's drag region, with
 buttons whose handlers are the window's actions:
 
 ```yaml
-- id: my_bar
-  kind: Container
+- widget: Container
+  name: my_bar
   window_region: drag          # a press here moves the window
-  style: {height: 36, background: surface_container}
+  style: {height: 36, background: surface_container, flex_direction: horizontal, align_content: center}
   children:
-    - {id: tabs, kind: Container, window_region: none, ...}   # not a handle
-    - id: close
-      kind: Rect
+    - widget: Container
+      name: tabs
+      window_region: none      # not a handle
+      style: {width: 200, height: 30}
+      children: []
+    - widget: Rect
+      name: toggle
+      style: {width: 80, height: 30, background: primary}
+      handlers: {on_click: window.toggle_maximized}
+      children:
+        - widget: Text
+          name: label
+          text: "{{ 'Restore' if app.maximized else 'Maximize' }}"
+          typography_role: label_large
+          style: {foreground: on_primary}
+    - widget: Rect
+      name: close
+      style: {width: 46, height: 30, background: error}
       handlers: {on_click: window.close}
-      ...
 ```
 
 `window_region: drag` covers the node and everything in it that isn't
@@ -141,25 +170,23 @@ moving the window. The handlers are `window.minimize`,
 `app.close()` closes the window as the user's close would, so a "save
 changes?" check on `close_requested` still runs and can cancel it.
 
-A binding follows the window's state like any Signal's:
-
-```yaml
-bindings:
-  text: "{{ app.maximized.get() and 'Restore' or 'Maximize' }}"
-```
+An expression follows the window's state like any Signal's: `app.maximized` and `app.active` (the toggle above shows
+`Restore` while the window is maximized).
 
 ### `pointer_cancel`
 
 When the OS takes a press (moving the window from its bar, maximizing it
-on a double-click), the pressed node gets `pointer_cancel` instead of
+on a double-click), the pressed node gets a `pointer_cancel` event instead of
 `pointer_up`, and no click. Every Tesserae widget releases its press on
-it; a widget of your own that tracks a press should listen for both.
+it, and the `pressed` state of an `interaction` clears. In a view, `on_release` is the
+pointer-up only, so it does not run for a press the OS took; a widget of your own built in Python that
+tracks a press should listen for both events.
 
 ## A top app bar as the title bar
 
 In a borderless app, a `top_app_bar` made in code is the title bar: the window's drag region, with the window
 buttons after its trailing icons. `top_app_bar(..., window_controls=)` asks for it or refuses it. In a view, use
-a `kind: TitleBar` or a window's `title_bar:` instead.
+a `widget: TitleBar` or a window's `title_bar:` instead: the `TopAppBar` view is not a title bar.
 
 ## The window border
 
@@ -181,14 +208,9 @@ styles:
     style: {border_color: "#FF0000", border_width: 2}   # 0 hides it too
 ```
 
-Rounded corners and a drawn shadow aren't possible: they need
-transparent windows.
-
-## Hot reload
-
-A TitleBar hot-reloads like the rest of its view: an edit to its title,
-icon, buttons or content shows while the app runs, and the buttons keep
-working. So does a window view's `title_bar:`. See [Hot Reload](hot-reload.md).
+Rounded corners and a drawn shadow are not done for you: they need a
+transparent window (`transparent: true` on the `Window`, see
+[Window Options](window-options.md)) and a view that draws its own edge.
 
 ## On each platform
 

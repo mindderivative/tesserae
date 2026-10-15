@@ -1,26 +1,24 @@
-from pathlib import Path
-
-from tesserae import Computed, Repeater, Signal, ViewModel
-
-from TaskItem_ViewModel import TaskItemViewModel
-
-HERE = Path(__file__).parent
+from tesserae import Computed, Signal, ViewModel
 
 
 class TasksViewModel(ViewModel):
-    def __init__(self, view):
-        self.tasks = Signal([])  # the ids of the tasks: the one source of truth
-        self._next_id = 1
-        self.rows = Repeater(view, self.tasks, HERE / "TaskItem_View.yaml", TaskItemViewModel,
-                             view.node("list"), args=lambda task_id: (task_id, self.tasks))
-        self.done_text = Computed(lambda: str(self._done()))  # a binding to text needs a string
-        self.open_text = Computed(lambda: str(len(self.tasks.get()) - self._done()))
-        super().__init__(view)
+    views = "Tasks"
 
-    def _done(self):
-        self.tasks.get()  # recount when tasks come or go, and when a row's checkbox changes
-        return sum(1 for _key, _component, row in self.rows if row.done.get())
+    def __init__(self):
+        super().__init__()
+        self.tasks = Signal([])  # a list of {"id", "text", "done"}: the one source of truth
+        self._next_id = 1
+        # a text property wants a string, so the counts are strings
+        self.open_text = Computed(lambda: str(sum(1 for t in self.tasks.get() if not t["done"])))
+        self.done_text = Computed(lambda: str(sum(1 for t in self.tasks.get() if t["done"])))
 
     def add_task(self):
-        self.tasks.update(lambda ids: [*ids, self._next_id])
+        task = {"id": self._next_id, "text": f"Task {self._next_id}", "done": False}
         self._next_id += 1
+        self.tasks.update(lambda tasks: [*tasks, task])
+
+    def toggle(self, task_id):
+        self.tasks.update(lambda tasks: [{**t, "done": not t["done"]} if t["id"] == task_id else t for t in tasks])
+
+    def remove(self, task_id):
+        self.tasks.update(lambda tasks: [t for t in tasks if t["id"] != task_id])

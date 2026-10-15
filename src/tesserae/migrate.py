@@ -195,7 +195,11 @@ def migrate_project(root: str | Path, *, write: bool = False, force: bool = Fals
 
 
 def _validate(translated: dict[Path, FileResult], params: dict[str, Any]) -> None:
-    """Loads every translated file with the loader the app uses and marks the ones that do not load as failed."""
+    """Loads every translated file with the loader the app uses and marks the ones that do not load as failed. A widget name is one of the project's
+    own views, else a view Tesserae ships."""
+    from tesserae.shipped import ViewLibrary
+
+    shipped = ViewLibrary()
     decls: dict[str, WidgetDecl] = {}
     for stem, header in params.items():
         try:
@@ -209,7 +213,7 @@ def _validate(translated: dict[Path, FileResult], params: dict[str, Any]) -> Non
             if path.name.endswith("_Stylesheet.yaml"):
                 RuleSheet.of(yaml.safe_load(result.text))
             else:
-                parse_view(result.text, str(result.new_path), resolver=decls.get)
+                parse_view(result.text, str(result.new_path), resolver=lambda name: decls.get(name) or shipped.decl(name))
         except LoadError as exc:
             result.status, result.error = "failed", f"does not load yet: {exc.message}" + (f" ({exc.hint})" if exc.hint else "")
 

@@ -1,8 +1,8 @@
 # Themes
 
-A theme decides how an app looks as a whole: its colours, the shapes and
-shadows of its components, its type, and any style rules you add. This page
-says what a theme is made of, how Tesserae applies one, how to change each
+A theme decides how an app looks as a whole: its colours, its type, and the shapes
+and shadows of its components. A stylesheet holds the style rules you add. This page
+says what a theme is made of, how Tesserae applies one with a stylesheet, how to change each
 part, and ends with the complete API.
 
 ## What a theme is
@@ -10,11 +10,11 @@ part, and ends with the complete API.
 | Thing | Scope | Lives in | Set with |
 | --- | --- | --- | --- |
 | **Theme** | the whole app | `*_Theme.yaml` | `App(custom_theme=)` |
-| **Stylesheet** | one view, or every view by default | `*_Stylesheet.yaml` | `App(stylesheet=)`, `app.load(..., stylesheet=)` |
-| **Component stylesheet** | one built-in component | `<Name>_Stylesheet.yaml` | next to your views: [Component Stylesheets](../stylesheets/index.md) |
-| **Style** | one node | `style:` or `*_Style.yaml` | the node |
+| **Stylesheet** | every view of the app | `*_Stylesheet.yaml` | `App(stylesheet=)` |
+| **Shipped rules** | one view Tesserae ships | `<Name>_Stylesheet.yaml` in the package | a rule of your own goes over them: [Component Stylesheets](../stylesheets/index.md) |
+| **Style** | one node | `style:` | the node |
 
-A theme file can hold everything:
+A theme file holds the palette, the type and the shapes. Every key is optional:
 
 ```yaml
 # Brand_Theme.yaml
@@ -24,44 +24,56 @@ colors:                      # roles to replace, after the palette is made
   tertiary: "#C2410C"
 typography:                  # changes to MD3's type styles
   body_large: {font_family: Inter, font_size: 17}
-components:                  # the shape and elevation of components
+components:                  # the shape and elevation of widgets made in Python
   card.elevated: {corner_radius: 8, elevation: level_2}
-styles:                      # style rules, as in a stylesheet
-  - {kind: Rect, classes: [panel], style: {background: surface_container_high}}
 ```
 
-Every key is optional. A stylesheet has only `styles:`. The keys are listed in
-the [YAML reference](../api/yaml.md#theme-and-stylesheet).
+A stylesheet has only `styles:`. The keys are listed in the [YAML reference](../api/yaml.md#theme-and-stylesheet).
+Rules are written in a stylesheet, not a theme: a theme's own `styles:` list is read in the older rule shape (`kind`,
+`classes`, `id`) and is not how a view in the current language is styled.
 
 ## How a node gets its style
 
-A node's style is built from four layers, lowest first. A later layer
-changes only the fields it mentions:
+A node's style is built from layers, lowest first. A later layer changes only the fields it mentions:
 
-1. the **default theme's** `styles:` (Tesserae's own, which gives a few kinds their shape);
-2. the **custom theme's** `styles:`;
-3. the view's **stylesheet**;
-4. the node's own **`style:`**.
+1. the **shipped rules** of the view or widget (Tesserae's own look for a `Button`, a `Card`, and so on);
+2. the app's **stylesheet**;
+3. the node's own **`style:`**.
 
-Inside a layer, rules apply from the general to the specific: a rule with no
-selector, then rules matching the node's `kind:`, then rules whose `classes:`
-the node has all of (fewer classes first), then a rule matching its `id:`.
-Rules of the same kind apply in the order written.
+A stylesheet is a list of rules. A rule names a `widget` (a built-in or a view, yours or Tesserae's) and may narrow it:
 
 ```yaml
 # Notes_Stylesheet.yaml
 styles:
-  - style: {gap: 8}                                   # every node
-  - {kind: Container, style: {padding: 12}}           # every Container
-  - {classes: [panel], style: {background: surface_container_high}}
-  - {id: title, style: {foreground: primary}}         # one node
+  - widget: Container
+    style: {padding: 12}                              # every Container
+  - widget: Container
+    classes: [panel]
+    style: {background: surface_container_high}       # a Container with the class `panel`
+  - widget: Text
+    name: title
+    style: {foreground: primary}                      # the node named `title`
+  - widget: Button
+    variant: filled
+    style: {background: tertiary}                     # a property the widget declares
+  - widget: Button
+    variant: filled
+    part: label
+    style: {foreground: on_tertiary}                  # a named node inside the widget
+  - widget: Button
+    state: hovered
+    style: {elevation: 2}                             # while the pointer is over it
 ```
 
-A built-in component's own look is part of the node's `style:` (layer 4): its
-[component stylesheet](../stylesheets/index.md) is merged under whatever the
-fragment sets itself, which is why a view's stylesheet doesn't restyle a
-component's parts. Give the component call a `classes:` and style that, or restyle
-the component with a stylesheet of its own.
+A rule may narrow by `variant`, `size` and `shape` (properties the widget declares), `classes`, `name`, a `part` (a node of the
+widget's own view, named in its stylesheet page) and a `state` (`hovered`, `focused`, `focus_visible`, `pressed`, `disabled`, `selected`, `checked`,
+`expanded`, `error`, `read_only`, `visited`). The most specific rule wins: a `name`, then how many of `variant`, `size`, `shape` and
+`classes` it names, then a `state`, then the widget alone; a later rule wins a tie. A node's own `style:` beats every rule, for the
+fields it sets and no others, and a value in a rule may be an expression over the widget's properties (`"{{ height / 2 }}"`).
+
+A built-in view's look is its shipped rules, so restyling a part everywhere is a rule of your own with the same `widget` and `part`
+in the app's stylesheet. See [Component Stylesheets](../stylesheets/index.md) for each widget's parts, and
+[The View Language](../guide/view-language.md#style) for the rest.
 
 ## Colour
 
@@ -140,9 +152,41 @@ app.set_dark("system")                            # back to following the OS
 Pass `dark=True` or `dark=False` to fix it. A widget made on the app's window with no `theme=` follows
 the app; an explicit `theme=` pins it to that theme.
 
+### Contrast and motion
+
+The OS can also ask for more contrast and for less motion, and an app follows both by default.
+`App(high_contrast="system")` takes MD3's highest-contrast colours when the OS asks for them, and
+`App(reduced_motion="system")` makes animations take no time when it asks for that. Pass `True` or `False` to fix
+either, or change them while the app runs:
+
+```python
+app = App(theme_seed=(0x67, 0x50, 0xA4, 0xFF), high_contrast=False, reduced_motion="system")
+app.set_high_contrast(True)       # every screen re-themed in place
+app.set_reduced_motion("system")  # back to following the OS
+app.high_contrast, app.reduced_motion    # what is in force now
+```
+
+The look of a press and of keyboard focus is the app's too: `App(ripple="shader")` draws every ripple with one shader
+instead of a circle node per press, and `App(focus_ring="gradient")` turns a gradient around the focus ring
+instead of the solid one.
+
 ## Shape and elevation
 
-A theme's `components:` sets a component's corner radius and elevation, by MD3 component and variant:
+A view's shape and elevation are style: `corner_radius` and `elevation` in a rule or a node's `style:`, a number or one of MD3's
+tokens. To change a widget's everywhere, write a rule for it in the app's stylesheet:
+
+```yaml
+styles:
+  - {widget: Card, variant: elevated, style: {corner_radius: 4, elevation: 5}}
+  - {widget: Dialog, style: {corner_radius: small}}
+  - {widget: Fab, variant: surface, style: {corner_radius: 8}}
+```
+
+Shapes are `none`, `extra_small`, `small`, `medium`, `large`, `extra_large` and `full` (a pill or a circle: half the node's
+shorter side), or a number; an elevation is a level from 0 to 5.
+
+A theme's `components:` sets the corner radius and elevation of a widget made in Python with `tesserae.widgets`,
+by MD3 component and variant. It is not read by a view written in YAML, which takes its shape from its rules.
 
 ```yaml
 components:
@@ -151,17 +195,14 @@ components:
   fab.small: {corner_radius: 8}
 ```
 
-It shapes widgets from `tesserae.widgets` and `component:` fragments in views alike. A fragment's root
-reads the entry for its variant (`card.elevated`), then its component's (`card`), over its own values.
-Fragment names map as `CardElevated` to `card.elevated`, `ButtonFilledTonal` to `button.filled_tonal`,
-`SideSheetModal` to `side_sheet.modal` and `Dialog` to `dialog`. A FAB's variant is its size
-(`fab.small`, `fab.default`, `fab.large`). Values are numbers or MD3's tokens: shapes `none`,
-`extra_small`, `small`, `medium`, `large`, `extra_large`, and `full` (a pill or a circle: half the node's shorter side), and elevations
-`level_0` to `level_5`.
+```python
+from tesserae.widgets import card
 
-Tesserae's default theme has entries for MD3's own shapes. A custom theme's entry for a key replaces the
-default's. Buttons, icon buttons and toolbars have no default entry: their corner radius is a formula of
-their size, and a theme that names one overrides the formula.
+card(app.window, 200, 120, variant="elevated")     # corner radius 4, from the theme
+```
+
+A widget's entry for its variant (`card.elevated`) is read, then its component's (`card`), over the widget's own values. A FAB's
+variant is its size (`fab.small`, `fab.default`, `fab.large`). A custom theme's entry for a key replaces the default's.
 
 ## Type
 
@@ -176,14 +217,15 @@ typography:
 
 A `Text` or `Link` with `typography_role: body_large` takes the theme's `body_large`; fields the node
 sets itself still win. A custom theme's entry for a role replaces the default's, rather than merging
-with it. Widgets follow it too. Text inputs don't: a text field keeps its own font, so typed text isn't
+with it. Widgets follow it too. Text inputs don't: a `TextInput` keeps its own font, so typed text isn't
 restyled by the theme.
 
 ### Fonts
 
 Three families are bundled and always available: **Roboto**, **Noto Sans Arabic** and **Hack Nerd Font
-Mono**. Tesserae never looks at the system's fonts, so text looks the same on every machine. To use any
-other family, register its file first:
+Mono**. Tesserae does not look at the system's fonts unless you ask (`App(system_fonts=True)` lets text fall back to
+installed fonts for scripts the bundled ones lack, such as CJK and colour emoji), so by default text looks the same on every
+machine. To use any other family, register its file first:
 
 ```python
 import tesserae
@@ -201,19 +243,21 @@ registered draws a bundled face in its place, and Tesserae warns, naming the fil
 | --- | --- |
 | the app's colours | `App(theme_seed=...)`, or `seed:` in a theme |
 | one colour role | `colors:` in a theme |
-| one screen's look | a stylesheet for that screen: `app.load(..., stylesheet=...)` |
-| every screen's default look | `App(stylesheet=...)` |
-| a component's shape or shadow | `components:` in a theme |
-| a built-in component's parts, everywhere | [its stylesheet](../stylesheets/index.md), next to your views |
+| every view's look | `App(stylesheet=...)`: rules |
+| one kind of widget, a variant of it, or a part of it | a rule for the `widget`, with `variant`, `part` or `state`, in the stylesheet |
+| one view or a few nodes | `classes:` on the nodes and a rule for them; or a rule for the view's name |
+| a widget's shape or shadow | `corner_radius` and `elevation` in a rule (`components:` in a theme is for widgets made in Python) |
 | the type | `typography:` in a theme, and [fonts](#fonts) |
 | one node | its `style:` |
 
+An app has one stylesheet, and every view it opens uses it.
+
 ### While the app runs
 
-`app.set_theme_specs(default, custom)` re-themes every screen the app built, and the window, in one
+`app.set_theme_specs(default, custom)` re-themes every view the app opened, and the window, in one
 call. Both dicts are the complete new selection (`None` for none); the seed and the light or dark
-appearance stay as they are. `app.set_stylesheet_spec(spec)` does the same for the default stylesheet.
-With `run(hot_reload=True)`, saving a theme or stylesheet file does this for you.
+appearance stay as they are. With `run(hot_reload=True)`, saving a theme file does this for you.
+A stylesheet of rules is read when the app is made: change it and run the app again.
 
 ```python
 from tesserae.spec import load_theme
@@ -239,52 +283,15 @@ single-curve form, `(0.2, 0, 0, 1)`.
 
 ### Style files
 
-A node's `style:` can name a `*_Style.yaml` file instead of a mapping, so several views can share one:
+A `*_Style.yaml` file holds one node's `style:` (its fields under a `style:` key, and an optional `id:`), and a node of a view in
+the older syntax can name it (`style: row_Style.yaml`) so several nodes share it. A view in the current language does not apply
+one: write the fields in `style:`, or in a rule that several nodes match through a class or a widget name.
 
-```yaml
-# Counter_View.yaml
-id: root
-kind: Container
-style: counter_Style.yaml   # or {flex_direction: vertical, width: 240, gap: 12}
-```
+### Files and checking
 
-```yaml
-# counter_Style.yaml: one node's style
-id: counter_style      # a name for the style, for the reader (optional)
-style:
-  flex_direction: vertical
-  width: 240
-  gap: 12
-```
-
-The fields go under `style:`, as they do in a view, and `id:` is a name for the style that Tesserae doesn't use. A
-file that is only the fields, with no `style:` above them, is read as well. An editor with the
-[style schema](../guide/editor-support.md) checks the file and says what each field is.
-
-The file is found next to the file that names it, and can't be outside that folder (the same rules as
-`include:`). Hot reload watches it. It is the whole style: a node's `style:` is a file or a mapping, not
-both. To vary one node, give it a class and a stylesheet rule. A stylesheet's or theme's rule can name
-one too (`- {kind: Rect, classes: [card], style: card_Style.yaml}`). A component fragment can't name one:
-its look comes from its parameters and its [stylesheet](../stylesheets/index.md).
-
-### On a single view
-
-Outside an `App`, `load_view` takes the same arguments:
-
-```python
-from tesserae.spec import load_view
-
-view = load_view(
-    "Home_View.yaml",
-    theme_seed=(0x67, 0x50, 0xA4, 0xFF),
-    custom_theme="themes/Brand_Theme.yaml",
-    stylesheet="styles/Home_Stylesheet.yaml",
-)
-```
-
-`stylesheet=`, `default_theme=` and `custom_theme=` take file paths; each also has a `*_spec=` form that
-takes a dict directly (`custom_theme_spec={"colors": {"primary": "#00FF00"}}`). Give one form or the other.
-A mistake in a theme or stylesheet names the file:
+`load_theme` and `load_stylesheet` read a file into the dict the app takes; `App(custom_theme=)` and `App(stylesheet=)` do it for you,
+and each also has a `*_spec=` form that takes a dict directly (`custom_theme_spec={"colors": {"primary": "#00FF00"}}`). Give one
+form or the other. A mistake in a theme or stylesheet names the file:
 `ValueError: themes/Brand_Theme.yaml: custom_theme_spec=: unknown field 'colours'`.
 
 ## How it is implemented
@@ -292,15 +299,15 @@ A mistake in a theme or stylesheet names the file:
 - **Resolving.** `Theme.resolve(seed, dark, default_theme_spec, custom_theme_spec)` turns the four inputs
   into one `Theme`: the role table (`tokens.resolve_scheme`), the `components:` map, the type scale and the
   motion tokens. `app.theme` and `view.theme` return one.
-- **Applying.** A view is built by Tesserae's own compiler: for each node it merges the four layers
+- **Applying.** A view is built by Tesserae's own compiler: for each node it merges the layers
   (above), resolves colour roles against the scheme, and sets the result on the node. `view.set_theme`
   runs the same pass again over the nodes already built, in place, so a theme change never rebuilds a view.
 - **Following.** `tesserae.follow` keeps the widgets, controls and overlays made on an app's window
   without a `theme=`. When the app's theme or appearance changes (including the OS switching) it re-themes
   them with the app's views.
 - **Files.** Tesserae reads theme and stylesheet files itself and hands the engine only data, as for views
-  and images. `*_Theme.yaml`, `*_Stylesheet.yaml` and `*_Style.yaml` say what a file is, and a file named
-  for one kind is refused by the loader of another. A rule's `style:` may name a `*_Style.yaml` file.
+  and images. `*_Theme.yaml` and `*_Stylesheet.yaml` say what a file is, and a file named
+  for one kind is refused by the loader of another.
 
 ## The complete API
 

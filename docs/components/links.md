@@ -10,54 +10,37 @@ A link takes the user somewhere else, or opens a related page. It is text, in th
 
 `widget: Link` is text that takes focus, and that Enter or a click activates. It is `primary`, in `body_medium` unless you name another type role.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `text` | text | what it says; it also names the link for a screen reader |
-| `href` | a link | opened in the OS's browser or mail program when it is activated: `http`, `https`, `mailto` and `tel` only, anything else is refused |
-| `visited` | true or false, two-way | whether it has been followed; opening its `href` sets a bound one, and `state: visited` in a rule colours it (`secondary` by default) |
-| `disabled` | true or false | dimmed, out of the Tab order, and does nothing |
-| `underline` | `hover`, `always` or `never` | underlined while the pointer is over it or keyboard focus is on it (the default), always, or never |
-| `handlers` | | `on_click` runs as well as the `href` opens |
+The `text` also names the link for a screen reader. Its `href` is opened in the OS's browser or mail program when the link is activated: `http`, `https`, `mailto` and `tel` only,
+anything else is refused. Opening it sets a bound `visited`, and `state: visited` in a rule colours it (`secondary` by default). A disabled link is dimmed, out of the Tab order,
+and does nothing. It is underlined while the pointer is over it or keyboard focus is on it (`underline: hover`, the default), always, or never. `handlers: {on_click: ...}` runs
+as well as the `href` opens; a link with no `href` just runs its handler.
 
-The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. Inside a longer text, use `text.runs` with a `link`.
-
-`widget: Link` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: Link` | Text that opens something when it is clicked. | [`Link_Stylesheet.yaml`](../stylesheets/links/link.md) |
+The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. Inside a longer text, put the `Link` in a row with the `Text` pieces around it.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
-
 ### `Link`
 
-Text that opens something when it is clicked. Its look: [`Link_Stylesheet.yaml`](../stylesheets/links/link.md).
+Text that can be activated.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `text` | required |  |
-| `width` | required |  |
-| `height` | required |  |
-| `wrap` | optional | `none` |
-| `overflow` | optional | `ellipsis` |
+| Property | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `text` | `str` |  | The link's text, which names it for a screen reader. |
+| `typography_role` | `str` |  | A type role of the theme, such as body_large or title_large. |
+| `font_family` | `str` |  |  |
+| `font_size` | `float` |  |  |
+| `font_weight` | `any` |  |  |
+| `wrap` | `word` or `none` | `word` | 'word' breaks a long line; 'none' never does. |
+| `overflow` | `clip` or `ellipsis` | `clip` |  |
+| `text_align` | `start` or `center` or `end` | `start` |  |
+| `max_lines` | `int` |  | The most lines shown, from 1; a longer text is cut (with `overflow: ellipsis`, an ellipsis ends the last line). |
+| `letter_spacing` | `float` |  | Extra space between letters, in pixels (tracking). |
+| `href` | `str` |  | A web or mail link (http, https, mailto, tel) opened in the OS's browser or mail program when it is activated. |
+| `visited` | `bool` |  | Whether it has been followed; opening its href sets it, and a rule can show it with `state: visited`. Two-way. |
+| `disabled` | `bool` |  | Dimmed, and not activated. |
+| `underline` | `hover` or `always` or `never` | `hover` | When the text is underlined: while the pointer is over it or it has the keyboard focus, always, or never. |
 
-```yaml
-params:
-  - text
-  - width
-  - height
-  - {wrap: none}
-  - {overflow: ellipsis}
-id: root
-kind: Link
-text:
-  content: "{{ text }}"
-  typography_role: body_large
-  wrap: "{{ wrap }}"
-  overflow: "{{ overflow }}"
-```
+Its `style:` also takes `foreground`.
 
 ## Using it
 
@@ -71,22 +54,7 @@ children:
   - {widget: Link, text: Sign in, handlers: {on_click: sign_in}}
 ```
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: help
-    component: Link
-    with: {text: Read the docs, width: 160, height: 24}
-    handlers: {on_click: open_docs}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import link
@@ -94,20 +62,8 @@ from tesserae.widgets import link
 help_link = link(app.window, "Read the docs", 160, on_click=viewmodel.open_docs)
 ```
 
-## Changing its look
-
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
-
-```yaml
-# Link_Stylesheet.yaml, next to your views
-styles:
-  - id: root
-    style: {foreground: tertiary}
-```
-
-See [Component stylesheets](../stylesheets/index.md).
-
 ## See also
 
+- [Rich Text](../guide/rich-text.md)
 - [Python API reference](../api/python.md)
 - [YAML reference](../api/yaml.md)

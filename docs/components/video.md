@@ -12,57 +12,39 @@ An `Image` takes a `frame`, `(rgba bytes, width, height)`, from a binding and sh
 
 `widget: VideoPlayer` is a view Tesserae ships (`VideoPlayer_View.yaml`) that puts transport controls under such a picture: a play/pause button, the time, a seek slider, the length and a mute button.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `frame` | `(rgba, width, height)` | the picture, pushed by the app as the video plays |
-| `width`, `height`, `fit` | | the picture's size (the controls are as wide) and how it fills its box |
-| `playing` | true or false; two-way | the play button flips it; the app's player follows |
-| `position` | seconds; two-way | the seek slider shows and writes it; the app moves it on as it plays |
-| `duration` | seconds | the length (the slider is off without one) |
-| `muted` | true or false; two-way | the volume button flips it |
-| `buffering` | true or false | a wait ring over the picture |
-| `caption` | text | a subtitle on a darkened band at the foot of the picture |
-| `step`, `label` | | how far the arrow keys move the slider; the player's accessible name |
+The app pushes each `frame` as the video plays; `width` and `height` are the picture's size (the controls are as wide) and `fit` how it fills its box (`contain` here). The three
+two-way values are `playing` (the play button flips it; the app's player follows), `position` (seconds; the seek slider shows and writes it, and the app moves it on as it plays)
+and `muted` (the volume button flips it). `duration` is the length in seconds, and the slider is off without one. `buffering` lays a wait ring over the picture, `caption` puts a
+subtitle on a darkened band at its foot, `step` is how far the arrow keys move the slider, and `label` is the player's name for a screen reader.
 
 On the seek slider: Space plays or pauses, the arrows step the position, M mutes. Not built: a decoder (decode with the library you choose, and set `frame`), full-screen, speeds, a volume level, a poster.
 
-`widget: VideoPlayer` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: Video` | A frame of video, fitted to its box. Frames come from a binding. | [`Video_Stylesheet.yaml`](../stylesheets/video/video.md) |
-
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: VideoPlayer`. A file of the same name in your project replaces it.
 
-### `Video`
+### `VideoPlayer`
 
-A frame of video, fitted to its box. Frames come from a binding. Its look: [`Video_Stylesheet.yaml`](../stylesheets/video/video.md).
+A video player: a picture surface with the usual transport controls under it. Tesserae has no decoder, so the app supplies the frames: a `frame` (rgba bytes, width, height) that a ViewModel updates as it plays, like an `Image`'s `frame`. The player owns none of the playing: `playing` (two-way) is what the play button flips, `position` (two-way, seconds) is where the seek slider is and what it writes when dragged, and the app's player follows both and moves `position` on as the video plays. `duration` is the length in seconds. `muted` (two-way) is the volume button. `buffering` lays a wait ring over the picture; `caption` is a line of subtitle on a darkened band at its foot. Keys, on the seek slider: Space plays or pauses, the arrows step `position` by `step` seconds, M mutes (the buttons are Tab stops with their own keys). The role is a group named by `label`. Not here: a decoder, full-screen, speeds, a volume level.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `width` | required |  |
-| `height` | required |  |
-| `fit` | optional | `fill` |
-| `frame` | optional | `None` |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `frame` | `any` |  | The current picture: (rgba bytes, width, height), pushed by the app as the video plays. |
+| `width` | `float` | `480` | The picture's width. |
+| `height` | `float` | `270` | The picture's height. |
+| `fit` | `cover` or `contain` or `fill` | `contain` | How the picture fills its box. |
+| `playing` | `bool` | `false` | Whether it is playing; the play button flips it. Two-way: give it a bare reference and the view writes it back. |
+| `position` | `float` | `0` | Seconds in; the seek slider shows and writes it. Two-way: give it a bare reference and the view writes it back. |
+| `duration` | `float` | `0` | The length in seconds. |
+| `muted` | `bool` | `false` | Whether the sound is off; the volume button flips it. Two-way: give it a bare reference and the view writes it back. |
+| `buffering` | `bool` | `false` | A wait ring over the picture. |
+| `caption` | `str` |  | A subtitle line shown at the foot of the picture. |
+| `step` | `float` | `1` | Seconds the arrow keys move the seek slider (and a drag lands on a multiple of it). |
+| `label` | `str` | `Video` | What a screen reader calls the player. |
 
-```yaml
-params:
-  - width
-  - height
-  - {fit: fill}
-  - {frame: null}
-id: root
-kind: Image
-image:
-  fit: "{{ fit }}"
-bindings:
-  if: "{{ frame }}"
-  then:
-    frame: "{{ frame }}"
-a11y: {hidden: true}
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `stage` (Container), `picture` (Image), `wait` (CircularProgress), `caption` (Container), `caption_text` (Text), `controls` (Container), `play` (IconButton), `elapsed` (Text), `seek` (Slider), `total` (Text), `volume` (IconButton).
+
+Its look is in [`VideoPlayer_Stylesheet.yaml`](../stylesheets/video/video-player.md).
 
 ## Using it
 
@@ -80,21 +62,7 @@ children:
     caption: "{{ words }}"
 ```
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: clip
-    component: Video
-    with: {width: 320, height: 180, fit: contain}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import video
@@ -104,13 +72,14 @@ clip = video(app.window, 320, 180, fit="contain")
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# Video_Stylesheet.yaml, next to your views
+# VideoPlayer_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: root
-    style: {width: tertiary}
+  - widget: VideoPlayer
+    part: elapsed
+    style: {foreground: tertiary}
 ```
 
 See [Component stylesheets](../stylesheets/index.md).

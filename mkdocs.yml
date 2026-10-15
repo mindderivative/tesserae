@@ -146,51 +146,19 @@ nav:
       - Overview: stylesheets/index.md
       - Actions:
           - Buttons:
-              - ButtonFilled: stylesheets/buttons/button-filled.md
-              - ButtonFilledTonal: stylesheets/buttons/button-filled-tonal.md
-              - ButtonElevated: stylesheets/buttons/button-elevated.md
-              - ButtonOutlined: stylesheets/buttons/button-outlined.md
-              - ButtonText: stylesheets/buttons/button-text.md
-          - Button groups:
-              - ButtonGroup: stylesheets/button-groups/button-group.md
-          - Split buttons:
-              - SplitButtonFilled: stylesheets/split-buttons/split-button-filled.md
-              - SplitButtonFilledTonal: stylesheets/split-buttons/split-button-filled-tonal.md
-              - SplitButtonElevated: stylesheets/split-buttons/split-button-elevated.md
-              - SplitButtonOutlined: stylesheets/split-buttons/split-button-outlined.md
-              - SplitButtonText: stylesheets/split-buttons/split-button-text.md
+              - Button: stylesheets/buttons/button.md
           - Icon buttons:
-              - IconButtonStandard: stylesheets/icon-buttons/icon-button-standard.md
-              - IconButtonFilled: stylesheets/icon-buttons/icon-button-filled.md
-              - IconButtonFilledTonal: stylesheets/icon-buttons/icon-button-filled-tonal.md
-              - IconButtonOutlined: stylesheets/icon-buttons/icon-button-outlined.md
+              - IconButton: stylesheets/icon-buttons/icon-button.md
           - Floating action buttons:
-              - FabPrimary: stylesheets/fabs/fab-primary.md
-              - FabSecondary: stylesheets/fabs/fab-secondary.md
-              - FabTertiary: stylesheets/fabs/fab-tertiary.md
-              - FabSurface: stylesheets/fabs/fab-surface.md
-          - Extended FABs:
-              - ExtendedFabPrimary: stylesheets/extended-fabs/extended-fab-primary.md
-              - ExtendedFabSecondary: stylesheets/extended-fabs/extended-fab-secondary.md
-              - ExtendedFabTertiary: stylesheets/extended-fabs/extended-fab-tertiary.md
-              - ExtendedFabSurface: stylesheets/extended-fabs/extended-fab-surface.md
+              - Fab: stylesheets/fabs/fab.md
       - Communication:
           - Badges:
-              - BadgeDot: stylesheets/badges/badge-dot.md
-              - BadgeLabeled: stylesheets/badges/badge-labeled.md
-          - Progress indicators:
-              - LinearProgress: stylesheets/progress-indicators/linear-progress.md
-              - CircularProgress: stylesheets/progress-indicators/circular-progress.md
-              - LoadingIndicator: stylesheets/progress-indicators/loading-indicator.md
+              - Badge: stylesheets/badges/badge.md
           - Snackbars:
               - Snackbar: stylesheets/snackbars/snackbar.md
-          - Tooltips:
-              - Tooltip: stylesheets/tooltips/tooltip.md
       - Containment:
           - Cards:
-              - CardElevated: stylesheets/cards/card-elevated.md
-              - CardFilled: stylesheets/cards/card-filled.md
-              - CardOutlined: stylesheets/cards/card-outlined.md
+              - Card: stylesheets/cards/card.md
           - Dialogs:
               - Dialog: stylesheets/dialogs/dialog.md
           - Dividers:
@@ -198,27 +166,25 @@ nav:
           - Lists:
               - ListItem: stylesheets/lists/list-item.md
           - Side sheets:
-              - SideSheetStandard: stylesheets/side-sheets/side-sheet-standard.md
+              - SideSheet: stylesheets/side-sheets/side-sheet.md
               - SideSheetModal: stylesheets/side-sheets/side-sheet-modal.md
+              - SideSheetPanel: stylesheets/side-sheets/side-sheet-panel.md
           - Accordions:
-              - AccordionHeader: stylesheets/accordions/accordion-header.md
+              - Accordion: stylesheets/accordions/accordion.md
           - Trees:
-              - TreeNodeBranch: stylesheets/trees/tree-node-branch.md
-              - TreeNodeLeaf: stylesheets/trees/tree-node-leaf.md
+              - TreeNode: stylesheets/trees/tree-node.md
       - Navigation:
           - Navigation rail:
               - NavigationRail: stylesheets/navigation-rail/navigation-rail.md
               - NavigationRailItem: stylesheets/navigation-rail/navigation-rail-item.md
-              - NavigationRailScreens: stylesheets/navigation-rail/navigation-rail-screens.md
-              - NavigationRailScreen: stylesheets/navigation-rail/navigation-rail-screen.md
           - Navigation drawer:
               - NavigationDrawer: stylesheets/navigation-drawer/navigation-drawer.md
               - NavigationDrawerItem: stylesheets/navigation-drawer/navigation-drawer-item.md
+              - NavigationDrawerModal: stylesheets/navigation-drawer/navigation-drawer-modal.md
+              - NavigationDrawerPanel: stylesheets/navigation-drawer/navigation-drawer-panel.md
+              - NavigationDrawerScreens: stylesheets/navigation-drawer/navigation-drawer-screens.md
           - Top app bar:
               - TopAppBar: stylesheets/top-app-bar/top-app-bar.md
-          - Tabs:
-              - Tabs: stylesheets/tabs/tabs.md
-              - TabsItem: stylesheets/tabs/tabs-item.md
           - Menus:
               - Menu: stylesheets/menus/menu.md
               - MenuItem: stylesheets/menus/menu-item.md
@@ -226,46 +192,32 @@ nav:
               - SearchBar: stylesheets/search/search-bar.md
               - SearchView: stylesheets/search/search-view.md
           - Toolbars:
-              - ToolbarDocked: stylesheets/toolbars/toolbar-docked.md
-              - ToolbarFloating: stylesheets/toolbars/toolbar-floating.md
-          - Links:
-              - Link: stylesheets/links/link.md
+              - Toolbar: stylesheets/toolbars/toolbar.md
       - Selection and input:
-          - Checkbox:
-              - Checkbox: stylesheets/checkboxes/checkbox.md
-          - Radio button:
-              - RadioButton: stylesheets/radio-buttons/radio-button.md
-          - Switch:
-              - Switch: stylesheets/switches/switch.md
-          - Slider:
-              - Slider: stylesheets/sliders/slider.md
           - Chips:
-              - ChipAssist: stylesheets/chips/chip-assist.md
-              - ChipFilter: stylesheets/chips/chip-filter.md
-              - ChipFilterSelected: stylesheets/chips/chip-filter-selected.md
-              - ChipInput: stylesheets/chips/chip-input.md
-              - ChipSuggestion: stylesheets/chips/chip-suggestion.md
+              - Chip: stylesheets/chips/chip.md
+          - Text fields:
+              - TextField: stylesheets/text-fields/text-field.md
+          - Spin box:
+              - SpinBoxField: stylesheets/spin-boxes/spin-box-field.md
           - Date picker:
+              - DatePicker: stylesheets/date-pickers/date-picker.md
               - DatePickerDay: stylesheets/date-pickers/date-picker-day.md
-              - DatePickerDayToday: stylesheets/date-pickers/date-picker-day-today.md
-              - DatePickerDaySelected: stylesheets/date-pickers/date-picker-day-selected.md
-              - DatePickerDayOutsideMonth: stylesheets/date-pickers/date-picker-day-outside-month.md
           - Time picker:
-              - TimePickerDial: stylesheets/time-pickers/time-picker-dial.md
-              - PeriodSelectorAM: stylesheets/time-pickers/period-selector-am.md
-              - PeriodSelectorPM: stylesheets/time-pickers/period-selector-pm.md
+              - TimePicker: stylesheets/time-pickers/time-picker.md
+              - PeriodSelector: stylesheets/time-pickers/period-selector.md
+          - Time input:
+              - TimeInput: stylesheets/time-input/time-input.md
       - Content:
-          - Text:
-              - Text: stylesheets/text/text.md
-          - Images:
-              - Image: stylesheets/images/image.md
           - Video:
-              - Video: stylesheets/video/video.md
+              - VideoPlayer: stylesheets/video/video-player.md
+          - Carousel:
+              - Carousel: stylesheets/carousel/carousel.md
+          - Pagination:
+              - Pagination: stylesheets/pagination/pagination.md
       - Beyond MD3:
           - Status bar:
               - StatusBar: stylesheets/status-bar/status-bar.md
-          - Node graph:
-              - NodeGraph: stylesheets/node-graph/node-graph.md
   # <<< components
   - Reference:
       - Python API: api/python.md

@@ -2,11 +2,11 @@ from tesserae import Signal, ViewModel
 
 
 class CounterViewModel(ViewModel):
-    def __init__(self, view):
-        self.count = 0
-        self.label_text = Signal("Count: 0")
-        super().__init__(view)  # last: it reads the Signals above
+    views = "Counter"  # the view it serves: the `name:` at the top of Counter_View.yaml
+
+    def __init__(self):
+        super().__init__()
+        self.count = Signal(0)
 
     def increment(self):
-        self.count += 1
-        self.label_text.set(f"Count: {self.count}")
+        self.count.update(lambda n: n + 1)

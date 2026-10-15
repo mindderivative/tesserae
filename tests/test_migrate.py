@@ -294,10 +294,6 @@ def stub(prefix, names):
 
 CASES = [
     ("examples/counter/Counter_View.yaml", "Counter", {"label": "Count: 0", "button_label": "Increment", "increment": None}),
-    ("examples/getting_started/declarative/step1/Counter_View.yaml", "Counter", {}),
-    ("examples/getting_started/declarative/step2/Counter_View.yaml", "Counter", {}),
-    ("examples/getting_started/declarative/step3/Counter_View.yaml", "Counter", {}),
-    ("examples/getting_started/declarative/step4/Counter_View.yaml", "Counter", {"label_text": "Count: 0", "increment": None}),
     ("examples/window_dock/Files_View.yaml", "Files", {}),
     ("examples/window_dock/Home_View.yaml", "Home", {}),
     ("examples/window_dock/Outline_View.yaml", "Outline", {}),
@@ -325,3 +321,19 @@ def test_a_migrated_view_draws_the_same_tree_as_the_old_one(tmp_path, path, pref
     bindings.bind(new_vm)
     new_view = open_composed(doc, bindings, base_dir=source.parent, theme_seed=SEED)
     assert dump(new_view.root) == dump(old_view.root)
+
+
+def test_a_view_that_calls_a_view_tesserae_ships_is_checked_against_it(tmp_path):
+    """The check loads each result as the app does, so a call of `NavigationRailScreens` or `StatusBar` (shipped, and called by the same name) must resolve."""
+    (tmp_path / "Window_View.yaml").write_text(
+        "id: root\nkind: Window\ntitle: T\nstyle: {width: 300, height: 200, flex_direction: vertical}\nchildren:\n"
+        "  - id: nav\n    component: NavigationRailScreens\n    with:\n      items:\n        - {label: Home, icon: home, screen: Home}\n"
+        "  - id: status\n    component: StatusBar\n    with: {text: Ready, width: '100%'}\n")
+    report = migrate_project(tmp_path)
+    assert not report.failed and [r.status for r in report.results] == ["migrated"]
+
+
+def test_a_name_that_is_neither_the_projects_nor_shipped_still_fails_the_check(tmp_path):
+    (tmp_path / "Home_View.yaml").write_text("id: root\nkind: Container\nchildren:\n  - id: b\n    component: ButtonFilled\n    with: {label: Go}\n")
+    report = migrate_project(tmp_path)
+    assert [r.status for r in report.results] == ["failed"] and "no widget named 'ButtonFilled'" in report.results[0].error

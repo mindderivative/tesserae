@@ -2,12 +2,19 @@
 
 `tesserae.widgets` builds MD3 (Material Design 3) widgets from Python: one
 function per widget, called against a live `Window`. Use it when a widget
-is created at run time. For a widget in a static view, write
-[`component:`](component-fragments.md) in the YAML instead.
+is created at run time. For a widget in a view, write `widget: Button` (or
+any other [component view](component-fragments.md)) in the YAML instead.
 
 Every widget, with its look and its YAML, has a page under
 [Components](../components/index.md). Every function's signature is in the
 [Python API](../api/python.md).
+
+The YAML and Python forms are separate. `widget: Button` in a view is the
+view Tesserae ships (`Button_View.yaml`), with its properties (`label`,
+`variant`, `size`, ...); `button(window, ...)` builds the same Material 3
+button from Tesserae's own definition for Python, with the arguments of the
+function. A `Button_View.yaml` of your own changes the first, not the
+second.
 
 ```python
 from tesserae.widgets import button
@@ -24,10 +31,9 @@ colours. See [Themes](../themes/index.md).
 
 ## The Widget object
 
-Most widgets are composed: each expands the same `*_Component.yaml`
-fragment that a `component: ButtonFilled` does, and builds it with
-Tesserae's compiler, so the Python and YAML paths share one definition.
-They return a `Widget`:
+Most widgets are composed: each is built from Tesserae's definition of
+that component, a tree of ordinary nodes with named parts. They return a
+`Widget`:
 
 ```python
 from tesserae.widgets import button
@@ -92,24 +98,25 @@ overlays with `open()` and `close()`. See [Overlays](overlays.md).
 
 ## Code or YAML
 
-| | `tesserae.widgets` | [`component:`](component-fragments.md) |
+| | `tesserae.widgets` | [`widget: Name`](component-fragments.md) |
 | --- | --- | --- |
 | Called from | Python (a ViewModel, setup code) | a `*_View.yaml` |
-| Style | imperative: `button(window, ...)` | declarative: `component: ButtonFilled` |
-| Runtime data | plain function arguments | what is known when the view loads |
+| Style | imperative: `button(window, ...)` | declarative: `widget: Button` |
+| Runtime data | plain function arguments | any expression, and it follows the data |
 
-Reach for a fragment first when a widget is part of a static layout: it
-keeps the screen declarative. Reach for `tesserae.widgets` when the widget
-is made at run time, such as a count decided by data, or one that only
-some code path builds.
+Reach for a view first when a widget is part of a layout: it keeps the
+screen declarative, and `for:` and `if:` already make widgets from data and
+add or remove them as it changes. Reach for `tesserae.widgets` when the
+widget has to be made by code, such as one that only some code path
+builds, or one added to a window that is not built from a view.
 
-## `list_` and `repeat:`
+## `list_` and `for:`
 
-`list_` takes pre-built `Node`s and lays them out. In a view, a list of
-`ListItem` fragments is a container with N children, and
-[`repeat:`](component-fragments.md#repeating-a-fragment-repeat) saves
-writing N blocks by hand. For a list that changes while the app runs, use
-a [Repeater](repeater.md).
+`list_` takes pre-built `Node`s and lays them out. In a view, a list is a
+container of `ListItem` calls, and
+[`for:`](component-fragments.md#repeating-a-view-for) writes the one call
+once and builds a row for each element of the data, adding and removing
+rows as the data changes.
 
 ## Layout
 

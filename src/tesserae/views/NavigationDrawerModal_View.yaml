@@ -1,4 +1,4 @@
-# The Material 3 modal navigation drawer: the same destinations, slid over the content on a scrim from the start edge, `surface_container_low` at level 1 with 16 pixel
+# The Material 3 modal navigation drawer: the same destinations, over the content on a scrim from the start edge, `surface_container_low` at level 1 with 16 pixel
 # corners on the side that opens. Pressing a destination closes it (and writes the choice); Escape and a press on the scrim close it too, writing false to `open`, and
 # focus goes back to where it was. A menu button in the calling view opens it by writing `open`.
 params:

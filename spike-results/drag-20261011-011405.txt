@@ -1,0 +1,2 @@
+drag spike: 8474 events, 0 drops, 0 pointer_moves during a drag
+root pointer_move kept arriving during a drag: NO (Tesserae cannot hit-test; ask tre)

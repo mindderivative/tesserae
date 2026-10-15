@@ -1,8 +1,91 @@
 # Overlays
 
-`tesserae.overlays` shows MD3's dialogs, menus, snackbars, tooltips,
-side sheets and modal navigation drawers over a window's content.
-They're built from Tesserae's fragments and shown with `tre`'s layers.
+An overlay is a layer over the window: a dialog, a menu, a snackbar, a side sheet. There are two ways to make one.
+In a view, a `widget: Overlay` shows its children while its `open` is true. From Python, `tesserae.overlays` has MD3's
+dialogs, menus, snackbars, tooltips, popovers, side sheets and modal navigation drawers, ready made, built from Tesserae's
+fragments and shown with `tre`'s layers.
+
+## An Overlay in a view
+
+`widget: Overlay` takes no room where it is written. Its children are drawn in a layer over the window while `open` is
+true. Bind `open` to a Signal (or a `state:` name) and the layer follows it, and the user's Escape or outside press writes
+`false` back:
+
+```yaml
+widget: Container
+name: page
+state: {confirm: false}
+style: {flex_direction: vertical, width: 400, height: 300, padding: 20}
+children:
+  - {widget: Button, name: delete, label: Delete, handlers: {on_click: "confirm = True"}}
+  - widget: Overlay
+    open: "{{ confirm }}"
+    modal: true
+    children:
+      - widget: Container
+        name: dialog
+        style: {flex_direction: vertical, gap: 16, padding: 24, width: 312, background: surface_container_high, corner_radius: 28}
+        a11y: {role: dialog, label: Delete this file}
+        children:
+          - {widget: Text, text: "Delete this file?", typography_role: headline_small, style: {foreground: on_surface}}
+          - widget: Container
+            style: {flex_direction: horizontal, gap: 8, align_content: right}
+            children:
+              - {widget: Button, name: cancel, label: Cancel, variant: text, handlers: {on_click: "confirm = False"}}
+              - {widget: Button, name: confirm_it, label: Delete, variant: text, handlers: {on_click: "confirm = False; delete_file()"}}
+```
+
+| Property | What it does |
+| --- | --- |
+| `open` | Whether it is showing. Two-way. With an `open` that is not a Signal, a layer the user closed stays closed until `open` goes false. |
+| `anchor` | The `name` of a node in this view to sit against, or `parent` for the node it is written inside. |
+| `placement` | `below` (the default), `above`, `start` or `end` of the anchor; it flips or shifts to fit. |
+| `modal` | A scrim (the `scrim` colour at 32%) over the whole window, blocking input to what is under it and keeping Tab inside. It follows the window's size and centres its children unless the style places them (`align_content`). A press on the scrim closes a dismissible modal; a press on its content does not. |
+| `dismissible` | `true` (the default): Escape and a press outside close it. `false` turns both off. |
+| `focus_first` | When it opens, the focus moves to the first thing in it that can take it (a menu's first row). |
+| `timeout` | Closes it that many milliseconds after it opens, unless the pointer is over it. 0, the default, never. |
+| `handlers` | `on_dismiss` runs when it closes itself or the user closes it. |
+
+Without an `anchor` and not modal, the layer sits at its own `x` and `y` in the window (the top left unless its style says).
+Focus goes back to where it was when the layer closes. To close it from inside, write `false` to the Signal `open` is bound
+to, as the Cancel button does. The `style:` of the Overlay sizes and paints the layer; put the dialog itself in a child with
+its own size and background.
+
+A menu against a button, closed by the same Signal:
+
+```yaml
+widget: Container
+state: {menu_open: false}
+style: {flex_direction: vertical, padding: 20, width: 300, height: 240}
+children:
+  - {widget: Button, name: trigger, label: Options, handlers: {on_click: "menu_open = not menu_open"}}
+  - widget: Overlay
+    open: "{{ menu_open }}"
+    anchor: trigger
+    placement: below
+    focus_first: true
+    style: {width: 160, background: surface_container}
+    children:
+      - widget: Container
+        name: rename
+        style: {height: 40, padding: 12, align_content: left}
+        handlers: {on_click: "menu_open = False; rename()"}
+        children:
+          - {widget: Text, text: Rename, typography_role: label_large, style: {foreground: on_surface}}
+      - widget: Container
+        name: remove
+        style: {height: 40, padding: 12, align_content: left}
+        handlers: {on_click: "menu_open = False; remove()"}
+        children:
+          - {widget: Text, text: Delete, typography_role: label_large, style: {foreground: on_surface}}
+```
+
+[The View Language](view-language.md#overlays) has the rest, and a `tooltip:` on any node is the lighter way to show a hint
+([Tooltips](view-language.md#tooltips)).
+
+## Overlays from Python
+
+For a dialog, menu or snackbar that code opens, `tesserae.overlays` makes them:
 
 ```python
 from tesserae.overlays import Dialog, Menu, Snackbar, Tooltip
@@ -26,25 +109,16 @@ Every overlay has `open()`, `close()`, `is_open`, `on_close(fn)` and
 
 ## A dialog with a view of its own
 
-`ViewDialog(window, "Settings_View.yaml", width=480, height=320)` is a `Dialog` whose content is a [view](components.md#in-yaml-view): its
+`ViewDialog(window, "Settings_View.yaml", width=480, height=320)` is a `Dialog` whose content is a view file: its
 file, or its name in a project, with its ViewModel if it has one (`arguments={"who": "Ada"}` goes to the constructor) and without one
-if it hasn't. `dialog.content` is the view and `dialog.viewmodel` its ViewModel. Put a `TitleBar` with `buttons: [dismiss]` at
-the top of the view for a header with a close button, and a `surface.dismiss` handler on anything for the rest:
+if it hasn't. `dialog.content` is the view and `dialog.viewmodel` its ViewModel. A `TitleBar` with `buttons: [dismiss]` at
+the top of the view is a header with a close button, and a `surface.dismiss` handler on anything closes the dialog.
 
-```yaml
-id: root
-kind: Container
-style: {flex_direction: vertical, width: 100%, height: 100%}
-children:
-  - {id: bar, kind: TitleBar, title: Settings, icon: settings, buttons: [dismiss]}
-  - id: done
-    component: ButtonText
-    with: {label: Done, width: 72, height: 40, corner_radius: 20}
-    handlers: {on_click: surface.dismiss}
-```
+`ViewDialog` reads its file with the older view loader, so a view written in the current language does not load in it. To
+show a view of your own in a dialog, put it in a `widget: Overlay` as above.
 
-`surface.dismiss` closes the overlay the node is in (the nearest one up its parents), as its `close()` does; in `tesserae.overlays`,
-`dismiss_surface(node)` is the same from Python.
+`surface.dismiss` closes the overlay made by `tesserae.overlays` that the node is in (the nearest one up its parents), as its `close()` does; in `tesserae.overlays`,
+`dismiss_surface(node)` is the same from Python. It does not close a `widget: Overlay` of a view: that one closes by writing `open`.
 
 ## Which closes how
 
@@ -111,8 +185,6 @@ modal overlay keeps Tab inside it.
 
 ## Not yet covered
 
-- A scrim is sized when its overlay opens. If the window is resized while
-  the overlay is open, the scrim keeps its old size.
 - Dialog and snackbar text is one line. Long supporting text doesn't
   wrap yet.
 - Submenus: `menu_item(submenu=True)` draws the chevron, and opening a

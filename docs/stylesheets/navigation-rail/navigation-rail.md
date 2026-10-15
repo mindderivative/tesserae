@@ -1,74 +1,44 @@
 # NavigationRail_Stylesheet.yaml
 
-A navigation rail: a narrow column of destinations beside the content.
+The look of NavigationRail (Material 3): a surface column 80 pixels wide, with 44 pixels above the first destination (less when there is a header), 12 between destinations. An expanded rail has 20 pixels of padding each side.
 
 The look of [`NavigationRail`](../../components/navigation-rail.md) (in [Navigation rail](../../components/navigation-rail.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# NavigationRail: the look of each part of the component, by the part's id.
-# A value in {{ }} is one of the component's parameters.
+# The look of NavigationRail (Material 3): a surface column 80 pixels wide, with 44 pixels above the first destination (less when there is a header),
+# 12 between destinations. An expanded rail has 20 pixels of padding each side.
 styles:
-  - id: root
+  - widget: NavigationRail
     style:
-      width: 80
-      flex_direction: vertical
-      align_content: top
+      background: "{{ 'surface@72%' if frosted else 'surface' }}"
+      backdrop_blur: "{{ 20 if frosted else 0 }}"
+      padding: "{{ {'left': 20, 'right': 20, 'top': 44, 'bottom': 56} if expanded else {'left': 0, 'right': 0, 'top': 44, 'bottom': 56} }}"
       gap: 12
-      padding:
-        left: 0
-        right: 0
-        top: 12
-        bottom: 12
-      background: surface
 ```
 
-## How it is tied to the component
+## How it reaches the view
 
-`NavigationRail_Component.yaml` holds the structure: the parts, each with an `id`. This file holds the look: each rule's `id` names a part, and its `style` is what that part looks like. When a view uses `component: NavigationRail`, Tesserae fills in the parameters (a value like `"{{ width }}"` becomes the `width` the view passed), picks a branch of any `if:`, and puts each rule under the style the part already has, so a part's own `style:` always wins.
+Each rule names `widget: NavigationRail` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
-## The parts
+## The rules
 
-### `root` (Container)
+### `NavigationRail` itself
 
-| Field | Value | What it does |
-| --- | --- | --- |
-| `width` | `80` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| `flex_direction` | `vertical` | How its children are laid out: `horizontal` (the default) or `vertical`. |
-| `align_content` | `top` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
-| `gap` | `12` | Space between its children. |
-| `padding` | left `0`, right `0`, top `12`, bottom `12` | Space inside it: one number, or `{left, right, top, bottom}`. |
-| `background` | `surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-
-## What it makes
-
-With ``, and a list of items, each part's style is:
-
-```yaml
-root:
-  width: 80
-  flex_direction: vertical
-  align_content: top
-  gap: 12
-  padding: {left: 0, right: 0, top: 12, bottom: 12}
-  background: surface
-item.0: {width: 80, height: 56, flex_direction: vertical, align_content: top, gap: 4}
-item.0.pill: {width: 56, height: 32, corner_radius: 16, background: secondary_container, align_content: center}
-item.0.icon: {width: 24, height: 24, foreground: on_secondary_container}
-item.0.label: {foreground: on_surface}
-item.1: {width: 80, height: 56, flex_direction: vertical, align_content: top, gap: 4}
-item.1.pill: {width: 56, height: 32, corner_radius: 16, background: transparent, align_content: center}
-item.1.icon: {width: 24, height: 24, foreground: on_surface_variant}
-item.1.label: {foreground: on_surface_variant}
-```
+| When | Field | Value | What it does |
+| --- | --- | --- | --- |
+| always | `background` | `{{ 'surface@72%' if frosted else 'surface' }}` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
+| always | `backdrop_blur` | `{{ 20 if frosted else 0 }}` | Blurs what is behind it, by this many pixels: with a translucent `background`, a frosted surface. |
+| always | `padding` | `{{ {'left': 20, 'right': 20, 'top': 44, 'bottom': 56} if expanded else {'left': 0, 'right': 0, 'top': 44, 'bo…` | Space inside it: one number, or `{left, right, top, bottom}`. |
+| always | `gap` | `12` | Space between its children. |
 
 ## Changing it
 
-Put a `NavigationRail_Stylesheet.yaml` next to your views. Its rules go over this file's, field by field:
+Write a rule of your own; it goes over this file's, field by field:
 
 ```yaml
 styles:
-  - id: root
+  - widget: NavigationRail
     style: {background: tertiary}
 ```

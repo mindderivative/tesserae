@@ -1,6 +1,6 @@
 # Controls
 
-Tesserae draws MD3's stateful controls itself: the checkbox, radio button, switch, slider, spin box,
+Tesserae draws MD3's stateful controls itself: the checkbox, radio button, switch, slider, range slider, spin box,
 linear and circular progress, loading indicator and time picker dial.
 They work with a mouse, a keyboard and a screen reader, and follow the
 theme, including light and dark ([Themes](../themes/index.md)). Each control
@@ -9,38 +9,54 @@ signatures are in the [Python API](../api/python.md).
 
 ## In a view
 
-In a `*_View.yaml`, the nine control kinds are controls:
+In a `*_View.yaml`, these widgets are controls: `Checkbox`, `RadioButton`, `Switch`, `Slider`, `RangeSlider`, `SpinBox`,
+`LinearProgress`, `CircularProgress`, `LoadingIndicator` and `TimePickerDial`.
 
 ```yaml
-- id: agree
-  kind: Checkbox
-  checked: false
-  style: {}
-  bindings: {checked: "{{ agreed.get() }}"}
-  two_way: checked
-  handlers: {on_change: "agreement_changed"}
+widget: Container
+style: {flex_direction: vertical, gap: 8, width: 320, padding: 16}
+children:
+  - widget: Checkbox
+    name: agree
+    label: I agree
+    checked: "{{ agreed }}"                 # one bare reference: the user's change is written back to `agreed`
+    handlers: {on_change: agreement_changed}
+  - {widget: Switch, name: dark, selected: "{{ dark }}"}
+  - {widget: Slider, name: volume, value: "{{ volume }}", min: 0, max: 1, step: 0.1, style: {width: 200}}
+  - {widget: SpinBox, name: quantity, value: "{{ quantity }}", min: 1, max: 9}
+  - {widget: LinearProgress, name: loaded, value: "{{ loaded }}", style: {width: 200}}
 ```
 
-- **State:** bind `checked` (Checkbox), `selected` (RadioButton, Switch),
-  `value` (Slider, SpinBox, the progress kinds), `hour` and `minute`
-  (TimePickerDial), and `disabled` (any). `two_way:` writes the user's
-  changes back to the `Signal`.
+- **State:** `checked` (Checkbox), `selected` (RadioButton, Switch), `value` (Slider, SpinBox, the progress widgets), `low` and `high`
+  (RangeSlider), `hour`, `minute` and `mode` (TimePickerDial), and `disabled` (on every control that has one: not the progress widgets or the dial). Given one bare reference to a
+  Signal or a `state:` name, the property is two-way: the user's changes are written back. Any other expression is one-way.
 - **`on_change`** runs for changes the user makes, never for ones your
   code or a binding makes.
-- **A `SpinBox`** takes `value:`, `min:`, `max:` and `step:` (a bound
-  `value` is kept between the bounds), and its `a11y:` label goes to its
-  text field. It's sized by MD3, two 40 px buttons around a 64 px field,
-  not by `width`/`height`.
+- **`label`** on a Checkbox, RadioButton or Switch is text beside it that is part of what you press, and what a screen reader calls it. On the
+  others it is what a screen reader calls the control (`a11y: {label: ...}` says the same on any node).
+- **A `Checkbox`** with `checked: null` is neither on nor off (a parent of some checked children). `error: true` draws a Checkbox or RadioButton in the error
+  colours. A `Switch` with `icons: true` shows a check on its handle when on and a cross when off.
+- **A `Slider`** takes `min`, `max` (0 and 1 when left out), `step`, `ticks: true` (a mark at each step, which needs `step`), `value_indicator: true` (a
+  bubble with the value while dragged), `vertical: true` (the bottom is `min`; `height` is its length and `width` the touch target's), `size` (`xs`, `s`, `m`, `l`, `xl`:
+  MD3 Expressive's thicker track and thin handle) and, from size `s` up, an `icon` at the start of the track. A `RangeSlider` is a slider with two handles,
+  `low` and `high`, and the same keys.
+- **A `SpinBox`** takes `value`, `min`, `max` and `step`, and `decimals` (how many places show), `prefix`, `suffix` and `wrap` (a step past one bound lands on the other,
+  which needs both). A bound `value` is shown kept between the bounds. Its `a11y:` label goes to its text field. It is sized by MD3, two 40 px
+  buttons around a 64 px field (152 px wide), not by `width`. Holding a button repeats the step; Page Up and Page Down step by ten.
+- **The progress widgets** take `value` from 0 to 1, or nothing (`value: null`) for a wait with no end. `track` is the colour role behind the indicator, `thickness`
+  the bar's height or the ring's width in pixels. A `LinearProgress` also has `buffer` (how much has loaded, 0 to 1), `stop_indicator`, `wavy` and
+  `two_bar` (an endless wait sweeps as two bars); a `CircularProgress` has `wavy`; a `LoadingIndicator` has `contained`.
+- **A `TimePickerDial`** has `hour` (0 to 23), `minute` (0 to 59), `mode` (`hour` or `minute`, which hand the face shows and sets) and `auto_advance`
+  (`true`: letting go in hour mode moves on to the minutes).
 - **Size:** `style: {width, height}` sets the control's touch target;
   it's MD3's 48 px when not given. A slider's `width` is its track's
   length, a dial's is its face, and a progress bar's is its track.
-- **Colour:** `background` replaces `primary` for the selected parts;
-  for the indicators, `foreground` does.
+- **Colour:** `foreground` replaces `primary`, the colour of the selected or active parts.
 - **Radio groups:** radio buttons with the same `group:` name exclude
   each other, and the group is a single Tab stop whose arrow keys move
   the selection.
-- `view.control("agree")` returns the control, and `view.node("agree")`
-  its node.
+- From Python, `view.control("root.agree")` returns the control, and `view.node("root.agree")`
+  its node (a node's id is the path from the root, using its `name`).
 
 ## From Python
 
@@ -70,8 +86,9 @@ so on build these too, attached to the window's root.
 | `RadioButton` | `selected` | a click selects it; with `group=RadioGroup()`, the arrow keys move the selection |
 | `Switch` | `selected` | click, Space, Enter toggle it; the handle grows while pressed |
 | `Slider(value=, min=, max=, step=, width=)` | `value` | press or drag (the pointer is captured); arrows, Page Up/Down, Home/End; `on_change` once a drag ends |
-| `SpinBox(value=, min=, max=, step=)` | `value` | − and + buttons, the up and down arrows, typing |
-| `TimePickerDial(hour=, minute=, mode=)` | `hour`, `minute`, `mode` | press or drag points the hand; the hour snaps to 12, the minute to 5; releasing on the hour moves on to minutes |
+| `RangeSlider(low=, high=, min=, max=, step=, width=)` | `low`, `high` | the same, for two handles; `high` is never below `low` |
+| `SpinBox(value=, min=, max=, step=, decimals=, prefix=, suffix=, wrap=)` | `value` | − and + buttons, the up and down arrows, typing |
+| `TimePickerDial(hour=, minute=, mode=, auto_advance=)` | `hour`, `minute`, `mode` | press or drag points the hand; the hour snaps to 12, the minute to 5; releasing on the hour moves on to minutes |
 | `LinearProgress(value=, width=)`, `CircularProgress(value=)` | `value`: 0–1, or `None` for indeterminate | none |
 | `LoadingIndicator()` | none | none: it morphs forever |
 
@@ -92,9 +109,3 @@ its touch target with the state layer, ripple and keyboard focus ring
 from [Interaction & Accessibility](interaction.md). Disabled controls use
 MD3's disabled colours: content at 38%, containers at 12%. The timing is
 MD3's motion tokens.
-
-## Not yet covered
-
-- Checkbox's indeterminate state, error colours, and the switch's icons
-  aren't built. The linear indicator's indeterminate sweep is one bar,
-  not MD3's two.

@@ -1,18 +1,19 @@
-id: root
-kind: Container
+# One row. A view with `params:` is a component: Tasks_View.yaml calls it as `widget: TaskItem`.
+params:
+  task: {type: dict, required: true}
+  on_toggle: {type: handler}
+  on_remove: {type: handler}
+widget: Container
 style: {flex_direction: horizontal, align_content: left, gap: 8, width: 100%}
 children:
-  - id: done
-    kind: Checkbox
-    style: {width: 40, height: 40, background: surface}
-    bindings: {checked: "{{ done.get() }}"}
-    two_way: checked
-  - id: label
-    kind: Text
-    text: {content: Task, typography_role: body_large}
-    style: {flex: expand_horizontal, foreground: on_surface}
-    bindings: {text: "{{ text.get() }}"}
-  - id: remove
-    component: IconButtonStandard
-    with: {icon: close, size: 40, corner_radius: 20}
-    handlers: {on_click: remove_self}
+  - widget: Checkbox
+    name: done
+    checked: "{{ task.done }}"
+    label: "{{ task.text }}"
+    style: {flex: expand_horizontal}
+    handlers: {on_change: on_toggle}
+  - widget: IconButton
+    name: remove
+    icon: close
+    label: Remove
+    handlers: {on_click: on_remove}

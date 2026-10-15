@@ -13,81 +13,59 @@ things the user entered, and **suggestion** chips offer a reply or next step.
 `widget: Chip` is a view Tesserae ships (`Chip_View.yaml`): 32 pixels tall with 8 pixel corners, as wide as its label. `widget: ChipGroup` is a wrapping row of
 them.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `label` | text | the text |
-| `variant` | `assist`, `filter`, `input`, `suggestion` | what it is for (default `assist`) |
-| `icon`, `avatar_text` | an icon, letters | a leading 18 pixel icon, or letters in a 24 pixel circle |
-| `selected` | true or false; two-way | a filter or input chip that is on: `secondary_container`, no outline, a check in place of the icon |
-| `elevated` | true or false | a raised surface instead of an outline |
-| `removable`, `removed`, `on_remove` | true or false; true or false, two-way; a handler | a close button; pressing it sets `removed` and runs `on_remove` |
-| `disabled` | true or false | dimmed, not focusable, handlers do not respond |
+A chip has a leading 18 pixel `icon`, or `avatar_text`: letters in a 24 pixel circle. A filter or input chip that is `selected` is `secondary_container` with no outline, and
+a filter chip also shows a check in place of its icon. `elevated` swaps the outline for a raised surface. A `removable` chip (an input chip) has a close button: pressing it
+sets `removed` to true and runs `on_remove`. A filter chip is a checkbox to a screen reader and the others are buttons; a disabled chip is dimmed and not focusable.
 
 A filter chip flips `selected` itself (`flip: false` leaves that to you); `handlers: {on_click: ...}` on the call is what a press does. A `ChipGroup` takes
 `chips` (`{value, label}` and optionally `{icon, avatar_text, disabled}`) and a `mode`: `none` (assist or suggestion chips; the last pressed goes to
 `chosen`), `single` or `multiple` (filter chips; `selected` is the value or the list of values), or `input` (chips with a close, and a field: Enter adds a
-chip, the close removes one, and `chips` is two-way). Not built: dragging chips to reorder, and a chip group that scrolls sideways.
-
-`widget: Chip` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: ChipAssist` | An assist chip: a smart or automated action, such as adding to a calendar. | [`ChipAssist_Stylesheet.yaml`](../stylesheets/chips/chip-assist.md) |
-| `component: ChipFilter` | A filter chip, not selected: narrows a set of results. | [`ChipFilter_Stylesheet.yaml`](../stylesheets/chips/chip-filter.md) |
-| `component: ChipFilterSelected` | A filter chip, selected: shows a check mark and the selected colour. | [`ChipFilterSelected_Stylesheet.yaml`](../stylesheets/chips/chip-filter-selected.md) |
-| `component: ChipInput` | An input chip: a piece of information the user entered, such as a tag. | [`ChipInput_Stylesheet.yaml`](../stylesheets/chips/chip-input.md) |
-| `component: ChipSuggestion` | A suggestion chip: a dynamic suggestion, such as a smart reply. | [`ChipSuggestion_Stylesheet.yaml`](../stylesheets/chips/chip-suggestion.md) |
+chip, the close removes one, and `chips` is two-way; `entry` is what is typed and `placeholder` its hint). In `none` mode `variant` is `assist` or `suggestion`, and
+`elevated` raises every chip. The group is one Tab stop and the arrow keys move the focus along the chips (in `single` mode the focus carries the choice with it). Not built:
+dragging chips to reorder, and a chip group that scrolls sideways.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: Chip`. A file of the same name in your project replaces it.
 
-### `ChipAssist`, `ChipFilter`, `ChipInput`, `ChipSuggestion`
+### `Chip`
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `label` | required |  |
-| `width` | required |  |
+The Material 3 chip: assist (an action), filter (a toggle), input (a piece of what the user entered, with a close) or suggestion (a suggested reply or query). 32 pixels tall with 8 pixel corners, a `label_large` label and an optional 18 pixel leading `icon` or 24 pixel avatar (`avatar_text`, letters in a circle). A filter chip flips `selected` on a press, and while it is on it is `secondary_container` with a check in place of its icon. An input chip has a close button, `removable`, which sets `removed` to true. `elevated` swaps the outline for a raised surface. `handlers: {on_click: ...}` on the call is what a press does. Colours and shapes are in Chip_Stylesheet.yaml.
 
-These 4 have one structure; only their stylesheets, above, differ.
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `label` | `str` |  | The text. |
+| `variant` | `assist` or `filter` or `input` or `suggestion` | `assist` | assist runs an action; filter toggles; input is what the user entered; suggestion offers a reply or a query. |
+| `icon` | `str` |  | A leading icon. |
+| `avatar_text` | `str` |  | Letters in a circle before the label (an avatar). |
+| `selected` | `bool` | `false` | For a filter or input chip: whether it is on. Two-way: give it a bare reference and the view writes it back. |
+| `elevated` | `bool` | `false` | A raised surface instead of an outline. |
+| `removable` | `bool` | `false` | A close button after the label (an input chip). |
+| `removed` | `bool` | `false` | Set to true when the close button is pressed. Two-way: give it a bare reference and the view writes it back. |
+| `on_remove` | `handler` |  | What to do when the close button is pressed, written as a handler (an action name or statements). |
+| `flip` | `bool` | `true` | For a filter chip: whether a press flips `selected` itself. Off, the caller decides (a chip group does). |
+| `disabled` | `bool` | `false` | Dimmed, not focusable, and it does not respond. |
 
-```yaml
-params: [label, width]
-id: root
-kind: Rect
-children:
-  - id: label
-    kind: Text
-    text:
-      content: "{{ label }}"
-      typography_role: label_large
-      text_align: center
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `avatar` (Container), `avatar_text` (Text), `icon` (Icon), `label` (Text), `close` (Container), `close_icon` (Icon).
 
-### `ChipFilterSelected`
+Its look is in [`Chip_Stylesheet.yaml`](../stylesheets/chips/chip.md).
 
-A filter chip, selected: shows a check mark and the selected colour. Its look: [`ChipFilterSelected_Stylesheet.yaml`](../stylesheets/chips/chip-filter-selected.md).
+### `ChipGroup`
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `label` | required |  |
-| `width` | required |  |
+A group of chips, wrapping onto new rows. `chips` is a list of {value, label} and optionally {icon, avatar_text, disabled}. `mode` says how they behave: `none` suggestion/assist chips that act (the last one pressed goes to `chosen`); `single` and `multiple` filter chips (`selected` is the chosen value, or the list of them); `input` chips with a close button and a text field after them, so typing and pressing Enter adds a chip, and the close removes one (`chips` is two-way: the list the user has built). One Tab stop; the arrows move the focus along the chips (and, for `single`, the choice).
 
-```yaml
-params: [label, width]
-id: root
-kind: Rect
-children:
-  - id: check
-    kind: Icon
-    icon: {name: check}
-  - id: label
-    kind: Text
-    text:
-      content: "{{ label }}"
-      typography_role: label_large
-      text_align: center
-```
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `chips` | `list` | `[]` | The chips, each {value, label} and optionally {icon, avatar_text, disabled}. In input mode adding and removing write it back. Two-way: give it a bare reference and the view writes it back. |
+| `mode` | `none` or `single` or `multiple` or `input` | `none` | none: actions; single or multiple: filters; input: what the user entered. |
+| `selected` | `any` |  | single: the chosen value; multiple: the list of chosen values. Two-way: give it a bare reference and the view writes it back. |
+| `chosen` | `any` |  | none: the value of the chip last pressed. Two-way: give it a bare reference and the view writes it back. |
+| `variant` | `assist` or `suggestion` | `assist` | The look of the chips in `none` mode. |
+| `elevated` | `bool` | `false` | Raised chips instead of outlined ones. |
+| `placeholder` | `str` | `Add` | Input mode: the hint in the text field. |
+| `entry` | `str` |  | Input mode: what is typed in the field. Two-way: give it a bare reference and the view writes it back. |
+
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `chip` (Chip), `entry` (TextField).
 
 ## Using it
 
@@ -104,9 +82,7 @@ children:
   - {widget: ChipGroup, mode: input, chips: "{{ tags }}", entry: "{{ typed }}"}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import chip
@@ -116,13 +92,14 @@ shipped = chip(app.window, "Shipped", 96, variant="filter", selected=True)
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# ChipAssist_Stylesheet.yaml, next to your views
+# Chip_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: root
-    style: {background: tertiary}
+  - widget: Chip
+    part: label
+    style: {foreground: tertiary}
 ```
 
 See [Component stylesheets](../stylesheets/index.md).

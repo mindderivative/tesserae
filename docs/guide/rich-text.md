@@ -1,69 +1,85 @@
 # Rich Text & Links
 
-A `Text` is one style by default. Give it `runs` instead of `content` and it is one text in several: bold, coloured,
-struck through, a different size, or a link.
+A `Text` is one piece of text in one style: one `typography_role`, one `foreground`, one weight. Text that is
+partly bold, coloured or a link is built from several nodes laid out in a row, and a whole line that opens a page
+is a `Link`.
 
 ```yaml
-id: root
-kind: Container
-style: {flex_direction: vertical, gap: 12, padding: 16, width: 360, background: surface}
+widget: Container
+style: {flex_direction: horizontal, align_content: left, width: 360, padding: 16, background: surface}
 children:
-  - id: price
-    kind: Text
-    text:
-      typography_role: body_large
-      runs:
-        - "Sale: "
-        - {text: "$12", strikethrough: true, color: on_surface_variant}
-        - " "
-        - {text: "$9", weight: 500, color: error}
-        - ", ends Friday. "
-        - {text: "Read the terms", link: terms}
+  - widget: Text
+    name: was
+    text: "$12"
+    typography_role: body_large
+    style: {foreground: on_surface_variant}
+  - widget: Text
+    name: now
+    text: " $9"
+    typography_role: body_large
+    font_weight: 700
+    style: {foreground: error}
+  - widget: Text
+    name: ends
+    text: ", ends Friday. "
+    typography_role: body_large
     style: {foreground: on_surface}
-    handlers: {on_link: open_terms}
+  - widget: Link
+    name: terms
+    text: Read the terms
+    handlers: {on_click: open_terms}
 ```
 
-A run is a string, or a mapping with its `text` and any of:
-
-| Key | What it does |
-| --- | --- |
-| `color` | A theme role or a CSS colour. |
-| `weight` | The font weight. |
-| `italic`, `underline`, `strikethrough` | `true` or `false`. |
-| `font_size`, `font_family` | A different size or face for the run. |
-| `link` | Makes the run a link: a click on it calls `on_link` with `event.href`. |
-
-What a run leaves out stays the `Text`'s own. The text is the runs joined, so give `runs` *or* `content`, not both;
-and only a `Text` has runs (a `Link` is one piece, a `TextField` one style).
+Each piece takes its own `typography_role`, `font_size`, `font_family` and `font_weight`, and its own `foreground`. The row keeps
+its pieces on one line; for a paragraph that wraps, use one `Text` with a `width`.
 
 ## Links
 
-A run with a `link` is the theme's `primary` and underlined, unless it says its own `color` or `underline`. The
-engine opens nothing: what `href` means is the app's. The handler decides:
+`widget: Link` is text that takes focus and that a click or Enter activates. It is the theme's `primary`, underlined
+while the pointer is over it or it has the keyboard focus.
 
-```python
-class MainViewModel(ViewModel):
-    def open_terms(self, event):
-        if event.href == "terms":
-            self.app.navigate("Terms")
+| Property | What it does |
+| --- | --- |
+| `text` | What it says; it also names the link for a screen reader. |
+| `href` | A link the OS opens in the browser or mail program when it is activated: `http`, `https`, `mailto` and `tel` only. Anything else is an error. |
+| `visited` | Whether it has been followed. Opening its `href` sets a bound one, and a stylesheet rule with `state: visited` can colour it. |
+| `underline` | `hover` (the default), `always` or `never`. |
+| `disabled` | Dimmed, out of the Tab order, and does nothing. |
+
+`handlers: {on_click: ...}` runs as well as the `href` opens. A link that goes somewhere inside the app has no `href`, only a
+handler; the handler decides what it means:
+
+```yaml
+widget: Link
+text: Settings
+handlers: {on_click: open_settings}
 ```
 
-The pointer is a hand over a link. For a whole line that is one link, use the `Link` kind.
+To open an address from any other node, a handler calls `open_url('https://example.com')`
+([Opening a link](view-language.md#opening-a-link)). The pointer is a hand over a link.
+
+`on_link` is the event of a link range inside one text, with the range's `href` in `event.href`. A `Text` written in a view
+is one piece and has no such ranges; use a `Link` for a link.
 
 ## Sizing
 
-A `Text` with no `width` is measured to fit its runs on one line, each in its own size and weight. Rich text that
-wraps wants a `width`; a bigger `font_size` in a run makes its line taller.
+A `Text` with no `width` is measured to fit its text on one line. Give it a `width` and it wraps, and is as tall as
+its lines. `max_lines` and `overflow: ellipsis` end a long text with an ellipsis; see
+[Text in a box](layout.md#text-in-a-box).
 
 ## Selectable text
 
-`selectable: true` in `text:` lets the user select a `Text` with the pointer, and copy it with Ctrl+C. Double-click
+`selectable: true` on a `Text` lets the user select it with the pointer, and copy it with Ctrl+C. Double-click
 selects a word, triple-click a line, and a drag from one selectable text into another selects across them. Only a
 `Text` can be selectable.
 
 ```yaml
-- id: help
-  kind: Text
-  text: {content: "Press and drag to select this.", typography_role: body_medium, selectable: true}
-  style: {foreground: on_surface, width: 240}
+widget: Text
+name: help
+text: Press and drag to select this.
+typography_role: body_medium
+selectable: true
+style: {foreground: on_surface, width: 240}
 ```
+
+To copy from a handler instead, `copy(text)` puts text on the clipboard ([The clipboard](view-language.md#the-clipboard)).

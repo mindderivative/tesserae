@@ -2,8 +2,8 @@
 # character counter and an error state. `variant: filled | outlined`. What it looks like is in TextField_Stylesheet.yaml; this file is its
 # structure. `text` is two-way: give it a bare reference (`text: "{{ query }}"`) and typing writes `query`.
 #
-# The label is raised (small, at the top) while the field has focus or text, and sits in the middle as a hint otherwise; it jumps between the
-# two, because moving it smoothly needs `transition:`, which the language reserves.
+# The label is raised (small, at the top) while the field has focus or text, and sits in the middle as a hint otherwise; it glides between
+# the two (`transition:` on its position).
 params:
   variant: {type: enum, choices: [filled, outlined], default: filled, doc: "filled has a fill and a line under it; outlined has a border."}
   label: {type: str, default: "", doc: "The field's name; it also names the field for a screen reader."}

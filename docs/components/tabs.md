@@ -12,93 +12,30 @@ may carry an icon above the label.
 `widget: Tabs` is a view Tesserae ships (`Tabs_View.yaml`): a row of equal tabs over a divider, with an indicator under the chosen tab that
 slides to the next one.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `tabs` | a list | the tabs, each `{value, label}` and optionally `{icon, badge}`; an expression follows its Signals |
-| `selected` | a value; two-way | the chosen tab; a press, or an arrow key, writes it back |
-| `variant` | `primary` or `secondary` | primary: a 3 pixel rounded indicator as wide as the label's share of the tab; secondary: 2 pixels across the whole tab |
-| `tab_width` | a number | how wide each tab is (default 120) |
+The `tabs` are `{value, label}` and optionally `{icon, badge}`; an expression follows its Signals. `selected` is the value of the chosen tab, and a press or an arrow key writes it
+back. With `variant: primary` (the default) the indicator is 3 pixels tall, rounded on top, and 12 pixels in from each side of the tab; with `secondary` it is 2 pixels tall across
+the whole tab. Every tab is `tab_width` wide (120 by default).
 
 The bar is 48 pixels tall, or 64 when a primary bar has an icon. The chosen tab's label and icon are `primary`, the others `on_surface_variant`. The bar
 is a `tablist` with one Tab stop; the arrow keys, Home and End move the focus and choose the tab. The panel each tab shows is yours: put an
-`if: "selected == 'trips'"` on it. Not built yet: a bar that scrolls when the tabs do not fit.
-
-`widget: Tabs` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: Tabs` | Tabs: a row of destinations in one view, with the selected one marked. | [`Tabs_Stylesheet.yaml`](../stylesheets/tabs/tabs.md) |
-| `component: TabsItem` | One tab: a label, and an icon if you want one, with an indicator when selected. | [`TabsItem_Stylesheet.yaml`](../stylesheets/tabs/tabs-item.md) |
+`if: "selected == 'trips'"` on it. Not built: a bar that scrolls when the tabs do not fit.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: Tabs`. A file of the same name in your project replaces it.
 
 ### `Tabs`
 
-Tabs: a row of destinations in one view, with the selected one marked. Its look: [`Tabs_Stylesheet.yaml`](../stylesheets/tabs/tabs.md).
+The Material 3 tab bar: a row of tabs over a divider, an indicator under the selected one that slides to the next. `tabs` is a list of {value, label, icon, badge}; `selected` is the chosen value and a press writes it back. `variant: primary` (48 tall, 64 with icons, a 3 dp indicator as wide as the label's share of the tab) or `secondary` (48 tall, a 2 dp indicator across the whole tab). The tabs are `tab_width` wide each: a fixed bar. Arrow keys move the focus along the bar and choose the tab (one Tab stop); the panel each tab shows is yours to switch on `selected`. A scrolling bar waits for the engine to scroll sideways.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `items` | required |  |
-| `item_width` | required |  |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `tabs` | `list` | `[]` | The tabs, each {value, label} and optionally {icon, badge}. |
+| `selected` | `any` |  | The value of the chosen tab; a press writes it back. Two-way: give it a bare reference and the view writes it back. |
+| `variant` | `primary` or `secondary` | `primary` | primary has a short rounded indicator; secondary one across the tab. |
+| `tab_width` | `float` | `120` | How wide each tab is. |
 
-```yaml
-params: [items, item_width]
-id: root
-kind: Container
-children:
-  - id: row
-    kind: Container
-    children:
-      - id: item
-        component: TabsItem
-        with:
-          width: "{{ item_width }}"
-        repeat: "{{ items }}"
-  - {id: divider, kind: Rect}
-```
-
-### `TabsItem`
-
-One tab: a label, and an icon if you want one, with an indicator when selected. Its look: [`TabsItem_Stylesheet.yaml`](../stylesheets/tabs/tabs-item.md).
-
-| Parameter | | Default |
-| --- | --- | --- |
-| `label` | required |  |
-| `width` | required |  |
-| `icon` | optional | `None` |
-| `selected` | optional | `False` |
-
-```yaml
-params:
-  - label
-  - width
-  - {icon: null}
-  - {selected: false}
-id: root
-kind: Rect
-children:
-  - id: tab
-    kind: Container
-    children:
-      - {id: top, kind: Rect}
-      - id: content
-        kind: Container
-        children:
-          - id: icon
-            when: "{{ icon }}"
-            kind: Icon
-            icon:
-              name: "{{ icon }}"
-          - id: label
-            kind: Text
-            text:
-              content: "{{ label }}"
-              typography_role: title_small
-              wrap: none
-      - {id: indicator, kind: Rect}
-```
+Its parts, by name (a stylesheet rule's `part:` or `name:` addresses one): `bar` (Container), `tab` (Container), `badged` (Badge), `badged_icon` (Icon), `icon` (Icon), `label` (Text), `indicator` (Container), `divider` (Divider).
 
 ## Using it
 
@@ -115,28 +52,13 @@ children:
       - {value: explore, label: Explore, icon: menu}
 ```
 
-## Using it
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import tabs
 
 bar = tabs(app.window, ["Videos", "Photos"], selected=0)
 ```
-
-## Changing its look
-
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
-
-```yaml
-# Tabs_Stylesheet.yaml, next to your views
-styles:
-  - id: root
-    style: {background: tertiary}
-```
-
-See [Component stylesheets](../stylesheets/index.md).
 
 ## See also
 

@@ -1,13 +1,16 @@
 styles:
-  - classes: [page]
-    style: {flex_direction: vertical, width: 100%, height: 100%, gap: 12, padding: 24, background: surface}
-  - classes: [heading]
-    style: {foreground: on_surface}
-  - classes: [muted]
-    style: {foreground: on_surface_variant}
-  - classes: [rows]
-    style: {flex_direction: vertical, gap: 4, width: 100%}
-  - classes: [task]
-    style: {flex: expand_horizontal, foreground: on_surface}
-  - classes: [row]
-    style: {flex_direction: horizontal, gap: 12}
+  - {widget: Container, classes: [page], style: {flex_direction: vertical, width: 100%, height: 100%, gap: 12, padding: 24, background: surface}}
+  - {widget: Text, classes: [heading], style: {foreground: on_surface}}
+  - {widget: Text, classes: [muted], style: {foreground: on_surface_variant}}
+  # a rule for a view of your own: every TaskItem is a row
+  - {widget: TaskItem, style: {flex_direction: horizontal, align_content: left, gap: 8, width: 100%}}
+  - {widget: Container, classes: [rows], style: {flex_direction: vertical, gap: 4, width: 100%}}
+  # the add button, a tertiary one: a rule for Button goes over the one Tesserae ships
+  - {widget: Button, variant: filled, style: {background: tertiary}}
+  - {widget: Button, variant: filled, part: label, style: {foreground: on_tertiary}}
+  - {widget: Container, classes: [row], style: {flex_direction: horizontal, gap: 12}}
+  # the look of Stat: a rule for the widget, and one for each of its named parts
+  - widget: Stat
+    style: {flex_direction: vertical, align_content: top, width: 96, padding: 12, background: secondary_container, corner_radius: medium}
+  - {widget: Stat, part: value, style: {foreground: on_secondary_container}}
+  - {widget: Stat, part: label, style: {foreground: on_secondary_container}}

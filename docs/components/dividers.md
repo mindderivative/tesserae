@@ -12,36 +12,24 @@ A divider is a thin line that groups and separates content in lists and containe
 `widget: Divider` is a view Tesserae ships (`Divider_View.yaml`) with its look as rules (`Divider_Stylesheet.yaml`): a line in the
 `outline_variant` colour that fills the length it is in, and is a `separator` to a screen reader.
 
-| Property | Type | Meaning |
-| --- | --- | --- |
-| `variant` | `full`, `inset` or `middle` | how much of the ends it keeps clear; `full` by default |
-| `orientation` | `horizontal` or `vertical` | horizontal fills the width it is in, vertical the height; `horizontal` by default |
-| `thickness` | number | how thick the line is; `1` by default |
-
-`widget: Divider` is the view-language form (see [The View Language](../guide/view-language.md)); the fragment below is the older `component:` form, which keeps working.
-
-| Fragment | What it is | Stylesheet |
-| --- | --- | --- |
-| `component: Divider` | A thin line that separates content. | [`Divider_Stylesheet.yaml`](../stylesheets/dividers/divider.md) |
+The `variant` says how much of the ends it keeps clear (`full` by default; `inset` leaves 16 pixels at the start, `middle` 16 at both ends). A `horizontal` divider fills the
+width it is in and a `vertical` one the height; it is 1 pixel thick unless `thickness` says.
 
 ## How it is built
 
-Each fragment is a `*_Component.yaml`: its structure, and the parameters it takes. Its look is in its stylesheet, linked under each one.
+A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made of) with a `<Name>_Stylesheet.yaml` (how it looks). Use it by name: `widget: Divider`. A file of the same name in your project replaces it.
 
 ### `Divider`
 
-A thin line that separates content. Its look: [`Divider_Stylesheet.yaml`](../stylesheets/dividers/divider.md).
+The Material 3 divider: a thin line that separates content. `variant: full | inset | middle`, `orientation: horizontal | vertical`. What it looks like (the colour, the thickness, the insets) is in Divider_Stylesheet.yaml; this file is its structure. A screen reader hears it as a `separator`.
 
-| Parameter | | Default |
-| --- | --- | --- |
-| `width` | required |  |
-| `height` | required |  |
+| Parameter | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `variant` | `full` or `inset` or `middle` | `full` | full spans the whole length; inset starts 16 in from the start; middle is 16 in from both ends. |
+| `orientation` | `horizontal` or `vertical` | `horizontal` | Horizontal separates rows and fills the width it is in; vertical separates columns and fills the height. |
+| `thickness` | `float` | `1` | How thick the line is. |
 
-```yaml
-params: [width, height]
-id: root
-kind: Rect
-```
+Its look is in [`Divider_Stylesheet.yaml`](../stylesheets/dividers/divider.md).
 
 ## Using it
 
@@ -69,21 +57,7 @@ styles:
 
 A view named `Divider_View.yaml` in your project replaces the shipped divider, and its shipped look with it.
 
-## Using the fragment
-
-In a view:
-
-```yaml
-# Home_View.yaml
-id: root
-kind: Container
-children:
-  - id: rule
-    component: Divider
-    with: {width: 240, height: 1}
-```
-
-In Python:
+## Using it in Python
 
 ```python
 from tesserae.widgets import divider
@@ -93,12 +67,12 @@ rule = divider(app.window, 240)
 
 ## Changing its look
 
-To restyle a component in your whole app, put a stylesheet of the same name next to your views. Its rules go over the built-in ones, field by field, and the rest is kept:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
-# Divider_Stylesheet.yaml, next to your views
+# Divider_Stylesheet.yaml, or any stylesheet your app loads
 styles:
-  - id: root
+  - widget: Divider
     style: {background: tertiary}
 ```
 
