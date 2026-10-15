@@ -2831,3 +2831,10 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Maintainer allowed the download.** `npm install --ignore-scripts yaml-language-server` (1.25.0) in a scratch folder; `tools/check_schema_in_language_server.py` rewritten for the current language (views and rule stylesheets, each example against its own project schema; 14 asserted completions and flagged mistakes). **Result: 145 files, 0 diagnostics; all 14 checks pass.**
 - **What it taught:** the server applies *every* schema whose glob matches a file, so mapping the packaged widget schema to `**/*_View.yaml` next to a project schema flags the project's views (the script maps the packaged one to the shipped views only; the editor-support page now says to map each file to one schema). Its diagnostic for a misspelt key names the allowed values, not the key. The rule completions offered a stray `rule` (the `$ref` name); inlining the rule and titling it fixed that, leaving the server's own array-item snippet.
 - **Still unseen:** VS Code itself (the extension is this server).
+
+## 0.5.0.19 #276: the four remaining examples
+
+- **By hand, not by the tool:** the examples drew their buttons as `Rect`s, so I rewrote the views with `Button`/`IconButton`/`Checkbox` (the tool kept the `Rect`s); `custom_title_bar` was moved with `migrate-yaml` (its search field became `TextInput`, the tool's note) and then by hand. Each app.py keeps its own self-checks, with node paths (`root.item_list.row[1].check`).
+- **todo_list** lost its per-row ViewModel and the `Repeater`: `items` is a list of dicts, rows come from `for: item in items` with `key: item.id`, and the row calls `on_toggle`/`on_remove`. **counter's** accessible name still follows the count (`a11y: {label: "{{ button_label }}"}` on the Button call works).
+- **Tests:** `tests/test_examples_run.py` (12, each example in a subprocess + a no-older-syntax + migrate check); the three tests that read the examples (`test_a11y` counter keyboard, `test_controls_in_views` todo, `test_title_bar` example) were moved to the new shape; two mutations of the examples caught.
+- **Not done:** the `--interactive` runs of these four by eye.

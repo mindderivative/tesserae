@@ -1,12 +1,17 @@
-id: root
-kind: Container
-style: {flex_direction: vertical, width: 300, height: 300, gap: 8, padding: 16}
+# The to-do list: an Add button and one `TodoItem` row for each item of `items`, kept by `key:` so a row keeps its own state as the list changes.
+name: Todo
+widget: Container
+style: {flex_direction: vertical, width: 300, height: 300, gap: 8, padding: 16, background: surface}
 children:
-  - id: add_button
-    kind: Rect
-    style: {width: 268, height: 32, background: "#03DAC6", corner_radius: 4}
-    handlers: {on_click: "add_item"}
-    a11y: {label: "Add item"}
-  - id: item_list
-    kind: Container
+  - {widget: Button, name: add_button, label: Add item, variant: tonal, style: {width: 268}, handlers: {on_click: add_item}}
+  - widget: Container
+    name: item_list
     style: {flex_direction: vertical, gap: 8, width: 268, height: 240}
+    children:
+      - for: item in items
+        key: item.id
+        widget: TodoItem
+        name: row
+        item: "{{ item }}"
+        on_toggle: "toggle(item.id)"
+        on_remove: "remove(item.id)"

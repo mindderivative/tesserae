@@ -1,19 +1,8 @@
-id: root
-kind: Container
-style: {flex_direction: vertical, width: 240, height: 150, gap: 8, padding: 16}
+# The Home screen. `Home_ViewModel.py` navigates; `app.state.came_from` is the app's shared state.
+name: Home
+widget: Container
+style: {flex_direction: vertical, width: 240, height: 150, gap: 8, padding: 16, background: surface}
 children:
-  - id: label
-    kind: Text
-    text: {content: "Home", font_family: Roboto, font_size: 20}
-    style: {width: 200, height: 32, foreground: "#FFFFFF"}
-  - id: came_from
-    kind: Text
-    text: {content: "", font_family: Roboto, font_size: 14}
-    style: {width: 200, height: 20, foreground: "#CAC4D0"}
-    bindings: {text: "{{ state.came_from.get() }}"}  # the app's shared state (M65)
-  - id: button
-    kind: Rect
-    style: {width: 160, height: 40, background: "#6750A4", corner_radius: 8}
-    handlers: {on_click: "go_to_settings"}
-    a11y: {label: "Open settings"}
-    interaction: {color: "#FFFFFF"}
+  - {widget: Text, name: label, text: Home, typography_role: headline_small, style: {foreground: on_surface}}
+  - {widget: Text, name: came_from, text: "{{ app.state.came_from }}", typography_role: body_medium, style: {foreground: on_surface_variant}}
+  - {widget: Button, name: button, label: Open settings, style: {width: 160}, handlers: {on_click: go_to_settings}}

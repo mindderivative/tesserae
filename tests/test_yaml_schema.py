@@ -82,7 +82,7 @@ def test_every_yaml_file_in_the_repository_validates(path, kind, data):
 
 def test_every_kind_of_file_has_files_to_check():
     # no file in the repository is a `*_Style.yaml` any more (a style file is not part of the 0.5.0 language); its schema stays for old projects
-    assert {param.values[1] for param in _yaml_files()} == set(NAMES) - {"style", "widget", "stylesheet"}  # those two are checked in test_widget_schema.py
+    assert {param.values[1] for param in _yaml_files()} == set(NAMES) - {"style", "widget", "stylesheet"}  # the widget and stylesheet schemas are checked in test_widget_schema.py
 
 
 def _node(**extra):

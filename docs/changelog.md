@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.19
+
+### Changed
+
+- **The vertical-slice examples are in the current view language** ([#276](https://github.com/mindderivative/tesserae/issues/276)). `examples/counter`, `multi_screen`, `todo_list` and `custom_title_bar` were written with `kind:`, `component:`, `app.load` and, for the to-do list, a `Repeater` and a ViewModel for each row. They are now `widget:` views and ViewModels that serve a named view, opened with `bind` and `open_view`; the buttons are `Button` and `IconButton` instead of drawn `Rect`s, and the to-do list is one list `Signal` that the view turns into rows by `for:` and `key:`. `tests/test_examples_run.py` runs each example's own checks in its own process (and the multi-screen deep link), and checks that none uses the older syntax and that `tesserae migrate-yaml` has nothing to translate in it.
+
 ## 0.5.0.18
 
 ### Fixed

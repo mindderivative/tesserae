@@ -1,16 +1,17 @@
-id: root
-kind: Container
-style: {flex_direction: vertical, width: 240, height: 120, gap: 12, padding: 16}
+# The counter: a label and a button. `Counter_ViewModel.py` holds what they show and do.
+name: Counter
+widget: Container
+style: {flex_direction: vertical, width: 240, height: 120, gap: 12, padding: 16, background: surface}
 children:
-  - id: label
-    kind: Text
-    text: {content: "Count: 0", font_family: Roboto, font_size: 20}
-    style: {width: 200, height: 32, foreground: "#FFFFFF"}
-    bindings: {text: "{{ label.get() }}"}
+  - widget: Text
+    name: label
+    text: "{{ label }}"
+    typography_role: headline_small
+    style: {foreground: on_surface}
     a11y: {live: polite}  # a screen reader announces the new count
-  - id: button
-    kind: Rect
-    style: {width: 120, height: 40, background: "#6750A4", corner_radius: 8}
-    handlers: {on_click: "increment"}
-    a11y: {label: "{{ button_label.get() }}"}  # M47: its name follows the count
-    interaction: {color: "#FFFFFF"}  # a white tint on the filled purple, as MD3 does
+  - widget: Button
+    name: button
+    label: Increment
+    style: {width: 120}
+    handlers: {on_click: increment}
+    a11y: {label: "{{ button_label }}"}  # its accessible name follows the count

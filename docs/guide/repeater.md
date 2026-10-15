@@ -72,8 +72,8 @@ items.update(lambda lst: [i for i in lst if i != id])  # removes one
 | `key` | the item itself | for items that are dicts or dataclasses: a function returning a stable, hashable key |
 | `args` | `lambda item: (item,)` | what is forwarded to `viewmodel_cls(component, *args)`: override it for a ViewModel that needs more than the item |
 
-`examples/todo_list/` in the repository forwards the shared `items`
-`Signal` too, so an item can remove itself. It is written in the older syntax.
+`examples/todo_list/` in the repository is the same list written in the current language: the view builds one row for each item by `for:` and `key:`
+(see [Components & Embedding](components.md)), and the ViewModel changes the one `items` list.
 
 ## What it does and doesn't do
 

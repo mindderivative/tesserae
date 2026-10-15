@@ -292,12 +292,13 @@ def stub(prefix, names):
     return Old, New
 
 
+#: Views in the older syntax, kept as they were written (the examples were once these), to prove a migrated view draws what the old one did.
 CASES = [
-    ("examples/counter/Counter_View.yaml", "Counter", {"label": "Count: 0", "button_label": "Increment", "increment": None}),
+    ("tests/older_syntax/Counter_View.yaml", "Counter", {"label": "Count: 0", "button_label": "Increment", "increment": None}),
 ]
 
 
-@pytest.mark.parametrize("path, prefix, names", CASES, ids=[c[0].split("examples/")[1] for c in CASES])
+@pytest.mark.parametrize("path, prefix, names", CASES, ids=[c[0].split("/")[-1] for c in CASES])
 def test_a_migrated_view_draws_the_same_tree_as_the_old_one(tmp_path, path, prefix, names):
     source = ROOT / path
     # the old way

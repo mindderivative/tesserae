@@ -1,18 +1,8 @@
-id: root
-kind: Container
-style: {flex_direction: vertical, width: 240, height: 150, gap: 8, padding: 16}
+# The Settings screen. `Settings_ViewModel.py` goes back; `app.state.came_from` is the app's shared state.
+name: Settings
+widget: Container
+style: {flex_direction: vertical, width: 240, height: 150, gap: 8, padding: 16, background: surface}
 children:
-  - id: label
-    kind: Text
-    text: {content: "Settings", font_family: Roboto, font_size: 20}
-    style: {width: 200, height: 32, foreground: "#FFFFFF"}
-  - id: came_from
-    kind: Text
-    text: {content: "", font_family: Roboto, font_size: 14}
-    style: {width: 200, height: 20, foreground: "#CAC4D0"}
-    bindings: {text: "{{ state.came_from.get() }}"}  # the app's shared state (M65)
-  - id: button
-    kind: Rect
-    style: {width: 160, height: 40, background: "#03DAC6", corner_radius: 8}
-    handlers: {on_click: "go_to_home"}
-    a11y: {label: "Back to home"}
+  - {widget: Text, name: label, text: Settings, typography_role: headline_small, style: {foreground: on_surface}}
+  - {widget: Text, name: came_from, text: "{{ app.state.came_from }}", typography_role: body_medium, style: {foreground: on_surface_variant}}
+  - {widget: Button, name: button, label: Back to home, variant: tonal, style: {width: 160}, handlers: {on_click: go_to_home}}

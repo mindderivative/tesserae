@@ -1,28 +1,15 @@
 #!/usr/bin/env python3
-"""Tesserae's second vertical slice: `App.show(name)` switching between two
-fully-bootstrapped, independent screens -- `Home`/`Settings`, each its
-own `*_View.yaml` + `*_ViewModel.py` pair -- through the same live
-`Window`, from inside a real dispatched click handler on each screen's
-own nav button.
+"""Tesserae's second vertical slice: `App.show(name)` switching between two independent screens, `Home` and `Settings`, each its own `*_View.yaml`
+and `*_ViewModel.py`, through the same live `Window`, from inside a real dispatched click handler on each screen's own button.
 
-Mirrors `tre`'s own `examples/live_view_switch.py` (the same capability
-one layer lower, attaching and detaching screen roots directly) -- this
-proves it through Tesserae's `App`, the shape a real Tesserae app uses.
+Both screens are opened with `open_view()` and bound to the ViewModel that serves them. Their ViewModels reach the app as `self.app` (to call
+`navigate` and `back`) and its shared state as `self.state`; the views read it as `app.state`. The state is one `Signal`, `came_from`, which each
+handler sets and both screens show: one write, both screens.
 
-Both screens are `load()`ed. Their ViewModels reach the app as
-`self.app` (to call `show`) and its shared state as `self.state`, found
-through the view's window (M65), so neither needs a widened constructor
-and `load()`'s plain `viewmodel_cls(view)` does. The state is one
-`Signal`, `came_from`, which each handler sets and both screens bind to
-(`{{ state.came_from.get() }}`): one write, both screens.
+Home navigates to Settings (`self.app.navigate`), a step in the app's history, and Settings goes `back()`. Routes name the screens (`""` for
+Home, `"settings"`), so `python app.py settings` opens on Settings, a deep link, and `app.location` says where the app is.
 
-Home navigates to Settings (`self.app.navigate`), a step in the app's
-history, and Settings goes `back()` (M66). Routes name the screens
-(`""` for Home, `"settings"`), so `python app.py settings` opens on
-Settings, a deep link, and `app.location` says where the app is.
-
-`load()` builds each view with the app's theme and stylesheet, and a
-screen built from a file is hot-reloaded by `app.run(hot_reload=True)`.
+`app.run(hot_reload=True)` shows an edit to either view at once.
 """
 
 import sys
@@ -41,16 +28,18 @@ directory = Path(__file__).parent
 
 
 class AppState:
-    """What both screens share (M65)."""
+    """What both screens share."""
 
     def __init__(self):
         self.came_from = Signal("just started")
 
 
-app = App(width=240, height=150, title="Tesserae Multi-Screen", state=AppState())
+app = App(width=240, height=150, title="Tesserae Multi-Screen", state=AppState(), root=directory, search=["."])
 
-home_view, _ = app.load(directory / "Home_View.yaml", HomeViewModel)
-settings_view, _ = app.load(directory / "Settings_View.yaml", SettingsViewModel)
+app.bind(HomeViewModel)
+app.bind(SettingsViewModel)
+home_view = app.open_view("Home")
+settings_view = app.open_view("Settings")
 
 app.route("", "Home")
 app.route("settings", "Settings")
@@ -61,10 +50,10 @@ if app.current == "Settings":  # opened by a deep link: show it for the run, ski
     app.run(max_frames=20)
     sys.exit(0)
 assert app.current == "Home" and app.location == ""
-assert home_view.node("came_from").get("text") == "just started"
+assert home_view.node("root.came_from").get("text") == "just started"
 
-home_button = home_view.node("button")
-settings_button = settings_view.node("button")
+home_button = home_view.node("root.button")
+settings_button = settings_view.node("root.button")
 
 # Three real, dispatched clicks, each firing from whichever screen is
 # genuinely active at that moment -- Home -> Settings -> back to Home -> Settings,
@@ -74,11 +63,11 @@ settings_button = settings_view.node("button")
 # which both screens show.
 window.simulate("click", node=home_button)
 assert app.current == "Settings" and app.location == "settings" and app.can_go_back.get()
-assert settings_view.node("came_from").get("text") == home_view.node("came_from").get("text") == "from Home"
+assert settings_view.node("root.came_from").get("text") == home_view.node("root.came_from").get("text") == "from Home"
 
 window.simulate("click", node=settings_button)  # back()
 assert app.current == "Home" and app.can_go_forward.get()
-assert home_view.node("came_from").get("text") == "from Settings"
+assert home_view.node("root.came_from").get("text") == "from Settings"
 
 window.simulate("click", node=home_button)
 assert app.current == "Settings"

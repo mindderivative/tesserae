@@ -120,12 +120,15 @@ for testing against an unreleased `tre` checkout.
 ```bash
 python examples/getting_started/declarative/step4/app.py   # the counter above
 python examples/tutorial/step5/app.py                      # the Tasks tutorial
+python examples/counter/app.py                             # one view and the ViewModel that serves it
+python examples/multi_screen/app.py [settings]             # two screens, shared state, routes and a deep link
+python examples/todo_list/app.py                           # a list kept by `for:` and `key:` from one Signal
+python examples/custom_title_bar/app.py                    # a window whose title bar the app draws
 python examples/window_dock/app.py                         # a window with a title bar, a rail, docked panels and routed screens
 python examples/typing_effects/app.py --interactive        # flash, fade-in and a gliding caret on a text field
 ```
 
-`examples/counter/`, `multi_screen/`, `todo_list/` and `custom_title_bar/` are still written in the older view syntax: `tesserae migrate-yaml`
-turns a project into the current one (see [Migrating](https://mindderivative.github.io/tesserae/migration/)).
+Each checks itself with real dispatched clicks and renders a few frames headless (`--interactive`, where there is one, keeps the window open).
 
 ## Reactivity
 

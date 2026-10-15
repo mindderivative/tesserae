@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-"""Tesserae's own real, first vertical slice (§ARCHITECTURE.md): a real
-`Counter_View.yaml` + `Counter_ViewModel.py` pair, registered and shown
-through `App`, proving the whole real stack end to end -- `*_View.yaml`/
-`*_ViewModel.py` -> `tesserae.App` -> Tesserae's own builder -> real GPU
-paint, and a real dispatched click re-evaluating a bound `text` property
-through `tre`'s own live Tree.
+"""Tesserae's first vertical slice: a `Counter_View.yaml` and the `Counter_ViewModel.py` that serves it, opened through `App`.
 
-`app.py` is the real entry point (the user's own explicit design
-requirement: "app.py should be the entry point for the app... calling
-the view/viewModel").
+`app.py` is the entry point: it binds the ViewModel, opens the view and shows it. It checks itself with real dispatched clicks, then renders 20 frames
+and exits. Run it with `--interactive` to keep the window open. `app.run(hot_reload=True)` shows an edit to the view at once, the count kept.
 """
 
+import sys
 from pathlib import Path
 
 from loguru import logger
@@ -23,32 +18,27 @@ configure_logging()  # Tesserae's console format; configure_logging("DEBUG") sho
 
 directory = Path(__file__).parent
 
-app = App(width=240, height=120, title="Tesserae Counter")
-# App.load enforces the *_View.yaml/*_ViewModel.py naming convention at
-# runtime (previously documentation-only) and registers under the
-# inferred prefix, "Counter" -- both files here already follow it, so
-# this succeeds; a mismatched pair would raise ValueError immediately.
-view, viewmodel = app.load(directory / "Counter_View.yaml", CounterViewModel)
+app = App(width=240, height=120, title="Tesserae Counter", root=directory, search=["."])
+app.bind(CounterViewModel)  # the ViewModel that serves the view named `Counter`
+view = app.open_view("Counter")  # Counter_View.yaml
 window = app.show("Counter")
 
-label = view.node("label")
-button = view.node("button")
+label = view.node("root.label")
+button = view.node("root.button")
 
-logger.info(f"before any click: label={label.get("text")!r}")
+logger.info(f"before any click: label={label.get('text')!r}")
 assert label.get("text") == "Count: 0"
 
-# Three real, dispatched clicks -- the same real proof `tre`'s own
-# live_view.py example already establishes for a single, un-wrapped
-# View, here going through Tesserae's own real App.show()/registry
-# layer instead.
-for _ in range(3):
+for _ in range(3):  # three real, dispatched clicks
     window.simulate("click", node=button)
 
-logger.info(f"after 3 clicks: label={label.get("text")!r}")
+logger.info(f"after 3 clicks: label={label.get('text')!r}")
 assert label.get("text") == "Count: 3"
-# the button's accessible name follows the count (a bound `a11y:` label, M47)
-assert button.get("label") == "Increment, count is 3"
+assert button.get("label") == "Increment, count is 3"  # the button's accessible name follows the count
 assert app.current == "Counter"
 
-app.run(max_frames=20)
-logger.info("examples/counter/app.py: exited cleanly after a real 20-frame render loop")
+if "--interactive" in sys.argv[1:]:
+    app.run(hot_reload=True)
+else:
+    app.run(max_frames=20)
+    logger.info("examples/counter/app.py: exited cleanly after a real 20-frame render loop")

@@ -250,19 +250,18 @@ def test_the_counter_example_works_from_the_keyboard_alone():
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
-    app = tesserae.App(width=240, height=120, dark=True)
-    view, _ = app.load(directory / "Counter_View.yaml", module.CounterViewModel)
+    app = tesserae.App(width=240, height=120, dark=True, root=directory, search=["."])
+    app.bind(module.CounterViewModel)
+    view = app.open_view("Counter")
     window = app.show("Counter")
     window.advance(16)
     _tab(window)
-    button = view.node("button")
+    button = view.node("root.button")
     assert (button.get("focused"), button.get("role"), button.get("label")) == (
         True, "button", "Increment, count is 0")
-    assert view.node("label").get("live") == "polite"
-    assert view.interaction("button").ring_visible
-    assert view.interaction("button").layer.get("fill") == (0xFF, 0xFF, 0xFF, 0xFF)
+    assert view.node("root.label").get("live") == "polite"
     window.simulate("key_down", key="enter")
     window.simulate("key_down", key="space")
     window.simulate("key_up", key="space")
-    assert view.node("label").get("text") == "Count: 2"
-    assert button.get("label") == "Increment, count is 2"  # its bound name followed (M47)
+    assert view.node("root.label").get("text") == "Count: 2"
+    assert button.get("label") == "Increment, count is 2"  # its bound name followed

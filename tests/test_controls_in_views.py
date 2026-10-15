@@ -166,19 +166,19 @@ def test_the_todo_list_checkbox_ticks(tmp_path):
     from pathlib import Path
 
     directory = Path(__file__).resolve().parent.parent / "examples" / "todo_list"
-    for name in ("TodoItem_ViewModel", "Todo_ViewModel"):
-        spec = importlib.util.spec_from_file_location(name, directory / f"{name}.py")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[name] = module
-        spec.loader.exec_module(module)
-    app = App(width=300, height=300)
-    view, vm = app.load(directory / "Todo_View.yaml", sys.modules["Todo_ViewModel"].TodoViewModel)
+    spec = importlib.util.spec_from_file_location("Todo_ViewModel", directory / "Todo_ViewModel.py")
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    app = App(width=300, height=300, root=directory, search=["."])
+    app.bind(module.TodoViewModel)
+    view = app.open_view("Todo")
     window = app.show("Todo")
-    window.simulate("click", node=view.node("add_button"))
+    vm = app.bindings.viewmodel_for("Todo")
+    window.simulate("click", node=view.node("root.add_button"))
     window.advance(16)
-    (key, component, item_vm), = list(vm.repeater)
-    window.simulate("click", node=component.node("check"))
-    assert item_vm.done.get() is True
+    window.simulate("click", node=view.node("root.item_list.row[1].check"))
+    assert vm.items.get()[0]["done"] is True
     window.simulate("key_down", key="space")  # focused by the click; the keyboard works too
     window.simulate("key_up", key="space")
-    assert item_vm.done.get() is False
+    assert vm.items.get()[0]["done"] is False

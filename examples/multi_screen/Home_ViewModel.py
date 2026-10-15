@@ -1,15 +1,12 @@
-"""Pairs with `Home_View.yaml`. Its handler navigates with
-`self.app.navigate(...)` (M66) and records where the user came from in the app's
-shared state (M65): `self.app` and `self.state` are found through the
-view's window, so `App.load()`'s plain `HomeViewModel(view)` is enough.
-Switching from inside a real dispatched handler is the reentrant case
-`tre`'s own M42 Phase 2 had to fix a borrow panic for.
-"""
+"""Serves `Home_View.yaml`. Its handler navigates with `self.app.navigate(...)` and records where the user came from in the app's shared state:
+`self.app` and `self.state` are found through the view's window. Switching from inside a real dispatched handler is the reentrant case."""
 
 from tesserae import ViewModel
 
 
 class HomeViewModel(ViewModel):
+    views = "Home"
+
     def go_to_settings(self):
         self.state.came_from.set("from Home")
-        self.app.navigate("Settings")  # a step in the history (M66): Settings goes back from it
+        self.app.navigate("Settings")  # a step in the history: Settings goes back from it

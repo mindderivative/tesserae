@@ -1,35 +1,24 @@
-"""Pairs with `Todo_View.yaml` -- the real, top-level screen `App.load`
-registers. Owns the real dynamic list via `tesserae.Repeater`: `items`
-is the single source of truth (a plain list of stable item ids) -- the
-`Repeater` keeps exactly one `TodoItem` component + `TodoItemViewModel`
-alive per id currently present, added/removed automatically whenever
-`items` changes, with zero manual bookkeeping here.
-"""
+"""Serves `Todo_View.yaml`. `items` is the single source of truth: a list of `{"id", "text", "done"}`. The view builds one `TodoItem` row for each, by
+`for:` and `key:`, so adding, toggling and removing are only changes to this list: there is nothing to keep in step by hand."""
 
-from pathlib import Path
-
-from tesserae import Repeater, Signal, ViewModel
-
-from TodoItem_ViewModel import TodoItemViewModel
-
-_ITEM_PATH = Path(__file__).parent / "TodoItem_View.yaml"
+from tesserae import Signal, ViewModel
 
 
 class TodoViewModel(ViewModel):
-    def __init__(self, view):
+    views = "Todo"
+
+    def __init__(self):
+        super().__init__()
         self._counter = 0
-        self.items = Signal([])  # the single source of truth: stable item ids
-        container = view.node("item_list")
-        self.repeater = Repeater(
-            view,
-            self.items,
-            _ITEM_PATH,
-            TodoItemViewModel,
-            container,
-            args=lambda item_id: (item_id, self.items),
-        )
-        super().__init__(view)
+        self.items = Signal([])
 
     def add_item(self):
         self._counter += 1
-        self.items.update(lambda lst: [*lst, self._counter])
+        item = {"id": self._counter, "text": f"Item {self._counter}", "done": False}
+        self.items.update(lambda items: [*items, item])
+
+    def toggle(self, item_id):
+        self.items.update(lambda items: [{**i, "done": not i["done"]} if i["id"] == item_id else i for i in items])
+
+    def remove(self, item_id):
+        self.items.update(lambda items: [i for i in items if i["id"] != item_id])

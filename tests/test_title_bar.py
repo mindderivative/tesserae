@@ -172,19 +172,20 @@ def test_the_example_builds(monkeypatch):
     # by its path, under a name of its own: other tests import a Home_ViewModel too
     spec = importlib.util.spec_from_file_location("custom_title_bar_Home_ViewModel", folder / "Home_ViewModel.py")
     module = importlib.util.module_from_spec(spec)
-    monkeypatch.setitem(sys.modules, spec.name, module)  # App.load asks inspect for the class's file
+    monkeypatch.setitem(sys.modules, spec.name, module)
     spec.loader.exec_module(module)
     HomeViewModel = module.HomeViewModel
 
-    app = App(width=720, height=420, theme_seed=SEED, borderless=True)
+    app = App(width=720, height=420, theme_seed=SEED, borderless=True, root=folder, search=["."])
     app._native_controls.set(False)
-    view, vm = app.load(folder / "Home_View.yaml", HomeViewModel)
+    app.bind(HomeViewModel)
+    view = app.open_view("Home")
     app.show("Home")
     app.window.advance(16)
-    assert view.node("bar").get("window_region") == "drag" and view.node("own_bar").get("window_region") == "drag"
-    search = view.node("search").get("layout_x")
-    assert view.node("bar.content").get("layout_x") <= search < view.node("bar.minimize").get("layout_x")
+    assert view.node("root.bar").get("window_region") == "drag" and view.node("root.body.own_bar").get("window_region") == "drag"
+    search = view.node("root.bar.search").get("layout_x")
+    assert view.node("root.bar.content").get("layout_x") <= search < view.node("root.bar.minimize").get("layout_x")
     closed = []
     monkeypatch.setattr(app, "close", lambda: closed.append(True))
-    app.window.simulate("click", node=view.node("own_close"))
+    app.window.simulate("click", node=view.node("root.body.own_bar.own_close"))
     assert closed == [True]
