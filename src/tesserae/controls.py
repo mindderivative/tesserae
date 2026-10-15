@@ -101,7 +101,7 @@ class Control:
 
     def color(self, role: str) -> RGBA:
         """A colour role of this control's theme, or MD3's baseline."""
-        return self.theme.role(role) or tokens.BASELINE[role]
+        return tokens.theme_color(self.theme, role)
 
     def set_theme(self, theme: Theme) -> None:
         """Re-tints the control for `theme`, at once."""
@@ -1147,7 +1147,7 @@ class SpinBox:
 
     def color(self, role: str) -> RGBA:
         """A colour role of this control's theme, or MD3's baseline."""
-        return self.theme.role(role) or tokens.BASELINE[role]
+        return tokens.theme_color(self.theme, role)
 
     def set_theme(self, theme: Theme) -> None:
         """Re-tints the spin box for `theme`, at once."""
@@ -1335,6 +1335,11 @@ class Indicator:
         self.window = window
         self.track = track  # the colour role of the track behind the indicator; each kind has its own when this is None
         self.theme = initial_theme(window, theme, self)  # the app's, followed, without one (M50)
+        if track is not None:
+            try:
+                self.color(track)  # a role that is not one is found now, not when the first frame paints
+            except ValueError as exc:
+                raise ValueError(f"track={track!r}: {exc}") from None
         self.value = Signal(value)
         self._color = color
         self._painted = False
@@ -1347,7 +1352,7 @@ class Indicator:
         self._effect = Effect(self._render)
 
     def color(self, role: str) -> RGBA:
-        return self.theme.role(role) or tokens.BASELINE[role]
+        return tokens.theme_color(self.theme, role)
 
     def _on_colour(self) -> RGBA:
         return self._color or self.color("primary")

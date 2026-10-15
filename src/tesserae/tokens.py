@@ -79,6 +79,28 @@ BASELINE: dict[str, RGBA] = {role: _hex(value) for role, value in {
     "on_surface": "#1D1B20", "secondary": "#625B71",
 }.items()}
 
+def unknown_role(role: str, roles: Any = None) -> ValueError:
+    """The error for a colour role that is not one: it names the role and, when one is a slip away, the nearest (`roles` are the known names;
+    MD3's own when not given)."""
+    import difflib
+
+    known = sorted(baseline_scheme() if roles is None else roles)
+    close = difflib.get_close_matches(str(role), known, n=1, cutoff=0.6)
+    return ValueError(f"{role!r} is not a colour role" + (f" -- did you mean {close[0]!r}?" if close else f"; they are {', '.join(known[:6])}, ..."))
+
+
+def theme_color(theme: Any, role: str) -> RGBA:
+    """A colour role of `theme`, else of MD3's baseline scheme (all of its roles, not only `BASELINE`'s published few), else the error
+    `unknown_role` makes. For a control, which may have no theme."""
+    found = theme.role(role)
+    if found is not None:
+        return found
+    base = _full_baseline()
+    if role in base:
+        return base[role]
+    raise unknown_role(role, theme.roles or base)
+
+
 def baseline_scheme() -> dict[str, RGBA]:
     """Every role, for widgets with no theme: the scheme MD3's baseline
     seed (#6750A4) generates, with MD3's published `BASELINE` values over
@@ -350,3 +372,12 @@ MD3_TRACKING_TYPOGRAPHY = {role: {"tracking": tracking} for role, tracking in MD
 def type_style(role: str) -> Optional[TypeStyle]:
     """The font size, weight, line height and tracking of the MD3 type role `role`, or `None` if it isn't one."""
     return TYPE_SCALE.get(role)
+
+
+_FULL: dict[str, RGBA] = {}
+
+
+def _full_baseline() -> dict[str, RGBA]:
+    if not _FULL:
+        _FULL.update(baseline_scheme())
+    return _FULL

@@ -1259,7 +1259,7 @@ def _control(ctx: _Context, node: dict[str, Any], style: dict[str, Any], built: 
     size = {k: float(v) for k, v in (("width", width), ("height", height)) if v is not None}
     if kind in _INDICATOR_KINDS:
         value = _progress_value(node)
-        common["track"] = node.get("track")
+        common["track"] = node.get("track")  # a role that is not one is refused by the control, and named here by the widget
         if kind == "LinearProgress":
             control = controls.LinearProgress(ctx.window, value=value, width=size.get("width", 240.0),
                                               stop_indicator=bool(node.get("stop_indicator")), buffer=node.get("buffer"),

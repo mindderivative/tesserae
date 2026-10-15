@@ -2777,3 +2777,10 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Reproduced** with a one-view project: `App(borderless=True, stylesheet="Look_Stylesheet.yaml")`, the sheet `styles: [{widget: Button, ...}]`, raised `ValueError: stylesheet_spec=: styles[0]: unknown field(s) ['widget']` from `App._build_border`.
 - **Fixed** by not passing a rule sheet to the border view. Three tests in `tests/test_window_border.py` (opens with a rule sheet, follows a dark/light switch, an old-shape sheet still restyles by class); removing the guard fails the first two. Removed `window_border=False` from the tutorial step 6 programs and pages, and `tesserae build --check` on `examples/tutorial_project/step6` builds and draws 30 frames with the border on.
 - **Not checked:** the border on a real borderless window by eye; the docs for `window_border` now say a `widget:` rule does not reach it.
+
+## 0.5.0.12 #267: a colour role that is not found
+
+- **The issue's premise was half wrong.** Reproduced with `track: surface_variant`: that is a real MD3 role (in `tokens.baseline_scheme()`), and it failed because an unthemed control looked it up in `tokens.BASELINE`, which holds only some roles. A truly unknown name (`surface_variantt`) raised the same bare `KeyError`. Both fixed: `tokens.theme_color` (theme, then the whole baseline scheme, then `unknown_role` with a nearest-name hint), used by the three `color()` methods in `controls.py`; `Indicator` checks `track` when it is made.
+- **A check in `spec/build.py` was written and then dropped:** the control's own check already raises through the builder with the widget named, and a mutation of the extra check was never caught, so it was dead.
+- **Tests:** `tests/test_track_role.py`, 9; four mutations of the lookup and the check are caught.
+- **Not done:** other string-role properties were looked for and `track` is the only one that takes a bare role; colours in `style:` already went through `resolve_color` with a hint.

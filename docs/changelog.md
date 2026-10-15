@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.12
+
+### Fixed
+
+- **`track: surface_variant` on a progress indicator was a bare `KeyError`, and a mistyped role was no better** ([#267](https://github.com/mindderivative/tesserae/issues/267)). Two faults. An indicator (or any control) with no theme looked a role up in `tokens.BASELINE`, which holds only some of MD3's roles, so a real role such as `surface_variant` raised `KeyError` while painting; it now falls back to the whole baseline scheme. And a name that is no role at all raised the same `KeyError` at the first frame; `track` is now checked when the indicator is made, and the error names the property, the role, the widget, and the nearest role when one is a slip away (`'surface_container_hihgest' is not a colour role -- did you mean 'surface_container_highest'?`). The same lookup in every control gives that message instead of a `KeyError`.
+
 ## 0.5.0.11
 
 ### Fixed
