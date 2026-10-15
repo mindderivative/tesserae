@@ -76,7 +76,7 @@ children keep the names they were given (`bar.search`).
 A `TitleBar` is a header for any surface, not only a window. With `buttons: [dismiss]` it has no window buttons, no room for the
 OS's controls and no drag region (a press on it doesn't move the window), and its one button closes the dialog or sheet the bar is
 in (`surface.dismiss`), which closes the overlay the bar is in, the nearest one up the tree (see [Overlays](overlays.md)). A bar in no overlay does
-nothing when it is pressed: a `Dialog` written in a view is closed by its own `open` and `actions`. `dismiss` is on its own: a bar is for a
+nothing when it is pressed. In a view the overlay is a `widget: Overlay`: the bar's button closes it and writes false to its `open`. `dismiss` is on its own: a bar is for a
 window or for a surface.
 
 ```yaml

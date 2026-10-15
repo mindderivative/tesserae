@@ -147,7 +147,16 @@ def builtin_actions(view_ref: Callable[[], Any], window: Any = None) -> Callable
         if head == "surface" and rest in SURFACE_ACTIONS:
             from tesserae.overlays import dismiss_surface
 
-            return lambda: dismiss_surface(view.root)
+            def dismiss() -> None:
+                inst = scope.nearest_instance() if scope is not None else None
+                while inst is not None:  # the nearest `widget: Overlay` the handler's widget is in closes, as a press outside it would
+                    if inst.widget == "Overlay":
+                        view._dismiss_layer(inst)
+                        return
+                    inst = inst.parent
+                dismiss_surface(view.root)  # else a Python overlay (`tesserae.overlays`) the view is in
+
+            return dismiss
         return None
 
     resolve.app = lambda: app_of(window if window is not None else getattr(view_ref(), "window", None))  # type: ignore[attr-defined]  # `app` in an expression

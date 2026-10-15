@@ -80,8 +80,8 @@ A dialog or a sheet takes one too, with a close button that dismisses it:
   buttons: [dismiss]
 ```
 
-`surface.dismiss` is the handler behind it. It closes the overlay the bar is in, the nearest one up the tree, and does nothing when the bar
-is in none: a `Dialog` written in a view is closed by its own `open` and `actions`. [Custom Title Bars](custom-title-bars.md) has the rest.
+`surface.dismiss` is the handler behind it. It closes the overlay the bar is in, the nearest one up the tree (a `widget: Overlay` of the view, else one made by
+`tesserae.overlays`), and does nothing when the bar is in none. [Custom Title Bars](custom-title-bars.md) has the rest.
 
 ## Embedded views
 

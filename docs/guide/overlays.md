@@ -117,8 +117,10 @@ the top of the view is a header with a close button, and a `surface.dismiss` han
 `ViewDialog` reads its file with the older view loader, so a view written in the current language does not load in it. To
 show a view of your own in a dialog, put it in a `widget: Overlay` as above.
 
-`surface.dismiss` closes the overlay made by `tesserae.overlays` that the node is in (the nearest one up its parents), as its `close()` does; in `tesserae.overlays`,
-`dismiss_surface(node)` is the same from Python. It does not close a `widget: Overlay` of a view: that one closes by writing `open`.
+`surface.dismiss` closes the nearest overlay the widget is in. In a view that is the nearest `widget: Overlay` up the tree, closed as a press outside it
+would: the layer hides, a bound `open` goes false, and `on_dismiss` runs. A button in a view the Overlay calls dismisses it too, and in nested
+Overlays it is the inner one. With no `widget: Overlay` around, it closes the overlay made by `tesserae.overlays` that the view is in, as its `close()`
+does (`dismiss_surface(node)` is the same from Python), and does nothing if there is none. Writing `false` to `open` still closes an Overlay.
 
 ## Which closes how
 

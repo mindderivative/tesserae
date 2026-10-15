@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.17
+
+### Fixed
+
+- **`surface.dismiss` closes a `widget: Overlay` in a view** ([#266](https://github.com/mindderivative/tesserae/issues/266)). A button in an Overlay with `handlers: {on_click: surface.dismiss}` did nothing: the handler only looked for overlays made by `tesserae.overlays`, and a view's Overlay closes another way. It now closes the nearest Overlay the widget is in, as a press outside it would: the layer hides, a bound `open` goes false, and `on_dismiss` runs. It works from a view the Overlay calls, and in nested Overlays it closes the inner one. With no Overlay around, it falls back to the `tesserae.overlays` surface the view is in, as before. A `TitleBar` with `buttons: [dismiss]` in an Overlay now closes it.
+
 ## 0.5.0.16
 
 ### Fixed

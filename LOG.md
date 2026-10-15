@@ -2812,3 +2812,9 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Reproduced:** `style: row_Style.yaml` on a Container: no error, 0 by 0. **Fix:** `NodeLoader.style` refuses any string; `Node.style_file` removed. The migration tool: `Translator(style_file=...)` inlines the fields (migrate.py's `_style_fields`: beside the view, else the only file of that name under the project; unwraps `style:`/`id:`); a missing or ambiguous file is a note and the file fails its check, so nothing is written.
 - **Tests:** `tests/test_style_file_refused.py` (6: the refusal with its position, fields written in, a migrated view lays out as the old one did through the older loader, a file of bare fields, a missing file, an ambiguous one); `test_nodes` changed; four mutations caught.
 - **Not done:** the leftover `*_Style.yaml` files are not deleted by the tool; a style file that itself `include:`s another is read as a plain mapping (the older loader would expand it). `tesserae-style-schema.json` (editor schema for those files) is unchanged.
+
+## 0.5.0.17 #266: surface.dismiss in a view Overlay
+
+- **Reproduced:** a modal Overlay bound to `open` with a Close button on `surface.dismiss`: `open` stayed True. **Fix:** `builtin_actions` resolves `surface.dismiss` with the handler's scope, walks the instance's parents to the nearest `Overlay` and calls `ComposedView._dismiss_layer`; otherwise `dismiss_surface(view.root)` as before.
+- **Tests:** `tests/test_surface_dismiss_overlay.py` (8: bound `open`, `on_dismiss` once, reopen, unbound `open`, a called view's button, nested, no overlay, the Python fallback via a stand-in); four mutations caught, including the fallback (not covered by any earlier test).
+- **Not checked:** a TitleBar `dismiss` button in a view Overlay by hand (only by its handler, which is the same one).
