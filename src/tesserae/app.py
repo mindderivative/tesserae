@@ -856,23 +856,41 @@ class App:
         the views it calls are found in the project too. Returns the `ComposedView`; its `.handle` is what the ViewModel holds."""
         return self._open_view(view, name, self._window)
 
-    def _open_view(self, view: str | Path, name: str | None, window: Any) -> Any:
-        from tesserae.composed import open_composed
-        from tesserae.shipped import ViewLibrary, shipped_rules
+    def _composed_docs(self, path: Path) -> tuple[Any, Any]:
+        """The parsed view file `path` and the library that found the views it calls (the project's, then the ones Tesserae ships). File work
+        only, so a hot reload does it off the loop."""
+        from tesserae.shipped import ViewLibrary
+
+        library = ViewLibrary(self.project.index("view"))
+        return library.parse(path), library
+
+    def _composed_rules(self, library: Any) -> tuple[list[Any], dict[str, Any]]:
+        """The rules under a composed view (what the shipped components look like, then the app's stylesheet) and the theme arguments."""
+        from tesserae.shipped import shipped_rules
         from tesserae.spec.rules import is_rule_sheet
 
-        path = Path(self._named("view", view))
-        library = ViewLibrary(self.project.index("view"))  # the project's views, then the ones Tesserae ships
-        doc = library.parse(path)
         kwargs = self._view_theme()
-        rules = [sheet.without(library.replaced) for sheet in shipped_rules()]  # the lowest layer: what the shipped components look like
+        rules = [sheet.without(library.replaced) for sheet in shipped_rules()]
         if self._stylesheet_spec is not None:
             if is_rule_sheet(self._stylesheet_spec):  # the app's rules by widget, variant, part and state
                 kwargs.pop("stylesheet_spec", None)
                 rules.append(self._rule_sheet())
             else:
                 kwargs["stylesheet_spec"] = self._stylesheet_spec
+        return rules, kwargs
+
+    def _open_view(self, view: str | Path, name: str | None, window: Any) -> Any:
+        from tesserae.composed import open_composed
+
+        path = Path(self._named("view", view))
+        doc, library = self._composed_docs(path)
+        rules, kwargs = self._composed_rules(library)
         opened = open_composed(doc, self.bindings, library.doc, base_dir=path.parent, window=window, rules=rules, **kwargs)
+        opened.source = path.resolve()  # the file a hot reload watches
+        if self._hot_handle is not None:  # opened while the app runs with hot reload on
+            watcher = self._composed_watcher(opened)
+            watcher.start(self._hot_handle)
+            self._watchers.append(watcher)
         key = name or doc.name or path.name.removesuffix("_View.yaml")
         if window is not self._window:  # another window's view is not a screen of the main one: it is kept, themed and checked with the rest
             self._built.append(_Built(opened))
@@ -1604,7 +1622,11 @@ class App:
         """Every hot-reload watcher `run(hot_reload=True)` needs, started
         on `handle`."""
         watchers: list[Any] = []
+        for opened in self._opened.values():  # views written with `widget:` nodes, opened with `open_view` or `open_window`
+            watchers.append(self._composed_watcher(opened))
         for name, registered in self._registered.items():
+            if registered.view in self._opened.values():
+                continue
             # M48: a screen built from a file -- by `load()` or `build_view()`,
             # then `register()` -- keeps that file as `view.path`
             path = getattr(registered.view, "path", None)
@@ -1657,6 +1679,12 @@ class App:
             sum(len(w.files) for w in watchers if not isinstance(w, ViewWatcher)),
         )
         return watchers
+
+    def _composed_watcher(self, opened: Any) -> Any:
+        from tesserae.shipped import SHIPPED
+        from tesserae.spec.watch import ComposedWatcher
+
+        return ComposedWatcher(opened, opened.source, self._composed_docs, lambda library: self._composed_rules(library)[0], shipped=SHIPPED)
 
     def _stop_watchers(self) -> None:
         """Stops every hot-reload watcher, including component watchers

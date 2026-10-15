@@ -63,7 +63,7 @@ Linux, macOS and Windows.
 - **Real desktop behaviour.** [Keyboard, state layers and screen-reader support](guide/interaction.md),
   [overlays](guide/overlays.md), [a window, docks, routed screens and several windows](guide/windows-and-docks.md),
   and [custom title bars](guide/custom-title-bars.md). A layout can follow the window's size class.
-- **Fast iteration.** [Hot reload](guide/hot-reload.md) re-themes a running app when a theme file changes,
+- **Fast iteration.** [Hot reload](guide/hot-reload.md) shows an edited view, or a theme, in a running app with its state kept,
   and [editor support](guide/editor-support.md) completes and checks your YAML.
 - **Shipping.** `tesserae build` makes one executable, or an installer: [Releasing](guide/releasing.md).
 

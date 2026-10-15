@@ -217,7 +217,7 @@ See [Windows, Docks & Embedded Views](guide/windows-and-docks.md) and [Custom Ti
 
 ## Where next
 
-- Edit a theme file while the app runs with `app.run(hot_reload=True)` and the colours change at once: see
+- Edit a view or a theme file while the app runs with `app.run(hot_reload=True)` and the window changes at once, your tasks kept: see
   [Hot Reload](guide/hot-reload.md) for what it watches.
 - `tesserae build --check` turns the app into one executable: [Releasing Your App](guide/releasing.md).
 - Browse the [components](components/index.md), and the [YAML](api/yaml.md) and

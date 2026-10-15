@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.13
+
+### Added
+
+- **Hot reload for views written with `widget:` nodes** ([#269](https://github.com/mindderivative/tesserae/issues/269)). `app.run(hot_reload=True)` watches a view opened with `open_view` or `open_window`, every view it calls (and the views those call) and the pictures it draws, and composes the view again when one changes: the ViewModel and its Signals are the same ones, a node that keeps its place keeps its `state:`, and handlers are wired again. A mistake (invalid YAML, a call with a wrong parameter, a name nothing defines, a widget the engine rejects) leaves the window as it was and is logged as one `ERROR` naming the file. A view opened while the app runs is watched too, and a view the file starts to call is watched from then on. The views Tesserae ships are not. Not reloaded: the app's stylesheet of rules ([#272](https://github.com/mindderivative/tesserae/issues/272)), Python code, and a `widget: Window` view's window options. Until now the log said such a screen "isn't watched" and a saved edit did nothing.
+
 ## 0.5.0.12
 
 ### Fixed

@@ -158,6 +158,9 @@ count)` runs `count`, which sets the label with `label.set(text=...)`.
 Run it. Click the button, or press Tab and then Enter or Space, and the count
 goes up. The two versions are the same app.
 
+To see an edit without restarting, run the declarative version with `app.run(hot_reload=True)`, count a few clicks, then change the label's text in
+`Counter_View.yaml` and save: the window shows the new text with the count kept ([Hot Reload](guide/hot-reload.md)).
+
 ## Which to use
 
 Use **declarative** for the screens you design: layout, styling, themes and

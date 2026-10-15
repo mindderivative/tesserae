@@ -7,13 +7,35 @@ opened:
 | --- | --- |
 | a theme: `App(custom_theme=)`, `App(default_theme=)` | every view is re-themed in place ([below](#theme-and-stylesheet-files)) |
 | a view the app opened with `app.load` (the older syntax), and the fragments and images it was built from | the screen is rebuilt in place, its ViewModel and bindings kept |
-| a view the app opened with `app.open_view` | not watched: stop the app and run it again |
+| a view the app opened with `app.open_view` or `app.open_window`, any view it calls, and the pictures it draws | the view is composed again in place: its ViewModel, the nodes that keep their name or position, and their `state:` stay ([below](#a-view-written-with-widget-nodes)) |
 | the app's stylesheet of rules (`App(stylesheet=)`, `widget:` rules) | not applied while the app runs: run it again |
 
 The log says what is watched when it starts, and names a screen it does not watch:
 `hot reload: screen 'Tasks' isn't watched -- it was built from a spec, not a file`.
 
-## In an app
+## A view written with `widget:` nodes
+
+```python
+app = App()
+app.bind(CounterViewModel)
+app.open_view("Counter")
+app.show("Counter")
+app.run(hot_reload=True)
+```
+
+Save `Counter_View.yaml`, a view it calls (and the views those call), or a picture it draws, and the window shows the change at once. The view is
+composed again from the new files and drawn over the old: the ViewModel and its Signals are the same ones, so the counter keeps its count; a node
+that keeps its place (its `name`, or its position, with the `key` of a row under `for:`) keeps its `state:`; a handler is wired again. A view
+the file starts to call is watched from then on. The views Tesserae ships are not watched. A view opened while the app runs is watched too, and
+so is every window `open_window` opens.
+
+A mistake leaves the window as it was and is logged as an `ERROR` naming the file: invalid YAML, a call with a wrong parameter, a name that is
+not defined, or a widget the engine rejects. Fix the file and save.
+
+Not reloaded: the app's own stylesheet of rules (`App(stylesheet=)`), the Python files (a ViewModel's code is not reloaded), and a `widget: Window`
+view's window options (its size, title and flags are read when it opens).
+
+## In an app (the older syntax)
 
 ```python
 app = App()

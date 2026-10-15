@@ -54,7 +54,7 @@ Main_View.yaml:11:5: error: Slider: no property 'valu' (did you mean 'value'; pr
 
 Nodes have **ids**, assigned by the loader and never written: the path from the root, using a node's `name` where it has one
 (`root.add`) and its place where it does not (`root.children[0]`), with `[key]` added under a `for:`. Give a node a `name` when something has to
-find it again: a ViewModel, a stylesheet rule, a test.
+find it again: a ViewModel, a stylesheet rule, a test, or a hot reload that should keep its state.
 
 ## Widgets and properties
 
@@ -161,7 +161,7 @@ children:
   worth keeping while it is away. On a view call it hides the whole view; on the root of a view file it is an error (write it where the view is called).
   Focus and the accessibility tree follow the engine's hidden nodes; nothing here changes them.
 - `state:` makes a Signal for each name, for this node and everything under it. A starting value may be an expression over the view's own params, which seed it once when the state is made (`state: {draft: "{{ hour }}"}`); it may not read a ViewModel's names. It belongs to the node (to each row under a `for:`), and is written
-  by handlers. Use it for presentation (open, on); what the app cares about belongs
+  by handlers, and survives a [hot reload](hot-reload.md#a-view-written-with-widget-nodes) for a node that keeps its name or position. Use it for presentation (open, on); what the app cares about belongs
   in the ViewModel.
 - `for:`, `if:` and `slot:` are not allowed on the root of a view.
 

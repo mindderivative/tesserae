@@ -45,12 +45,15 @@ class ViewLibrary:
         #: shipped views the project has replaced with its own: their shipped looks are not used either
         self.replaced: set[str] = set(shipped_views()) & set(project or {})
         self._docs: dict[Path, ViewDoc] = {}
+        #: every view file read through this library (the one opened, and each view it calls), for a hot reload to watch
+        self.read: set[Path] = set()
 
     def decl(self, name: str) -> Optional[WidgetDecl]:
         """The declaration of the view `name`'s params, or `None` when there is no such view."""
         path = self.paths.get(name)
         if path is None:
             return None
+        self.read.add(path.resolve())
         params = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("params")
         return decl_from_params(name, params) if params is not None else WidgetDecl(name, view=True, container=True)
 
@@ -60,9 +63,11 @@ class ViewLibrary:
         if path is None:
             return None
         if path not in self._docs:
+            self.read.add(path.resolve())
             self._docs[path] = parse_view(path.read_text(encoding="utf-8"), str(path), resolver=self.decl, view_name=name)
         return self._docs[path]
 
     def parse(self, path: Path, name: Optional[str] = None) -> ViewDoc:
         """Parses a view file that is not looked up by name (the one being opened), against this library."""
+        self.read.add(path.resolve())
         return parse_view(path.read_text(encoding="utf-8"), str(path), resolver=self.decl, view_name=name or path.name.removesuffix("_View.yaml"))

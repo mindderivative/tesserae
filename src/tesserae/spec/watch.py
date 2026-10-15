@@ -58,7 +58,7 @@ from loguru import logger
 from tesserae.spec.images import Frame
 from tesserae.spec.load import build_view_spec
 
-__all__ = ["ComponentWatcher", "FileWatcher", "ViewWatcher"]
+__all__ = ["ComponentWatcher", "ComposedWatcher", "FileWatcher", "ViewWatcher"]
 
 #: `(st_mtime_ns, st_size)`, or `None` for a file that doesn't exist.
 _Stamp = Optional[Tuple[int, int]]
@@ -286,6 +286,44 @@ class ComponentWatcher(ViewWatcher):
             except ValueError as exc:
                 raise ValueError(f"{self._path}: {exc}") from exc
         logger.info("reloaded {} ({} instance(s))", self._path, len(live))
+
+
+class ComposedWatcher(ViewWatcher):
+    """Watches a view opened with `app.open_view` -- the file, every view it calls, and its pictures -- and recomposes it on change. The ViewModel,
+    the nodes that keep their id and the `state:` of those nodes stay. `parse(path)` gives the parsed
+    doc and the `ViewLibrary` that read the files, and `rules(library)` the rules to compose under (both from `App`).
+
+    A change that fails to parse or compose is logged naming the file, and the view stays as it was. The files watched are re-read after each
+    reload, so a view the file now calls is watched too."""
+
+    def __init__(self, view: Any, path: str | Path, parse: Callable[[Path], tuple[Any, Any]], rules: Callable[[Any], Any], *,
+                 shipped: Optional[Path] = None) -> None:
+        self._parse, self._rules = parse, rules
+        if shipped is None:
+            from tesserae.shipped import SHIPPED as shipped  # Tesserae's own views are not the app's to edit
+        self._shipped = shipped.resolve()
+        super().__init__(view, path)
+
+    def _rebuild(self) -> tuple[Any, list[Frame], set[Path]]:
+        """All the file work, safe off the loop: parses the view and every view it calls (so a mistake in any of them is found here), and names the
+        files."""
+        doc, library = self._parse(self._path)
+        pending, seen = [doc], set()
+        while pending:
+            for node in pending.pop().root.walk():
+                if node.widget in library.paths and node.widget not in seen:
+                    seen.add(node.widget)
+                    pending.append(library.doc(node.widget))
+        files = {p for p in library.read if self._shipped not in p.parents} | {self._path.resolve()}
+        files |= set(self._view.image_files)
+        return (doc, library), [], files
+
+    def _apply(self, spec: Any, frames: list[Frame]) -> None:
+        if self._view.handle.closed:
+            return
+        doc, library = spec
+        self._view.recompose(doc, library.doc, self._rules(library))
+        logger.info("reloaded {}", self._path)
 
 
 class FileWatcher:

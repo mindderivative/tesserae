@@ -24,7 +24,7 @@ from tesserae.follow import app_of
 from tesserae.listeners import handled, listen_window
 from tesserae.reactive import Effect, Signal, untrack
 from tesserae.expr import compile_statements, is_action_name
-from tesserae.spec.compose import Instance
+from tesserae.spec.compose import Composer, Instance
 from tesserae.timers import Timers
 from tesserae.typing_effects import OPTIONS, TypingEffects
 from tesserae.spec.images import extract_images
@@ -191,6 +191,8 @@ class ComposedView(View):
         self._typed: tuple[str, float] = ("", 0.0)
         self._observed: set[int] = set()
         self._synced = False
+        self.source: Optional[Path] = None  # the view file it was opened from (set by `App.open_view`), which a hot reload watches
+        self.image_files: set[Path] = set()  # the pictures the view draws, for a hot reload to watch
         self._effect: Optional[Effect] = None
         self._timers: Optional[Timers] = None
         self._scrolled: dict[str, dict[str, str]] = {}
@@ -273,8 +275,30 @@ class ComposedView(View):
 
     def _lowered(self) -> tuple[dict[str, Any], dict[str, tuple[bytes, int, int]]]:
         spec = lower(self.handle.composition.root)
-        spec, frames = extract_images(spec, self._base_dir, dependencies=set())
+        images: set[Path] = set()
+        spec, frames = extract_images(spec, self._base_dir, dependencies=images)
+        self.image_files = images
         return spec, {node_id: (rgba, w, h) for node_id, rgba, w, h in frames}
+
+    def recompose(self, doc: ViewDoc, views: Any, rules: Any = ()) -> None:
+        """Hot reload: composes `doc` again, with the state of the nodes whose id is the same carried over, and shows it in place of the old
+        composition. The ViewModel, the handle and the window's nodes (matched by id) stay. If the new one cannot be composed or built, the view is
+        as it was and the error is raised."""
+        old_handle = self.handle
+        old = old_handle.composition
+        new = Composer(views, old_handle.viewmodel, previous=old, actions=old._composer.actions, rules=rules).compose(doc)
+        old_doc, old_observed, old_effect = old_handle.doc, self._observed, self._effect
+        if old_effect is not None:
+            old_effect.dispose()
+        old_handle.composition, old_handle.doc, self._observed = new, doc, set()
+        try:
+            self._effect = Effect(self._sync)
+        except Exception:
+            old_handle.composition, old_handle.doc, self._observed = old, old_doc, old_observed
+            new.dispose()
+            self._effect = Effect(self._sync)  # the old composition drawn again
+            raise
+        old.dispose()
 
     def _sync(self) -> None:
         spec, frames = self._lowered()  # read inside the effect: these are the values the view depends on
