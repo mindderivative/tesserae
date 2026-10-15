@@ -88,7 +88,9 @@ def test_style_takes_universal_fields_a_widgets_extras_and_expressions():
     err = fails("widget: Container\nstyle: {widht: 100}", "Container: style 'widht' is not valid here")
     assert "did you mean 'width'" in str(err)
     fails("widget: Container\nstyle: [1]", "'style:' takes a mapping")
-    assert node("widget: Container\nstyle: row_Style.yaml").style_file == "row_Style.yaml"
+    err = fails("widget: Container\nstyle: row_Style.yaml", "a style file (`*_Style.yaml`) is not part of the view language")
+    assert "migrate-yaml" in str(err)
+    fails("widget: Container\nstyle: row", "'style:' takes a mapping of style fields; write the fields here")
     assert node("widget: Text\nstyle: {foreground: on_surface}").style["foreground"] == "on_surface"  # an extra of the widgets that draw text
     err = fails("widget: Container\nstyle: {foreground: red}", "Container: style 'foreground' is not valid here")
     assert f"widgets that accept it: {accepting_foreground()}" in str(err)

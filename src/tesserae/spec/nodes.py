@@ -200,7 +200,6 @@ class Node:
     slot: Optional[str] = None
     state: dict[str, Any] = field(default_factory=dict)
     style: dict[str, Any] = field(default_factory=dict)
-    style_file: Optional[str] = None
     classes: list[str] = field(default_factory=list)
     handlers: dict[str, Handler] = field(default_factory=dict)
     a11y: dict[str, Any] = field(default_factory=dict)
@@ -432,9 +431,10 @@ class _Parser:
             node.route_options["lazy"] = value["lazy"]
 
     def style(self, node: Node, value: Any, vat: Position) -> None:
-        if isinstance(value, str) and value.endswith((".yaml", ".yml")):  # a style file shared by nodes (M75)
-            node.style_file = value
-            return
+        if isinstance(value, str):
+            what = "a style file (`*_Style.yaml`) is not part of the view language: " if value.endswith((".yaml", ".yml")) else ""
+            raise self.fail(vat, f"'style:' takes a mapping of style fields; {what}write the fields here, or give the node `classes:` and a rule in a "
+                                 "stylesheet" + (" (`tesserae migrate-yaml` writes the file's fields in)" if what else ""))
         if not isinstance(value, PMap):
             raise self.fail(vat, f"'style:' takes a mapping or a style file name, got {_describe(value)}")
         allowed = style_fields_of(node.decl)

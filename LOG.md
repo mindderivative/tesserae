@@ -2806,3 +2806,9 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **A bug found by running window_dock with hot reload:** `_live_components` asked a routed `_Screen` for `_prune_components`. Fixed, with a test and the log noise removed.
 - **window_dock:** `migrate-yaml --write`, then by hand: `Window_ViewModel.py` replaces `Console_ViewModel.py` and `Notes_ViewModel.py` (a called view has no ViewModel of its own); ids are paths (`root.body.dock.compare.after`). `tests/test_window_dock_example.py` finds the rail's pill by its node instead of fixed pixels.
 - **Not done:** counter, multi_screen, todo_list and custom_title_bar are still the old syntax (#276, Backlog). Not tried: `tesserae new` with the virtual environment (the tests use `--no-venv`), and `python app.py --interactive` on window_dock by eye.
+
+## 0.5.0.16 #273: a style file in a 0.5.0 view
+
+- **Reproduced:** `style: row_Style.yaml` on a Container: no error, 0 by 0. **Fix:** `NodeLoader.style` refuses any string; `Node.style_file` removed. The migration tool: `Translator(style_file=...)` inlines the fields (migrate.py's `_style_fields`: beside the view, else the only file of that name under the project; unwraps `style:`/`id:`); a missing or ambiguous file is a note and the file fails its check, so nothing is written.
+- **Tests:** `tests/test_style_file_refused.py` (6: the refusal with its position, fields written in, a migrated view lays out as the old one did through the older loader, a file of bare fields, a missing file, an ambiguous one); `test_nodes` changed; four mutations caught.
+- **Not done:** the leftover `*_Style.yaml` files are not deleted by the tool; a style file that itself `include:`s another is read as a plain mapping (the older loader would expand it). `tesserae-style-schema.json` (editor schema for those files) is unchanged.

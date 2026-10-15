@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.16
+
+### Fixed
+
+- **`style: row_Style.yaml` in a view of the 0.5.0 language is refused, not silently ignored** ([#273](https://github.com/mindderivative/tesserae/issues/273)). The loader stored the file name and nothing read it, so the node laid out at 0 by 0 with no message. It is an error at the line and column, saying a style file is not part of the language and what to write instead (the fields inline, or `classes:` and a rule in a stylesheet). `tesserae migrate-yaml` now writes a style file's fields into each node that names it (the file beside the view, else the only one of that name in the project; the fields may be the file's own or under a `style:` key), says so in its report, and fails with the file named when it cannot read one. The older loader still expands a style file for a view in the older syntax.
+
 ## 0.5.0.15
 
 ### Changed

@@ -285,8 +285,9 @@ single-curve form, `(0.2, 0, 0, 1)`.
 ### Style files
 
 A `*_Style.yaml` file holds one node's `style:` (its fields under a `style:` key, and an optional `id:`), and a node of a view in
-the older syntax can name it (`style: row_Style.yaml`) so several nodes share it. A view in the current language does not apply
-one: write the fields in `style:`, or in a rule that several nodes match through a class or a widget name.
+the older syntax can name it (`style: row_Style.yaml`) so several nodes share it. A view in the current language refuses one, naming the
+line: write the fields in `style:`, or in a rule that several nodes match through a class or a widget name. `tesserae migrate-yaml` writes a
+style file's fields into each node that named it.
 
 ### Files and checking
 

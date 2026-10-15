@@ -19,7 +19,8 @@ tesserae migrate-yaml --write    # writes it, if every file checked out
 It reads every `*_View.yaml`, `*_Component.yaml` and `*_Stylesheet.yaml` in the project, translates them, checks each result with the loader
 the app uses, and writes only if all of them load (`--force` writes the ones that did). Keep the project in version control: the old files are
 rewritten, and a fragment is renamed. The comments at the top of a file are kept; comments inside a file are not, and the report says which files had
-them. Themes (`*_Theme.yaml`) and style files are left as they are.
+them. Themes (`*_Theme.yaml`) are left as they are. A node that names a style file (`style: row_Style.yaml`) gets the file's fields written into its
+`style:`, and the report says so; the style files stay where they are, for you to delete once nothing else reads them.
 
 | Before | After |
 | --- | --- |

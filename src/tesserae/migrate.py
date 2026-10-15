@@ -120,6 +120,21 @@ def _old_rules(data: dict[str, Any]) -> bool:
     return isinstance(rules, list) and any(isinstance(r, dict) and set(r) & {"kind", "id", "classes"} for r in rules)
 
 
+def _style_fields(root: Path, folder: Path, name: str) -> Optional[dict[str, Any]]:
+    """The fields in the style file `name`: beside the view, else the only one under `root`. A file may be the fields themselves, or `style:` over them
+    (and an `id:`), as the older loader read it."""
+    found = [folder / name] if (folder / name).is_file() else _files(root, name)
+    if len(found) != 1:
+        return None
+    try:
+        data = yaml.safe_load(found[0].read_text(encoding="utf-8"))
+    except yaml.YAMLError:
+        return None
+    if isinstance(data, dict) and "style" in data and set(data) <= {"id", "style"}:
+        data = data["style"]
+    return data if isinstance(data, dict) else None
+
+
 def migrate_project(root: str | Path, *, write: bool = False, force: bool = False) -> Report:
     """Works out (and with `write=True`, writes) the migration of the project under `root`."""
     root = Path(root).resolve()
@@ -151,7 +166,7 @@ def migrate_project(root: str | Path, *, write: bool = False, force: bool = Fals
             current = isinstance(data, dict) and "widget" in data
             report.results.append(FileResult(path, "current" if current else "skipped", error=None if current else "not a view"))
             continue
-        translator = Translator(params_of=params.get)
+        translator = Translator(params_of=params.get, style_file=lambda name, folder=path.parent: _style_fields(root, folder, name))
         new = translator.translate(data)
         if flavour == "View" and stem in viewmodels and isinstance(new, dict):
             new = {"name": stem, **new}

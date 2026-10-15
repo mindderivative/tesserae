@@ -55,11 +55,14 @@ def _unbrace(value: Any) -> Any:
 
 class Translator:
     """Translates nodes. `params_of(name)` returns a fragment's `params:` (so a `repeat:` over a parameter knows the per-item keys);
-    `addressed`, when given, is the set of ids something addresses: the others lose their `id:`."""
+    `addressed`, when given, is the set of ids something addresses: the others lose their `id:`; `style_file(name)`, when given, reads the fields of a
+    `style:` that names a file, which a node of 0.5.0 holds itself."""
 
-    def __init__(self, params_of: Optional[Callable[[str], Any]] = None, addressed: Optional[set[str]] = None) -> None:
+    def __init__(self, params_of: Optional[Callable[[str], Any]] = None, addressed: Optional[set[str]] = None,
+                 style_file: Optional[Callable[[str], Optional[dict[str, Any]]]] = None) -> None:
         self.params_of = params_of
         self.addressed = addressed
+        self.style_file = style_file  # a `*_Style.yaml` file's fields by its name, or `None` when there is no such file
         self.notes: list[str] = []
 
     # documents
@@ -106,6 +109,8 @@ class Translator:
                     self.notes.append(f"{where}: interaction keys other than color were dropped: {sorted(set(value) - {'color'})}")
             elif key == "handlers" and isinstance(value, dict):
                 out["handlers"] = {event: self._handler(action, where) for event, action in value.items()}
+            elif key == "style" and isinstance(value, str):
+                props[key] = self._style_of(value, where)
             else:
                 props[key] = _clean(value)
         for key, value in (old.get("with") or {}).items():
@@ -154,6 +159,15 @@ class Translator:
         for key in props:
             if key not in declared and key not in universal:
                 self.notes.append(f"{where}: {component} declares no parameter '{key}'; the component pass adds the property")
+
+    def _style_of(self, name: str, where: Any) -> Any:
+        """A node's `style: row_Style.yaml`: the file's fields, written in (the file is not part of the language), else left as it was with a note."""
+        fields = self.style_file(name) if self.style_file is not None else None
+        if fields is None:
+            self.notes.append(f"{where}: style: {name} names a style file that could not be read; write its fields in the node's style")
+            return name
+        self.notes.append(f"{where}: style: {name} was written in as the node's own style fields")
+        return {k: _clean(v) for k, v in fields.items()}
 
     def _handler(self, action: Any, where: Any) -> Any:
         match = _NAVIGATE.match(action) if isinstance(action, str) else None
