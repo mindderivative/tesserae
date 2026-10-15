@@ -294,12 +294,6 @@ def stub(prefix, names):
 
 CASES = [
     ("examples/counter/Counter_View.yaml", "Counter", {"label": "Count: 0", "button_label": "Increment", "increment": None}),
-    ("examples/window_dock/Files_View.yaml", "Files", {}),
-    ("examples/window_dock/Home_View.yaml", "Home", {}),
-    ("examples/window_dock/Outline_View.yaml", "Outline", {}),
-    ("examples/window_dock/Properties_View.yaml", "Properties", {}),
-    ("examples/window_dock/Console_View.yaml", "Console", {"last": "ready"}),
-    ("examples/window_dock/Notes_View.yaml", "Notes", {"note": "hello", "echo": "hello"}),
 ]
 
 

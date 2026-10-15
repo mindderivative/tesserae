@@ -1,0 +1,12 @@
+# The ${name} screen of the window. It has no `name:` and no ViewModel of its own: it reads the names of
+# `Window_ViewModel.py`, which serves `Window_View.yaml`.
+widget: Container
+style: {flex_direction: vertical, gap: 16, padding: 24, flex: fill}
+children:
+  - widget: Text
+    name: title
+    text: "${title}"
+    typography_role: headline_small
+    style: {foreground: on_surface}
+    a11y: {role: heading, level: 1}
+  - {widget: Button, name: back, label: Back, variant: tonal, style: {width: 96}, handlers: {on_click: go_back}}

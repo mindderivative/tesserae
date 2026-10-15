@@ -1,11 +1,9 @@
-# The Console panel: a view and a ViewModel (Console_ViewModel.py), found
-# by name and shown by the Dock in Window_View.yaml.
-id: root
-kind: Container
+# The Console panel: a view called in Window_View.yaml's dock. It has no ViewModel of its own: it reads the names of Window_ViewModel.py.
+widget: Container
 style: {flex_direction: vertical, gap: 8, padding: 16}
 children:
-  - id: last
-    kind: Text
-    text: {content: "", typography_role: body_medium}
-    style: {foreground: on_surface}
-    bindings: {text: "{{ last.get() }}"}
+- widget: Text
+  name: last
+  text: '{{ last }}'
+  typography_role: body_medium
+  style: {foreground: on_surface}

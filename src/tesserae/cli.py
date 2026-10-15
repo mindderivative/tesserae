@@ -8,8 +8,8 @@
 
 `new` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair
 following the naming convention, runnable at once; `--window` makes the app
-one `kind: Window` view (title bar, rail, and two routed screens). `add screen` adds a pair and, at the
-marker comments `new` leaves in `app.py`, its import, `load()` and route.
+one `widget: Window` view (title bar, rail, and two routed screens). `add screen` adds a pair and, at the
+marker comments `new` leaves in `app.py`, its bind, `open_view()` and route.
 Neither overwrites a file. The templates are in `tesserae/templates/`.
 `build` makes the app one executable: see `tesserae.build`.
 `schema` (0.3.2) says where the YAML schemas for Red Hat's YAML language
@@ -30,7 +30,7 @@ from typing import Optional, Sequence
 TEMPLATES = Path(__file__).parent / "templates"
 #: The lines `tesserae new` leaves in `app.py`; `add screen` inserts above them.
 IMPORT_MARKER = "# (tesserae add screen adds each new screen's import above this line)"
-LOAD_MARKER = "# (tesserae add screen adds each new screen's load and route above this line)"
+LOAD_MARKER = "# (tesserae add screen adds each new screen's lines above this line)"
 SCHEMAS = Path(__file__).parent / "schema"
 #: Each YAML schema and the files it is for, as `yaml.schemas` globs (a `!` leaves files out).
 SCHEMA_FILES = {
@@ -87,11 +87,11 @@ def _make_venv(folder: Path) -> None:
 def new(name: str, parent: Path, custom_title_bar: bool = False, venv: bool = True, window: bool = False) -> Path:
     """Makes the project `name` in `parent` and returns its folder: its virtual environment (unless
     `venv=False`), the folders its files are found in, `app.py`, and a `Main` screen.
-    `window` makes the app a `kind: Window` view with `Main` and `Settings` screens in it; `custom_title_bar`
+    `window` makes the app a `widget: Window` view with `Main` and `Settings` screens in it; `custom_title_bar`
     (with `window`) makes its window borderless, so its own title bar is the window's."""
     if custom_title_bar and not window:
         raise CliError("--custom-title-bar goes with --window: the window's title bar is the title bar "
-                       "(without it, put a `kind: TitleBar` in a view)")
+                       "(without it, put a `widget: TitleBar` in a view)")
     if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]*", name):
         raise CliError(f"{name!r} isn't a project name: start with a letter; then letters, digits, - or _")
     folder = parent / name
@@ -103,17 +103,17 @@ def new(name: str, parent: Path, custom_title_bar: bool = False, venv: bool = Tr
         if sub not in ("Views", "ViewModels"):
             (folder / sub / ".gitkeep").touch()  # an empty folder is kept by git
     title = " ".join(w.capitalize() for w in _words(name))
-    if window:
+    if window:  # one ViewModel serves the window and, through it, its screens (a routed screen has none of its own)
         _write(folder / "app.py", _render("app_window.py.tmpl", title=title))
         _write(folder / "Views" / "Window_View.yaml",
                _render("Window_View.yaml.tmpl", title=title, borderless="true" if custom_title_bar else "false"))
+        _write(folder / "ViewModels" / "Window_ViewModel.py", _render("Window_ViewModel.py.tmpl"))
+        _write(folder / "Views" / "Main_View.yaml", _render("WindowMain_View.yaml.tmpl"))
+        _write(folder / "Views" / "Settings_View.yaml", _render("WindowScreen_View.yaml.tmpl", name="Settings", title="Settings"))
     else:
         _write(folder / "app.py", _render("app.py.tmpl", title=title, width="480", height="320"))
-    _write(folder / "Views" / "Main_View.yaml", _render("Main_View.yaml.tmpl"))
-    _write(folder / "ViewModels" / "Main_ViewModel.py", _render("Main_ViewModel.py.tmpl"))
-    if window:  # its screens are `view:` nodes in the window, not `app.load()` lines
-        _write(folder / "Views" / "Settings_View.yaml", _render("Screen_View.yaml.tmpl", name="Settings", title="Settings"))
-        _write(folder / "ViewModels" / "Settings_ViewModel.py", _render("Screen_ViewModel.py.tmpl", name="Settings"))
+        _write(folder / "Views" / "Main_View.yaml", _render("Main_View.yaml.tmpl"))
+        _write(folder / "ViewModels" / "Main_ViewModel.py", _render("Main_ViewModel.py.tmpl"))
     if venv:
         _make_venv(folder)
     return folder
@@ -128,24 +128,26 @@ def add_screen(name: str, folder: Path) -> list[str]:
     if not folder.is_dir():
         raise CliError(f"{folder} isn't a folder")
     laid_out = (folder / "Views").is_dir() and (folder / "ViewModels").is_dir()  # a project, or the flat layout
+    in_window = laid_out and (folder / "Views" / "Window_View.yaml").is_file()  # a window project: its screens have no ViewModel of their own
     view = folder / "Views" / f"{name}_View.yaml" if laid_out else folder / f"{name}_View.yaml"
     viewmodel = folder / "ViewModels" / f"{name}_ViewModel.py" if laid_out else folder / f"{name}_ViewModel.py"
-    for path in (view, viewmodel):  # both checked first, so a refusal writes neither
+    for path in (view,) if in_window else (view, viewmodel):  # both checked first, so a refusal writes neither
         if path.exists():
             raise CliError(f"{path} already exists; nothing was overwritten")
     title = " ".join(w.capitalize() for w in _words(name))
+    if in_window:
+        _write(view, _render("WindowScreen_View.yaml.tmpl", name=name, title=title))
+        return [f'{{widget: {name}, name: {screen_route(name).replace("-", "_")}, route: "{screen_route(name)}", style: {{flex: fill}}}}']
     _write(view, _render("Screen_View.yaml.tmpl", name=name, title=title))
     _write(viewmodel, _render("Screen_ViewModel.py.tmpl", name=name))
-    if laid_out and (folder / "Views" / "Window_View.yaml").is_file():  # a window project: its screens are `view:` nodes
-        return [f'{{id: {screen_route(name)}, view: {name}_View.yaml, route: "{screen_route(name)}"}}']
     route = f'app.route("{screen_route(name)}", "{name}")'
     app = folder / "app.py"
     text = app.read_text(encoding="utf-8") if app.is_file() else ""
     if laid_out:  # found by name: no import, no path
-        imports, load_lines = [], [f'app.load("{name}")', route]
+        imports, load_lines = [], [f'app.bind(app.project.viewmodel("{name}"))', f'app.open_view("{name}")', route]
     else:
         imports = [f"from {name}_ViewModel import {name}ViewModel"]
-        load_lines = [f'app.load(HERE / "{name}_View.yaml", {name}ViewModel)', route]
+        load_lines = [f"app.bind({name}ViewModel)", f'app.open_view(HERE / "{name}_View.yaml")', route]
     if LOAD_MARKER not in text or (imports and IMPORT_MARKER not in text):
         return [*imports, *load_lines]
     if imports:
@@ -289,13 +291,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         else:
             missing = add_screen(args.name, args.dir)
             if missing and (args.dir / "Views" / "Window_View.yaml").is_file():
-                print(f"added {args.name}_View.yaml and {args.name}_ViewModel.py; add this under the `screens` node's "
-                      "`children:` in Views/Window_View.yaml:\n\n    - " + missing[0] + "\n")
+                print(f"added {args.name}_View.yaml (a screen of the window has no ViewModel of its own: its names are in "
+                      "ViewModels/Window_ViewModel.py); add this under the `screens` node's `children:` in Views/Window_View.yaml, "
+                      f"and a rail item `{{label: {args.name}, icon: home, screen: {args.name}}}` under `nav`'s `items:`:\n\n    - " + missing[0] + "\n")
             elif missing:
                 print(f"added {args.name}_View.yaml and {args.name}_ViewModel.py; app.py has no markers, "
                       "so add these lines to it:\n\n    " + "\n    ".join(missing) + "\n")
             else:
-                print(f"added {args.name}_View.yaml and {args.name}_ViewModel.py, and loaded it in app.py "
+                print(f"added {args.name}_View.yaml and {args.name}_ViewModel.py, and opened it in app.py "
                       f"with the route {screen_route(args.name)!r}")
     except CliError as exc:
         print(f"tesserae: {exc}", file=sys.stderr)

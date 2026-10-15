@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.0.15
+
+### Changed
+
+- **`tesserae new` and `tesserae add screen` write the current view language** ([#270](https://github.com/mindderivative/tesserae/issues/270)). The templates were still `kind:` / `component: ButtonFilled` views and `app.load(...)`. A new app is now `Main_View.yaml` (a tree of `widget:` nodes), a `Main_ViewModel.py` that says which view it serves (`views = "Main"`), and an `app.py` that binds the ViewModel and opens the view. `--window` makes a `widget: Window` view whose Main and Settings screens are called with a `route:`; they have no ViewModel of their own, so one `Window_ViewModel.py` serves the window and them (the tutorial's shape). `add screen` writes the view and ViewModel and adds `bind`, `open_view` and the route above the marker; in a window project it writes only the view and prints the node and rail item to add. New projects check clean (`app.check()`) and `tesserae migrate-yaml` has nothing to move in them.
+- **`examples/window_dock` is in the current language**, moved with `tesserae migrate-yaml` and by hand: one `Window_ViewModel.py` serves the window and the Console panel and Notes screen it calls; the example addresses nodes and panels by their path from the root (`root.body.dock.outline`).
+
+### Fixed
+
+- **`app.run(hot_reload=True)` failed in an app whose window has routed screens.** A routed call is registered as a screen of its window's view, and hot reload asked it for the older view's components (`'_Screen' object has no attribute '_prune_components'`). It is skipped, as it is part of the window's view, and the log no longer says such a screen "isn't watched".
+
 ## 0.5.0.14
 
 ### Fixed

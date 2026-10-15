@@ -5,10 +5,10 @@ Run it with `python app.py`, or `python app.py <route>` to open on a
 screen by its route. Add a screen with `tesserae add screen <Name>`.
 
 The project's files are found by name in its folders: `Views/Main_View.yaml`
-and `ViewModels/Main_ViewModel.py` are `app.load("Main")`, a component in
-`Components/` is `component: Name`, a theme in `Themes/` is
-`App(custom_theme="Name")`, and a stylesheet in `Styles/` is
-`App(stylesheet="Name")`.
+is `app.open_view("Main")`, `ViewModels/Main_ViewModel.py` is
+`app.project.viewmodel("Main")`, a view of your own that another view calls
+is `widget: Name`, a theme in `Themes/` is `App(custom_theme="Name")`, and a
+stylesheet in `Styles/` is `App(stylesheet="Name")`.
 """
 
 import sys
@@ -22,7 +22,7 @@ HERE = Path(__file__).parent
 
 
 class AppState:
-    """What every screen shares: `self.state` in a ViewModel, `state` in a binding."""
+    """What every screen shares: `self.state` in a ViewModel, `app.state` in a view."""
 
     def __init__(self):
         self.greeting = Signal("Hello from ${title}")
@@ -31,9 +31,10 @@ class AppState:
 app = App(width=${width}, height=${height}, title="${title}", root=HERE, theme_seed=(0x67, 0x50, 0xA4, 0xFF),
           state=AppState())
 
-app.load("Main")  # Views/Main_View.yaml and ViewModels/Main_ViewModel.py
+app.bind(app.project.viewmodel("Main"))  # ViewModels/Main_ViewModel.py
+app.open_view("Main")  # Views/Main_View.yaml
 app.route("", "Main")
-# (tesserae add screen adds each new screen's load and route above this line)
+# (tesserae add screen adds each new screen's lines above this line)
 
 app.navigate_to(sys.argv[1] if len(sys.argv) > 1 else "")  # a route, or "" for Main
-app.run()
+app.run()  # app.run(hot_reload=True) shows an edited view at once

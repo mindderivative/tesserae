@@ -15,7 +15,7 @@ import pytest
 from tesserae import cli
 
 RUNNER = textwrap.dedent('''
-    import json, runpy, sys
+    import json, re, runpy, sys
     from pathlib import Path
     import tesserae
 
@@ -28,12 +28,15 @@ RUNNER = textwrap.dedent('''
     def run(app, max_frames=None, **kwargs):
         report["start"] = app.current
         report["location"] = app.location
-        home = app._registered["Main"].view
-        report["greeting"] = home.node("greeting").get("text")
-        report["button"] = [home.node("button").get(k) for k in ("role", "label")]
+        window = "Window" in app._opened  # a window app: its screens are routed calls inside the window's view
+        host = app._opened["Window" if window else "Main"]
+        prefix = "root.screens.main." if window else "root."
+        home = lambda name: host.node(prefix + name)
+        report["greeting"] = home("greeting").get("text")
+        report["button"] = [home("button").get(k) for k in ("role", "label")]
         if app.current == "Main":
-            app.window.simulate("click", node=home.node("button"))
-            report["count"] = home.node("count").get("text")
+            app.window.simulate("click", node=home("button"))
+            report["count"] = home("count").get("text")
         report["screens"] = sorted(app._registered)
         report["routes"] = [r.pattern for r in app._routes]
         report["size"] = [app.window.get("width"), app.window.get("height")]
@@ -42,7 +45,9 @@ RUNNER = textwrap.dedent('''
             if name in ("Main", "Window"):  # a window app registers its window view too
                 continue
             app.navigate(name)
-            app.window.simulate("click", node=app._registered[name].view.node("back"))  # its Back button
+            where = host if window else app._opened[name]
+            back = f"root.screens.{re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()}.back" if window else "root.back"
+            app.window.simulate("click", node=where.node(back))  # its Back button
             report.setdefault("back_from", []).append((name, app.current))
         real_run(app, max_frames=3, **kwargs)
         report["ran"] = True
@@ -70,7 +75,7 @@ def test_new_makes_a_runnable_app(tmp_path):
     report = _run(project)
     assert report["start"] == "Main" and report["location"] == "" and report["ran"]
     assert report["greeting"] == "Hello from My Notes" and report["count"] == "Clicked 1 times"
-    assert report["button"] == ["button", "Click me"]  # a ButtonFilled fragment, named (M69)
+    assert report["button"] == ["button", "Click me"]
     assert report["screens"] == ["Main"] and report["size"] == [480, 320]
 
 
@@ -83,7 +88,8 @@ def test_add_screen_adds_a_pair_and_loads_and_routes_it(tmp_path, capsys):
     assert (project / "ViewModels" / "UserProfile_ViewModel.py").is_file()
     lines = (project / "app.py").read_text().splitlines()
     marker = lines.index(cli.LOAD_MARKER)  # the lines go just above the marker, as it says; found by name, so no import
-    assert lines[marker - 2:marker] == ['app.load("UserProfile")', 'app.route("user-profile", "UserProfile")']
+    assert lines[marker - 3:marker] == ['app.bind(app.project.viewmodel("UserProfile"))', 'app.open_view("UserProfile")',
+                                        'app.route("user-profile", "UserProfile")']
     assert "UserProfile_ViewModel" not in "\n".join(lines)
     report = _run(project)
     assert report["screens"] == ["Main", "UserProfile"] and report["routes"] == ["", "user-profile"]
@@ -102,7 +108,7 @@ def test_without_markers_add_screen_prints_the_lines(tmp_path, capsys, app_py):
     (tmp_path / "app.py").write_text(app_py)
     assert cli.main(["add", "screen", "Settings", "--dir", str(tmp_path)]) == 0
     out = capsys.readouterr().out
-    assert "add these lines to it" in out and 'app.load(HERE / "Settings_View.yaml", SettingsViewModel)' in out
+    assert "add these lines to it" in out and 'app.open_view(HERE / "Settings_View.yaml")' in out and "app.bind(SettingsViewModel)" in out
     assert 'app.route("settings", "Settings")' in out and "from Settings_ViewModel import SettingsViewModel" in out
     assert (tmp_path / "app.py").read_text() == app_py  # left alone
 
@@ -201,7 +207,7 @@ def test_a_failed_install_keeps_the_project_and_says_how_to_finish(tmp_path, mon
 
 
 def test_new_with_a_window(tmp_path):
-    """0.4.4 (#101): `--window` makes a `kind: Window` view whose screens are routed `view:` nodes."""
+    """`--window` makes a `widget: Window` view whose screens are routed calls of views, served by one ViewModel."""
     assert cli.main(["new", "studio", "--window", "--no-venv", "--dir", str(tmp_path)]) == 0
     project = tmp_path / "studio"
     assert (project / "Views" / "Window_View.yaml").is_file() and not list(project.glob("Views/*_Shell.yaml"))
@@ -225,5 +231,45 @@ def test_add_screen_to_a_window_project_says_where_the_view_node_goes(tmp_path, 
     project = tmp_path / "studio"
     assert cli.main(["add", "screen", "UserProfile", "--dir", str(project)]) == 0
     out = capsys.readouterr().out
-    assert 'view: UserProfile_View.yaml, route: "user-profile"' in out and "Window_View.yaml" in out
+    assert '{widget: UserProfile, name: user_profile, route: "user-profile"' in out and "Window_View.yaml" in out and "items:" in out
     assert (project / "Views" / "UserProfile_View.yaml").is_file()
+    assert not (project / "ViewModels" / "UserProfile_ViewModel.py").exists()  # a screen of the window reads Window_ViewModel's names
+
+
+@pytest.mark.parametrize("flags", [[], ["--window"], ["--window", "--custom-title-bar"]])
+def test_a_new_project_is_in_the_current_view_language_and_checks_clean(tmp_path, flags):
+    """#270: the templates write `widget:` views and ViewModels that serve a named view; `app.check()` and the migration tool find nothing to say."""
+    import re
+
+    assert cli.main(["new", "fresh", *flags, "--no-venv", "--dir", str(tmp_path)]) == 0
+    project = tmp_path / "fresh"
+    for path in [*project.glob("Views/*.yaml"), *project.glob("ViewModels/*.py"), project / "app.py"]:
+        text = path.read_text()
+        assert not re.search(r"^\s*-?\s*(kind|component|include|view|id):", text, re.M), path.name
+        assert "app.load(" not in text and "load_shell" not in text
+    out = subprocess.run([sys.executable, "-c", textwrap.dedent("""
+        import runpy, sys
+        from pathlib import Path
+        import tesserae
+        project = Path(sys.argv[1]); sys.path.insert(0, str(project)); sys.argv = ["app.py"]
+        seen = {}
+        tesserae.App.run = lambda app, *a, **k: seen.setdefault("problems", app.check())
+        runpy.run_path(str(project / "app.py"), run_name="__main__")
+        print("PROBLEMS", seen["problems"])
+    """), str(project)], capture_output=True, text=True, timeout=120)
+    assert out.returncode == 0, out.stderr[-1500:]
+    assert "PROBLEMS []" in out.stdout
+    assert cli.main(["migrate-yaml", str(project)]) == 0
+
+
+def test_a_screen_added_to_a_window_project_works_once_its_node_is_in_the_window(tmp_path, capsys):
+    assert cli.main(["new", "studio", "--window", "--no-venv", "--dir", str(tmp_path)]) == 0
+    project = tmp_path / "studio"
+    cli.main(["add", "screen", "UserProfile", "--dir", str(project)])
+    node = next(line for line in capsys.readouterr().out.splitlines() if line.strip().startswith("- {widget: UserProfile"))
+    window = project / "Views" / "Window_View.yaml"
+    window.write_text(window.read_text().rstrip("\n") + "\n      " + node.strip() + "\n")
+    assert _run(project, "user-profile")["start"] == "UserProfile"
+    report = _run(project)
+    assert report["routes"] == ["", "settings", "user-profile"]
+    assert ["UserProfile", "Main"] in report["back_from"]

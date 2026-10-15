@@ -369,3 +369,28 @@ def test_a_wrong_name_or_property_in_an_edit_leaves_the_view_as_it_was(opened, b
         watcher.poll()
     view.window.advance(16)
     assert text_of(view, "label") == "Count 0"
+
+
+def test_hot_reload_starts_in_an_app_with_routed_screens(tmp_path):
+    """A routed call is registered as a screen of the window's view; hot reload used to ask it for the older view's components and fail."""
+    (tmp_path / "Views").mkdir()
+    (tmp_path / "Views" / "Window_View.yaml").write_text(
+        "name: Window\nwidget: Window\ntitle: T\nstyle: {width: 300, height: 200}\nchildren:\n  - {widget: Screen, name: screen, route: \"\", style: {flex: fill}}\n")
+    (tmp_path / "Views" / "Screen_View.yaml").write_text("widget: Container\nchildren:\n  - {widget: Text, name: t, text: hi, typography_role: body_large, style: {foreground: on_surface}}\n")
+
+    class Win(ViewModel):
+        views = "Window"
+
+    app = App(root=tmp_path)
+    app.bind(Win)
+    app.open_view("Window")
+    app.navigate_to("")
+    messages = []
+    from loguru import logger
+
+    sink = logger.add(lambda m: messages.append(str(m)), level="INFO")
+    try:
+        app.run(max_frames=3, hot_reload=True)
+    finally:
+        logger.remove(sink)
+    assert not any("isn't watched" in m for m in messages), messages

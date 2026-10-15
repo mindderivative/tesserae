@@ -1,22 +1,18 @@
-# The Main screen: `Main_ViewModel.py` holds what it binds and handles.
-id: root
-kind: Container
+# The Main screen: `Main_ViewModel.py` holds what it shows and handles.
+name: Main
+widget: Container
 style: {flex_direction: vertical, gap: 16, padding: 24, background: surface}
 children:
-  - id: greeting
-    kind: Text
-    text: {content: "", typography_role: headline_small}
+  - widget: Text
+    name: greeting
+    text: "{{ app.state.greeting }}"  # the app's shared state
+    typography_role: headline_small
     style: {foreground: on_surface}
-    bindings: {text: "{{ state.greeting.get() }}"}  # the app's shared state
     a11y: {role: heading, level: 1}
-  - id: count
-    kind: Text
-    text: {content: "", typography_role: body_large}
+  - widget: Text
+    name: count
+    text: "{{ label }}"
+    typography_role: body_large
     style: {foreground: on_surface_variant}
-    bindings: {text: "{{ label.get() }}"}
     a11y: {live: polite}
-  - id: button
-    component: ButtonFilled  # MD3's filled button; the call's handlers go on it
-    with: {label: "Click me", width: 120, height: 40, corner_radius: 20}
-    handlers: {on_click: "increment"}
-    a11y: {label: "Click me"}  # announced by name
+  - {widget: Button, name: button, label: Click me, style: {width: 120}, handlers: {on_click: increment}}

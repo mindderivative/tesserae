@@ -1,0 +1,18 @@
+# The Main screen of the window. It has no `name:` and no ViewModel of its own: it reads the names of
+# `Window_ViewModel.py`, which serves `Window_View.yaml`.
+widget: Container
+style: {flex_direction: vertical, gap: 16, padding: 24, flex: fill}
+children:
+  - widget: Text
+    name: greeting
+    text: "{{ app.state.greeting }}"  # the app's shared state
+    typography_role: headline_small
+    style: {foreground: on_surface}
+    a11y: {role: heading, level: 1}
+  - widget: Text
+    name: count
+    text: "{{ label }}"
+    typography_role: body_large
+    style: {foreground: on_surface_variant}
+    a11y: {live: polite}
+  - {widget: Button, name: button, label: Click me, style: {width: 120}, handlers: {on_click: increment}}

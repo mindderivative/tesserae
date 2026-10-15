@@ -1,8 +1,7 @@
-# The app's window (loaded by app.py with app.load("Window")): its title bar, a rail
-# that navigates, and the screens, each a view of its own with a `route:`.
-# `app.run(hot_reload=True)` applies edits live.
-id: root
-kind: Window
+# The app's window (opened by app.py with app.open_view("Window")): its title bar, a rail that navigates, and the
+# screens, each a view of its own called with a `route:`. `app.run(hot_reload=True)` applies edits live.
+name: Window
+widget: Window
 title: "${title}"
 borderless: ${borderless}
 min_width: 480
@@ -10,15 +9,14 @@ min_height: 320
 style: {width: 960, height: 600, background: surface, flex_direction: horizontal}
 title_bar: {title: "${title}", icon: home, buttons: [minimize, maximize, close]}
 children:
-  - id: nav
-    component: NavigationRailScreens
-    with:
-      items:
-        - {label: Main, icon: home, screen: Main}
-        - {label: Settings, icon: settings, screen: Settings}
-  - id: screens
-    kind: Container
+  - widget: NavigationRailScreens
+    name: nav
+    items:
+      - {label: Main, icon: home, screen: Main}
+      - {label: Settings, icon: settings, screen: Settings}
+  - widget: Container
+    name: screens
     style: {flex: fill}
     children:
-      - {id: main, view: Main_View.yaml, route: "", style: {flex: fill}}
-      - {id: settings, view: Settings_View.yaml, route: settings, style: {flex: fill}}
+      - {widget: Main, name: main, route: "", style: {flex: fill}}
+      - {widget: Settings, name: settings, route: settings, style: {flex: fill}}

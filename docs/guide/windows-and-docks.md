@@ -14,8 +14,7 @@ screens inside it, each a view of its own.
 
 `tesserae new notes --window` makes a project with a window, a rail and routed screens ([The `tesserae` command](cli.md)), and
 `examples/window_dock/` in the repository is a studio with all of it: a title bar, a rail, docked panels, routed screens and a status
-bar, in one `Window_View.yaml`. Both are written in the older syntax, which `tesserae migrate-yaml` moves to the one on this page
-([Migrating](../migration.md)).
+bar, in one `Window_View.yaml`. Both are written in the language on this page.
 
 ## The window
 

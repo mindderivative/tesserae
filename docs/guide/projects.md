@@ -21,8 +21,7 @@ notes/
   Styles/             Name_Stylesheet.yaml
 ```
 
-The files `tesserae new` writes (`Main` and the `Settings` that `tesserae add screen` adds) are in the older view
-syntax, which still loads and says so when it runs; [`tesserae migrate-yaml`](cli.md#move-a-project-to-the-current-syntax) moves them, and the
+The files `tesserae new` writes are in the current view language; [`tesserae migrate-yaml`](cli.md#move-a-project-to-the-current-syntax) moves a project written in the older syntax, and the
 [project tutorial](../tutorial-project.md) shows the app written in the current one.
 
 The [project tutorial](../tutorial-project.md) builds an app in one, step by step, beside the

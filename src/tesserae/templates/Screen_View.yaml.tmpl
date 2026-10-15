@@ -1,15 +1,12 @@
-# The ${name} screen: `${name}_ViewModel.py` holds what it binds and handles.
-id: root
-kind: Container
+# The ${name} screen: `${name}_ViewModel.py` holds what it shows and handles.
+name: ${name}
+widget: Container
 style: {flex_direction: vertical, gap: 16, padding: 24, background: surface}
 children:
-  - id: title
-    kind: Text
-    text: {content: "${title}", typography_role: headline_small}
+  - widget: Text
+    name: title
+    text: "${title}"
+    typography_role: headline_small
     style: {foreground: on_surface}
     a11y: {role: heading, level: 1}
-  - id: back
-    component: ButtonFilledTonal
-    with: {label: "Back", width: 96, height: 40, corner_radius: 20}
-    handlers: {on_click: "go_back"}
-    a11y: {label: "Back"}
+  - {widget: Button, name: back, label: Back, variant: tonal, style: {width: 96}, handlers: {on_click: go_back}}

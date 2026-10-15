@@ -36,8 +36,8 @@ python app.py
 ```
 
 `tesserae new` makes the folders, a `Main` screen that counts clicks, and a virtual environment with Tesserae in
-it (`--no-venv` skips the environment). Its files are written in the older view syntax, which still loads and says so
-when it runs; replace the screen and `app.py` with the Tasks app's, in the current one:
+it (`--no-venv` skips the environment). Its files are in the current view language already; replace the screen and
+`app.py` with the Tasks app's:
 
 ```text
 tasks/

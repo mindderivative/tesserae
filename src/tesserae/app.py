@@ -1653,7 +1653,7 @@ class App:
         for opened in self._opened.values():  # views written with `widget:` nodes, opened with `open_view` or `open_window`
             watchers.append(self._composed_watcher(opened))
         for name, registered in self._registered.items():
-            if registered.view in self._opened.values():
+            if registered.view in self._opened.values() or hasattr(registered.view, "record"):  # watched with its view, or a routed call: a node of its window's view
                 continue
             # M48: a screen built from a file -- by `load()` or `build_view()`,
             # then `register()` -- keeps that file as `view.path`
@@ -1726,7 +1726,7 @@ class App:
         in the app's screens and views, nested ones included -- or only
         those built from `path` -- and, since M61, in any other view
         on the app's window, as `instantiate` registered them."""
-        views = [r.view for r in self._registered.values()] + [b.view for b in self._built]
+        views = [r.view for r in self._registered.values() if hasattr(r.view, "_prune_components")] + [b.view for b in self._built]  # a routed call (`_Screen`) is a node of its window's view, which is in `_built`
         views += [f for f in self._followers if isinstance(f, TesseraeView)]
         found: list[Any] = []
         seen: set[int] = set()

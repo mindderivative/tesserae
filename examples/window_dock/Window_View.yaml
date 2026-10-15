@@ -1,75 +1,89 @@
 # The whole window: its title bar, a rail, a dock of panels around the screens, and a status bar.
 # Edit it while the app runs with hot_reload=True: the title, sizes and panels change in place, and a panel the user
 # moved stays where they put it.
-id: root
-kind: Window
+name: Window
+widget: Window
 title: Tesserae Studio
 borderless: true
 min_width: 640
 min_height: 400
 style: {width: 1100, height: 700, background: surface, flex_direction: vertical}
-title_bar: {title: Tesserae Studio, icon: home, buttons: [minimize, maximize, close]}
+title_bar:
+  title: Tesserae Studio
+  icon: home
+  buttons: [minimize, maximize, close]
 children:
-  - id: body
-    kind: Container
-    style: {flex: fill, flex_direction: horizontal}
+- widget: Container
+  name: body
+  style: {flex: fill, flex_direction: horizontal}
+  children:
+  - widget: NavigationRailScreens
+    name: nav
+    items:
+    - {label: Home, icon: home, screen: Home}
+    - {label: Notes, icon: search, screen: Notes}
+  - widget: Dock
+    name: dock
+    style: {flex: fill}
     children:
-      - id: nav
-        component: NavigationRailScreens
-        with:
-          items:
-            - {label: Home, icon: home, screen: Home}
-            - {label: Notes, icon: search, screen: Notes}
-      - id: dock
-        kind: Dock
+    - widget: DockPanel
+      name: files
+      title: Files
+      style: {zone: left, width: 220}
+      children:
+      - {widget: Files, name: files_view}
+    - widget: DockPanel
+      name: outline
+      title: Outline
+      style: {zone: left}
+      children:
+      - {widget: Outline, name: outline_view}
+    - widget: DockPanel
+      name: properties
+      title: Properties
+      style: {zone: right, width: 260}
+      children:
+      - {widget: Properties, name: properties_view}
+    - widget: DockPanel
+      name: console
+      title: Console
+      style: {zone: bottom, height: 160}
+      children:
+      - {widget: Console, name: console_view}
+    - widget: DockPanel
+      name: screens
+      title: Screens
+      style: {zone: center}
+      children:
+      - widget: Home
+        name: home
+        route: ''
         style: {flex: fill}
+      - widget: Notes
+        name: notes
+        route: notes
+        style: {flex: fill}
+    - widget: DockPanel
+      name: compare
+      title: Compare
+      style: {zone: center}
+      children:
+      - widget: DockPanel
+        name: before
+        title: Before
         children:
-          - id: files
-            kind: DockPanel
-            title: Files
-            style: {zone: left, width: 220}
-            children:
-              - {id: files_view, view: Files_View.yaml}
-          - id: outline
-            kind: DockPanel
-            title: Outline
-            style: {zone: left}
-            children:
-              - {id: outline_view, view: Outline_View.yaml}
-          - id: properties
-            kind: DockPanel
-            title: Properties
-            style: {zone: right, width: 260}
-            children:
-              - {id: properties_view, view: Properties_View.yaml}
-          - id: console
-            kind: DockPanel
-            title: Console
-            style: {zone: bottom, height: 160}
-            children:
-              - {id: console_view, view: Console_View.yaml}
-          - id: screens
-            kind: DockPanel
-            title: Screens
-            style: {zone: center}
-            children:
-              - {id: home, view: Home_View.yaml, route: "", style: {flex: fill}}
-              - {id: notes, view: Notes_View.yaml, route: notes, style: {flex: fill}}
-          - id: compare                  # a panel of two halves: drag a tab onto a half to add it, or onto an edge to split it
-            kind: DockPanel
-            title: Compare
-            style: {zone: center}
-            children:
-              - id: before
-                kind: DockPanel
-                title: Before
-                children:
-                  - {id: before_text, kind: Text, text: {content: "Drop a panel here", typography_role: body_large}, style: {foreground: on_surface, padding: 16}}
-              - id: after
-                kind: DockPanel
-                title: After
-                children:
-                  - {id: after_text, kind: Text, text: {content: "or on an edge to split this half", typography_role: body_large}, style: {foreground: on_surface, padding: 16}}
-  - id: status
-    component: StatusBar
-    with: {text: Ready, width: "100%"}
+        - widget: Text
+          name: before_text
+          text: Drop a panel here
+          typography_role: body_large
+          style: {foreground: on_surface, padding: 16}
+      - widget: DockPanel
+        name: after
+        title: After
+        children:
+        - widget: Text
+          name: after_text
+          text: or on an edge to split this half
+          typography_role: body_large
+          style: {foreground: on_surface, padding: 16}
+- {widget: StatusBar, name: status, text: Ready, width: 100%}

@@ -20,13 +20,14 @@ python app.py
 `app.py` gives Main the route `""`, so `python app.py <route>` opens on a screen by its
 route (a [deep link](apps-and-screens.md#routes-and-deep-links)).
 
-The template's files are written in the older view syntax (`kind:`, `component: ButtonFilled`). They run, and log once per file
-that they are in the older syntax. The [project tutorial](../tutorial-project.md) is the same project written in the current one.
+The files are written in the current [view language](view-language.md): `Main_View.yaml` is a tree of `widget:` nodes, `Main_ViewModel.py` says which
+view it serves with `views = "Main"`, and `app.py` binds it (`app.bind(app.project.viewmodel("Main"))`) and opens the view
+(`app.open_view("Main")`). The [project tutorial](../tutorial-project.md) grows the same project into the Tasks app.
 
 | Option | What it does |
 | --- | --- |
 | `--no-venv` | Makes the folders and files without the virtual environment, which needs the network to install Tesserae. |
-| `--window` | Makes the app one [`Window_View.yaml`](windows-and-docks.md): a title bar, a navigation rail and two routed screens, Main and Settings. |
+| `--window` | Makes the app one [`Window_View.yaml`](windows-and-docks.md): a title bar, a navigation rail and two routed screens, Main and Settings. One ViewModel, `Window_ViewModel.py`, serves the window and so the screens in it, which have none of their own. |
 | `--custom-title-bar` | With `--window`: no OS title bar (`borderless: true`). The window's own [title bar](custom-title-bars.md): it moves the window and has the minimize, maximize and close buttons. The window is at least 640 by 400. |
 | `--dir PARENT` | Makes the app in `PARENT` instead of here. |
 
@@ -39,11 +40,15 @@ tesserae add screen Settings
 ```
 
 This writes `Views/Settings_View.yaml` and `ViewModels/Settings_ViewModel.py` (a title and a Back button that
-calls `self.app.back()`, in the older syntax like the rest of the template) and adds `app.load("Settings")` and its route (`settings`) to
+calls `self.app.back()`) and adds `app.bind(...)`, `app.open_view("Settings")` and its route (`settings`) to
 `app.py`, above the marker comment `tesserae new` left there. Without the marker it
 prints the lines to add. A CamelCase name gets a kebab-case route: `UserProfile` is
 `user-profile`. `--dir` names the app's folder; a screen whose files exist is refused. In an app with its files
 in one folder (no `Views/` and `ViewModels/`), it writes them beside `app.py` and adds the import and path too.
+
+In a `--window` project a screen has no ViewModel of its own, so only `Views/Name_View.yaml` is written, and the command prints the two things to add
+by hand: the screen's node under `screens` in `Views/Window_View.yaml` (`{widget: Name, name: ..., route: "..."}`) and its item under the rail's `items:`.
+Names the screen reads (and a Back handler, `go_back`, which the template has) go in `ViewModels/Window_ViewModel.py`.
 
 ## Move a project to the current syntax
 

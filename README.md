@@ -120,10 +120,11 @@ for testing against an unreleased `tre` checkout.
 ```bash
 python examples/getting_started/declarative/step4/app.py   # the counter above
 python examples/tutorial/step5/app.py                      # the Tasks tutorial
+python examples/window_dock/app.py                         # a window with a title bar, a rail, docked panels and routed screens
 python examples/typing_effects/app.py --interactive        # flash, fade-in and a gliding caret on a text field
 ```
 
-`examples/counter/`, `multi_screen/`, `todo_list/` and `window_dock/` are still written in the older view syntax: `tesserae migrate-yaml`
+`examples/counter/`, `multi_screen/`, `todo_list/` and `custom_title_bar/` are still written in the older view syntax: `tesserae migrate-yaml`
 turns a project into the current one (see [Migrating](https://mindderivative.github.io/tesserae/migration/)).
 
 ## Reactivity
@@ -149,8 +150,7 @@ A `{{ }}` binding in a view can read a `Signal` or a `Computed` directly. See
 ## Starting an app
 
 `tesserae new notes` makes a runnable app; `--window` makes the app one window view with a rail and two routed screens.
-`tesserae add screen Settings` adds a screen. The templates are still in the older view syntax ([Migrating](https://mindderivative.github.io/tesserae/migration/)
-shows the move). See [Getting Started](https://mindderivative.github.io/tesserae/getting-started/) and the
+`tesserae add screen Settings` adds a screen. See [Getting Started](https://mindderivative.github.io/tesserae/getting-started/) and the
 [CLI](https://mindderivative.github.io/tesserae/guide/cli/).
 
 ## Architecture

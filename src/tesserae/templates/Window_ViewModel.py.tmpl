@@ -1,0 +1,19 @@
+"""The window's ViewModel: it serves `Window_View.yaml`, and so the screens in it, which read these names.
+`self.app` and `self.state` are the app and its shared state."""
+
+from tesserae import Computed, Signal, ViewModel
+
+
+class WindowViewModel(ViewModel):
+    views = "Window"  # the view it serves
+
+    def __init__(self):
+        super().__init__()
+        self.clicks = Signal(0)  # Main
+        self.label = Computed(lambda: f"Clicked {self.clicks.get()} times")
+
+    def increment(self):
+        self.clicks.update(lambda n: n + 1)
+
+    def go_back(self):
+        self.app.back()
