@@ -1,43 +1,72 @@
 # Tesserae
 
-A declarative Python GUI framework, powered by the [Tesserae Render
-Engine](https://github.com/mindderivative/tre) (`tre`) -- a Rust/Python
-hybrid rendering, layout, animation, and accessibility engine.
+**Write desktop apps in Python and YAML.** A Tesserae app is **YAML views** (what the screen looks like), each paired with a Python
+**ViewModel** (what it does), drawn by the [Tesserae Render Engine](https://github.com/mindderivative/tre) (`tre`): a Rust/Python hybrid
+for rendering, layout, animation and accessibility.
 
-Tesserae's own shape follows [pyCopper](https://github.com/mindderivative/pycopper)
-(an earlier, standalone framework by the same author, powered by a direct
-GLFW/wgpu-py stack instead): app authors write **YAML views**, not Python
-widget-class trees, paired with a Python `ViewModel` per view -- a plain
-`Signal`-driven MVVM layer, not a whole-tree reconcile.
+Tesserae's own shape follows [pyCopper](https://github.com/mindderivative/pycopper) (an earlier, standalone framework by the same author):
+app authors write views, not Python widget-class trees, and a plain `Signal`-driven MVVM layer keeps them in step.
 
-**Status: pre-alpha, 0.3.0** (custom title bars, `tesserae build`, a `tesserae new` CLI). `App`/`Signal`/`View`/
-`ViewModel`/`Component`/`Repeater` exist and are exercised end to end by
-`examples/counter/` (a single screen), `examples/multi_screen/` (two
-screens, switched via `App.show()` from inside a real dispatched
-handler), `examples/todo_list/` (a real dynamic list, one list
-`Signal` as the single source of truth, `Repeater` keeping components in
-sync automatically), and `examples/window_dock/` (a window with a title
-bar, a rail, docked panels and routed screens, in one `Window_View.yaml`). `Signal`/`Computed`/`Effect`/`batch`/`untrack`/
-`ViewModel` are Tesserae's own (M35) -- see Reactivity below. The MD3 widget catalog
-is real too: 67 declarative `component:` fragments for `*_View.yaml`
-files, plus `tesserae.widgets` for building widgets from Python. See the
-[documentation](https://mindderivative.github.io/tesserae/) for both.
+**Status: pre-alpha.** The [documentation](https://mindderivative.github.io/tesserae/) is the reference, and the
+[changelog](https://mindderivative.github.io/tesserae/changelog/) says what each release changed.
+
+```yaml
+# Counter_View.yaml
+name: Counter
+widget: Container
+style: {flex_direction: vertical, gap: 12, padding: 24, background: surface}
+children:
+  - widget: Text
+    name: label
+    text: "Count: {{ count }}"
+    typography_role: headline_medium
+    style: {foreground: on_surface}
+  - {widget: Button, name: button, label: Count, style: {width: 120}, handlers: {on_click: increment}}
+```
+
+```python
+# Counter_ViewModel.py
+from tesserae import Signal, ViewModel
+
+class CounterViewModel(ViewModel):
+    views = "Counter"             # the view it serves
+
+    def __init__(self):
+        super().__init__()
+        self.count = Signal(0)
+
+    def increment(self):
+        self.count.update(lambda n: n + 1)
+```
+
+```python
+# app.py
+from tesserae import App
+from Counter_ViewModel import CounterViewModel
+
+app = App(width=240, height=160, title="Counter", search=["."])
+app.bind(CounterViewModel)
+app.open_view("Counter")      # Counter_View.yaml
+app.show("Counter")
+app.run()
+```
+
+```bash
+python app.py
+```
+
+A view is a tree of `widget:` nodes. A view with `params:` is a component, called by its name; `for:` and `if:` build lists and choices from
+data; every Material Design 3 component ships as such a view. See the
+[view language](https://mindderivative.github.io/tesserae/guide/view-language/), the
+[component pages](https://mindderivative.github.io/tesserae/components/) and the
+[Getting Started](https://mindderivative.github.io/tesserae/getting-started/) walk-through, then the
+[Tasks tutorial](https://mindderivative.github.io/tesserae/tutorial/).
 
 ## Files: Tesserae reads them, `tre` gets data
 
-You give Tesserae file paths -- views, component fragments, `include:`d
-files, images, themes, stylesheets, fonts. Tesserae reads, parses,
-decodes and watches them itself, and hands `tre` only data: a finished
-view built by Tesserae's own compiler onto `tre`'s building blocks
-(M37), RGBA pixels and font bytes (`register_font`). Tesserae never gives
-`tre` a file path.
-
-That's what lets Tesserae resolve `include:` and `component:` together,
-name the right file in every error, warn when a font would silently
-fall back, and hot-reload a running app when any of those files change
-(`app.run(hot_reload=True)`) -- views, includes, fragments and images,
-components added at run time (every row of a `Repeater`, in place), and
-the app's theme and stylesheet files.
+You give Tesserae file paths or names: views, images, themes, stylesheets and fonts. Tesserae reads, parses, decodes and checks them itself and
+hands `tre` only data (a finished view on `tre`'s building blocks, RGBA pixels and font bytes). Every error names the file, line and column you
+wrote, and the nearest name when you misspelt one.
 
 Tesserae logs through [loguru](https://loguru.readthedocs.io/): hot
 reloads, failed reloads naming the file, and warnings. Call
@@ -86,104 +115,20 @@ treats `tesserae-engine` as a different project, and both would own the
 `tre` package. See the [installation guide](https://mindderivative.github.io/tesserae/installation/)
 for testing against an unreleased `tre` checkout.
 
-## The real vertical slices
+## Examples
 
 ```bash
-python examples/counter/app.py
-python examples/multi_screen/app.py
-python examples/todo_list/app.py
-python examples/window_dock/app.py
-python examples/typing_effects/app.py --interactive
+python examples/getting_started/declarative/step4/app.py   # the counter above
+python examples/tutorial/step5/app.py                      # the Tasks tutorial
+python examples/typing_effects/app.py --interactive        # flash, fade-in and a gliding caret on a text field
 ```
 
-`counter/`: a real `Signal`-bound counter -- a `Counter_View.yaml` +
-`Counter_ViewModel.py` pair, loaded via `App.load()` and shown via
-`App`, a real dispatched click incrementing a bound label, then a
-genuine render loop.
-
-`multi_screen/`: two independent screens (`Home`/`Settings`), each its
-own `*_View.yaml`/`*_ViewModel.py` pair: Home navigates to Settings and
-Settings goes `back()` (M66), from inside each screen's own real
-dispatched `on_click` handler --
-proving a switch works even when triggered *reentrantly*, from the
-handler `App.show` itself is dispatching into. Both screens show the
-app's shared state (`App(state=...)`, M65), which each handler writes, and
-routes make `python app.py settings` a deep link.
-
-`todo_list/`: a real dynamic list, driven by `tesserae.Repeater` -- one
-list `Signal` of stable item ids (`TodoViewModel.items`) is the single
-source of truth; adding a "to-do" appends an id, removing one drops it
--- the `Repeater` keeps exactly one independent `TodoItem` `Component` +
-`ViewModel` (`TodoItem_View.yaml`/`TodoItem_ViewModel.py`) alive per id,
-instantiating/removing automatically. Proves the full real multi-
-instance lifecycle: add, toggle a two-way-bound checkbox, remove
-(mutating the shared `items` `Signal` from *inside* the item's own
-dispatched handler), add again, all through real dispatched clicks and
-one live window.
-
-`window_dock/`: a studio written as one `Window_View.yaml`: a title bar, a
-navigation rail, tool panels docked left, right and bottom, routed screens
-in the middle, and a status bar -- all `kind: Window`, `kind: Dock` and
-`view:` nodes, with no widgets made in Python. `python examples/window_dock/app.py --interactive`
-keeps the window open to try by hand (drag a tab onto a half of `Compare`).
-
-## Components
-
-`tesserae.instantiate(parent, path, viewmodel_cls, into, *args,
-**kwargs)` embeds another view's own YAML as a real, independent
-`Component` with its own `ViewModel`, built in its host's window with
-the host's theme and stylesheet. `parent` is a `View`
-or another `Component` (they nest); `into` is the `Node` to embed under
-(e.g. `view.node("item_list")`); extra positional/keyword args are
-forwarded to `viewmodel_cls(component, *args, **kwargs)` -- the real,
-common case for a component that needs its own data or a callback to
-notify its parent when it removes itself (see `examples/todo_list/`).
-
-```python
-component, viewmodel = instantiate(view, "Card_View.yaml", CardViewModel, container)
-```
-
-Call this once per instance for multiple simultaneous instances (a list
-where each row is its own independent component) -- each call is fully
-independent, even reusing the same `path` repeatedly. `component.remove()`
-tears the instance down for real, unsubscribing its own `Signal`s first.
-
-## Repeater
-
-`Repeater` automates the add/remove bookkeeping `instantiate`/
-`Component.remove()` otherwise need by hand: point it at a list `Signal`
-and it keeps exactly one `Component` + `ViewModel` alive per item
-currently present, diffed by a real key.
-
-```python
-from tesserae import Repeater, Signal
-
-items = Signal([])  # the single source of truth
-repeater = Repeater(view, items, "Card_View.yaml", CardViewModel, container)
-
-items.update(lambda lst: [*lst, new_id])              # adds one
-items.update(lambda lst: [i for i in lst if i != id])  # removes one
-```
-
-`key` (default: the item itself) and `args` (default: `lambda item:
-(item,)`, forwarded to `viewmodel_cls(component, *args)`) are both
-overridable for items that are dicts/dataclasses rather than bare ids
--- see `examples/todo_list/`'s own `Todo_ViewModel.py`.
-
-**Real, deliberate scope boundary:** `Repeater` only ever adds or
-removes instances to match the *set* of keys present -- it never
-reorders an already-present key's own position, and never re-applies a
-changed item's own data to an existing instance (that's the item's own
-`ViewModel`'s job, via its own `Signal`s). Reordering isn't supported
-for the same real reason `tre`'s own `Reconciler` doesn't: `engine_core
-::Tree` has no child-reorder primitive today. `Repeater.remove()` tears
-every remaining instance down and unsubscribes, mirroring `Component
-.remove()`'s own real teardown ordering.
+`examples/counter/`, `multi_screen/`, `todo_list/` and `window_dock/` are still written in the older view syntax: `tesserae migrate-yaml`
+turns a project into the current one (see [Migrating](https://mindderivative.github.io/tesserae/migration/)).
 
 ## Reactivity
 
-Tesserae's reactivity (`tesserae.reactive`, taken over from `tre` in
-M35 with the same behaviour):
+`Signal`, `Computed`, `Effect`, `batch` and `ViewModel` are Tesserae's own (`tesserae.reactive`):
 
 ```python
 from tesserae import Computed, Effect, batch
@@ -198,57 +143,19 @@ def apply_discount():
 batch(apply_discount)  # total recomputes once, not twice
 ```
 
-`Computed`/`Effect` duck-type against `Signal`'s own subscribe shape, so
-a `{{ }}` binding can point straight at a `Computed.get()` value with no
-special handling. See `tre`'s own `examples/reactivity.py` for a full,
-live-window proof of `Computed`-of-`Computed` chains, `Effect`, and
-`batch()` composing together.
-
-## Naming convention
-
-Every real view is a `*_View.yaml` + `*_ViewModel.py` pair (mirroring
-pyCopper's own real MVVM naming) -- enforced at runtime by
-`App.load(view_path, viewmodel_cls, name=None)`:
-
-```python
-from tesserae import App
-from Counter_ViewModel import CounterViewModel
-
-app = App(width=240, height=120, title="My App")
-view, viewmodel = app.load("Counter_View.yaml", CounterViewModel)
-app.show("Counter")  # registered under the inferred prefix
-```
-
-Raises `ValueError` immediately if the view file doesn't end in
-`_View.yaml`, the `ViewModel`'s own defining file doesn't end in
-`_ViewModel.py`, or the two prefixes don't match -- catching a
-mismatched pair at load time rather than a cryptic failure later when a
-handler name doesn't resolve. `App.register(name, view, viewmodel)`
-stays available directly for a view and ViewModel built by hand. A
-ViewModel doesn't need the app passed in: on the app's window it has
-`self.app`, and `self.state` for state the screens share
-(`App(state=...)`, M65; see `examples/multi_screen/`).
-
-`app.py` is the real entry point: it loads (or registers) each pair and
-calls `App.show(name)` to pick which one is currently on screen --
-switching later (another `App.show(other_name)` call, typically from a
-registered handler) doesn't re-parse the YAML or re-construct the
-`ViewModel`; both stay alive, `Signal` subscriptions intact, for the
-life of the app.
-
-## Architecture
-
-See [ARCHITECTURE.md](ARCHITECTURE.md).
+A `{{ }}` binding in a view can read a `Signal` or a `Computed` directly. See
+[Reactivity](https://mindderivative.github.io/tesserae/guide/reactivity/).
 
 ## Starting an app
 
-`tesserae new notes` makes a runnable app (`app.py` and a `Home` pair,
-with shared state and routes); `--window` makes the app one window view
-with a rail and two routed screens. `tesserae add screen Settings` adds a pair and loads and
-routes it in `app.py` (M67). See [Getting Started](https://mindderivative.github.io/tesserae/getting-started/).
+`tesserae new notes` makes a runnable app; `--window` makes the app one window view with a rail and two routed screens.
+`tesserae add screen Settings` adds a screen. The templates are still in the older view syntax ([Migrating](https://mindderivative.github.io/tesserae/migration/)
+shows the move). See [Getting Started](https://mindderivative.github.io/tesserae/getting-started/) and the
+[CLI](https://mindderivative.github.io/tesserae/guide/cli/).
 
-The items once listed here as deferred are done: shared state (M65),
-routing with a history and deep links (M66), and this CLI (M67).
+## Architecture
+
+See [the architecture page](https://mindderivative.github.io/tesserae/architecture/). To work on Tesserae itself, [DEVELOPING.md](DEVELOPING.md).
 
 **Releasing:** publishing a GitHub Release runs `.github/workflows/release.yml`.
 It checks that the tag matches the version and that no dependency is PyPI's
