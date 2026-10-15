@@ -2465,67 +2465,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "rule": {
-      "type": "object",
-      "description": "Styles for the nodes it matches: a widget (a built-in, or a view called by its name), narrowed by variant, size, shape, classes, name, part and state.",
-      "required": [
-        "style"
-      ],
-      "properties": {
-        "widget": {
-          "type": "string",
-          "description": "The widget the rule is for: a built-in, or a view (`Button`)."
-        },
-        "variant": {
-          "type": "string",
-          "description": "Only widgets with this variant."
-        },
-        "size": {
-          "type": "string",
-          "description": "Only widgets of this size."
-        },
-        "shape": {
-          "type": "string",
-          "description": "Only widgets of this shape."
-        },
-        "classes": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Only nodes with all of these classes."
-        },
-        "name": {
-          "type": "string",
-          "description": "Only the node with this name."
-        },
-        "part": {
-          "type": "string",
-          "description": "A named node inside the widget's view (the widget's root when left out)."
-        },
-        "state": {
-          "enum": [
-            "hovered",
-            "focused",
-            "focus_visible",
-            "pressed",
-            "disabled",
-            "selected",
-            "checked",
-            "expanded",
-            "error",
-            "read_only",
-            "visited"
-          ],
-          "description": "Only while the widget is in this state."
-        },
-        "style": {
-          "$ref": "#/definitions/style",
-          "description": "The style fields the rule sets."
-        }
-      },
-      "additionalProperties": false
     }
   },
   "type": "object",
@@ -2537,7 +2476,66 @@
     "styles": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/rule"
+        "type": "object",
+        "title": "Rule",
+        "description": "Styles for the nodes it matches: a widget (a built-in, or a view called by its name), narrowed by variant, size, shape, classes, name, part and state.",
+        "required": [
+          "style"
+        ],
+        "properties": {
+          "widget": {
+            "type": "string",
+            "description": "The widget the rule is for: a built-in, or a view (`Button`)."
+          },
+          "variant": {
+            "type": "string",
+            "description": "Only widgets with this variant."
+          },
+          "size": {
+            "type": "string",
+            "description": "Only widgets of this size."
+          },
+          "shape": {
+            "type": "string",
+            "description": "Only widgets of this shape."
+          },
+          "classes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Only nodes with all of these classes."
+          },
+          "name": {
+            "type": "string",
+            "description": "Only the node with this name."
+          },
+          "part": {
+            "type": "string",
+            "description": "A named node inside the widget's view (the widget's root when left out)."
+          },
+          "state": {
+            "enum": [
+              "hovered",
+              "focused",
+              "focus_visible",
+              "pressed",
+              "disabled",
+              "selected",
+              "checked",
+              "expanded",
+              "error",
+              "read_only",
+              "visited"
+            ],
+            "description": "Only while the widget is in this state."
+          },
+          "style": {
+            "$ref": "#/definitions/style",
+            "description": "The style fields the rule sets."
+          }
+        },
+        "additionalProperties": false
       },
       "description": "The rules, in order: a later rule wins a tie."
     }

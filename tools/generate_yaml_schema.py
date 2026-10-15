@@ -684,7 +684,7 @@ def _stylesheet() -> dict[str, Any]:
 
     defs = _style_definitions()
     rule = {
-        "type": "object",
+        "type": "object", "title": "Rule",
         "description": "Styles for the nodes it matches: a widget (a built-in, or a view called by its name), narrowed by variant, size, shape, classes, name, part and state.",
         "required": ["style"],
         "properties": {
@@ -698,11 +698,10 @@ def _stylesheet() -> dict[str, Any]:
             "state": {"enum": list(STATES), "description": "Only while the widget is in this state."},
             "style": {"$ref": "#/definitions/style", "description": "The style fields the rule sets."}},
         "additionalProperties": False}
-    defs["rule"] = rule
     return _root("tesserae-stylesheet-schema.json", "Tesserae stylesheet of rules",
                  "A stylesheet of rules: `<Name>_Stylesheet.yaml`, or the file `App(stylesheet=)` names. Each rule says which widgets it is for and the style it sets.",
                  defs, {"type": "object", "required": ["styles"], "additionalProperties": False, "properties": {
-                     "styles": {"type": "array", "items": {"$ref": "#/definitions/rule"}, "description": "The rules, in order: a later rule wins a tie."}}})
+                     "styles": {"type": "array", "items": rule, "description": "The rules, in order: a later rule wins a tie."}}})
 
 
 def schemas() -> dict[str, dict[str, Any]]:

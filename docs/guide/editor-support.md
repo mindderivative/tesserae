@@ -59,6 +59,9 @@ your project's `.vscode/settings.json` (or your user settings):
 }
 ```
 
+Map each file to one schema: the server applies every schema whose glob matches a file, so a view that also matches the packaged widget schema's glob
+would be checked against both and flagged for your own views. The setting `--project` prints has one for the views.
+
 The project schema is a snapshot: run `tesserae schema --project` again after you add a view or change a view's params (add `.tesserae/` to
 `.gitignore`). The packaged paths change if you move to a new virtual environment, so rerun it then too.
 
