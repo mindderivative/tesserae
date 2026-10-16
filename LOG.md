@@ -2838,3 +2838,8 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **todo_list** lost its per-row ViewModel and the `Repeater`: `items` is a list of dicts, rows come from `for: item in items` with `key: item.id`, and the row calls `on_toggle`/`on_remove`. **counter's** accessible name still follows the count (`a11y: {label: "{{ button_label }}"}` on the Button call works).
 - **Tests:** `tests/test_examples_run.py` (12, each example in a subprocess + a no-older-syntax + migrate check); the three tests that read the examples (`test_a11y` counter keyboard, `test_controls_in_views` todo, `test_title_bar` example) were moved to the new shape; two mutations of the examples caught.
 - **Not done:** the `--interactive` runs of these four by eye.
+
+## 0.5.0.20 #268: ViewDialog and a view in the current language
+
+- **Decision (the issue offered two):** refuse with a useful message, not port. A port would be a second way to make what a modal `widget: Overlay` already makes, and `ViewDialog`'s per-dialog ViewModel built from `arguments` does not fit the 0.5.0 model (a called view has no ViewModel of its own). The maintainer can reverse this: porting means composing the view in the dialog's panel through `open_composed` with the app's bindings and rules (`App._composed_docs/_composed_rules`).
+- **Done:** `overlays._refuse_current_language` (by path, or by name through the app's project; a missing or broken file keeps the older loader's own error); docstring and guide. **Tests:** `tests/test_view_dialog_current_language.py` (5, including the Overlay the message names working); three mutations caught.

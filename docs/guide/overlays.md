@@ -114,8 +114,10 @@ file, or its name in a project, with its ViewModel if it has one (`arguments={"w
 if it hasn't. `dialog.content` is the view and `dialog.viewmodel` its ViewModel. A `TitleBar` with `buttons: [dismiss]` at
 the top of the view is a header with a close button, and a `surface.dismiss` handler on anything closes the dialog.
 
-`ViewDialog` reads its file with the older view loader, so a view written in the current language does not load in it. To
-show a view of your own in a dialog, put it in a `widget: Overlay` as above.
+`ViewDialog` is for a view in the older syntax (`kind:`), read with the older loader, and given one in the current language (`widget:`) it refuses it
+with a message that says what to write instead. A dialog in the current language is a modal `widget: Overlay` in a view, as above: its content is the
+view you call by name, `open` is bound to a Signal, and a `surface.dismiss` handler closes it. A called view has no ViewModel of its own, so
+the `arguments` that `ViewDialog` hands to a ViewModel's constructor are the Overlay's content's params, or names the view's ViewModel serves.
 
 `surface.dismiss` closes the nearest overlay the widget is in. In a view that is the nearest `widget: Overlay` up the tree, closed as a press outside it
 would: the layer hides, a bound `open` goes false, and `on_dismiss` runs. A button in a view the Overlay calls dismisses it too, and in nested

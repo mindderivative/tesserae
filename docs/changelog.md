@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.20
+
+### Fixed
+
+- **`ViewDialog` given a view in the current language says what to do instead** ([#268](https://github.com/mindderivative/tesserae/issues/268)). It reads its view with the older loader, so a `widget:` view failed inside it with `every widget needs an id`, which says nothing useful. It is refused up front, by path or by name, naming the file and pointing to a modal `widget: Overlay` bound to `open` and closed by `surface.dismiss` (which works in a view since 0.5.0.17). `ViewDialog` itself is unchanged for views in the older syntax. Porting it was not done: a dialog in the current language is that Overlay, and a called view has no ViewModel of its own, which is what `ViewDialog`'s `arguments` and `.viewmodel` are for.
+
 ## 0.5.0.19
 
 ### Changed

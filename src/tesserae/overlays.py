@@ -200,12 +200,37 @@ class Dialog(Overlay):
         self.node.set(width=width, height=height)  # the scrim covers the window
 
 
+def _refuse_current_language(window: Any, ref: str) -> None:
+    """`ViewDialog` reads its view with the older loader. A view in the current language (`widget:`) does not load there, and the loader's own error
+    says nothing of what to do, so say it here: the content of such a dialog is a modal `widget: Overlay` in a view."""
+    import yaml
+
+    from tesserae.follow import app_of
+
+    path = Path(ref)
+    if not path.suffix:  # a name: found in the app's project, if it has one
+        app = app_of(window)
+        try:
+            path = app.project.find("view", ref) if app is not None else path
+        except LookupError:
+            return  # the older loader says it is not there
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return  # the older loader says what is wrong with the file
+    if isinstance(data, dict) and "widget" in data:
+        raise ValueError(f"{path.name}: ViewDialog shows a view in the older syntax (`kind:`), and this one is in the current language (`widget:`). "
+                         "Show it in a modal `widget: Overlay` in a view instead: `open: \"{{ show_settings }}\"`, `modal: true`, the content as its "
+                         "children (a view you call by name), and a `surface.dismiss` handler to close it. See Overlays in the guide.")
+
+
 class ViewDialog(Overlay):
     """A dialog whose content is a view: `ViewDialog(window, "Settings_View.yaml")` shows that view, with its
     ViewModel if it has one (`with:` as keyword arguments to its constructor), on a `surface_container_high` panel with 28 px
     corners over a scrim, as `Dialog` does. A name is found in the app's project. Modal: focus moves into it, and Escape closes
     it. Give the view a `TitleBar` with `buttons: [dismiss]` for a header with a close button. `.content` is the embedded view
-    and `.viewmodel` its ViewModel (`None` for a view with none)."""
+    and `.viewmodel` its ViewModel (`None` for a view with none). The view is written in the older syntax; for one in the current language,
+    use a modal `widget: Overlay` in a view: `ViewDialog` says so when it is given one."""
 
     modal = True
 
@@ -213,6 +238,7 @@ class ViewDialog(Overlay):
                  height: float = 320.0, label: Optional[str] = None, theme: Optional[Theme] = None) -> None:
         name = "viewdialog"
         ref = str(Path(view).resolve()) if Path(str(view)).suffix else str(view)  # a file by its full path, a name as it is
+        _refuse_current_language(window, ref)
         spec = {"id": name, "kind": "Container", "classes": ["view_dialog"],
                 "style": {"width": 1, "height": 1, "background": SCRIM, "align_content": "center"},
                 "children": [{"id": f"{name}.panel", "kind": "Container", "classes": ["view_dialog_panel"],
