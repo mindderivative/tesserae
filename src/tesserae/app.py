@@ -803,21 +803,19 @@ class App:
         rules_now = is_rule_sheet(stylesheet_spec)
         rules_before = is_rule_sheet(previous)
         library = self._composed_docs_library()
-        new_rules = self._composed_rules(library, stylesheet_spec)[0]
-        old_rules = self._composed_rules(library, previous)[0]
 
-        def restyle(view: Any, spec: Any, rules: Any, is_rules: bool, was_rules: bool) -> None:
+        def restyle(view: Any, spec: Any, is_rules: bool, was_rules: bool) -> None:
             if isinstance(view, ComposedView):  # a view of `widget:` nodes: its rules are part of its composition, and an older-shape sheet is the view's own
                 view.set_stylesheet(stylesheet_spec=None if is_rules else spec)
                 if is_rules or was_rules:
-                    view.restyle(rules)
+                    view.restyle(self._composed_rules(library, spec, view.handle.doc)[0])  # the stylesheets of the widgets this view uses, under the new sheet
             elif not is_rules:  # an older view cannot take a sheet of rules
                 view.set_stylesheet(stylesheet_spec=spec)
 
         _apply_all(
             [b.view for b in self._built if not b.own_stylesheet or isinstance(b.view, ComposedView)],
-            lambda view: restyle(view, stylesheet_spec, new_rules, rules_now, rules_before),
-            lambda view: restyle(view, previous, old_rules, rules_before, rules_now),
+            lambda view: restyle(view, stylesheet_spec, rules_now, rules_before),
+            lambda view: restyle(view, previous, rules_before, rules_now),
         )
         self._stylesheet_spec = stylesheet_spec
 
@@ -881,24 +879,27 @@ class App:
         only, so a hot reload does it off the loop."""
         from tesserae.shipped import ViewLibrary
 
-        library = ViewLibrary(self.project.index("view"))
+        library = ViewLibrary(self.project.index("view"), self.project.index("stylesheet"))
         return library.parse(path), library
 
     def _composed_docs_library(self) -> Any:
         """A library of the project's views and Tesserae's, for what needs only its names."""
         from tesserae.shipped import ViewLibrary
 
-        return ViewLibrary(self.project.index("view"))
+        return ViewLibrary(self.project.index("view"), self.project.index("stylesheet"))
 
-    def _composed_rules(self, library: Any, spec: Any = _SAME) -> tuple[list[Any], dict[str, Any]]:
-        """The rules under a composed view (what the shipped components look like, then the app's stylesheet `spec`, by default the current one) and
-        the theme arguments."""
-        from tesserae.shipped import shipped_rules
+    def _app_sheet_file(self) -> Optional[Path]:
+        """The file of the app's own stylesheet (`App(stylesheet=)`), which is not also a view's."""
+        return Path(self._stylesheet_file).resolve() if self._stylesheet_file is not None else None
+
+    def _composed_rules(self, library: Any, spec: Any = _SAME, doc: Any = None) -> tuple[list[Any], dict[str, Any]]:
+        """The rules under a composed view: the stylesheets of the widgets `doc` uses (the shipped ones, then the project's: a view's sheet is read only when
+        the view is used), then the app's stylesheet `spec`, by default the current one; and the theme arguments."""
         from tesserae.spec.rules import RuleSheet, is_rule_sheet
 
         spec = self._stylesheet_spec if spec is _SAME else spec
         kwargs = self._view_theme()
-        rules = [sheet.without(library.replaced) for sheet in shipped_rules()]
+        rules = library.sheets_of(library.used(doc), self._app_sheet_file())[0]
         if spec is not None:
             if is_rule_sheet(spec):  # the app's rules by widget, variant, part and state
                 kwargs.pop("stylesheet_spec", None)
@@ -912,7 +913,7 @@ class App:
 
         path = Path(self._named("view", view))
         doc, library = self._composed_docs(path)
-        rules, kwargs = self._composed_rules(library)
+        rules, kwargs = self._composed_rules(library, doc=doc)
         opened = open_composed(doc, self.bindings, library.doc, base_dir=path.parent, window=window, rules=rules, **kwargs)
         opened.source = path.resolve()  # the file a hot reload watches
         if self._hot_handle is not None:  # opened while the app runs with hot reload on
@@ -1712,7 +1713,8 @@ class App:
         from tesserae.shipped import SHIPPED
         from tesserae.spec.watch import ComposedWatcher
 
-        return ComposedWatcher(opened, opened.source, self._composed_docs, lambda library: self._composed_rules(library)[0], shipped=SHIPPED)
+        return ComposedWatcher(opened, opened.source, self._composed_docs, lambda library, doc: self._composed_rules(library, doc=doc)[0], shipped=SHIPPED,
+                                sheet_files=lambda library, used: library.sheets_of(used, self._app_sheet_file())[1])
 
     def _stop_watchers(self) -> None:
         """Stops every hot-reload watcher, including component watchers

@@ -40,6 +40,7 @@ install Tesserae). [The `tesserae` command](cli.md) has the rest.
 | `widget: Side` in a view | the view `Side`: `Views/Side_View.yaml`, or one of the views Tesserae ships; a name of yours wins |
 | `App(custom_theme="Brand")` | `Themes/Brand_Theme.yaml` |
 | `App(stylesheet="Page")` | `Styles/Page_Stylesheet.yaml` |
+| a view `Stat` that a view calls | `Stat_Stylesheet.yaml` beside `Stat_View.yaml`, or in `Styles/`: its look, read only while the app uses `Stat` |
 
 A **path** works wherever a name does: `app.open_view(HERE / "Views" / "Main_View.yaml")`. A string with a `/` or a `.` is a
 path too, read from the folder you run in, so build it from `HERE` (the script's folder) and it works from anywhere. A name has

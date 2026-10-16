@@ -55,7 +55,7 @@ hour = time_input_field(app.window, 9, unit="hour")
 
 ## Changing its look
 
-To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
+To restyle it in your whole app, write rules for it in your app's stylesheet, or put `<Name>_Stylesheet.yaml` next to your views (or in `Styles/`); it is read only while the app uses the view. A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, and a node's own `style:` beats every rule:
 
 ```yaml
 # TimeInput_Stylesheet.yaml, or any stylesheet your app loads

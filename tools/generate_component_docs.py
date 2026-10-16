@@ -221,7 +221,7 @@ def component_page(entry: dict[str, Any], views: dict[str, View]) -> str:
         selectors = {k: v for k, v in rule.items() if k not in ("style",)}
         selectors.setdefault("widget", view.name)
         out += ["## Changing its look", "",
-                "To restyle it in your whole app, write rules for it in your app's stylesheet, or put a stylesheet of the same name next to your views. "
+                "To restyle it in your whole app, write rules for it in your app's stylesheet, or put `<Name>_Stylesheet.yaml` next to your views (or in `Styles/`); it is read only while the app uses the view. "
                 "A rule names the widget and may narrow it by the properties it declares, a part and a state; the most specific rule wins, "
                 "and a node's own `style:` beats every rule:", ""]
         out += _fence(f"# {view.name}_Stylesheet.yaml, or any stylesheet your app loads\nstyles:\n  - " + yaml.safe_dump(
@@ -303,7 +303,7 @@ def overview_stylesheets(data: dict[str, Any], views: dict[str, View]) -> str:
     out += ["- A rule narrows by the properties the view declares (`variant`, `size`, `shape`), `classes`, a node `name`, a `part` (a named node inside the view) and a `state`.",
             "- A value in `{{ }}` is an expression over the view's parameters, worked out where the view is used.",
             "- The most specific rule wins; a node's own `style:` beats every rule for the fields it sets.",
-            "- The shipped rules are the lowest layer. Your app's stylesheet goes over them, and a `<Name>_Stylesheet.yaml` of the same name next to your views replaces the shipped one.",
+            "- A stylesheet is read only when the application uses its widget: the widgets in the views you open, and in the views those call. The shipped rules are the lowest layer, a `<Name>_Stylesheet.yaml` of yours (next to your views, or in `Styles/`) goes over them, and your app's stylesheet goes over that. A view of the same name that you wrote replaces the shipped one and its look.",
             "- Hot reload watches the stylesheets a view uses.", "",
             "See [The View Language](../guide/view-language.md#style) for the rule syntax and [Themes](../themes/index.md) for colours, type and shape.", ""]
     for group in data["groups"]:

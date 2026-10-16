@@ -333,7 +333,7 @@ Nothing in your code has to change.
 - The built-in components keep their look in `<Name>_Stylesheet.yaml` files and their structure in
   `<Name>_Component.yaml`. A view that uses `component: ButtonFilled` expands to exactly what it did.
   If you copied a built-in `*_Component.yaml` to restyle it, you can delete the copy and put just a
-  `<Name>_Stylesheet.yaml` with the fields you change next to your views.
+  `<Name>_Stylesheet.yaml` with the fields you change next to your views (in the current language it is read only while the app uses the view).
 - A `*_Component.yaml` or `*_Stylesheet.yaml` in a view's own folder is now found. A file there named
   for a built-in component replaces or restyles it, so check that none is there by accident.
 

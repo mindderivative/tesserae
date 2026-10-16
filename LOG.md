@@ -2843,3 +2843,10 @@ User: "release tesserae 0.5.0", then "pypi is up".
 
 - **Decision (the issue offered two):** refuse with a useful message, not port. A port would be a second way to make what a modal `widget: Overlay` already makes, and `ViewDialog`'s per-dialog ViewModel built from `arguments` does not fit the 0.5.0 model (a called view has no ViewModel of its own). The maintainer can reverse this: porting means composing the view in the dialog's panel through `open_composed` with the app's bindings and rules (`App._composed_docs/_composed_rules`).
 - **Done:** `overlays._refuse_current_language` (by path, or by name through the app's project; a missing or broken file keeps the older loader's own error); docstring and guide. **Tests:** `tests/test_view_dialog_current_language.py` (5, including the Overlay the message names working); three mutations caught.
+
+## 0.5.0.21 #274: a view's stylesheet is read when the view is used
+
+- **Measured before:** all 40 shipped sheets read for every app; a project sheet never. **After:** a view of Button, Checkbox and Text reads 6 sheets (those plus the Container/Icon/CircularProgress sheets of widgets the shipped views use inside).
+- **Design:** `ViewLibrary.used(doc)` (every widget in the doc and, transitively, in the views it calls), `sheets_of(used, app_sheet)` (shipped sheet unless the project replaced the view, then the project's sheet: beside its view, else `Styles/` by name; the app's own stylesheet file is not read twice), `shipped_sheet(name)` (lazy, cached). `App._composed_rules(library, spec, doc)` takes the doc; `set_stylesheet_spec` re-derives per view; `ComposedWatcher` watches the project sheets of the views in use. Premise checked by a test: each shipped sheet names only its own widget.
+- **Tests:** `tests/test_view_stylesheets.py` (14); seven mutations caught, after the first run missed the app-sheet dedupe (a spy on the library's reads can't see the app's own read: the assertion became `== 0`).
+- **Not done:** a project sheet for a *built-in* widget name beside no view (it is found only by the `Styles/` index); a sheet shared by several views.

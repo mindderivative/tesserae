@@ -296,9 +296,10 @@ class ComposedWatcher(ViewWatcher):
     A change that fails to parse or compose is logged naming the file, and the view stays as it was. The files watched are re-read after each
     reload, so a view the file now calls is watched too."""
 
-    def __init__(self, view: Any, path: str | Path, parse: Callable[[Path], tuple[Any, Any]], rules: Callable[[Any], Any], *,
-                 shipped: Optional[Path] = None) -> None:
+    def __init__(self, view: Any, path: str | Path, parse: Callable[[Path], tuple[Any, Any]], rules: Callable[[Any, Any], Any], *,
+                 shipped: Optional[Path] = None, sheet_files: Optional[Callable[[Any, set[str]], list[Path]]] = None) -> None:
         self._parse, self._rules = parse, rules
+        self._sheet_files = sheet_files or (lambda library, used: library.sheets_of(used)[1])
         if shipped is None:
             from tesserae.shipped import SHIPPED as shipped  # Tesserae's own views are not the app's to edit
         self._shipped = shipped.resolve()
@@ -308,21 +309,17 @@ class ComposedWatcher(ViewWatcher):
         """All the file work, safe off the loop: parses the view and every view it calls (so a mistake in any of them is found here), and names the
         files."""
         doc, library = self._parse(self._path)
-        pending, seen = [doc], set()
-        while pending:
-            for node in pending.pop().root.walk():
-                if node.widget in library.paths and node.widget not in seen:
-                    seen.add(node.widget)
-                    pending.append(library.doc(node.widget))
+        used = library.used(doc)  # parses every view it calls, so a mistake in one is found here
         files = {p for p in library.read if self._shipped not in p.parents} | {self._path.resolve()}
         files |= set(self._view.image_files)
+        files |= set(self._sheet_files(library, used))  # the project's stylesheets of the views in use: an edit to one reloads the view
         return (doc, library), [], files
 
     def _apply(self, spec: Any, frames: list[Frame]) -> None:
         if self._view.handle.closed:
             return
         doc, library = spec
-        self._view.recompose(doc, library.doc, self._rules(library))
+        self._view.recompose(doc, library.doc, self._rules(library, doc))
         logger.info("reloaded {}", self._path)
 
 

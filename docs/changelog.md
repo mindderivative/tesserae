@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.21
+
+### Changed
+
+- **A view's stylesheet is read when the application uses the view** ([#274](https://github.com/mindderivative/tesserae/issues/274)). A project's `<Name>_Stylesheet.yaml` next to `<Name>_View.yaml` (or in `Styles/`) was never loaded, and all 40 shipped stylesheets were read and compiled for every app, used or not. Each opened view now works out the widgets it uses (its own and, through every view it calls, theirs) and reads only those widgets' stylesheets: the shipped ones, then the project's, then the app's own over both. A small app that uses a button, a checkbox and some text reads 6 of the 40. A project view that replaces a shipped one has its own sheet and not the shipped look; a sheet for a view nothing calls is not even parsed (so a mistake in it is not reported); one that is used and wrong is an error naming the file, line and column. The app's own stylesheet is not read again as a view's when a view has its name. A hot reload re-works out what is used, so a view the file starts to call gets its sheet, and editing a used project stylesheet reloads the view.
+
 ## 0.5.0.20
 
 ### Fixed

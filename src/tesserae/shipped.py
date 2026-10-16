@@ -18,10 +18,11 @@ from tesserae.spec.nodes import ViewDoc, parse_view
 from tesserae.spec.rules import RuleSheet, load_rule_sheet
 from tesserae.spec.widgets import WidgetDecl, decl_from_params
 
-__all__ = ["SHIPPED", "ViewLibrary", "shipped_rules", "shipped_views"]
+__all__ = ["SHIPPED", "ViewLibrary", "shipped_rules", "shipped_sheet", "shipped_views"]
 
 SHIPPED = Path(__file__).parent / "views"
 _RULES: Optional[list[RuleSheet]] = None
+_SHEETS: dict[str, Optional[RuleSheet]] = {}
 
 
 def shipped_views() -> dict[str, Path]:
@@ -29,8 +30,17 @@ def shipped_views() -> dict[str, Path]:
     return {p.name.removesuffix("_View.yaml"): p for p in sorted(SHIPPED.glob("*_View.yaml"))} if SHIPPED.is_dir() else {}
 
 
+def shipped_sheet(name: str) -> Optional[RuleSheet]:
+    """The shipped stylesheet of the widget or view `name` (`<name>_Stylesheet.yaml`), read the first time it is asked for, or `None` when it has none.
+    An app reads only the ones for the widgets it uses."""
+    if name not in _SHEETS:
+        path = SHIPPED / f"{name}_Stylesheet.yaml"
+        _SHEETS[name] = load_rule_sheet(path) if path.is_file() else None
+    return _SHEETS[name]
+
+
 def shipped_rules() -> list[RuleSheet]:
-    """The shipped stylesheets, the lowest layer of an app's rules."""
+    """Every shipped stylesheet (not what an app uses: that is `shipped_sheet` for the widgets it has; this is for a tool that wants them all)."""
     global _RULES
     if _RULES is None:
         _RULES = [load_rule_sheet(p) for p in sorted(SHIPPED.glob("*_Stylesheet.yaml"))] if SHIPPED.is_dir() else []
@@ -40,8 +50,11 @@ def shipped_rules() -> list[RuleSheet]:
 class ViewLibrary:
     """Finds a view by name among the project's (`project`, name to path) and the shipped ones; the project's wins."""
 
-    def __init__(self, project: Optional[dict[str, Path]] = None) -> None:
+    def __init__(self, project: Optional[dict[str, Path]] = None, sheets: Optional[dict[str, Path]] = None) -> None:
         self.paths: dict[str, Path] = {**shipped_views(), **(project or {})}
+        #: the project's own views, and its stylesheets by name (`Styles/Name_Stylesheet.yaml`): a view's stylesheet may also sit beside its view
+        self.project_views: dict[str, Path] = dict(project or {})
+        self.project_sheets: dict[str, Path] = dict(sheets or {})
         #: shipped views the project has replaced with its own: their shipped looks are not used either
         self.replaced: set[str] = set(shipped_views()) & set(project or {})
         self._docs: dict[Path, ViewDoc] = {}
@@ -71,3 +84,42 @@ class ViewLibrary:
         """Parses a view file that is not looked up by name (the one being opened), against this library."""
         self.read.add(path.resolve())
         return parse_view(path.read_text(encoding="utf-8"), str(path), resolver=self.decl, view_name=name or path.name.removesuffix("_View.yaml"))
+
+    def used(self, doc: ViewDoc) -> set[str]:
+        """The names of the widgets `doc` uses: its own nodes' and, through every view it calls (and those call), theirs. A view's stylesheet belongs to
+        the application only when its name is here."""
+        names: set[str] = set()
+        pending = [doc]
+        while pending:
+            for node in pending.pop().root.walk():
+                if node.widget not in names:
+                    names.add(node.widget)
+                    if node.widget in self.paths:
+                        pending.append(self.doc(node.widget))
+        return names
+
+    def project_sheet(self, name: str) -> Optional[Path]:
+        """The project's stylesheet for the widget or view `name`: `<name>_Stylesheet.yaml` beside the project's `<name>_View.yaml`, else the one of that
+        name in the project's stylesheet folders; `None` when there is none."""
+        beside = self.project_views.get(name)
+        if beside is not None and beside.with_name(f"{name}_Stylesheet.yaml").is_file():
+            return beside.with_name(f"{name}_Stylesheet.yaml")
+        return self.project_sheets.get(name)
+
+    def sheets_of(self, used: set[str], app_sheet: Optional[Path] = None) -> tuple[list[RuleSheet], list[Path]]:
+        """`(rules, files)`: the stylesheets of the widgets in `used`, lowest layer first (the shipped ones, then the project's), and the project files they
+        came from. A widget the project has replaced with a view of its own has not its shipped look; `app_sheet` (the app's own stylesheet) is not read
+        twice when it is also named like a view's."""
+        rules: list[RuleSheet] = []
+        files: list[Path] = []
+        for name in sorted(used):
+            sheet = shipped_sheet(name) if name not in self.replaced else None
+            if sheet is not None:
+                rules.append(sheet)
+        for name in sorted(used):
+            path = self.project_sheet(name)
+            if path is None or (app_sheet is not None and path.resolve() == app_sheet.resolve()):
+                continue
+            rules.append(load_rule_sheet(path))
+            files.append(path.resolve())
+        return rules, files

@@ -49,7 +49,7 @@ def opened(tmp_path):
     view = app.open_view("Main")
     app.show("main")
     view.window.advance(16)
-    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library: app._composed_rules(library)[0])
+    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library, doc: app._composed_rules(library, doc=doc)[0])
     return app, view, path, watcher, app.bindings.viewmodel_for("main")
 
 
@@ -160,7 +160,7 @@ def calling(tmp_path):
     view = app.open_view("Main")
     app.show("main")
     view.window.advance(16)
-    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library: app._composed_rules(library)[0])
+    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library, doc: app._composed_rules(library, doc=doc)[0])
     return app, view, main, chip, watcher
 
 
@@ -192,7 +192,7 @@ def test_a_view_called_by_a_view_it_calls_is_watched_too(tmp_path):
     app.bind(VM)
     view = app.open_view("Main")
     view.window.advance(16)
-    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library: app._composed_rules(library)[0])
+    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library, doc: app._composed_rules(library, doc=doc)[0])
     assert inner.resolve() in watcher.files
     write(inner, inner.read_text().replace("{{ title }}", "<{{ title }}>"))
     assert watcher.poll() is True
@@ -218,7 +218,7 @@ def test_the_old_instances_are_let_go_and_a_list_still_follows_its_data_after_a_
     vm = app.bindings.viewmodel_for("main")
     before = list(view.handle.composition.walk())
     write(path, rows + "# edited\n")
-    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library: app._composed_rules(library)[0])
+    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library, doc: app._composed_rules(library, doc=doc)[0])
     write(path, rows + "# edited again\n")
     assert watcher.poll() is True
     assert all(inst.disposed for inst in before) and not any(inst.disposed for inst in view.handle.composition.walk())
@@ -238,7 +238,7 @@ def test_a_view_the_file_starts_to_call_is_watched_from_then_on(tmp_path):
     app = App(root=tmp_path)
     app.bind(VM)
     view = app.open_view("Main")
-    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library: app._composed_rules(library)[0])
+    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library, doc: app._composed_rules(library, doc=doc)[0])
     assert chip.resolve() not in watcher.files
     write(main, WITH_CALL)
     assert watcher.poll() is True
@@ -256,7 +256,7 @@ def test_a_picture_it_draws_is_watched(tmp_path):
     app = App(root=tmp_path)
     app.bind(VM)
     view = app.open_view("Main")
-    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library: app._composed_rules(library)[0])
+    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library, doc: app._composed_rules(library, doc=doc)[0])
     assert (tmp_path / "Views" / "dot.png").resolve() in watcher.files
     Image.new("RGBA", (4, 4), (0, 255, 0, 255)).save(tmp_path / "Views" / "dot.png")
     bump_time(tmp_path / "Views" / "dot.png")
