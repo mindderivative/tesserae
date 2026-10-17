@@ -30,8 +30,8 @@ python3 -m venv .venv
 .venv/bin/pip install mkdocs mkdocs-material   # the docs build; also pillow-based tools need no extra
 ```
 
-`pip install -e ".[dev]"` pulls `tesserae-engine>=0.5.6,<0.6` from PyPI (still `import tre`); nothing else is needed. The suite was run on the PyPI build of 0.5.6
-(7712 passed, 3 skipped). To work against an unreleased tre, build its wheel (`pip install maturin`, then in the tre checkout `maturin build --release -m
+`pip install -e ".[dev]"` pulls `tesserae-engine>=0.5.7,<0.6` from PyPI (still `import tre`); nothing else is needed. The suite was run on the PyPI build of 0.5.7
+(7853 passed, 4 skipped). To work against an unreleased tre, build its wheel (`pip install maturin`, then in the tre checkout `maturin build --release -m
 crates/engine-py/Cargo.toml`) and `pip install --force-reinstall --no-deps` it into a scratch venv.
 
 Never put a scratch tre build into `.venv` by accident; to try another tre version make a throwaway venv (`python3 -m venv /tmp/v055`, install the wheel and

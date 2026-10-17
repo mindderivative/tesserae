@@ -68,13 +68,44 @@ def test_the_four_sides_each_start_at_the_anchors_start_edge(placement, expected
     assert rect(layer)[:2] == expected
 
 
-@pytest.mark.parametrize("placement", ["top_end", "above_end", "bottom_start", "center", "over"])
-def test_there_is_no_corner_or_centre_placement(placement):
+@pytest.mark.parametrize("placement, expected", [("top_start", (144.0, 114.0)), ("top_end", (204.0, 114.0)), ("bottom_start", (144.0, 154.0)),
+                                                 ("bottom_end", (204.0, 154.0)), ("center", (174.0, 134.0))])
+def test_a_layer_takes_a_corner_or_the_centre_of_its_anchor(placement, expected):
+    """tre 0.5.7: the marker is centred on the anchor's corner (the anchor is 60 by 40 at 150, 120; the marker 12 by 12)."""
     window = tre.Window(width=400, height=300)
     anchor = window.create("box", position="absolute", x=150.0, y=120.0, width=60.0, height=40.0)
     window.root.add_child(anchor)
-    with pytest.raises(ValueError, match="`placement` must be one of: below, above, start, end"):
+    layer = window.create("box", width=12.0, height=12.0)
+    window.show_layer(layer, anchor=anchor, placement=placement, dismissible=False)
+    window.advance(16)
+    assert (layer.get("layout_x"), layer.get("layout_y")) == expected
+
+
+@pytest.mark.parametrize("placement", ["above_end", "over", "nonsense"])
+def test_other_placements_are_still_rejected(placement):
+    window = tre.Window(width=400, height=300)
+    anchor = window.create("box", position="absolute", x=150.0, y=120.0, width=60.0, height=40.0)
+    window.root.add_child(anchor)
+    with pytest.raises(ValueError, match="`placement` must be one of: below, above, start, end, top_start, top_end, bottom_start, bottom_end, center"):
         window.show_layer(window.create("box", width=12.0, height=12.0), anchor=anchor, placement=placement)
+
+
+def test_an_ordinary_node_can_stay_in_the_tree_and_be_placed_against_another():
+    """tre 0.5.7: `anchor`, `placement` and `offset` on a node that is not a layer."""
+    window = tre.Window(width=400, height=300)
+    anchor = window.create("box", position="absolute", x=150.0, y=120.0, width=60.0, height=40.0)
+    window.root.add_child(anchor)
+    marker = window.create("box", position="absolute", width=12.0, height=12.0)
+    window.root.add_child(marker)
+    marker.set(anchor=anchor, placement="top_end")
+    window.advance(16)
+    assert (marker.get("layout_x"), marker.get("layout_y")) == (204.0, 114.0)
+    marker.set(offset=(2.0, -2.0))
+    window.advance(16)
+    assert (marker.get("layout_x"), marker.get("layout_y")) == (206.0, 112.0)
+    anchor.set(x=200.0)
+    window.advance(16)
+    assert marker.get("layout_x") == 256.0  # it follows its anchor with no lag
 
 
 def test_a_layer_flips_to_fit_which_a_marker_on_a_corner_would_not_want():

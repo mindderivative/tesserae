@@ -53,19 +53,31 @@ def test_the_recipes_follow_the_parent_when_it_changes(tmp_path):
 
 
 def test_what_tre_takes_for_a_size_today():
-    """The facts the request rests on; if tre changes one, this fails and the request needs its first section rewritten."""
+    """The facts the feature rests on (tre 0.5.7); if tre changes one, this fails. 0.5.6 took only a number, `auto` or a percentage, and no insets."""
     import tre
 
     window = tre.Window(width=300, height=200)
     node = window.create("box")
-    for ok in (40, 40.5, "auto", "50%"):
+    for ok in (40, 40.5, "auto", "50%", "calc(100% - 16)", "100% - 16", "fit-content"):
         node.set(width=ok)
-    for bad in ("calc(100% - 16)", "100% - 16", "40px", "10vw", "fit-content", "stretch"):
+    for bad in ("40px", "10vw", "stretch", "min-content"):
         with pytest.raises(ValueError, match='must be a number, "auto", or a percentage'):
             node.set(width=bad)
-    for prop in ("right", "bottom", "inset", "inset_right", "x2"):
+    for prop in ("left", "top", "right", "bottom", "inset"):
+        node.set(**{prop: 8.0})
+    for prop in ("inset_right", "x2"):
         with pytest.raises(ValueError, match="unknown node property"):
             node.set(**{prop: 8.0})
+
+
+def test_an_absolute_node_is_stretched_between_two_insets():
+    import tre
+
+    window = tre.Window(width=300, height=200)
+    node = window.create("box", position="absolute", x=8.0, right=16.0, height=20.0)
+    window.root.add_child(node)
+    window.advance(32)
+    assert (node.get("layout_x"), node.get("layout_width")) == (8.0, 276.0)  # 300 - 8 - 16
 
 
 def test_an_absolute_node_is_not_stretched_by_a_margin_today():

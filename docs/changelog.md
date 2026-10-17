@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.23
+
+### Changed
+
+- **Requires tre 0.5.7** ([#278](https://github.com/mindderivative/tesserae/issues/278)). `tesserae-engine>=0.5.7,<0.6`. 0.5.7 adds what Tesserae asked of it on 2026-10-11 (tre#178, tre#179) and more: sizes that take `calc(100% - 16)` and mixed units, and `fit-content` for text; `left`, `top`, `right`, `bottom` and `inset` on an absolute node, so one can be stretched between two edges; `anchor`, `placement` and `offset` on an ordinary node, which stays in the tree and follows its anchor with no lag, and the corner and centre placements (`top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`) for a layer; bitmap colour emoji; and a larger minimum window size that no longer reports repeated resizes. Nothing in Tesserae broke: the suite passes (7853). Four tests that recorded what tre could not do (a size other than a number, `auto` or a percentage; an inset; a corner placement) failed because it can now, and say what it does. Tesserae's own `calc()`, insets and `anchor` in the view language are the next issues ([#261](https://github.com/mindderivative/tesserae/issues/261) and [#262](https://github.com/mindderivative/tesserae/issues/262) were built as far as 0.5.6 allowed).
+
 ## 0.5.0.22
 
 ### Added

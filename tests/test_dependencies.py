@@ -20,7 +20,7 @@ def _project():
 def test_tre_is_the_0_5_line():
     engine = next(d for d in _project()["dependencies"] if d.startswith("tesserae-engine"))
     bounds = set(re.findall(r"(>=|<)\s*([\d.]+)", engine))
-    assert (">=", "0.5.6") in bounds, f"{engine!r}: Tesserae 0.5.0 needs tre 0.5.6 (timers, layout animation, accessibility states)"
+    assert (">=", "0.5.7") in bounds, f"{engine!r}: Tesserae needs tre 0.5.7 (calc and insets, anchored layout; before that timers, layout animation, accessibility states)"
     assert ("<", "0.6") in bounds, f"{engine!r}: a new tre line is a new Tesserae line, the user's to start"
 
 
