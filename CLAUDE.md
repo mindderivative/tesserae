@@ -9,7 +9,8 @@
 * **Done:** Move approved `In review` entries to `Done` then update documentation on the finished entry.
 
 ## Memory Policy
-* **YOU MUST** update your local memory using the memory MCP server as soon as a local commit finishes.
+* **YOU MUST** update your local memory using the memory MCP server when a local commit finishes **and it changed something worth remembering**: a decision and its reason, a lesson (a mistake and how to avoid it), a standing instruction, or the project's status (what is pushed, what is open, what is waited on).
+* **Do not log each commit** in memory: git history, `LOG.md` and `docs/changelog.md` already hold that. Keep one compact entity per project, update it in place, and prune an entry when it goes stale. Take a backup of the memory graph before pruning it.
 
 ## Documentation Policy
 * **IMPORTANT:** Update all relevant documentation immediately upon completing any milestone, phase, stage, step, or feature.
