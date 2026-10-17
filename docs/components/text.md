@@ -13,7 +13,7 @@ label), each large, medium or small, with a font, size, weight, line height and 
 what a role means.
 
 `text` can be an expression, and follows the Signals it reads. `font_family`, `font_size` and `font_weight` replace what the role gives. `wrap` is `word` or `none`,
-`overflow` is `clip` or `ellipsis`, `text_align` is `start`, `center` or `end`, and `max_lines` cuts a longer text to that many lines (with `overflow: ellipsis` the last
+`runs` gives pieces of one text their own style and links ([Rich Text & Links](../guide/rich-text.md)). `overflow` is `clip` or `ellipsis`, `text_align` is `start`, `center` or `end`, and `max_lines` cuts a longer text to that many lines (with `overflow: ellipsis` the last
 one ends in an ellipsis). `letter_spacing` adds space between letters, in pixels. `selectable: true` lets the text be selected and copied, and `heading: 1` to `6` makes it a heading of that level for a screen reader.
 
 The colour is `style.foreground`. Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are
@@ -39,6 +39,7 @@ A run of text.
 | `max_lines` | `int` |  | The most lines shown, from 1; a longer text is cut (with `overflow: ellipsis`, an ellipsis ends the last line). |
 | `letter_spacing` | `float` |  | Extra space between letters, in pixels (tracking). |
 | `selectable` | `bool` |  | The text can be selected and copied. |
+| `runs` | `list` |  | Pieces of one text in different styles, instead of `text`: each a string, or `{text, color, weight, italic, underline, strikethrough, font_size, font_family, link}`. A piece with a `link` is the theme's `primary` and underlined, and `on_link` runs with `event.href` when it is pressed. |
 | `heading` | `1` or `2` or `3` or `4` or `5` or `6` |  | Makes it a heading of this level for a screen reader. |
 
 Its `style:` also takes `foreground`.

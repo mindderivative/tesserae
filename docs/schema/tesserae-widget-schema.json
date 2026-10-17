@@ -13897,6 +13897,18 @@
             ],
             "description": "The text can be selected and copied."
           },
+          "runs": {
+            "anyOf": [
+              {
+                "type": "array"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Pieces of one text in different styles, instead of `text`: each a string, or `{text, color, weight, italic, underline, strikethrough, font_size, font_family, link}`. A piece with a `link` is the theme's `primary` and underlined, and `on_link` runs with `event.href` when it is pressed."
+          },
           "heading": {
             "anyOf": [
               {
@@ -13945,6 +13957,7 @@
             "max_lines",
             "letter_spacing",
             "selectable",
+            "runs",
             "heading"
           ]
         }

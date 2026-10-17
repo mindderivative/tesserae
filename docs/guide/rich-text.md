@@ -1,8 +1,40 @@
 # Rich Text & Links
 
-A `Text` is one piece of text in one style: one `typography_role`, one `foreground`, one weight. Text that is
-partly bold, coloured or a link is built from several nodes laid out in a row, and a whole line that opens a page
-is a `Link`.
+A `Text` is text in one style: one `typography_role`, one `foreground`, one weight. For text that is partly bold, struck through, coloured
+or a link, give it `runs`: the pieces of one text, each with its own style. A whole line that opens a page is a [`Link`](#links).
+
+```yaml
+widget: Text
+name: offer
+typography_role: body_large
+style: {foreground: on_surface, width: 360}
+runs:
+  - "Sale: "
+  - {text: "{{ was }}", strikethrough: true, color: on_surface_variant}
+  - {text: " $9", weight: 700, color: error}
+  - " ends Friday. "
+  - {text: "Read the terms", link: terms}
+handlers: {on_link: "open_terms(event.href)"}
+```
+
+A run is a string, or a mapping with its `text` and any of:
+
+| Key | What it does |
+| --- | --- |
+| `color` | A theme role or a CSS colour. |
+| `weight` | A font weight, 1 to 1000 (`700` is bold). |
+| `italic`, `underline`, `strikethrough` | `true` for the style. |
+| `font_size`, `font_family` | A size in pixels, a family. |
+| `link` | A name for the link; the run is the theme's `primary` and underlined unless it says otherwise. |
+
+`runs` is the text, so a `Text` has `runs` or `text`, not both. The pieces are joined into one text that wraps as one (give it a `width`),
+and a string in a run may be an expression (`"{{ was }}"`), so the pieces follow your data. A mistake is refused with the node named: an empty
+list, a run with no `text`, an unknown key, a `weight` that is not a number. Only a `Text` has `runs` (a `Link` is one piece, and what is typed in
+a `TextInput` is one style).
+
+## Pieces that need their own layout
+
+When the pieces must be separate nodes (each with its own `handlers`, padding or alignment), lay `Text` and `Link` nodes out in a row:
 
 ```yaml
 widget: Container
@@ -19,11 +51,6 @@ children:
     typography_role: body_large
     font_weight: 700
     style: {foreground: error}
-  - widget: Text
-    name: ends
-    text: ", ends Friday. "
-    typography_role: body_large
-    style: {foreground: on_surface}
   - widget: Link
     name: terms
     text: Read the terms
@@ -31,7 +58,7 @@ children:
 ```
 
 Each piece takes its own `typography_role`, `font_size`, `font_family` and `font_weight`, and its own `foreground`. The row keeps
-its pieces on one line; for a paragraph that wraps, use one `Text` with a `width`.
+its pieces on one line; for a paragraph that wraps, use one `Text` with `runs` and a `width`.
 
 ## Links
 
@@ -58,8 +85,8 @@ handlers: {on_click: open_settings}
 To open an address from any other node, a handler calls `open_url('https://example.com')`
 ([Opening a link](view-language.md#opening-a-link)). The pointer is a hand over a link.
 
-`on_link` is the event of a link range inside one text, with the range's `href` in `event.href`. A `Text` written in a view
-is one piece and has no such ranges; use a `Link` for a link.
+`on_link` is the event of a link run inside one `Text`, with the run's `link` in `event.href`: `handlers: {on_link: "open_terms(event.href)"}`. A handler named
+without brackets is called with no event, so write the call to get `event.href`.
 
 ## Sizing
 

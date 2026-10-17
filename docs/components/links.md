@@ -15,7 +15,7 @@ anything else is refused. Opening it sets a bound `visited`, and `state: visited
 and does nothing. It is underlined while the pointer is over it or keyboard focus is on it (`underline: hover`, the default), always, or never. `handlers: {on_click: ...}` runs
 as well as the `href` opens; a link with no `href` just runs its handler.
 
-The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. Inside a longer text, put the `Link` in a row with the `Text` pieces around it.
+The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. A link inside a longer text is a `link` run of a `Text` (`runs`, [Rich Text & Links](../guide/rich-text.md)); a `Link` is for a whole line.
 
 ## How it is built
 

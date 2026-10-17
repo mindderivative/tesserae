@@ -918,7 +918,7 @@ components:
       and does nothing. It is underlined while the pointer is over it or keyboard focus is on it (`underline: hover`, the default), always, or never. `handlers: {on_click: ...}` runs
       as well as the `href` opens; a link with no `href` just runs its handler.
 
-      The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. Inside a longer text, put the `Link` in a row with the `Text` pieces around it.
+      The type properties of `Text` (`typography_role`, `wrap`, `overflow`, `max_lines`, ...) apply. A link inside a longer text is a `link` run of a `Text` (`runs`, [Rich Text & Links](../guide/rich-text.md)); a `Link` is for a whole line.
     usage_view: |
       name: help
       widget: Container
@@ -1374,7 +1374,7 @@ components:
       what a role means.
 
       `text` can be an expression, and follows the Signals it reads. `font_family`, `font_size` and `font_weight` replace what the role gives. `wrap` is `word` or `none`,
-      `overflow` is `clip` or `ellipsis`, `text_align` is `start`, `center` or `end`, and `max_lines` cuts a longer text to that many lines (with `overflow: ellipsis` the last
+      `runs` gives pieces of one text their own style and links ([Rich Text & Links](../guide/rich-text.md)). `overflow` is `clip` or `ellipsis`, `text_align` is `start`, `center` or `end`, and `max_lines` cuts a longer text to that many lines (with `overflow: ellipsis` the last
       one ends in an ellipsis). `letter_spacing` adds space between letters, in pixels. `selectable: true` lets the text be selected and copied, and `heading: 1` to `6` makes it a heading of that level for a screen reader.
 
       The colour is `style.foreground`. Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are

@@ -37,8 +37,7 @@ from tesserae.reactive import Computed, Signal
 
 __all__ = [
     "BUILTIN_FUNCTIONS", "DEFAULT_LIMITS", "Expr", "ExprError", "Limits", "MapScope", "Origin", "Statements", "Template",
-    "check_handler_calls", "compile_expr", "compile_statements", "compile_template", "is_action_name",
-]
+    "check_handler_calls", "compile_expr", "compile_statements", "compile_template", "is_action_name", "NestedTemplate"]
 
 MISSING = object()
 
@@ -635,6 +634,49 @@ class Template:
             else:
                 out.append(part)
         return "".join(out)
+
+
+@dataclass
+class NestedTemplate:
+    """A list or mapping with `{{ }}` strings inside it (a `Text`'s `runs`): it evaluates to the same shape with each of those strings worked out
+    (a string that is one whole `{{ }}` keeps the type of its value), and is reactive if any of them is."""
+
+    value: Any
+
+    def templates(self) -> list[Template]:
+        found: list[Template] = []
+
+        def walk(item: Any) -> None:
+            if isinstance(item, Template):
+                found.append(item)
+            elif isinstance(item, list):
+                for sub in item:
+                    walk(sub)
+            elif isinstance(item, dict):
+                for sub in item.values():
+                    walk(sub)
+
+        walk(self.value)
+        return found
+
+    @property
+    def names(self) -> frozenset[str]:
+        return frozenset().union(*(t.names for t in self.templates()))
+
+    def is_reactive(self, scope: Any) -> bool:
+        return any(t.is_reactive(scope) for t in self.templates())
+
+    def evaluate(self, scope: Any) -> Any:
+        def work(item: Any) -> Any:
+            if isinstance(item, Template):
+                return item.evaluate(scope)
+            if isinstance(item, list):
+                return [work(sub) for sub in item]
+            if isinstance(item, dict):
+                return {key: work(sub) for key, sub in item.items()}
+            return item
+
+        return work(self.value)
 
 
 def _text(value: Any) -> str:

@@ -35,6 +35,8 @@ _TEXT = {
     "letter_spacing": P("float", default=0.0, doc="Extra space between letters, in pixels (tracking)."),
 }
 declare("Text", {**_TEXT, "selectable": P("bool", doc="The text can be selected and copied."),
+                 "runs": P("list", doc="Pieces of one text in different styles, instead of `text`: each a string, or `{text, color, weight, italic, underline, strikethrough, font_size, font_family, link}`. "
+                                       "A piece with a `link` is the theme's `primary` and underlined, and `on_link` runs with `event.href` when it is pressed."),
                  "heading": P("int", choices=(1, 2, 3, 4, 5, 6), doc="Makes it a heading of this level for a screen reader.")},
         extras=("foreground",), doc="A run of text.")
 declare("Link", {**_TEXT, "text": P("str", default="", doc="The link's text, which names it for a screen reader."),

@@ -19,7 +19,7 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 
 from tesserae import a11y as a11y_module
-from tesserae.expr import Expr, ExprError, Origin, Statements, compile_expr, compile_statements, compile_template, is_action_name, timer_handlers
+from tesserae.expr import Expr, ExprError, NestedTemplate, Origin, Statements, compile_expr, compile_statements, compile_template, is_action_name, timer_handlers
 from tesserae.spec import widgets as registry
 from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from_params, is_expression, style_fields_of
 
@@ -288,6 +288,25 @@ class _Parser:
                 raise self.expr_error(exc) from None
         return value
 
+    def nested(self, value: Any, at: Position) -> Any:
+        """A list or mapping whose strings may have `{{ }}` parts: a `NestedTemplate` when any do, else the value itself."""
+        found = False
+
+        def work(item: Any) -> Any:
+            nonlocal found
+            if isinstance(item, str):
+                made = self.template(item, getattr(item, "at", at))
+                found = found or made is not item
+                return made
+            if isinstance(item, list):
+                return [work(sub) for sub in item]
+            if isinstance(item, dict):
+                return {key: work(sub) for key, sub in item.items()}
+            return item
+
+        worked = work(value)
+        return NestedTemplate(worked) if found else value
+
     def expression(self, value: Any, at: Position, what: str, offset: int = 0, text: Optional[str] = None) -> Expr:
         if not isinstance(value, str) or not value.strip():
             raise self.fail(at, f"'{what}:' takes an expression")
@@ -541,6 +560,8 @@ class _Parser:
 
     def property(self, node: Node, prop: Property, key: str, value: Any, vat: Position, depth: int) -> None:
         node.prop_at[key] = vat
+        if {key, *node.props} >= {"text", "runs"} and node.decl.name == "Text":  # the runs are the text
+            raise self.fail(vat, "Text: `runs:` is the text, so there is no `text:` with it", "give one or the other")
         if prop.type == "node":
             node.props[key] = self.node(value, depth + 1)
         elif prop.type == "nodes":
@@ -552,7 +573,7 @@ class _Parser:
                 coerced = prop.coerce(value)
             except PropertyError as exc:
                 raise self.fail(vat, f"{node.decl.name}: {exc.message}", exc.hint) from None
-            node.props[key] = self.template(coerced, vat)
+            node.props[key] = self.nested(coerced, vat) if key == "runs" and node.decl.name == "Text" else self.template(coerced, vat)
 
 
 def _check_names(parser: _Parser) -> None:

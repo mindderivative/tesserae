@@ -19,7 +19,7 @@ from __future__ import annotations
 import ast
 from typing import Any, Callable, Iterable, Iterator, Optional
 
-from tesserae.expr import BUILTIN_FUNCTIONS, Expr, Statements, Template
+from tesserae.expr import BUILTIN_FUNCTIONS, Expr, NestedTemplate, Statements, Template
 from tesserae.reactive import Computed, Signal, untrack
 from tesserae.spec.compose import Composer, Composition, Instance
 from tesserae.spec.nodes import Node, ViewDoc
@@ -249,6 +249,9 @@ def _expressions(node: Node) -> Iterator[tuple[Any, tuple[int, int]]]:
     for value in (*node.props.values(), *node.style.values(), *node.a11y.values(), *node.state.values()):
         if isinstance(value, (Template, Expr)):
             yield value, node.at
+        elif isinstance(value, NestedTemplate):  # a Text's runs: each string with a {{ }} in it
+            for inner in value.templates():
+                yield inner, node.at
     if node.when is not None:
         yield node.when, node.at
     if node.loop is not None:

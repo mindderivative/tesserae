@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.22
+
+### Added
+
+- **Styled spans inside one `Text`: `runs`** ([#265](https://github.com/mindderivative/tesserae/issues/265)). `Text` had lost `runs` when views moved to the `widget:` language (a `Text` was one piece, and mixed styles meant a row of nodes). It has it again: a list of pieces of one text, each a string or a mapping with `text` and any of `color`, `weight`, `italic`, `underline`, `strikethrough`, `font_size`, `font_family` and `link`, drawn as one text that wraps as one (tre's `spans`, from byte ranges Tesserae works out). A string in a run may be an expression, so the pieces follow your data; a `link` run is the theme's `primary` and underlined, and `handlers: {on_link: "open_terms(event.href)"}` runs with its `link` in `event.href`. `runs` and `text` together are refused where they are written, and a bad run (an empty list, no `text`, an unknown key, a weight that is not a number) names the node. `tesserae migrate-yaml` carries a `text: {runs: ...}` over (it failed on it before). The row-of-nodes layout stays for pieces that need their own handlers or alignment.
+
 ## 0.5.0.21
 
 ### Changed
