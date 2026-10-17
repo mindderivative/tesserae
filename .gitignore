@@ -7,3 +7,6 @@ dist/
 build/
 /site/
 /tools/build-tracker-artifact.generated.html
+
+# graphify knowledge-graph output (built by /graphify; local cache and paths)
+graphify-out/
