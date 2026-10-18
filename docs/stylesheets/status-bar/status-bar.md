@@ -49,16 +49,16 @@ Each rule names `widget: StatusBar` and may add the properties the view declares
 | When | Field | Value | What it does |
 | --- | --- | --- | --- |
 | always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| always | `width` | `16` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `16` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `16` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `16` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 
 ### `note_icon` (Icon)
 
 | When | Field | Value | What it does |
 | --- | --- | --- | --- |
 | always | `foreground` | `on_surface_variant` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| always | `width` | `16` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `16` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `16` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `16` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 
 ## Changing it
 

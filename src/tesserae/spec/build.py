@@ -334,6 +334,7 @@ def _spacing(value: Any, prefix: str) -> dict[str, float]:
 _OPTIONAL_LAYOUT: dict[str, Any] = {
     "flex_wrap": "no_wrap", "align_self": None, "min_width": "auto", "max_width": "auto", "min_height": "auto",
     "max_height": "auto", "aspect_ratio": None, "position": "relative", "x": "auto", "y": "auto", "z_index": 0,
+    "left": None, "top": None, "right": None, "bottom": None,  # insets (#279): tre leaves them unset unless given; `inset` is worked out into these by `layout.engine_style`
     "clip_children": False,
     # `style.pointer_events`, as `layout.engine_style` turns it: the node's own pointer hits (its children keep theirs)
     "hit_testable": True,
@@ -459,7 +460,7 @@ def _radius(node_id: str, value: Any) -> float:
 #: The style fields that are a node property of the same name (0.3.3, #81).
 _STYLE_PASSTHROUGH = frozenset({
     "width", "height", "min_width", "max_width", "min_height", "max_height", "flex_direction", "flex_wrap",
-    "position", "display", "aspect_ratio", "x", "y", "z_index", "clip_children", "grid_template_columns",
+    "position", "display", "aspect_ratio", "x", "y", "left", "top", "right", "bottom", "inset", "z_index", "clip_children", "grid_template_columns",
     "grid_template_rows", "grid_auto_columns", "grid_auto_rows", "grid_auto_flow", "grid_column", "grid_row",
 })
 _STYLE_FLOATS = frozenset({"gap", "row_gap", "column_gap"})
@@ -760,7 +761,7 @@ def _text_props(ctx, node, style):
 
 
 _PLACED = ("scale", "translate_x", "translate_y", "rotation_deg", "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
-           "align_self", "position", "x", "y", "z_index", "min_width", "max_width", "min_height", "max_height",
+           "align_self", "position", "x", "y", "left", "top", "right", "bottom", "inset", "z_index", "min_width", "max_width", "min_height", "max_height",
            "aspect_ratio", "grid_column", "grid_row", "justify_self", "visible", "hit_testable")
 
 
@@ -1191,7 +1192,7 @@ def _role(ctx, name):
 #: size (a control is built at its size) or its own content alignment.
 _PLACEMENT = frozenset({
     "margin_top", "margin_right", "margin_bottom", "margin_left", "flex_grow", "flex_shrink", "flex_basis",
-    "align_self", "position", "x", "y", "z_index", "grid_column", "grid_row", "justify_self", "visible", "hit_testable",
+    "align_self", "position", "x", "y", "left", "top", "right", "bottom", "inset", "z_index", "grid_column", "grid_row", "justify_self", "visible", "hit_testable",
 })
 _PLACEMENT_RESET = {"margin_top": 0.0, "margin_right": 0.0, "margin_bottom": 0.0, "margin_left": 0.0,
                     "flex_grow": 0.0, "flex_shrink": 1.0}

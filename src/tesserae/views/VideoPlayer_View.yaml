@@ -39,7 +39,7 @@ children:
       - widget: Container
         name: caption
         if: "caption != ''"
-        style: {position: absolute, x: 0, y: "100%", translate_y: -40, width: 100%, height: 40, align_content: center, background: "scrim@60%"}
+        style: {position: absolute, left: 0, right: 0, bottom: 0, height: 40, align_content: center, background: "scrim@60%"}
         children:
           - {widget: Text, name: caption_text, text: "{{ caption }}", typography_role: body_medium, max_lines: 1, overflow: ellipsis}
   - widget: Container

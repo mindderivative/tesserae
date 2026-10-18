@@ -37,8 +37,8 @@ Each rule names `widget: Divider` and may add the properties the view declares (
 | When | Field | Value | What it does |
 | --- | --- | --- | --- |
 | always | `background` | `outline_variant` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| always | `width` | `{{ thickness if orientation == 'vertical' else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `{{ thickness if orientation == 'horizontal' else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `{{ thickness if orientation == 'vertical' else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `{{ thickness if orientation == 'horizontal' else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `variant: inset` | `margin` | `{{ {'left': 16} if orientation == 'horizontal' else {'top': 16} }}` | Space outside it: one number, or `{left, right, top, bottom}`. |
 | `variant: middle` | `margin` | `{{ {'left': 16, 'right': 16} if orientation == 'horizontal' else {'top': 16, 'bottom': 16} }}` | Space outside it: one number, or `{left, right, top, bottom}`. |
 

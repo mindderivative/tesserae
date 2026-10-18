@@ -120,7 +120,7 @@ Each rule names `widget: TextField` and may add the properties the view declares
 
 | When | Field | Value | What it does |
 | --- | --- | --- | --- |
-| always | `width` | `280` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `280` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | always | `background` | `transparent` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | state `disabled` | `opacity` | `0.38` | From 0 (clear) to 1 (opaque). |
 
@@ -142,10 +142,10 @@ Each rule names `widget: TextField` and may add the properties the view declares
 
 | When | Field | Value | What it does |
 | --- | --- | --- | --- |
-| always | `height` | `1` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `1` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | always | `background` | `on_surface_variant` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | state `hovered` | `background` | `on_surface` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| state `focused` | `height` | `2` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| state `focused` | `height` | `2` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | state `focused` | `background` | `primary` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 | state `error` | `background` | `error` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
 

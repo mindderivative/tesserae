@@ -17839,6 +17839,32 @@
             }
           ]
         },
+        "bottom": {
+          "description": "How far an `absolute` node is from its parent's bottom edge; with `top` it is stretched between the two. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
         "clip_children": {
           "description": "Whether children are cut off at its edge. (Paint and effects.)",
           "x-group": "Paint and effects",
@@ -18416,8 +18442,40 @@
           ]
         },
         "height": {
-          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "description": "Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). (Size and spacing.)",
           "x-group": "Size and spacing",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "enum": [
+                    "auto",
+                    "fit-content"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?:calc\\(\\s*\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)*\\s*\\)|\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)+)$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "inset": {
+          "description": "All four insets at once: an `absolute` node with `inset: 8` fills its parent less 8 pixels each side. (Position.)",
+          "x-group": "Position",
           "anyOf": [
             {
               "anyOf": [
@@ -18431,7 +18489,33 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "left": {
+          "description": "How far an `absolute` node is from its parent's left edge; with `right` it is stretched between the two. A node in the flow is moved by it. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -18483,7 +18567,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -18492,7 +18577,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -18509,7 +18594,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -18518,7 +18604,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -18535,7 +18621,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -18544,7 +18631,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -18561,7 +18648,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -18570,7 +18658,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -18678,6 +18766,32 @@
             }
           ]
         },
+        "right": {
+          "description": "How far an `absolute` node is from its parent's right edge; with `left` it is stretched between the two. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
         "rotation_deg": {
           "description": "Turns the node by this many degrees, clockwise, about its centre. (Motion.)",
           "x-group": "Motion",
@@ -18761,6 +18875,32 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "top": {
+          "description": "How far an `absolute` node is from its parent's top edge; with `bottom` it is stretched between the two. A node in the flow is moved by it. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
             },
             {
               "type": "string",
@@ -19845,22 +19985,28 @@
           ]
         },
         "width": {
-          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "description": "Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). (Size and spacing.)",
           "x-group": "Size and spacing",
           "anyOf": [
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
-                    "auto"
+                    "auto",
+                    "fit-content"
                   ]
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?:calc\\(\\s*\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)*\\s*\\)|\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)+)$"
                 }
               ]
             },
@@ -19871,7 +20017,7 @@
           ]
         },
         "x": {
-          "description": "Where an `absolute` node sits from the left. (Position.)",
+          "description": "Where an `absolute` node sits from the left; the same as `left` (say one of them). (Position.)",
           "x-group": "Position",
           "anyOf": [
             {
@@ -19886,7 +20032,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -19897,7 +20043,7 @@
           ]
         },
         "y": {
-          "description": "Where an `absolute` node sits from the top. (Position.)",
+          "description": "Where an `absolute` node sits from the top; the same as `top` (say one of them). (Position.)",
           "x-group": "Position",
           "anyOf": [
             {
@@ -19912,7 +20058,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },

@@ -59,17 +59,17 @@ Each rule names `widget: Fab` and may add the properties the view declares (a `v
 | --- | --- | --- | --- |
 | always | `elevation` | `3` | A shadow level, 0 to 5. |
 | always | `transition` | `{corner_radius: 200, elevation: 200}` | Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. `all` covers every one that can. A node is where it says when first drawn; only a change eases. |
-| always | `height` | `56` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `width` | `auto` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `56` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `width` | `auto` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | always | `corner_radius` | `16` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `size: small` | `height` | `40` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: small` | `height` | `40` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: small` | `corner_radius` | `12` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `size: medium` | `height` | `56` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: medium` | `height` | `56` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: medium` | `corner_radius` | `16` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| `size: large` | `height` | `96` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: large` | `height` | `96` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: large` | `corner_radius` | `28` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
-| always | `width` | `{{ {'small': 40, 'medium': 56, 'large': 96}[size] if (label == '' or collapsed) else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `{{ 56 if (label != '' and not collapsed) else {'small': 40, 'medium': 56, 'large': 96}[size] }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `{{ {'small': 40, 'medium': 56, 'large': 96}[size] if (label == '' or collapsed) else 'auto' }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `{{ 56 if (label != '' and not collapsed) else {'small': 40, 'medium': 56, 'large': 96}[size] }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | always | `padding` | `{{ {'left': 16, 'right': 20, 'top': 0, 'bottom': 0} if (label != '' and not collapsed) else 0 }}` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | always | `gap` | `8` | Space between its children. |
 | state `hovered` | `elevation` | `4` | A shadow level, 0 to 5. |
@@ -87,8 +87,8 @@ Each rule names `widget: Fab` and may add the properties the view declares (a `v
 | `variant: secondary` | `foreground` | `on_secondary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `variant: tertiary` | `foreground` | `on_tertiary_container` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `variant: surface` | `foreground` | `primary` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| always | `width` | `{{ 36 if size == 'large' else 24 }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `{{ 36 if size == 'large' else 24 }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `{{ 36 if size == 'large' else 24 }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `{{ 36 if size == 'large' else 24 }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 
 ### `label` (Text)
 

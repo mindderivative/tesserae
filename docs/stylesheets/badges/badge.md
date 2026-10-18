@@ -38,13 +38,13 @@ Each rule names `widget: Badge` and may add the properties the view declares (a 
 | When | Field | Value | What it does |
 | --- | --- | --- | --- |
 | always | `background` | `error` | Its fill: a theme role such as `surface`, `#RRGGBB`, any CSS colour, or a gradient such as `linear-gradient(90deg, primary, tertiary)`. |
-| always | `width` | `{{ 6 if value == '' else (16 if len(str(value)) < 2 else 8 + 6 * len(str(value))) }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `{{ 6 if value == '' else 16 }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `{{ 6 if value == '' else (16 if len(str(value)) < 2 else 8 + 6 * len(str(value))) }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `{{ 6 if value == '' else 16 }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | always | `corner_radius` | `{{ 3 if value == '' else 8 }}` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
 | always | `align_content` | `center` | Where its children sit: `top_left`, `top`, `top_right`, `left`, `center`, `right`, `bottom_left`, `bottom` or `bottom_right`. Not set, they fill the space across the layout. |
 | always | `position` | `{{ 'absolute' if anchored else 'relative' }}` | `absolute` takes it out of the flow and places it at `x` and `y`. |
-| always | `x` | `{{ '100%' if anchored else 'auto' }}` | Where an `absolute` node sits from the left. |
-| always | `y` | `{{ (0 if value == '' else -4) if anchored else 'auto' }}` | Where an `absolute` node sits from the top. |
+| always | `x` | `{{ '100%' if anchored else 'auto' }}` | Where an `absolute` node sits from the left; the same as `left` (say one of them). |
+| always | `y` | `{{ (0 if value == '' else -4) if anchored else 'auto' }}` | Where an `absolute` node sits from the top; the same as `top` (say one of them). |
 | always | `translate_x` | `{{ (-4 if value == '' else -12) if anchored else 0 }}` | Draws the node this many pixels to the right of where it is laid out. |
 
 ### `label` (Text)

@@ -185,3 +185,13 @@ def test_a_failed_write_leaves_no_temporary_file(tmp_path, monkeypatch):
     with pytest.raises(OSError):
         cli.project_schema(tmp_path)
     assert not [p for p in (tmp_path / ".tesserae").iterdir() if p.name != ".gitkeep"]
+
+
+def test_the_insets_and_sums_are_in_the_editor_schemas():
+    ok = {"widget": "Container", "style": {"position": "absolute", "left": 8, "right": "10%", "bottom": -4, "top": "auto", "inset": 2,
+                                           "width": "calc(100% - 16)", "height": "fit-content", "min_width": "50%"}}
+    assert not _flagged(ok)
+    for style in ({"width": "40px"}, {"width": -3}, {"right": "calc(100% - 4)"}, {"min_width": "calc(100% - 4)"}, {"inset": "-5%"}, {"width": "100%-16"}):
+        assert _flagged({"widget": "Container", "style": style}), style
+    rule = {"widget": "Rect", "style": {"right": 4, "width": "100% - 8"}}
+    assert not _problems(jsonschema.Draft7Validator(STYLESHEET), {"styles": [rule]})

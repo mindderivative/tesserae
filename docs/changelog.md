@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0.24
+
+### Added
+
+- **Insets, and sums as sizes** ([#279](https://github.com/mindderivative/tesserae/issues/279)). With tre 0.5.7, `left`, `top`, `right`, `bottom` and `inset` are style fields: `left: 8, right: 16` stretches an absolute node across its parent less 8 and 16 pixels, `inset: 4` fills the parent less 4 each side, and on a node in the flow an inset moves it from its place. An inset is a number (negative is allowed), a percentage or `auto`; `x` and `y` are `left` and `top` and say the same thing (giving `x` with `left` or `inset` in one `style:` is an error, found at the line). A rule's `inset` gives way to an edge the node, or a more specific rule, says itself. A size may be a sum, `calc(100% - 16)` or `100% - 16` (numbers, percentages and `16px`, joined by `+` and `-` with a space each side), and `width`/`height` take `fit-content`. These already reached tre untouched; what is new is that they are part of the language: a size or inset tre would refuse (`40px`, `10vw`, `stretch`, `100%-16`, a negative size, `calc` in a limit or an inset) is refused where it is written, with file, line and column and what to write instead (it was tre's message with no position, when the view was built), the same for a stylesheet rule, and the editor schemas know them (the language-server check was not re-run). An inset cannot ease (tre does not animate it): `transition:` takes `x` and `y`. The check agrees with tre on a corpus of values (`tests/test_sizes.py`), so it fails if tre's grammar moves.
+
+### Fixed
+
+- **A ListItem's divider was never drawn.** It was placed at `y: 100%` with no width, so it was 0 wide. It now takes `left: 16, right: 0, bottom: 0`: 16 pixels in from the left edge to the right edge, on the item's bottom edge. The Carousel's caption and the VideoPlayer's controls bar used `y: 100%` and a negative `translate_y` for the same thing; they take `bottom: 0` now, and draw where they did.
+
+### Known
+
+- A control with a `label:` (`Checkbox`, `RadioButton`, `Switch`) takes `position`, `x`, `y` and now the insets on its inner box, not on the row that holds the box and its label, so an inset on one lands in the wrong place ([#281](https://github.com/mindderivative/tesserae/issues/281)). The layout guide says so.
+
 ## 0.5.0.23
 
 ### Changed

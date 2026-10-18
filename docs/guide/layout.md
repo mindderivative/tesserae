@@ -90,10 +90,14 @@ explicit `width` is the size it starts from, and `expand_*` overrides it across 
 ## Sizes
 
 `width` and `height` take pixels, `"auto"` (the default: its content's
-size, or stretched), or a percentage of the parent (`"50%"`).
-`min_width`, `max_width`, `min_height` and `max_height` bound it the same
-ways, and `aspect_ratio` (width over height) gives the missing side from
-the one that's set.
+size, or stretched), `"fit-content"` (its content's size), a percentage of
+the parent (`"50%"`), or a sum of those such as `"calc(100% - 16)"`
+([below](#a-size-that-is-the-parent-minus-something)). A size is never
+negative. `min_width`, `max_width`, `min_height` and `max_height` bound it
+with a number, `"auto"` or a percentage, and `aspect_ratio` (width over
+height) gives the missing side from the one that's set. A size that tre
+would refuse (`40px`, `10vw`, `stretch`, `100%-16`) is an error at the line
+that writes it, saying what to write.
 
 ### Text in a box
 
@@ -242,8 +246,10 @@ own parent.
 
 ## A size that is the parent minus something
 
-A size is a number, `auto` or a percentage; there is no `calc(100% - 16)`. In the flow you do not need one, because the layout does the sum
-and follows the parent when it changes:
+A size may be a sum: `width: "calc(100% - 16)"`, or the same without the wrapper, `"100% - 16"`. The terms are numbers, percentages and pixels
+written `16px`, joined by `+` and `-` with a space each side; there is no `*`, `/` or `min()`, and a unit other than pixels (`vw`, `em`) is an error. A sum works
+for `width` and `height`; the limits (`min_width`...) take a number, `auto` or a percentage. A sum may be an expression (`width: "{{ gutter }}"`
+working out to `"100% - 24"`). In the flow you often do not need one, because the layout does the sum and follows the parent when it changes:
 
 ```yaml
 widget: Container
@@ -269,8 +275,7 @@ children:
       - {widget: Container, name: rest, style: {flex: fill, background: outline}}
 ```
 
-What cannot be said is an **absolutely positioned** node stretched between two edges of its parent (`x: 8` and 8 pixels from the right): its percentage
-width ignores margins, and a style has no `right` or `bottom`. Give it a number, or put it in the flow.
+An **absolutely positioned** node stretched between two edges of its parent takes insets instead (below).
 
 ## Placing a node against another node
 
@@ -298,7 +303,12 @@ or the middle. For a badge on a corner, make it a child of its host and place it
 ## Placing a node exactly
 
 `position: absolute` takes a node out of the flow, and `x`/`y` place it
-in its parent, in pixels or percentages. `z_index` (an integer)
+in its parent, in pixels or percentages. The insets `left`, `top`, `right` and `bottom` say how far it is from each edge of its parent, and `inset` says all four
+at once: `left: 8, right: 16` stretches a node across its parent less 8 and 16 pixels, and `inset: 4` fills the parent less 4 each side. An inset is a number
+(it may be negative), a percentage or `auto`. `x` is the same as `left` and `y` as `top`; giving both, or `x` with `inset`, in one `style:` is an
+error, since one would not be heard. A rule's `inset` gives way to an edge the node (or a more specific rule) says itself. On a node in the flow an inset moves it from its place. An inset
+does not ease: `transition:` takes `x` and `y` for a position. A control with a `label:` is placed by its inner box, not by the row that holds the box and its label, so an inset on one lands in the wrong
+place: leave the label off, or put the control in a container you place. `z_index` (an integer)
 draws it above or below its siblings, and a container with
 `clip_children: true` cuts its children to its own box. `overflow: hidden`
 is another way to write that (and `overflow: visible` is `clip_children: false`); a node that gives both must
@@ -312,6 +322,7 @@ children:
   - widget: Rect
     name: badge
     style: {position: absolute, x: 176, y: 8, width: 16, height: 16, corner_radius: 8, background: error, z_index: 1}
+  - {widget: Rect, name: strip, style: {position: absolute, left: 8, right: 8, bottom: 8, height: 4, background: primary}}
 ```
 
 ## Scrolling

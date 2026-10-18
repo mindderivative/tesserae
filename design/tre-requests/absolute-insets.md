@@ -2,6 +2,8 @@
 
 *Drafted for Tesserae 0.5.0.8 (#261, part of #257). Sent 2026-10-11 as mindderivative/tre#178. Probed on tre 0.5.6.*
 
+**Done:** tre 0.5.7 takes `calc(100% - 16)`, `100% - 16` and `fit-content` as a size, and `left`, `top`, `right`, `bottom` and `inset` on a node. Tesserae uses them from 0.5.0.24 (#279); the facts below are what tre 0.5.6 did.
+
 ## What Tesserae needs
 
 An absolutely positioned node that is stretched between two edges of its parent: "8 pixels from the left and 8 from the right", or "the whole width except a 16 pixel strip". Today a view cannot say it. The YAML user's wish (#116, L10) was spelled `width: calc(100% - 16)`.

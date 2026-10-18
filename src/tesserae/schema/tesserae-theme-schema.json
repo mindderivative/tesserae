@@ -391,6 +391,34 @@
           "description": "The width of its border, in pixels. (Paint and effects.)",
           "x-group": "Paint and effects"
         },
+        "bottom": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "How far an `absolute` node is from its parent's bottom edge; with `top` it is stretched between the two. (Position.)",
+          "x-group": "Position"
+        },
         "clip_children": {
           "anyOf": [
             {
@@ -1010,16 +1038,22 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
-                    "auto"
+                    "auto",
+                    "fit-content"
                   ]
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?:calc\\(\\s*\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)*\\s*\\)|\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)+)$"
                 }
               ]
             },
@@ -1030,8 +1064,64 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "description": "Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). (Size and spacing.)",
           "x-group": "Size and spacing"
+        },
+        "inset": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "All four insets at once: an `absolute` node with `inset: 8` fills its parent less 8 pixels each side. (Position.)",
+          "x-group": "Position"
+        },
+        "left": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "How far an `absolute` node is from its parent's left edge; with `right` it is stretched between the two. A node in the flow is moved by it. (Position.)",
+          "x-group": "Position"
         },
         "margin": {
           "anyOf": [
@@ -1125,7 +1215,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -1134,7 +1225,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -1153,7 +1244,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -1162,7 +1254,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -1181,7 +1273,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -1190,7 +1283,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -1209,7 +1302,8 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
@@ -1218,7 +1312,7 @@
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -1390,6 +1484,34 @@
           "description": "`absolute` takes it out of the flow and places it at `x` and `y`. (Position.)",
           "x-group": "Position"
         },
+        "right": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "How far an `absolute` node is from its parent's right edge; with `left` it is stretched between the two. (Position.)",
+          "x-group": "Position"
+        },
         "rotation_deg": {
           "anyOf": [
             {
@@ -1490,6 +1612,34 @@
             }
           ],
           "description": "In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. (Position.)",
+          "x-group": "Position"
+        },
+        "top": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "enum": [
+                    "auto"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                }
+              ]
+            },
+            {
+              "$ref": "#/definitions/parameter"
+            },
+            {
+              "$ref": "#/definitions/conditional"
+            }
+          ],
+          "description": "How far an `absolute` node is from its parent's top edge; with `bottom` it is stretched between the two. A node in the flow is moved by it. (Position.)",
           "x-group": "Position"
         },
         "transition": {
@@ -2533,16 +2683,22 @@
             {
               "anyOf": [
                 {
-                  "type": "number"
+                  "type": "number",
+                  "minimum": 0
                 },
                 {
                   "enum": [
-                    "auto"
+                    "auto",
+                    "fit-content"
                   ]
                 },
                 {
                   "type": "string",
-                  "pattern": "^-?\\d+(\\.\\d+)?%$"
+                  "pattern": "^\\d+(\\.\\d+)?%$"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^(?:calc\\(\\s*\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)*\\s*\\)|\\d+(?:\\.\\d+)?(?:%|px)?(?: [+-] \\d+(?:\\.\\d+)?(?:%|px)?)+)$"
                 }
               ]
             },
@@ -2553,7 +2709,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. (Size and spacing.)",
+          "description": "Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). (Size and spacing.)",
           "x-group": "Size and spacing"
         },
         "x": {
@@ -2567,6 +2723,10 @@
                   "enum": [
                     "auto"
                   ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -2577,7 +2737,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Where an `absolute` node sits from the left. (Position.)",
+          "description": "Where an `absolute` node sits from the left; the same as `left` (say one of them). (Position.)",
           "x-group": "Position"
         },
         "y": {
@@ -2591,6 +2751,10 @@
                   "enum": [
                     "auto"
                   ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^\\d+(\\.\\d+)?%$"
                 }
               ]
             },
@@ -2601,7 +2765,7 @@
               "$ref": "#/definitions/conditional"
             }
           ],
-          "description": "Where an `absolute` node sits from the top. (Position.)",
+          "description": "Where an `absolute` node sits from the top; the same as `top` (say one of them). (Position.)",
           "x-group": "Position"
         },
         "z_index": {

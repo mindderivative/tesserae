@@ -69,4 +69,4 @@ children:
   - widget: Divider
     name: line
     if: divider
-    style: {position: absolute, x: 16, y: "100%", translate_y: -1}
+    style: {position: absolute, left: 16, right: 0, bottom: 0}

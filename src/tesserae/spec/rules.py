@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Optional
 
 from tesserae.expr import ExprError, Origin, compile_template
-from tesserae.spec import widgets as registry
+from tesserae.spec import sizes, widgets as registry
 from tesserae.spec.nodes import LoadError, load_marked
 from tesserae.spec.widgets import style_fields_of
 
@@ -197,7 +197,14 @@ def _build(spec: Any, file: str, text: str) -> RuleSheet:
                     users = sorted(n for n in registry.names() if "foreground" in (registry.lookup(n).extras or ()))
                     raise fail(style_key_at.get(field_name, at), message, f"widgets that accept it: {', '.join(users)}")
                 raise fail(style_key_at.get(field_name, at), message, _near(field_name, allowed))
+            problem = None if not isinstance(value, (str, int, float)) or (isinstance(value, str) and "{{" in value) else sizes.size_problem(field_name, value)
+            if problem:
+                raise fail(style_val_at.get(field_name, at), f"{widget or 'a rule'}: {problem}")
             style[field_name] = _template(value, file, style_val_at.get(field_name, at), text)
+        for edge, others in (("x", ("left", "inset")), ("y", ("top", "inset"))):  # two ways to place one edge in one rule
+            for other in others:
+                if style.get(edge) is not None and style.get(other) is not None:
+                    raise fail(style_key_at.get(other, at), f"{widget or 'a rule'}: style.{edge} and style.{other} both place the node; say one of them ({edge} is the same as {'left' if edge == 'x' else 'top'})")
         rules.append(Rule(widget, style, selectors, frozenset(classes), name, part, state, order=len(rules), at=at))
     return RuleSheet(rules, file)
 

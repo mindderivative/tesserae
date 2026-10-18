@@ -192,7 +192,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | Field | Values | What it does |
 | --- | --- | --- |
 | `aspect_ratio` | a number | Width over height: gives the missing side from the one set. |
-| `height` | a number or `auto` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `height` | a number or `auto` \| `fit-content` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `margin` | a number or a mapping | Space outside it: one number, or `{left, right, top, bottom}`. |
 | `margin.top` | a number | Space on the top side. |
 | `margin.right` | a number | Space on the right side. |
@@ -207,7 +207,7 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 | `padding.right` | a number | Space on the right side. |
 | `padding.bottom` | a number | Space on the bottom side. |
 | `padding.left` | a number | Space on the left side. |
-| `width` | a number or `auto` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `width` | a number or `auto` \| `fit-content` or a percentage such as `50%` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 
 ### Flex
 
@@ -248,11 +248,16 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 
 | Field | Values | What it does |
 | --- | --- | --- |
+| `bottom` | a number or `auto` or a percentage such as `50%` | How far an `absolute` node is from its parent's bottom edge; with `top` it is stretched between the two. |
+| `inset` | a number or `auto` or a percentage such as `50%` | All four insets at once: an `absolute` node with `inset: 8` fills its parent less 8 pixels each side. |
+| `left` | a number or `auto` or a percentage such as `50%` | How far an `absolute` node is from its parent's left edge; with `right` it is stretched between the two. A node in the flow is moved by it. |
 | `position` | `relative` \| `absolute` | `absolute` takes it out of the flow and places it at `x` and `y`. |
+| `right` | a number or `auto` or a percentage such as `50%` | How far an `absolute` node is from its parent's right edge; with `left` it is stretched between the two. |
 | `snap_align` | `none` \| `start` \| `center` \| `end` | In a scroll view that has `snap`, this node is a place it settles on, with this edge of the node at the same edge of the view. |
 | `sticky` | a number | In a scroll view, it sticks this many pixels from the top edge as its siblings scroll past. |
-| `x` | a number or `auto` | Where an `absolute` node sits from the left. |
-| `y` | a number or `auto` | Where an `absolute` node sits from the top. |
+| `top` | a number or `auto` or a percentage such as `50%` | How far an `absolute` node is from its parent's top edge; with `bottom` it is stretched between the two. A node in the flow is moved by it. |
+| `x` | a number or `auto` or a percentage such as `50%` | Where an `absolute` node sits from the left; the same as `left` (say one of them). |
+| `y` | a number or `auto` or a percentage such as `50%` | Where an `absolute` node sits from the top; the same as `top` (say one of them). |
 | `z_index` | an integer | Stacking order: higher is in front. |
 
 ### Docking

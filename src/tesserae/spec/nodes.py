@@ -19,6 +19,7 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 
 from tesserae import a11y as a11y_module
+from tesserae.spec import sizes
 from tesserae.expr import Expr, ExprError, NestedTemplate, Origin, Statements, compile_expr, compile_statements, compile_template, is_action_name, timer_handlers
 from tesserae.spec import widgets as registry
 from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from_params, is_expression, style_fields_of
@@ -464,7 +465,15 @@ class _Parser:
                     users = sorted(n for n in registry.names() if "foreground" in (registry.lookup(n).extras or ()))
                     hint = f"widgets that accept it: {', '.join(users)}"
                 raise self.fail(value.key_at[key], f"{node.decl.name}: style '{key}' is not valid here", hint or _near(key, allowed))
+            problem = None if not isinstance(item, (str, int, float)) or (isinstance(item, str) and "{{" in item) else sizes.size_problem(key, item)
+            if problem:  # a size or an inset that tre would refuse, found where it is written (an expression is checked when it is worked out)
+                raise self.fail(value.val_at[key], f"{node.decl.name}: {problem}")
             node.style[key] = self.template(item, value.val_at[key])
+        for edge, others in _EDGES.items():  # two ways to place one edge in one mapping leave one unheard
+            if edge in value and value[edge] is not None:
+                for other in others:
+                    if other in value and value[other] is not None:
+                        raise self.fail(value.key_at[other], f"{node.decl.name}: style.{edge} and style.{other} both place the node; say one of them ({edge} is the same as {_SAME_AS[edge]})")
 
     def handlers(self, node: Node, value: Any, vat: Position) -> None:
         if not isinstance(value, PMap):
@@ -574,6 +583,11 @@ class _Parser:
             except PropertyError as exc:
                 raise self.fail(vat, f"{node.decl.name}: {exc.message}", exc.hint) from None
             node.props[key] = self.nested(coerced, vat) if key == "runs" and node.decl.name == "Text" else self.template(coerced, vat)
+
+
+#: `x` is `left` and `y` is `top`, and `inset` is all four: a mapping that gives an edge twice says what it means only once.
+_EDGES = {"x": ("left", "inset"), "y": ("top", "inset")}
+_SAME_AS = {"x": "left", "y": "top"}
 
 
 def _check_names(parser: _Parser) -> None:

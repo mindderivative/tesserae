@@ -102,14 +102,21 @@ def _definitions(fragment: bool) -> dict[str, Any]:
 
     number = {"type": "number"}
     radius = {"anyOf": [number, {"enum": [*sorted(tokens.SHAPES), "full"]}]}
-    dimension = {"anyOf": [number, {"enum": ["auto"]}, {"type": "string", "pattern": r"^-?\d+(\.\d+)?%$"}]}
+    percent = {"type": "string", "pattern": r"^\d+(\.\d+)?%$"}
+    term = r"\d+(?:\.\d+)?(?:%|px)?"
+    # as `tesserae.spec.sizes` takes them (tre 0.5.7): a size is not negative; a sum has a space each side of `+` and `-`
+    dimension = {"anyOf": [{"type": "number", "minimum": 0}, {"enum": ["auto"]}, percent]}
+    size = {"anyOf": [{"type": "number", "minimum": 0}, {"enum": ["auto", "fit-content"]}, percent,
+                      {"type": "string", "pattern": rf"^(?:calc\(\s*{term}(?: [+-] {term})*\s*\)|{term}(?: [+-] {term})+)$"}]}
+    inset = {"anyOf": [number, {"enum": ["auto"]}, percent]}
     sides = ("top", "right", "bottom", "left")
     spacing = {"anyOf": [loose(number), {"type": "object", "properties": {side: loose(number) for side in sides},
                                          "additionalProperties": False}]}
     enums = {name: {"enum": _tre_values(name)} for name in TRE_ENUMS}
-    size_text = "Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`."
+    size_text = ("Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as "
+                 "`calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum).")
     style_fields: dict[str, tuple[dict[str, Any], str]] = {
-        "width": (dimension, size_text), "height": (dimension, size_text),
+        "width": (size, size_text), "height": (size, size_text),
         "min_width": (dimension, "The least width it can take."), "max_width": (dimension, "The most width it can take."),
         "min_height": (dimension, "The least height it can take."), "max_height": (dimension, "The most height it can take."),
         "flex_direction": (enums["flex_direction"], "How its children are laid out: `horizontal` (the default) or `vertical`."),
@@ -209,8 +216,13 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "opacity": ({"type": "number", "minimum": 0, "maximum": 1}, "From 0 (clear) to 1 (opaque)."),
         "elevation": ({"anyOf": [number, {"enum": sorted(tokens.ELEVATION_LEVELS)}]}, "A shadow level, 0 to 5."),
         "aspect_ratio": ({"type": "number", "exclusiveMinimum": 0}, "Width over height: gives the missing side from the one set."),
-        "x": ({"anyOf": [number, {"enum": ["auto"]}]}, "Where an `absolute` node sits from the left."),
-        "y": ({"anyOf": [number, {"enum": ["auto"]}]}, "Where an `absolute` node sits from the top."),
+        "x": (inset, "Where an `absolute` node sits from the left; the same as `left` (say one of them)."),
+        "y": (inset, "Where an `absolute` node sits from the top; the same as `top` (say one of them)."),
+        "left": (inset, "How far an `absolute` node is from its parent's left edge; with `right` it is stretched between the two. A node in the flow is moved by it."),
+        "top": (inset, "How far an `absolute` node is from its parent's top edge; with `bottom` it is stretched between the two. A node in the flow is moved by it."),
+        "right": (inset, "How far an `absolute` node is from its parent's right edge; with `left` it is stretched between the two."),
+        "bottom": (inset, "How far an `absolute` node is from its parent's bottom edge; with `top` it is stretched between the two."),
+        "inset": (inset, "All four insets at once: an `absolute` node with `inset: 8` fills its parent less 8 pixels each side."),
         "z_index": ({"type": "integer"}, "Stacking order: higher is in front."),
         "clip_children": ({"type": "boolean"}, "Whether children are cut off at its edge."),
         "grid_template_columns": ({"type": "string"}, "The grid's columns, as in CSS: `1fr 2fr 100px`."),
@@ -650,9 +662,6 @@ def _style_definitions() -> dict[str, Any]:
         meta = {k: spec[k] for k in ("description", "x-group") if k in spec}
         body = {k: v for k, v in spec.items() if k not in meta}
         wrapped[key] = {**meta, "anyOf": [body, expression]}
-    percent = {"type": "string", "pattern": r"^-?\d+(\.\d+)?%$"}
-    for key in ("x", "y"):  # a position may be a percentage of the parent
-        wrapped[key]["anyOf"][0] = {"anyOf": [*wrapped[key]["anyOf"][0]["anyOf"], percent]}
     from tesserae.spec.transition import LAYOUT_TRANSITIONABLE, TRANSITIONABLE
 
     for option in wrapped["transition"]["anyOf"]:  # the fields that can ease are the ones the engine's planner takes

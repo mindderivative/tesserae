@@ -113,17 +113,17 @@ Each rule names `widget: Button` and may add the properties the view declares (a
 
 | When | Field | Value | What it does |
 | --- | --- | --- | --- |
-| always | `height` | `40` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `height` | `40` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | always | `transition` | `{background: 150, corner_radius: 200, elevation: 200}` | Which style changes ease to their new value: a duration in milliseconds, or `{duration, easing, bounce}`. `all` covers every one that can. A node is where it says when first drawn; only a change eases. |
-| `size: xs` | `height` | `32` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: xs` | `height` | `32` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: xs` | `gap` | `4` | Space between its children. |
-| `size: s` | `height` | `40` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: s` | `height` | `40` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: s` | `gap` | `8` | Space between its children. |
-| `size: m` | `height` | `56` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: m` | `height` | `56` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: m` | `gap` | `8` | Space between its children. |
-| `size: l` | `height` | `96` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: l` | `height` | `96` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: l` | `gap` | `12` | Space between its children. |
-| `size: xl` | `height` | `136` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| `size: xl` | `height` | `136` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 | `size: xl` | `gap` | `16` | Space between its children. |
 | always | `padding` | `{{ {'left': (({'xs': 12, 's': 16, 'm': 24, 'l': 48, 'xl': 64}[size]) if (icon != '' or loading) else ({'xs': …` | Space inside it: one number, or `{left, right, top, bottom}`. |
 | `shape: round` | `corner_radius` | `full` | Pixels, or a shape token (`none` to `extra_large`, or `full` for a pill or circle). Per corner: a list `[top_left, top_right, bottom_right, bottom_left]`, or a mapping of corners and edges (`top`, `right`, `bottom`, `left`) with the rest square. |
@@ -163,8 +163,8 @@ Each rule names `widget: Button` and may add the properties the view declares (a
 | `variant: elevated` | `foreground` | `{{ 'primary' if (not toggle or not selected) else 'on_primary' }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `variant: outlined` | `foreground` | `{{ 'primary' if not toggle else ('inverse_on_surface' if selected else 'on_surface_variant') }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `variant: text` | `foreground` | `primary` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| always | `width` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 
 ### `trailing` (Icon)
 
@@ -175,8 +175,8 @@ Each rule names `widget: Button` and may add the properties the view declares (a
 | `variant: elevated` | `foreground` | `{{ 'primary' if (not toggle or not selected) else 'on_primary' }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `variant: outlined` | `foreground` | `{{ 'primary' if not toggle else ('inverse_on_surface' if selected else 'on_surface_variant') }}` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
 | `variant: text` | `foreground` | `primary` | Its text or glyph colour: a theme role, `#RRGGBB`, any CSS colour, or a gradient. |
-| always | `width` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
-| always | `height` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), or a percentage of the parent such as `50%`. |
+| always | `width` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
+| always | `height` | `{{ {'xs': 20, 's': 18, 'm': 24, 'l': 32, 'xl': 40}[size] }}` | Pixels, `auto` (its content's size, or stretched), `fit-content`, a percentage of the parent such as `50%`, or a sum such as `calc(100% - 16)` or `100% - 16` (a space each side of `+` and `-`; `16px` may be written inside a sum). |
 
 ## Changing it
 

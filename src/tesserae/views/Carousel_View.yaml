@@ -45,7 +45,7 @@ children:
         style: {position: absolute, x: 0, y: 0, width: 100%, height: 100%}
       - widget: Container
         name: caption
-        style: {position: absolute, x: 0, y: "100%", translate_y: -64, width: 100%, height: 64, padding: {left: 16, right: 16, top: 8, bottom: 8}, flex_direction: vertical, background: "scrim@32%"}
+        style: {position: absolute, left: 0, right: 0, bottom: 0, height: 64, padding: {left: 16, right: 16, top: 8, bottom: 8}, flex_direction: vertical, background: "scrim@32%"}
         children:
           - {widget: Text, name: title, text: "{{ it['title'] }}", typography_role: title_medium, max_lines: 1, overflow: ellipsis}
           - {widget: Text, name: supporting, if: "it.get('supporting', '') != ''", text: "{{ it.get('supporting', '') }}", typography_role: body_small, max_lines: 1, overflow: ellipsis}
