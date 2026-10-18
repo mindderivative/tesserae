@@ -78,7 +78,7 @@ def lower(inst: Instance) -> dict[str, Any]:
         folded = {"orientation", "position", "min_first", "min_second", "collapsible", "label"}
         node["kind"] = "Container"
     elif widget == "Overlay":
-        folded = {"open", "anchor", "placement", "modal", "dismissible", "timeout", "focus_first"}  # the renderer shows the layer; the builder needs only to know it is modal
+        folded = {"open", "anchor", "placement", "offset", "flip", "modal", "dismissible", "timeout", "focus_first"}  # the renderer shows the layer; the builder needs only to know it is modal
         node["overlay"] = {"modal": bool(values.get("modal"))}
     elif widget == "TimePickerDial":
         folded = {"mode", "auto_advance", "label"}

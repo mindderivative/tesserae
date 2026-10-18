@@ -248,9 +248,12 @@ A node's `style:` is a mapping of these fields, or the name of a `*_Style.yaml` 
 
 | Field | Values | What it does |
 | --- | --- | --- |
+| `anchor` | text | The name of another node in this view to sit against, or `parent` for the node it is inside. The node leaves the flow and follows the anchor with no lag; it stays in the tree, clipped and ordered as a child of its parent is. |
 | `bottom` | a number or `auto` or a percentage such as `50%` | How far an `absolute` node is from its parent's bottom edge; with `top` it is stretched between the two. |
 | `inset` | a number or `auto` or a percentage such as `50%` | All four insets at once: an `absolute` node with `inset: 8` fills its parent less 8 pixels each side. |
 | `left` | a number or `auto` or a percentage such as `50%` | How far an `absolute` node is from its parent's left edge; with `right` it is stretched between the two. A node in the flow is moved by it. |
+| `offset` | a list | With `anchor`: `[dx, dy]` pixels added to the point it sits on. |
+| `placement` | `below` \| `above` \| `start` \| `end` \| `top_start` \| `top_end` \| `bottom_start` \| `bottom_end` \| `center` | With `anchor`: which side of the anchor (`below`, `above`, `start`, `end`) or which of its corners, or its centre, the node's centre sits on. |
 | `position` | `relative` \| `absolute` | `absolute` takes it out of the flow and places it at `x` and `y`. |
 | `right` | a number or `auto` or a percentage such as `50%` | How far an `absolute` node is from its parent's right edge; with `left` it is stretched between the two. |
 | `snap_align` | `none` \| `start` \| `center` \| `end` | In a scroll view that has `snap`, this node is a place it settles on, with this edge of the node at the same edge of the view. |

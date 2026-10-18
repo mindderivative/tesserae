@@ -8488,7 +8488,12 @@
                   "below",
                   "above",
                   "start",
-                  "end"
+                  "end",
+                  "top_start",
+                  "top_end",
+                  "bottom_start",
+                  "bottom_end",
+                  "center"
                 ]
               },
               {
@@ -8496,7 +8501,31 @@
                 "pattern": "\\{\\{"
               }
             ],
-            "description": "Which side of the anchor; it flips or shifts to fit."
+            "description": "Where it sits against the anchor: a side (`below`, `above`, `start`, `end`), which flips or shifts to fit, or a corner or the centre (`top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`), which puts its centre on that point of the anchor and is never moved."
+          },
+          "offset": {
+            "anyOf": [
+              {
+                "type": "array"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "`[dx, dy]` pixels added to the point it is attached to, for example `[2, -2]` to nudge a badge off a corner."
+          },
+          "flip": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "string",
+                "pattern": "\\{\\{"
+              }
+            ],
+            "description": "Whether a side placement may flip or shift to fit the window; `false` keeps it where it was asked. A corner or the centre never moves."
           },
           "modal": {
             "anyOf": [
@@ -8575,6 +8604,8 @@
             "open",
             "anchor",
             "placement",
+            "offset",
+            "flip",
             "modal",
             "dismissible",
             "focus_first",
@@ -17727,6 +17758,20 @@
             }
           ]
         },
+        "anchor": {
+          "description": "The name of another node in this view to sit against, or `parent` for the node it is inside. The node leaves the flow and follows the anchor with no lag; it stays in the tree, clipped and ordered as a child of its parent is. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
         "aspect_ratio": {
           "description": "Width over height: gives the missing side from the one set. (Size and spacing.)",
           "x-group": "Size and spacing",
@@ -18668,6 +18713,24 @@
             }
           ]
         },
+        "offset": {
+          "description": "With `anchor`: `[dx, dy]` pixels added to the point it sits on. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 2,
+              "maxItems": 2
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
         "opacity": {
           "description": "From 0 (clear) to 1 (opaque). (Paint and effects.)",
           "x-group": "Paint and effects",
@@ -18726,6 +18789,29 @@
                   },
                   "additionalProperties": false
                 }
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "\\{\\{"
+            }
+          ]
+        },
+        "placement": {
+          "description": "With `anchor`: which side of the anchor (`below`, `above`, `start`, `end`) or which of its corners, or its centre, the node's centre sits on. (Position.)",
+          "x-group": "Position",
+          "anyOf": [
+            {
+              "enum": [
+                "below",
+                "above",
+                "start",
+                "end",
+                "top_start",
+                "top_end",
+                "bottom_start",
+                "bottom_end",
+                "center"
               ]
             },
             {

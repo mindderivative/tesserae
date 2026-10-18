@@ -416,7 +416,9 @@ list of 10 000 builds about a dozen rows.
 widget: Overlay
 open: "{{ menu_open }}"
 anchor: trigger            # the name of a node in this view; the layer sits against it
-placement: below           # or above, start, end; it flips or shifts to fit
+placement: below           # or above, start, end (they flip or shift to fit), or a corner: top_end, bottom_start, center...
+offset: [0, 4]             # optional, in pixels
+flip: true                 # false keeps the side it is given
 style: {width: 160, background: surface_container}
 children:
   - {widget: Text, text: Rename, typography_role: label_large, style: {foreground: on_surface}}

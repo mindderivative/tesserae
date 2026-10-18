@@ -2,6 +2,8 @@
 
 *Drafted for Tesserae 0.5.0.8 (#262, part of #257). Sent 2026-10-11 as mindderivative/tre#179. Probed on tre 0.5.6.*
 
+> **Done in tre 0.5.7 and adopted in Tesserae 0.5.0.25 (#280):** layers take corner `placement`, `offset` and `flip=False`, and an ordinary node takes `anchor`/`placement`/`offset`. In Tesserae they are the style fields `anchor`, `placement` and `offset` (see the [layout guide](../../docs/guide/layout.md#placing-a-node-against-another-node)). The text below is the request as sent.
+
 ## What Tesserae needs
 
 A node placed against a named node that is not its parent, and following it: a badge on the corner of a distant button, a label beside a field, a marker on a chart point. #116 (L10) listed it as `style: {anchor: b}`.

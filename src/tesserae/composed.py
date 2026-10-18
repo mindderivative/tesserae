@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import difflib
 import time
 import weakref
 from pathlib import Path
@@ -22,7 +23,7 @@ from typing import Any, Callable, Optional
 from tesserae import a11y as a11y_module, tokens, urls
 from tesserae.follow import app_of
 from tesserae.listeners import handled, listen_window
-from tesserae.reactive import Effect, Signal, untrack
+from tesserae.reactive import Computed, Effect, Signal, untrack
 from tesserae.expr import compile_statements, is_action_name
 from tesserae.spec.compose import Composer, Instance
 from tesserae.timers import Timers
@@ -30,6 +31,8 @@ from tesserae.typing_effects import OPTIONS, TypingEffects
 from tesserae.spec.images import extract_images
 from tesserae.spec.lower import SPLIT_HANDLE, lower
 from tesserae.spec.mask import Mask
+from tesserae.spec import placement as placement_module
+from tesserae.spec.placement import offset_pair
 from tesserae.spec.nodes import ViewDoc
 from tesserae.view import _EVENTS, SURFACE_ACTIONS, WINDOW_ACTIONS, View
 
@@ -223,6 +226,7 @@ class ComposedView(View):
         self._shown_layers: dict[str, Any] = {}  # each Overlay showing: its id -> the layer node shown
         self._overlay_undos: list[Callable[[], None]] = []
         self._dismissed_open: set[str] = set()  # overlays closed by the user whose `open` is not a Signal: not reopened until `open` goes false
+        self._anchored: dict[str, tuple] = {}  # a node placed against another by its style: its id -> (the anchor's id, placement, offset) as last set; or ('gone',) while hidden
         self._timer_code: dict[str, Any] = {}
         self._timer_scopes: weakref.WeakKeyDictionary[Any, int] = weakref.WeakKeyDictionary()
         spec, frames = self._lowered()
@@ -325,6 +329,7 @@ class ComposedView(View):
             untrack(self._wire_scroll)
             untrack(self._fit_graphs)
             untrack(self._wire_overlays)
+            untrack(self._wire_anchors)
             untrack(self._wire_splitters)
             untrack(self._wire_tooltips)
             untrack(self._wire_links)
@@ -844,14 +849,92 @@ class ComposedView(View):
             if inst.parent is None or inst.parent.id not in self._built.outer:
                 raise ValueError(f"Overlay {inst.id!r}: anchor 'parent' needs the overlay to be inside another node")
             return self._built.outer[inst.parent.id]
+        found = self._named_near(inst, name)
+        if found is None:
+            raise ValueError(f"Overlay {inst.id!r}: anchor {name!r} is no node by that name in this view")
+        return found
+
+    def _named_near(self, inst: Instance, name: str) -> Optional[Any]:
+        """The node called `name` that `inst` sits against: in the view `inst` is written in, then the one that called it, and so on out (a menu names its
+        button in the caller's view). Where several have the name (the rows of a `for:`), the one that shares the most of `inst`'s own path: its own row's."""
         here = inst
-        while here is not None:  # the view the overlay is written in, then the one that called it, and so on out (a menu names its button in the caller's view)
+        while here is not None:
             root = here.view_root or self.handle.composition.root
-            for other in root.walk():
-                if other.name == name and other.id in self._built.outer:
-                    return self._built.outer[other.id]
+            candidates = [other for other in root.walk() if other.name == name and other is not inst and other.id in self._built.outer]
+            if candidates:
+                def shared(other: Instance) -> int:
+                    count = 0
+                    for left, right in zip(inst.id.split("."), other.id.split(".")):
+                        if left != right:
+                            break
+                        count += 1
+                    return count
+
+                return self._built.outer[max(candidates, key=shared).id]
             here = root.parent  # the node the view was called from, in the view that called it (None at the top)
-        raise ValueError(f"Overlay {inst.id!r}: anchor {name!r} is no node by that name in this view")
+        return None
+
+    def _wire_anchors(self) -> None:
+        """A node whose style says `anchor: name` (with `placement` and `offset`) is placed against that node by tre, and follows it: the anchor is set on the
+        engine's node here, every time the view is synced, and taken off when the style stops saying it. If the anchor goes (an `if:`), the node is hidden until
+        it is back, as tre would leave it where it was."""
+        live: set[str] = set()
+        for inst in self.handle.composition.walk():
+            if inst.id not in self._built.nodes:
+                continue
+            style = inst.effective_style()
+            name = style.get("anchor")
+            node = self._built.outer[inst.id] if inst.widget == "Link" else self._built.nodes[inst.id]
+            before = self._anchored.get(inst.id)
+            if not name:
+                if before is not None:
+                    self._unanchor(inst, node, style)
+                continue
+            live.add(inst.id)
+            where = f"{inst.widget} {inst.id!r}"
+            placement = style.get("placement") or "below"
+            problem = placement_module.style_problem("placement", placement)
+            if problem:
+                raise ValueError(f"{where}: {problem}")
+            offset = offset_pair(style["offset"], where) if style.get("offset") is not None else (0.0, 0.0)
+            if name == "parent":
+                if inst.parent is None or inst.parent.id not in self._built.outer:
+                    raise ValueError(f"{where}: anchor 'parent' needs the node to be inside another node")
+                target = self._built.outer[inst.parent.id]
+            else:
+                target = self._named_near(inst, name)
+            if target is None:
+                if before is None:
+                    names = sorted({o.name for o in self.handle.composition.walk() if o.name and o is not inst})
+                    near = difflib.get_close_matches(name, names, n=1)
+                    raise ValueError(f"{where}: anchor {name!r} is no node by that name in this view"
+                                     + (f" (did you mean {near[0]!r}?)" if near else f" (the names here: {', '.join(names[:12])})"))
+                if before != ("gone",):  # it was there and is not now: hide the node until it is back
+                    node.set(anchor=None, visible=False)
+                    self._anchored[inst.id] = ("gone",)
+                continue
+            key = (id(target), placement, offset)
+            if before == key:
+                continue
+            node.set(anchor=target, placement=placement, offset=offset)
+            if before == ("gone",) and self._shown(inst):
+                node.set(visible=True)
+            self._anchored[inst.id] = key
+        for gone in [i for i in self._anchored if i not in live]:  # the node itself went, or its style stopped saying it
+            self._anchored.pop(gone, None)
+
+    @staticmethod
+    def _shown(inst: Instance) -> bool:
+        """Whether the node's own `visible:` (if it has one) lets it be seen."""
+        held = inst.props.get("visible", True)
+        return (held.get() if isinstance(held, (Signal, Computed)) else held) is not False
+
+    def _unanchor(self, inst: Instance, node: Any, style: dict[str, Any]) -> None:
+        """The style no longer says `anchor`: the node is put back in the flow (or wherever its `position` says) and shown if it was hidden for want of an anchor."""
+        node.set(anchor=None, position=style.get("position") or "relative")
+        if self._anchored.get(inst.id) == ("gone",) and self._shown(inst):
+            node.set(visible=True)
+        self._anchored.pop(inst.id, None)
 
     def _fit_layer(self, inst: Instance, layer: Any) -> None:
         if inst.value("modal"):  # the scrim fills the window
@@ -861,8 +944,13 @@ class ComposedView(View):
     def _show_layer(self, inst: Instance, layer: Any) -> None:
         self._fit_layer(inst, layer)
         anchor = None if inst.value("modal") else self._anchor_node(inst)
+        extra: dict[str, Any] = {}
+        if inst.value("offset") is not None:
+            extra["offset"] = offset_pair(inst.value("offset"), f"Overlay {inst.id!r}")
+        if inst.value("flip") is False:
+            extra["flip"] = False
         self.window.show_layer(layer, anchor=anchor, placement=inst.value("placement") or "below", modal=bool(inst.value("modal")),
-                               dismissible=inst.value("dismissible") is not False)
+                               dismissible=inst.value("dismissible") is not False, **extra)
         self._shown_layers[inst.id] = layer
         if inst.value("focus_first") is True:
             self._focus_into(inst)

@@ -279,26 +279,34 @@ An **absolutely positioned** node stretched between two edges of its parent take
 
 ## Placing a node against another node
 
-`style: {anchor: ...}` does not exist. A node that floats beside a node that is not its parent, and follows it, is an `Overlay`:
+Three style fields place a node against another node, wherever it is written, and keep it there as the target moves (tre lays it out after the target, so
+there is no lag):
 
 ```yaml
 widget: Container
-style: {flex_direction: vertical, padding: 40}
+style: {width: 300, height: 200, padding: 40}
 children:
   - {widget: Rect, name: target, style: {width: 60, height: 40, background: primary}}
-  - widget: Overlay
-    anchor: target
-    placement: above       # below, above, start or end; aligned with the target's start edge
-    open: true
-    dismissible: false
-    children:
-      - {widget: Rect, style: {width: 12, height: 12, background: error}}
+  - widget: Rect
+    style: {anchor: target, placement: top_end, offset: [6, -6], width: 12, height: 12, background: error}
 ```
 
-The engine keeps it against the target at every layout, so it follows with no lag. Because it is a layer it is drawn above the whole window, is not cut by
-a parent's `clip_children`, is its own Tab scope, and flips to the other side when it does not fit. It can sit on the four sides only, not on a corner
-or the middle. For a badge on a corner, make it a child of its host and place it with `position: absolute` (the shipped `Badge` does). See
-[Overlays](overlays.md).
+| Field | What it says |
+| --- | --- |
+| `anchor` | The `name` of the node to sit against, or `parent` for the node it is written inside. The nearest node of that name wins: in a `for:` row it is the row's own node, then the view's, then the view that called this one. |
+| `placement` | `below` (the default), `above`, `start`, `end`, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, or `center`. A corner is the node's matching corner on the target's. |
+| `offset` | `[dx, dy]` in pixels, added to the placement. |
+
+The node stays in the tree, so a parent's `clip_children` cuts it and its `z_index` orders it among its siblings, unlike a layer. It takes itself out of the
+flow (it is absolute by itself). `anchor`, `placement` and `offset` may come from a stylesheet rule or an expression. A missing anchor name is an error at the
+node, with the nearest name; a bad `placement` or `offset` is found at load. Take the fields out and the node is back in the flow.
+
+Limits: if the anchor goes (an `if:`), the node is hidden until it is back; if the *anchor* is hidden with `visible: false`, tre leaves the node at the window's
+corner, so hide both. A control with a `label:` is anchored by its inner box, not the row that holds the box and its label. `transition:` does not ease a placement.
+
+An `Overlay` is the same thing as a layer: drawn above the whole window, not cut by a parent's `clip_children`, its own Tab scope. It takes the corners and `offset`
+too, and `flip: false` keeps it where it is put instead of moving it to the other side when it does not fit (the default, `true`, suits a menu; a marker wants
+`false`). See [Overlays](overlays.md).
 
 ## Placing a node exactly
 

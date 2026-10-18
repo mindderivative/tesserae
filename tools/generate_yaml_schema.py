@@ -84,7 +84,7 @@ def _definitions(fragment: bool) -> dict[str, Any]:
     when the fragment is used, so there they may also be that."""
     from tesserae import a11y, icons, tokens
     from tesserae import view as view_module
-    from tesserae.spec import build, cascade, expand, layout, title_bar
+    from tesserae.spec import build, cascade, expand, layout, placement, title_bar
 
     roles = sorted(tokens.color_scheme((0x67, 0x50, 0xA4, 0xFF)))
     param = {"type": "string", "pattern": r"^\s*\{\{.*\}\}\s*$",
@@ -223,6 +223,12 @@ def _definitions(fragment: bool) -> dict[str, Any]:
         "right": (inset, "How far an `absolute` node is from its parent's right edge; with `left` it is stretched between the two."),
         "bottom": (inset, "How far an `absolute` node is from its parent's bottom edge; with `top` it is stretched between the two."),
         "inset": (inset, "All four insets at once: an `absolute` node with `inset: 8` fills its parent less 8 pixels each side."),
+        "anchor": ({"type": "string", "minLength": 1},
+                   "The name of another node in this view to sit against, or `parent` for the node it is inside. The node leaves the flow and follows the anchor with no lag; "
+                   "it stays in the tree, clipped and ordered as a child of its parent is."),
+        "placement": ({"enum": list(placement.PLACEMENTS)},
+                      "With `anchor`: which side of the anchor (`below`, `above`, `start`, `end`) or which of its corners, or its centre, the node's centre sits on."),
+        "offset": ({"type": "array", "items": number, "minItems": 2, "maxItems": 2}, "With `anchor`: `[dx, dy]` pixels added to the point it sits on."),
         "z_index": ({"type": "integer"}, "Stacking order: higher is in front."),
         "clip_children": ({"type": "boolean"}, "Whether children are cut off at its edge."),
         "grid_template_columns": ({"type": "string"}, "The grid's columns, as in CSS: `1fr 2fr 100px`."),

@@ -9,6 +9,7 @@ These are the 0.4.x `kind:` values with their properties in the new, flat form: 
 
 from __future__ import annotations
 
+from tesserae.spec.placement import PLACEMENTS
 from tesserae.spec.widgets import Property as P, declare
 
 _TEXT_ALIGNS = ("start", "center", "end")
@@ -106,7 +107,10 @@ declare("Splitter", {
 declare("Overlay", {
     "open": P("bool", default=False, model=True, doc="Whether it is showing. Closing it (Escape, a press outside) writes false back to a Signal it is bound to."),
     "anchor": P("str", doc="The name of a node in this view to sit against, or `parent` for the node it is written inside; without one it sits at its own `x` and `y`."),
-    "placement": P("enum", choices=("below", "above", "start", "end"), default="below", doc="Which side of the anchor; it flips or shifts to fit."),
+    "placement": P("enum", choices=PLACEMENTS, default="below", doc="Where it sits against the anchor: a side (`below`, `above`, `start`, `end`), which flips or shifts to fit, or a corner or the centre "
+                                                                    "(`top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`), which puts its centre on that point of the anchor and is never moved."),
+    "offset": P("list", doc="`[dx, dy]` pixels added to the point it is attached to, for example `[2, -2]` to nudge a badge off a corner."),
+    "flip": P("bool", default=True, doc="Whether a side placement may flip or shift to fit the window; `false` keeps it where it was asked. A corner or the centre never moves."),
     "modal": P("bool", doc="Dims the window behind it, blocks input to it, and keeps focus inside."),
     "dismissible": P("bool", default=True, doc="Escape and a press outside close it."),
     "focus_first": P("bool", default=False, doc="When it opens, the focus moves to the first thing in it that can take it (a menu's first row)."),

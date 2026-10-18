@@ -19,7 +19,7 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 
 from tesserae import a11y as a11y_module
-from tesserae.spec import sizes
+from tesserae.spec import placement, sizes
 from tesserae.expr import Expr, ExprError, NestedTemplate, Origin, Statements, compile_expr, compile_statements, compile_template, is_action_name, timer_handlers
 from tesserae.spec import widgets as registry
 from tesserae.spec.widgets import Property, PropertyError, WidgetDecl, decl_from_params, is_expression, style_fields_of
@@ -32,7 +32,7 @@ VISIBLE = Property("bool", name="visible", doc="Shown while true; while false it
 #: Keys every node may have, besides its widget's properties (section 2).
 #: What a `tooltip:` mapping may hold, and where it may sit against its node.
 TOOLTIP_FIELDS = ("text", "title", "delay", "placement", "actions")
-TOOLTIP_PLACEMENTS = ("below", "above", "start", "end")
+TOOLTIP_PLACEMENTS = placement.PLACEMENTS
 UNIVERSAL_KEYS = ("widget", "name", "if", "for", "key", "slot", "state", "style", "classes", "handlers", "a11y", "interaction",
                   "window_region", "route", "focus_group", "tooltip", "children")
 #: Keys only the root of a view file may have.
@@ -466,6 +466,8 @@ class _Parser:
                     hint = f"widgets that accept it: {', '.join(users)}"
                 raise self.fail(value.key_at[key], f"{node.decl.name}: style '{key}' is not valid here", hint or _near(key, allowed))
             problem = None if not isinstance(item, (str, int, float)) or (isinstance(item, str) and "{{" in item) else sizes.size_problem(key, item)
+            if problem is None and key in placement.ANCHOR_FIELDS and not (isinstance(item, str) and "{{" in item):
+                problem = placement.style_problem(key, item.unwrap() if hasattr(item, "unwrap") else item)
             if problem:  # a size or an inset that tre would refuse, found where it is written (an expression is checked when it is worked out)
                 raise self.fail(value.val_at[key], f"{node.decl.name}: {problem}")
             node.style[key] = self.template(item, value.val_at[key])

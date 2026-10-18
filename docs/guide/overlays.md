@@ -39,7 +39,9 @@ children:
 | --- | --- |
 | `open` | Whether it is showing. Two-way. With an `open` that is not a Signal, a layer the user closed stays closed until `open` goes false. |
 | `anchor` | The `name` of a node in this view to sit against, or `parent` for the node it is written inside. |
-| `placement` | `below` (the default), `above`, `start` or `end` of the anchor; it flips or shifts to fit. |
+| `placement` | `below` (the default), `above`, `start` or `end` of the anchor, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`. The sides flip or shift to fit; the corners do not. |
+| `offset` | `[dx, dy]` in pixels from the placement. |
+| `flip` | `true` (the default) moves a side placement to the other side when it does not fit; `false` keeps it. |
 | `modal` | A scrim (the `scrim` colour at 32%) over the whole window, blocking input to what is under it and keeping Tab inside. It follows the window's size and centres its children unless the style places them (`align_content`). A press on the scrim closes a dismissible modal; a press on its content does not. |
 | `dismissible` | `true` (the default): Escape and a press outside close it. `false` turns both off. |
 | `focus_first` | When it opens, the focus moves to the first thing in it that can take it (a menu's first row). |

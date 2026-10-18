@@ -195,3 +195,12 @@ def test_the_insets_and_sums_are_in_the_editor_schemas():
         assert _flagged({"widget": "Container", "style": style}), style
     rule = {"widget": "Rect", "style": {"right": 4, "width": "100% - 8"}}
     assert not _problems(jsonschema.Draft7Validator(STYLESHEET), {"styles": [rule]})
+
+
+def test_the_anchor_fields_are_in_the_editor_schemas():
+    ok = {"widget": "Rect", "style": {"anchor": "target", "placement": "top_end", "offset": [4, -4]}}
+    assert not _flagged(ok)
+    for style in ({"anchor": ""}, {"placement": "above_end"}, {"offset": [1]}, {"offset": "3"}):
+        assert _flagged({"widget": "Rect", "style": style}), style
+    assert not _flagged({"widget": "Overlay", "anchor": "t", "placement": "bottom_start", "offset": [0, 8], "flip": False})
+    assert _flagged({"widget": "Overlay", "anchor": "t", "placement": "diagonal"})

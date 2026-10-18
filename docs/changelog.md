@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0.25
+
+### Added
+
+- **Place a node against another node** ([#280](https://github.com/mindderivative/tesserae/issues/280)). With tre 0.5.7, `style: {anchor: target, placement: top_end, offset: [6, -6]}` sits a node on the corner of a named node, wherever either is written, and keeps it there as the target moves, with no lag. The node stays in the tree: a parent's `clip_children` cuts it and `z_index` orders it. `placement` is a side (`below`, `above`, `start`, `end`) or a corner (`top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`); `anchor: parent` is the node it is written inside; the nearest node of the name wins (a `for:` row's own node first). The fields come from rules and expressions, a mistake is found at load with its position, an unknown anchor name is an error naming the nearest name, and the editor schemas know them. If the anchor goes (an `if:`) the node is hidden until it is back. `Overlay` takes the corners too, with `offset` and `flip` (`false` keeps a side where it is put instead of flipping it), and `Tooltip` accepts corner placements. `design/tre-requests/anchored-layout.md` is marked done.
+
+### Known
+
+- If the anchor is hidden with `visible: false`, tre leaves the anchored node at the window's corner; hide both. `transition:` does not ease a placement.
+
 ## 0.5.0.24
 
 ### Added

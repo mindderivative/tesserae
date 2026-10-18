@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Optional
 
 from tesserae.expr import ExprError, Origin, compile_template
-from tesserae.spec import sizes, widgets as registry
+from tesserae.spec import placement, sizes, widgets as registry
 from tesserae.spec.nodes import LoadError, load_marked
 from tesserae.spec.widgets import style_fields_of
 
@@ -198,6 +198,8 @@ def _build(spec: Any, file: str, text: str) -> RuleSheet:
                     raise fail(style_key_at.get(field_name, at), message, f"widgets that accept it: {', '.join(users)}")
                 raise fail(style_key_at.get(field_name, at), message, _near(field_name, allowed))
             problem = None if not isinstance(value, (str, int, float)) or (isinstance(value, str) and "{{" in value) else sizes.size_problem(field_name, value)
+            if problem is None and field_name in placement.ANCHOR_FIELDS and not (isinstance(value, str) and "{{" in value):
+                problem = placement.style_problem(field_name, value)
             if problem:
                 raise fail(style_val_at.get(field_name, at), f"{widget or 'a rule'}: {problem}")
             style[field_name] = _template(value, file, style_val_at.get(field_name, at), text)
