@@ -145,6 +145,27 @@ u = open_doc("Scn13_Stylesheet.yaml", "styles:\n  - widget: Button\n    sta\n");
 check("a rule's keys are suggested", "state" in got and "variant" in got, got)
 u = open_doc("Scn14_Stylesheet.yaml", "styles:\n  - widget: Button\n    state: hovered\n    style:\n      corner_radius: 8\n")
 check("a good rule is accepted", not messages(u), messages(u))
+# 3. the sizes, insets and anchor fields of 0.5.0.24-28: good values pass, each bad one is flagged, the new fields and their choices are offered
+u = open_doc("Scn15_View.yaml", "widget: Container\nstyle:\n  position: absolute\n  left: 8\n  right: 10%\n  bottom: -4\n  top: auto\n  inset: 2\n"
+             "  width: \"calc(100% - 16)\"\n  height: fit-content\n  min_width: 50%\n")
+check("insets, sums and fit-content are accepted", not messages(u), messages(u))
+for n, (what, style) in enumerate([("40px", "width: 40px"), ("a negative size", "width: -3"), ("a sum in an inset", "right: \"calc(100% - 4)\""), ("a sum in a limit", "min_width: \"calc(100% - 4)\""),
+                                    ("a negative percentage inset", "inset: -5%"), ("a sum without spaces", "width: \"100%-16\"")]):
+    u = open_doc(f"Scn{16 + n}_View.yaml", f"widget: Container\nstyle:\n  {style}\n")
+    check(f"a size or inset tre refuses is flagged: {what}", bool(messages(u)), messages(u)[:1])
+u = open_doc("Scn22_View.yaml", "widget: Rect\nstyle:\n  anchor: target\n  placement: top_end\n  offset: [4, -4]\n")
+check("anchor, placement and offset are accepted", not messages(u), messages(u))
+for n, (what, style) in enumerate([("an empty anchor", "anchor: ''"), ("a placement tre refuses", "placement: above_end"), ("a short offset", "offset: [1]"), ("a scalar offset", "offset: 3")]):
+    u = open_doc(f"Scn{23 + n}_View.yaml", f"widget: Rect\nstyle:\n  {style}\n")
+    check(f"a mistake in the anchor fields is flagged: {what}", bool(messages(u)), messages(u)[:1])
+u = open_doc("Scn27_View.yaml", "widget: Rect\nstyle:\n  anc\n"); got = labels(u, 2, 5)
+check("the anchor style fields are suggested", {"anchor"} <= set(got), [x for x in got if x.startswith("anc")])
+u = open_doc("Scn28_View.yaml", "widget: Rect\nstyle:\n  placement: \n"); got = labels(u, 2, 13)
+check("the placements are suggested", {"below", "top_end", "center"} <= set(got), got[:10])
+u = open_doc("Scn29_View.yaml", "widget: Overlay\nanchor: t\nplacement: bottom_start\noffset: [0, 8]\nflip: false\n")
+check("an overlay's corner placement, offset and flip are accepted", not messages(u), messages(u))
+u = open_doc("Scn30_View.yaml", "widget: Overlay\nanchor: t\nplacement: diagonal\nflip: maybe\n")
+check("an overlay's wrong placement and flip are flagged", len(messages(u)) >= 2, messages(u)[:2])
 c.p.terminate()
 if problems:
     sys.exit("FAILED: " + "; ".join(problems))

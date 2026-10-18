@@ -2908,3 +2908,9 @@ User: "release tesserae 0.5.0", then "pypi is up".
 
 - `Composer._check_statements` runs `check_handler_calls` and `check_handler_targets` on a handler's statements and, recursively, on each literal `after`/`every` text (`timer_handlers`, compiled with the handler's origin, so an error points at the handler, not inside the string). An action-name text is left alone (it was never judged and the scope check for dotted names needs the app).
 - Tests: 7 (`tests/test_unknown_functions.py`, `tests/test_two_way_state.py`); 5 mutations, all caught. The shared `actions` helper in the first file now lists `every` too.
+
+## 0.5.0.30 #285: the language-server check, re-run on the new fields
+
+- I was about to write a new LSP client when `git ls-files` showed `tools/check_schema_in_language_server.py` (#275). It ran as it was (151 files clean, 14 checks) on a scratch `npm install yaml-language-server@1.15.0` (in the session scratchpad, outside the repo), then gained 17 checks for sums, insets, the anchor style fields, the placement completions and the Overlay's corners.
+- **Result:** every good value accepted, every bad one flagged, completions right. No schema change. A negative control (the schema's `center` renamed) failed the placements check and the examples, then restored.
+- **Not checked:** VS Code itself; the server's wording for a bad size is generic.

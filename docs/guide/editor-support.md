@@ -103,7 +103,8 @@ after changing what a file may hold. The tests check that the committed files ar
     `tools/check_schema_in_language_server.py` drives Red Hat's real
     language server over the Language
     Server Protocol, the way VS Code does. It needs node, so CI doesn't run
-    it. It doesn't run inside VS Code itself, only the server VS Code uses. If
+    it. It opens every view and stylesheet of the repository, and then checks completions and that mistakes are flagged: the sizes and insets, the `anchor`,
+    `placement` and `offset` style fields and an `Overlay`'s corner placements among them. It doesn't run inside VS Code itself, only the server VS Code uses. If
     completion or a squiggle is wrong in your editor, please
     [open an issue](https://github.com/mindderivative/tesserae/issues) with
     the file.

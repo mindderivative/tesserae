@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.30
+
+### Changed
+
+- **The editor schemas were checked in the real language server again** ([#285](https://github.com/mindderivative/tesserae/issues/285)). `tools/check_schema_in_language_server.py` (Red Hat's YAML language server 1.15.0, over the Language Server Protocol) opens all 151 views and stylesheets of the repository with no diagnostics, and now also checks the sizes and insets from 0.5.0.24 and the anchor fields and corner placements from 0.5.0.25: sums, `fit-content` and the insets are accepted; `40px`, a negative size, a sum in an inset or a limit, a negative percentage inset and a sum with no spaces are each flagged; `anchor`, `placement` and `offset` are accepted, suggested as style fields (with the nine placements) and flagged when wrong; an `Overlay`'s corner `placement`, `offset` and `flip` likewise. 31 checks in all. No schema had to change: the server read every pattern the way the JSON validator does. The server's messages for a bad size are the generic "Expected number" (the pattern says nothing more).
+
 ## 0.5.0.29
 
 ### Changed
