@@ -459,6 +459,11 @@ Anything else is **one-way**, and nothing complains: an expression (`"{{ not dar
 Signal, a loop variable, a plain (not `model:`) param even when it holds a Signal. The widget shows the value, and the user's edit stays on screen, unwritten,
 until the value next changes (a plain attribute never changes, so it stays). Write the change yourself in a handler (`on_change: "dark = not dark"`).
 
+A property given one bare name that is none of the writable kinds (a Computed, a ViewModel attribute that is not a Signal, a plain param, a loop variable) looks two-way
+and is not, so Tesserae says so in the log when the view is composed, with the file, line and column, once for that place:
+`Main_View.yaml:7:14: Checkbox checked is given 'inverse', which is a Computed: the user's edit is not written back (one-way)`. It is a warning, not an error. Give the property a Signal or a
+`state:` name to make it two-way, or write an expression (`"{{ inverse and True }}"`) to say that one-way is what you meant.
+
 **What a handler may assign.** An assignment (`=`, `+=`, `-=`...) writes a `state:` name, a `model: true` param of the view it is written in, or a Signal of the ViewModel.
 It cannot write a plain param, a loop variable, a Computed, a ViewModel attribute that is not a Signal, `hovered`, `focused`, `pressed`, or a name nothing
 has. This is found when the view loads, with the file, line and column, and the names that could be written (`'cuont' is not writable here ... did you mean 'count'`).

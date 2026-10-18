@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.31
+
+### Added
+
+- **A model property given a bare name it cannot write back is warned about** ([#284](https://github.com/mindderivative/tesserae/issues/284)). `checked: "{{ inverse }}"` on a `Checkbox`, where `inverse` is a Computed, a ViewModel attribute that is not a Signal, a plain param or a loop variable, looks two-way and is silently one-way: the user's edit stays on screen and nothing learns of it. The log now says so when the view is composed (`Main_View.yaml:7:14: Checkbox checked is given 'inverse', which is a Computed: the user's edit is not written back (one-way). Give it a Signal or a state: name to make it two-way`), once for the place in the file, also for a model param of a view you call. It is a warning, not an error, and nothing that loaded before stops loading; an expression (`"{{ inverse and True }}"`) or a literal says one-way on purpose and stays quiet, as does a bare Signal, `state:` name or model param, which are two-way. Across the whole test suite it fires once, on a test that pins exactly this case.
+
 ## 0.5.0.30
 
 ### Changed

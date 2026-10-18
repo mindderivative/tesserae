@@ -26,6 +26,8 @@ from __future__ import annotations
 
 from typing import Any, Callable, Iterable, Iterator, Mapping, Optional
 
+from loguru import logger
+
 from tesserae.expr import (BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_handler_calls, check_handler_targets, compile_statements, is_action_name,
                            timer_handlers)
 from tesserae.reactive import Computed, Effect, Signal, untrack
@@ -712,6 +714,7 @@ class Composer:
                  actions: Optional[Callable[[str], Optional[Callable[..., Any]]]] = None, rules: Iterable[RuleSheet] = ()) -> None:
         self._views = views if views is not None else {}
         self.viewmodel = viewmodel
+        self._warned: set[tuple[str, int, int]] = set()  # the places `_one_way_note` has spoken of
         self.actions = actions
         #: stylesheet layers, lowest first (a widget's shipped looks, then the app's)
         self.rules = [sheet for sheet in rules if sheet.rules]
@@ -952,6 +955,8 @@ class Composer:
                 bare = self._model_ref(node.decl, name, value, inner)
                 if bare is not None:
                     inst.models[name] = (bare, inner)
+                else:
+                    self._one_way_note(ctx, node, node.decl, name, value, inner)
                 continue
             inst.parts[name] = [self._instance(sub, name if isinstance(value, Node) else f"{name}[{i}]", inner, ctx, parent_id=iid)
                                 for i, sub in enumerate(nodes)]
@@ -1021,6 +1026,28 @@ class Composer:
         except KeyError:
             return None
 
+    def _one_way_note(self, ctx: _Ctx, node: Node, decl: Optional[WidgetDecl], name: str, value: Any, scope: Scope) -> None:
+        """Logs a warning when a `model` property is given one bare name that is not writable: it looks two-way and is not, so the user's edit stays on screen and
+        is never written back. Said once for a place in a file (a `for:` composes its node for every row). Only called where `_model_ref` found nothing to share, so a name that could be written never gets here."""
+        prop = decl.properties.get(name) if decl else None
+        if prop is None or not prop.model or not isinstance(value, Template) or not value.single:
+            return
+        bare = value.parts[0].bare_name()
+        frame = scope._frame(bare) if bare else None
+        if bare is None or (frame is None and (scope.root is None or bare.startswith("_") or not hasattr(scope.root, bare))):
+            return
+        if frame is not None:
+            what = "a read-only param or loop variable"
+        else:
+            what = "a Computed" if isinstance(getattr(scope.root, bare), Computed) else "a ViewModel attribute that is not a Signal"
+        at = node.prop_at.get(name, node.at)
+        place = (ctx.doc.file, at[0], at[1])
+        if place in self._warned:
+            return
+        self._warned.add(place)
+        logger.warning("{}:{}:{}: {} {} is given '{}', which is {}: the user's edit is not written back (one-way). Give it a Signal or a `state:` name to make it two-way",
+                       *place, node.widget, name, bare, what)
+
     # view calls
 
     def _slots_of(self, doc: ViewDoc) -> list[str]:
@@ -1050,6 +1077,7 @@ class Composer:
                     values[pname] = call_scope.lookup(shared)
                     models.add(pname)
                     continue
+                self._one_way_note(ctx, node, decl, pname, node.props[pname], call_scope)
                 values[pname] = self._bind(node.props[pname], call_scope, holder, self._coercer(ctx, node, decl, pname))
                 if prop.model:  # one-way: the view may write its own copy (its handlers do), and it follows the expression whenever that changes
                     values[pname] = self._local_copy(values[pname], holder)
