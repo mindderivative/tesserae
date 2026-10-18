@@ -26,7 +26,8 @@ from __future__ import annotations
 
 from typing import Any, Callable, Iterable, Iterator, Mapping, Optional
 
-from tesserae.expr import BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_handler_calls, check_handler_targets
+from tesserae.expr import (BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_handler_calls, check_handler_targets, compile_statements, is_action_name,
+                           timer_handlers)
 from tesserae.reactive import Computed, Effect, Signal, untrack
 from tesserae.spec.nodes import VISIBLE, Handler, LoadError, Node, ViewDoc
 from tesserae.spec.rules import INTERACTION_STATES, Identity, Rule, RuleSheet, ordered
@@ -738,10 +739,18 @@ class Composer:
         if handler.statements is None:
             return
         try:
-            check_handler_calls(handler.statements, scope)
-            check_handler_targets(handler.statements, scope)
+            self._check_statements(handler.statements, scope)
         except ExprError as exc:
             raise LoadError(exc.message, file=ctx.doc.file, line=exc.line, column=exc.column, hint=exc.hint, text=ctx.doc.text) from None
+
+    def _check_statements(self, statements: Any, scope: "Scope") -> None:
+        """The checks of a handler's calls and assignments, and the same for the statements written as the text of an `after(...)` or `every(...)` inside it
+        (they run in this scope too, later; their position is the handler's, since the text has none of its own)."""
+        check_handler_calls(statements, scope)
+        check_handler_targets(statements, scope)
+        for text in timer_handlers(statements):
+            if not is_action_name(text):
+                self._check_statements(compile_statements(text, origin=statements.origin), scope)
 
     def _check_root(self, root: Node, ctx: _Ctx) -> None:
         for directive, label in ((root.loop, "for"), (root.when, "if"), (root.slot, "slot")):

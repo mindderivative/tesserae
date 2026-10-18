@@ -22,10 +22,10 @@ class VM:
 
 def actions(path):
     """What an app's built-in actions answer: `copy` and `focus` exist, the rest do not."""
-    return (lambda *args: None) if path in ("copy", "focus", "after") else None
+    return (lambda *args: None) if path in ("copy", "focus", "after", "every") else None
 
 
-actions.names = ("copy", "focus", "after")
+actions.names = ("copy", "focus", "after", "every")
 
 
 def view(body, root="widget: Container\n"):
@@ -111,3 +111,32 @@ def test_without_the_actions_a_handlers_names_cannot_be_judged_so_it_loads():
 def test_compile_statements_keeps_the_calls_it_saw():
     statements = compile_statements("bump(1); count = nosuch(2)")
     assert sorted(call.func.id for call in statements.calls) == ["bump", "nosuch"]
+
+
+# -- #283: the text of an `after(...)` or `every(...)` in a handler is checked as the handler is --------------------------------------------------
+
+
+def test_an_unknown_action_in_a_timer_text_is_a_load_error():
+    with pytest.raises(LoadError, match="'nosuch' is not a function or an action you can call here"):
+        composed("  - {widget: Rect, name: r, handlers: {on_click: 'after(10, \"nosuch()\")'}}\n")
+
+
+def test_an_unknown_action_in_an_every_text_is_a_load_error():
+    with pytest.raises(LoadError, match="'nosuch' is not a function or an action"):
+        composed("  - {widget: Rect, name: r, handlers: {on_click: 'every(10, \"nosuch()\")'}}\n")
+
+
+def test_a_timer_text_inside_a_timer_text_is_checked_too():
+    nested = r"""  - {widget: Rect, name: r, handlers: {on_click: "after(10, 'after(5, \"nosuch()\")')"}}""" + "\n"
+    with pytest.raises(LoadError, match="'nosuch' is not a function or an action"):
+        composed(nested)
+
+
+def test_a_good_timer_text_loads_and_runs():
+    comp = composed("  - {widget: Rect, name: r, handlers: {on_click: 'after(10, \"count += 1\")'}}\n")
+    assert comp.find("root.r") is not None
+
+
+def test_a_timer_text_that_is_an_action_name_or_not_a_literal_is_left_alone():
+    composed("  - {widget: Rect, name: r, handlers: {on_click: 'after(10, \"copy\")'}}\n")
+    composed("  - {widget: Rect, name: s, handlers: {on_click: 'after(10, bump)'}}\n")

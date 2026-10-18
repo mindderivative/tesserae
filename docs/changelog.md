@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.29
+
+### Changed
+
+- **The text of a timer in a handler is checked when the view loads** ([#283](https://github.com/mindderivative/tesserae/issues/283)). `after(10, "r = 1")` and `every(10, "nosuch()")` were compiled when the view was read, but an unknown action or a name that cannot be written in the text was found only when the timer fired. Both are now load errors, as they are for the handler itself, also for a timer inside a timer's text. The error is at the handler's position (the text has none of its own). A text that is a bare action name, or an action that is not a literal, is not checked.
+
 ## 0.5.0.28
 
 ### Fixed

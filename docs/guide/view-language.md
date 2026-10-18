@@ -192,7 +192,7 @@ anything else that is not writable is an error, found when the view loads ([what
 scope the handler was written in: an action name (`'bump'`) or statements (`'shown = False'`). A third argument names the timer so `cancel('name')`
 can stop it, and starting one of the same name again restarts it (a hover delay, a debounce). A name belongs to the scope that wrote it, as a local
 name does: two items of a `for:` each have their own. A timer stops when its view closes or the widget that started it is gone. Times are
-frame-quantized: a timer fires on the first frame after its time is up. A mistake in a literal action text is found when the view loads.
+frame-quantized: a timer fires on the first frame after its time is up. A mistake in a literal action text (a syntax error, an unknown action, a name that cannot be written) is found when the view loads, at the handler's position, as it is for the handler itself.
 
 ```yaml
 widget: Container

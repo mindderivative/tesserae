@@ -229,3 +229,17 @@ def test_the_state_of_a_row_follows_its_key_when_the_rows_are_reordered():
     vm.rows.set(list(reversed(vm.rows.get())))
     again = _again(comp, vm, source)
     assert again.find("root.row[1].t").value("text") == "a True" and again.find("root.row[2].t").value("text") == "b False"
+
+
+# -- #283: the same for the text of an `after(...)` or `every(...)` ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("timer", ["after", "every"])
+def test_a_timer_text_that_assigns_what_cannot_be_written_is_a_load_error(timer):
+    with pytest.raises(LoadError, match="'r' is not writable here"):
+        make(None, "widget: Container\nchildren:\n  - {for: r in rows, key: r.id, widget: Text, name: t, text: x, handlers: {on_click: '" + timer + "(10, \"r = 1\")'}}")
+
+
+def test_a_timer_text_that_assigns_state_loads():
+    comp, _, _ = make(None, "widget: Container\nstate: {s: 1}\nchildren:\n  - {widget: Text, name: t, text: x, handlers: {on_click: 'after(10, \"s = 2\")'}}")
+    assert comp.root.state["s"].get() == 1

@@ -2903,3 +2903,8 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Design changed from the scope:** no per-node `Effect`. The anchor's `visible` is lowered into its own spec, so changing it already syncs the view, and `_wire_anchors` runs after every sync; it now also calls `_follow_visibility` for every anchored node (hide while the anchor or an ancestor is not shown, show when back, leave a node whose own `visible:` is false alone). That needs no disposal, and a sync that lowers the node again cannot leave it shown. The anchor is now resolved to its instance (`_instance_near`) as well as its node.
 - **Tests:** 9 added to `tests/test_anchor_style.py` (at load, at once on a Signal, hidden container, the node's own `visible:`, its `visible:` changing while the anchor is hidden, a labelled control, the style dropping `anchor` while hidden, an anchor in the calling view). Mutations: 9 checked, 2 equivalent (the `elif` guard that skips a node already hidden by itself; clearing a stale id from the hidden set).
 - **Not done:** an anchor hidden only by the engine (a whole window hidden); easing the node in and out.
+
+## 0.5.0.29 #283: the text of a timer in a handler is checked at load
+
+- `Composer._check_statements` runs `check_handler_calls` and `check_handler_targets` on a handler's statements and, recursively, on each literal `after`/`every` text (`timer_handlers`, compiled with the handler's origin, so an error points at the handler, not inside the string). An action-name text is left alone (it was never judged and the scope check for dotted names needs the app).
+- Tests: 7 (`tests/test_unknown_functions.py`, `tests/test_two_way_state.py`); 5 mutations, all caught. The shared `actions` helper in the first file now lists `every` too.
