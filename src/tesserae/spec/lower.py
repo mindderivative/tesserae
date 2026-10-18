@@ -132,12 +132,29 @@ def lower(inst: Instance) -> dict[str, Any]:
     return node
 
 
+#: What a labelled control's style says about where it is, which goes to the row that holds the control and its label.
+PLACED = frozenset({
+    "position", "x", "y", "left", "top", "right", "bottom", "inset", "margin", "flex", "align_self", "z_index", "grid_column", "grid_row",
+    "scale", "translate_x", "translate_y", "rotation_deg",
+})
+
+
 def _field(inst: Instance, control: dict[str, Any], label: str) -> dict[str, Any]:
     """A control with a label beside it: a row of the control and its text, in which a press on the text is a press on the control."""
     text = {"id": f"{inst.id}.label", "kind": "Text", "text": {"content": label, "typography_role": "body_large"},
             "style": {"foreground": "on_surface", "opacity": 0.38 if control.get("disabled") else 1.0}}
-    return {"id": f"{inst.id}.field", "kind": "Container",
-            "style": {"flex_direction": "horizontal", "align_content": "left", "gap": 4}, "children": [control, text]}
+    style = control.get("style") or {}
+    placed = {k: v for k, v in style.items() if k in PLACED}  # where the control sits is where the row sits: the node a view places is the node it draws
+    if placed:
+        control["style"] = {k: v for k, v in style.items() if k not in PLACED}
+    row = {"id": f"{inst.id}.field", "kind": "Container",
+           "style": {"flex_direction": "horizontal", "align_content": "left", "gap": 4, **placed}, "children": [control, text]}
+    if "transition" in style:  # the control eases its own fields; the row eases its place
+        row["style"]["transition"] = style["transition"]
+    for key in ("visible", "hit_testable"):  # a hidden control hides its label
+        if key in control:
+            row[key] = control.pop(key)
+    return row
 
 
 #: The handle between a Splitter's panes: its width along the split, and the grip drawn in it (MD3's 4 x 48 drag handle).

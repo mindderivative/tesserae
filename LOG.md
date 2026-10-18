@@ -2881,3 +2881,10 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Overlay/Tooltip:** `placement` takes the corners, `offset` and `flip` are new, a layer always passes `flip=False` to tre when asked.
 - **Tests:** `tests/test_overlay_corners.py` (17), `tests/test_anchor_style.py` (26), a schema test. Mutations: 12 checked, 2 equivalent (re-setting an unchanged anchor is idempotent; tre puts an un-anchored node back in the flow itself).
 - **Not done:** a hidden anchor is not handled for you (documented); the language-server check not re-run; a labelled control is anchored by its inner box (#281).
+
+## 0.5.0.26 #281: a labelled control is placed as a whole
+
+- **Cause:** `lower._field` wrapped a labelled control in a `.field` row but left the whole style on the control, so placement landed on the inner box. The fix is in the lowering (`PLACED` style names move to the row; `transition` is copied to it; node-level `visible`/`hit_testable` go with it), so rules, expressions, hot reload and the builder's normal Container path needed no change. `composed._row_of` makes anchors and the nearest-name lookup use the row.
+- **Found on the way:** the view language's names differ from the engine's (`margin`, `flex`, not `margin_left`/`flex_grow`), so the first set of names was wrong and only the tests showed it.
+- **Tests:** `tests/test_labelled_placement.py` (13). Mutations: 9 checked; anchor/placement/offset in `PLACED` were dead (the renderer reads them from the instance) and removed, and `anchor: parent` cannot name a labelled control (controls have no children), so that call is unchanged.
+- **Not done:** `opacity` and the paint fields stay on the box, not the row.

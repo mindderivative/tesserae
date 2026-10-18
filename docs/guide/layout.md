@@ -302,7 +302,7 @@ flow (it is absolute by itself). `anchor`, `placement` and `offset` may come fro
 node, with the nearest name; a bad `placement` or `offset` is found at load. Take the fields out and the node is back in the flow.
 
 Limits: if the anchor goes (an `if:`), the node is hidden until it is back; if the *anchor* is hidden with `visible: false`, tre leaves the node at the window's
-corner, so hide both. A control with a `label:` is anchored by its inner box, not the row that holds the box and its label. `transition:` does not ease a placement.
+corner, so hide both. A control with a `label:` is anchored as the row that holds the box and its label. `transition:` does not ease a placement.
 
 An `Overlay` is the same thing as a layer: drawn above the whole window, not cut by a parent's `clip_children`, its own Tab scope. It takes the corners and `offset`
 too, and `flip: false` keeps it where it is put instead of moving it to the other side when it does not fit (the default, `true`, suits a menu; a marker wants
@@ -315,8 +315,8 @@ in its parent, in pixels or percentages. The insets `left`, `top`, `right` and `
 at once: `left: 8, right: 16` stretches a node across its parent less 8 and 16 pixels, and `inset: 4` fills the parent less 4 each side. An inset is a number
 (it may be negative), a percentage or `auto`. `x` is the same as `left` and `y` as `top`; giving both, or `x` with `inset`, in one `style:` is an
 error, since one would not be heard. A rule's `inset` gives way to an edge the node (or a more specific rule) says itself. On a node in the flow an inset moves it from its place. An inset
-does not ease: `transition:` takes `x` and `y` for a position. A control with a `label:` is placed by its inner box, not by the row that holds the box and its label, so an inset on one lands in the wrong
-place: leave the label off, or put the control in a container you place. `z_index` (an integer)
+does not ease: `transition:` takes `x` and `y` for a position. A control with a `label:` (a `Checkbox`, `RadioButton` or `Switch`) is placed as the row that holds the box and its label, so an inset or a margin
+moves both. `z_index` (an integer)
 draws it above or below its siblings, and a container with
 `clip_children: true` cuts its children to its own box. `overflow: hidden`
 is another way to write that (and `overflow: visible` is `clip_children: false`); a node that gives both must

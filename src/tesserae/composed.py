@@ -870,7 +870,7 @@ class ComposedView(View):
                         count += 1
                     return count
 
-                return self._built.outer[max(candidates, key=shared).id]
+                return self._row_of(max(candidates, key=shared).id)
             here = root.parent  # the node the view was called from, in the view that called it (None at the top)
         return None
 
@@ -884,7 +884,7 @@ class ComposedView(View):
                 continue
             style = inst.effective_style()
             name = style.get("anchor")
-            node = self._built.outer[inst.id] if inst.widget == "Link" else self._built.nodes[inst.id]
+            node = self._built.outer[inst.id] if inst.widget == "Link" else self._row_of(inst.id)
             before = self._anchored.get(inst.id)
             if not name:
                 if before is not None:
@@ -922,6 +922,11 @@ class ComposedView(View):
             self._anchored[inst.id] = key
         for gone in [i for i in self._anchored if i not in live]:  # the node itself went, or its style stopped saying it
             self._anchored.pop(gone, None)
+
+    def _row_of(self, inst_id: str) -> Any:
+        """The node that stands for `inst_id` in the layout: for a control with a label, the row that holds the control and its text, since that is what the
+        view places; else the node it built."""
+        return self._built.outer.get(f"{inst_id}.field") or self._built.outer[inst_id]
 
     @staticmethod
     def _shown(inst: Instance) -> bool:

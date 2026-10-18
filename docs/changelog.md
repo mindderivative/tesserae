@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0.26
+
+### Fixed
+
+- **A labelled control is placed as a whole** ([#281](https://github.com/mindderivative/tesserae/issues/281)). A `Checkbox`, `RadioButton` or `Switch` with a `label:` is a row of the box and its text, but `position`, `x`, `y`, the insets, `margin`, `flex`, `align_self`, `z_index`, the grid fields and the transforms were applied to the box inside it, so `right: 8` put the box outside its parent. They now go to the row: it is the node the view places, and the one an `anchor:` sits against (or is) and a `transition:` eases. A control without a label is as it was. `visible` hides the label with the box.
+
 ## 0.5.0.25
 
 ### Added
