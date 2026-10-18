@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0.28
+
+### Fixed
+
+- **A node anchored to a hidden node is hidden with it** ([#282](https://github.com/mindderivative/tesserae/issues/282)). With `style: {anchor: target}`, hiding the target with `visible: false` (its own, or a container's it is in) left the anchored node at the window's top left corner, drawn and pressable, because tre puts a node whose anchor is hidden there. The node is now hidden while its anchor, or anything it is inside, is hidden, in the same step, and shown when the anchor is back (its own `visible: false` still wins). It already followed an anchor removed by an `if:`. The guide no longer says to hide both.
+
+### Known
+
+- `transition:` still does not ease an anchored placement.
+
 ## 0.5.0.27
 
 ### Changed

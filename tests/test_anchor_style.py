@@ -188,3 +188,90 @@ def test_an_overlay_in_a_row_sits_against_its_own_rows_node(tmp_path):
     app, view, vm = opened(tmp_path, body)
     first, second = where(view, "root.row[1].pop.dot"), where(view, "root.row[2].pop.dot")
     assert second[1] - first[1] == 100.0 and first[0] == second[0] == 120.0  # one row apart, each beside its own field
+
+
+# -- #282: an anchor that is hidden hides the node anchored to it (tre leaves the node at the window's corner, drawn and pressable) ------------------
+
+SHOWN = '  - {widget: Rect, name: target, visible: "{{ show }}", style: {position: absolute, x: 150, y: 120, width: 60, height: 40, background: primary}}\n'
+
+
+def test_an_anchor_hidden_at_load_hides_the_node(tmp_path):
+    body = '  - {widget: Rect, name: target, visible: false, style: {position: absolute, x: 150, y: 120, width: 60, height: 40, background: primary}}\n' + DOT % ""
+    app, view, vm = opened(tmp_path, body)
+    assert view.node("root.dot").get("visible") is False
+
+
+def test_hiding_the_anchor_hides_the_node_at_once_and_showing_it_puts_it_back(tmp_path):
+    app, view, vm = opened(tmp_path, SHOWN + DOT % "")
+    assert view.node("root.dot").get("visible") is True and where(view) == (204.0, 114.0)
+    vm.show.set(False)
+    assert view.node("root.dot").get("visible") is False  # in the same step, before any frame can draw it at the corner
+    vm.show.set(True)
+    view.window.advance(16)
+    assert view.node("root.dot").get("visible") is True and where(view) == (204.0, 114.0)
+
+
+def test_an_anchor_in_a_hidden_container_hides_the_node(tmp_path):
+    body = ('  - {widget: Container, name: box, visible: "{{ show }}", style: {position: absolute, x: 150, y: 120}, children: [{widget: Rect, name: target, style: {width: 60, height: 40, background: primary}}]}\n'
+            + DOT % "")
+    app, view, vm = opened(tmp_path, body)
+    assert view.node("root.dot").get("visible") is True
+    vm.show.set(False)
+    assert view.node("root.dot").get("visible") is False
+    vm.show.set(True)
+    view.window.advance(16)
+    assert view.node("root.dot").get("visible") is True and where(view) == (204.0, 114.0)
+
+
+def test_the_nodes_own_visible_false_wins_when_the_anchor_is_shown_again(tmp_path):
+    body = SHOWN + "  - {widget: Rect, name: dot, visible: false, style: {anchor: target, placement: top_end, width: 12, height: 12, background: error}}\n"
+    app, view, vm = opened(tmp_path, body)
+    vm.show.set(False)
+    vm.show.set(True)
+    view.window.advance(16)
+    assert view.node("root.dot").get("visible") is False
+
+
+def test_a_node_whose_own_visible_comes_while_the_anchor_is_hidden_stays_hidden(tmp_path):
+    body = (SHOWN + '  - {widget: Rect, name: dot, visible: "{{ on }}", style: {anchor: target, placement: top_end, width: 12, height: 12, background: error}}\n')
+    app, view, vm = opened(tmp_path, body.replace("{{ on }}", "{{ x > 100 }}"))
+    vm.show.set(False)
+    vm.x.set(50)
+    vm.x.set(150)  # its own `visible:` goes false and true again while the anchor is hidden
+    view.window.advance(16)
+    assert view.node("root.dot").get("visible") is False
+    vm.show.set(True)
+    view.window.advance(16)
+    assert view.node("root.dot").get("visible") is True
+
+
+def test_a_labelled_control_as_the_anchor_is_hidden_with_its_row(tmp_path):
+    body = ('  - {widget: Checkbox, name: target, label: ok, visible: "{{ show }}", style: {position: absolute, x: 150, y: 120}}\n' + DOT % "")
+    app, view, vm = opened(tmp_path, body)
+    assert view.node("root.dot").get("visible") is True
+    vm.show.set(False)
+    assert view.node("root.dot").get("visible") is False
+
+
+def test_the_node_is_shown_again_when_its_style_stops_saying_anchor_while_the_anchor_is_hidden(tmp_path):
+    app, view, vm = opened(tmp_path, SHOWN + DOT % "")
+    vm.show.set(False)
+    (tmp_path / "Views" / "Main_View.yaml").write_text(
+        "name: main\nwidget: Container\nstyle: {width: 400, height: 300, background: surface}\nchildren:\n" + SHOWN +
+        "  - {widget: Rect, name: dot, style: {width: 12, height: 12, background: error}}\n")
+    from tesserae.spec.watch import ComposedWatcher
+    import os
+    watcher = ComposedWatcher(view, view.source, app._composed_docs, lambda library, doc: app._composed_rules(library, doc=doc)[0])
+    stat = view.source.stat()
+    os.utime(view.source, ns=(stat.st_atime_ns, stat.st_mtime_ns + 5_000_000_000))
+    assert watcher.poll() is True
+    view.window.advance(50)
+    assert view.node("root.dot").get("visible") is True
+
+
+def test_the_anchor_may_be_in_the_view_that_called_this_one_and_hidden_there(tmp_path):
+    files = {"Tag_View.yaml": "widget: Rect\nstyle: {anchor: target, placement: top_end, width: 12, height: 12, background: error}\n"}
+    app, view, vm = opened(tmp_path, SHOWN + "  - {widget: Tag, name: tag}\n", files)
+    assert view.node("root.tag").get("visible") is True
+    vm.show.set(False)
+    assert view.node("root.tag").get("visible") is False

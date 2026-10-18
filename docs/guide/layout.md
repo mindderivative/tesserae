@@ -301,8 +301,8 @@ The node stays in the tree, so a parent's `clip_children` cuts it and its `z_ind
 flow (it is absolute by itself). `anchor`, `placement` and `offset` may come from a stylesheet rule or an expression. A missing anchor name is an error at the
 node, with the nearest name; a bad `placement` or `offset` is found at load. Take the fields out and the node is back in the flow.
 
-Limits: if the anchor goes (an `if:`), the node is hidden until it is back; if the *anchor* is hidden with `visible: false`, tre leaves the node at the window's
-corner, so hide both. A control with a `label:` is anchored as the row that holds the box and its label. `transition:` does not ease a placement.
+If the anchor goes (an `if:`), or is hidden with `visible:` (its own, or that of anything it is inside), the node is hidden with it and comes back when the anchor does,
+unless its own `visible:` says no. A control with a `label:` is anchored as the row that holds the box and its label. `transition:` does not ease a placement.
 
 An `Overlay` is the same thing as a layer: drawn above the whole window, not cut by a parent's `clip_children`, its own Tab scope. It takes the corners and `offset`
 too, and `flip: false` keeps it where it is put instead of moving it to the other side when it does not fit (the default, `true`, suits a menu; a marker wants

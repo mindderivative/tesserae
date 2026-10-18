@@ -226,6 +226,7 @@ class ComposedView(View):
         self._shown_layers: dict[str, Any] = {}  # each Overlay showing: its id -> the layer node shown
         self._overlay_undos: list[Callable[[], None]] = []
         self._dismissed_open: set[str] = set()  # overlays closed by the user whose `open` is not a Signal: not reopened until `open` goes false
+        self._anchor_hidden: set[str] = set()  # the anchored nodes hidden because their anchor is not there or not shown (the node's own `visible:` is not this)
         self._anchored: dict[str, tuple] = {}  # a node placed against another by its style: its id -> (the anchor's id, placement, offset) as last set; or ('gone',) while hidden
         self._timer_code: dict[str, Any] = {}
         self._timer_scopes: weakref.WeakKeyDictionary[Any, int] = weakref.WeakKeyDictionary()
@@ -855,6 +856,11 @@ class ComposedView(View):
         return found
 
     def _named_near(self, inst: Instance, name: str) -> Optional[Any]:
+        """The node `_instance_near` finds, as the layout knows it (the row of a labelled control)."""
+        found = self._instance_near(inst, name)
+        return None if found is None else self._row_of(found.id)
+
+    def _instance_near(self, inst: Instance, name: str) -> Optional[Instance]:
         """The node called `name` that `inst` sits against: in the view `inst` is written in, then the one that called it, and so on out (a menu names its
         button in the caller's view). Where several have the name (the rows of a `for:`), the one that shares the most of `inst`'s own path: its own row's."""
         here = inst
@@ -870,7 +876,7 @@ class ComposedView(View):
                         count += 1
                     return count
 
-                return self._row_of(max(candidates, key=shared).id)
+                return max(candidates, key=shared)
             here = root.parent  # the node the view was called from, in the view that called it (None at the top)
         return None
 
@@ -900,9 +906,10 @@ class ComposedView(View):
             if name == "parent":
                 if inst.parent is None or inst.parent.id not in self._built.outer:
                     raise ValueError(f"{where}: anchor 'parent' needs the node to be inside another node")
-                target = self._built.outer[inst.parent.id]
+                target_inst = inst.parent
             else:
-                target = self._named_near(inst, name)
+                target_inst = self._instance_near(inst, name)
+            target = None if target_inst is None else self._built.outer[inst.parent.id] if name == "parent" else self._row_of(target_inst.id)
             if target is None:
                 if before is None:
                     names = sorted({o.name for o in self.handle.composition.walk() if o.name and o is not inst})
@@ -912,16 +919,35 @@ class ComposedView(View):
                 if before != ("gone",):  # it was there and is not now: hide the node until it is back
                     node.set(anchor=None, visible=False)
                     self._anchored[inst.id] = ("gone",)
+                    self._anchor_hidden.add(inst.id)
                 continue
             key = (id(target), placement, offset)
-            if before == key:
-                continue
-            node.set(anchor=target, placement=placement, offset=offset)
-            if before == ("gone",) and self._shown(inst):
-                node.set(visible=True)
-            self._anchored[inst.id] = key
+            if before != key:
+                node.set(anchor=target, placement=placement, offset=offset)
+                self._anchored[inst.id] = key
+            self._follow_visibility(inst, node, target_inst)
         for gone in [i for i in self._anchored if i not in live]:  # the node itself went, or its style stopped saying it
             self._anchored.pop(gone, None)
+            self._anchor_hidden.discard(gone)
+
+    def _follow_visibility(self, inst: Instance, node: Any, target: Instance) -> None:
+        """tre leaves a node whose anchor is hidden at the window's corner, drawn and pressable, so the node is hidden while its anchor, or anything it is in, is.
+        The anchor's `visible` is a value the view reads, so a change of it syncs the view, and this runs again."""
+        if self._shown(inst) and self._shown_with_parents(target):
+            if inst.id in self._anchor_hidden:  # back: shown, unless the node's own `visible:` says no
+                self._anchor_hidden.discard(inst.id)
+                node.set(visible=True)
+        elif self._shown(inst):
+            self._anchor_hidden.add(inst.id)
+            node.set(visible=False)  # (every time: a sync that lowered the node again has put its own `visible` back)
+
+    @classmethod
+    def _shown_with_parents(cls, inst: Optional[Instance]) -> bool:
+        while inst is not None:
+            if not cls._shown(inst):
+                return False
+            inst = inst.parent
+        return True
 
     def _row_of(self, inst_id: str) -> Any:
         """The node that stands for `inst_id` in the layout: for a control with a label, the row that holds the control and its text, since that is what the
@@ -937,8 +963,9 @@ class ComposedView(View):
     def _unanchor(self, inst: Instance, node: Any, style: dict[str, Any]) -> None:
         """The style no longer says `anchor`: the node is put back in the flow (or wherever its `position` says) and shown if it was hidden for want of an anchor."""
         node.set(anchor=None, position=style.get("position") or "relative")
-        if self._anchored.get(inst.id) == ("gone",) and self._shown(inst):
+        if inst.id in self._anchor_hidden and self._shown(inst):
             node.set(visible=True)
+        self._anchor_hidden.discard(inst.id)
         self._anchored.pop(inst.id, None)
 
     def _fit_layer(self, inst: Instance, layer: Any) -> None:
