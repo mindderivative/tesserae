@@ -239,13 +239,12 @@ def test_state_rules_follow_the_interaction_signals_and_the_widgets_own_properti
 
 
 def test_hovered_focused_and_pressed_are_names_an_expression_can_read_but_not_write():
-    comp = compose("widget: Rect\ninteraction: true\nstyle: {background: \"{{ 'hover' if hovered else 'rest' }}\"}\n"
-                   "handlers: {on_click: 'hovered = True'}\n", [])
+    comp = compose("widget: Rect\ninteraction: true\nstyle: {background: \"{{ 'hover' if hovered else 'rest' }}\"}\n", [])
     assert style(comp)["background"] == "rest"
     comp.root.interaction_signal("hovered").set(True)
     assert style(comp)["background"] == "hover"
-    with pytest.raises(Exception, match="not writable"):
-        comp.root.fire("on_click")
+    with pytest.raises(LoadError, match="'hovered' is not writable here"):  # found when the view loads (#277)
+        compose("widget: Rect\ninteraction: true\nhandlers: {on_click: 'hovered = True'}\n", [])
     with pytest.raises(LoadError, match="reserved name"):
         compose("widget: Rect\nstate: {hovered: false}\n", [])
 

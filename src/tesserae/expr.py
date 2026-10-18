@@ -520,6 +520,7 @@ class Statements:
     origin: Optional[Origin] = None
     limits: Limits = field(default=DEFAULT_LIMITS, repr=False)
     calls: tuple[ast.Call, ...] = ()  # the calls of a bare name, which only the scope can judge (`check_handler_calls`)
+    targets: tuple[ast.Name, ...] = ()  # the names it assigns, which only the scope can judge (`check_handler_targets`)
 
     def run(self, scope: Any, *, event: Any = None) -> None:
         """Runs the statements in order against `scope` (assignments through `scope.assign`, calls through the scope's actions
@@ -537,6 +538,7 @@ def compile_statements(source: str, *, origin: Optional[Origin] = None, limits: 
     tree = _parse(text, "exec", origin, limits)
     checker = _Checker(text, origin, limits, "handler")
     names: set[str] = set()
+    targets: list[ast.Name] = []
     assert isinstance(tree, ast.Module)
     for statement in tree.body:
         if isinstance(statement, ast.Assign):
@@ -544,6 +546,7 @@ def compile_statements(source: str, *, origin: Optional[Origin] = None, limits: 
                 raise checker.error(statement, "assign to one name: `name = expression`")
             _private_target(checker, statement.targets[0])
             names.add(statement.targets[0].id)
+            targets.append(statement.targets[0])
             checker.check(statement.value)
         elif isinstance(statement, ast.AugAssign):
             if not isinstance(statement.target, ast.Name):
@@ -552,13 +555,14 @@ def compile_statements(source: str, *, origin: Optional[Origin] = None, limits: 
                 raise checker.error(statement, f"{type(statement.op).__name__} is not allowed here (use + - * / // % **)")
             _private_target(checker, statement.target)
             names.add(statement.target.id)
+            targets.append(statement.target)
             checker.check(statement.value)
         elif isinstance(statement, ast.Expr) and isinstance(statement.value, ast.Call):
             checker.check(statement.value)
         else:
             raise checker.error(statement, f"'{_statement_name(statement)}' is not available in a handler (an assignment or a call only)",
                                 "if, for, del, return and the rest are reserved")
-    return Statements(text, tree.body, frozenset(checker.names | names), origin, limits, tuple(checker.calls))
+    return Statements(text, tree.body, frozenset(checker.names | names), origin, limits, tuple(checker.calls), tuple(targets))
 
 
 def check_handler_calls(statements: Statements, scope: Any) -> None:
@@ -573,6 +577,18 @@ def check_handler_calls(statements: Statements, scope: Any) -> None:
             continue
         near = _did_you_mean(name, [*BUILTIN_FUNCTIONS, *getattr(scope, "callable_names", lambda: [])()])
         raise _node_error(statements.source, statements.origin, call.func, f"'{name}' is not a function or an action you can call here", near)
+
+
+def check_handler_targets(statements: Statements, scope: Any) -> None:
+    """Raises `ExprError` for a name a handler assigns that its `scope` cannot write (a param, a loop variable, a Computed, a plain attribute of
+    the ViewModel, or no name at all), so the mistake shows when the view loads, not when the handler is pressed."""
+    writable = getattr(scope, "is_writable", None)
+    if writable is None:
+        return
+    for target in statements.targets:
+        if not writable(target.id):
+            near = _did_you_mean(target.id, getattr(scope, "writable_names", lambda: [])())
+            raise _node_error(statements.source, statements.origin, target, f"'{target.id}' is not writable here", near or "assign only local state, a model param and the ViewModel's Signals")
 
 
 #: The calls whose second argument is a handler of its own, run later: `after(ms, "statements")`, `every(ms, "statements")`.

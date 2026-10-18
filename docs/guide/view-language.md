@@ -162,7 +162,7 @@ children:
   Focus and the accessibility tree follow the engine's hidden nodes; nothing here changes them.
 - `state:` makes a Signal for each name, for this node and everything under it. A starting value may be an expression over the view's own params, which seed it once when the state is made (`state: {draft: "{{ hour }}"}`); it may not read a ViewModel's names. It belongs to the node (to each row under a `for:`), and is written
   by handlers, and survives a [hot reload](hot-reload.md#a-view-written-with-widget-nodes) for a node that keeps its name or position. Use it for presentation (open, on); what the app cares about belongs
-  in the ViewModel.
+  in the ViewModel. [Two-way properties](#two-way-properties) says what it keeps on a reload.
 - `for:`, `if:` and `slot:` are not allowed on the root of a view.
 
 ## Handlers
@@ -183,8 +183,8 @@ anything in it; unlike `on_click` it does not make the node a button), `on_move`
 A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
 `navigate.back`, `navigate.Settings`), or statements, which may call `focus('name')` to give the focus to the node of that name in the view the handler
 is written in: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a ViewModel Signal, or a call
-of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a param, a loop variable or
-anything else is an error; so is `if`, `for` or any other statement. A disabled node's handlers do not run.
+of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a plain param, a loop variable or
+anything else that is not writable is an error, found when the view loads ([what a handler may assign](#two-way-properties)); so is `if`, `for` or any other statement. A disabled node's handlers do not run.
 
 ### Timers
 
@@ -445,13 +445,38 @@ a text field inside the group is the field's). Disabled items are skipped, and a
 
 ## Two-way properties
 
-A `model` property given **one bare reference** to a Signal or local state is two-way: the user's edit is written back to it. Any other
-expression is one-way, and the widget shows the expression's value.
+This is the one place that says what a view may write back; [Bindings](bindings.md) and [Components](component-fragments.md#letting-the-component-change-something-of-the-callers) point here.
+
+A `model` property (a widget's `text`, `checked`, `value`, `selected`, `open`; a view's `model: true` param) given **one bare reference to a writable Signal** is
+two-way: the user's edit is written back to it. The writable names are a `state:` name, a `model: true` param, and a Signal of the ViewModel.
 
 ```yaml
 widget: Switch
 selected: "{{ dark }}"                 # toggling writes `dark`
 ```
+
+Anything else is **one-way**, and nothing complains: an expression (`"{{ not dark }}"`), a literal, a Computed, an attribute of the ViewModel that is not a
+Signal, a loop variable, a plain (not `model:`) param even when it holds a Signal. The widget shows the value, and the user's edit stays on screen, unwritten,
+until the value next changes (a plain attribute never changes, so it stays). Write the change yourself in a handler (`on_change: "dark = not dark"`).
+
+**What a handler may assign.** An assignment (`=`, `+=`, `-=`...) writes a `state:` name, a `model: true` param of the view it is written in, or a Signal of the ViewModel.
+It cannot write a plain param, a loop variable, a Computed, a ViewModel attribute that is not a Signal, `hovered`, `focused`, `pressed`, or a name nothing
+has. This is found when the view loads, with the file, line and column, and the names that could be written (`'cuont' is not writable here ... did you mean 'count'`).
+
+**A model param, by what the caller gives it.**
+
+| The caller writes | The view gets | A write by the view |
+| --- | --- | --- |
+| a bare `state:` name or ViewModel Signal | that Signal itself, through as many views as pass it on | reaches the caller |
+| an expression (`"{{ n + 1 }}"`) | a copy that follows the expression | stays in the copy until the expression next changes |
+| a literal, or nothing | its own value | stays in the view |
+
+A param that is not `model: true` always follows what it is given and cannot be written.
+
+**What `state:` keeps.** A `state:` Signal belongs to the node that declares it (and to each row of a `for:`, by its `key`). When the view is edited and reloaded, a node that
+keeps its name or position keeps the value the user left, **over an edited starting value**: change `state: {n: 1}` to `{n: 100}` and a running view still shows its `n`.
+A renamed state, or a renamed or moved node, starts again from its starting value, and so does a row whose `key` is new. A ViewModel's Signals are not part of the view and are
+untouched.
 
 ## Style
 

@@ -26,7 +26,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Iterable, Iterator, Mapping, Optional
 
-from tesserae.expr import BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_handler_calls
+from tesserae.expr import BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_handler_calls, check_handler_targets
 from tesserae.reactive import Computed, Effect, Signal, untrack
 from tesserae.spec.nodes import VISIBLE, Handler, LoadError, Node, ViewDoc
 from tesserae.spec.rules import INTERACTION_STATES, Identity, Rule, RuleSheet, ordered
@@ -180,6 +180,10 @@ class Scope:
         if frame is not None:
             return not frame.readonly or name in frame.writable
         return self.root is not None and not name.startswith("_") and isinstance(getattr(self.root, name, None), Signal)
+
+    def writable_names(self) -> list[str]:
+        """The names a handler may assign here: local state, the model params, and the ViewModel's Signals; for the names offered when one is mistyped."""
+        return [n for n in dict.fromkeys(self.names()) if self.is_writable(n)]
 
     def params_hold(self, name: str) -> bool:
         """Whether `name` is one a view was called with (a read-only frame of params or loop variables), not a ViewModel's or a local state's."""
@@ -735,6 +739,7 @@ class Composer:
             return
         try:
             check_handler_calls(handler.statements, scope)
+            check_handler_targets(handler.statements, scope)
         except ExprError as exc:
             raise LoadError(exc.message, file=ctx.doc.file, line=exc.line, column=exc.column, hint=exc.hint, text=ctx.doc.text) from None
 

@@ -2888,3 +2888,11 @@ User: "release tesserae 0.5.0", then "pypi is up".
 - **Found on the way:** the view language's names differ from the engine's (`margin`, `flex`, not `margin_left`/`flex_grow`), so the first set of names was wrong and only the tests showed it.
 - **Tests:** `tests/test_labelled_placement.py` (13). Mutations: 9 checked; anchor/placement/offset in `PLACED` were dead (the renderer reads them from the instance) and removed, and `anchor: parent` cannot name a labelled control (controls have no children), so that call is unchanged.
 - **Not done:** `opacity` and the paint fields stay on the box, not the row.
+
+## 0.5.0.27 #277: what a view may write back, and what it keeps
+
+- **The graph's inferred link was right, and the mechanism is one:** `Model param` and `Two-way binding` are the same rule (`Composer._model_ref`: one bare reference to a writable Signal, else one-way); `Scope.params_hold()` is not part of it (it only tells a read-only frame from state, for the starting value of a `state:`). Read from the code, then confirmed by running probes (kept in the issue comments).
+- **Answers:** (1) a handler may write state, a model param and a ViewModel Signal; (2) anything else given to a model property is silently one-way, and the user's edit stays until the value changes (for a plain attribute, for good); a model param given an expression is a local copy; (3) `state:` is keyed by (id, name, level) and kept over an edited starting value, a rename starts again; (4) the three pages agreed but repeated each other without linking, and none said the edit lingers.
+- **One behaviour change, with the maintainer's yes:** a bad assignment target was found only when the handler ran (and two tests pinned that). `expr.check_handler_targets` now runs beside `check_handler_calls` at load. Prototype first: of 7,989 tests only those two changed.
+- **Not done:** `after(...)`/`every(...)` text handlers are still checked at run time (they were not checked for calls either); a one-way property gives no warning for a view that obviously meant two-way (a possible lint, not asked for); `graphify update .` and the query for the two concepts were run after the docs (result in the issue).
+- **Tests:** `tests/test_two_way_state.py` (27); 9 mutations all caught.

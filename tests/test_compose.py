@@ -282,9 +282,8 @@ def test_state_is_per_instance_per_row():
 
 
 def test_a_handler_cannot_assign_a_param_a_loop_variable_or_an_unknown_name():
-    comp, vm, _ = make(None, "widget: Container\nchildren:\n  - {for: r in rows, key: r.id, widget: Rect, name: row, handlers: {on_click: 'r = 1'}}")
-    with pytest.raises(Exception, match="not writable"):
-        comp.find("root.row[1]").fire("on_click")
+    with pytest.raises(LoadError, match="'r' is not writable here"):  # found when the view loads, with its line (#277)
+        make(None, "widget: Container\nchildren:\n  - {for: r in rows, key: r.id, widget: Rect, name: row, handlers: {on_click: 'r = 1'}}")
     comp, vm, _ = make(None, "widget: Container\nchildren:\n  - {widget: Rect, name: r, handlers: {on_click: 'count = count + 1'}}")
     comp.find("root.r").fire("on_click")
     assert vm.count.get() == 1  # a Signal of the ViewModel is writable

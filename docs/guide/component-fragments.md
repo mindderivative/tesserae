@@ -169,6 +169,10 @@ children:
 - {widget: Setting, name: dark_mode, label: Dark mode, checked: "{{ dark }}"}
 ```
 
+Given an expression (`checked: "{{ not light }}"`) the component gets a copy that follows it, and a write by the component stays in the copy until the
+expression next changes; given a literal or nothing it keeps its own value. A param without `model: true` follows what it is given and cannot be written.
+[Two-way properties](view-language.md#two-way-properties) has the table.
+
 A param of type `handler` takes an action of the caller's, to run when something happens in the component. The component calls it
 like an action, and a param the caller left out does nothing when called:
 

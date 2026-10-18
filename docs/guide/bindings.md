@@ -48,8 +48,9 @@ the same, and both keep the binding in step when it changes.
 
 A property the user edits (a text field's `text`, a `Checkbox`'s `checked`, a `Slider`'s `value`) is **two-way** when it is given
 one bare reference to a Signal or a local `state:` name: `checked: "{{ done }}"`. The user's edit is written back to `done`. Any
-other expression (`"{{ not done }}"`, `"{{ app.state.user }}"`) is one-way: the widget shows its value, and a handler such as
-`on_change` does the writing.
+other expression (`"{{ not done }}"`, `"{{ app.state.user }}"`) is one-way: the widget shows its value, the user's edit stays on screen until the value
+next changes, and a handler such as `on_change` does the writing. [Two-way properties](view-language.md#two-way-properties) has the whole rule: which
+names a handler may write, what a model param does with each thing a caller gives it, and what `state:` keeps when a view is reloaded.
 
 Names and attributes starting with `_` do not exist for an expression.
 A call is only a built-in function, a method of text, a list or a dict, or

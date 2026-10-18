@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0.27
+
+### Changed
+
+- **A handler's assignment to a name it cannot write is found when the view loads** ([#277](https://github.com/mindderivative/tesserae/issues/277)). `r = 1` on a loop variable, a write to a plain param, a Computed, a ViewModel attribute that is not a Signal, `hovered`, or a misspelt name was an error only when the handler ran. It is now a load error with file, line and column and, for a typo, the names that can be written (`'cuont' is not writable here (did you mean 'count'?)`). It is the same check a call to an unknown action already had. No shipped view or example was affected. A handler written as the text of an `after(...)` or `every(...)` call is still checked only when it runs.
+
+### Documentation
+
+- [Two-way properties](guide/view-language.md#two-way-properties) is now the one place that says what a view may write back, answered by running the code: which names a handler may assign; that a property given anything but one bare reference to a writable Signal is one-way, and the user's edit stays on screen until the value next changes; what a `model: true` param does with a Signal, an expression, a literal and nothing; and that a `state:` keeps its value over an edited starting value when a view is reloaded. The bindings and component pages say the same and point to it. `tests/test_two_way_state.py` pins each answer.
+
 ## 0.5.0.26
 
 ### Fixed
