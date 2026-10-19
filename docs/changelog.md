@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.5.1
+
+Everything since 0.5.0 (the point releases 0.5.0.1 to 0.5.0.31, below, which were committed and pushed but never published to PyPI). Requires tre (`tesserae-engine`) 0.5.7.
+
+### The view language
+
+- **Layout** (0.5.0.8, 0.5.0.24, 0.5.0.25, 0.5.0.26, 0.5.0.28): sizes may be sums (`calc(100% - 16)`, `100% - 16`) and `fit-content`; `left`, `top`, `right`, `bottom` and `inset` place an absolute node against the edges of its parent; `anchor`, `placement` and `offset` place a node in the tree against another node, at a side or a corner, and it follows with no lag (hidden with its anchor); `overflow: hidden | visible`; a labelled `Checkbox`, `RadioButton` or `Switch` is placed as a whole row; a `ListItem`'s divider is drawn. `Overlay` takes the corner placements, `offset` and `flip`.
+- **Nodes** (0.5.0.6, 0.5.0.7, 0.5.0.9, 0.5.0.22): `visible:` on any node, `pointer_events: none`, typing effects on a text field, number ranges, and styled spans inside one `Text` (`runs`).
+- **Components**: `Slider` (Expressive sizes, vertical, an inset icon), `RangeSlider` with two handles, thicker progress indicators with the circular gap, the two-bar sweep, a contained loading indicator and wavy shapes, and drop zones on the halves of a split dock.
+- **Bindings** (0.5.0.27, 0.5.0.29, 0.5.0.31): [Two-way properties](guide/view-language.md#two-way-properties) is the one page that says what a view may write back and what it keeps. A handler's assignment to a name it cannot write, and the same in the text of an `after(...)` or `every(...)`, is found when the view loads, with its position; the log warns when an editable property is given a bare name that cannot be written back.
+- **Projects** (0.5.0.15, 0.5.0.19, 0.5.0.21): `tesserae new` and `tesserae add screen` write the current language; the examples are in it; a view's stylesheet is read only when the application uses the view.
+
+### Hot reload and editor support
+
+- Hot reload for views written with `widget:` nodes, including routed screens, and the app's stylesheet of `widget:` rules (0.5.0.13 to 0.5.0.15).
+- The editor schemas know the current language, and are checked in Red Hat's YAML language server (0.5.0.18, 0.5.0.30).
+
+### Fixed
+
+- A flex-expanded `Slider` maps the pointer with the width it was laid out at; `surface.dismiss` closes a `widget: Overlay`; a borderless window no longer crashes with a stylesheet of `widget:` rules; a function name that does not exist is a load error; a mistyped colour role is named; `ViewDialog` given a current-language view says what to do.
+
+Each point release has its own entry below, with the issue and the detail.
+
 ## 0.5.0.31
 
 ### Added
