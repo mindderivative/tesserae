@@ -26,7 +26,8 @@ class MainViewModel(ViewModel):
         self.a, self.b, self.c, self.d, self.e = Signal(""), Signal(""), Signal(""), Signal(""), Signal("")
 
 
-app = App(root=Path(__file__).parent, title="Typing effects", theme_seed=(0x67, 0x50, 0xA4, 0xFF), dark=False)
+app = App(root=Path(__file__).parent, title="Typing effects", theme_seed=(0x67, 0x50, 0xA4, 0xFF), dark=False,
+          reduced_motion=False)  # the effects are what this shows: not the OS's setting (CI's macOS and Windows runners ask for reduced motion)
 app.bind(MainViewModel)
 view = app.open_view("Main")
 app.show("main")

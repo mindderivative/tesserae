@@ -2,6 +2,7 @@
 `tesserae schema --project` writes it), every stylesheet of rules against the stylesheet schema, and the mistakes an editor should flag are flagged."""
 
 import json
+import sys
 from pathlib import Path
 
 import jsonschema
@@ -176,7 +177,9 @@ def test_a_link_planted_at_the_old_temporary_name_is_not_written_through(tmp_pat
     (tmp_path / ".tesserae" / "tesserae-widget-schema.json.tmp").symlink_to(victim)
     path = cli.project_schema(tmp_path)
     assert victim.read_text() == "mine" and json.loads(path.read_text())["title"]
-    assert not path.is_symlink() and path.stat().st_mode & 0o777 == 0o644
+    assert not path.is_symlink()
+    if sys.platform != "win32":  # Windows has no permission bits to set: a file is 0o666 there
+        assert path.stat().st_mode & 0o777 == 0o644
 
 
 def test_a_failed_write_leaves_no_temporary_file(tmp_path, monkeypatch):

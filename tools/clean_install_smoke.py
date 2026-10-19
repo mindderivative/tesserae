@@ -32,11 +32,11 @@ def main() -> int:
 
         def run(app, max_frames=None, **kwargs):  # headless: no render loop, so no GPU or display needed
             home = app._registered["Main"].view
-            app.window.simulate("click", node=home.node("button"))
+            app.window.simulate("click", node=home.node("root.button"))
             for _ in range(3):
                 app.window.advance(16)
-            report.update(current=app.current, greeting=home.node("greeting").get("text"),
-                          count=home.node("count").get("text"))
+            report.update(current=app.current, greeting=home.node("root.greeting").get("text"),
+                          count=home.node("root.count").get("text"))
 
         tesserae.App.run = run
         sys.path.insert(0, str(project))
