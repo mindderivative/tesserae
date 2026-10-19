@@ -47,8 +47,8 @@ Operating systems let users ask for less animation and for more contrast. An app
 
 ## Spring easing
 
-An animation's easing can be a spring: `Theme.easing("spring")`, or `Theme.spring(bounce)` with a `bounce` from -1
-to 1 (above 0 overshoots). The duration is the spring's period, and it runs until it settles:
+An animation's easing can be a spring: `Theme.easing("spring")`, or `Theme.spring(bounce)` with a `bounce` above -1
+and below 1 (above 0 overshoots). The duration is the spring's period, and it runs until it settles:
 
 ```python
 node.animate("scale", 1.0, 300, easing=Theme.spring(0.3))

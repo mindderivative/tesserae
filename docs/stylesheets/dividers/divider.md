@@ -1,13 +1,13 @@
 # Divider_Stylesheet.yaml
 
-The look of Divider (Material 3): a line in outline_variant that fills the length it is in. The insets are margins at the ends it keeps clear.
+The look of Divider (Material 3): a line in outline_variant that fills the length it is in (in a container that does not set `align_content`). The insets are margins at the ends it keeps clear.
 
 The look of [`Divider`](../../components/dividers.md) (in [Dividers](../../components/dividers.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# The look of Divider (Material 3): a line in outline_variant that fills the length it is in. The insets are margins at the ends it keeps clear.
+# The look of Divider (Material 3): a line in outline_variant that fills the length it is in (in a container that does not set `align_content`). The insets are margins at the ends it keeps clear.
 styles:
   - widget: Divider
     style:
@@ -28,7 +28,7 @@ styles:
 
 ## How it reaches the view
 
-Each rule names `widget: Divider` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
+Each rule names `widget: Divider` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties matched (all the `classes` count as one more), then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
 ## The rules
 

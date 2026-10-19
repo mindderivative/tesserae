@@ -27,7 +27,7 @@ The output looks like:
 ```
 
 `configure_logging` replaces loguru's default stderr handler and leaves
-any handler you added yourself. It takes `level`, `sink` (anything
+any handler you added yourself. Call it once: each call adds a handler, so a second call prints every message twice (`logger.remove(handler_id)` removes one). It takes `level`, `sink` (anything
 `logger.add` accepts: a stream, a file path, a function) and `format`
 (`tesserae.log.DEFAULT_FORMAT` by default), and returns the handler id.
 
@@ -36,13 +36,13 @@ any handler you added yourself. It takes `level`, `sink` (anything
 | Level | Message |
 |---|---|
 | `DEBUG` | a screen loaded (`app.load`), a screen shown (`app.show`), the traceback of a failed hot reload |
-| `INFO` | hot reload started, and what it watches; a screen it does not watch; each view reloaded; each theme or stylesheet file applied; the app switching between light and dark or between standard and high contrast |
-| `WARNING` | a view file in the older syntax, once per file (it still loads: `tesserae migrate-yaml` moves it); a `Link` whose `href` is refused (only `http`, `https`, `mailto` and `tel` are opened); Python warnings such as `FontFallbackWarning`, when `configure_logging` captures them (below) |
-| `ERROR` | a hot reload that failed, naming the file and the error |
+| `INFO` | hot reload started (`hot reload on: watching N screen(s) and M theme/stylesheet file(s)`), and what it watches; hot reload off in a built app (there are no source files); a screen it does not watch; each view reloaded; each theme or stylesheet file applied; the app switching between light and dark or between standard and high contrast |
+| `WARNING` | a view file in the older syntax, once per file (it still loads: `tesserae migrate-yaml` moves it); a `Link` whose `href` is refused (only `http`, `https`, `mailto` and `tel` are opened); a property the user edits given one bare name that cannot be written back (`Main_View.yaml:5:42: Checkbox checked is given 'flag', which is a ViewModel attribute that is not a Signal: the user's edit is not written back (one-way)`), once for each place in a file; Python warnings such as `FontFallbackWarning`, when `configure_logging` captures them (below) |
+| `ERROR` | a hot reload that failed, naming the file and the error; a hot-reload watcher that stopped |
 
 Each message carries the Tesserae module it came from (`tesserae.app`,
 `tesserae.spec.watch`), which loguru shows as `{name}`. A mistake in a view, such as an unknown property or a name
-no ViewModel has, is not logged: it is an exception that names the file, line and column.
+no ViewModel has, is an exception that names the file, line and column; the one mistake that is logged instead is the one-way property above.
 
 ## Failed hot reloads
 
@@ -55,7 +55,7 @@ your own loop calls, still raises instead.
 
 ## Warnings
 
-`FontFallbackWarning` is a real Python warning, so
+`FontFallbackWarning` (`from tesserae.fonts import FontFallbackWarning`) is a real Python warning, so
 `warnings.filterwarnings("error", category=FontFallbackWarning)` still
 turns it into an exception. By default, `configure_logging` also shows
 warnings through loguru, so they appear in the same format as

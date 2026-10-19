@@ -26,7 +26,7 @@ A view Tesserae ships is a `<Name>_View.yaml` (what it takes and what it is made
 
 ### `Tabs`
 
-The Material 3 tab bar: a row of tabs over a divider, an indicator under the selected one that slides to the next. `tabs` is a list of {value, label, icon, badge}; `selected` is the chosen value and a press writes it back. `variant: primary` (48 tall, 64 with icons, a 3 dp indicator as wide as the label's share of the tab) or `secondary` (48 tall, a 2 dp indicator across the whole tab). The tabs are `tab_width` wide each: a fixed bar. Arrow keys move the focus along the bar and choose the tab (one Tab stop); the panel each tab shows is yours to switch on `selected`. A scrolling bar waits for the engine to scroll sideways.
+The Material 3 tab bar: a row of tabs over a divider, an indicator under the selected one that slides to the next. `tabs` is a list of {value, label, icon, badge}; `selected` is the chosen value and a press writes it back. `variant: primary` (48 tall, 64 with icons, a 3 dp indicator as wide as the label's share of the tab) or `secondary` (48 tall, a 2 dp indicator across the whole tab). The tabs are `tab_width` wide each: a fixed bar. Arrow keys move the focus along the bar and choose the tab (one Tab stop); the panel each tab shows is yours to switch on `selected`.
 
 | Parameter | Type | Default | Meaning |
 | --- | --- | --- | --- |

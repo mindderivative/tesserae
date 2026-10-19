@@ -252,7 +252,7 @@ def stylesheet_page(entry: dict[str, Any], view: View, help_: dict[str, str]) ->
     out += ["## How it reaches the view", "",
             f"Each rule names `widget: {view.name}` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, "
             "a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be "
-            "expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, "
+            "expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties matched (all the `classes` count as one more), then a `state`, "
             "then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` "
             "beats every rule for the fields it sets.", ""]
     by_part: dict[str, list[dict[str, Any]]] = {}
@@ -293,13 +293,13 @@ def overview_components(data: dict[str, Any]) -> str:
 
 def overview_stylesheets(data: dict[str, Any], views: dict[str, View]) -> str:
     out = ["# Component Stylesheets", "",
-           "Every shipped view keeps its look in a stylesheet, `<Name>_Stylesheet.yaml`, beside the view itself, `<Name>_View.yaml`. Each page here shows one "
+           "Most shipped views keep their look in a stylesheet, `<Name>_Stylesheet.yaml`, beside the view itself, `<Name>_View.yaml` (a few, such as the tab and chip groups, have only their params). Each page here shows one "
            "stylesheet, how its rules reach the view, and what each part's rules do.", "",
            "## How they work", "",
            "A stylesheet is a list of rules. A rule names a widget (the view), may narrow it, and gives a `style`:", ""]
     out += _fence("styles:\n  - widget: Button\n    variant: filled\n    style: {background: primary, foreground: on_primary}\n"
                   "  - widget: Button\n    variant: filled\n    state: disabled\n    style: {background: \"on_surface@12%\"}\n"
-                  "  - widget: Card\n    part: heading\n    style: {foreground: on_surface}", "yaml")
+                  "  - widget: Card\n    part: headline\n    style: {foreground: on_surface}", "yaml")
     out += ["- A rule narrows by the properties the view declares (`variant`, `size`, `shape`), `classes`, a node `name`, a `part` (a named node inside the view) and a `state`.",
             "- A value in `{{ }}` is an expression over the view's parameters, worked out where the view is used.",
             "- The most specific rule wins; a node's own `style:` beats every rule for the fields it sets.",

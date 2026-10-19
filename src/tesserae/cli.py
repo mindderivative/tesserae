@@ -6,13 +6,13 @@
     tesserae schema [--settings] [--project [DIR]]
     tesserae migrate-yaml [PATH] [--write] [--force]
 
-`new` makes `<name>/` with `app.py` and a `Home` View/ViewModel pair
+`new` makes `<name>/` with `app.py` and a `Main` View/ViewModel pair
 following the naming convention, runnable at once; `--window` makes the app
 one `widget: Window` view (title bar, rail, and two routed screens). `add screen` adds a pair and, at the
 marker comments `new` leaves in `app.py`, its bind, `open_view()` and route.
 Neither overwrites a file. The templates are in `tesserae/templates/`.
 `build` makes the app one executable: see `tesserae.build`.
-`schema` (0.3.2) says where the YAML schemas for Red Hat's YAML language
+`schema` says where the YAML schemas for Red Hat's YAML language
 server are, and with `--settings` prints the `yaml.schemas` setting for them. `--project` writes a schema of the views too that the project
 DIR (here by default) has of its own, in `DIR/.tesserae/`, and maps the views to it.
 """
@@ -180,7 +180,7 @@ def _parser() -> argparse.ArgumentParser:
     new_cmd = commands.add_parser("new", help="make a new app")
     new_cmd.add_argument("name", help="the app's folder name, e.g. notes or my-notes")
     new_cmd.add_argument("--window", action="store_true",
-                         help="make the app one `kind: Window` view: title bar, rail, and two routed screens")
+                         help="make the app one `widget: Window` view: title bar, rail, and two routed screens")
     new_cmd.add_argument("--dir", type=Path, default=Path("."), help="where to make it (default: here)")
     new_cmd.add_argument("--no-venv", action="store_true", help="don't make a virtual environment in the project")
     new_cmd.add_argument("--custom-title-bar", action="store_true",

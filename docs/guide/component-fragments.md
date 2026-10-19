@@ -30,9 +30,9 @@ The values are checked when the view loads, against what the component declares,
 
 ```
 Main_View.yaml:5:5: error: Stat: 'label' is required
-Main_View.yaml:5:40: error: Stat: no property 'colour' (properties: label, unit, size)
+Main_View.yaml:5:40: error: Stat: no property 'colour' (properties: label, value, unit, size)
 Main_View.yaml:5:46: error: Stat: 'size' is 'xl', which is not one of: s, m
-Main_View.yaml:5:43: error: Stat: 'n' takes a number from 0 to 10, got 11
+Main_View.yaml:5:43: error: Stat: 'n' takes a number from 0 to 10, got 11   # for a param declared {type: int, min: 0, max: 10}
 ```
 
 ### Handlers, bindings and names on a call
@@ -67,8 +67,8 @@ The call's `name:` is the prefix of everything inside it. The component's nodes 
 
 ## Writing your own
 
-Put a `<Name>_View.yaml` anywhere in the project (`Views/`, `Components/`, a feature folder: it is found by name) and call it as
-`widget: Name`.
+Put a `<Name>_View.yaml` in `Views/` and call it as `widget: Name`; it is found by name. To keep views in other folders, give the app
+`search=[...]`, or `recursive=True` to look through the whole project ([Projects](projects.md)).
 
 ```yaml
 # Stat_View.yaml
@@ -102,7 +102,7 @@ children:
 
 | Key | Meaning |
 | --- | --- |
-| `type` | one of `str int float bool color length icon enum list dict node nodes handler any` |
+| `type` | one of `str int float bool color length icon enum list dict node nodes handler mask any` |
 | `default` | the value when the call leaves it out (a param with a default is optional) |
 | `choices` | the values an `enum` allows |
 | `required` | the call must give it |
@@ -110,9 +110,10 @@ children:
 | `doc` | one line, shown by the editor and in the schema |
 | `min`, `max` | the range a number may take |
 
-!!! warning "Don't name a param `on`, `off`, `yes` or `no`"
-    YAML reads those bare words as booleans before Tesserae sees them, so the name is refused. Name a boolean param `selected` or
-    `enabled`, or quote the name.
+!!! warning "Don't name a param `on`, `off`, `yes` or `no` in the list form"
+    In `params: [on, off]` YAML reads those bare words as booleans before Tesserae sees them, and the load fails (`a params entry is a name
+    or {name: default}, got True`). The mapping form (`params: {on: {type: bool}}`) keeps the name, but a boolean param is easier to
+    read as `selected` or `enabled`.
 
 ### Children and slots
 
@@ -283,7 +284,7 @@ For a value that changes with a param, write the expression: `padding: "{{ {'lef
 
 ## Nesting
 
-A component can call other components, and its parts are named under the outer call's name too (`save.label.text`). A component may
+A component can call other components, and its parts are named under the outer call's name too (`panel.heading.label`, for a `heading` the `panel` component calls). A component may
 call itself, which is how a tree is written, to a depth of 64.
 
 ## Looking at the shipped ones

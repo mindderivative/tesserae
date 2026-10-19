@@ -90,12 +90,14 @@ explicit `width` is the size it starts from, and `expand_*` overrides it across 
 ## Sizes
 
 `width` and `height` take pixels, `"auto"` (the default: its content's
-size, or stretched), `"fit-content"` (its content's size), a percentage of
+size, or stretched), `"fit-content"` (its content's size along the line of the layout: across it a box is still stretched unless its parent sets
+`align_content` or it sets `align_self`), a percentage of
 the parent (`"50%"`), or a sum of those such as `"calc(100% - 16)"`
 ([below](#a-size-that-is-the-parent-minus-something)). A size is never
 negative. `min_width`, `max_width`, `min_height` and `max_height` bound it
 with a number, `"auto"` or a percentage, and `aspect_ratio` (width over
-height) gives the missing side from the one that's set. A size that tre
+height) gives the missing side from the one that's set: a side the layout stretches is not computed, so set `align_content` on the parent or
+`align_self` on the node (or use `flex_wrap`). A `Text` with no `width` is measured to its text; `width: auto` stretches it like any box. A size that tre
 would refuse (`40px`, `10vw`, `stretch`, `100%-16`) is an error at the line
 that writes it, saying what to write.
 
@@ -294,12 +296,12 @@ children:
 | Field | What it says |
 | --- | --- |
 | `anchor` | The `name` of the node to sit against, or `parent` for the node it is written inside. The nearest node of that name wins: in a `for:` row it is the row's own node, then the view's, then the view that called this one. |
-| `placement` | `below` (the default), `above`, `start`, `end`, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, or `center`. A corner is the node's matching corner on the target's. |
+| `placement` | `below` (the default), `above`, `start`, `end`, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, or `center`. A corner puts the node's *centre* on that corner of the target (and `center` on the target's centre); `offset` moves it from there. |
 | `offset` | `[dx, dy]` in pixels, added to the placement. |
 
 The node stays in the tree, so a parent's `clip_children` cuts it and its `z_index` orders it among its siblings, unlike a layer. It takes itself out of the
 flow (it is absolute by itself). `anchor`, `placement` and `offset` may come from a stylesheet rule or an expression. A missing anchor name is an error at the
-node, with the nearest name; a bad `placement` or `offset` is found at load. Take the fields out and the node is back in the flow.
+node, with the nearest name; a bad `placement` or `offset` is found at load. Take the fields out and the node is back in the flow. `placement` and `offset` do nothing without an `anchor`.
 
 If the anchor goes (an `if:`), or is hidden with `visible:` (its own, or that of anything it is inside), the node is hidden with it and comes back when the anchor does,
 unless its own `visible:` says no. A control with a `label:` is anchored as the row that holds the box and its label. `transition:` does not ease a placement.
@@ -378,7 +380,7 @@ children:
 - `scroll_offset: "{{ pos }}"`, one bare reference to a Signal or a `state:`
   name, is two-way: setting it scrolls, and scrolling writes back where the
   user scrolled, to save and restore a position. An offset past the end is
-  held at the end at once, and that is what's written back. `at_top`,
+  held at the end at once, and that is what's written back (on the next frame, when the Signal was the one that set it). `at_top`,
   `at_end` and `scroll_direction` report where it is, the same way (see
   [Scrolling](view-language.md#scrolling)).
 - Its scrollbar is the theme's `outline`.

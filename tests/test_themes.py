@@ -50,6 +50,12 @@ def _view(tmp_path: Path, text: str = RECT_VIEW) -> Path:
 # -- load_theme / load_stylesheet -------------------------------------
 
 
+def test_an_unknown_key_in_a_theme_file_is_found_when_it_is_read_and_names_the_file(tmp_path: Path):
+    path = _write(tmp_path / "Brand_Theme.yaml", "colours: {primary: '#00FF00'}\n")
+    with pytest.raises(ValueError, match=r"Brand_Theme\.yaml: unknown field `colours`, expected one of `seed`"):
+        load_theme(path)
+
+
 def test_load_theme_reads_a_mapping(tmp_path: Path):
     theme = _write(tmp_path / "t.yaml", "colors: {primary: '#00FF00'}\ndark: true\n")
     assert load_theme(theme) == {"colors": {"primary": "#00FF00"}, "dark": True}
@@ -109,7 +115,7 @@ def test_giving_both_a_theme_file_and_its_spec_is_an_error(tmp_path: Path):
 
 def test_a_bad_key_in_a_theme_file_names_the_theme_file(tmp_path: Path):
     theme = _write(tmp_path / "Theme.yaml", "colours: {primary: '#00FF00'}\n")
-    with pytest.raises(ValueError, match=r"Theme\.yaml: custom_theme_spec=: unknown field `colours`"):
+    with pytest.raises(ValueError, match=r"Theme\.yaml: unknown field `colours`"):
         load_view(_view(tmp_path), theme_seed=SEED, custom_theme=theme)
 
 

@@ -209,7 +209,7 @@ brings the two screens in.
 - A call with a `route:` is a screen: `widget: Tasks` is the view `Tasks_View.yaml`, and the app can `navigate("Tasks")`, `show("Tasks")`
   or `navigate_to("")` it. A routed screen is part of the window view, not opened by itself, so it has no `name:` and no ViewModel
   of its own: it reads the names of the ViewModel that serves the window. That is why `Tasks_ViewModel.py` and
-  `Settings_ViewModel.py` are now one, `Window_ViewModel.py`, serving `Window`.
+  `Settings_ViewModel.py` are now one, `Window_ViewModel.py`, serving `Window`: delete the two old files, which nothing uses any more.
 - The rail replaces the Settings and Back buttons, so they are gone from the screens.
 - The window is still resizable (from its edges), and the title bar still drags it.
 

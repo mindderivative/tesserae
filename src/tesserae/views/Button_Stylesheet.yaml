@@ -1,5 +1,4 @@
-# The look of Button (Material 3, with the Expressive sizes). Sizes set the height, the padding (24 each side, 16 on the side with an icon; a text button
-# 12 and 12) and the gap; variants set the colours; the shape is a pill or a rounded square, and a toggle that is on, or a press, takes the other.
+# The look of Button (Material 3, with the Expressive sizes). Sizes set the height, the padding (by size: 12 for `xs`, 24 for `s` and `m` (16 on the side with an icon on `s`), 48 for `l`, 64 for `xl`) and the gap; variants set the colours; the shape is a pill or a rounded square, and a toggle that is on, or a press, takes the other.
 # A state layer and a ripple come from the node's interaction; a filled, tonal or elevated button lifts when hovered.
 styles:
   - widget: Button

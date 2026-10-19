@@ -31,7 +31,7 @@ window's actions and the `app.maximized` and `app.active` values a binding can f
 
 `tesserae new notes --window --custom-title-bar` makes an app like this
 ([The `tesserae` command](cli.md)); the window is a [`widget: Window`](windows-and-docks.md) with `borderless: true` and a `title_bar:`
-(the generated files are in the older syntax, which `tesserae migrate-yaml` moves over: [Migrating](../migration.md)).
+(the generated `Window_View.yaml` is the window view of this page).
 
 ## `widget: TitleBar`
 
@@ -168,7 +168,7 @@ moving the window. The handlers are `window.minimize`,
 `window.maximize`, `window.restore`, `window.toggle_maximized` and
 `window.close`; they need the view to be on an `App`'s window.
 `app.close()` closes the window as the user's close would, so a "save
-changes?" check on `close_requested` still runs and can cancel it.
+changes?" check on `close_requested` still runs and can cancel it (`app.window.on("close_requested", handler)`, then `event.cancel()` in the handler).
 
 An expression follows the window's state like any Signal's: `app.maximized` and `app.active` (the toggle above shows
 `Restore` while the window is maximized).

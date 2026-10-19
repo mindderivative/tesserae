@@ -13,7 +13,7 @@ A divider is a thin line that groups and separates content in lists and containe
 `outline_variant` colour that fills the length it is in, and is a `separator` to a screen reader.
 
 The `variant` says how much of the ends it keeps clear (`full` by default; `inset` leaves 16 pixels at the start, `middle` 16 at both ends). A `horizontal` divider fills the
-width it is in and a `vertical` one the height; it is 1 pixel thick unless `thickness` says.
+width it is in and a `vertical` one the height (in a container that does not set `align_content`, which would size it to its content, and so to nothing); it is 1 pixel thick unless `thickness` says.
 
 ## How it is built
 

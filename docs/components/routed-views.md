@@ -29,8 +29,8 @@ children:
 ```
 
 ```python
-app.navigate("Settings")
-app.navigate_to("settings")
+app.navigate("Settings")        # a screen, by name
+app.navigate_to("settings")     # a route (a handler's navigate_to(screen) in YAML takes a screen name)
 ```
 
 A call with a `route:` is the screen, named for the view it calls (`- {widget: Settings, name: settings, route: settings}`

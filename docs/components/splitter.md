@@ -16,8 +16,7 @@ pane has, two-way: bind a Signal and the handle writes it. `min_first` and `min_
 on the handle closes the first pane, and opens it again where it was. `label` is what a screen reader calls the handle.
 
 The pointer drags it (the pointer is captured, so it keeps following outside the handle); the arrow keys along its axis move it by 5%, Home
-and End go to the ends; a screen reader can increment, decrement and set it. The parts a stylesheet can address are `first`, `handle`
-and `second`. For more than two panes, nest splitters.
+and End go to the ends; a screen reader can increment, decrement and set it. For more than two panes, nest splitters.
 
 ## How it is built
 

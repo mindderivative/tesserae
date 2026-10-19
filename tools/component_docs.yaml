@@ -3,9 +3,9 @@
 # parameters, from the files themselves.
 #
 # groups:        the collapsing tree, in order.
-# components:    one page each: slug, title, group, fragments (the *_Component.yaml it is built from, or none
-#                for a widget that is Python only), md3 (what it is in Material Design 3), built (how Tesserae
-#                makes it), usage (an example in a view), python (the same in code), see (guide pages).
+# components:    one page each: slug, title, group, views (the shipped views it is built from), widgets (the
+#                built-in widgets), md3 (what it is in Material Design 3), built (how Tesserae makes it),
+#                usage_view (an example in a view), python (the same in code), shares, see (guide pages).
 groups:
   - Actions
   - Communication
@@ -329,7 +329,7 @@ components:
       A tooltip names or explains a control when the pointer rests on it, or it has keyboard focus.
     built: |
       Any node takes a `tooltip:`. A plain one is text on the inverse surface; a rich one has a `title`, up to two `actions` and a `placement`
-      (`below`, `above`, `start`, `end`), is a raised surface the pointer can move onto, and closes when an action is pressed. It shows after the
+      (`below`, `above`, `start`, `end`, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`, which puts the middle of the tooltip on that point and is not flipped), is a raised surface the pointer can move onto, and closes when an action is pressed. It shows after the
       pointer rests for `delay` (500 ms by default), at once on keyboard focus (focus that a click gave does not count), or after a touch held in place; Escape, a press, or leaving
       closes it. The text also names the node for a screen reader, unless the node has a description of its own. Not built: reaching the actions by keyboard.
     usage_view: |
@@ -442,7 +442,7 @@ components:
       `outline_variant` colour that fills the length it is in, and is a `separator` to a screen reader.
 
       The `variant` says how much of the ends it keeps clear (`full` by default; `inset` leaves 16 pixels at the start, `middle` 16 at both ends). A `horizontal` divider fills the
-      width it is in and a `vertical` one the height; it is 1 pixel thick unless `thickness` says.
+      width it is in and a `vertical` one the height (in a container that does not set `align_content`, which would size it to its content, and so to nothing); it is 1 pixel thick unless `thickness` says.
     usage_view: |
       name: settings
       widget: Container
@@ -1174,7 +1174,7 @@ components:
     after: |
       `TextInput` is the bare input, for when the field around it is your own: `text`, `placeholder`, `multiline`, `obscured`, `max_length`,
       `read_only`, `disabled`, `mask`, the typing and caret effects above (`typing_effect`, `caret_effect` and the five that tune them) and the font (`typography_role`,
-      `font_family`, `font_size`, `font_weight`); its colour is `style.foreground`.
+      `font_family`, `font_size`, `font_weight`); its colour is `style.foreground`. A `TextInput` needs a `style.background` and a `typography_role` (or `font_family`): without them the view does not build.
 
       ## Changing its look
 
@@ -1370,14 +1370,14 @@ components:
       Text is set in Material Design 3's type scale: 15 styles in five groups (display, headline, title, body and
       label), each large, medium or small, with a font, size, weight, line height and tracking.
     built: |
-      `widget: Text`. Name a `typography_role` and Tesserae fills in the rest; a theme's `typography:` can change
-      what a role means.
+      `widget: Text`. Name a `typography_role` (or a `font_family`) and Tesserae fills in the rest; a theme's `typography:` can change
+      what a role means. A `Text` needs one of them and a `style.foreground`: without either the view does not build, and the error says which.
 
       `text` can be an expression, and follows the Signals it reads. `font_family`, `font_size` and `font_weight` replace what the role gives. `wrap` is `word` or `none`,
       `runs` gives pieces of one text their own style and links ([Rich Text & Links](../guide/rich-text.md)). `overflow` is `clip` or `ellipsis`, `text_align` is `start`, `center` or `end`, and `max_lines` cuts a longer text to that many lines (with `overflow: ellipsis` the last
       one ends in an ellipsis). `letter_spacing` adds space between letters, in pixels. `selectable: true` lets the text be selected and copied, and `heading: 1` to `6` makes it a heading of that level for a screen reader.
 
-      The colour is `style.foreground`. Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are
+      The colour is `style.foreground` (required). Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are
       `tokens.MD3_TRACKING`, and a theme turns them on with `typography: tokens.MD3_TRACKING_TYPOGRAPHY` (or one role at a time:
       `typography: {body_large: {tracking: 0.5}}`). A node's own `letter_spacing` wins.
     usage_view: |
@@ -1659,8 +1659,7 @@ components:
       on the handle closes the first pane, and opens it again where it was. `label` is what a screen reader calls the handle.
 
       The pointer drags it (the pointer is captured, so it keeps following outside the handle); the arrow keys along its axis move it by 5%, Home
-      and End go to the ends; a screen reader can increment, decrement and set it. The parts a stylesheet can address are `first`, `handle`
-      and `second`. For more than two panes, nest splitters.
+      and End go to the ends; a screen reader can increment, decrement and set it. For more than two panes, nest splitters.
     usage_view: |
       name: editor
       widget: Container
@@ -1888,8 +1887,8 @@ components:
       ```
 
       ```python
-      app.navigate("Settings")
-      app.navigate_to("settings")
+      app.navigate("Settings")        # a screen, by name
+      app.navigate_to("settings")     # a route (a handler's navigate_to(screen) in YAML takes a screen name)
       ```
 
       A call with a `route:` is the screen, named for the view it calls (`- {widget: Settings, name: settings, route: settings}`

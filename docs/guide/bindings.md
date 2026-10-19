@@ -19,7 +19,7 @@ a loop variable over a fixed list) is worked out once.
 An expression is a **Python subset**, run by a sandboxed
 evaluator (`tesserae.expr`): nothing in a view file can import, open a
 file, reach `__class__` or run code the application did not expose. The
-full grammar and limits are in `design/yaml-language.md` section 8.
+limits are below.
 
 A binding can drive text, sizes, colours and other numbers, `checked`
 and `selected`, and `visible`: `false` takes a node out of the
@@ -40,8 +40,9 @@ expressions: `text: "{{ app.state.user }}'s tasks"`.
 | logic and choice | `a and b`, `a or b`, `not a`, `x if cond else y` |
 | literals and displays | `42`, `1.5`, `"text"`, `True`, `None`, `[1, 2]`, `{"a": 1}`, `f"{n} items"` |
 | comprehensions | `[t.upper() for t in tags if t]` |
-| built-in functions | `len`, `min`, `max`, `sum`, `abs`, `round`, `sorted`, `str`, `int`, `float`, `range`, `format_number`, `pluralize`, `clamp`, `format_date`, `current_date`, ... |
-| methods of text, lists and dicts | `name.upper()`, `items.index(x)`, `d.get("k")` |
+| built-in functions | `len min max abs round sum str int float bool sorted reversed range enumerate zip any all list dict tuple set isinstance` (`isinstance` takes `str int float bool list dict`), `format_number pluralize clamp`, and the date functions `date_add_days date_weekday days_in_month format_date current_date` (dates are `year-month-day` text) |
+| methods of text | `lower upper title capitalize strip lstrip rstrip split splitlines join startswith endswith replace find count zfill isdigit isalpha center ljust rjust removeprefix removesuffix` |
+| methods of lists, tuples, dicts | lists and tuples: `index`, `count` only (they are read-only: `items.append(x)` and `items.sort()` are errors, so assign a new list); dicts: `get keys values items` |
 
 A **Signal or Computed reads as its value**: `count` and `count.get()` are
 the same, and both keep the binding in step when it changes.
@@ -58,8 +59,7 @@ A call is only a built-in function, a method of text, a list or a dict, or
 (its public attributes), but it cannot be added, compared, formatted or
 iterated by an expression, so its own methods never run from a view.
 
-An `a11y:` field can be bound the same way (`label`, `hidden` and
-`level`): see [Interaction & Accessibility](interaction.md#bound-fields).
+Every `a11y:` field except `role` and `live` can be bound the same way (`label` must then be text, so write `"{{ n }} unread"`, not `"{{ n }}"`): see [Interaction & Accessibility](interaction.md#bound-fields).
 
 ### Video frames
 
@@ -105,7 +105,7 @@ Counter_View.yaml:5:43: 'cont' is not defined (did you mean 'count')
 
 A function name that does not exist is found when the view loads, with the line, not when the expression runs. In a property, an `if:`,
 a `for:` or a stylesheet rule the only functions are the built-in ones (`clamp`, `min`, `max`, `len`, `format_number`, ...), so
-`{{ limit(x, 0, 1) }}` is a load error naming `limit` and offering the near names (`did you mean 'clamp'`). In a handler a call may also be
+`{{ clmap(x, 0, 1) }}` is a load error naming `clmap` and offering the near names (`did you mean 'clamp'`). In a handler a call may also be
 a built-in action (`copy`, `focus`, `after`, `navigate_to`, ...), a method of the ViewModel or a handler parameter; a name that is none of
 these is a load error too (`bmup(2)` offers `bump`). `app.check()` lists every name and action the open views use that their ViewModels
 do not have, without a window.

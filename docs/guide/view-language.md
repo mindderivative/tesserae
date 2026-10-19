@@ -20,7 +20,7 @@ children:
     a11y: {label: Add one}
 ```
 
-Files are named `<Name>_View.yaml`, wherever they are in the project. A view with `params:` is a component: another view calls it by
+Files are named `<Name>_View.yaml` and found by name in `Views/` or a folder the app searches ([Projects](projects.md)). A view with `params:` is a component: another view calls it by
 its name, with the params as plain keys. There is no other difference.
 
 ## Nodes
@@ -47,8 +47,8 @@ its name, with the params as plain keys. There is no other difference.
 An unknown key or property is an error that names the file, line and column and suggests the nearest one:
 
 ```
-Main_View.yaml:11:5: error: Slider: no property 'valu' (did you mean 'value'; properties: value, disabled)
-    11 |     valu: 3
+Main_View.yaml:11:5: error: Rect: no property 'colour' (properties: disabled)
+    11 |     colour: red
        |     ^
 ```
 
@@ -63,22 +63,26 @@ Every widget declares its properties: a type, a default, the values it allows, w
 
 | Widget | Properties |
 |---|---|
-| `Container`, `Rect` | none; they hold children (a `Rect` is the usual clickable box) |
-| `Text`, `Link` | `text`, `typography_role`, `font_family`, `font_size`, `font_weight`, `wrap`, `overflow`, `text_align`, `max_lines`, `letter_spacing`; a `Text` also `selectable` and `heading`, a `Link` also `href`, `visited`, `disabled` and `underline` |
-| `TextInput` | `text` (model), `placeholder`, `multiline`, `obscured`, `max_length`, `read_only`, `typography_role`, `font_family`, `font_size`, `font_weight`, `disabled` |
+| `Container`, `Rect` | they hold children (a `Rect` is the usual clickable box); `disabled`. A `Container` also has `measured_width` and `measured_height`, outputs bound like `at_top`: the size it was laid out at |
+| `Text`, `Link` | `text`, `typography_role`, `font_family`, `font_size`, `font_weight`, `wrap`, `overflow`, `text_align`, `max_lines`, `letter_spacing`; a `Text` also `selectable`, `runs` ([styled pieces](rich-text.md)) and `heading`, a `Link` also `href`, `visited` (model), `disabled` and `underline` |
+| `TextInput` | `text` (model), `placeholder`, `multiline`, `obscured`, `max_length`, `read_only`, `typography_role`, `font_family`, `font_size`, `font_weight`, `disabled`, `mask` and the [typing effects](../components/text-fields.md) (`typing_effect`, `typing_duration`, `flash_color`, `flash_opacity`, `caret_effect`, `glide_duration`, `caret_blink`) |
 | `TextField` | the Material text field, a view Tesserae ships: see [Text fields](../components/text-fields.md) |
 | `Icon` | `icon` (a built-in icon name, or `path` and `view_box`: one of them) |
-| `Image`, `Svg` | `src`, `fit`; `src`, `content` |
-| `Checkbox`, `Switch`, `RadioButton` | `checked` or `selected` (model), `group`, `disabled` |
-| `Slider`, `SpinBox` | `value` (model), `min`, `max`, `step`, `disabled` |
-| `CircularProgress`, `LinearProgress`, `LoadingIndicator` | `value` |
-| `TimePickerDial` | `hour`, `minute` (model) |
+| `Image`, `Svg` | `src`, `fit`, `alt`, `frame` (a picture pushed in as bytes); `src`, `content`, `alt` |
+| `Checkbox` | `checked` (model), `disabled`, `error`, `label` |
+| `Switch` | `selected` (model), `disabled`, `label`, `icons` |
+| `RadioButton` | `selected` (model), `group`, `disabled`, `error`, `label` |
+| `Slider`, `RangeSlider` | `value` (model; `low` and `high` for a `RangeSlider`), `min`, `max`, `step`, `ticks`, `value_indicator`, `vertical`, `size`, `icon`, `label`, `disabled` |
+| `SpinBox` | `value` (model), `min`, `max`, `step`, `decimals`, `prefix`, `suffix`, `wrap`, `label`, `disabled` |
+| `CircularProgress`, `LinearProgress`, `LoadingIndicator` | `value`, `track`, `thickness`, `wavy` and more: see [Progress indicators](../components/progress-indicators.md) |
+| `TimePickerDial` | `hour`, `minute`, `mode` (model), `auto_advance`, `label` |
+| `Splitter`, `Canvas`, `VirtualList`, `Overlay` | their own sections below |
 | `ScrollView`, `NodeGraph`, `GraphNode` | a scrolling box; a canvas of linked nodes; a node of it |
 | `Window`, `TitleBar`, `Dock`, `DockPanel` | see [Windows, Docks & Embedded Views](windows-and-docks.md); written with `widget:` in a view opened with `app.open_view`, a `Window` root sets the OS window (title, borderless, minimum sizes) and a title bar's buttons, dimming and glyphs follow the app |
 | `Slot` | where a calling view's children go |
 
 State is a property (`checked`, `selected`, `value`, `disabled`), never a style. `foreground` is a style extra of the widgets that draw text or
-glyphs, indicators and controls (`Text`, `Link`, `TextInput`, `Icon`, `Svg`, `LoadingIndicator`, `LinearProgress`, `CircularProgress`, `Checkbox`, `RadioButton`, `Switch`); anywhere else it is an error that names who accepts it.
+glyphs, indicators and controls (`Text`, `Link`, `TextInput`, `Icon`, `Svg`, `LoadingIndicator`, `LinearProgress`, `CircularProgress`, `Checkbox`, `RadioButton`, `Switch`, `Slider`, `RangeSlider`); anywhere else it is an error that names who accepts it.
 
 ## Expressions
 
@@ -86,7 +90,7 @@ Everything inside `{{ }}` is one expression in a safe subset of Python: arithmet
 lists, dicts, comprehensions, indexing, and a short list of functions and methods (`len`, `min`, `max`, `sum`, `round`, `sorted`, `str`,
 `format_number`, `pluralize`, `clamp`, the date functions `date_add_days`, `date_weekday`, `days_in_month`, `format_date` and `current_date`, the usual text and list methods). Nothing else runs: no imports, no attribute that starts with `_`, no
 calling an object's own methods, and every expression has limits on size, steps and the numbers it may make. See
-[Binding Expressions](bindings.md) for the full list.
+[Bindings](bindings.md) for the full list.
 
 A **Signal reads as its value**: `{{ count }}` and `{{ count.get() }}` are the same, and the property follows the Signal. A value that cannot
 change (only literals, params with fixed values, loop variables over a fixed list) is worked out once when the view is built.
@@ -114,7 +118,7 @@ children:
 ```
 
 `params:` is a list of names (`[title, icon]`, each required unless written `{icon: null}`) or a mapping of names to a type or to
-`{type, default, choices, required, model, doc, min, max}`. The types are `str int float bool color length icon enum list dict node nodes handler any`.
+`{type, default, choices, required, model, doc, min, max}`. The types are `str int float bool color length icon enum list dict node nodes handler mask any`.
 `min` and `max` bound an `int` or a `float`: a value outside them, written at a call or worked out by an expression, is an error that names the
 parameter and the range (`flash_opacity: {type: float, min: 0, max: 1}`).
 
@@ -125,7 +129,7 @@ the one named by their `slot:`; a view with no slot takes no children.
 A call's own `style`, `classes`, `a11y`, `interaction` and `handlers` lie over the called view's root, and a handler written at the call runs in
 the caller's names. A view may call itself (a tree), to a depth of 64.
 
-A param of type `handler` takes the caller's action name or statements (`on_remove: "items = [x for x in items if x != row]"`), read in the caller's names. The view runs it by calling the param like an action, `on_remove()`; a param the caller left out does nothing when called.
+A param of type `handler` takes the caller's action name or statements (`on_remove: "items = [x for x in items if x != row]"`), read in the caller's names. The view runs it by calling the param like an action, `on_remove()`; a param the caller left out does nothing when called. A handler param is called with no arguments: if the caller needs a value, it writes it in its own text (`on_remove: "remove(item.id)"`).
 
 A param that is `model: true` and is given a bare Signal (`dark_on: "{{ dark }}"`) passes the Signal itself, so the view's own `Switch` edits the
 caller's value.
@@ -178,13 +182,13 @@ handlers:
 
 An event is one of `on_click`, `on_hover_enter`, `on_hover_exit`, `on_change`, `on_focus_enter`, `on_focus_exit`, `on_tap`, `on_long_press`,
 `on_pan`, `on_pinch`, `on_touch_start`, `on_touch_move`, `on_touch_end`, `on_touch_cancel`, `on_file_hover`, `on_file_hover_cancel`,
-`on_file_drop`, `on_link`, `on_key` (a key pressed), `on_submit` (Enter in a field that is not multiline), `on_press` (the pointer pressed on the node or
+`on_file_drop`, `on_link`, `on_input` (a slider moving, drag or key), `on_dismiss` (an overlay closed by Escape, an outside press, its timeout or `surface.dismiss`), `on_key` (a key pressed), `on_submit` (Enter in a field that is not multiline), `on_press` (the pointer pressed on the node or
 anything in it; unlike `on_click` it does not make the node a button), `on_move` (the pointer moved over it, or anywhere while it holds the pointer) and `on_release` (the button let go); a misspelt one is an error.
 A handler is a dotted name (`save`, `window.close`, `surface.dismiss`,
 `navigate.back`, `navigate.Settings`), or statements, which may call `focus('name')` to give the focus to the node of that name in the view the handler
-is written in: an assignment (`=`, `+=`, `-=`, `*=`, `/=`) to local state or a ViewModel Signal, or a call
+is written in: an assignment (`=`, `+=`, `-=`, `*=`, `/=`, `//=`, `%=`, `**=`) to local state or a ViewModel Signal, or a call
 of a ViewModel method (`navigate_to(screen)` goes to a screen held in a name). `event` is in scope. Assigning to a plain param, a loop variable or
-anything else that is not writable is an error, found when the view loads ([what a handler may assign](#two-way-properties)); so is `if`, `for` or any other statement. A disabled node's handlers do not run.
+anything else that is not writable is an error, found when the view loads ([what a handler may assign](#two-way-properties)); so is `if`, `for` or any other statement. An assignment is to one plain name (`done = not done`): `row.done = True`, `items[0] = x` and `a, b = 1, 2` are errors, so change a list by assigning a new one (`items = [x for x in items if x != row]`). A disabled node's handlers do not run.
 
 ### Timers
 
@@ -192,7 +196,7 @@ anything else that is not writable is an error, found when the view loads ([what
 scope the handler was written in: an action name (`'bump'`) or statements (`'shown = False'`). A third argument names the timer so `cancel('name')`
 can stop it, and starting one of the same name again restarts it (a hover delay, a debounce). A name belongs to the scope that wrote it, as a local
 name does: two items of a `for:` each have their own. A timer stops when its view closes or the widget that started it is gone. Times are
-frame-quantized: a timer fires on the first frame after its time is up. A mistake in a literal action text (a syntax error, an unknown action, a name that cannot be written) is found when the view loads, at the handler's position, as it is for the handler itself.
+frame-quantized: a timer fires on the first frame after its time is up. A mistake in a literal action text (a syntax error, a call to an unknown function or action, a name that cannot be written) is found when the view loads, at the handler's position, as it is for the handler itself. A bare action name that does not exist (`on_click: nothere`) is reported by `app.check()`.
 
 ```yaml
 widget: Container
@@ -201,7 +205,7 @@ handlers:
   on_hover_exit: "cancel('dismiss')"
 ```
 
-For Python, `tesserae.timers.Timers(window)` has the same `after`, `every`, `cancel` and `cancel_all`.
+For Python, `tesserae.timers.Timers(window)` has the same `after`, `every`, `cancel` and `cancel_all`, each taking a function where the YAML form takes action text.
 
 ## Scrolling
 
@@ -299,7 +303,7 @@ handlers: {on_click: "open_url('https://example.com/docs')"}
 
 ## Tooltips
 
-Any node can have a `tooltip:`. A plain one is text; a rich one adds a title, up to two actions, or both.
+Any node can have a `tooltip:`. A plain one is text; a rich one adds a title, up to two actions, or both to the text, which every tooltip needs.
 
 ```yaml
 widget: Container
@@ -316,7 +320,7 @@ widget: Container
 tooltip:
   title: Delete
   text: Removes the file for good
-  placement: above                                # below (the default), above, start or end
+  placement: above                                # below (the default), above, start, end, or a corner: top_start, top_end, bottom_start, bottom_end, center
   actions:                                        # one or two text buttons; each is a handler
     - {label: Undo, on_click: undo}
     - {label: Close, on_click: "hint = 'closed'"}
@@ -342,9 +346,8 @@ name: menu_button
 a11y: {pressed: "{{ open }}", controls: menu, description: "{{ hint }}"}
 ```
 
-The engine does not have properties for `pressed`, `invalid`, `description`, `current`, `value_now`, `value_text`, `busy`, `describedby` and `controls` yet
-(they are requested of it), so they are checked, kept, and sent as far as the engine takes them: on an engine without one, that field is skipped and a
-warning names it once. The components set the ones they mean (a text field sets `invalid` and `description`).
+Each is set on the node as written; `describedby` and `controls` become the nodes of those names in the same view. The components set the ones they mean
+(a text field sets `invalid` and `description`).
 
 ## Moving between screens
 
@@ -455,7 +458,7 @@ widget: Switch
 selected: "{{ dark }}"                 # toggling writes `dark`
 ```
 
-Anything else is **one-way**, and nothing complains: an expression (`"{{ not dark }}"`), a literal, a Computed, an attribute of the ViewModel that is not a
+Anything else is **one-way**: an expression (`"{{ not dark }}"`), a literal, a Computed, an attribute of the ViewModel that is not a
 Signal, a loop variable, a plain (not `model:`) param even when it holds a Signal. The widget shows the value, and the user's edit stays on screen, unwritten,
 until the value next changes (a plain attribute never changes, so it stays). Write the change yourself in a handler (`on_change: "dark = not dark"`).
 
@@ -487,7 +490,8 @@ untouched.
 
 `style:` holds layout and paint: size and spacing (`width height min_width max_width min_height max_height aspect_ratio padding margin`),
 flex and grid, alignment, position, `background border_width border_color corner_radius opacity elevation`, effects (`blur backdrop_blur
-blend_mode filter cursor pointer_events clip_children`), and the widget's extras. Values may be expressions.
+blend_mode filter cursor pointer_events clip_children`), and the widget's extras. Values may be expressions. A size may be a sum (`calc(100% - 16)`), a node may be
+placed by its edges (`left`, `top`, `right`, `bottom`, `inset`) or against another node (`anchor`, `placement`, `offset`): see [Layout](layout.md).
 
 A **stylesheet** (`<Name>_Stylesheet.yaml`) holds rules, so a look is written once and not on every node:
 
@@ -499,14 +503,14 @@ styles:
     variant: outlined
     style: {border_width: 1, border_color: outline}
   - widget: Card
-    part: heading
+    part: headline
     state: hovered
     style: {foreground: primary}
 ```
 
-A rule names a `widget` (a built-in or a view), and may add `variant`, `size`, `shape` (properties the widget declares), `classes`, `name`, a
+A rule usually names a `widget` (a built-in or a view; a rule of only `classes`, a `name` or a `style` is allowed), and may add `variant`, `size`, `shape` (properties the widget declares), `classes`, `name`, a
 `part` (a named node inside that widget's view) and a `state` (`hovered focused focus_visible pressed disabled selected checked expanded error read_only visited`; the last seven read the
-widget's own property). The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the
+widget's own property). The most specific rule wins: a `name`, then the number of properties matched (with all the `classes` counting as one more), then a `state`, then the
 widget alone, and a later rule wins a tie. A widget's own shipped looks are the lowest layer and the app's stylesheet is above them. **A
 node's inline `style:` beats every rule, for the fields it sets and no others.** A rule's value may be an expression over the widget's params.
 

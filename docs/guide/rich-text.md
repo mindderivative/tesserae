@@ -68,7 +68,7 @@ while the pointer is over it or it has the keyboard focus.
 | Property | What it does |
 | --- | --- |
 | `text` | What it says; it also names the link for a screen reader. |
-| `href` | A link the OS opens in the browser or mail program when it is activated: `http`, `https`, `mailto` and `tel` only. Anything else is an error. |
+| `href` | A link the OS opens in the browser or mail program when it is activated: `http`, `https`, `mailto` and `tel` only. Anything else is not opened: activating it logs a warning. |
 | `visited` | Whether it has been followed. Opening its `href` sets a bound one, and a stylesheet rule with `state: visited` can colour it. |
 | `underline` | `hover` (the default), `always` or `never`. |
 | `disabled` | Dimmed, out of the Tab order, and does nothing. |

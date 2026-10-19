@@ -9,14 +9,14 @@ label), each large, medium or small, with a font, size, weight, line height and 
 
 ## In Tesserae
 
-`widget: Text`. Name a `typography_role` and Tesserae fills in the rest; a theme's `typography:` can change
-what a role means.
+`widget: Text`. Name a `typography_role` (or a `font_family`) and Tesserae fills in the rest; a theme's `typography:` can change
+what a role means. A `Text` needs one of them and a `style.foreground`: without either the view does not build, and the error says which.
 
 `text` can be an expression, and follows the Signals it reads. `font_family`, `font_size` and `font_weight` replace what the role gives. `wrap` is `word` or `none`,
 `runs` gives pieces of one text their own style and links ([Rich Text & Links](../guide/rich-text.md)). `overflow` is `clip` or `ellipsis`, `text_align` is `start`, `center` or `end`, and `max_lines` cuts a longer text to that many lines (with `overflow: ellipsis` the last
 one ends in an ellipsis). `letter_spacing` adds space between letters, in pixels. `selectable: true` lets the text be selected and copied, and `heading: 1` to `6` makes it a heading of that level for a screen reader.
 
-The colour is `style.foreground`. Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are
+The colour is `style.foreground` (required). Tracking: the roles are drawn with none, as the engine draws them; Material 3's per-role values are
 `tokens.MD3_TRACKING`, and a theme turns them on with `typography: tokens.MD3_TRACKING_TYPOGRAPHY` (or one role at a time:
 `typography: {body_large: {tracking: 0.5}}`). A node's own `letter_spacing` wins.
 

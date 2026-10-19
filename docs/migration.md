@@ -3,6 +3,14 @@
 What to change in an existing app when you upgrade. Each section is the release you are moving to; the
 [changelog](changelog.md) has everything else that changed.
 
+## To 0.5.1
+
+Nothing in a working app has to change, but one thing that loaded before is now refused: a handler that assigns to a name it cannot write (a plain param, a loop
+variable, a Computed, a ViewModel attribute that is not a `Signal`, `hovered`, or a misspelt name), including one written in the text of an `after(...)`
+or `every(...)`, is an error when the view loads, with the file, line and column. It used to fail only when the handler ran, so a handler that could never have worked
+now stops the view from opening: [what a handler may assign](guide/view-language.md#two-way-properties) says what is writable. A property the user edits, given a bare
+name that cannot be written back, is also warned about in the log.
+
 ## To 0.5.0
 
 **This release changes the view language.** Everything you wrote before still loads: a view in the old syntax is read as it always was, and says
@@ -89,7 +97,7 @@ view below is the new form of one or more old names:
 | `SideSheetStandard` | `widget: SideSheet` (`SideSheetModal` for a modal one) |
 | `AccordionHeader` | `widget: Accordion` (`AccordionGroup` to hold several) |
 | `TreeNodeBranch`, `TreeNodeLeaf` | `widget: TreeNode`, a branch with `branch: true` |
-| `TabsItem` | the `tabs:` list of `widget: Tabs` |
+| `TabsItem` | the `tabs:` list of `widget: Tabs`: each tab is `{value, label}`, and `selected` is the chosen tab's value |
 | `DatePickerDayToday`, `DatePickerDaySelected`, `DatePickerDayOutsideMonth` | `widget: DatePickerDay` with `today: true`, `selected: true`, `outside: true` |
 | `PeriodSelectorAM`, `PeriodSelectorPM` | `widget: PeriodSelector` with `period: AM` or `PM` |
 | `Video` | `widget: VideoPlayer` |
@@ -112,7 +120,7 @@ children:
   - {widget: SideSheet, title: Filters, open: true}
   - {widget: Accordion, title: Details}
   - {widget: TreeNode, label: src, branch: true}
-  - {widget: Tabs, tabs: [{label: One}, {label: Two}], selected: 0}
+  - {widget: Tabs, tabs: [{value: one, label: One}, {value: two, label: Two}], selected: one}
   - {widget: DatePickerDay, day: 7, today: true}
   - {widget: PeriodSelector, period: PM}
   - widget: Text

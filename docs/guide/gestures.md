@@ -27,7 +27,7 @@ handlers:
 | `on_file_hover`, `on_file_hover_cancel`, `on_file_drop` | files dragged over, away from, or dropped on it | `paths`, and `path` for the first (not on `on_file_hover_cancel`) |
 | `on_link` | a link range inside a text was activated (a [`Link`](rich-text.md#links) uses `on_click`) | `href` |
 
-Every event except `on_file_hover_cancel` also has `x` and `y` (from the top left of the node that handles it) and `window_x` and `window_y`.
+Every event except `on_file_hover_cancel` and `on_link` also has `x` and `y` (from the top left of the node that handles it) and `window_x` and `window_y`.
 
 The first finger is also the pointer: a tap is a click, so an app written for the mouse works under a finger. When
 that finger starts to pan, the press is cancelled and the pan scrolls the scroll view under it, unless a node on the

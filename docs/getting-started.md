@@ -89,7 +89,7 @@ and `window.root.add_child(...)` puts it in the window. The text's colour is
     misspelt word says what you probably meant:
 
     ```text
-    tesserae.spec.nodes.LoadError: .../Counter_View.yaml:6:37: error: Text: style 'foregorund' is not valid here (did you mean 'foreground')
+    tesserae.spec.nodes.LoadError: .../Counter_View.yaml:9:37: error: Text: style 'foregorund' is not valid here (did you mean 'foreground')
     ```
 
 ## 3. A second node

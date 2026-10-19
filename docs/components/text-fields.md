@@ -146,7 +146,7 @@ children:
 
 `TextInput` is the bare input, for when the field around it is your own: `text`, `placeholder`, `multiline`, `obscured`, `max_length`,
 `read_only`, `disabled`, `mask`, the typing and caret effects above (`typing_effect`, `caret_effect` and the five that tune them) and the font (`typography_role`,
-`font_family`, `font_size`, `font_weight`); its colour is `style.foreground`.
+`font_family`, `font_size`, `font_weight`); its colour is `style.foreground`. A `TextInput` needs a `style.background` and a `typography_role` (or `font_family`): without them the view does not build.
 
 ## Changing its look
 

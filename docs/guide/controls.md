@@ -42,7 +42,8 @@ children:
   `low` and `high`, and the same keys.
 - **A `SpinBox`** takes `value`, `min`, `max` and `step`, and `decimals` (how many places show), `prefix`, `suffix` and `wrap` (a step past one bound lands on the other,
   which needs both). A bound `value` is shown kept between the bounds. Its `a11y:` label goes to its text field. It is sized by MD3, two 40 px
-  buttons around a 64 px field (152 px wide), not by `width`. Holding a button repeats the step; Page Up and Page Down step by ten.
+  buttons around a 64 px field (152 px wide), not by `width`; like any box it is stretched across the layout, so give its parent `align_content: left` (or
+  itself `align_self`) to keep that size. Holding a button repeats the step; Page Up and Page Down step by ten.
 - **The progress widgets** take `value` from 0 to 1, or nothing (`value: null`) for a wait with no end. `track` is the colour role behind the indicator, `thickness`
   the bar's height or the ring's width in pixels. A `LinearProgress` also has `buffer` (how much has loaded, 0 to 1), `stop_indicator`, `wavy` and
   `two_bar` (an endless wait sweeps as two bars); a `CircularProgress` has `wavy`; a `LoadingIndicator` has `contained`.
@@ -71,8 +72,8 @@ cb.disabled.set(True)
 ```
 
 Every control has `.node` (a `tre` node to put in a tree), its state as
-`Signal`s, `.disabled`, `on_change(fn)` (which returns a function that
-stops it), `set_theme(theme)` and `destroy()`. On an `App`'s window, a
+`Signal`s, `set_theme(theme)` and `destroy()`; all but the progress widgets and the loading indicator also have `.disabled` and
+`on_change(fn)` (which returns a function that stops it). On an `App`'s window, a
 control made without `theme=` takes the app's theme and follows it
 through `set_dark`, the OS switching light and dark, and
 `set_theme_specs`. Give `theme=` a `tesserae.Theme` to pin it to

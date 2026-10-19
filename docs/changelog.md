@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.1.1
+
+The documentation audit ([#287](https://github.com/mindderivative/tesserae/issues/287)): every page checked against the code, every tutorial run as written.
+
+### Fixed
+
+- **A theme file with an unknown key names the file** when it is read (`ValueError: themes/Brand_Theme.yaml: unknown field `colours`, expected one of ...`). It used to be found only when the theme was first used, and the message named no file.
+- **An offset past the end of a bound `ScrollView` no longer logs a "written to again" error.** The offset was held at the end as documented, but writing it back to the Signal that had just set it happened inside that Signal's own notification; it now waits for the next frame.
+- `tesserae new --help` says `widget: Window`, not `kind: Window`; the message for a theme, stylesheet or style file loaded under the wrong name no longer carries a milestone tag.
+
+### Documentation
+
+- About a hundred statements on the pages were corrected after being run against the code. The ones a reader would have hit: views are found in `Views/` and the folders the app searches, not "anywhere in the project"; a Tabs example that did not load; the repeater example needed `name: main`; a rule's `part:` that names no node does nothing (the example used a part Card does not have); `Text` and `TextInput` need a `typography_role` (or `font_family`) and, for `Text`, a `style.foreground`; hot reload does apply an edit to the app's stylesheet of `widget:` rules and to views opened with `open_view`; `tesserae add screen` adds `bind`, `open_view` and a route; the keyword-only arguments of the Python overlays; a window is found by its view's name; `Slider` accepts `foreground`; the exact function and method lists of an expression; what an assignment in a handler may be; the real `tesserae schema --settings` output; and the limits that were stale after the work of the last weeks (anchoring, insets and sums, runs, labelled controls).
+- Both tutorials say to delete the two ViewModel files that step 6 replaces.
+- New guards: `tests/test_docs_examples.py` checks that every `part:` a docs rule example names is a node of that view, and `tests/test_docs_expr_lists.py` that the Bindings page lists every function and method the expression language has.
+
 ## 0.5.1
 
 Everything since 0.5.0 (the point releases 0.5.0.1 to 0.5.0.31, below, which were committed and pushed but never published to PyPI). Requires tre (`tesserae-engine`) 0.5.7.

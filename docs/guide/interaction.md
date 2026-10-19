@@ -20,7 +20,7 @@ A `Button` works the same way: give its call the handler,
 A clickable node is focusable. Tab reaches it, and Enter or Space clicks
 it, calling the same ViewModel method a mouse click does. It has
 `role="button"`, so assistive technology announces it as a button.
-Links and text fields keep their own roles. Give a button a label, so
+A `Link` keeps its own role. Give a button a label, so
 it's announced by name (see [below](#labels-and-roles-a11y)). A `Text` or
 `Icon` with an `on_click` is focusable and a button in the same way, but
 has no state layer or ripple (see below).
@@ -159,7 +159,7 @@ A node's `a11y:` field sets what assistive technology hears:
 | Field | What it does |
 | --- | --- |
 | `label` | The name read out, for a node whose content doesn't say it (an icon button, say). |
-| `role` | One of `tre`'s roles: `alert`, `button`, `checkbox`, `dialog`, `group`, `heading`, `img`, `link`, `list`, `listitem`, `menu`, `menuitem`, `none`, `progressbar`, `radio`, `separator`, `slider`, `switch`, `tab`, `tablist`, `tabpanel`, `textbox`, `tree` or `treeitem`. A clickable node is a `button` unless you give another role, and it stays focusable. Links and text fields have their own roles, so `role` isn't allowed on them. |
+| `role` | One of `tre`'s roles: `alert`, `button`, `checkbox`, `dialog`, `group`, `heading`, `img`, `link`, `list`, `listitem`, `menu`, `menuitem`, `none`, `progressbar`, `radio`, `separator`, `slider`, `switch`, `tab`, `tablist`, `tabpanel`, `textbox`, `tree` or `treeitem`. A clickable node is a `button` unless you give another role, and it stays focusable. A `Link` has its own role, so `role` is an error on it. |
 | `hidden` | `true` hides a decorative node from assistive technology. |
 | `live` | `off`, `polite` or `assertive`, so changes to the node's content are announced. |
 | `level` | A heading's level, from 1. |
@@ -177,7 +177,7 @@ Anything else that does not fit is an error that names the widget.
 
 ### Bound fields
 
-Every field but `live`, `describedby` and `controls` can be an expression (a binding), and it is kept up to date as what it reads changes:
+Every field but `role`, `live`, `describedby` and `controls` can be an expression (a binding), and it is kept up to date as what it reads changes (a `label` must come out as text, so write `"{{ n }} unread"`, not `"{{ n }}"`):
 
 ```yaml
 - widget: Text

@@ -196,7 +196,7 @@ bar, and the two screens as calls with a `route:`:
   `route:`, are the screens: each is registered under its view's name (`Main`, `Settings`), so `app.py` no longer opens
   or routes them.
 - A routed screen has no ViewModel of its own: it reads the names of the one that serves the window, so
-  `Main_ViewModel.py` and `Settings_ViewModel.py` are now one, `Window_ViewModel.py`.
+  `Main_ViewModel.py` and `Settings_ViewModel.py` are now one, `Window_ViewModel.py`: delete the two old files, which nothing uses any more.
 - The window's `borderless: true` and `title_bar:` make the window's own title bar; the rail is a `NavigationRailScreens` whose
   `screen:` names the screens.
 

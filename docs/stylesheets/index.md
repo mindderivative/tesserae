@@ -1,6 +1,6 @@
 # Component Stylesheets
 
-Every shipped view keeps its look in a stylesheet, `<Name>_Stylesheet.yaml`, beside the view itself, `<Name>_View.yaml`. Each page here shows one stylesheet, how its rules reach the view, and what each part's rules do.
+Most shipped views keep their look in a stylesheet, `<Name>_Stylesheet.yaml`, beside the view itself, `<Name>_View.yaml` (a few, such as the tab and chip groups, have only their params). Each page here shows one stylesheet, how its rules reach the view, and what each part's rules do.
 
 ## How they work
 
@@ -16,7 +16,7 @@ styles:
     state: disabled
     style: {background: "on_surface@12%"}
   - widget: Card
-    part: heading
+    part: headline
     style: {foreground: on_surface}
 ```
 

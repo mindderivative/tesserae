@@ -86,6 +86,15 @@ def test_setting_the_bound_signal_scrolls_the_view(tmp_path):
     assert scroller(view).get("scroll_offset") == 150.0 and vm.top.get() is False and vm.way.get() == "down"
 
 
+def test_an_offset_past_the_end_is_held_at_the_end_and_written_back_without_an_error(tmp_path, capfd):
+    view, vm = opened(tmp_path)
+    vm.y.set(100000.0)
+    settle(view)
+    out, err = capfd.readouterr()
+    assert vm.y.get() == scroller(view).get("scroll_offset") < 100000.0 and vm.end.get() is True
+    assert "written to again" not in out + err and "uncaught exception" not in out + err  # the write back waits for the next frame, not inside the notification
+
+
 def test_a_scroll_view_that_nothing_reads_keeps_its_own_position(tmp_path):
     view, _ = opened(tmp_path, props="classes: []")
     scroller(view).set(scroll_offset=90.0)

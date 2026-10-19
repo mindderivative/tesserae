@@ -1,14 +1,13 @@
 # Button_Stylesheet.yaml
 
-The look of Button (Material 3, with the Expressive sizes). Sizes set the height, the padding (24 each side, 16 on the side with an icon; a text button 12 and 12) and the gap; variants set the colours; the shape is a pill or a rounded square, and a toggle that is on, or a press, takes the other. A state layer and a ripple come from the node's interaction; a filled, tonal or elevated button lifts when hovered.
+The look of Button (Material 3, with the Expressive sizes). Sizes set the height, the padding (by size: 12 for `xs`, 24 for `s` and `m` (16 on the side with an icon on `s`), 48 for `l`, 64 for `xl`) and the gap; variants set the colours; the shape is a pill or a rounded square, and a toggle that is on, or a press, takes the other. A state layer and a ripple come from the node's interaction; a filled, tonal or elevated button lifts when hovered.
 
 The look of [`Button`](../../components/buttons.md) (in [Buttons](../../components/buttons.md)). [How component stylesheets work](../index.md).
 
 ## The stylesheet
 
 ```yaml
-# The look of Button (Material 3, with the Expressive sizes). Sizes set the height, the padding (24 each side, 16 on the side with an icon; a text button
-# 12 and 12) and the gap; variants set the colours; the shape is a pill or a rounded square, and a toggle that is on, or a press, takes the other.
+# The look of Button (Material 3, with the Expressive sizes). Sizes set the height, the padding (by size: 12 for `xs`, 24 for `s` and `m` (16 on the side with an icon on `s`), 48 for `l`, 64 for `xl`) and the gap; variants set the colours; the shape is a pill or a rounded square, and a toggle that is on, or a press, takes the other.
 # A state layer and a ripple come from the node's interaction; a filled, tonal or elevated button lifts when hovered.
 styles:
   - widget: Button
@@ -105,7 +104,7 @@ styles:
 
 ## How it reaches the view
 
-Each rule names `widget: Button` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties and classes matched, then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
+Each rule names `widget: Button` and may add the properties the view declares (a `variant`, a `size`, a `shape`), `classes`, a node `name`, a `part` (one of the view's named nodes) and a `state` (`hovered`, `focused`, `pressed`, `disabled`, `selected`, ...). A rule's values may be expressions over the view's parameters. The most specific rule wins: a `name`, then the number of properties matched (all the `classes` count as one more), then a `state`, then the widget alone; a later rule wins a tie. These rules are the lowest layer: your app's stylesheet goes over them, and a node's own `style:` beats every rule for the fields it sets.
 
 ## The rules
 

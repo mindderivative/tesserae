@@ -47,7 +47,7 @@ serves every view that names it. See [Apps and screens](guide/apps-and-screens.m
 4. **Build** (`spec/build.py`, with the cascade). The builder creates `tre` nodes: `Rect`/`Container`
    become a `box`, `Text` and `Link` a `text`, `Icon` a `path`, `Image` an `image`, a text input a
    `text_input`. The stateful kinds (`Checkbox`, `RadioButton`, `Switch`, `Slider`,
-   `CircularProgress`, `LinearProgress`, `LoadingIndicator`, `TimePickerDial`) become Tesserae's own
+   `RangeSlider`, `SpinBox`, `CircularProgress`, `LinearProgress`, `LoadingIndicator`, `TimePickerDial`) become Tesserae's own
    controls. Image `src:` files are decoded to pixels (Pillow). Every property is set explicitly, defaults
    included, so a later patch can reset it.
 
@@ -121,9 +121,9 @@ running animations, a changed one is patched in place, a changed kind is rebuilt
 is destroyed, and children follow the new spec's order. Bindings and handlers are wired again
 after each update, without doubling listeners. A node that keeps its `name` or `key` keeps its `state:`.
 
-`App.run(hot_reload=True)` uses the same machinery. It watches the theme files given to the app, and a
-`ViewWatcher` per screen built from a file by `app.load` (`watchfiles`, on a background thread)
-watches the file and everything it was built from. On a change it reruns the pipeline off the main thread
+`App.run(hot_reload=True)` uses the same machinery. It watches the theme files and the app's stylesheet file given to the app, a
+`ComposedWatcher` per view opened with `open_view` or `open_window` (the file and every view, stylesheet and theme it was built from), and a
+`ViewWatcher` per screen built from a file by `app.load` in the older syntax (`watchfiles`, on a background thread). On a change it reruns the pipeline off the main thread
 and hands the result to the event loop through `tre`'s thread-safe loop handle, which reconciles the live
 view. A failed reload is logged and the app keeps running. See [Hot reload](guide/hot-reload.md) for what is
 watched.

@@ -123,7 +123,7 @@ instead (`Path.home()`, or a per-platform app-data folder, which the
 | `app.py` (positional) | The app's entry point; defaults to `app.py` here. |
 | `--name NAME` | The executable's name; defaults to the app's folder name. |
 | `--icon FILE` | The app's icon. A PNG (square, 1024 px or more is best) works everywhere: it's made into an `.ico` on Windows and an `.icns` on macOS. An `.ico` or `.icns` is used as it is. |
-| `--console` | Keeps a console window on Windows, to see the app's log while debugging. Without it there's none. |
+| `--console` | Keeps a console window (on Windows, and the `.app` of a macOS installer), to see the app's log while debugging. Without it there's none. |
 | `--include GLOB` | Bundles files the scan leaves out. |
 | `--exclude GLOB` | Leaves more files out. |
 | `--check` | Runs the result for 30 frames from an empty folder. |
@@ -198,7 +198,7 @@ app doesn't unpack itself each time it starts.
     pacman package itself; for the AppImage it fetches `appimagetool`
     1.9.1 and the AppImage runtime (16 MB together, from their GitHub
     releases, checked against the releases' SHA-256), once, into
-    `~/.cache/tesserae/tools`. With no `--icon`, the menu gets a plain one.
+    `~/.cache/tesserae/tools` (under `$XDG_CACHE_HOME` when that is set). With no `--icon`, the menu gets a plain one.
 
     The `.rpm` and the Flatpak need tools Tesserae can't fetch; where one
     is missing, the build makes the rest and says what to install:

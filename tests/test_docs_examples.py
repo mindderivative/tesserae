@@ -58,3 +58,28 @@ def test_a_marked_old_syntax_block_is_one_the_loader_refuses():
             if marker:
                 with pytest.raises(Exception):
                     parse_view(block, "doc_View.yaml", resolver=lambda name: LIBRARY.decl(name) or WidgetDecl(name, view=True, container=True))
+
+
+def _rule_parts():
+    """Every `part:` a docs rule example names for a view Tesserae ships."""
+    for page in sorted(DOCS.rglob("*.md")):
+        rel = page.relative_to(DOCS).as_posix()
+        if rel.startswith(LEFT_OUT):
+            continue
+        for number, (marker, block) in enumerate(FENCE.findall(page.read_text(encoding="utf-8")), 1):
+            try:
+                data = yaml.safe_load(block)
+            except yaml.YAMLError:
+                continue
+            if marker or not isinstance(data, dict) or not isinstance(data.get("styles"), list):
+                continue
+            for rule in data["styles"]:
+                if isinstance(rule, dict) and rule.get("part") and LIBRARY.doc(str(rule.get("widget"))) is not None:
+                    yield pytest.param(rule["widget"], rule["part"], id=f"{rel}#{number}:{rule['widget']}.{rule['part']}")
+
+
+@pytest.mark.parametrize("widget, part", list(_rule_parts()))
+def test_a_part_a_docs_rule_names_is_a_node_of_the_view(widget, part):
+    """A rule whose `part:` names no node of the view matches nothing, and says nothing: so the page shows a rule that does nothing."""
+    names = {node.name for node in LIBRARY.doc(widget).root.walk() if node.name}
+    assert part in names, f"{widget} has the parts {sorted(names)}"

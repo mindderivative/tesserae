@@ -28,7 +28,7 @@ components:                  # the shape and elevation of widgets made in Python
   card.elevated: {corner_radius: 8, elevation: level_2}
 ```
 
-A stylesheet has only `styles:`. The keys are listed in the [YAML reference](../api/yaml.md#theme-and-stylesheet).
+A stylesheet has only `styles:` (another key, such as a `seed:`, is ignored). The keys are listed in the [YAML reference](../api/yaml.md#theme-and-stylesheet).
 Rules are written in a stylesheet, not a theme: a theme's own `styles:` list is read in the older rule shape (`kind`,
 `classes`, `id`) and is not how a view in the current language is styled.
 
@@ -293,12 +293,12 @@ style file's fields into each node that named it.
 
 `load_theme` and `load_stylesheet` read a file into the dict the app takes; `App(custom_theme=)` and `App(stylesheet=)` do it for you,
 and each also has a `*_spec=` form that takes a dict directly (`custom_theme_spec={"colors": {"primary": "#00FF00"}}`). Give one
-form or the other. A mistake in a theme or stylesheet names the file:
-`ValueError: themes/Brand_Theme.yaml: custom_theme_spec=: unknown field 'colours'`.
+form or the other. An unknown key in a theme file is found when the file is read, and the error names it:
+`ValueError: themes/Brand_Theme.yaml: unknown field `colours`, expected one of `seed`, `dark`, `colors`, `styles`, `components`, `typography``. A theme given as a dict names the argument instead (`custom_theme_spec=: unknown field ...`).
 
 ## How it is implemented
 
-- **Resolving.** `Theme.resolve(seed, dark, default_theme_spec, custom_theme_spec)` turns the four inputs
+- **Resolving.** `Theme.resolve(theme_seed, dark, default_theme_spec, custom_theme_spec, contrast)` turns the five inputs
   into one `Theme`: the role table (`tokens.resolve_scheme`), the `components:` map, the type scale and the
   motion tokens. `app.theme` and `view.theme` return one.
 - **Applying.** A view is built by Tesserae's own compiler: for each node it merges the layers

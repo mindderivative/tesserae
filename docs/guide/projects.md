@@ -64,7 +64,7 @@ app = App(root=HERE, search=["shared", "../common/ui"])
 standard ones. `search=["."]` makes the root itself one of them, which is how an app whose files all sit side by side
 (a flat folder, as in the [tutorial](../tutorial.md)) finds its views by name. To look through the whole project instead, give the app `recursive=True`: every folder under
 the root is searched for every kind, except hidden folders, virtual environments, `__pycache__`,
-`node_modules`, `build`, `dist` and `site`. It is slower in a big tree, and it finds files you didn't
+`node_modules`, `site-packages`, `build`, `dist` and `site`. It is slower in a big tree, and it finds files you didn't
 mean to use, which is why it is opt-in.
 
 ```python
@@ -88,7 +88,7 @@ ProjectError: no view called 'Nope' (Nope_View.yaml) in Views under /home/you/no
 ## Adding to a project
 
 `tesserae add screen Settings` writes `Views/Settings_View.yaml` and `ViewModels/Settings_ViewModel.py` and adds
-`app.load("Settings")` and its route to `app.py` ([the command](cli.md#add-a-screen)). In a project written in the current
+its `bind`, `open_view` and route to `app.py` ([the command](cli.md#add-a-screen)). In a project written in the current
 syntax a screen is a view in `Views/` with a `name:`, a ViewModel in `ViewModels/` that serves it, and a `bind` and an
 `open_view` in `app.py`; a view you call is a file in `Views/`; a theme or a stylesheet is a file in `Themes/` or `Styles/`.
 Nothing else needs registering.

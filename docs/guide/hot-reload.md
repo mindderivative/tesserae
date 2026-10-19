@@ -10,7 +10,7 @@ opened:
 | a view the app opened with `app.open_view` or `app.open_window`, any view it calls, and the pictures it draws | the view is composed again in place: its ViewModel, the nodes that keep their name or position, and their `state:` stay ([below](#a-view-written-with-widget-nodes)) |
 | the app's stylesheet of rules (`App(stylesheet=)`, `widget:` rules) | every view opened with `open_view` is composed again under the new rules, its state kept; a sheet with a mistake leaves them as they were |
 
-The log says what is watched when it starts, and names a screen it does not watch:
+The log says what is watched when it starts (`hot reload on: watching 2 screen(s) and 2 theme/stylesheet file(s)`), and names a screen it does not watch:
 `hot reload: screen 'Tasks' isn't watched -- it was built from a spec, not a file`.
 
 ## A view written with `widget:` nodes
@@ -119,7 +119,7 @@ first one of a new file. It's found in any view on the app's window,
 even one the app doesn't otherwise know, since `instantiate`
 registers it with the app. A row removed before the edit is left alone. A
 broken edit leaves every instance as it was and is logged once for the
-file:
+file, as an `ERROR` (`hot reload of /path/to/TodoItem_View.yaml failed: ...`). What works is logged at `INFO`:
 
 ```text
 hot reload: watching component TodoItem_View.yaml (3 instance(s))
@@ -129,7 +129,7 @@ reloaded /path/to/TodoItem_View.yaml (3 instance(s))
 ## The window view
 
 A `kind: Window` view loaded with `app.load("Window")` is watched like any view, and so is each view it embeds (`view:`). An edit is
-applied in place. (A `widget: Window` view opened with `app.open_view` is not watched.)
+applied in place. (A `widget: Window` view is recomposed like any view opened with `app.open_view` or `app.open_window`: [above](#a-view-written-with-widget-nodes). Its window options are read when it opens.)
 
 | Edit | What happens |
 | --- | --- |
@@ -152,7 +152,7 @@ through `app.set_theme_specs(...)`: a different `seed:`, `colors:` or
 `*_spec=` dict has no file, so it isn't watched. A broken edit is logged
 at `ERROR` like a failed view reload, and the app keeps its previous theme.
 
-Stylesheet files are watched for screens of the older syntax:
+Stylesheet files are watched:
 
 - **The default stylesheet** from `App(stylesheet=)`: saving it
   re-styles every screen that uses the default, through
@@ -161,8 +161,8 @@ Stylesheet files are watched for screens of the older syntax:
 - **A screen's own stylesheet** from `app.load(..., stylesheet=)`:
   saving it re-styles only the screens loaded with that file.
 
-A stylesheet of `widget:` rules, which views opened with `app.open_view` use, is not applied by a reload: the edit is logged as
-an error naming the file, the views keep their old rules, and the new ones are read when the app starts again.
+- **A stylesheet of `widget:` rules** (`App(stylesheet=)`, used by views opened with `app.open_view`): every such view is composed again under the new
+  rules, its state kept. A mistake in the sheet is logged as an `ERROR` naming the file, and the views keep their old rules.
 A stylesheet `tre` rejects is reported naming the file, and every
 screen keeps its old stylesheet.
 

@@ -27,7 +27,7 @@ def _load_mapping(path: str | Path, what: str, suffix: str | None = None) -> dic
     path = Path(path)
     kind = kind_of_file(path.name)
     if suffix is not None and kind is not None and not path.name.endswith(suffix):
-        raise ValueError(f"{path}: loaded as {what}, but its name says it's {kind} (M75: "
+        raise ValueError(f"{path}: loaded as {what}, but its name says it's {kind} ("
                          f"*{STYLE_SUFFIX} is one node's style, *{STYLESHEET_SUFFIX} a stylesheet, *{THEME_SUFFIX} a theme)")
     try:
         data = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -82,6 +82,12 @@ def load_theme(path: str | Path) -> dict[str, Any]:
     names a font family that isn't available.
     """
     theme = _load_mapping(path, "a theme", THEME_SUFFIX)
+    from tesserae.spec.cascade import check_theme
+
+    try:
+        check_theme(theme)  # an unknown key is found here, naming the file, and not when the theme is first used
+    except ValueError as exc:
+        raise ValueError(f"{path}: {exc}") from None
     check_font_families(theme_font_families(theme), str(path))
     return theme
 

@@ -4,6 +4,7 @@ A list on screen is a `for:` in a view. For a list that changes, the node repeat
 element each built node belongs to:
 
 ```yaml
+name: main
 widget: Container
 style: {flex_direction: vertical, width: 300, gap: 4}
 children:

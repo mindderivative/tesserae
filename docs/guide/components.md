@@ -24,8 +24,8 @@ children:
   - {widget: Button, name: add, label: Add note, handlers: {on_click: add_note}}
 ```
 
-- `Card` and `Button` are views Tesserae ships. A view of your own is called the same way: `Sidebar` is `Sidebar_View.yaml` wherever it
-  is in the project. There is no file path and no separate kind of embedded view: any view can be called, and a view with `params:`
+- `Card` and `Button` are views Tesserae ships. A view of your own is called the same way: `Sidebar` is `Views/Sidebar_View.yaml` (or a file in
+  a folder the app searches: [Projects](projects.md)). There is no file path and no separate kind of embedded view: any view can be called, and a view with `params:`
   takes them as keys (`- {widget: Counter, name: counter, start: 5}`).
 - Its nodes have ids under the call (`root.counter.label`), so a view can be called as often as you like.
 - `style:` on the call places the view in its parent, as on any node.

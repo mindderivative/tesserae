@@ -68,7 +68,7 @@ styles:
 
 A press during a hover carries on from where the shadow is. A level a view works out itself, such as a lift while dragging, eases the same way:
 `style: {elevation: "{{ 4 if dragging else 1 }}", transition: {elevation: 200}}`. An app that reduces motion gets the level at once. Levels are 0 to 5, or
-`level_0` to `level_5`.
+`level_0` to `level_5`; a number above 5 is drawn as 5.
 
 ## Frosted surfaces
 

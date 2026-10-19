@@ -39,14 +39,14 @@ children:
 | --- | --- |
 | `open` | Whether it is showing. Two-way. With an `open` that is not a Signal, a layer the user closed stays closed until `open` goes false. |
 | `anchor` | The `name` of a node in this view to sit against, or `parent` for the node it is written inside. |
-| `placement` | `below` (the default), `above`, `start` or `end` of the anchor, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`. The sides flip or shift to fit; the corners do not. |
+| `placement` | `below` (the default), `above`, `start` or `end` of the anchor, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`. The sides flip or shift to fit; the corners do not, and a corner puts the middle of the overlay on that point of the anchor (use `offset` to move it). |
 | `offset` | `[dx, dy]` in pixels from the placement. |
 | `flip` | `true` (the default) moves a side placement to the other side when it does not fit; `false` keeps it. |
 | `modal` | A scrim (the `scrim` colour at 32%) over the whole window, blocking input to what is under it and keeping Tab inside. It follows the window's size and centres its children unless the style places them (`align_content`). A press on the scrim closes a dismissible modal; a press on its content does not. |
 | `dismissible` | `true` (the default): Escape and a press outside close it. `false` turns both off. |
 | `focus_first` | When it opens, the focus moves to the first thing in it that can take it (a menu's first row). |
 | `timeout` | Closes it that many milliseconds after it opens, unless the pointer is over it. 0, the default, never. |
-| `handlers` | `on_dismiss` runs when it closes itself or the user closes it. |
+| `handlers` | `on_dismiss` runs when Escape, a press outside, its `timeout` or `surface.dismiss` closes it; writing `false` to `open` from code does not run it. |
 
 Without an `anchor` and not modal, the layer sits at its own `x` and `y` in the window (the top left unless its style says).
 Focus goes back to where it was when the layer closes. To close it from inside, write `false` to the Signal `open` is bound
@@ -148,16 +148,16 @@ modal overlay keeps Tab inside it.
 
 ## Each one
 
-- **`Dialog(window, headline, text, width=312, height=200, actions=[(label, fn)])`:**
+- **`Dialog(window, headline, text, *, width=312, height=200, actions=[(label, fn)])`:**
   MD3's basic dialog, with text-button actions on the right. An action
   calls its `fn` and closes the dialog.
-- **`Menu(window, items, width=200)`:** `items` are `(label, fn)` pairs or
+- **`Menu(window, items, *, width=200)`:** `items` are `(label, fn)` pairs or
   `tesserae.widgets.menu_item(...)` widgets. It opens with
   `open(anchor)`, `open_at(x, y)`, or on a right-click with
   `attach_context(node)`. Focus moves to the first item; the up and down
   arrows move between items; a click or Enter calls the item and closes
   the menu.
-- **`Snackbar(window, text, action=None, on_action=None, closable=False, duration=4000)`:**
+- **`Snackbar(window, text, *, action=None, on_action=None, closable=False, duration=4000, width=344)`:**
   it hides itself after `duration` ms, as MD3's does (`None` keeps it
   until closed). The action button calls `on_action` and closes it. It's
   announced politely.
@@ -165,20 +165,20 @@ modal overlay keeps Tab inside it.
   anchor is hovered, or at once when the anchor gets keyboard focus, and
   hides it when the pointer or focus leaves. It gives the anchor its text
   as a label, since screen readers can't reach a tooltip.
-- **`Popover(window, supporting_text, subhead=None, width=312, actions=[(label, fn)])`:**
+- **`Popover(window, supporting_text, *, subhead=None, width=312, actions=[(label, fn)])`:**
   MD3's rich tooltip, `tre`'s popover: a `surface_container` panel with
   an optional subhead, the text wrapped to the width, and optional text
   buttons. Unlike a plain tooltip it stays open until an outside press,
   Escape or an action closes it, and with actions, focus moves to the
   first. `open(anchor)` shows it below `anchor`; `attach(anchor)` opens
   and closes it on the anchor's click.
-- **`SideSheet(window, width=360, label=None)`:** a modal side sheet. Put
+- **`SideSheet(window, *, width=360, label=None)`:** a modal side sheet. Put
   its content in `.panel`. A standard (non-modal) side sheet isn't an
   overlay: use `tesserae.widgets.side_sheet(modal=False)`.
-- **`NavigationDrawer(window, labels, icons, selected=None)`:** the modal
+- **`NavigationDrawer(window, labels, icons, *, selected=None, width=360)`:** the modal
   navigation drawer. `.drawer` is the drawer widget (`.drawer.selected`,
   `.drawer.on_change`), and choosing an item closes it.
-- **`SearchView(window, bar=None, width=360, max_height=336, results=None)`:**
+- **`SearchView(window, *, bar=None, width=360, max_height=336, results=None, max_results=8)`:**
   MD3's docked search view, the results under a `search_bar`. Given the
   `bar`, it opens below it when the field has focus or is typed in and
   there are results. The down arrow in the field moves into the rows, up

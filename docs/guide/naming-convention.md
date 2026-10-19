@@ -37,7 +37,7 @@ registered under its file's name.
 ## What is checked
 
 - **A ViewModel that is not found.** `app.project.viewmodel("Counter")` imports `Counter_ViewModel.py` and takes the class
-  `CounterViewModel`. A file with no such class is an error that lists the `*ViewModel` classes it has.
+  `CounterViewModel`. A file with no such class is an error that lists the classes it does have.
 - **A name no ViewModel has.** Every name a view reads and every action a handler calls is looked up when the view
   opens, and a miss is an error that names the file, line and column and the nearest name:
   `Counter_View.yaml:5:43: 'cont' is not defined (did you mean 'count')`.
@@ -49,15 +49,17 @@ registered under its file's name.
 
 ## Stylesheet and theme files
 
-Two more names say what a YAML file is:
+More names say what a YAML file is:
 
 | Suffix | What it holds | Used by |
 |---|---|---|
 | `*_Stylesheet.yaml` | a stylesheet: a `styles:` list of rules that name a `widget` | `App(stylesheet=)`, `load_stylesheet` |
 | `*_Theme.yaml` | a theme: `seed:`, `colors:`, `typography:`, `components:` | `App(default_theme=, custom_theme=)`, `load_theme` |
+| `*_Style.yaml` | one node's style, kept in `Styles/` | the older syntax; the current language refuses it |
+| `*_Component.yaml` | a fragment of the older syntax, kept in `Components/` | `app.load` |
 
 A file named for one kind and loaded as another is refused, naming what its name says it is: `load_theme("card_Stylesheet.yaml")`,
-say. A theme or stylesheet file with neither suffix (`themes/Brand.yaml`) still loads; the suffixes are recommended, not required.
+say (`load_theme` and `load_stylesheet` are in `tesserae.spec.themes`). A theme or stylesheet file with neither suffix (`themes/Brand.yaml`) still loads; the suffixes are recommended, not required.
 
 ## The views Tesserae ships
 

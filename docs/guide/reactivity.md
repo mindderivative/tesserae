@@ -73,6 +73,8 @@ class CartViewModel(ViewModel):
         self.quantity.update(lambda q: q + 1)
 ```
 
+The view that names it starts `name: Cart`, which must match `views` exactly.
+
 See [Binding Expressions](bindings.md) for what a `{{ }}` expression can contain.
 
 ## Details worth knowing

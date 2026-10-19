@@ -93,8 +93,8 @@ count.content.set("3 notes")
 
 ## Overlays
 
-`dialog`, `snackbar`, `side_sheet`, `menu`, `tooltip` and `popover` return
-overlays with `open()` and `close()`. See [Overlays](overlays.md).
+`dialog`, `snackbar`, `menu`, `tooltip` and `popover`, and `side_sheet(..., modal=True)`, return
+overlays with `open()` and `close()` (`side_sheet` without `modal` is a plain panel widget you place yourself). See [Overlays](overlays.md).
 
 ## Code or YAML
 

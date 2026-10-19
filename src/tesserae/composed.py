@@ -469,8 +469,15 @@ class ComposedView(View):
                 last["direction"] = scroll_direction(last["direction"], getattr(event, "old_value", None), getattr(event, "new_value", None), across)
                 at_top, at_end = scroll_edges(offset, float(outer.get(side)), float(content.get(side)))
                 values = {"scroll_offset": offset, "at_top": at_top, "at_end": at_end, "scroll_direction": last["direction"]}
-                for prop, (name, scope) in outputs.items():
-                    scope.assign(name, values[prop])
+
+                def write(values: dict = values, outputs: dict = outputs) -> None:
+                    for prop, (name, scope) in outputs.items():
+                        scope.assign(name, values[prop])
+
+                if self._syncing:  # the offset came from the Signal it is bound to, still notifying: writing it back now would be a write inside its own notification
+                    self.timers.after(0, write, name=f"scrolled:{inst.id}")
+                else:
+                    write()
                 if inst.virtual is not None:  # build the rows that are in view
                     window = inst.virtual.window_for(offset, float(outer.get("layout_height")))
                     if self._syncing:

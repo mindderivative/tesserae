@@ -24,7 +24,7 @@ needs no ViewModel.
 ```yaml
 name: window
 widget: Window
-title: Notes                # the OS window's title
+title: Notes                # required: the OS window's title
 borderless: true            # no OS title bar or borders: the title bar below is the window's
 min_width: 480
 min_height: 320
@@ -92,7 +92,7 @@ Another view is shown where it is called, as a part of this one:
 ```
 
 It takes the keys of any call: the view's params (`size: 3`), `name`, `style`, `classes`, `a11y`, `handlers`, `route` and the rest. A view
-found by name can be anywhere in the project (`Views/`, a feature folder) or one of the views Tesserae ships. Its ids sit under the
+found by name is in `Views/` (or a folder the app searches, [Projects](projects.md)) or is one of the views Tesserae ships. Its ids sit under the
 call's name (`root.left`), and the host's theme and stylesheet apply to it.
 
 This is the same thing as using a [component](component-fragments.md): a view that is called is part of the view that calls it, with
@@ -131,7 +131,7 @@ children:
   path. A route can read params from the path (`route: "notes/{id:int}"`), and the screen showing reads the ones it was reached with as
   `app.params` (`{{ app.params.get('id') }}`). Going back or forward restores each step's params, and `show()` clears them.
 - `NavigationRailScreens` is a rail whose destinations navigate and fill while their screen is current.
-- A `route:` is an error outside the window view, and a view can be routed once.
+- A `route:` only means something in the window view: elsewhere it is ignored, and the view is not a screen. A view can be routed once.
 - The app's `transition` plays between screens ([The View Language](view-language.md#moving-between-screens)).
 
 A route can be a mapping, `route: {path: admin, guard: signed_in, redirect: "", lazy: true}`:
@@ -150,7 +150,7 @@ Call `app.navigate_to("")` after opening the window; nothing shows until a scree
 ## Several windows
 
 `app.window` is the main window. `app.open_window("Prefs")` builds `Prefs_View.yaml` in a new OS window and returns its `AppWindow` (also
-`app.windows`, `app.window_of("prefs")`, `app.close_window("prefs")`). The view's `widget: Window` root gives that window its title, size,
+`app.windows`, `app.window_of("Prefs")`, `app.close_window("Prefs")`: a window is found by its view's name, and opening one whose name is already open raises `ValueError`). The view's `widget: Window` root gives that window its title, size,
 minimum size, `borderless` and flags (without one it is 480 by 320). The view has the ViewModel that serves its name, and the app's theme,
 stylesheet and `app`. From a handler: `open_window('Prefs')`, and `open_window('Prefs', True)` for a modal one.
 

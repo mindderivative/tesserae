@@ -9,7 +9,7 @@ A tooltip names or explains a control when the pointer rests on it, or it has ke
 ## In Tesserae
 
 Any node takes a `tooltip:`. A plain one is text on the inverse surface; a rich one has a `title`, up to two `actions` and a `placement`
-(`below`, `above`, `start`, `end`), is a raised surface the pointer can move onto, and closes when an action is pressed. It shows after the
+(`below`, `above`, `start`, `end`, or a corner: `top_start`, `top_end`, `bottom_start`, `bottom_end`, `center`, which puts the middle of the tooltip on that point and is not flipped), is a raised surface the pointer can move onto, and closes when an action is pressed. It shows after the
 pointer rests for `delay` (500 ms by default), at once on keyboard focus (focus that a click gave does not count), or after a touch held in place; Escape, a press, or leaving
 closes it. The text also names the node for a screen reader, unless the node has a description of its own. Not built: reaching the actions by keyboard.
 

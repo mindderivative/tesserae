@@ -28,10 +28,10 @@ view it serves with `views = "Main"`, and `app.py` binds it (`app.bind(app.proje
 | --- | --- |
 | `--no-venv` | Makes the folders and files without the virtual environment, which needs the network to install Tesserae. |
 | `--window` | Makes the app one [`Window_View.yaml`](windows-and-docks.md): a title bar, a navigation rail and two routed screens, Main and Settings. One ViewModel, `Window_ViewModel.py`, serves the window and so the screens in it, which have none of their own. |
-| `--custom-title-bar` | With `--window`: no OS title bar (`borderless: true`). The window's own [title bar](custom-title-bars.md): it moves the window and has the minimize, maximize and close buttons. The window is at least 640 by 400. |
+| `--custom-title-bar` | With `--window`: no OS title bar (`borderless: true`). The window's own [title bar](custom-title-bars.md): it moves the window and has the minimize, maximize and close buttons. The window is at least 480 by 320 (`min_width` and `min_height` in `Window_View.yaml`). |
 | `--dir PARENT` | Makes the app in `PARENT` instead of here. |
 
-Nothing is overwritten: a folder that isn't empty is refused with a one-line message (exit code 2).
+`NAME` starts with a letter and then has letters, digits, `-` or `_`. Nothing is overwritten: a folder that isn't empty is refused with a one-line message (exit code 2).
 
 ## Add a screen
 
@@ -43,7 +43,7 @@ This writes `Views/Settings_View.yaml` and `ViewModels/Settings_ViewModel.py` (a
 calls `self.app.back()`) and adds `app.bind(...)`, `app.open_view("Settings")` and its route (`settings`) to
 `app.py`, above the marker comment `tesserae new` left there. Without the marker it
 prints the lines to add. A CamelCase name gets a kebab-case route: `UserProfile` is
-`user-profile`. `--dir` names the app's folder; a screen whose files exist is refused. In an app with its files
+`user-profile`. A screen's name is CamelCase (`Settings`, `UserProfile`; a lower-case `settings` is refused). `--dir` names the app's folder; a screen whose files exist is refused. In an app with its files
 in one folder (no `Views/` and `ViewModels/`), it writes them beside `app.py` and adds the import and path too.
 
 In a `--window` project a screen has no ViewModel of its own, so only `Views/Name_View.yaml` is written, and the command prints the two things to add
@@ -60,9 +60,10 @@ tesserae migrate-yaml --write    # writes it, if every file checked out
 `tesserae migrate-yaml [PATH]` (the project's folder, here by default) reads every `*_View.yaml`, `*_Component.yaml` and
 `*_Stylesheet.yaml`, translates each, checks the result with the loader an app uses, and writes only if all of them load. `--force`
 with `--write` writes the ones that did. Keep the project in version control: the old files are rewritten and a fragment is
-renamed. The report lists the changes each ViewModel and `app.py` need, because Python is not rewritten. A call of a shipped
-fragment that became one view with a property (`ButtonFilled` is `widget: Button` with `variant: filled`) is reported, and
-written by hand. [Migrating](../migration.md#to-050) has the table of every change and of the shipped names.
+renamed (a `*_Style.yaml` file is read in and left in place). The report lists what each ViewModel needs, including the `app.bind` and `app.open_view`
+lines for `app.py`, because Python is not rewritten. A call of a shipped fragment that became one view with a property (`ButtonFilled` is `widget: Button` with
+`variant: filled`) fails the check with `no widget named 'ButtonFilled'`, and is written by hand from the table in Migrating. The exit code is 1 if any file failed,
+and 2 for a wrong argument (`--force` without `--write` is one). [Migrating](../migration.md#to-050) has the table of every change and of the shipped names.
 
 ## Build an executable
 

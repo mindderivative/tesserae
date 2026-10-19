@@ -12,7 +12,7 @@ a mistake such as `foregorund`.
 | `tesserae-widget-schema.json` | a view in the current language, `*_View.yaml`: one node, with a branch for each built-in widget and each view Tesserae ships, and its properties |
 | `tesserae-stylesheet-schema.json` | a stylesheet of rules, `*_Stylesheet.yaml` |
 | `tesserae-theme-schema.json` | a theme, `*_Theme.yaml` |
-| `tesserae-yaml-schema.json` | a view written with `kind:` and `id:` (the older syntax) |
+| `tesserae-yaml-schema.json` | a view written with `kind:` and `id:` (the older syntax); `--settings` maps no file to it: name it in a `# yaml-language-server: $schema=` comment |
 | `tesserae-component-schema.json` | a fragment written with `component:` (the older syntax), `*_Component.yaml` |
 | `tesserae-style-schema.json` | a style file (the older syntax), `*_Style.yaml` |
 
@@ -23,7 +23,7 @@ come with Tesserae: `tesserae schema` says where.
 
 - **A view in the current language** (`widget:`) is described by `tesserae-widget-schema.json`. It knows the keys every node has
   (`name`, `if`, `for`, `key`, `slot`, `state`, `style`, `classes`, `handlers`, `a11y`, `interaction`, `visible`, `route`,
-  `focus_group`, `tooltip`, `params`, `expects`) and, for each built-in widget (`Container`, `Rect`, `Text`, `TextInput`,
+  `focus_group`, `window_region`, `tooltip`, `params`, `expects`) and, for each built-in widget (`Container`, `Rect`, `Text`, `TextInput`,
   `Checkbox`, `Slider`, `Window`, ...) and each view Tesserae ships (`Button`, `Card`, ...), its properties or params with their types, choices
   and bounds. A value may be an expression (`"{{ width / 2 }}"`) wherever a number or a choice is. `style:` is every style field with what it takes.
 - **Your own views** (`widget: TaskItem`) are known once you add them: `tesserae schema --project` writes a copy of the widget schema that has every view the
@@ -31,9 +31,9 @@ come with Tesserae: `tesserae schema` says where.
   Tesserae ships replaces it, as in the loader.
 - **A stylesheet of rules** (`widget:`, `variant:`, `size:`, `shape:`, `classes:`, `name:`, `part:`, `state:` and a `style:`) is described by
   `tesserae-stylesheet-schema.json`; the states are the real ones, and `style:` is the same fields as a node's.
-- **A theme file** (`seed`, `colors`, `typography`, `components`) by `tesserae-theme-schema.json`.
-- **The older syntax** keeps its schemas (`tesserae-yaml-schema.json` for a view, the component and style ones), which `tesserae schema --settings` does
-  not map to `*_View.yaml` any more; `tesserae migrate-yaml` moves such a project to the current language.
+- **A theme file** (`seed`, `dark`, `colors`, `typography`, `components`, and `styles` in the older rule shape) by `tesserae-theme-schema.json`.
+- **The older syntax** keeps its schemas: `tesserae-yaml-schema.json` for a `kind:` view (never mapped by `--settings`: name it in a `$schema=` comment, below),
+  and the component and style ones, which `--settings` maps to `*_Component.yaml` and `*_Style.yaml`. `tesserae migrate-yaml` moves such a project to the current language.
 
 ## Setting it up in VS Code
 
@@ -54,7 +54,9 @@ your project's `.vscode/settings.json` (or your user settings):
   "yaml.schemas": {
     "/path/to/project/.tesserae/tesserae-widget-schema.json": ["**/*_View.yaml"],
     "/path/to/site-packages/tesserae/schema/tesserae-stylesheet-schema.json": ["**/*_Stylesheet.yaml", "**/*stylesheet*.yaml"],
-    "/path/to/site-packages/tesserae/schema/tesserae-theme-schema.json": ["**/*_Theme.yaml", "**/*theme*.yaml", "!**/*_View.yaml", "!**/*_Stylesheet.yaml"]
+    "/path/to/site-packages/tesserae/schema/tesserae-theme-schema.json": ["**/*_Theme.yaml", "**/*theme*.yaml", "!**/*_View.yaml", "!**/*_Component.yaml", "!**/*_Stylesheet.yaml", "!**/*stylesheet*.yaml"],
+    "/path/to/site-packages/tesserae/schema/tesserae-component-schema.json": ["**/*_Component.yaml"],
+    "/path/to/site-packages/tesserae/schema/tesserae-style-schema.json": ["**/*_Style.yaml"]
   }
 }
 ```

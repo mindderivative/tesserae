@@ -44,7 +44,7 @@ Its look is in [`DatePicker_Stylesheet.yaml`](../stylesheets/date-pickers/date-p
 
 ### `DatePickerDay`
 
-One day of a date picker (Material 3): a 48 pixel target holding a 40 pixel circle with the number in `body_large`. Today is outlined in `primary`; the selected day is a `primary` circle with `on_primary` text; a day outside the month shown is `on_surface_variant`; a disabled day is dimmed. It is pressable; `handlers: {on_click: ...}` on the call is what a press does. One view for the four states the old fragments were.
+One day of a date picker (Material 3): a 48 pixel target holding a 40 pixel circle with the number in `body_large`. Today is outlined in `primary`; the selected day is a `primary` circle with `on_primary` text; a day outside the month shown is `on_surface_variant`; a disabled day is dimmed. It is pressable; `handlers: {on_click: ...}` on the call is what a press does. One view for a day's states: normal, selected, today, outside the month and disabled.
 
 | Parameter | Type | Default | Meaning |
 | --- | --- | --- | --- |

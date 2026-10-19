@@ -109,7 +109,7 @@ A view reads the params of the screen showing as `app.params` (`{{ app.params.ge
 - A `NavigationRailScreens` in a [window view](windows-and-docks.md) navigates, so `back()` returns from a
   rail choice, and the rail follows `back()` and `forward()`.
 - `app.guard("Admin", check)` runs `check(params)` before the app goes to a screen: `True` lets it in, `False` keeps the app
-  where it is, and a route (a string) sends it there instead. `navigate`, `navigate_to`, `back` and `forward` ask it; `show` is a
+  where it is, and a route (a string, read as `navigate_to` reads it; more than eight redirects in a row raise `ValueError`) sends it there instead. `navigate`, `navigate_to`, `back` and `forward` ask it; `show` is a
   jump and does not. A routed view of a window view can say the same in the view (`route: {guard: ..., redirect: ...}`:
   [Windows, Docks & Embedded Views](windows-and-docks.md#routed-views)).
 - `app.transition` sets how a step between screens looks (`fade_through`, `shared_axis_x`, `container_transform`, ...);
@@ -202,7 +202,7 @@ app.bind(ProfileViewModel(state))       # a ViewModel you made yourself
 ```python
 app = App(width=960, height=640, title="Notes",
           borderless=True,     # no OS title bar or borders: the app draws its own
-          min_width=480, min_height=320, icon="icon.png")
+          min_width=480, min_height=320, icon=HERE / "icon.png")  # the file must exist
 ```
 
 | Option | What it does |
@@ -235,7 +235,7 @@ state:
 - **Actions:** `app.minimize()`, `app.maximize()`, `app.restore()`,
   `app.toggle_maximized()` (a maximize button) and `app.close()`. `close()`
   closes the window as the user's close would, so a "save changes?" check
-  on `close_requested` still runs and can cancel it.
+  on `close_requested` still runs and can cancel it: `app.window.on("close_requested", handler)`, and `event.cancel()` in the handler keeps the window open.
 - **State:** `app.maximized` and `app.active` are read-only
   [Computeds](reactivity.md) that follow the window: maximized or not, and
   whether it has the OS's focus. A binding follows them like any Signal:
@@ -282,7 +282,7 @@ none raises `RuntimeError`.
 | Option | What it does |
 | --- | --- |
 | `max_frames` | Stops after that many frames; for headless and CI runs. |
-| `hot_reload=True` | Reloads the app's theme files, and the screens that `app.load` made from a file in the older syntax, when they change on disk. A view opened with `app.open_view` is not watched. See [Hot Reload](hot-reload.md). |
+| `hot_reload=True` | Reloads the app's theme and stylesheet files, the views opened with `app.open_view` or `app.open_window` (their ViewModel and state stay), and the screens that `app.load` made from a file in the older syntax, when they change on disk. See [Hot Reload](hot-reload.md). |
 | `keepalive` | `False` (the default) does not tick. `True` wakes the loop every 0.02 s; a number is the interval in seconds. Each tick sleeps on the loop thread, so input can wait up to a tick, and an idle window costs about half a percent of one core. It is for code that wants the loop woken regularly; hot reload and threads don't need it. |
 
 ### From another thread
