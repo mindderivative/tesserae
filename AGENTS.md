@@ -22,6 +22,7 @@
 
 ## Git and Session Rules (adopted from the tre kit, 2026-10-25)
 * **Staging:** stage an explicit file list. Never `git add -A` or `git add .`.
+* **Skills:** project skills live in `.agents/skills/` (what pi reads); `.claude/skills` is a symlink to it for Claude Code. Working a board issue follows the `issue-workflow` skill; a release follows `release-checklist`.
 * **Session start:** run `tools/status.sh` (branch, unpushed work, version, board), then read the newest `LOG.md` section and the `Tesserae` memory entity.
 * **While working:** `python3 -I tools/tests_for.py [--run] [FILES]` picks (and runs) the tests that cover a change, by imports and names, in seconds; a hook runs it after each edit under `src/tesserae/` or `tests/`. It misses a test that reaches the code only through another module (for example `focusring.py`, reached via `App(focus_ring=...)`), so read its notes. It is not the full check.
 * **Before calling work done:** `python3 tools/docs_audit.py`, `python3 tools/check.py`, then `python3 tools/wrapup.py` (what LOG.md, docs, the board and memory are behind on). Hooks in `.claude/hooks/` block `git push` and lint staged files before a commit.
