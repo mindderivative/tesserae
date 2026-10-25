@@ -29,7 +29,7 @@ python3 tools/check.py --full   # types, the whole suite, then mkdocs --strict (
 python3 tools/wrapup.py         # what LOG.md, docs, the board, memory are behind on
 ```
 
-Tests that need a display skip without one: say so. CI also runs Windows and macOS; their results are read from CI, never assumed.
+Tests that need a display skip without one: say so. CI runs `full` by itself when the version's first three parts change (`0.5.1.x` to `0.5.2`); for a point release in the same series it runs `partial`, so ask the user whether to call for a full CI run (a `[full-ci]` mark in the release commit, or a manual run with mode `full`). CI also runs Windows and macOS; their results are read from CI, never assumed.
 
 ## 4. Documentation
 

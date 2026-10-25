@@ -1,19 +1,102 @@
 name: CI
 
-# check + test + the examples, on Linux. Since tre 0.3.5.2 the engine is
-# on PyPI as `tesserae-engine` (still `import tre`), so installing
-# Tesserae installs it as a user's `pip install` would: no tre checkout, no
-# Rust toolchain, no maturin build.
+# Three modes, chosen by `tools/ci_plan.py` from what changed (read it for the rules):
+#   docs     only documentation changed: the docs checks and the tests that read the docs.
+#   partial  the normal one: the tests that cover the change, and those it affects (`tools/tests_for.py`).
+#   full     the whole suite and the platform jobs: when called for (a manual run with mode `full`, a pull request labelled `full-test`, or
+#            `[full-ci]` in the head commit's message or the pull request's title), or when the release series moves up (0.5.1.x -> 0.5.2).
+# The docs checks run in every mode. The platform jobs (clean install, built executable) run in `full`, and in `partial` when a packaging
+# file changed. Since tre 0.3.5.2 the engine is on PyPI as `tesserae-engine` (still `import tre`), so installing Tesserae installs it as a
+# user's `pip install` would: no tre checkout, no Rust toolchain, no maturin build.
 
 on:
   push:
     branches: [main, "0.3.0", "0.3.1", "0.3.2", "0.3.3", "0.3.4", "0.3.5", "0.3.6", "0.4.0", "0.4.1", "0.4.2", "0.4.3", "0.4.3.1", "0.4.3.2", "0.4.3.3", "0.4.4", "0.5.0"]  # a line's branch, until the user merges it
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, labeled]  # `labeled`: adding `full-test` starts a full run
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "What to run: auto (decide from the last commit), docs, partial or full"
+        type: choice
+        options: [auto, docs, partial, full]
+        default: auto
 
 jobs:
+  # Decides the mode. Needs the history (fetch-depth 0) to see what changed and the version before.
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      reason: ${{ steps.plan.outputs.reason }}
+      tests: ${{ steps.plan.outputs.tests }}
+      doc_tests: ${{ steps.plan.outputs.doc_tests }}
+      packaging: ${{ steps.plan.outputs.packaging }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - id: plan
+        env:
+          DISPATCH_MODE: ${{ github.event.inputs.mode }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          MESSAGE: ${{ github.event.head_commit.message || github.event.pull_request.title }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}  # a pull request: its base (`before` is also set on a synchronize, and is only the last push)
+        run: python -I tools/ci_plan.py --base "${BASE:-HEAD~1}"
+
+  # The docs checks, in every mode: the generated pages and schemas match the code, the skill files parse, the site builds with warnings as
+  # errors, and the tests that read the docs pass. Alone, this is the whole run for a documentation-only change.
+  docs:
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: tesserae
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers libfontconfig1-dev
+
+      # tre's source, for the one real font file a docs test reads (see the test job).
+      - uses: actions/checkout@v4
+        with:
+          repository: mindderivative/tre
+          ref: v0.5.5
+          path: tre
+
+      - name: Install tesserae and the docs build
+        working-directory: tesserae
+        run: pip install -e ".[dev]" mkdocs mkdocs-material
+
+      - name: The generated pages, schemas and skill files are current
+        working-directory: tesserae
+        run: python tools/docs_audit.py
+
+      - name: Build the docs, warnings as errors
+        working-directory: tesserae
+        run: mkdocs build --strict
+
+      - name: The tests that read the docs
+        working-directory: tesserae
+        env:
+          TRE_SOURCE_DIR: ${{ github.workspace }}/tre
+          PYTHONUTF8: "1"
+        run: pytest ${{ needs.plan.outputs.doc_tests }}
+
   # The suite and the examples on each supported platform (M76 Phase 3).
   test:
+    needs: plan
+    if: needs.plan.outputs.mode != 'docs'
     strategy:
       fail-fast: false
       matrix:
@@ -51,12 +134,19 @@ jobs:
 
       # PYTHONUTF8 for the tests' own file reads (Windows defaults to its
       # code page); Tesserae's source says UTF-8 itself (test_source_encoding).
-      - name: Run tests
+      # `full`: the whole suite. Otherwise the files `tools/ci_plan.py` picked.
+      - name: Run tests (${{ needs.plan.outputs.mode }})
+        shell: bash
         working-directory: tesserae
         env:
           TRE_SOURCE_DIR: ${{ github.workspace }}/tre
           PYTHONUTF8: "1"
-        run: pytest tests/
+          MODE: ${{ needs.plan.outputs.mode }}
+          TESTS: ${{ needs.plan.outputs.tests }}
+          REASON: ${{ needs.plan.outputs.reason }}
+        run: |
+          echo "mode $MODE: $REASON"
+          if [ "$MODE" = full ]; then pytest tests/; else pytest $TESTS; fi
 
       - name: Run the counter example
         working-directory: tesserae
@@ -84,6 +174,8 @@ jobs:
   # fails here rather than on a developer's machine. Then a `tesserae new`
   # app runs headlessly (tools/clean_install_smoke.py: no GPU or display).
   clean-install:
+    needs: plan
+    if: needs.plan.outputs.packaging == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -123,6 +215,8 @@ jobs:
   # libxkbcommon-x11, which winit loads for an X11 window (every Linux
   # desktop has it; the runner image doesn't).
   build-executable:
+    needs: plan
+    if: needs.plan.outputs.packaging == 'true'
     strategy:
       fail-fast: false
       matrix:

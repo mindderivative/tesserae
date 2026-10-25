@@ -4,6 +4,7 @@
     python3 -I tools/tests_for.py                    # uncommitted changes (staged, unstaged, new files)
     python3 -I tools/tests_for.py --base HEAD~3      # also what was committed since that ref
     python3 -I tools/tests_for.py src/tesserae/binding.py tests/test_build.py
+    python3 -I tools/tests_for.py --list --include-core --base origin/main   # what CI runs: paths only, core importers included
     python3 -I tools/tests_for.py --run              # run the picked tests with the repo's .venv (pytest -q -x)
 
 The full suite takes about three minutes and is run only when the user calls for it (`tools/check.py --full`); this picks the tests that cover a change so a step takes seconds:
@@ -107,7 +108,8 @@ def load_tests():
     return tests
 
 
-def pick(files, tests):
+def pick(files, tests, include_core=False):
+    """Return ({test: [reasons]}, [notes]). `include_core` keeps the tests that import a core module: for CI, where a change to one affects them all."""
     picks = defaultdict(list)  # test -> [reasons]
     notes = []
 
@@ -127,7 +129,7 @@ def pick(files, tests):
             module = module_name(f)
             direct = [t for t, (_, imps) in tests.items() if module in imps]
             named = [t for t in tests if norm(path.stem) and norm(path.stem) in norm(Path(t).stem)]
-            if len(direct) > CORE_SHARE * len(tests):
+            if len(direct) > CORE_SHARE * len(tests) and not include_core:
                 notes.append(f"{f} is a core module ({len(direct)} of {len(tests)} tests import {module}): hand-pick the tests that mention what you changed (grep -l); the full suite only if asked")
                 direct = []
             for t in direct:
@@ -165,6 +167,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("files", nargs="*", help="files to look up (default: what git says changed)")
     parser.add_argument("--base", help="a ref: also count what was committed since it")
+    parser.add_argument("--include-core", action="store_true", help="also pick every test that imports a core module (what CI does)")
+    parser.add_argument("--list", action="store_true", help="print only the picked test paths, one per line")
     parser.add_argument("--run", action="store_true", help="run the picked tests with .venv/bin/python -m pytest -q -x")
     args = parser.parse_args(argv)
 
@@ -173,7 +177,10 @@ def main(argv=None):
         print("nothing changed (the tree is clean). Pass files, or --base REF to include committed work.")
         return 0
     tests = load_tests()
-    picks, notes = pick(files, tests)
+    picks, notes = pick(files, tests, args.include_core)
+    if args.list:
+        print("\n".join(sorted(picks)))
+        return 0
     print(f"changed: {', '.join(files[:8])}{' ...' if len(files) > 8 else ''}")
     for t in sorted(picks):
         print(f"  {t}  <- {'; '.join(picks[t][:2])}")
