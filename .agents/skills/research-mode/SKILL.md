@@ -1,6 +1,6 @@
 ---
 name: research-mode
-description: Use when the user says the project is in "optimization, performance, efficiency, feature, and research mode" (or asks to research, baseline, audit or find better ways to do something in the framework). Sets the five goals and a measure-first method: baseline and inventory, ranked findings as Backlog issues, nothing built until the user approves.
+description: 'Use when the user says the project is in "optimization, performance, efficiency, feature, and research mode" (or asks to research, baseline, audit or find better ways to do something in the framework). Sets the five goals and a measure-first method: baseline and inventory, ranked findings as Backlog issues, nothing built until the user approves.'
 ---
 
 # Research mode
