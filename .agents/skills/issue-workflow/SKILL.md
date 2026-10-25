@@ -1,6 +1,6 @@
 ---
 name: issue-workflow
-description: Use when asked to work a Tesserae board issue (a Backlog/Ready/In progress card such as "do #288", "start N+1", "fix this issue"), or to finish, document, commit or hand over a piece of work. Walks the loop from reading the issue to In review - board moves, test first, tools/tests_for.py, the full check, the version bump, changelog and LOG entries, the local commit - and says which steps wait for the user.
+description: 'Use when asked to work a Tesserae board issue (a Backlog/Ready/In progress card such as "do #288", "start N+1", "fix this issue"), or to finish, document, commit or hand over a piece of work. Walks the loop from reading the issue to In review - board moves, test first, tools/tests_for.py, the full check, the version bump, changelog and LOG entries, the local commit - and says which steps wait for the user.'
 ---
 
 # Working a board issue
