@@ -1,11 +1,13 @@
-"""The commit check as a summary: no new type errors, the test suite, then the docs build with warnings as errors, and only what failed.
+"""The check before work is called done, as a summary of what failed: no new type errors, then the docs build with warnings as errors.
 
-    python3 tools/check.py          # tests, then docs
-    python3 tools/check.py --docs   # the docs build only (about a minute)
+    python3 tools/check.py          # types, then docs (about a minute); NO tests
+    python3 tools/check.py --docs   # the docs build only
+    python3 tools/check.py --full   # also the whole test suite (about three minutes): only when the user calls for a full test
 
-The type check is `tools/mypy_ratchet.py`: the old errors are a baseline and only a new one fails.
+The standing rule is to run only the tests that cover a change (`python3 -I tools/tests_for.py --run`); CI runs the rest. `--full` is for when the
+user asks for it. The type check is `tools/mypy_ratchet.py`: the old errors are a baseline and only a new one fails.
 
-Exits 1 on any failure. `tools/fullcheck.sh` is the same check with the raw tails. About three minutes in full.
+Exits 1 on any failure. `tools/fullcheck.sh` is the same as `--full` with the raw tails.
 """
 
 import re
@@ -27,6 +29,7 @@ def main(argv):
         types = subprocess.run([sys.executable, "-I", str(ROOT / "tools" / "mypy_ratchet.py")], cwd=ROOT, capture_output=True, text=True)
         print("types: " + (types.stdout.strip().splitlines() or ["no output"])[0] if types.returncode == 0 else "types: " + types.stdout.strip())
         failed |= types.returncode != 0
+    if "--full" in argv:
         done = run("-m", "pytest", "-q", "-rfE", "--no-header", "-p", "no:cacheprovider")
         lines = done.stdout.splitlines()
         bad = [line for line in lines if re.match(r"(FAILED|ERROR) ", line)]

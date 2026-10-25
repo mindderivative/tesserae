@@ -25,7 +25,7 @@ The version is in `pyproject.toml` and the newest heading of `docs/changelog.md`
 
 ```bash
 python3 tools/docs_audit.py     # generated pages and schemas current (fast)
-python3 tools/check.py          # tests, then mkdocs --strict (about three minutes)
+python3 tools/check.py --full   # types, the whole suite, then mkdocs --strict (about three minutes): a release is the user's call for a full test; ask first, and say if it was not run
 python3 tools/wrapup.py         # what LOG.md, docs, the board, memory are behind on
 ```
 

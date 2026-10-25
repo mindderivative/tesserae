@@ -2973,3 +2973,12 @@ No change a user sees. Seven local commits (`f5d6562` to this one); nothing push
 - **What ran, by the user's instruction no full suite:** `tests/test_anchor_style.py`, then the 14 files `tools/tests_for.py` picked for `composed.py` plus the anchor, overlay, tooltip, menu and navigation-drawer files that mention these fields: 23 files, 458 passed. `tools/docs_audit.py` (generators and skills current), `mkdocs build --strict`, the mypy ratchet (no new errors) and ruff on the changed files. **Not run:** the rest of the suite (about 225 files), which CI runs.
 - **Docs:** the layout guide's "do nothing without an `anchor`" sentence now says it is an error and what is not; changelog 0.5.1.2; version 0.5.1.2.
 - **Checked by reading, not by running:** the `placement:` lines in the shipped views (`Menu`, `SearchView`, `SplitButton`, `Toolbar`) are properties of `Overlay` and `Menu`, not `style`, so the check does not apply to them; the 23 files passing agrees.
+
+## 2026-10-25 Standing rule: no full test suite unless the user calls for one
+
+The user's instruction while #289 was worked, made standing: run only the tests that change or are affected by a change; CI runs the rest.
+
+- `AGENTS.md` has the rule ("Tests: never the full suite"), and the "before calling work done" line says `check.py` is types and docs, no tests.
+- `tools/check.py` no longer runs the suite by default: it is the mypy ratchet and `mkdocs --strict` (about a minute). `--full` adds the whole suite, for when the user asks. `tools/fullcheck.sh` still runs it.
+- The `issue-workflow` skill's check step is now `tests_for --run`, then `docs_audit.py`, then `check.py`, with a wider hand-picked set (grep for the touched names) for a core module, and a report that names the files that ran and says the rest did not. `release-checklist` uses `check.py --full` and says to ask first. `tools/tests_for.py` and `DEVELOPING.md` say the same.
+- A cost to know: a change that breaks a test the pick missed shows up in CI, not here. `tests_for` says when it picked nothing or the module is core, and the report must say which files ran.

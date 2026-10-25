@@ -6,7 +6,7 @@
     python3 -I tools/tests_for.py src/tesserae/binding.py tests/test_build.py
     python3 -I tools/tests_for.py --run              # run the picked tests with the repo's .venv (pytest -q -x)
 
-The full suite takes about three minutes (`tools/check.py`); this picks the tests that cover a change so a step takes seconds:
+The full suite takes about three minutes and is run only when the user calls for it (`tools/check.py --full`); this picks the tests that cover a change so a step takes seconds:
 
   * a changed test file is itself the test;
   * a changed `src/tesserae/**.py` module gives the tests that import it (read with `ast`: `import a.b`, `from a import b`,
@@ -128,7 +128,7 @@ def pick(files, tests):
             direct = [t for t, (_, imps) in tests.items() if module in imps]
             named = [t for t in tests if norm(path.stem) and norm(path.stem) in norm(Path(t).stem)]
             if len(direct) > CORE_SHARE * len(tests):
-                notes.append(f"{f} is a core module ({len(direct)} of {len(tests)} tests import {module}): run tools/check.py")
+                notes.append(f"{f} is a core module ({len(direct)} of {len(tests)} tests import {module}): hand-pick the tests that mention what you changed (grep -l); the full suite only if asked")
                 direct = []
             for t in direct:
                 add(t, f"imports {module}")
@@ -151,7 +151,7 @@ def pick(files, tests):
                 elif key and key in norm(Path(t).stem):
                     add(t, f"name matches {path.name}")
             if not any(path.name in " ".join(r) for r in picks.values()):
-                notes.append(f"{f}: no test names or mentions it; try tools/check.py or tests/test_shipped*.py")
+                notes.append(f"{f}: no test names or mentions it; look for one by hand (tests/test_shipped*.py)")
         elif f.startswith("tools/") and path.suffix == ".py":
             for t, (text, _) in tests.items():
                 if re.search(rf"\b{re.escape(path.stem)}\b", text):

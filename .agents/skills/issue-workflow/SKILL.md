@@ -32,14 +32,15 @@ The board is the GitHub project "Tesserae UI Framework" (`python3 tools/board.py
 
 ## 4. Check
 
-In this order; stop at the first failure and fix it:
+**Never the full suite** unless the user calls for a full test (standing rule). In this order; stop at the first failure and fix it:
 
 ```bash
-python3 tools/docs_audit.py      # generated pages and schemas current (seconds)
-python3 tools/check.py           # the whole suite, then mkdocs --strict (about three minutes)
+python3 -I tools/tests_for.py --run   # the tests that cover what changed; add by hand any related file it missed (it says when it picked none)
+python3 tools/docs_audit.py           # generated pages, schemas and skill files current (seconds)
+python3 tools/check.py                # no new mypy errors, then mkdocs --strict (about a minute); no tests
 ```
 
-Tests that need a display skip without one, and macOS/Windows are CI's. Report what was not run or not seen.
+A change in a core module (`tests_for` says so) gets a wider hand-picked set: the files that mention the fields or functions you touched (`grep -l`), not the whole suite. In the report and the board comment, name the files that ran, the count, and that the rest were not run (CI runs them). Tests that need a display skip without one, and macOS/Windows are CI's.
 
 ## 5. Document, in the same commit
 

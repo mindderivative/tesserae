@@ -40,11 +40,12 @@ Never put a scratch tre build into `.venv` by accident; to try another tre versi
 ## 3. Checking your work
 
 ```bash
-tools/fullcheck.sh                                  # the whole suite, then `mkdocs build --strict` (about 3 minutes)
+python3 -I tools/tests_for.py --run                 # the tests that cover what changed (seconds): the usual check
+tools/fullcheck.sh                                  # the whole suite, then `mkdocs build --strict` (about 3 minutes): only when the maintainer asks
 .venv/bin/python -m pytest tests/test_toolbar.py -q   # one file
 ```
 
-A commit needs `fullcheck.sh` to pass. Tests run against a headless window whose `window.snapshot()` draws shaders, gradients and backdrop blur, so
+A commit needs the tests that cover its change to pass; the full suite runs when the maintainer calls for it, and in CI. Tests run against a headless window whose `window.snapshot()` draws shaders, gradients and backdrop blur, so
 `tests/test_pixels.py` reads those back by pixel (see its helpers); what a snapshot cannot tell you is how it *feels* (timing, scroll snap) or looks to a person. A real display is needed for
 `tools/window_perf.py` and anything that opens a second OS window while running.
 
@@ -78,7 +79,7 @@ once**, run the test file with an isolated bytecode cache (`PYTHONPYCACHEPREFIX=
 
 ## 5. Working rules (from `CLAUDE.md`)
 
-- **Commit locally** as soon as a milestone, step or feature is finished and `fullcheck.sh` passes. Message style: `0.5.0 #<issues>: <what>`. **Never push, merge to `main`, tag or release without being told to.**
+- **Commit locally** as soon as a milestone, step or feature is finished and the tests that cover it pass (no full suite unless asked). Message style: `0.5.0 #<issues>: <what>`. **Never push, merge to `main`, tag or release without being told to.**
 - Update the docs (the changelog, `design/yaml-language.md`, the component page, a `mkdocs build --strict`) with each finished piece.
 - The board is the GitHub project "Tesserae UI Framework" (owner `mindderivative`, number 2): Backlog → Ready → In progress → In review → **Done only when the maintainer says so**. Move items with `python3 tools/board.py 124=review 125=done`; comment on the issue with what was built, how it was tested, and what was not built or not checked.
 - Report outcomes as they are: say what was not run or not seen.
