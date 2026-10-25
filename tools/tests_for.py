@@ -198,7 +198,7 @@ def main(argv=None):
     if not picks:
         print("no test picked.")
         return 0
-    command = [".venv/bin/python", "-m", "pytest", "-q", "-x", *sorted(picks)]
+    command = [".venv/bin/python" if (ROOT / ".venv" / "bin" / "python").exists() else sys.executable, "-m", "pytest", "-q", "-x", *sorted(picks)]
     print(f"\n{len(picks)} test file(s):\n  " + " ".join(command), flush=True)
     if args.run:
         return subprocess.run(command, cwd=ROOT).returncode

@@ -13,7 +13,13 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
-PY = str(ROOT / ".venv" / "bin" / "python")
+def venv_python(root):
+    """The checkout's own `.venv` Python when there is one, else the Python running this (CI installs into the runner's, with no `.venv`)."""
+    venv = root / ".venv" / "bin" / "python"
+    return str(venv) if venv.exists() else sys.executable
+
+
+PY = venv_python(ROOT)
 GENERATORS = ["generate_api_docs", "generate_yaml_docs", "generate_component_docs", "generate_component_order", "generate_yaml_schema"]
 
 

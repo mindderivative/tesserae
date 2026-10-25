@@ -160,3 +160,17 @@ def test_the_output_file_gets_the_values(tmp_path, monkeypatch):
     monkeypatch.setenv("GITHUB_OUTPUT", str(out))
     plan.emit({key: "x" for key in plan.OUTPUTS})
     assert set(line.split("=")[0] for line in out.read_text().splitlines()) == set(plan.OUTPUTS)
+
+
+@pytest.mark.parametrize("tool", ["docs_audit", "check"])
+def test_the_checks_use_the_running_python_when_the_checkout_has_no_venv(tool, tmp_path):
+    """CI installs into the runner's Python and has no `.venv`: a hard-coded `.venv/bin/python` failed the first docs job (#289 push)."""
+    import sys
+
+    spec = importlib.util.spec_from_file_location(tool, ROOT / "tools" / f"{tool}.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert module.venv_python(tmp_path) == sys.executable
+    (tmp_path / ".venv" / "bin").mkdir(parents=True)
+    (tmp_path / ".venv" / "bin" / "python").write_text("")
+    assert module.venv_python(tmp_path) == str(tmp_path / ".venv" / "bin" / "python")

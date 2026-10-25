@@ -16,7 +16,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PY = str(ROOT / ".venv" / "bin" / "python")
+def venv_python(root):
+    """The checkout's own `.venv` Python when there is one, else the Python running this (CI installs into the runner's, with no `.venv`)."""
+    venv = root / ".venv" / "bin" / "python"
+    return str(venv) if venv.exists() else sys.executable
+
+
+PY = venv_python(ROOT)
 
 
 def run(*args):
