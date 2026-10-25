@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1.2
+
+[#289](https://github.com/mindderivative/tesserae/issues/289): `style.placement` or `style.offset` with no `style.anchor`.
+
+### Fixed
+
+- **`placement` or `offset` without an `anchor` is an error at the node.** `style: {placement: above}` used to be accepted and did nothing (the node stayed in the flow), so a forgotten `anchor` gave no hint. The view now fails when it is built, naming the node: `Rect 'root.dot': style.placement does nothing without style.anchor (name the node to sit against, or `parent`)`. The check is on the style a node ends up with, so a rule that gives only `placement` still works for nodes that give the `anchor` (and the other way round); an `anchor:` that is an expression and works out to nothing still returns the node to the flow.
+
 ## 0.5.1.1
 
 The documentation audit ([#287](https://github.com/mindderivative/tesserae/issues/287)): every page checked against the code, every tutorial run as written.

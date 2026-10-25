@@ -4,7 +4,6 @@ stays clipped by its parent, and is looked for, checked and cleaned up by Tesser
 import pytest
 
 from tesserae import App, Signal, ViewModel
-from tesserae.spec.build import SpecBuildError
 from tesserae.spec.nodes import LoadError
 
 
@@ -275,3 +274,54 @@ def test_the_anchor_may_be_in_the_view_that_called_this_one_and_hidden_there(tmp
     assert view.node("root.tag").get("visible") is True
     vm.show.set(False)
     assert view.node("root.tag").get("visible") is False
+
+
+# #289: placement or offset with no anchor does nothing, so it is an error at the node (checked on the merged style, where rules and the node meet)
+
+def opened_with_rule(tmp_path, node, rule):
+    (tmp_path / "Views").mkdir(exist_ok=True)
+    (tmp_path / "Views" / "Main_View.yaml").write_text(
+        "name: main\nwidget: Container\nstyle: {width: 400, height: 300, background: surface}\nchildren:\n" + TARGET.replace('if: "{{ show }}", ', "") + f"  - {node}\n")
+    app = App(root=tmp_path, width=400, height=300, stylesheet_spec={"styles": [rule]})
+    app.bind(VM)
+    view = app.open_view("Main")
+    view.window.advance(50)
+    return view
+
+
+DOT_NODE = "{widget: Rect, name: dot, classes: [badge], style: {%s width: 12, height: 12, background: error}}"
+
+
+@pytest.mark.parametrize("fields, said", [
+    ("placement: top_end,", "style.placement"),
+    ("offset: [3, 3],", "style.offset"),
+    ("placement: above, offset: [3, 3],", "style.placement and style.offset"),
+])
+def test_placement_or_offset_without_an_anchor_is_an_error_naming_the_node(tmp_path, fields, said):
+    with pytest.raises(ValueError) as caught:
+        opened(tmp_path, TARGET + "  - " + (DOT_NODE % fields) + "\n")
+    message = str(caught.value)
+    assert "root.dot" in message and f"{said} does nothing without style.anchor" in message
+
+
+def test_a_rule_that_gives_only_the_placement_to_a_node_with_no_anchor_is_an_error(tmp_path):
+    with pytest.raises(ValueError, match="does nothing without style.anchor"):
+        opened_with_rule(tmp_path, DOT_NODE % "", {"classes": ["badge"], "widget": "Rect", "style": {"placement": "top_end"}})
+
+
+def test_a_rule_that_gives_only_the_placement_still_works_for_a_node_that_gives_the_anchor(tmp_path):
+    view = opened_with_rule(tmp_path, DOT_NODE % "anchor: target,", {"classes": ["badge"], "widget": "Rect", "style": {"placement": "top_end"}})
+    assert where(view) == (204.0, 114.0)
+
+
+def test_a_node_that_gives_the_placement_still_works_when_a_rule_gives_the_anchor(tmp_path):
+    view = opened_with_rule(tmp_path, DOT_NODE % "placement: top_end,", {"classes": ["badge"], "widget": "Rect", "style": {"anchor": "target"}})
+    assert where(view) == (204.0, 114.0)
+
+
+def test_an_anchor_expression_that_works_out_to_nothing_leaves_the_node_in_the_flow(tmp_path):
+    app, view, vm = opened(tmp_path, TARGET + "  - " + (DOT_NODE % "anchor: \"{{ 'target' if show else '' }}\", placement: top_end,") + "\n")
+    assert where(view) == (204.0, 114.0)
+    vm.show.set(False)
+    view.window.advance(50)
+    assert view.node("root.dot").get("position") == "relative"

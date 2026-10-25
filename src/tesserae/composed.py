@@ -900,6 +900,9 @@ class ComposedView(View):
             node = self._built.outer[inst.id] if inst.widget == "Link" else self._row_of(inst.id)
             before = self._anchored.get(inst.id)
             if not name:
+                idle = [f"style.{f}" for f in ("placement", "offset") if style.get(f) is not None]
+                if idle and "anchor" not in inst.style:  # an `anchor:` that works out to nothing is a node leaving its anchor, not a forgotten one
+                    raise ValueError(f"{inst.widget} {inst.id!r}: {' and '.join(idle)} does nothing without style.anchor (name the node to sit against, or `parent`)")
                 if before is not None:
                     self._unanchor(inst, node, style)
                 continue

@@ -301,7 +301,7 @@ children:
 
 The node stays in the tree, so a parent's `clip_children` cuts it and its `z_index` orders it among its siblings, unlike a layer. It takes itself out of the
 flow (it is absolute by itself). `anchor`, `placement` and `offset` may come from a stylesheet rule or an expression. A missing anchor name is an error at the
-node, with the nearest name; a bad `placement` or `offset` is found at load. Take the fields out and the node is back in the flow. `placement` and `offset` do nothing without an `anchor`.
+node, with the nearest name; a bad `placement` or `offset` is found at load. Take the fields out and the node is back in the flow. `placement` or `offset` with no `anchor` (written on the node or given by a rule) is an error that names the node, since they would do nothing (0.5.1.2, #289); an `anchor:` that is an expression and works out to nothing is not that, and leaves the node in the flow.
 
 If the anchor goes (an `if:`), or is hidden with `visible:` (its own, or that of anything it is inside), the node is hidden with it and comes back when the anchor does,
 unless its own `visible:` says no. A control with a `label:` is anchored as the row that holds the box and its label. `transition:` does not ease a placement.
