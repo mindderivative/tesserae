@@ -39,6 +39,14 @@ echo "== LOG.md"
 grep '^## ' LOG.md | tail -1 || true
 
 echo
+echo "== mailbox"
+if [ -f "$HOME/.claude/mailbox/cli.py" ]; then
+    echo "messages waiting: $(python3 -I "$HOME/.claude/mailbox/cli.py" pending 2>/dev/null || echo 'not configured for this project')"
+else
+    echo "no mailbox on this machine"
+fi
+
+echo
 echo "== board"
 if gh auth status >/dev/null 2>&1; then
     python3 -I tools/board.py status
