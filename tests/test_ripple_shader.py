@@ -43,12 +43,13 @@ def test_a_press_makes_one_slot_that_grows_and_a_release_after_the_minimum_fades
     assert inter._shader.shader.uniforms["r0"] == (0.0, 0.0, 0.0, 0.0)
 
 
+# A press lands in the middle of the node: a point 5 px in from the corner of a rounded shape is outside it, and tre 0.5.8 hit-tests the shape.
 def test_a_quick_tap_still_shows_for_the_minimum_press_time(tmp_path):
     app, view = opened(tmp_path)
     node = view.node("root.b")
     inter = next(i for i in _interactions(view) if i.node == node)
-    view.window.simulate("pointer_down", x=node.get("layout_x") + 5, y=node.get("layout_y") + 5)
-    view.window.simulate("pointer_up", x=node.get("layout_x") + 5, y=node.get("layout_y") + 5)
+    view.window.simulate("pointer_down", x=node.get("layout_x") + node.get("layout_width") / 2, y=node.get("layout_y") + node.get("layout_height") / 2)
+    view.window.simulate("pointer_up", x=node.get("layout_x") + node.get("layout_width") / 2, y=node.get("layout_y") + node.get("layout_height") / 2)
     for _ in range(8):  # 128 ms: under the 225 ms minimum
         view.window.advance(16)
     assert inter._shader.presses[0].fade_age is None and inter._shader.shader.uniforms["r0"][3] > 0.0
@@ -99,7 +100,7 @@ def test_the_default_is_still_a_node_per_press(tmp_path):
     app, view = opened(tmp_path, shader=False)
     node = view.node("root.b")
     inter = next(i for i in _interactions(view) if i.node == node)
-    view.window.simulate("pointer_down", x=node.get("layout_x") + 5, y=node.get("layout_y") + 5)
+    view.window.simulate("pointer_down", x=node.get("layout_x") + node.get("layout_width") / 2, y=node.get("layout_y") + node.get("layout_height") / 2)
     assert inter.sparks is None and len(inter.ripples) == 1 and hasattr(inter.ripples[0], "get")
 
 

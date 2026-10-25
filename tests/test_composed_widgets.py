@@ -248,13 +248,14 @@ def test_a_button_group_reshapes_and_reflows_the_pressed_button_and_restores_it(
     bg = button_group(window, ["A", "B", "C"], 60, 40, on_click=heard.append)
     window.advance(16)
     b1 = bg.part("b1")
-    x, y = b1.get("layout_x"), b1.get("layout_y")
-    window.simulate("pointer_down", x=x + 5, y=y + 5)
+    # the middle of the button: a point 5 px in from its corner is outside a rounded shape, and tre 0.5.8 hit-tests the shape (the press missed)
+    x, y = b1.get("layout_x") + b1.get("layout_width") / 2, b1.get("layout_y") + b1.get("layout_height") / 2
+    window.simulate("pointer_down", x=x, y=y)
     _frames(window, 150)
     widths = [bg.part(f"b{i}").get("width") for i in range(3)]
     assert widths == [60 - GROUP_GROWTH / 2, 60 + GROUP_GROWTH, 60 - GROUP_GROWTH / 2] and sum(widths) == 180
     assert b1.get("corner_radius") == 12.0  # tightened, for a 40 px button
-    window.simulate("pointer_up", x=x + 5, y=y + 5)
+    window.simulate("pointer_up", x=x, y=y)
     _frames(window, 150)
     assert [bg.part(f"b{i}").get("width") for i in range(3)] == [60.0] * 3 and b1.get("corner_radius") == 20.0
     assert heard == [1]
@@ -280,8 +281,9 @@ def test_repeated_presses_dont_compound():
     bg = button_group(window, ["A", "B"], 60, 40)
     window.advance(16)
     b0 = bg.part("b0")
+    x, y = b0.get("layout_x") + b0.get("layout_width") / 2, b0.get("layout_y") + b0.get("layout_height") / 2  # the middle: see above
     for _ in range(3):
-        window.simulate("pointer_down", x=b0.get("layout_x") + 5, y=b0.get("layout_y") + 5)
+        window.simulate("pointer_down", x=x, y=y)
         _frames(window, 50)
     assert bg.part("b0").get("width") == 72.0
 
