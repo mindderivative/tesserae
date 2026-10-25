@@ -23,6 +23,7 @@
 ## Git and Session Rules (adopted from the tre kit, 2026-10-25)
 * **Staging:** stage an explicit file list. Never `git add -A` or `git add .`.
 * **Session start:** run `tools/status.sh` (branch, unpushed work, version, board), then read the newest `LOG.md` section and the `Tesserae` memory entity.
+* **While working:** `python3 -I tools/tests_for.py [--run] [FILES]` picks (and runs) the tests that cover a change, by imports and names, in seconds; a hook runs it after each edit under `src/tesserae/` or `tests/`. It misses a test that reaches the code only through another module (for example `focusring.py`, reached via `App(focus_ring=...)`), so read its notes. It is not the full check.
 * **Before calling work done:** `python3 tools/docs_audit.py`, `python3 tools/check.py`, then `python3 tools/wrapup.py` (what LOG.md, docs, the board and memory are behind on). Hooks in `.claude/hooks/` block `git push` and lint staged files before a commit.
 * **Board:** `python3 tools/board.py status|move N COLUMN [--comment TEXT]|create TITLE --body ... --dry-run`. Moving to Done needs `--approved`, which only the user's approval allows. Anything but Backlog or Ready is reached by `move`, never `create`.
 * **Agent instructions:** they live in `AGENTS.md`; `CLAUDE.md` only imports it (`@AGENTS.md`). Do not run `graphify claude install`; after upgrading graphify run `python3 tools/graphify_agents.py`. If any tool adds a section to `CLAUDE.md`, run `python3 tools/check_agent_docs.py --fix`.
