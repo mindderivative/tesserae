@@ -18,7 +18,6 @@ not reachable from a script, so that last step stays by hand: update the entity 
 lessons, status), not one entry per commit. Exit status 1 if anything looks stale, so it can gate.
 """
 import argparse
-import json
 import re
 import subprocess
 import sys
@@ -86,6 +85,8 @@ def main():
 
     version = subprocess.run([sys.executable, "-I", "tools/check_version.py"], capture_output=True, text=True, cwd=ROOT)
     check(version.returncode == 0, version.stdout.strip() or "version agrees", "version: " + (version.stdout + version.stderr).strip()[:150])
+    types = subprocess.run([sys.executable, "-I", "tools/mypy_ratchet.py"], capture_output=True, text=True, cwd=ROOT)
+    check(types.returncode == 0, "no new mypy errors", "mypy: " + types.stdout.strip()[:200].replace("\n", " | "))
     graph = subprocess.run(["tools/graphify_refresh.sh", "--check"], capture_output=True, text=True, cwd=ROOT).stdout.strip()
     if graph:
         check(graph.startswith("graph is current"), graph, graph)
