@@ -2,6 +2,8 @@
 
     python3 tools/board.py 124=review 125=review 204=done
 
+    python3 tools/board.py 124=review --comment "Phase 2 done: tests pass"   # also comments on each issue named
+
 States: backlog, ready, progress, review, done. Needs the `gh` CLI, logged in with the `project` scope. Item ids are cached in
 the system temp directory; a number not in the cache refreshes it from the project.
 """
@@ -29,11 +31,19 @@ def item_ids(wanted):
 
 
 def main(args):
+    comment = None
+    if "--comment" in args:
+        i = args.index("--comment")
+        comment = args[i + 1]
+        args = args[:i] + args[i + 2:]
     moves = [a.split("=") for a in args]
     ids = item_ids([int(n) for n, _ in moves])
     for number, state in moves:
         subprocess.run(["gh", "project", "item-edit", "--id", ids[number], "--project-id", PROJECT_ID, "--field-id", STATUS_FIELD,
                         "--single-select-option-id", OPTIONS[state]], check=True, capture_output=True)
+        if comment:
+            subprocess.run(["gh", "issue", "comment", number, "--repo", "mindderivative/tesserae", "--body", comment], check=True,
+                           capture_output=True)
         print(number, state)
 
 
