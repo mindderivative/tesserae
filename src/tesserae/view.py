@@ -44,7 +44,7 @@ import copy
 import inspect
 import types
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable, Optional
 
 import tre
 
@@ -67,6 +67,9 @@ from tesserae.spec.build import (
 )
 from tesserae.spec.cascade import resolve_style
 from tesserae.spec.cascade import check_stylesheet, check_theme
+
+if TYPE_CHECKING:
+    from tesserae.theme import Theme
 
 __all__ = ["Component", "View"]
 

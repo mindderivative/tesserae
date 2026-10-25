@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from tesserae.theme import Theme
     from tesserae.widgets._composed import Widget
-    from tre import Node, Window
+    from tre import Window
 
 
 def _image_spec(node_id: str, width: float, height: float, fit: str) -> dict[str, Any]:

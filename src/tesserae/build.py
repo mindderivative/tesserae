@@ -152,9 +152,9 @@ class AppInfo:
             self.identifier = f"com.example.{slug(self.name)}"
         elif not re.fullmatch(r"[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+", self.identifier):
             raise BuildError(f"identifier {self.identifier!r} isn't reverse-DNS, like com.yourcompany.notes")
-        for field in ("name", "publisher", "description"):
-            if any(c in getattr(self, field) for c in "\r\n"):
-                raise BuildError(f"the app's {field} can't span lines")
+        for attr in ("name", "publisher", "description"):
+            if any(c in getattr(self, attr) for c in "\r\n"):
+                raise BuildError(f"the app's {attr} can't span lines")
 
     @property
     def placeholder_identifier(self) -> bool:

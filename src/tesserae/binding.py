@@ -20,7 +20,7 @@ from __future__ import annotations
 import math
 import re
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from tesserae.expr import Expr, ExprError, compile_expr
 

@@ -8,17 +8,17 @@ builtin `list`.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, Any, Callable, Optional
+from typing import TYPE_CHECKING, Any, Callable
 
 from tesserae import a11y
 from tesserae.reactive import Effect, Signal
-from tesserae.widgets._composed import Widget, fragment
+from tesserae.widgets._composed import Widget
 from tesserae.widgets.buttons import _borders, _hex, _variant
 from tesserae import motion
 
 if TYPE_CHECKING:
     from tesserae.theme import Theme
-    from tre import Node, Window
+    from tre import Window
 
 
 _CARDS = {"elevated": "CardElevated", "filled": "CardFilled", "outlined": "CardOutlined"}

@@ -32,7 +32,7 @@ from tesserae.expr import (BUILTIN_FUNCTIONS, Expr, ExprError, Template, check_h
                            timer_handlers)
 from tesserae.reactive import Computed, Effect, Signal, untrack
 from tesserae.spec.nodes import VISIBLE, Handler, LoadError, Node, ViewDoc
-from tesserae.spec.rules import INTERACTION_STATES, Identity, Rule, RuleSheet, ordered
+from tesserae.spec.rules import INTERACTION_STATES, Identity, Rule, RuleSheet
 from tesserae.spec.widgets import PropertyError, WidgetDecl
 
 __all__ = ["Composer", "Composition", "Instance", "Scope"]

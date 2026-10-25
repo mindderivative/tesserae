@@ -19,7 +19,7 @@ from tesserae import motion
 
 if TYPE_CHECKING:
     from tesserae.theme import Theme
-    from tre import Node, Window
+    from tre import Window
 
 
 #: `button`'s variants: the fragment, and its label's colour role (its feedback's too).

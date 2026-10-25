@@ -899,7 +899,6 @@ class RangeSlider(Slider):
             self._place(self.icon, (thick - px) / 2, px, mid - px / 2, px)
             self.node.add_child(self.icon)
         self.thumbs: list[Any] = []
-        names = ("minimum", "maximum")
         for i in range(2):
             handle = self.window.create("box", position="absolute", corner_radius=_min(self._hl, self._across) / 2, hit_testable=False, a11y_hidden=True)
             bubble = self.window.create("box", corner_radius=14.0, align_items="center", justify_content="center", visible=False, position="absolute",

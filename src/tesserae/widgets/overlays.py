@@ -15,7 +15,7 @@ from tesserae.widgets.buttons import _borders
 
 if TYPE_CHECKING:
     from tesserae.theme import Theme
-    from tre import Node, Window
+    from tre import Window
 
 
 def dialog(

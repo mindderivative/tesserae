@@ -13,11 +13,11 @@ from tesserae.follow import app_of
 from tesserae.reactive import Effect, Signal, ViewModel
 from tesserae.theme import Theme
 from tesserae.widgets._composed import Widget
-from tesserae.widgets.buttons import _borders, _hex, _variant, icon_button
+from tesserae.widgets.buttons import _borders, _variant
 from tesserae import motion
 
 if TYPE_CHECKING:
-    from tre import Node, Window
+    from tre import Window
 
 
 class _Selection:

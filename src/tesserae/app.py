@@ -888,7 +888,7 @@ class App:
 
         return ViewLibrary(self.project.index("view"), self.project.index("stylesheet"))
 
-    def _app_sheet_file(self) -> Optional[Path]:
+    def _app_sheet_file(self) -> Path | None:
         """The file of the app's own stylesheet (`App(stylesheet=)`), which is not also a view's."""
         return Path(self._stylesheet_file).resolve() if self._stylesheet_file is not None else None
 

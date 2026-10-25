@@ -10,7 +10,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from tre import Node, Window
+    from tre import Window
+
+    from tesserae import controls
 
 
 def date_picker_day(
