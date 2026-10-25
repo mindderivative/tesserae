@@ -1,5 +1,7 @@
 name: CI
 
+# The example apps are run by `tests/test_examples_run.py` (six of them, each in its own process, each checking itself), which is part of the full
+# suite and of the smoke set, and is picked when an example changes: there are no separate steps for them.
 # Three modes, chosen by `tools/ci_plan.py` from what changed (read it for the rules):
 #   docs     only documentation changed: the docs checks and the tests that read the docs.
 #   partial  the normal one: the tests that cover the change, and those it affects (`tools/tests_for.py`).
@@ -147,26 +149,6 @@ jobs:
         run: |
           echo "mode $MODE: $REASON"
           if [ "$MODE" = full ]; then pytest tests/; else pytest $TESTS; fi
-
-      - name: Run the counter example
-        working-directory: tesserae
-        run: python examples/counter/app.py
-
-      - name: Run the multi-screen example
-        working-directory: tesserae
-        run: python examples/multi_screen/app.py
-
-      - name: Run the todo-list example
-        working-directory: tesserae
-        run: python examples/todo_list/app.py
-
-      - name: Run the window and dock example
-        working-directory: tesserae
-        run: python examples/window_dock/app.py
-
-      - name: Run the custom title bar example
-        working-directory: tesserae
-        run: python examples/custom_title_bar/app.py
 
   # M76: one `pip install` is enough, on every supported platform. Only the
   # built wheel goes into a fresh venv; its dependencies come from PyPI as

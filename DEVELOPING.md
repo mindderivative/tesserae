@@ -99,8 +99,8 @@ once**, run the test file with an isolated bytecode cache (`PYTHONPYCACHEPREFIX=
 | Mode | When | What runs |
 |---|---|---|
 | `docs` | every changed file is documentation (`docs/`, `design/`, `.agents/`, root `*.md`, `mkdocs.yml`) | the docs checks only |
-| `partial` | everything else: the normal run | the tests `tools/tests_for.py` picks, with the importers of a core module included; five smoke tests when nothing is picked; the example apps |
-| `full` | called for, or the release series moves up | the whole suite, the examples, and the platform jobs (clean install, built executable) |
+| `partial` | everything else: the normal run | the tests `tools/tests_for.py` picks, with the importers of a core module included; five smoke tests when nothing is picked (they include `tests/test_examples_run.py`, which runs six example apps); a changed example picks that test and its own |
+| `full` | called for, or the release series moves up | the whole suite (which runs the example apps), and the platform jobs (clean install, built executable) |
 
 Called for: run the workflow by hand with mode `full`, label the pull request `full-test`, or put `[full-ci]` in the head commit's message or the pull request's title. The series moves up when the first three parts of the version change (`0.5.1.x` to `0.5.2`). The docs checks (`tools/docs_audit.py`, `mkdocs build --strict`, the tests that read the docs) run in every mode, and the platform jobs also run in `partial` when a packaging file changed (`pyproject.toml` beyond its `version` line, the templates, `cli.py`, `build.py`).
 

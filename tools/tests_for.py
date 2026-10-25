@@ -15,6 +15,8 @@ The full suite takes about three minutes and is run only when the user calls for
   * the tests that mention a public function, class or constant the module defines (compound names only, and not ones found in over a tenth of the tests);
   * a changed view or component file (`views/Button_View.yaml`, `spec/components/*.yaml`) gives the tests whose name matches its stem
     or that mention the file name;
+  * a changed example (`examples/<name>/...`) gives the tests that mention the example by folder (`examples/<name>`, or `"<name>"` in a test that
+    mentions `examples`): the run-every-example test, the tutorials' and the example's own;
   * a changed `tools/*.py` gives the tests that mention the script's name.
 
 It is a name and import match, not coverage data, so it misses a test that reaches the code only through another module. A module that
@@ -154,6 +156,13 @@ def pick(files, tests, include_core=False):
                     add(t, f"name matches {path.name}")
             if not any(path.name in " ".join(r) for r in picks.values()):
                 notes.append(f"{f}: no test names or mentions it; look for one by hand (tests/test_shipped*.py)")
+        elif f.startswith("examples/") and len(path.parts) > 2:
+            name = path.parts[1]
+            for t, (text, _) in tests.items():
+                if f"examples/{name}" in text or ("examples" in text and re.search(rf"""["']{re.escape(name)}["']""", text)):
+                    add(t, f"mentions the example {name}")
+            if not any(f"example {name}" in " ".join(r) for r in picks.values()):
+                notes.append(f"{f}: no test names the example {name}; run it by hand: python examples/{name}/app.py")
         elif f.startswith("tools/") and path.suffix == ".py":
             for t, (text, _) in tests.items():
                 if re.search(rf"\b{re.escape(path.stem)}\b", text):

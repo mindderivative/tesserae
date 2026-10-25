@@ -88,6 +88,17 @@ def test_partial_with_nothing_picked_runs_the_smoke_tests():
     assert fallback and tests == list(plan.SMOKE)
 
 
+def test_the_smoke_tests_exist_and_include_the_run_of_every_example():
+    assert all((ROOT / t).exists() for t in plan.SMOKE)
+    assert "tests/test_examples_run.py" in plan.SMOKE
+
+
+def test_the_workflow_has_no_separate_steps_for_the_examples():
+    """`tests/test_examples_run.py` runs them; a second run per platform is the same apps again."""
+    text = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    assert "examples/" not in text.replace("`tests/test_examples_run.py`", "")
+
+
 def test_the_doc_tests_exist_and_are_found():
     found = plan.doc_tests()
     assert "tests/test_api_docs.py" in found and "tests/test_tutorials_current.py" in found and "tests/test_yaml_schema.py" in found
