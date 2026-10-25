@@ -40,11 +40,6 @@
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ruff_edit.sh",
             "timeout": 30
-          },
-          {
-            "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/graphify_update.sh",
-            "timeout": 10
           }
         ]
       },
@@ -62,6 +57,11 @@
     "Stop": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/tools/graphify_refresh.sh",
+            "timeout": 60
+          },
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop_docs.sh",

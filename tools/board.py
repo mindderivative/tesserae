@@ -1,51 +1,165 @@
-"""Moves issues on the "Tesserae UI Framework" GitHub project (owner mindderivative, project 2).
+#!/usr/bin/env python3
+"""Read and move cards on the GitHub project board "Tesserae UI Framework" (project 2).
 
-    python3 tools/board.py 124=review 125=review 204=done
+    python3 tools/board.py status [--all]          # open cards by column (--all adds Done)
+    python3 tools/board.py move N COLUMN [--comment TEXT] [--approved] [--dry-run]
+    python3 tools/board.py N=state ... [--comment TEXT] [--approved]   # the older form: backlog, ready, progress, review, done
+    python3 tools/board.py create TITLE (--body TEXT | --body-file FILE) [--label L]... [--column COLUMN] [--dry-run]
 
-    python3 tools/board.py 124=review --comment "Phase 2 done: tests pass"   # also comments on each issue named
-
-States: backlog, ready, progress, review, done. Needs the `gh` CLI, logged in with the `project` scope. Item ids are cached in
-the system temp directory; a number not in the cache refreshes it from the project.
+COLUMN is Backlog, Ready, "In progress", "In review" or Done (case does not matter). Done is the
+user's to approve, so moving to Done needs --approved. --comment posts TEXT on issue or PR N.
+`create` opens an issue on the repo and puts it on the board (default column Backlog). Anything but
+Backlog or Ready is refused: a card only reaches In progress, In review or Done by `move`. Issues are
+public, so use --dry-run first to see what would be filed. Needs `gh` logged in with the `project`
+scope.
 """
-
+import argparse
 import json
-import os
+import re
 import subprocess
 import sys
-import tempfile
 
-OPTIONS = {"backlog": "f75ad846", "ready": "e18bf179", "progress": "47fc9ee4", "review": "aba860b9", "done": "98236657"}
-PROJECT_ID = "PVT_kwHOAH-9nM4BlPO7"
-STATUS_FIELD = "PVTSSF_lAHOAH-9nM4BlPO7zhj83AU"
-CACHE = os.path.join(tempfile.gettempdir(), "tesserae_board_items.json")
+OWNER = "mindderivative"
+PROJECT = "2"
+REPO = f"{OWNER}/tesserae"
 
 
-def item_ids(wanted):
-    ids = json.load(open(CACHE, encoding="utf-8")) if os.path.exists(CACHE) else {}
-    if any(str(n) not in ids for n in wanted):
-        items = json.loads(subprocess.check_output(["gh", "project", "item-list", "2", "--owner", "mindderivative", "--limit", "400",
-                                                    "--format", "json"]))["items"]
-        ids = {str(i["content"]["number"]): i["id"] for i in items if i.get("content", {}).get("number")}
-        json.dump(ids, open(CACHE, "w", encoding="utf-8"))
-    return ids
+def gh(*args):
+    done = subprocess.run(["gh", *args], capture_output=True, text=True)
+    if done.returncode != 0:
+        sys.exit(f"gh {' '.join(args[:2])} failed: {done.stderr.strip()}")
+    return done.stdout
 
 
-def main(args):
-    comment = None
-    if "--comment" in args:
-        i = args.index("--comment")
-        comment = args[i + 1]
-        args = args[:i] + args[i + 2:]
-    moves = [a.split("=") for a in args]
-    ids = item_ids([int(n) for n, _ in moves])
-    for number, state in moves:
-        subprocess.run(["gh", "project", "item-edit", "--id", ids[number], "--project-id", PROJECT_ID, "--field-id", STATUS_FIELD,
-                        "--single-select-option-id", OPTIONS[state]], check=True, capture_output=True)
-        if comment:
-            subprocess.run(["gh", "issue", "comment", number, "--repo", "mindderivative/tesserae", "--body", comment], check=True,
-                           capture_output=True)
-        print(number, state)
+def project_json(*args):
+    return json.loads(gh("project", *args, PROJECT, "--owner", OWNER, "--format", "json"))
+
+
+def columns():
+    for field in project_json("field-list")["fields"]:
+        if field["name"] == "Status":
+            return field["id"], {o["name"].lower(): o for o in field["options"]}
+    sys.exit("the project has no Status field")
+
+
+def items():
+    return project_json("item-list", "--limit", "500")["items"]
+
+
+def status(show_done):
+    _, options = columns()
+    order = [o["name"] for o in options.values()]
+    cards = items()
+    for column in order:
+        if column == "Done" and not show_done:
+            continue
+        rows = [c for c in cards if c.get("status") == column]
+        print(f"\n{column} ({len(rows)})")
+        for c in sorted(rows, key=lambda c: c["content"].get("number", 0)):
+            kind = "PR " if c["content"].get("type") == "PullRequest" else ""
+            print(f"  {kind}#{c['content'].get('number', '?')}  {c['title']}")
+    return 0
+
+
+def set_status(item_id, field_id, option):
+    project_id = project_json("view")["id"]
+    gh("project", "item-edit", "--id", item_id, "--project-id", project_id,
+       "--field-id", field_id, "--single-select-option-id", option["id"])
+
+
+def create(title, body, labels, column, dry_run):
+    field_id, options = columns()
+    option = options.get(column.lower())
+    if option is None:
+        sys.exit(f"unknown column {column!r}; choose from: {', '.join(o['name'] for o in options.values())}")
+    if option["name"] not in ("Backlog", "Ready"):
+        sys.exit("create files cards in Backlog or Ready only; use `move` for the other columns")
+    if not title.strip() or not body.strip():
+        sys.exit("an issue needs a title and a body")
+    print(f"issue on {REPO}: {title}")
+    print(f"  labels: {', '.join(labels) or '(none)'}   column: {option['name']}   body: {len(body)} chars")
+    if dry_run:
+        print("dry run: nothing filed")
+        return 0
+    cmd = ["issue", "create", "-R", REPO, "--title", title, "--body", body]
+    for label in labels:
+        cmd += ["--label", label]
+    url = gh(*cmd).strip().splitlines()[-1]
+    print(f"filed {url}")
+    added = json.loads(gh("project", "item-add", PROJECT, "--owner", OWNER, "--url", url, "--format", "json"))
+    set_status(added["id"], field_id, option)
+    print(f"on the board in {option['name']}")
+    return 0
+
+
+def move(number, column, comment, approved, dry_run):
+    field_id, options = columns()
+    option = options.get(column.lower())
+    if option is None:
+        sys.exit(f"unknown column {column!r}; choose from: {', '.join(o['name'] for o in options.values())}")
+    if option["name"] == "Done" and not approved:
+        sys.exit("Done is the user's to approve: pass --approved once they have")
+    card = next((c for c in items() if c["content"].get("number") == number), None)
+    if card is None:
+        sys.exit(f"#{number} is not on the board")
+    print(f"#{number} {card['title']}: {card.get('status')} -> {option['name']}")
+    if dry_run:
+        print("dry run: nothing changed")
+        return 0
+    set_status(card["id"], field_id, option)
+    if comment:
+        gh("issue", "comment", str(number), "-R", REPO, "--body", comment)
+        print("comment posted")
+    print("moved")
+    return 0
+
+
+LEGACY = {"backlog": "Backlog", "ready": "Ready", "progress": "In progress", "review": "In review", "done": "Done"}
+
+
+def legacy(argv):
+    """`124=review 125=review [--comment TEXT] [--approved]`, the form this script took before it had subcommands."""
+    flags = [a for a in argv if not re.fullmatch(r"\d+=\w+", a)]
+    code = 0
+    for a in argv:
+        m = re.fullmatch(r"(\d+)=(\w+)", a)
+        if m:
+            if m[2] not in LEGACY:
+                sys.exit(f"unknown state {m[2]!r}; choose from: {', '.join(LEGACY)}")
+            code |= main(["move", m[1], LEGACY[m[2]], *flags])
+    return code
+
+
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and re.fullmatch(r"\d+=\w+", argv[0]):
+        return legacy(argv)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("status")
+    s.add_argument("--all", action="store_true")
+    m = sub.add_parser("move")
+    m.add_argument("number", type=int)
+    m.add_argument("column")
+    m.add_argument("--comment")
+    m.add_argument("--approved", action="store_true")
+    m.add_argument("--dry-run", action="store_true")
+    c = sub.add_parser("create")
+    c.add_argument("title")
+    body = c.add_mutually_exclusive_group(required=True)
+    body.add_argument("--body")
+    body.add_argument("--body-file")
+    c.add_argument("--label", action="append", default=[])
+    c.add_argument("--column", default="Backlog")
+    c.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args(argv)
+    if args.cmd == "status":
+        return status(args.all)
+    if args.cmd == "create":
+        text = args.body if args.body is not None else sys.stdin.read() if args.body_file == "-" else open(args.body_file).read()
+        return create(args.title, text, args.label, args.column, args.dry_run)
+    return move(args.number, args.column, args.comment, args.approved, args.dry_run)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(main())
