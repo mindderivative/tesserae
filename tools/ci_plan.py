@@ -33,8 +33,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 DOC_DIRS = ("docs/", "design/", ".agents/", "spike-results/")
 DOC_FILES = ("mkdocs.yml", "AGENTS.md", "CLAUDE.md")
-#: The tests that read the documentation or files generated for it.
-DOC_TESTS = ("test_*docs*.py", "test_tutorials_current.py", "test_*schema.py", "test_component_order.py", "test_component_docs.py")
 #: Run when no test covers a change. `test_examples_run.py` runs six example apps end to end, so it is the cross-platform smoke test of the whole.
 SMOKE = ("tests/test_app.py", "tests/test_build.py", "tests/test_composed.py", "tests/test_pixels.py", "tests/test_examples_run.py")
 PACKAGING = ("tools/clean_install_smoke.py", "src/tesserae/templates/*", "src/tesserae/cli.py", "src/tesserae/build.py",
@@ -70,7 +68,9 @@ def decide(files, *, dispatch="auto", labels=(), message="", base_version=None, 
 
 
 def doc_tests():
-    found = {str(p.relative_to(ROOT)) for pattern in DOC_TESTS for p in (ROOT / "tests").glob(pattern)}
+    import tests_for
+
+    found = {str(p.relative_to(ROOT)) for pattern in tests_for.DOC_TESTS for p in (ROOT / "tests").glob(pattern)}
     return sorted(found)
 
 

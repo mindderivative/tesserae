@@ -903,7 +903,7 @@ class App:
         if spec is not None:
             if is_rule_sheet(spec):  # the app's rules by widget, variant, part and state
                 kwargs.pop("stylesheet_spec", None)
-                rules.append(RuleSheet.of(spec, "<stylesheet>"))
+                rules.append(RuleSheet.of(spec, "<stylesheet>", parts_of=library.parts_of))
             else:
                 kwargs["stylesheet_spec"] = spec
         return rules, kwargs

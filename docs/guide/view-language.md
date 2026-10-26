@@ -509,7 +509,7 @@ styles:
 ```
 
 A rule usually names a `widget` (a built-in or a view; a rule of only `classes`, a `name` or a `style` is allowed), and may add `variant`, `size`, `shape` (properties the widget declares), `classes`, `name`, a
-`part` (a named node inside that widget's view) and a `state` (`hovered focused focus_visible pressed disabled selected checked expanded error read_only visited`; the last seven read the
+`part` (a named node inside that widget's view; one the view does not have is an error that names the nearest, `Card has no part 'heading' (did you mean 'headline')`) and a `state` (`hovered focused focus_visible pressed disabled selected checked expanded error read_only visited`; the last seven read the
 widget's own property). The most specific rule wins: a `name`, then the number of properties matched (with all the `classes` counting as one more), then a `state`, then the
 widget alone, and a later rule wins a tie. A widget's own shipped looks are the lowest layer and the app's stylesheet is above them. **A
 node's inline `style:` beats every rule, for the fields it sets and no others.** A rule's value may be an expression over the widget's params.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1.3
+
+[#288](https://github.com/mindderivative/tesserae/issues/288): a stylesheet rule's `part:`.
+
+### Fixed
+
+- **A rule's `part:` that names no node of the widget is an error that names the nearest one.** `widget: Card` with `part: heading` used to match nothing and say nothing (the docs index example had exactly that mistake). It now fails where the stylesheet is read, with the file, line and column: `Card has no part 'heading'`, `did you mean 'headline' (parts: actions, body, headline, picture, subhead, text)`. A part is a named node in the view's own YAML. This covers the app's stylesheet (`App(stylesheet=)` or `stylesheet_spec=`) and a project's `<View>_Stylesheet.yaml`; a built-in widget has no parts, so a rule that names one for `Splitter` or `Container` says `has no parts`. A rule for a view that is not found is still not checked. The stylesheets Tesserae ships are checked against the shipped views by a test.
+
 ## 0.5.1.2
 
 [#289](https://github.com/mindderivative/tesserae/issues/289): `style.placement` or `style.offset` with no `style.anchor`.

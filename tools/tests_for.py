@@ -15,6 +15,8 @@ The full suite takes about three minutes and is run only when the user calls for
   * the tests that mention a public function, class or constant the module defines (compound names only, and not ones found in over a tenth of the tests);
   * a changed view or component file (`views/Button_View.yaml`, `spec/components/*.yaml`) gives the tests whose name matches its stem
     or that mention the file name;
+  * a changed page under `docs/` gives the tests that read the docs (`DOC_TESTS`: the generated pages, the examples in them, no version history, the
+    tutorials, the schemas);
   * a changed example (`examples/<name>/...`) gives the tests that mention the example by folder (`examples/<name>`, or `"<name>"` in a test that
     mentions `examples`): the run-every-example test, the tutorials' and the example's own;
   * a changed `tools/*.py` gives the tests that mention the script's name.
@@ -26,6 +28,7 @@ output says to run the full check. Read the "why" column before trusting a pick.
 
 import argparse
 import ast
+import fnmatch
 import re
 import subprocess
 import sys
@@ -34,6 +37,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CORE_SHARE = 1 / 3
+#: The tests that read the documentation or files generated for it: a change under `docs/` picks them (CI's docs job runs the same).
+DOC_TESTS = ("test_*docs*.py", "test_tutorials_current.py", "test_*schema.py", "test_component_order.py", "test_component_docs.py")
 
 
 def git(*args):
@@ -168,7 +173,12 @@ def pick(files, tests, include_core=False):
                 if re.search(rf"\b{re.escape(path.stem)}\b", text):
                     add(t, f"mentions {path.stem}")
         elif f.startswith("docs/") or f.endswith(".md"):
-            notes.append(f"{f}: documentation; run tools/docs_audit.py and tools/check.py --docs")
+            if f.startswith("docs/"):
+                for pattern in DOC_TESTS:
+                    for t in sorted(tests):
+                        if fnmatch.fnmatch(Path(t).name, pattern):
+                            add(t, f"reads the docs: {f}")
+            notes.append(f"{f}: documentation; also run tools/docs_audit.py and tools/check.py --docs")
     return picks, notes
 
 

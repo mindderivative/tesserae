@@ -300,7 +300,7 @@ def overview_stylesheets(data: dict[str, Any], views: dict[str, View]) -> str:
     out += _fence("styles:\n  - widget: Button\n    variant: filled\n    style: {background: primary, foreground: on_primary}\n"
                   "  - widget: Button\n    variant: filled\n    state: disabled\n    style: {background: \"on_surface@12%\"}\n"
                   "  - widget: Card\n    part: headline\n    style: {foreground: on_surface}", "yaml")
-    out += ["- A rule narrows by the properties the view declares (`variant`, `size`, `shape`), `classes`, a node `name`, a `part` (a named node inside the view) and a `state`.",
+    out += ["- A rule narrows by the properties the view declares (`variant`, `size`, `shape`), `classes`, a node `name`, a `part` (a named node inside the view; a name the view does not have is an error that suggests the nearest) and a `state`.",
             "- A value in `{{ }}` is an expression over the view's parameters, worked out where the view is used.",
             "- The most specific rule wins; a node's own `style:` beats every rule for the fields it sets.",
             "- A stylesheet is read only when the application uses its widget: the widgets in the views you open, and in the views those call. The shipped rules are the lowest layer, a `<Name>_Stylesheet.yaml` of yours (next to your views, or in `Styles/`) goes over them, and your app's stylesheet goes over that. A view of the same name that you wrote replaces the shipped one and its look.",

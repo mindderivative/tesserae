@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from tesserae import App, Signal, ViewModel
+from tesserae import App, ViewModel
 from tesserae import shipped
 from tesserae.spec.watch import ComposedWatcher
 
@@ -42,7 +42,7 @@ def loads(monkeypatch):
     """The stylesheets read, by file name."""
     seen = []
     real = shipped.load_rule_sheet
-    monkeypatch.setattr(shipped, "load_rule_sheet", lambda path: seen.append(os.path.basename(str(path))) or real(path))
+    monkeypatch.setattr(shipped, "load_rule_sheet", lambda path, **kw: seen.append(os.path.basename(str(path))) or real(path, **kw))
     monkeypatch.setattr(shipped, "_SHEETS", {})  # a fresh cache: each test sees what its own app reads
     return seen
 

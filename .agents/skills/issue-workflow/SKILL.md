@@ -44,7 +44,7 @@ A change in a core module (`tests_for` says so) gets a wider hand-picked set: th
 
 ## 5. Document, in the same commit
 
-- **Version:** bump the fourth digit in `pyproject.toml` (`0.5.1.1` -> `0.5.1.2`) and put the same number as the new top heading of `docs/changelog.md`; `python3 tools/check_version.py --expect 0.5.1.2` confirms they agree. A guide note about a feature's arrival is stamped `0.5.1.2 (#N)`.
+- **Version:** bump the fourth digit in `pyproject.toml` (`0.5.1.1` -> `0.5.1.2`) and put the same number as the new top heading of `docs/changelog.md`; `python3 tools/check_version.py --expect 0.5.1.2` confirms they agree. **Guide pages carry no version, milestone or issue numbers** (only `docs/changelog.md` and `docs/migration.md` may: `tests/test_docs_no_history.py` fails the page): describe what is, not when it arrived.
 - **`docs/changelog.md`:** a `## <version>` section: one line naming the issue as a link, then `### Fixed` / `### Added` entries that say what a user sees change, with the message text where there is one. See `0.5.1.1` for the shape.
 - **`LOG.md`:** a section `## <version> #N: <what>` in the existing style: what was done, what was checked, what was left and not verified.
 - **The guide page** the change belongs to (`docs/guide/...`), `design/yaml-language.md` if the language changed.

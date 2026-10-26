@@ -24,7 +24,7 @@ from __future__ import annotations
 import difflib
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Collection, Iterable, Optional
 
 from tesserae.expr import ExprError, Origin, compile_template
 from tesserae.spec import placement, sizes, widgets as registry
@@ -99,9 +99,10 @@ class RuleSheet:
             self.by_widget.setdefault(rule.widget, []).append(rule)
 
     @classmethod
-    def of(cls, spec: Any, file: str = "<stylesheet>", text: str = "") -> "RuleSheet":
-        """Checks and prepares `{styles: [...]}`. Every problem is a `LoadError` naming the rule."""
-        return _build(spec, file, text)
+    def of(cls, spec: Any, file: str = "<stylesheet>", text: str = "", parts_of: Optional[Callable[[str], Optional[Collection[str]]]] = None) -> "RuleSheet":
+        """Checks and prepares `{styles: [...]}`. Every problem is a `LoadError` naming the rule. `parts_of(widget)` gives the parts of a view (the
+        named nodes in its YAML) or `None` when it knows no such view: given it, a rule's `part:` that no node of the view has is an error."""
+        return _build(spec, file, text, parts_of)
 
     def without(self, widgets: Iterable[str]) -> "RuleSheet":
         """The sheet less the rules that name any of `widgets` (the looks of components a project has replaced)."""
@@ -126,7 +127,7 @@ def _near(text: Any, options: Iterable[Any]) -> Optional[str]:
     return ("did you mean " + " or ".join(f"'{c}'" for c in close)) if close else None
 
 
-def _build(spec: Any, file: str, text: str) -> RuleSheet:
+def _build(spec: Any, file: str, text: str, parts_of: Optional[Callable[[str], Optional[Collection[str]]]] = None) -> RuleSheet:
     def fail(at: tuple[int, int], message: str, hint: Optional[str] = None) -> LoadError:
         return LoadError(message, file=file, line=at[0], column=at[1], hint=hint, text=text)
 
@@ -179,8 +180,15 @@ def _build(spec: Any, file: str, text: str) -> RuleSheet:
         if part is not None:
             if widget is None:
                 raise fail(key_at.get("part", at), "'part:' needs a 'widget:'")
-            if decl is not None and decl.parts and part not in decl.parts:
-                raise fail(val_at.get("part", at), f"{widget} has no part '{part}'", f"parts: {', '.join(decl.parts)}")
+            if decl is not None and not decl.view:
+                known: Optional[Collection[str]] = decl.parts  # a built-in widget has the parts it declares, and none of its own to name
+            else:
+                known = parts_of(widget) if parts_of is not None else None  # a view: known only to the project that has it
+            if known is not None and part not in known:
+                if not known:
+                    raise fail(val_at.get("part", at), f"{widget} has no parts", "a part is a named node inside a view; a built-in widget has none")
+                near = _near(part, known)
+                raise fail(val_at.get("part", at), f"{widget} has no part '{part}'", (near + " (" if near else "") + f"parts: {', '.join(sorted(known))}" + (")" if near else ""))
         state = item.get("state")
         if state is not None and state not in STATES:
             raise fail(val_at.get("state", at), f"'state:' is one of {', '.join(STATES)}, not {state!r}", _near(state, STATES))
@@ -220,8 +228,8 @@ def _template(value: Any, file: str, at: tuple[int, int], text: str) -> Any:
     return value
 
 
-def load_rule_sheet(path: Any) -> RuleSheet:
-    """Reads a stylesheet file in the rule shape."""
+def load_rule_sheet(path: Any, parts_of: Optional[Callable[[str], Optional[Collection[str]]]] = None) -> RuleSheet:
+    """Reads a stylesheet file in the rule shape; `parts_of` as for `RuleSheet.of`."""
     file = Path(path)
     text = file.read_text(encoding="utf-8")
-    return RuleSheet.of(load_marked(text, str(file)), str(file), text)
+    return RuleSheet.of(load_marked(text, str(file)), str(file), text, parts_of)

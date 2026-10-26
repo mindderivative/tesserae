@@ -70,6 +70,11 @@ class ViewLibrary:
         params = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("params")
         return decl_from_params(name, params) if params is not None else WidgetDecl(name, view=True, container=True)
 
+    def parts_of(self, name: str) -> Optional[set[str]]:
+        """The parts of the view `name` that a stylesheet rule can address (`part:`): the names of the nodes in its YAML. `None` when there is no such view."""
+        doc = self.doc(name)
+        return None if doc is None else {node.name for node in doc.root.walk() if node.name}
+
     def doc(self, name: str) -> Optional[ViewDoc]:
         """The parsed view `name`, or `None`."""
         path = self.paths.get(name)
@@ -120,6 +125,6 @@ class ViewLibrary:
             path = self.project_sheet(name)
             if path is None or (app_sheet is not None and path.resolve() == app_sheet.resolve()):
                 continue
-            rules.append(load_rule_sheet(path))
+            rules.append(load_rule_sheet(path, parts_of=self.parts_of))  # the project's own sheet: a part no view has is its mistake (the shipped ones are tested)
             files.append(path.resolve())
         return rules, files
