@@ -49,7 +49,7 @@ def git(*args):
 def relative(name):
     """A path as the repository names it: the hooks pass absolute ones."""
     path = Path(name)
-    return str(path.resolve().relative_to(ROOT)) if path.is_absolute() and path.resolve().is_relative_to(ROOT) else name
+    return path.resolve().relative_to(ROOT).as_posix() if path.is_absolute() and path.resolve().is_relative_to(ROOT) else name
 
 
 def changed_files(base):
@@ -111,7 +111,7 @@ def load_tests():
     tests = {}
     for path in sorted((ROOT / "tests").rglob("test_*.py")):
         text = path.read_text(encoding="utf-8", errors="replace")
-        tests[str(path.relative_to(ROOT))] = (text, imports_of(text))
+        tests[path.relative_to(ROOT).as_posix()] = (text, imports_of(text))  # git and pytest say `tests/x.py` on every platform
     return tests
 
 

@@ -70,7 +70,7 @@ def decide(files, *, dispatch="auto", labels=(), message="", base_version=None, 
 def doc_tests():
     import tests_for
 
-    found = {str(p.relative_to(ROOT)) for pattern in tests_for.DOC_TESTS for p in (ROOT / "tests").glob(pattern)}
+    found = {p.relative_to(ROOT).as_posix() for pattern in tests_for.DOC_TESTS for p in (ROOT / "tests").glob(pattern)}
     return sorted(found)
 
 
