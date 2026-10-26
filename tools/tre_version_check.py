@@ -1,4 +1,4 @@
-"""Compares the `tesserae-engine` pin in pyproject.toml with the installed version and the newest on PyPI.
+"""Compares the `tesserae-engine` pin in pyproject.toml (an exact `==x.y.z`, or a range) with the installed version and the newest on PyPI.
 
     python3 tools/tre_version_check.py
 
@@ -22,16 +22,23 @@ def key(v):
 
 def main():
     pin = re.search(r'"tesserae-engine([^"]*)"', (ROOT / "pyproject.toml").read_text(encoding="utf-8")).group(1)
-    low = re.search(r">=([\d.]+)", pin).group(1)
-    high = re.search(r"<([\d.]+)", pin).group(1)
+    exact = re.fullmatch(r"==([\d.]+)", pin)
+    low = exact[1] if exact else re.search(r">=([\d.]+)", pin).group(1)
+    high = None if exact else re.search(r"<([\d.]+)", pin).group(1)
     try:
         installed = metadata.version("tesserae-engine")
     except metadata.PackageNotFoundError:
         installed = "not installed"
     with urllib.request.urlopen("https://pypi.org/pypi/tesserae-engine/json", timeout=20) as r:
         releases = [v for v in json.load(r)["releases"] if re.fullmatch(r"[\d.]+", v)]
+    newest = max(releases, key=key)
+    if exact:
+        print(f"pin {pin} | installed {installed} | newest on PyPI {newest}")
+        if key(newest) > key(low):
+            print(f"{newest} is newer than the pin: try it (a throwaway venv, then the suite), and only then move the pin.")
+        return int(installed != low)
     fits = [v for v in releases if key(low) <= key(v) < key(high)]
-    newest, newest_fit = max(releases, key=key), max(fits, key=key)
+    newest_fit = max(fits, key=key)
     print(f"pin {pin} | installed {installed} | newest in range {newest_fit} | newest overall {newest}")
     if key(newest) >= key(high):
         print(f"{newest} is outside the pin: a new Tesserae line.")

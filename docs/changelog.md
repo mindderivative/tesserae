@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1.4
+
+### Changed
+
+- **Tesserae now asks for exactly `tesserae-engine` 0.5.8** (it was 0.5.7 or newer, below 0.6). A new `tre` release could reach a fresh install the day it came out, and 0.5.8 did: it changed hit testing so that a press on a rounded shape must land inside the shape. Tesserae's own tests had pressed 5 px in from the corner of a rounded button, which is outside it; four of them failed, and now press the middle. The whole suite passes on 0.5.8 (8404 tests). A newer `tre` is tried by the maintainer before this moves.
+
 ## 0.5.1.3
 
 [#288](https://github.com/mindderivative/tesserae/issues/288): a stylesheet rule's `part:`.

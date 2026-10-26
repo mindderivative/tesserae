@@ -66,8 +66,9 @@ python examples/counter/app.py
 
 The last command opens a window with a `Count: 0` label and a button that counts.
 
-- **A newer or local `tre`.** `pip install --upgrade tesserae-engine` picks up
-  the newest `tre` Tesserae's requirements allow; re-run the tests after. To try
+- **A newer or local `tre`.** Tesserae asks for one exact `tre` (`tesserae-engine`)
+  release, the one its tests were run on, so `pip install --upgrade tesserae-engine`
+  changes nothing. To try
   a `tre` checkout you're working on, install it editable with
   `python -m maturin develop --release --manifest-path /path/to/tre/crates/engine-py/Cargo.toml`
   with Tesserae's environment active, and reinstall the released one with

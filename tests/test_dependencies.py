@@ -1,4 +1,4 @@
-"""Tesserae's dependency on `tre` is capped below `tre`'s next minor line.
+"""Tesserae's dependency on `tre` is one exact release (it was a range below `tre`'s next minor line until 0.5.8).
 
 Moving to a new `tre` line is a new Tesserae line, which the user starts:
 the user (2026-09-30) made `tre` 0.5.0 and custom windowing Tesserae 0.3.0,
@@ -17,11 +17,12 @@ def _project():
     return tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
 
 
-def test_tre_is_the_0_5_line():
+def test_tre_is_pinned_to_the_release_the_suite_was_run_on():
+    """`tre` 0.5.8 (published the day the user pinned it) changed hit testing and broke four tests in CI, which had taken it because the range allowed it."""
     engine = next(d for d in _project()["dependencies"] if d.startswith("tesserae-engine"))
-    bounds = set(re.findall(r"(>=|<)\s*([\d.]+)", engine))
-    assert (">=", "0.5.7") in bounds, f"{engine!r}: Tesserae needs tre 0.5.7 (calc and insets, anchored layout; before that timers, layout animation, accessibility states)"
-    assert ("<", "0.6") in bounds, f"{engine!r}: a new tre line is a new Tesserae line, the user's to start"
+    found = re.fullmatch(r"tesserae-engine==(0\.5\.(\d+))", engine)
+    assert found, f"{engine!r}: pin one exact tre release (==0.5.x); a new one is tried by the user first, then this moves"
+    assert int(found[2]) >= 8, f"{engine!r}: Tesserae needs tre 0.5.8 (a press hit-tests a rounded shape; calc, insets and anchored layout came in 0.5.7)"
 
 
 def test_tesserae_is_0_5():
